@@ -610,6 +610,8 @@ export function toDetail(e: EventRow, ctx: EventContext, actor: Actor, now: numb
         summary.mine.some((m) => m.participant)));
   const roster: RosterEntry[] | null = showRoster
     ? parts
+        // Optional participants only once they accepted (otherwise they are not expected)
+        .filter((p) => !p.optional || p.status === "yes")
         .map((p) => ({
           personId: p.person.id,
           name: p.person.lastName ? `${p.person.firstName} ${p.person.lastName.charAt(0)}.` : p.person.firstName,

@@ -133,4 +133,12 @@ describe("Optionales Mittrainieren", () => {
     });
     expect(bad.status).toBe(400);
   });
+  it("„Zu- und Absagen für alle sichtbar“: Optionale erst mit Zusage", async () => {
+    await exec("UPDATE teams SET show_responses = 1");
+    const carlaCookie = await loginAs(carla);
+    const names = async () => ((await api(`/events/${training}`, { cookie: carlaCookie })).body.roster as { personId: number }[]).map((r) => r.personId);
+    expect(await names()).not.toContain(dana);
+    await api(`/events/${training}/responses`, { cookie: await loginAs(dana), body: { personId: dana, status: "yes" } });
+    expect(await names()).toContain(dana);
+  });
 });
