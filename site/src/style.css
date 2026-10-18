@@ -96,6 +96,16 @@ h2 { font-size: clamp(34px, 5vw, 52px); }
 .shot img { border-radius: 20px; border: 1px solid var(--line-2, #d6d2c6); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12); background: #fff; }
 .shot figcaption { margin-top: 10px; font-size: 15px; color: var(--text-2); text-align: center; }
 
+/* FAQ */
+.faqs { margin-top: 28px; display: grid; gap: 10px; max-width: 860px; }
+.faq { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 0 20px; }
+.faq summary { cursor: pointer; list-style: none; padding: 16px 32px 16px 0; position: relative; font: 700 22px/1.2 var(--font-cond); }
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary::after { content: "+"; position: absolute; right: 0; top: 12px; font: 800 26px/1 var(--font-cond); color: var(--text-2); }
+.faq[open] summary::after { content: "–"; }
+.faq p { color: var(--text-2); font-size: 16px; margin: 0 0 14px; }
+.faq code { background: var(--muted); padding: 1px 5px; border-radius: 5px; }
+
 /* Lists */
 .two { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
 @media (max-width: 800px) { .two { grid-template-columns: 1fr; gap: 28px; } }

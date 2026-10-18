@@ -58,6 +58,88 @@ Most users are children and teenagers. Of players and parents Kabine stores only
 
 The full list of stored data, who sees it and when it is deleted, plus a template for the club's privacy policy: [docs/privacy.md](docs/privacy.md).
 
+## Frequently asked questions
+
+For club officials and data protection officers.
+
+<details>
+<summary><b>What is Kabine – and what is it not?</b></summary>
+
+Kabine organises the everyday life of teams: trainings and games with yes/no responses, squads, team chat, helper duties and carpools.
+
+Kabine is **not club management software**: no membership records with addresses and joining dates, no fees, no direct debits, no bookkeeping, no club website and no public results portal. Those programs stay where they are. Kabine deliberately stores only what a team needs week after week.
+
+</details>
+
+<details>
+<summary><b>What does Kabine cost?</b></summary>
+
+The software is free (AGPL-3.0): no licence, no subscription, no ads, forever.
+
+For a typical club with a few hundred members, Cloudflare's free plan is enough to run it. If you want more headroom, the paid plan costs 5 US dollars a month at the time of writing. Costs per message only arise if the club switches on the SMS module. A domain of your own is optional.
+
+</details>
+
+<details>
+<summary><b>Why Cloudflare and not a German or local host?</b></summary>
+
+Cost and availability. A server of your own at a hosting company costs money every month and has to be set up, updated, backed up and monitored, in a club usually by a volunteer. On Cloudflare, Kabine runs without a server of its own on the free plan. The platform applies security updates itself, copes on Sunday evening when everyone responds at once, and keeps a history of the database that lets you undo a mistake.
+
+On data protection: the club is the controller, Cloudflare the processor. The club concludes Cloudflare's data processing agreement in its own account; it includes the EU standard contractual clauses, and Cloudflare is certified under the EU-US Data Privacy Framework. The database should be created explicitly in the EU (`--jurisdiction eu`); the team chat already lives in the EU jurisdiction. Cloudflare handles requests at locations near the users, for users in Germany usually in Europe.
+
+Kabine does not run on a server of your own: it is built for the Cloudflare platform (Workers, D1, Durable Objects).
+
+</details>
+
+<details>
+<summary><b>Who has access to our data?</b></summary>
+
+Only the club. Every installation lives in the club's own Cloudflare account. There is no central Kabine server, and the developers of Kabine have no access to any club's data. Inside the app, everyone sees only what their role needs: decline reasons, for example, only coaches and admins.
+
+</details>
+
+<details>
+<summary><b>Is Kabine GDPR compliant?</b></summary>
+
+Kabine is built for data minimisation: of players and parents only first name, last name and year of birth, no tracking, deletion periods built in. Whether the processing in the club is lawful remains the club's responsibility. For that there is a complete list of the stored data (who sees what, when it is deleted) and a template for the privacy policy: [privacy and data inventory](docs/privacy.md).
+
+</details>
+
+<details>
+<summary><b>Do children need their own phone or an e-mail address?</b></summary>
+
+No. Parents respond for their children. Children with a device of their own get access by link, without an e-mail address and without a phone number. Parents decide what their child may do in the app and approve profile pictures.
+
+</details>
+
+<details>
+<summary><b>How much work is running it?</b></summary>
+
+Installing takes about 30 minutes. After that there is no server to look after: updates arrive as pull requests in the club's copy and are taken over with one click, the season change runs once a year with a wizard, and the data export saves everything to a file. Coaches manage their teams themselves.
+
+</details>
+
+<details>
+<summary><b>What happens if we stop?</b></summary>
+
+The club exports its data and deletes the Worker, database, KV store and queue in its own Cloudflare account. Then the data is gone. There is no provider to cancel or to ask for deletion.
+
+</details>
+
+<details>
+<summary><b>Which sports does Kabine suit?</b></summary>
+
+Kabine started in a handball club and brings age groups, playing times, helper duties and the game schedules from handball4all for handball. Football and other sports have basic settings. More sports and fixture systems can be contributed on GitHub.
+
+</details>
+
+<details>
+<summary><b>Is there support?</b></summary>
+
+Kabine is free software without commercial support. Questions, bugs and ideas go into the issues on GitHub. You can try everything in the demo first.
+
+</details>
+
 ## Installation
 
 [![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/witscher/kabine)

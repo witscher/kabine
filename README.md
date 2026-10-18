@@ -58,6 +58,88 @@ Die meisten Nutzer sind Kinder und Jugendliche. Von Spielern und Eltern speicher
 
 Die vollständige Liste der gespeicherten Daten, wer sie sieht und wann sie gelöscht werden, dazu eine Vorlage für die Datenschutzerklärung des Vereins: [docs/privacy.de.md](docs/privacy.de.md).
 
+## Häufige Fragen
+
+Für Vereinsverantwortliche und Datenschutzbeauftragte.
+
+<details>
+<summary><b>Was ist Kabine – und was nicht?</b></summary>
+
+Kabine organisiert den Alltag von Mannschaften: Trainings und Spiele mit Zu- und Absagen, Kader, Mannschaftschat, Helferdienste und Fahrgemeinschaften.
+
+Kabine ist **keine Vereinsverwaltung**: keine Mitgliederverwaltung mit Adressen und Eintrittsdaten, keine Beiträge, kein SEPA-Lastschrifteinzug, keine Buchhaltung, keine Vereinswebsite und kein öffentliches Ergebnisportal. Diese Programme bleiben, wo sie sind. Kabine speichert bewusst nur, was eine Mannschaft Woche für Woche braucht.
+
+</details>
+
+<details>
+<summary><b>Was kostet Kabine?</b></summary>
+
+Die Software ist kostenlos und frei (AGPL-3.0): keine Lizenz, kein Abo, keine Werbung, für immer.
+
+Für den Betrieb reicht bei einem üblichen Verein mit einigen hundert Mitgliedern der kostenlose Tarif von Cloudflare. Wer mehr Spielraum möchte, nimmt den Bezahltarif (zurzeit 5 US-Dollar im Monat). Kosten pro Nachricht entstehen nur, wenn der Verein das SMS-Modul einschaltet. Eine eigene Domain ist optional.
+
+</details>
+
+<details>
+<summary><b>Warum Cloudflare und nicht ein deutsches Hosting?</b></summary>
+
+Wegen Kosten und Verfügbarkeit. Ein eigener Server bei einem Hoster kostet jeden Monat und muss eingerichtet, aktualisiert, gesichert und überwacht werden, im Verein meist von einer ehrenamtlichen Person. Kabine läuft bei Cloudflare ohne eigenen Server im kostenlosen Tarif. Die Plattform spielt Sicherheitsupdates selbst ein, hält auch am Sonntagabend durch, wenn alle gleichzeitig zusagen, und bewahrt eine Historie der Datenbank auf, mit der sich ein Fehler zurückdrehen lässt.
+
+Zum Datenschutz: Der Verein ist Verantwortlicher, Cloudflare ist Auftragsverarbeiter. Der Verein schließt im eigenen Konto den Auftragsverarbeitungsvertrag von Cloudflare ab; er enthält die EU-Standardvertragsklauseln, und Cloudflare ist unter dem EU-US Data Privacy Framework zertifiziert. Die Datenbank sollte ausdrücklich in der EU angelegt werden (`--jurisdiction eu`), der Mannschaftschat liegt bereits in der EU-Jurisdiktion. Anfragen bearbeitet Cloudflare an Standorten in der Nähe der Nutzer, bei Nutzern in Deutschland in der Regel in Europa.
+
+Auf einem eigenen Server läuft Kabine nicht: Die App ist für die Cloudflare-Plattform gebaut (Workers, D1, Durable Objects).
+
+</details>
+
+<details>
+<summary><b>Wer hat Zugriff auf unsere Daten?</b></summary>
+
+Nur der Verein. Jede Installation liegt im eigenen Cloudflare-Konto des Vereins. Es gibt keinen zentralen Kabine-Server, und die Entwickler von Kabine haben keinen Zugriff auf die Daten irgendeines Vereins. In der App sieht jede Person nur, was ihre Rolle braucht: Absagegründe zum Beispiel nur Trainer und Admins.
+
+</details>
+
+<details>
+<summary><b>Ist Kabine DSGVO-konform?</b></summary>
+
+Kabine ist auf Datensparsamkeit gebaut: Von Spielern und Eltern nur Vorname, Nachname und Jahrgang, kein Tracking, Löschfristen eingebaut. Ob die Verarbeitung im Verein rechtmäßig ist, verantwortet der Verein selbst. Dafür gibt es eine vollständige Liste der gespeicherten Daten (wer sieht was, wann wird es gelöscht) und eine Vorlage für die Datenschutzerklärung: [Datenschutz und Datenverzeichnis](docs/privacy.de.md).
+
+</details>
+
+<details>
+<summary><b>Brauchen Kinder ein eigenes Handy oder eine E-Mail-Adresse?</b></summary>
+
+Nein. Eltern sagen für ihre Kinder zu und ab. Kinder mit eigenem Gerät bekommen über einen Link Zugang, ohne E-Mail-Adresse und ohne Telefonnummer. Die Eltern legen fest, was ihr Kind in der App darf, und geben Profilbilder frei.
+
+</details>
+
+<details>
+<summary><b>Wie viel Arbeit macht der Betrieb?</b></summary>
+
+Die Installation dauert etwa 30 Minuten. Danach gibt es keinen Server zu pflegen: Updates kommen als Pull Request in die Kopie des Vereins und werden mit einem Klick übernommen, der Saisonwechsel läuft einmal im Jahr mit einem Assistenten, und der Datenexport sichert alles in eine Datei. Trainer verwalten ihre Mannschaften selbst.
+
+</details>
+
+<details>
+<summary><b>Was passiert, wenn wir aufhören?</b></summary>
+
+Der Verein exportiert seine Daten und löscht Worker, Datenbank, KV-Speicher und Warteschlange im eigenen Cloudflare-Konto. Dann sind die Daten weg. Es gibt keinen Anbieter, bei dem man kündigen oder eine Löschung beantragen muss.
+
+</details>
+
+<details>
+<summary><b>Für welche Sportarten eignet sich Kabine?</b></summary>
+
+Kabine ist in einem Handballverein entstanden und bringt für Handball Altersklassen, Spielzeiten, Helferdienste und die Spielpläne aus handball4all mit. Für Fußball und andere Sportarten gibt es Grundeinstellungen. Weitere Sportarten und Spielplan-Systeme können über GitHub beigesteuert werden.
+
+</details>
+
+<details>
+<summary><b>Gibt es Support?</b></summary>
+
+Kabine ist freie Software ohne kommerziellen Support. Fragen, Fehler und Ideen gehören in die Issues auf GitHub. Ausprobieren lässt sich alles vorher in der Demo.
+
+</details>
+
 ## Installation
 
 [![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/witscher/kabine)
