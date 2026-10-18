@@ -384,6 +384,10 @@ msgstr "No one yet"
 msgid "Title and info are saved quietly, without notification."
 msgstr "Title and info are saved quietly, without notification."
 
+#: src/pages/admin.tsx
+msgid "Youth referee"
+msgstr "Youth referee"
+
 #: src/pages/event.tsx
 msgid "Taking part"
 msgstr "Taking part"
@@ -487,6 +491,10 @@ msgstr "{seats, plural, one {{driver} has one free seat: {game}. Book it in the 
 msgid "Final confirmation"
 msgstr "Final confirmation"
 
+#: src/pages/club-settings.tsx
+msgid "Whole country"
+msgstr "Whole country"
+
 #: src/pages/chat.tsx
 msgid "React to announcement from {author}"
 msgstr "React to announcement from {author}"
@@ -506,6 +514,10 @@ msgstr "Chat {roomTeam}"
 #: src/pages/event.tsx
 msgid "Notes"
 msgstr "Notes"
+
+#: src/pages/season.tsx
+msgid "The school holidays of the club's region replace all previous holiday periods at the change. Afterwards they can be changed, deleted or supplemented under Administration → Holidays (e.g. carnival holidays). No trainings take place on public holidays. Source: {holidaySource}."
+msgstr "The school holidays of the club's region replace all previous holiday periods at the change. Afterwards they can be changed, deleted or supplemented under Administration → Holidays (e.g. carnival holidays). No trainings take place on public holidays. Source: {holidaySource}."
 
 #: src/pages/team.tsx
 msgid "The link signs out the previous devices, for example after losing a device."
@@ -831,11 +843,6 @@ msgstr "me"
 msgid "Special duty"
 msgstr "Special duty"
 
-#: src/pages/admin.tsx
-msgctxt "gender"
-msgid "f"
-msgstr "f"
-
 #: src/pages/team.tsx
 msgid "The link will stop working afterwards. Existing access remains."
 msgstr "The link will stop working afterwards. Existing access remains."
@@ -1119,6 +1126,10 @@ msgstr "For example for an injury, illness or a school exchange. The app does no
 #: worker/routes/events.ts
 msgid "Invalid period."
 msgstr "Invalid period."
+
+#: src/pages/admin.tsx
+msgid "female"
+msgstr "female"
 
 #: worker/routes/carpool.ts
 msgid "The driver does not have enough free seats. Please cancel the lift and book again."
@@ -1756,6 +1767,10 @@ msgstr "More events"
 msgid "valid until {until}"
 msgstr "valid until {until}"
 
+#: src/pages/admin.tsx
+msgid "Youth referee at home games"
+msgstr "Youth referee at home games"
+
 #: worker/routes/persons.ts
 #: worker/routes/persons.ts
 msgid "This link does not exist."
@@ -2279,6 +2294,10 @@ msgstr "Matchday at {host}"
 msgid "Stay in their team unless something else is chosen."
 msgstr "Stay in their team unless something else is chosen."
 
+#: src/pages/club-settings.tsx
+msgid "State or region"
+msgstr "State or region"
+
 #: src/pages/squad.tsx
 msgid "Squad published. The nominated players have been notified."
 msgstr "Squad published. The nominated players have been notified."
@@ -2526,6 +2545,10 @@ msgstr "Coach notes (short-notice declines, stand-ins)"
 msgid "More people are already signed up. Please remove someone first."
 msgstr "More people are already signed up. Please remove someone first."
 
+#: src/pages/admin.tsx
+msgid "Game (min.)"
+msgstr "Game (min.)"
+
 #: src/pages/profile.tsx
 #: src/pages/team.tsx
 msgid "{name} (no access)"
@@ -2649,6 +2672,10 @@ msgstr "In the browser menu, choose <0>Add to Home screen</0> or <1>Install app<
 #: src/pages/admin.tsx
 msgid "Delete team?"
 msgstr "Delete team?"
+
+#: src/pages/season.tsx
+msgid "Public holidays (no training)"
+msgstr "Public holidays (no training)"
 
 #: src/pages/help.tsx
 msgid "Reply by e-mail wanted"
@@ -2988,6 +3015,10 @@ msgstr "Parent link"
 msgid "What data does the app store?"
 msgstr "What data does the app store?"
 
+#: src/pages/admin.tsx
+msgid "Replaces the rows above with the age groups of the club's sport for this season. Nothing is saved until you tap Save."
+msgstr "Replaces the rows above with the age groups of the club's sport for this season. Nothing is saved until you tap Save."
+
 #: src/pages/profile.tsx
 msgid "After that you can only sign in with your passkey."
 msgstr "After that you can only sign in with your passkey."
@@ -3098,6 +3129,10 @@ msgstr "full"
 #: src/carpool.tsx
 msgid "One companion"
 msgstr "One companion"
+
+#: src/pages/club-settings.tsx
+msgid "Language and region"
+msgstr "Language and region"
 
 #: worker/routes/chat.ts
 msgid "No access to this chat."
@@ -3532,6 +3567,10 @@ msgstr "Include parents"
 msgid "– Choose duty –"
 msgstr "– Choose duty –"
 
+#: src/pages/admin.tsx
+msgid "male"
+msgstr "male"
+
 #: src/pages/event.tsx
 msgid "Reason for declining"
 msgstr "Reason for declining"
@@ -3784,10 +3823,6 @@ msgstr "not in any team"
 msgid "This e-mail address is already taken."
 msgstr "This e-mail address is already taken."
 
-#: src/pages/season.tsx
-msgid "The school holidays of Baden-Württemberg replace all previous holiday periods at the change. Afterwards they can be changed, deleted or supplemented under Administration → Holidays (e.g. carnival holidays). Source: {holidaySource}."
-msgstr "The school holidays of Baden-Württemberg replace all previous holiday periods at the change. Afterwards they can be changed, deleted or supplemented under Administration → Holidays (e.g. carnival holidays). Source: {holidaySource}."
-
 #: src/pages/chat.tsx
 msgid "No connection. The message was not sent."
 msgstr "No connection. The message was not sent."
@@ -3821,6 +3856,10 @@ msgstr "Looking for a lift"
 #: src/pages/help.tsx
 msgid "Install app"
 msgstr "Install app"
+
+#: src/pages/admin.tsx
+msgid "mixed"
+msgstr "mixed"
 
 #: worker/routes/club.ts
 msgid "Please upload a PNG, JPEG, WebP or SVG file."
@@ -3936,11 +3975,6 @@ msgstr "No one yet."
 #: src/pages/profile.tsx
 msgid "Mails go to the confirmed address you sign in with. You don't have one yet, add it under <0>Profile → Sign-in</0>."
 msgstr "Mails go to the confirmed address you sign in with. You don't have one yet, add it under <0>Profile → Sign-in</0>."
-
-#: src/pages/admin.tsx
-msgctxt "gender"
-msgid "m"
-msgstr "m"
 
 #: src/pages/profile.tsx
 msgid "You are now working as a coach."
@@ -4128,6 +4162,10 @@ msgstr "Without a passkey, the e-mail address is your only way into the app. Set
 msgid "+ together with …"
 msgstr "+ together with …"
 
+#: src/pages/admin.tsx
+msgid "No trainings are created on these days. Remove a day if your teams train on it after all."
+msgstr "No trainings are created on these days. Remove a day if your teams train on it after all."
+
 #: worker/routes/avatars.ts
 #: worker/routes/avatars.ts
 #: worker/routes/feedback.ts
@@ -4162,6 +4200,10 @@ msgstr "Venue (optional)"
 #: worker/routes/duties.ts
 msgid "You are already signed up for this duty."
 msgstr "You are already signed up for this duty."
+
+#: src/pages/admin.tsx
+msgid "Use them"
+msgstr "Use them"
 
 #: src/calendar.tsx
 msgid "Calendar link"
@@ -4460,6 +4502,10 @@ msgstr "{list} and {last}"
 msgid "Only chat and special events. No training, no games, no squad, no parents."
 msgstr "Only chat and special events. No training, no games, no squad, no parents."
 
+#: src/pages/club-settings.tsx
+msgid "For everyone who has not chosen a language, and for messages outside the app."
+msgstr "For everyone who has not chosen a language, and for messages outside the app."
+
 #: src/pages/team.tsx
 msgid "Set core squad"
 msgstr "Set core squad"
@@ -4563,6 +4609,10 @@ msgstr "active today"
 msgid "Send"
 msgstr "Send"
 
+#: src/pages/admin.tsx
+msgid "Remove public holiday {name}"
+msgstr "Remove public holiday {name}"
+
 #: worker/routes/carpool.ts
 msgid "This offer no longer exists."
 msgstr "This offer no longer exists."
@@ -4582,6 +4632,10 @@ msgstr "This game does not exist."
 #: src/email.tsx
 msgid "The link is incomplete. Please open it again in full or enter the code."
 msgstr "The link is incomplete. Please open it again in full or enter the code."
+
+#: src/pages/club-settings.tsx
+msgid "Country"
+msgstr "Country"
 
 #: src/pages/home.tsx
 msgid "Then: game"
@@ -4959,6 +5013,7 @@ msgid "On the iPhone, notifications only work if the app is installed on the Hom
 msgstr "On the iPhone, notifications only work if the app is installed on the Home Screen."
 
 #: worker/routes/admin.ts
+#: worker/routes/admin.ts
 msgid "There is no current season."
 msgstr "There is no current season."
 
@@ -5021,10 +5076,6 @@ msgstr "{coaches, plural, one {# coach} other {# coaches}}"
 #: src/pages/club-settings.tsx
 msgid "Please choose two colours."
 msgstr "Please choose two colours."
-
-#: src/pages/admin.tsx
-msgid "Named holiday periods. Each one can be changed or deleted. Team holiday plans linked to a period follow its changes. The school holidays of Baden-Württemberg are imported at the season change (source: {source})."
-msgstr "Named holiday periods. Each one can be changed or deleted. Team holiday plans linked to a period follow its changes. The school holidays of Baden-Württemberg are imported at the season change (source: {source})."
 
 #: src/pages/plans.tsx
 msgid "{occurrences} events will be created for the next {weeks} weeks."
@@ -5343,6 +5394,10 @@ msgctxt "view as"
 msgid "parent"
 msgstr "parent"
 
+#: src/pages/admin.tsx
+msgid "Named holiday periods. Each one can be changed or deleted. Team holiday plans linked to a period follow its changes. The school holidays of the club's region are imported at the season change (source: {source})."
+msgstr "Named holiday periods. Each one can be changed or deleted. Team holiday plans linked to a period follow its changes. The school holidays of the club's region are imported at the season change (source: {source})."
+
 #: src/pages/join.tsx
 msgid "Your passkey is set up. From now on you sign in with it."
 msgstr "Your passkey is set up. From now on you sign in with it."
@@ -5409,11 +5464,6 @@ msgstr "If this was not you, please contact your coach or an admin immediately."
 msgid "At least one passenger is not riding with this driver."
 msgstr "At least one passenger is not riding with this driver."
 
-#: src/pages/admin.tsx
-msgctxt "column header"
-msgid "Gender"
-msgstr "Gender"
-
 #: src/carpool.tsx
 #: src/carpool.tsx
 msgid "{seats} free"
@@ -5452,6 +5502,11 @@ msgstr "Club"
 msgctxt "team"
 msgid "Remove from {teamName}?"
 msgstr "Remove from {teamName}?"
+
+#: src/pages/admin.tsx
+#: src/pages/admin.tsx
+msgid "Public holidays"
+msgstr "Public holidays"
 
 #: src/pages/chat.tsx
 msgid "React to message from {author}"
@@ -5627,6 +5682,10 @@ msgstr "Delete team"
 #: src/pages/profile.tsx
 msgid "Valid for 7 days, can be used once."
 msgstr "Valid for 7 days, can be used once."
+
+#: src/pages/club-settings.tsx
+msgid "Time zone"
+msgstr "Time zone"
 
 #: src/pages/group.tsx
 msgid "{name} will then no longer be a lead in the group {teamName}. The person is kept."
@@ -6950,6 +7009,10 @@ msgstr "Please enter a valid e-mail address."
 msgid "no own access"
 msgstr "no own access"
 
+#: src/pages/admin.tsx
+msgid "Use the sport's age groups?"
+msgstr "Use the sport's age groups?"
+
 #: src/pages/help.tsx
 msgid "Kabine is free software under the AGPL-3.0 licence. <0>Source code</0>"
 msgstr "Kabine is free software under the AGPL-3.0 licence. <0>Source code</0>"
@@ -6969,6 +7032,10 @@ msgstr "Under <0>Profile → My events</0> you choose training, games and helper
 #: src/pages/admin.tsx
 msgid "{firstName} is no longer a full club member."
 msgstr "{firstName} is no longer a full club member."
+
+#: src/pages/admin.tsx
+msgid "Game duration in minutes"
+msgstr "Game duration in minutes"
 
 #: worker/domain/calendar.ts
 msgid "Helper duty {label} · {game} · for {child}"
@@ -7744,6 +7811,10 @@ msgstr "Can the second parent take part too?"
 msgid "No one in the squad yet"
 msgstr "No one in the squad yet"
 
+#: src/pages/club-settings.tsx
+msgid "Default language"
+msgstr "Default language"
+
 #: worker/lib/http.ts
 msgid "Expected JSON."
 msgstr "Expected JSON."
@@ -7856,6 +7927,10 @@ msgstr "{driver} can no longer take {rider}: {game}. The search continues (enter
 #: src/pages/home.tsx
 msgid "There have been no events this season yet."
 msgstr "There have been no events this season yet."
+
+#: worker/routes/club.ts
+msgid "Unknown time zone."
+msgstr "Unknown time zone."
 
 #: shared/types.ts
 msgid "Chat messages"
@@ -8460,11 +8535,6 @@ msgstr "A player or parent can no longer get into the app."
 msgid "Your reason: “{reason}”"
 msgstr "Your reason: “{reason}”"
 
-#: src/pages/admin.tsx
-msgctxt "gender"
-msgid "mixed"
-msgstr "mixed"
-
 #: src/pages/team.tsx
 msgid "Source"
 msgstr "Source"
@@ -8826,6 +8896,10 @@ msgstr "This template does not exist."
 msgid "just now"
 msgstr "just now"
 
+#: src/pages/club-settings.tsx
+msgid "For school holidays and public holidays."
+msgstr "For school holidays and public holidays."
+
 #: src/pages/referees.tsx
 msgid "{candidate} (me)"
 msgstr "{candidate} (me)"
@@ -9024,6 +9098,10 @@ msgstr "Create team"
 #: worker/routes/events.ts
 msgid "{label} on {oldDate} is now on {date} at {time}, {location}."
 msgstr "{label} on {oldDate} is now on {date} at {time}, {location}."
+
+#: src/pages/admin.tsx
+msgid "Age groups of the sport"
+msgstr "Age groups of the sport"
 
 #: src/pages/group.tsx
 msgid "Manually"
@@ -9287,6 +9365,7 @@ msgstr "Saved. The other parent will be notified."
 msgid "Link schedule"
 msgstr "Link schedule"
 
+#: worker/routes/admin.ts
 #: worker/routes/admin.ts
 #: worker/routes/admin.ts
 #: worker/routes/events.ts

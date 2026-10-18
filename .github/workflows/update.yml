@@ -69,8 +69,10 @@ jobs:
           if ! diff -q <(sed 's/"database_id": *"[^"]*"//;s/"id": *"[^"]*"//' /tmp/wrangler.release.jsonc) <(sed 's/"database_id": *"[^"]*"//;s/"id": *"[^"]*"//' wrangler.jsonc) >/dev/null; then
             wrangler_note=$'\n\n**Check wrangler.jsonc:** the release changes the Cloudflare configuration (for example a new binding). Compare your wrangler.jsonc with the one of the release and add new entries before merging.'
           fi
+          {
+            echo "Kabine $VERSION is available. Merging this pull request deploys it, database migrations included.${wrangler_note:-}"
+            echo
+            echo "$notes"
+          } > /tmp/pr-body.md
           gh pr create --base "${{ github.event.repository.default_branch }}" --head "kabine-update-$VERSION" \
-            --title "Update Kabine to $VERSION" \
-            --body "Kabine $VERSION is available. Merging this pull request deploys it, database migrations included.${wrangler_note:-}
-
-$notes"
+            --title "Update Kabine to $VERSION" --body-file /tmp/pr-body.md

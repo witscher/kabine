@@ -269,12 +269,17 @@ export function AdminBroadcastPage() {
 interface AgeClass {
   code: string;
   name: string;
-  gender: "w" | "m" | "x";
   rank: number;
   isYouth: boolean;
   birthYearMin: number | null;
   birthYearMax: number | null;
+  /** How long a game blocks the hall (helper duty blocks, "in progress" card). */
+  gameMinutes: number;
+  /** Home games need a youth referee (handball: KiHaSL/JuHaSL). */
+  youthReferee: boolean;
 }
+
+type TeamGender = "f" | "m" | "x";
 
 interface AdminPerson {
   person: PersonRef;
@@ -347,12 +352,19 @@ export function AdminTeamsPage() {
   useDocumentTitle(t`Teams`);
   const { refresh } = useSession();
   const teams = useQuery<{
-    teams: { id: number; name: string; kind: "team" | "group"; ageClassCode: string; level: number; parentsEnabled: boolean; players: number; coaches: number }[];
+    teams: { id: number; name: string; kind: "team" | "group"; ageClassCode: string; gender: TeamGender; level: number; parentsEnabled: boolean; players: number; coaches: number }[];
   }>("/teams");
   const ages = useQuery<{ ageClasses: AgeClass[] }>("/age-classes");
-  const [edit, setEdit] = useState<{ id?: number; name: string; ageClassCode: string; level: number; parentsEnabled: boolean; wasEnabled?: boolean } | null>(
-    null,
-  );
+  const [edit, setEdit] = useState<{
+    id?: number;
+    name: string;
+    ageClassCode: string;
+    gender: TeamGender;
+    level: number;
+    parentsEnabled: boolean;
+    wasEnabled?: boolean;
+  } | null>(null);
+  const genderLabel = (g: TeamGender) => (g === "f" ? t`female` : g === "m" ? t`male` : t`mixed`);
   const isYouth = (code: string) => ages.data?.ageClasses.find((a) => a.code === code)?.isYouth ?? true;
   const [coachesFor, setCoachesFor] = useState<{ id: number; name: string } | null>(null);
 
@@ -366,7 +378,7 @@ export function AdminTeamsPage() {
             icon="plus"
             onClick={() => {
               const code = ages.data?.ageClasses[0]?.code ?? "";
-              setEdit({ name: "", ageClassCode: code, level: 1, parentsEnabled: isYouth(code) });
+              setEdit({ name: "", ageClassCode: code, gender: "x", level: 1, parentsEnabled: isYouth(code) });
             }}
           >
             <Trans>Create team</Trans>
@@ -387,7 +399,9 @@ export function AdminTeamsPage() {
                       {team.name}
                     </span>
                     <span class="main">
-                      <span class="title">{ages.data?.ageClasses.find((a) => a.code === team.ageClassCode)?.name ?? team.ageClassCode}</span>
+                      <span class="title">
+                        {ages.data?.ageClasses.find((a) => a.code === team.ageClassCode)?.name ?? team.ageClassCode} · {genderLabel(team.gender)}
+                      </span>
                       <span class="sub">
                         {t`Team ${level}`} · {memberCounts(team.players, team.coaches)}
                         {team.parentsEnabled ? "" : ` · ${t`without parents`}`}
@@ -409,6 +423,7 @@ export function AdminTeamsPage() {
                           id: team.id,
                           name: team.name,
                           ageClassCode: team.ageClassCode,
+                          gender: team.gender,
                           level: team.level,
                           parentsEnabled: team.parentsEnabled,
                           wasEnabled: team.parentsEnabled,
@@ -446,6 +461,15 @@ export function AdminTeamsPage() {
                 </select>
               )}
             </Field>
+            <Field label={t`Gender`}>
+              {(id) => (
+                <select id={id} class="select" value={edit.gender} onChange={(e) => setEdit({ ...edit, gender: (e.target as HTMLSelectElement).value as TeamGender })}>
+                  {(["f", "m", "x"] as const).map((g) => (
+                    <option value={g}>{genderLabel(g)}</option>
+                  ))}
+                </select>
+              )}
+            </Field>
             <Field label={t`Team number`}>
               {(id) => (
                 <select id={id} class="select" value={edit.level} onChange={(e) => setEdit({ ...edit, level: Number((e.target as HTMLSelectElement).value) })}>
@@ -467,7 +491,7 @@ export function AdminTeamsPage() {
               block
               disabled={!edit.name.trim() || !edit.ageClassCode}
               onClick={async () => {
-                const body = { name: edit.name.trim(), ageClassCode: edit.ageClassCode, level: edit.level, parentsEnabled: edit.parentsEnabled };
+                const body = { name: edit.name.trim(), ageClassCode: edit.ageClassCode, gender: edit.gender, level: edit.level, parentsEnabled: edit.parentsEnabled };
                 if (edit.id && edit.wasEnabled && !edit.parentsEnabled) {
                   const ok = await confirmDialog({
                     title: t`Continue without parents?`,
@@ -1348,7 +1372,6 @@ export function AdminAgeClassesPage() {
                     <th>
                       <Trans>Name</Trans>
                     </th>
-                    <th>{t({ message: "Gender", context: "column header" })}</th>
                     <th>
                       <Trans>Rank</Trans>
                     </th>
@@ -1360,6 +1383,12 @@ export function AdminAgeClassesPage() {
                     </th>
                     <th>
                       <Trans>Born to</Trans>
+                    </th>
+                    <th>
+                      <Trans>Game (min.)</Trans>
+                    </th>
+                    <th>
+                      <Trans>Youth referee</Trans>
                     </th>
                     <th>
                       <span class="sr-only">
@@ -1380,13 +1409,6 @@ export function AdminAgeClassesPage() {
                           <input class="input" style={{ minWidth: "160px" }} value={r.name} aria-label={t`Name`} onInput={(e) => update(i, { name: (e.target as HTMLInputElement).value })} />
                         </td>
                         <td>
-                          <select class="select" style={{ minHeight: "40px", width: "64px" }} value={r.gender} aria-label={t`Gender`} onChange={(e) => update(i, { gender: (e.target as HTMLSelectElement).value as AgeClass["gender"] })}>
-                            <option value="w">{t({ message: "f", context: "gender" })}</option>
-                            <option value="m">{t({ message: "m", context: "gender" })}</option>
-                            <option value="x">{t({ message: "mixed", context: "gender" })}</option>
-                          </select>
-                        </td>
-                        <td>
                           <input class="input" style={{ width: "52px" }} inputMode="numeric" value={r.rank} aria-label={t`Rank`} onInput={(e) => update(i, { rank: Number((e.target as HTMLInputElement).value) || 0 })} />
                         </td>
                         <td>
@@ -1397,6 +1419,12 @@ export function AdminAgeClassesPage() {
                         </td>
                         <td>
                           <input class="input" style={{ width: "72px" }} inputMode="numeric" value={r.birthYearMax ?? ""} aria-label={t`Youngest year of birth`} onInput={(e) => update(i, { birthYearMax: num((e.target as HTMLInputElement).value) })} />
+                        </td>
+                        <td>
+                          <input class="input" style={{ width: "64px" }} inputMode="numeric" value={r.gameMinutes} aria-label={t`Game duration in minutes`} onInput={(e) => update(i, { gameMinutes: Number((e.target as HTMLInputElement).value) || 90 })} />
+                        </td>
+                        <td>
+                          <input type="checkbox" checked={r.youthReferee} aria-label={t`Youth referee at home games`} onChange={(e) => update(i, { youthReferee: (e.target as HTMLInputElement).checked })} style={{ width: "22px", height: "22px" }} />
                         </td>
                         <td>
                           <button type="button" class="icon-btn" aria-label={t`Remove ${name}`} onClick={() => setRows(rows.filter((_, j) => j !== i))}>
@@ -1412,9 +1440,26 @@ export function AdminAgeClassesPage() {
           ) : null}
           {rows ? (
             <>
-              <Button icon="plus" onClick={() => setRows([...rows, { code: "", name: "", gender: "w", rank: 1, isYouth: true, birthYearMin: null, birthYearMax: null }])}>
+              <Button icon="plus" onClick={() => setRows([...rows, { code: "", name: "", rank: 1, isYouth: true, birthYearMin: null, birthYearMax: null, gameMinutes: 90, youthReferee: false }])}>
                 <Trans>Add row</Trans>
               </Button>
+              {!seasonId ? (
+                <Button
+                  variant="ghost"
+                  icon="refresh"
+                  onClick={async () => {
+                    const ok = await confirmDialog({
+                      title: t`Use the sport's age groups?`,
+                      message: t`Replaces the rows above with the age groups of the club's sport for this season. Nothing is saved until you tap Save.`,
+                      confirmLabel: t`Use them`,
+                    });
+                    if (!ok) return;
+                    setRows((await api.get<{ ageClasses: AgeClass[] }>("/age-classes/from-profile")).ageClasses);
+                  }}
+                >
+                  <Trans>Age groups of the sport</Trans>
+                </Button>
+              ) : null}
               <Button
                 variant="primary"
                 size="lg"
@@ -1450,7 +1495,7 @@ const dayCount = (from: string, to: string) => Math.round((Date.parse(`${to}T00:
 
 export function AdminHolidaysPage() {
   useDocumentTitle(t`Holidays`);
-  const { data, error, reload } = useQuery<{ periods: HolidayPeriod[]; source: string }>("/holidays");
+  const { data, error, reload } = useQuery<{ periods: HolidayPeriod[]; publicHolidays?: { day: string; name: string }[]; source: string }>("/holidays");
   const [editing, setEditing] = useState<HolidayPeriod | "new" | null>(null);
   const today = todayLocal();
   const source = data?.source ?? "OpenHolidays API";
@@ -1463,7 +1508,7 @@ export function AdminHolidaysPage() {
           <p class="muted">
             <Trans>
               Named holiday periods. Each one can be changed or deleted. Team holiday plans linked to a period follow its changes. The school holidays of
-              Baden-Württemberg are imported at the season change (source: {source}).
+              the club's region are imported at the season change (source: {source}).
             </Trans>
           </p>
           <Button icon="plus" onClick={() => setEditing("new")}>
@@ -1498,6 +1543,42 @@ export function AdminHolidaysPage() {
               })}
             </ul>
           </section>
+          {data?.publicHolidays?.length ? (
+            <section class="stack-sm" aria-label={t`Public holidays`}>
+              <h2 class="section-title">
+                <Trans>Public holidays</Trans>
+              </h2>
+              <p class="small muted">
+                <Trans>No trainings are created on these days. Remove a day if your teams train on it after all.</Trans>
+              </p>
+              <ul class="list">
+                {data.publicHolidays.map((h) => {
+                  const name = h.name;
+                  return (
+                    <li class="list-row">
+                      <Icon name="calendar" size={20} />
+                      <span class="main">
+                        <span class="title">{h.name}</span>
+                        <span class="sub">{fullDate(h.day)}</span>
+                      </span>
+                      <button
+                        type="button"
+                        class="icon-btn"
+                        aria-label={t`Remove public holiday ${name}`}
+                        onClick={async () => {
+                          await api.del(`/public-holidays/${h.day}`);
+                          invalidate("/holidays", "/events");
+                          await reload();
+                        }}
+                      >
+                        <Icon name="trash" size={18} />
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            </section>
+          ) : null}
         </div>
         {editing ? (
           <HolidaySheet

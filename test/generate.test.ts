@@ -35,6 +35,11 @@ describe("Geplante Termine (rein)", () => {
     expect(occ.get("2|2026-10-09")!.teamIds).toEqual([10]);
   });
 
+  it("an Feiertagen kein Training", () => {
+    const occ = plannedOccurrences(plans, rules, new Map(), "2026-10-05", "2026-10-11", "2026-10-05T10:00", new Set(["2026-10-09"]));
+    expect([...occ.values()].map((o) => o.date)).toEqual(["2026-10-06"]);
+  });
+
   it("lässt vergangene Uhrzeiten von heute weg", () => {
     const occ = plannedOccurrences(plans, rules, new Map(), "2026-10-06", "2026-10-06", "2026-10-06T17:30");
     expect(occ.size).toBe(0);

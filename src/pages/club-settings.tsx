@@ -4,6 +4,8 @@ import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { useState } from "preact/hooks";
 import { type ClubProfile, isHexColor } from "../../shared/club";
+import { LOCALE_NAMES, LOCALES, type Locale } from "../../shared/i18n";
+import { useQuery } from "../store";
 import { api, errorMessage } from "../api";
 import { ClubMark, loadClub, setClub, useClub } from "../club";
 import { Button, Field, Notice, TextField, toast, TopBar, useDocumentTitle } from "../ui";
@@ -21,6 +23,10 @@ export function ClubProfileForm({ onSaved, submitLabel }: { onSaved?: () => void
   const [privacyUrl, setPrivacyUrl] = useState(club.privacyUrl ?? "");
   const [privacyText, setPrivacyText] = useState(club.privacyText ?? "");
   const [contact, setContact] = useState(club.contact ?? "");
+  const [defaultLocale, setDefaultLocale] = useState<Locale>(club.defaultLocale);
+  const [country, setCountry] = useState(club.country);
+  const [subdivision, setSubdivision] = useState(club.subdivision ?? "");
+  const [timeZone, setTimeZone] = useState(club.timeZone);
   const [error, setError] = useState<string | null>(null);
 
   const save = async () => {
@@ -35,6 +41,10 @@ export function ClubProfileForm({ onSaved, submitLabel }: { onSaved?: () => void
         privacyUrl: privacyUrl.trim() || null,
         privacyText: privacyText.trim() || null,
         contact: contact.trim() || null,
+        defaultLocale,
+        country,
+        subdivision: subdivision || null,
+        timeZone,
       });
       setClub(saved);
       toast(t`Saved`);
@@ -105,6 +115,19 @@ export function ClubProfileForm({ onSaved, submitLabel }: { onSaved?: () => void
           <Trans>PNG, JPEG, WebP or SVG, at most 256 KB. Without a logo the app shows the abbreviation.</Trans>
         </p>
       </section>
+      <RegionSection
+        locale={defaultLocale}
+        onLocale={setDefaultLocale}
+        country={country}
+        onCountry={(c) => {
+          setCountry(c);
+          setSubdivision("");
+        }}
+        subdivision={subdivision}
+        onSubdivision={setSubdivision}
+        timeZone={timeZone}
+        onTimeZone={setTimeZone}
+      />
       <section class="card card-pad stack" aria-label={t`Privacy and contact`}>
         <TextField
           label={t`Link to privacy policy and legal notice`}
@@ -147,5 +170,68 @@ export function AdminClubPage() {
         </div>
       </main>
     </AdminOnly>
+  );
+}
+
+interface RegionOption {
+  code: string;
+  name: string;
+}
+
+/** Club language, region for holidays and time zone. */
+export function RegionSection(props: {
+  locale: Locale;
+  onLocale: (l: Locale) => void;
+  country: string;
+  onCountry: (c: string) => void;
+  subdivision: string;
+  onSubdivision: (s: string) => void;
+  timeZone: string;
+  onTimeZone: (z: string) => void;
+}) {
+  const regions = useQuery<{ countries: RegionOption[]; subdivisions: RegionOption[] }>(`/admin/regions?country=${props.country}`);
+  const countries = regions.data?.countries.length ? regions.data.countries : [{ code: props.country, name: props.country }];
+  const zones = typeof Intl.supportedValuesOf === "function" ? Intl.supportedValuesOf("timeZone") : [props.timeZone];
+  return (
+    <section class="card card-pad stack" aria-label={t`Language and region`}>
+      <Field label={t`Default language`} hint={t`For everyone who has not chosen a language, and for messages outside the app.`}>
+        {(id) => (
+          <select id={id} class="select" value={props.locale} onChange={(e) => props.onLocale((e.target as HTMLSelectElement).value as Locale)}>
+            {LOCALES.map((l) => (
+              <option value={l}>{LOCALE_NAMES[l]}</option>
+            ))}
+          </select>
+        )}
+      </Field>
+      <Field label={t`Country`}>
+        {(id) => (
+          <select id={id} class="select" value={props.country} onChange={(e) => props.onCountry((e.target as HTMLSelectElement).value)}>
+            {countries.map((c) => (
+              <option value={c.code}>{c.name}</option>
+            ))}
+          </select>
+        )}
+      </Field>
+      <Field label={t`State or region`} hint={t`For school holidays and public holidays.`}>
+        {(id) => (
+          <select id={id} class="select" value={props.subdivision} onChange={(e) => props.onSubdivision((e.target as HTMLSelectElement).value)}>
+            <option value="">{t`Whole country`}</option>
+            {(regions.data?.subdivisions ?? []).map((s) => (
+              <option value={s.code}>{s.name}</option>
+            ))}
+            {props.subdivision && !regions.data?.subdivisions.some((s) => s.code === props.subdivision) ? <option value={props.subdivision}>{props.subdivision}</option> : null}
+          </select>
+        )}
+      </Field>
+      <Field label={t`Time zone`}>
+        {(id) => (
+          <select id={id} class="select" value={props.timeZone} onChange={(e) => props.onTimeZone((e.target as HTMLSelectElement).value)}>
+            {zones.map((z) => (
+              <option value={z}>{z.replaceAll("_", " ")}</option>
+            ))}
+          </select>
+        )}
+      </Field>
+    </section>
   );
 }

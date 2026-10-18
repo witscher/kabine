@@ -35,3 +35,18 @@ describe("Zeit in Europe/Berlin", () => {
     expect(addMinutesLocal("2026-10-24T23:30", 90)).toBe("2026-10-25T01:00");
   });
 });
+
+describe("Zeitzone des Vereins", () => {
+  it("rechnet in der eingestellten Zeitzone", async () => {
+    const { setTimeZone, toLocal, localToInstant } = await import("../worker/lib/time");
+    const instant = Date.parse("2026-10-18T12:00:00Z");
+    expect(toLocal(instant)).toBe("2026-10-18T14:00");
+    setTimeZone("America/New_York");
+    try {
+      expect(toLocal(instant)).toBe("2026-10-18T08:00");
+      expect(localToInstant("2026-10-18T08:00")).toBe(instant);
+    } finally {
+      setTimeZone("Europe/Berlin");
+    }
+  });
+});

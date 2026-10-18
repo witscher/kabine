@@ -54,11 +54,19 @@ export async function person(firstName: string, opts: { lastName?: string; birth
   return id;
 }
 
-export async function team(name: string, ageClassCode: string, opts: { level?: number; declineTraining?: number; declineGame?: number; maxSquad?: number } = {}) {
+/** Gender of a test team from the old-style code: "wD" female, "mC" male, otherwise mixed ("F" = women). */
+function genderOf(code: string): "f" | "m" | "x" {
+  if (code === "F" || code.startsWith("w")) return "f";
+  if (code === "M" || code.startsWith("m")) return "m";
+  return "x";
+}
+
+export async function team(name: string, ageClassCode: string, opts: { level?: number; declineTraining?: number; declineGame?: number; maxSquad?: number; gender?: "f" | "m" | "x" } = {}) {
   const row = await one<{ id: number }>(
-    "INSERT INTO teams (name, age_class_code, level, decline_hours_training, decline_hours_game, max_squad) VALUES (?, ?, ?, ?, ?, ?) RETURNING id",
+    "INSERT INTO teams (name, age_class_code, gender, level, decline_hours_training, decline_hours_game, max_squad) VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING id",
     name,
     ageClassCode,
+    opts.gender ?? genderOf(ageClassCode),
     opts.level ?? 1,
     opts.declineTraining ?? 6,
     opts.declineGame ?? 6,
@@ -77,24 +85,26 @@ export async function guardian(parentId: number, childId: number) {
 
 export async function season() {
   await exec("INSERT INTO seasons (id, name, starts_on, ends_on, is_current) VALUES (1, '2026/27', '2026-07-01', '2027-06-30', 1)");
-  const classes: [string, string, string, number, number, number | null, number | null][] = [
-    ["wE", "weibliche E-Jugend", "w", 1, 1, 2016, 2017],
-    ["wD", "weibliche D-Jugend", "w", 2, 1, 2014, 2015],
-    ["wC", "weibliche C-Jugend", "w", 3, 1, 2012, 2013],
-    ["wB", "weibliche B-Jugend", "w", 4, 1, 2010, 2011],
-    ["wA", "weibliche A-Jugend", "w", 5, 1, 2008, 2009],
-    ["F", "Frauen", "w", 6, 0, null, 2007],
+  // Test codes keep the gender letter of the old app ("wD"); the class itself has no gender
+  const classes: [string, string, number, number, number | null, number | null, number, number][] = [
+    ["wE", "weibliche E-Jugend", 1, 1, 2016, 2017, 75, 1],
+    ["wD", "weibliche D-Jugend", 2, 1, 2014, 2015, 90, 1],
+    ["wC", "weibliche C-Jugend", 3, 1, 2012, 2013, 90, 1],
+    ["wB", "weibliche B-Jugend", 4, 1, 2010, 2011, 90, 0],
+    ["wA", "weibliche A-Jugend", 5, 1, 2008, 2009, 120, 0],
+    ["F", "Frauen", 6, 0, null, 2007, 120, 0],
   ];
-  for (const [code, name, gender, rank, youth, min, max] of classes) {
+  for (const [code, name, rank, youth, min, max, minutes, referee] of classes) {
     await exec(
-      "INSERT INTO age_classes (season_id, code, name, gender, rank, is_youth, birth_year_min, birth_year_max) VALUES (1, ?, ?, ?, ?, ?, ?, ?)",
+      "INSERT INTO age_classes (season_id, code, name, rank, is_youth, birth_year_min, birth_year_max, game_minutes, youth_referee) VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?)",
       code,
       name,
-      gender,
       rank,
       youth,
       min,
       max,
+      minutes,
+      referee,
     );
   }
 }

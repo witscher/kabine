@@ -1,7 +1,8 @@
 // Personal calendar (iCalendar, RFC 5545): training, games and helper duties depending on
-// the checkboxes. Times are local Europe/Berlin time and are written with TZID.
+// the checkboxes. Times are local time of the club's zone and are written with TZID.
 import { t } from "@lingui/core/macro";
 import type { EventSummary, MyParticipation } from "../../shared/types";
+import { timeZone } from "../lib/time";
 
 export interface CalendarItem {
   uid: string;
@@ -13,9 +14,22 @@ export interface CalendarItem {
   cancelled: boolean;
 }
 
-const VTIMEZONE = [
+/** Rules of Central European Time; the zones listed below follow them. */
+const CET_ZONES = new Set([
+  "Europe/Berlin", "Europe/Vienna", "Europe/Zurich", "Europe/Amsterdam", "Europe/Brussels", "Europe/Luxembourg", "Europe/Paris",
+  "Europe/Rome", "Europe/Madrid", "Europe/Copenhagen", "Europe/Oslo", "Europe/Stockholm", "Europe/Prague", "Europe/Warsaw",
+  "Europe/Budapest", "Europe/Bratislava", "Europe/Ljubljana", "Europe/Zagreb", "Europe/Belgrade", "Europe/Vaduz", "Europe/Monaco",
+]);
+
+/**
+ * VTIMEZONE block for the club's zone. Calendar apps know IANA names, so other zones go without
+ * the block (TZID alone).
+ */
+function vtimezone(zone: string): string[] {
+  if (!CET_ZONES.has(zone)) return [];
+  return [
   "BEGIN:VTIMEZONE",
-  "TZID:Europe/Berlin",
+  `TZID:${zone}`,
   "BEGIN:DAYLIGHT",
   "TZOFFSETFROM:+0100",
   "TZOFFSETTO:+0200",
@@ -31,7 +45,8 @@ const VTIMEZONE = [
   "RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU",
   "END:STANDARD",
   "END:VTIMEZONE",
-];
+  ];
+}
 
 function escapeText(s: string): string {
   return s.replace(/\\/g, "\\\\").replace(/\n/g, "\\n").replace(/,/g, "\\,").replace(/;/g, "\\;");
@@ -62,7 +77,7 @@ function localStamp(local: string): string {
   return `${local.slice(0, 4)}${local.slice(5, 7)}${local.slice(8, 10)}T${local.slice(11, 13)}${local.slice(14, 16)}00`;
 }
 
-export function buildCalendar(name: string, items: CalendarItem[], nowUtcIso: string): string {
+export function buildCalendar(name: string, items: CalendarItem[], nowUtcIso: string, zone = timeZone()): string {
   const stamp = nowUtcIso.replace(/[-:]/g, "").replace(/\.\d+Z$/, "Z");
   const lines = [
     "BEGIN:VCALENDAR",
@@ -71,16 +86,16 @@ export function buildCalendar(name: string, items: CalendarItem[], nowUtcIso: st
     "CALSCALE:GREGORIAN",
     "METHOD:PUBLISH",
     `X-WR-CALNAME:${escapeText(name)}`,
-    "X-WR-TIMEZONE:Europe/Berlin",
+    `X-WR-TIMEZONE:${zone}`,
     "REFRESH-INTERVAL;VALUE=DURATION:PT6H",
-    ...VTIMEZONE,
+    ...vtimezone(zone),
   ];
   for (const it of items) {
     lines.push(
       "BEGIN:VEVENT",
       `UID:${it.uid}`,
       `DTSTAMP:${stamp}`,
-      `DTSTART;TZID=Europe/Berlin:${localStamp(it.start)}`,
+      `DTSTART;TZID=${zone}:${localStamp(it.start)}`,
       `DURATION:PT${it.durationMinutes}M`,
       `SUMMARY:${escapeText(it.summary)}`,
     );

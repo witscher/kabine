@@ -7,7 +7,8 @@ import { requireAdmin } from "../auth/actor";
 import { assertNotProtected, assertNotStaffUnlessAdmin } from "../auth/owner";
 import { recordAttendance, seasonStatsStatements } from "../domain/attendance";
 import { chatStub, clearChats, markFormerInChats } from "../domain/chat";
-import { type HolidayInput, holidaySource, holidaySourceLabel } from "../domain/holidays";
+import { holidayDays, type HolidayInput, holidaySource, holidaySourceLabel } from "../domain/holidays";
+import { loadClub } from "../domain/club";
 import { all, first, list, run, stmt } from "../lib/db";
 import { badRequest, conflict, forbidden, notFound, parse, readJson } from "../lib/http";
 import { isDate, nowLocal, utcIso } from "../lib/time";
@@ -28,11 +29,12 @@ interface SeasonRow {
 interface AgeClassRow {
   code: string;
   name: string;
-  gender: "w" | "m" | "x";
   rank: number;
   is_youth: number;
   birth_year_min: number | null;
   birth_year_max: number | null;
+  game_minutes: number;
+  youth_referee: number;
 }
 
 seasonRoutes.get("/seasons", async (c) => {
@@ -95,8 +97,8 @@ seasonRoutes.post("/seasons", async (c) => {
   if (current) {
     await run(
       c.env.DB,
-      `INSERT INTO age_classes (season_id, code, name, gender, rank, is_youth, birth_year_min, birth_year_max)
-       SELECT ?, code, name, gender, rank, is_youth, birth_year_min + 1, birth_year_max + 1 FROM age_classes WHERE season_id = ?`,
+      `INSERT INTO age_classes (season_id, code, name, rank, is_youth, birth_year_min, birth_year_max, game_minutes, youth_referee)
+       SELECT ?, code, name, rank, is_youth, birth_year_min + 1, birth_year_max + 1, game_minutes, youth_referee FROM age_classes WHERE season_id = ?`,
       season!.id,
       current.id,
     );
@@ -132,16 +134,17 @@ seasonRoutes.delete("/seasons/:id", async (c) => {
 
 seasonRoutes.get("/seasons/:id/age-classes", async (c) => {
   requireAdmin(requireActor(c));
-  const rows = await all<AgeClassRow>(c.env.DB, "SELECT * FROM age_classes WHERE season_id = ? ORDER BY rank, gender, code", intParam(c, "id"));
+  const rows = await all<AgeClassRow>(c.env.DB, "SELECT * FROM age_classes WHERE season_id = ? ORDER BY rank, code", intParam(c, "id"));
   return c.json({
     ageClasses: rows.map((r) => ({
       code: r.code,
       name: r.name,
-      gender: r.gender,
       rank: r.rank,
       isYouth: r.is_youth === 1,
       birthYearMin: r.birth_year_min,
       birthYearMax: r.birth_year_max,
+      gameMinutes: r.game_minutes,
+      youthReferee: r.youth_referee === 1,
     })),
   });
 });
@@ -158,15 +161,16 @@ seasonRoutes.put("/seasons/:id/age-classes", async (c) => {
     ...ageClasses.map((a) =>
       stmt(
         c.env.DB,
-        "INSERT INTO age_classes (season_id, code, name, gender, rank, is_youth, birth_year_min, birth_year_max) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO age_classes (season_id, code, name, rank, is_youth, birth_year_min, birth_year_max, game_minutes, youth_referee) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
         seasonId,
         a.code,
         a.name,
-        a.gender,
         a.rank,
         a.isYouth ? 1 : 0,
         a.birthYearMin,
         a.birthYearMax,
+        a.gameMinutes,
+        a.youthReferee ? 1 : 0,
       ),
     ),
   ]);
@@ -198,7 +202,10 @@ async function buildPreview(db: D1Database, seasonId: number) {
   const [currentClasses, nextClasses, teams, players, formers, coaches] = await Promise.all([
     all<AgeClassRow>(db, "SELECT * FROM age_classes WHERE season_id = ?", current?.id ?? 0),
     all<AgeClassRow>(db, "SELECT * FROM age_classes WHERE season_id = ? ORDER BY rank", seasonId),
-    all<{ id: number; name: string; age_class_code: string; level: number }>(db, "SELECT id, name, age_class_code, level FROM teams WHERE kind = 'team' ORDER BY name"),
+    all<{ id: number; name: string; age_class_code: string; level: number; gender: "f" | "m" | "x" }>(
+      db,
+      "SELECT id, name, age_class_code, level, gender FROM teams WHERE kind = 'team' ORDER BY name",
+    ),
     all<{ id: number; first_name: string; last_name: string | null; birth_year: number | null; team_ids: string }>(
       db,
       `SELECT p.id, p.first_name, p.last_name, p.birth_year, group_concat(tm.team_id) AS team_ids
@@ -231,26 +238,27 @@ async function buildPreview(db: D1Database, seasonId: number) {
     if (p.birth_year == null) {
       return { ...base, newAgeClass: null, category: "missing_birth_year" as const, options: allTeams, suggestedTeamIds: withAdult(currentTeams.map((t) => t.id)) };
     }
-    const gender = classOf(currentTeams[0]?.age_class_code ?? "")?.gender ?? "x";
+    // Age classes have no gender: the player's current team says whether girls', boys' or mixed teams fit
+    const gender = currentTeams[0]?.gender ?? "x";
+    const genderFits = (t: { gender: "f" | "m" | "x" }) => gender === "x" || t.gender === gender || t.gender === "x";
     const fits = youthNext.filter(
-      (a) =>
-        (a.birth_year_min == null || a.birth_year_min <= p.birth_year!) &&
-        (a.birth_year_max == null || p.birth_year! <= a.birth_year_max) &&
-        (gender === "x" || a.gender === gender || a.gender === "x"),
+      (a) => (a.birth_year_min == null || a.birth_year_min <= p.birth_year!) && (a.birth_year_max == null || p.birth_year! <= a.birth_year_max),
     );
     if (!fits.length) {
       if (p.birth_year < oldestYouth) {
         const adultTeams = teams.filter((t) => {
           const ac = nextClasses.find((a) => a.code === t.age_class_code);
-          return ac && ac.is_youth === 0 && (gender === "x" || ac.gender === gender);
+          return ac && ac.is_youth === 0 && genderFits(t);
         });
         return { ...base, newAgeClass: null, category: "outgrown" as const, options: (adultTeams.length ? adultTeams : teams).map(ref), suggestedTeamIds: adultIds };
       }
       return { ...base, newAgeClass: null, category: "no_team" as const, options: allTeams, suggestedTeamIds: adultIds };
     }
-    const exact = fits.filter((a) => a.gender === gender);
-    const chosenClasses = exact.length === 1 ? exact : fits;
-    const candidateTeams = teams.filter((t) => chosenClasses.some((a) => a.code === t.age_class_code));
+    const chosenClasses = fits;
+    const inClass = teams.filter((t) => chosenClasses.some((a) => a.code === t.age_class_code) && genderFits(t));
+    // Same gender first, mixed teams only if there is none
+    const sameGender = inClass.filter((t) => t.gender === gender);
+    const candidateTeams = sameGender.length ? sameGender : inClass;
     const newAgeClass = chosenClasses.length === 1 ? { code: chosenClasses[0]!.code, name: chosenClasses[0]!.name } : null;
     if (chosenClasses.length > 1) {
       return { ...base, newAgeClass, category: "ambiguous" as const, options: candidateTeams.length ? candidateTeams.map(ref) : allTeams, suggestedTeamIds: adultIds };
@@ -277,16 +285,23 @@ seasonRoutes.get("/season-change/preview", async (c) => {
   const seasonId = Number(c.req.query("seasonId"));
   if (!Number.isInteger(seasonId) || seasonId <= 0) throw badRequest(t`Please select the new season.`);
   const preview = await buildPreview(c.env.DB, seasonId);
-  // School holidays BW of the new season: once here, afterwards freely editable under Administration → Holidays
+  // School and public holidays of the club's region for the new season: once here, afterwards freely
+  // editable under Administration → Holidays
+  const club = await loadClub(c.env.DB);
+  const region = { country: club.country, subdivision: club.subdivision, language: club.defaultLocale };
   let holidays: HolidayInput[] = [];
+  let publicHolidays: HolidayInput[] = [];
   let holidaysError: string | null = null;
   try {
-    holidays = await holidaySource.bw(preview.next.startsOn, preview.next.endsOn);
+    [holidays, publicHolidays] = await Promise.all([
+      holidaySource.school(region, preview.next.startsOn, preview.next.endsOn),
+      holidaySource.public(region, preview.next.startsOn, preview.next.endsOn),
+    ]);
   } catch (err) {
     console.error("Holiday import failed", err);
     holidaysError = t`The school holidays could not be loaded just now. You can enter them after the change under Administration → Holidays or try again later.`;
   }
-  return c.json({ ...preview, holidays, holidaysError, holidaySource: holidaySourceLabel() });
+  return c.json({ ...preview, holidays, publicHolidays, holidaysError, holidaySource: holidaySourceLabel(), region });
 });
 
 const executeSchema = z.object({
@@ -302,6 +317,11 @@ const executeSchema = z.object({
         .object({ name: z.string().trim().min(1).max(60), startsOn: z.string().refine(isDate), endsOn: z.string().refine(isDate) })
         .refine((h) => h.startsOn <= h.endsOn),
     )
+    .max(60)
+    .default([]),
+  /** Public holidays of the new season from the preview; they replace the stored ones */
+  publicHolidays: z
+    .array(z.object({ name: z.string().trim().min(1).max(80), startsOn: z.string().refine(isDate), endsOn: z.string().refine(isDate) }))
     .max(60)
     .default([]),
 });
@@ -355,6 +375,10 @@ seasonRoutes.post("/season-change/execute", async (c) => {
     ...input.holidays.map((h) =>
       stmt(db, "INSERT INTO holiday_periods (name, starts_on, ends_on, imported) VALUES (?, ?, ?, 1)", h.name, h.startsOn, h.endsOn),
     ),
+    ...(input.publicHolidays.length ? [stmt(db, "DELETE FROM public_holidays")] : []),
+    ...input.publicHolidays.flatMap((h) =>
+      holidayDays(h).map((day) => stmt(db, "INSERT OR REPLACE INTO public_holidays (day, name) VALUES (?, ?)", day, h.name)),
+    ),
     stmt(db, "DELETE FROM core_squad"),
     stmt(db, "DELETE FROM team_memberships WHERE team_id IN (SELECT id FROM teams WHERE kind = 'team')"),
     stmt(
@@ -400,6 +424,7 @@ export const EXPORT_TABLES = [
   "core_squad",
   "locations",
   "holiday_periods",
+  "public_holidays",
   "training_plans",
   "training_rules",
   "rule_teams",

@@ -42,12 +42,18 @@ Each milestone ends with typecheck, unit tests and e2e green, a commit on `main`
 - **K7 Setup wizard** – installation, first steps, onboarding for coaches incl. CSV import.
 - **K8 Staff role** – team staff (physio, manager): see everything of the team, get change notifications, are not participants.
 - **K9 Release** – deploy button, update action, CI (GitHub Actions), docs (install, operation, privacy template, data inventory), demo installation on `yope.de`, README in English and German.
+  - README in English with a link to the German README (`README.de.md`) at the very top.
+  - Privacy and youth protection, clearly explained: data minimisation, parental consent for minors, who sees names and decline reasons, no tracking, data in the club's own Cloudflare account.
+  - Scope and reasons: an internal app for one club, deliberately not in the app stores (installed from the club's own address), no public pages, invitations only.
+  - Screenshots of an invented demo club that walk through the main functions (events, responses, squad, chat, helper duties, carpools, parents), generated with Playwright from the demo data in both languages.
 
 ## Progress
 
 - **K0 Import** done: code without history, one initial migration, tests green.
 - **K1 Club profile** done: profile in `app_meta` (name, short name, abbreviation, colours, logo in KV, privacy link and text, contact, owner), page *Verwaltung → Verein*, dynamic manifest, owner set by the first admin, neutral icons and splash, demo seed with invented names. Explainer videos removed (see open points).
 - **K2 Security checklist** done: twelve rules with a test each, see `docs/security.md`. Personal links on existing accounts always sign out the old devices (the switch in the UI is gone).
+- **K3 Languages** done: English source, German catalog (2,200+ messages), language per account, server texts per request and per recipient, language switch.
+- **K4 Sport and region profiles** done: age classes without gender (playing time and youth referee per class), team gender, sport profiles (handball, football, other), club country/subdivision/time zone, school and public holidays per region (no trainings on public holidays), age classes from the sport profile.
 
 ## Requested for the end (also for the original club app)
 

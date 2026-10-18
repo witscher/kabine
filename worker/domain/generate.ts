@@ -12,6 +12,7 @@
 //     responses.
 
 import { all, batch, first, list, run, stmt } from "../lib/db";
+import { publicHolidayDays } from "./holidays";
 import { addDays, eachDay, isoWeekday, nowLocal, todayLocal } from "../lib/time";
 
 export const HORIZON_DAYS = 70;
@@ -70,6 +71,7 @@ export function plannedOccurrences(
   from: string,
   to: string,
   nowL: string,
+  publicHolidays: ReadonlySet<string> = new Set(),
 ): Map<string, Occurrence> {
   const planById = new Map(plans.map((p) => [p.id, p]));
   const holidayPlansByTeam = new Map<number, PlanRow[]>();
@@ -87,6 +89,8 @@ export function plannedOccurrences(
     const teamIds = ruleTeams.get(rule.id)?.length ? ruleTeams.get(rule.id)! : [plan.team_id];
     for (const day of eachDay(start, end)) {
       if (isoWeekday(day) !== rule.weekday) continue;
+      // No training on public holidays (imported at the season change, removable by admins)
+      if (publicHolidays.has(day)) continue;
       if (plan.kind === "regular") {
         const holidays = holidayPlansByTeam.get(plan.team_id) ?? [];
         if (holidays.some((h) => h.valid_from <= day && day <= h.valid_to)) continue;
@@ -131,7 +135,7 @@ export async function generateTrainings(db: D1Database, now = Date.now()): Promi
   const ruleTeams = new Map<number, number[]>();
   for (const rt of ruleTeamRows) ruleTeams.set(rt.rule_id, [...(ruleTeams.get(rt.rule_id) ?? []), rt.team_id]);
 
-  const desired = plannedOccurrences(plans, rules, ruleTeams, today, horizon, nowL);
+  const desired = plannedOccurrences(plans, rules, ruleTeams, today, horizon, nowL, await publicHolidayDays(db, today, horizon));
 
   const existing = await all<ExistingRow>(
     db,

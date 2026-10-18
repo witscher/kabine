@@ -67,9 +67,9 @@ async function overlappingNominations(db: D1Database, event: EventRow, personIds
 }
 
 async function ageClassFor(db: D1Database, code: string) {
-  return first<{ code: string; name: string; gender: string; rank: number; birth_year_min: number | null; birth_year_max: number | null; is_youth: number }>(
+  return first<{ code: string; name: string; rank: number; birth_year_min: number | null; birth_year_max: number | null; is_youth: number }>(
     db,
-    `SELECT ac.code, ac.name, ac.gender, ac.rank, ac.birth_year_min, ac.birth_year_max, ac.is_youth
+    `SELECT ac.code, ac.name, ac.rank, ac.birth_year_min, ac.birth_year_max, ac.is_youth
        FROM age_classes ac JOIN seasons s ON s.id = ac.season_id AND s.is_current = 1 WHERE ac.code = ?`,
     code,
   );
@@ -318,7 +318,11 @@ export interface TeamCandidate {
  *   (so a helper can become a player).
  */
 export async function teamCandidates(db: D1Database, teamId: number, mode: "help" | "player"): Promise<TeamCandidate[]> {
-  const team = await first<{ id: number; age_class_code: string; level: number }>(db, "SELECT id, age_class_code, level FROM teams WHERE id = ?", teamId);
+  const team = await first<{ id: number; age_class_code: string; level: number; gender: string }>(
+    db,
+    "SELECT id, age_class_code, level, gender FROM teams WHERE id = ?",
+    teamId,
+  );
   if (!team) return [];
   const ac = await ageClassFor(db, team.age_class_code);
   const rows = await all<{ person_id: number; first_name: string; last_name: string | null; is_active: number; team_id: number; team_name: string }>(
@@ -330,7 +334,7 @@ export async function teamCandidates(db: D1Database, teamId: number, mode: "help
        LEFT JOIN age_classes ac ON ac.code = t.age_class_code AND ac.season_id = (SELECT id FROM seasons WHERE is_current = 1)
       WHERE t.id <> ?1
         AND ((t.age_class_code = ?2 AND (?6 = 'player' OR t.level > ?3))
-             OR (ac.rank = ?4 - 1 AND (ac.gender = ?5 OR ac.gender = 'x' OR ?5 = 'x')))
+             OR (ac.rank = ?4 - 1 AND (t.gender = ?5 OR t.gender = 'x' OR ?5 = 'x')))
         AND NOT EXISTS (SELECT 1 FROM team_memberships own WHERE own.team_id = ?1 AND own.person_id = p.id
                           AND (?6 = 'help' OR own.role = 'player'))
       ORDER BY p.first_name, p.last_name, p.id, t.name`,
@@ -338,7 +342,7 @@ export async function teamCandidates(db: D1Database, teamId: number, mode: "help
     team.age_class_code,
     team.level,
     ac?.rank ?? -99,
-    ac?.gender ?? "x",
+    team.gender,
     mode,
   );
   const byPerson = new Map<number, TeamCandidate>();

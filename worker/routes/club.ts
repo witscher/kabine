@@ -2,11 +2,13 @@ import { t } from "@lingui/core/macro";
 // Club profile: public read (login page, splash, manifest) and admin edit.
 import { Hono } from "hono";
 import { z } from "zod";
-import { isHexColor } from "../../shared/club";
+import { isHexColor, isTimeZone } from "../../shared/club";
 import { LOCALES } from "../../shared/i18n";
 import { type AppEnv, requireActor } from "../app";
 import { requireAdmin } from "../auth/actor";
 import { loadClub, saveClub } from "../domain/club";
+import { holidaySource } from "../domain/holidays";
+import { currentLocale } from "../i18n";
 import { badRequest, forbidden, parse, readJson } from "../lib/http";
 
 export const clubRoutes = new Hono<AppEnv>();
@@ -31,6 +33,10 @@ const clubSchema = z.object({
   privacyText: z.string().trim().max(5000).nullable().optional(),
   contact: z.string().trim().max(200).nullable().optional(),
   defaultLocale: z.enum(LOCALES).optional(),
+  sport: z.enum(["handball", "football", "other"]).optional(),
+  country: z.string().regex(/^[A-Z]{2}$/).optional(),
+  subdivision: z.string().regex(/^[A-Z]{2}-[A-Z0-9]{1,4}$/).nullable().optional(),
+  timeZone: z.string().max(64).refine(isTimeZone, { error: () => t`Unknown time zone.` }).optional(),
   setupDone: z.boolean().optional(),
 });
 
@@ -86,6 +92,17 @@ clubRoutes.delete("/admin/club/logo", async (c) => {
   await c.env.KV.delete(LOGO_KEY);
   await saveClub(c.env.DB, { logoVersion: null });
   return c.json({ ok: true });
+});
+
+/** Countries and subdivisions for the club's region (school and public holidays). */
+clubRoutes.get("/admin/regions", async (c) => {
+  requireAdmin(requireActor(c));
+  try {
+    return c.json(await holidaySource.regions(c.req.query("country") ?? null, currentLocale()));
+  } catch (err) {
+    console.warn("Regions not loaded", err instanceof Error ? err.message : err);
+    return c.json({ countries: [], subdivisions: [] });
+  }
 });
 
 /** Web app manifest with the club's name and colours (installation on the home screen). */

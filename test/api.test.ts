@@ -317,6 +317,21 @@ describe("Vereinsaustritt und Saisonwechsel", () => {
   });
 });
 
+describe("Altersklassen ohne Geschlecht", () => {
+  it("Saisonwechsel: Spielerinnen in die Mädchenmannschaft, gemischt nur wenn es keine gibt", async () => {
+    // Eine Altersklasse C, darin eine weibliche und eine gemischte Mannschaft
+    const girls = await team("wC", "wC", { gender: "f" });
+    const mixed = await team("gC", "wC", { gender: "x", level: 2 });
+    const cookie = await loginAs(await person("Ada", { admin: true }));
+    const created = await api(`/seasons`, { cookie, body: { name: "2027/28", startsOn: "2027-07-01", endsOn: "2028-06-30" } });
+    const preview = await api(`/season-change/preview?seasonId=${created.body.id}`, { cookie });
+    const byId = new Map(preview.body.players.map((p: any) => [p.person.id, p]));
+    // Alice (2014) spielt in der weiblichen wD: weiblich vor gemischt
+    expect(byId.get(alice)).toMatchObject({ category: "auto", suggestedTeamIds: [girls] });
+    expect((byId.get(alice) as any).options.map((o: any) => o.id)).not.toContain(mixed);
+  });
+});
+
 describe("Spieler in zwei Mannschaften", () => {
   it("Saisonwechsel: Jugend nach Jahrgang in die 1. Mannschaft, Erwachsene behalten beide Teams", async () => {
     const wd2 = await team("wD2", "wD", { level: 2 });

@@ -1,5 +1,6 @@
 // Club profile shared by worker and app (GET /api/club).
 import type { Locale } from "./i18n";
+import type { SportId } from "./sports";
 
 export interface ClubProfile {
   /** Full name, e.g. "SV Musterstadt 1900 Handball". */
@@ -22,6 +23,13 @@ export interface ClubProfile {
   privacyText: string | null;
   /** Contact for questions about the app, shown under Help (optional). */
   contact: string | null;
+  /** Sport profile (shared/sports.ts): age classes, playing times, default duties. */
+  sport: SportId;
+  /** ISO country code and subdivision (OpenHolidays codes, e.g. "DE-BW") for school and public holidays. */
+  country: string;
+  subdivision: string | null;
+  /** IANA time zone; events are stored and computed in it. */
+  timeZone: string;
   /** Language for people who have not chosen one, and for texts outside a request. */
   defaultLocale: Locale;
   /** The installation wizard has been completed. */
@@ -37,6 +45,10 @@ export const DEFAULT_CLUB: ClubProfile = {
   privacyUrl: null,
   privacyText: null,
   contact: null,
+  sport: "handball",
+  country: "DE",
+  subdivision: null,
+  timeZone: "Europe/Berlin",
   defaultLocale: "en",
   setupDone: false,
 };
@@ -54,4 +66,14 @@ export function clubAbbr(club: Pick<ClubProfile, "abbr" | "shortName">): string 
     .slice(0, 3)
     .map((w) => w[0]!.toUpperCase())
     .join("");
+}
+
+/** Is this an IANA time zone the runtime knows? */
+export function isTimeZone(zone: string): boolean {
+  try {
+    new Intl.DateTimeFormat("en", { timeZone: zone });
+    return zone.includes("/") || zone === "UTC";
+  } catch {
+    return false;
+  }
 }

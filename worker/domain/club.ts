@@ -3,6 +3,7 @@
 import type { ClubProfile } from "../../shared/club";
 import { clubAbbr, DEFAULT_CLUB } from "../../shared/club";
 import { setClubDefaultLocale } from "../i18n";
+import { setTimeZone } from "../lib/time";
 import { first, run } from "../lib/db";
 import { randomToken } from "../lib/crypto";
 
@@ -72,5 +73,6 @@ export async function enterClubContext(db: D1Database): Promise<ClubSettings> {
   ownAbbr = clubAbbr(club);
   ownShortName = club.shortName;
   setClubDefaultLocale(club.defaultLocale);
+  setTimeZone(club.timeZone);
   return club;
 }

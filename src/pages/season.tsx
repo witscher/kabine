@@ -37,8 +37,10 @@ interface Preview {
   players: PreviewPlayer[];
   formerPersons: PersonRef[];
   coaches: { person: PersonRef; team: string }[];
-  /** School holidays (BW) of the new season, they replace all holiday periods at the change */
+  /** School holidays of the club's region for the new season, they replace all holiday periods at the change */
   holidays: { name: string; startsOn: string; endsOn: string }[];
+  /** Public holidays of the club's region; no trainings on these days */
+  publicHolidays?: { name: string; startsOn: string; endsOn: string }[];
   holidaysError: string | null;
   holidaySource: string;
 }
@@ -330,8 +332,8 @@ export function SeasonChangePage() {
             </h2>
             <p class="muted">
               <Trans>
-                The school holidays of Baden-Württemberg replace all previous holiday periods at the change. Afterwards they can be changed, deleted or
-                supplemented under Administration → Holidays (e.g. carnival holidays). Source: {holidaySource}.
+                The school holidays of the club's region replace all previous holiday periods at the change. Afterwards they can be changed, deleted or
+                supplemented under Administration → Holidays (e.g. carnival holidays). No trainings take place on public holidays. Source: {holidaySource}.
               </Trans>
             </p>
             {preview.data.holidaysError ? <Notice kind="warn">{preview.data.holidaysError}</Notice> : null}
@@ -349,6 +351,14 @@ export function SeasonChangePage() {
                   </li>
                 ))}
               </ul>
+            ) : null}
+            {preview.data.publicHolidays?.length ? (
+              <>
+                <h3 class="small muted" style={{ margin: "8px 0 0" }}>
+                  <Trans>Public holidays (no training)</Trans>
+                </h3>
+                <p class="small">{preview.data.publicHolidays.map((h) => `${h.name} ${fullDate(h.startsOn)}`).join(" · ")}</p>
+              </>
             ) : null}
           </section>
         ) : null}
@@ -424,6 +434,7 @@ export function SeasonChangePage() {
                 confirmName: confirmText.trim(),
                 assignments: preview.data!.players.map((p) => ({ personId: p.person.id, ...(choices[p.person.id] ?? { teamIds: p.suggestedTeamIds, former: false }) })),
                 holidays: preview.data!.holidays,
+                publicHolidays: preview.data!.publicHolidays ?? [],
               });
               clearCache();
               await refresh();

@@ -1,21 +1,39 @@
-// Time calculations in Europe/Berlin.
+// Time calculations in the club's time zone (club profile, default Europe/Berlin).
 //
 // Events are stored as local wall-clock time ('YYYY-MM-DDTHH:MM').
 // For deadlines and comparisons with "now" they are converted here to instants (ms since
 // epoch). Intl takes care of daylight saving time.
 
-export const TZ = "Europe/Berlin";
+function formatFor(zone: string) {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: zone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hourCycle: "h23",
+  });
+}
 
-const partsFormat = new Intl.DateTimeFormat("en-CA", {
-  timeZone: TZ,
-  year: "numeric",
-  month: "2-digit",
-  day: "2-digit",
-  hour: "2-digit",
-  minute: "2-digit",
-  second: "2-digit",
-  hourCycle: "h23",
-});
+// One installation serves one club: the zone is set at the start of each request and cron run
+let zone = "Europe/Berlin";
+let partsFormat = formatFor(zone);
+
+export function timeZone(): string {
+  return zone;
+}
+
+export function setTimeZone(next: string): void {
+  if (next === zone) return;
+  try {
+    partsFormat = formatFor(next);
+    zone = next;
+  } catch {
+    // unknown zone: keep the previous one
+  }
+}
 
 type Parts = { year: number; month: number; day: number; hour: number; minute: number; second: number };
 
@@ -27,7 +45,7 @@ function partsAt(ms: number): Parts {
   return out as Parts;
 }
 
-/** Offset of Berlin wall-clock time from UTC in ms at instant `ms`. */
+/** Offset of the club's wall-clock time from UTC in ms at instant `ms`. */
 function offsetAt(ms: number): number {
   const whole = ms - (((ms % 1000) + 1000) % 1000);
   const p = partsAt(whole);

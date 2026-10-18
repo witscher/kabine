@@ -9,20 +9,17 @@ INSERT INTO seasons (id, name, starts_on, ends_on, is_current)
 SELECT 1, '2026/27', '2026-07-01', '2027-06-30', 1
 WHERE NOT EXISTS (SELECT 1 FROM app_meta WHERE key = 'demo_v1');
 
-INSERT INTO age_classes (season_id, code, name, gender, rank, is_youth, birth_year_min, birth_year_max)
+-- Handball profile (shared/sports.ts): ages relative to the season's start year 2026
+INSERT INTO age_classes (season_id, code, name, rank, is_youth, birth_year_min, birth_year_max, game_minutes, youth_referee)
 SELECT * FROM (VALUES
-  (1, 'Minis', 'Minis', 'x', 1, 1, 2018, 2020),
-  (1, 'gE', 'gemischte E-Jugend', 'x', 2, 1, 2016, 2017),
-  (1, 'wD', 'weibliche D-Jugend', 'w', 3, 1, 2014, 2015),
-  (1, 'mD', 'männliche D-Jugend', 'm', 3, 1, 2014, 2015),
-  (1, 'wC', 'weibliche C-Jugend', 'w', 4, 1, 2012, 2013),
-  (1, 'mC', 'männliche C-Jugend', 'm', 4, 1, 2012, 2013),
-  (1, 'wB', 'weibliche B-Jugend', 'w', 5, 1, 2010, 2011),
-  (1, 'mB', 'männliche B-Jugend', 'm', 5, 1, 2010, 2011),
-  (1, 'wA', 'weibliche A-Jugend', 'w', 6, 1, 2008, 2009),
-  (1, 'mA', 'männliche A-Jugend', 'm', 6, 1, 2008, 2009),
-  (1, 'F', 'Frauen', 'w', 7, 0, NULL, 2007),
-  (1, 'M', 'Männer', 'm', 7, 0, NULL, 2007)
+  (1, 'Bambini', 'Bambini', 0, 1, 2021, NULL, 60, 0),
+  (1, 'Minis', 'Minis', 1, 1, 2018, 2020, 60, 0),
+  (1, 'E', 'E-Jugend', 2, 1, 2016, 2017, 75, 1),
+  (1, 'D', 'D-Jugend', 3, 1, 2014, 2015, 90, 1),
+  (1, 'C', 'C-Jugend', 4, 1, 2012, 2013, 90, 1),
+  (1, 'B', 'B-Jugend', 5, 1, 2010, 2011, 90, 0),
+  (1, 'A', 'A-Jugend', 6, 1, 2008, 2009, 120, 0),
+  (1, 'Adults', 'Aktive', 7, 0, NULL, 2007, 120, 0)
 ) AS v
 WHERE NOT EXISTS (SELECT 1 FROM app_meta WHERE key = 'demo_v1');
 
@@ -33,11 +30,11 @@ SELECT * FROM (VALUES
 ) AS v
 WHERE NOT EXISTS (SELECT 1 FROM app_meta WHERE key = 'demo_v1');
 
-INSERT INTO teams (id, name, age_class_code, level)
+INSERT INTO teams (id, name, age_class_code, gender, level)
 SELECT * FROM (VALUES
-  (1, 'wD', 'wD', 1),
-  (2, 'mC', 'mC', 1),
-  (3, 'Damen 1', 'F', 1)
+  (1, 'wD', 'D', 'f', 1),
+  (2, 'mC', 'C', 'm', 1),
+  (3, 'Damen 1', 'Adults', 'f', 1)
 ) AS v
 WHERE NOT EXISTS (SELECT 1 FROM app_meta WHERE key = 'demo_v1');
 
@@ -117,7 +114,7 @@ SELECT * FROM (VALUES (1, 1), (2, 1), (3, 2), (4, 2), (5, 3), (6, 3)) AS v
 WHERE NOT EXISTS (SELECT 1 FROM app_meta WHERE key = 'demo_v1');
 
 INSERT INTO app_meta (key, value)
-SELECT 'club', '{"name":"SV Musterstadt 1900 Handball","shortName":"SV Musterstadt","abbr":"SVM","colors":{"primary":"#123a63","accent":"#f2c230"},"logoVersion":null,"privacyUrl":null,"privacyText":null,"contact":null,"setupDone":true,"ownerPersonId":null}'
+SELECT 'club', '{"name":"SV Musterstadt 1900 Handball","shortName":"SV Musterstadt","abbr":"SVM","defaultLocale":"de","colors":{"primary":"#123a63","accent":"#f2c230"},"logoVersion":null,"privacyUrl":null,"privacyText":null,"contact":null,"setupDone":true,"ownerPersonId":null}'
 WHERE NOT EXISTS (SELECT 1 FROM app_meta WHERE key = 'demo_v1');
 
 INSERT OR IGNORE INTO app_meta (key, value) VALUES ('demo_v1', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'));

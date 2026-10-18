@@ -30,13 +30,14 @@ teamRoutes.get("/teams", async (c) => {
     kind: "team" | "group";
     auto_members: "referees" | null;
     age_class_code: string;
+    gender: "f" | "m" | "x";
     level: number;
     parents_enabled: number;
     players: number;
     coaches: number;
   }>(
     c.env.DB,
-    `SELECT t.id, t.name, t.kind, t.auto_members, t.age_class_code, t.level, t.parents_enabled,
+    `SELECT t.id, t.name, t.kind, t.auto_members, t.age_class_code, t.gender, t.level, t.parents_enabled,
             (SELECT count(*) FROM team_memberships tm JOIN persons p ON p.id = tm.person_id
               WHERE tm.team_id = t.id AND tm.role = 'player' AND p.is_former = 0) AS players,
             (SELECT count(*) FROM team_memberships tm WHERE tm.team_id = t.id AND tm.role = 'coach') AS coaches
@@ -53,6 +54,7 @@ teamRoutes.get("/teams", async (c) => {
       kind: r.kind,
       autoMembers: r.auto_members,
       ageClassCode: r.age_class_code,
+      gender: r.gender,
       level: r.level,
       parentsEnabled: r.parents_enabled === 1,
       players: r.players,
@@ -64,6 +66,8 @@ teamRoutes.get("/teams", async (c) => {
 const createTeamSchema = z.object({
   name: z.string().trim().min(1).max(30),
   ageClassCode: z.string().trim().min(1).max(10),
+  /** f female, m male, x mixed */
+  gender: z.enum(["f", "m", "x"]).default("x"),
   level: z.number().int().min(1).max(9).default(1),
   /** If not given: youth with parents, adults without. */
   parentsEnabled: z.boolean().optional(),
@@ -82,9 +86,10 @@ teamRoutes.post("/teams", async (c) => {
   try {
     const row = await first<{ id: number }>(
       c.env.DB,
-      "INSERT INTO teams (name, age_class_code, level, parents_enabled, max_squad) VALUES (?, ?, ?, ?, 20) RETURNING id",
+      "INSERT INTO teams (name, age_class_code, gender, level, parents_enabled, max_squad) VALUES (?, ?, ?, ?, ?, 20) RETURNING id",
       input.name,
       input.ageClassCode,
+      input.gender,
       input.level,
       parentsEnabled ? 1 : 0,
     );
@@ -125,6 +130,7 @@ teamRoutes.post("/groups", async (c) => {
 interface TeamRow {
   id: number;
   name: string;
+  gender: "f" | "m" | "x";
   home_template_id: number | null;
   away_template_id: number | null;
   kind: "team" | "group";
@@ -288,6 +294,7 @@ teamRoutes.get("/teams/:id", async (c) => {
 const updateTeamSchema = z.object({
   name: z.string().trim().min(1).max(30).optional(),
   ageClassCode: z.string().trim().min(1).max(10).optional(),
+  gender: z.enum(["f", "m", "x"]).optional(),
   level: z.number().int().min(1).max(9).optional(),
   declineHoursTraining: z.number().int().min(0).max(168).optional(),
   declineHoursGame: z.number().int().min(0).max(168).optional(),
@@ -308,7 +315,7 @@ teamRoutes.patch("/teams/:id", async (c) => {
   const teamId = intParam(c, "id");
   requireCoach(actor, teamId);
   const input = parse(updateTeamSchema, await readJson(c.req.raw));
-  if ((input.name || input.ageClassCode || input.level || input.parentsEnabled !== undefined) && !actor.isAdmin) requireAdmin(actor);
+  if ((input.name || input.ageClassCode || input.gender || input.level || input.parentsEnabled !== undefined) && !actor.isAdmin) requireAdmin(actor);
   const team = await first<TeamRow>(c.env.DB, "SELECT * FROM teams WHERE id = ?", teamId);
   if (!team) throw notFound();
   if (team.kind === "group" && (input.ageClassCode || input.level || input.parentsEnabled || input.helperPlan || input.autoSquad || input.homeTemplateId || input.awayTemplateId)) {
@@ -320,10 +327,11 @@ teamRoutes.patch("/teams/:id", async (c) => {
   try {
     await run(
       c.env.DB,
-      `UPDATE teams SET name = ?, age_class_code = ?, level = ?, decline_hours_training = ?, decline_hours_game = ?, max_squad = ?,
+      `UPDATE teams SET name = ?, age_class_code = ?, gender = ?, level = ?, decline_hours_training = ?, decline_hours_game = ?, max_squad = ?,
          auto_squad = ?, parents_enabled = ?, helper_plan = ?, show_responses = ?, home_template_id = ?, away_template_id = ? WHERE id = ?`,
       input.name ?? team.name,
       input.ageClassCode ?? team.age_class_code,
+      input.gender ?? team.gender,
       input.level ?? team.level,
       input.declineHoursTraining ?? team.decline_hours_training,
       input.declineHoursGame ?? team.decline_hours_game,

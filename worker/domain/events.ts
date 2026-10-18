@@ -74,6 +74,8 @@ export interface TeamInfo {
   id: number;
   name: string;
   age_class_code: string;
+  /** Playing time of the age class (current season), 120 if unknown. */
+  game_minutes: number;
   decline_hours_training: number;
   decline_hours_game: number;
   max_squad: number;
@@ -187,9 +189,10 @@ export async function loadEventContext(db: D1Database, events: EventRow[]): Prom
   const [teamRows, responses, nominations, helps, unexcusedRows] = await db.batch([
     db
       .prepare(
-        `SELECT et.event_id, t.id, t.name, t.age_class_code, t.decline_hours_training, t.decline_hours_game, t.max_squad, t.auto_squad,
-                t.h4a_org_id, t.h4a_league_id, t.h4a_team_id, t.show_responses
+        `SELECT et.event_id, t.id, t.name, t.age_class_code, COALESCE(ac.game_minutes, 120) AS game_minutes, t.decline_hours_training,
+                t.decline_hours_game, t.max_squad, t.auto_squad, t.h4a_org_id, t.h4a_league_id, t.h4a_team_id, t.show_responses
            FROM event_teams et JOIN teams t ON t.id = et.team_id
+           ${CURRENT_AGE_CLASS_JOIN("t", "ac")}
           WHERE et.event_id IN (SELECT value FROM json_each(?)) ORDER BY t.name`,
       )
       .bind(list(ids)),
@@ -360,18 +363,16 @@ function gameLiveUrl(e: EventRow, teams: TeamInfo[]): string | null {
   return t ? h4aFetchUrl(t.h4a_org_id!, t.h4a_league_id!, t.h4a_team_id!) : null;
 }
 
+/** Age class of a team in the current season (alias for teams, alias for the class). */
+export const CURRENT_AGE_CLASS_JOIN = (team: string, ac: string) =>
+  `LEFT JOIN age_classes ${ac} ON ${ac}.code = ${team}.age_class_code AND ${ac}.season_id = (SELECT id FROM seasons WHERE is_current = 1)`;
+
 /**
- * Duration of the "In progress" card, after that there is the game report: adults and A youth 2 hours,
- * B to D youth 1.5 hours, E youth 75 minutes, younger 1 hour. With several teams the longest applies.
+ * Duration of the "In progress" card, after that there is the game report: the playing time of the
+ * age class (sport profile, editable by admins). With several teams the longest applies.
  */
-export function gameLiveMinutes(ageClassCodes: string[]): number {
-  const minutes = (code: string) => {
-    const youth = code.length === 2 ? code[1]! : code === "Minis" || code === "Bambini" ? "F" : null;
-    if (youth === null || youth === "A") return 120;
-    if ("BCD".includes(youth)) return 90;
-    return youth === "E" ? 75 : 60;
-  };
-  return ageClassCodes.length ? Math.max(...ageClassCodes.map(minutes)) : 120;
+export function gameLiveMinutes(minutes: number[]): number {
+  return minutes.length ? Math.max(...minutes) : 120;
 }
 
 function gameTableUrl(teams: TeamInfo[]): string | null {
@@ -532,7 +533,7 @@ export function toSummary(e: EventRow, ctx: EventContext, actor: Actor, now: num
             tableUrl: gameTableUrl(teams),
             h4aGameId: e.h4a_game_id,
             liveUrl: gameLiveUrl(e, teams),
-            liveMinutes: gameLiveMinutes(teams.map((t) => t.age_class_code)),
+            liveMinutes: gameLiveMinutes(teams.map((t) => t.game_minutes)),
           }
         : null,
     isDetached: e.is_detached === 1,

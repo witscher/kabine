@@ -1,6 +1,8 @@
+import { env } from "cloudflare:workers";
 // Ferienzeiträume: frei bearbeitbar, Ferienpläne ziehen mit, Import im Saisonwechsel. Erfundene Daten.
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { holidaySource } from "../worker/domain/holidays";
+import { saveClub } from "../worker/domain/club";
 import { addDays, todayLocal } from "../worker/lib/time";
 import { api, freshDb, hall, loginAs, member, one, person, rows, season, team } from "./helpers";
 
@@ -112,7 +114,7 @@ describe("Ferien im Saisonwechsel", () => {
     expect(preview.status).toBe(200);
     const done = await api("/season-change/execute", {
       cookie: adminCookie,
-      body: { seasonId: created.body.id, confirmName: "2027/28", assignments: [], holidays: holidays ?? preview.body.holidays },
+      body: { seasonId: created.body.id, confirmName: "2027/28", assignments: [], holidays: holidays ?? preview.body.holidays, publicHolidays: preview.body.publicHolidays },
     });
     expect(done.status).toBe(200);
     return preview.body;
@@ -120,22 +122,26 @@ describe("Ferien im Saisonwechsel", () => {
 
   it("übernimmt die BW-Ferien der neuen Saison und ersetzt die bisherigen", async () => {
     await api("/holidays", { cookie: adminCookie, body: { name: "Alte Ferien", startsOn: from, endsOn: to } });
-    const spy = vi.spyOn(holidaySource, "bw").mockResolvedValue([
+    await saveClub(env.DB, { country: "DE", subdivision: "DE-BW" });
+    const spy = vi.spyOn(holidaySource, "school").mockResolvedValue([
       { name: "Herbstferien", startsOn: "2027-11-02", endsOn: "2027-11-06" },
       { name: "Weihnachtsferien", startsOn: "2027-12-23", endsOn: "2028-01-08" },
     ]);
+    vi.spyOn(holidaySource, "public").mockResolvedValue([{ name: "Tag der Deutschen Einheit", startsOn: "2027-10-03", endsOn: "2027-10-03" }]);
     const preview = await change(null);
-    expect(spy).toHaveBeenCalledWith("2027-07-01", "2028-06-30");
+    expect(spy).toHaveBeenCalledWith({ country: "DE", subdivision: "DE-BW", language: "de" }, "2027-07-01", "2028-06-30");
     expect(preview.holidaysError).toBeNull();
     expect(await rows("SELECT name, starts_on, imported FROM holiday_periods ORDER BY starts_on")).toEqual([
       { name: "Herbstferien", starts_on: "2027-11-02", imported: 1 },
       { name: "Weihnachtsferien", starts_on: "2027-12-23", imported: 1 },
     ]);
+    expect(await rows("SELECT day, name FROM public_holidays")).toEqual([{ day: "2027-10-03", name: "Tag der Deutschen Einheit" }]);
   });
 
   it("ohne erreichbare Quelle bleiben die bisherigen Ferien", async () => {
     await api("/holidays", { cookie: adminCookie, body: { name: "Alte Ferien", startsOn: from, endsOn: to } });
-    vi.spyOn(holidaySource, "bw").mockRejectedValue(new Error("offline"));
+    vi.spyOn(holidaySource, "school").mockRejectedValue(new Error("offline"));
+    vi.spyOn(holidaySource, "public").mockResolvedValue([]);
     const preview = await change(null);
     expect(preview.holidaysError).toContain("nicht laden");
     expect(await rows("SELECT name FROM holiday_periods")).toEqual([{ name: "Alte Ferien" }]);

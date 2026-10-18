@@ -1,0 +1,6 @@
+{
+  "The school holidays of the club's region replace all previous holiday periods at the change. Afterwards they can be changed, deleted or supplemented under Administration → Holidays (e.g. carnival holidays). No trainings take place on public holidays. Source: {holidaySource}.": "Die Schulferien der Region des Vereins ersetzen beim Wechsel alle bisherigen Ferienzeiträume. Danach lassen sie sich unter Verwaltung → Ferien ändern, löschen oder ergänzen (z. B. Fastnachtsferien). An Feiertagen findet kein Training statt. Quelle: {holidaySource}.",
+  "Public holidays (no training)": "Feiertage (kein Training)",
+  "Named holiday periods. Each one can be changed or deleted. Team holiday plans linked to a period follow its changes. The school holidays of the club's region are imported at the season change (source: {source}).": "Benannte Ferienzeiträume. Jeder lässt sich ändern oder löschen. Ferienpläne der Mannschaften, die mit einem Zeitraum verknüpft sind, ziehen bei Änderungen mit. Die Schulferien der Region des Vereins werden beim Saisonwechsel übernommen (Quelle: {source}).",
+  "Unknown time zone.": "Unbekannte Zeitzone."
+}

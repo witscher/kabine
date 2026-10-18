@@ -86,3 +86,8 @@ export function ClubMark({ class: cls = "logo-mark" }: { class?: string }) {
     </div>
   );
 }
+
+/** IANA time zone of the club, for dates and "now". */
+export function clubTimeZone(): string {
+  return current.timeZone;
+}

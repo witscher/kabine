@@ -1,15 +1,15 @@
 -- Testdaten für die Ende-zu-Ende-Tests. Alle Namen sind erfunden.
 INSERT INTO seasons (id, name, starts_on, ends_on, is_current) VALUES (1, '2026/27', '2026-07-01', '2027-06-30', 1);
-INSERT INTO age_classes (season_id, code, name, gender, rank, is_youth, birth_year_min, birth_year_max) VALUES
-  (1, 'wD', 'weibliche D-Jugend', 'w', 2, 1, 2014, 2015),
-  (1, 'wC', 'weibliche C-Jugend', 'w', 3, 1, 2012, 2013);
+INSERT INTO age_classes (season_id, code, name, rank, is_youth, birth_year_min, birth_year_max, game_minutes, youth_referee) VALUES
+  (1, 'wD', 'weibliche D-Jugend', 2, 1, 2014, 2015, 90, 1),
+  (1, 'wC', 'weibliche C-Jugend', 3, 1, 2012, 2013, 90, 1);
 INSERT INTO persons (id, first_name, last_name, is_admin, admin_email) VALUES (1, 'Ada', 'Admin', 1, 'admin@example.org');
 INSERT INTO persons (id, first_name, last_name) VALUES (2, 'Theo', 'Trainer');
 INSERT INTO persons (id, first_name, last_name, birth_year) VALUES
   (11, 'Ida', 'Probe', 2014),
   (12, 'Jana', 'Probe', 2015),
   (13, 'Kim', 'Probe', 2015);
-INSERT INTO teams (id, name, age_class_code) VALUES (1, 'wT', 'wD');
+INSERT INTO teams (id, name, age_class_code, gender) VALUES (1, 'wT', 'wD', 'f');
 INSERT INTO team_memberships (person_id, team_id, role) VALUES (2, 1, 'coach'), (11, 1, 'player'), (12, 1, 'player'), (13, 1, 'player');
 INSERT INTO locations (id, name, kind) VALUES (1, 'Testhalle', 'hall');
 INSERT INTO training_plans (id, team_id, name, kind, valid_from, valid_to) VALUES (1, 1, 'Testplan', 'regular', '2020-01-01', '2099-12-31');

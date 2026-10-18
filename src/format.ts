@@ -13,9 +13,22 @@ import {
   shortDateIn,
   words,
 } from "../shared/dates";
+import { clubTimeZone } from "./club";
 import { currentLocale } from "./i18n";
 
-export const TZ = "Europe/Berlin";
+/** The club's time zone (club profile); events and "now" are computed in it. */
+export function clubZone(): string {
+  return clubTimeZone();
+}
+
+const formats = new Map<string, Intl.DateTimeFormat>();
+/** Intl formats are expensive: one per zone, locale and options. */
+function format(locale: string, options: Intl.DateTimeFormatOptions): Intl.DateTimeFormat {
+  const key = `${locale}|${JSON.stringify(options)}`;
+  let f = formats.get(key);
+  if (!f) formats.set(key, (f = new Intl.DateTimeFormat(locale, options)));
+  return f;
+}
 
 const pad = (n: number) => String(n).padStart(2, "0");
 
@@ -75,18 +88,9 @@ export function timeRange(start: string, end: string | null): string {
   return end ? `${time(start)} – ${time(end)}` : clockTimeIn(currentLocale(), time(start));
 }
 
-const nowParts = new Intl.DateTimeFormat("en-CA", {
-  timeZone: TZ,
-  year: "numeric",
-  month: "2-digit",
-  day: "2-digit",
-  hour: "2-digit",
-  minute: "2-digit",
-  hourCycle: "h23",
-});
-
 /** Now as local club time. */
 export function nowLocal(): string {
+  const nowParts = format("en-CA", { timeZone: clubZone(), year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23" });
   const o: Record<string, string> = {};
   for (const p of nowParts.formatToParts(new Date())) o[p.type] = p.value;
   return `${o.year}-${o.month}-${o.day}T${o.hour}:${o.minute}`;
@@ -123,8 +127,8 @@ export function relativeDay(local: string): string {
 }
 
 function stampFormat() {
-  return new Intl.DateTimeFormat(intlTag(currentLocale()), {
-    timeZone: TZ,
+  return format(intlTag(currentLocale()), {
+    timeZone: clubZone(),
     weekday: "short",
     day: "2-digit",
     month: "2-digit",
@@ -138,14 +142,12 @@ export function stamp(iso: string): string {
   return stampFormat().format(new Date(iso)).replace(/\.,/, ".,");
 }
 
-const dayOnly = new Intl.DateTimeFormat("en-CA", { timeZone: TZ, year: "numeric", month: "2-digit", day: "2-digit" });
-
 export function clock(iso: string): string {
-  return new Intl.DateTimeFormat(intlTag(currentLocale()), { timeZone: TZ, hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(iso));
+  return format(intlTag(currentLocale()), { timeZone: clubZone(), hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(iso));
 }
 
 export function isoToLocalDate(iso: string): string {
-  return dayOnly.format(new Date(iso));
+  return format("en-CA", { timeZone: clubZone(), year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date(iso));
 }
 
 export function dayLabel(iso: string): string {

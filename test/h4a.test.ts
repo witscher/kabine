@@ -204,19 +204,10 @@ describe("handball4all", () => {
 });
 
 describe("Dauer „Läuft gerade“", () => {
-  it("richtet sich nach der Altersklasse, bei mehreren Mannschaften die längste", async () => {
+  it("richtet sich nach der Spieldauer der Altersklasse, bei mehreren Mannschaften die längste", async () => {
     const { gameLiveMinutes } = await import("../worker/domain/events");
-    expect(gameLiveMinutes(["M"])).toBe(120);
-    expect(gameLiveMinutes(["F"])).toBe(120);
-    expect(gameLiveMinutes(["wA"])).toBe(120);
-    expect(gameLiveMinutes(["mB"])).toBe(90);
-    expect(gameLiveMinutes(["wC"])).toBe(90);
-    expect(gameLiveMinutes(["wD"])).toBe(90);
-    expect(gameLiveMinutes(["gE"])).toBe(75);
-    expect(gameLiveMinutes(["wE"])).toBe(75);
-    expect(gameLiveMinutes(["gF"])).toBe(60);
-    expect(gameLiveMinutes(["Minis"])).toBe(60);
-    expect(gameLiveMinutes(["wD", "wA"])).toBe(120);
+    expect(gameLiveMinutes([90])).toBe(90);
+    expect(gameLiveMinutes([90, 120])).toBe(120);
     expect(gameLiveMinutes([])).toBe(120);
   });
 });

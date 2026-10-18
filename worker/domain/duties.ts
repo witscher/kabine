@@ -8,7 +8,7 @@ import { isCoachOf, isCoachOfAny } from "../auth/actor";
 import type { MyDuty } from "../../shared/types";
 import { all, first, stmt } from "../lib/db";
 import { addMinutesLocal, localToInstant } from "../lib/time";
-import { gameLiveMinutes } from "./events";
+import { CURRENT_AGE_CLASS_JOIN } from "./events";
 
 /** Code of the KiHaSL/JuHaSL duty type (initial data of migration 0018). */
 export const REFEREE_CODE = "referee";
@@ -82,15 +82,12 @@ export async function loadAllDutyTypes(db: D1Database): Promise<Map<number, Duty
 }
 
 /**
- * KiHaSL/JuHaSL is needed at every home game of the youth classes F to C, regardless
- * of the team's helper plan. Recognised by the code of the age class (gE, wD, mC …).
+ * A youth referee (handball: KiHaSL/JuHaSL) is needed at every home game of the age classes marked
+ * so in the sport profile, regardless of the team's helper plan. SQL condition (alias of the team).
  */
-export function isRefereeAgeClass(code: string | null | undefined): boolean {
-  return !!code && /^[a-z][FEDC]$/.test(code);
-}
-
-/** SQL condition for the same (alias of the team). */
-export const REFEREE_TEAM_SQL = (t: string) => `(length(${t}.age_class_code) = 2 AND substr(${t}.age_class_code, 2, 1) IN ('F', 'E', 'D', 'C'))`;
+export const REFEREE_TEAM_SQL = (t: string) =>
+  `EXISTS (SELECT 1 FROM age_classes rac WHERE rac.code = ${t}.age_class_code AND rac.youth_referee = 1
+             AND rac.season_id = (SELECT id FROM seasons WHERE is_current = 1))`;
 
 /** Time span of the KiHaSL/JuHaSL block: from 15 minutes before throw-off until the end of the game. */
 const REFEREE_BEFORE_MIN = 15;
@@ -315,8 +312,8 @@ export async function templateItems(db: D1Database, templateId: number): Promise
 }
 
 /** End of a game: throw-off plus the playing time of the age class. */
-export function gameEnd(startsAt: string, ageClassCode: string): string {
-  return addMinutesLocal(startsAt, gameLiveMinutes([ageClassCode]));
+export function gameEnd(startsAt: string, gameMinutes: number): string {
+  return addMinutesLocal(startsAt, gameMinutes);
 }
 
 function minutesBetween(from: string, to: string): number {
@@ -339,15 +336,18 @@ export async function ensureEventDuties(db: D1Database, eventIds: number[] | nul
     duties_anchor: string | null;
     duties_generated: number;
     helper_plan: number;
-    age_class_code: string;
+    game_minutes: number;
+    youth_referee: number;
     home_template_id: number | null;
     away_template_id: number | null;
   }>(
     db,
     // Two variants instead of “?2 IS NULL OR …”: only then does SQLite look up the IDs directly
-    `SELECT e.id, e.starts_at, e.is_home, e.duties_anchor, e.duties_generated, t.helper_plan, t.age_class_code, t.home_template_id, t.away_template_id
+    `SELECT e.id, e.starts_at, e.is_home, e.duties_anchor, e.duties_generated, t.helper_plan, COALESCE(ac.game_minutes, 120) AS game_minutes,
+            COALESCE(ac.youth_referee, 0) AS youth_referee, t.home_template_id, t.away_template_id
        FROM events e
        JOIN teams t ON t.id = (SELECT et.team_id FROM event_teams et WHERE et.event_id = e.id ORDER BY et.team_id LIMIT 1)
+       ${CURRENT_AGE_CLASS_JOIN("t", "ac")}
       WHERE e.kind = 'game' AND e.starts_at >= ?1
         ${eventIds ? "AND e.id IN (SELECT value FROM json_each(?2))" : ""}
         AND (
@@ -380,7 +380,7 @@ export async function ensureEventDuties(db: D1Database, eventIds: number[] | nul
       }
     }
     let generated = g.duties_generated;
-    const end = gameEnd(g.starts_at, g.age_class_code);
+    const end = gameEnd(g.starts_at, g.game_minutes);
     if (g.helper_plan === 1 && (generated & 1) === 0) {
       const home = g.is_home !== 0;
       const templateId = (home ? g.home_template_id : g.away_template_id) ?? defaults.find((d) => d.default_for === (home ? "home" : "away"))?.id;
@@ -394,7 +394,7 @@ export async function ensureEventDuties(db: D1Database, eventIds: number[] | nul
       }
       generated |= 1;
     }
-    if (g.is_home === 1 && isRefereeAgeClass(g.age_class_code) && (generated & 2) === 0 && referee) {
+    if (g.is_home === 1 && g.youth_referee === 1 && (generated & 2) === 0 && referee) {
       statements.push(
         stmt(
           db,

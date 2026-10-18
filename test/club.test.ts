@@ -1,6 +1,7 @@
 // Club profile: public read, admin edit, logo, manifest, abbreviation in game titles. Invented names.
 import { env, exports } from "cloudflare:workers";
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { holidaySource } from "../worker/domain/holidays";
 import { DEFAULT_CLUB, clubAbbr } from "../shared/club";
 import { loadClub, saveClub } from "../worker/domain/club";
 import { eventTitle } from "../worker/domain/events";
@@ -87,5 +88,42 @@ describe("Vereinsprofil", () => {
   it("Eigentümer übergeben nur an Admins", async () => {
     const plain = await person("Ole");
     expect((await api("/admin/club/owner", { method: "PUT", cookie: adminCookie, body: { personId: plain } })).status).toBe(400);
+  });
+});
+
+describe("Region und Sportart", () => {
+  it("speichert Land, Bundesland, Zeitzone und prüft sie", async () => {
+    const ok = await api("/admin/club", { method: "PUT", cookie: adminCookie, body: { country: "AT", subdivision: "AT-9", timeZone: "Europe/Vienna" } });
+    expect(ok.status).toBe(200);
+    expect(ok.body).toMatchObject({ country: "AT", subdivision: "AT-9", timeZone: "Europe/Vienna" });
+    expect((await api("/admin/club", { method: "PUT", cookie: adminCookie, body: { timeZone: "Mars/Olympus" } })).status).toBe(400);
+    expect((await api("/admin/club", { method: "PUT", cookie: adminCookie, body: { country: "deu" } })).status).toBe(400);
+  });
+
+  it("Länder und Regionen über den Server, ohne Quelle eine leere Liste", async () => {
+    const spy = vi.spyOn(holidaySource, "regions").mockResolvedValue({ countries: [{ code: "DE", name: "Deutschland" }], subdivisions: [{ code: "DE-BW", name: "Baden-Württemberg" }] });
+    expect((await api("/admin/regions?country=DE", { cookie: playerCookie })).status).toBe(403);
+    const res = await api("/admin/regions?country=DE", { cookie: adminCookie });
+    expect(res.body.subdivisions).toEqual([{ code: "DE-BW", name: "Baden-Württemberg" }]);
+    expect(spy).toHaveBeenCalledWith("DE", "de");
+    spy.mockRejectedValue(new Error("offline"));
+    expect((await api("/admin/regions?country=DE", { cookie: adminCookie })).body).toEqual({ countries: [], subdivisions: [] });
+    vi.restoreAllMocks();
+  });
+
+  it("Altersklassen aus dem Sportprofil für die laufende Saison", async () => {
+    const res = await api("/age-classes/from-profile", { cookie: adminCookie });
+    expect(res.body.sport).toBe("handball");
+    expect(res.body.ageClasses.find((a: any) => a.code === "D")).toEqual({
+      code: "D",
+      name: "D-Jugend",
+      rank: 3,
+      isYouth: true,
+      birthYearMin: 2014,
+      birthYearMax: 2015,
+      gameMinutes: 90,
+      youthReferee: true,
+    });
+    expect((await api("/age-classes", { method: "PUT", cookie: adminCookie, body: { ageClasses: res.body.ageClasses } })).status).toBe(200);
   });
 });

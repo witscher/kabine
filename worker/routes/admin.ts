@@ -10,7 +10,10 @@ import { generateTrainings } from "../domain/generate";
 import { holidayPeriods, holidaySourceLabel, MAX_HOLIDAY_DAYS } from "../domain/holidays";
 import { all, first, run, stmt } from "../lib/db";
 import { badRequest, conflict, forbidden, notFound, parse, readJson } from "../lib/http";
-import { eachDay, isDate, nowLocal, utcIso } from "../lib/time";
+import { eachDay, isDate, nowLocal, todayLocal, utcIso } from "../lib/time";
+import { loadClub } from "../domain/club";
+import { birthYears, SPORTS, type SportId } from "../../shared/sports";
+import type { Locale } from "../../shared/i18n";
 
 export const adminRoutes = new Hono<AppEnv>();
 
@@ -118,7 +121,22 @@ adminRoutes.get("/holidays", async (c) => {
     "SELECT holiday_period_id, count(*) AS n FROM training_plans WHERE holiday_period_id IS NOT NULL GROUP BY holiday_period_id",
   );
   const count = new Map(plans.map((p) => [p.holiday_period_id, p.n]));
-  return c.json({ periods: periods.map((p) => ({ ...p, plans: count.get(p.id) ?? 0 })), source: holidaySourceLabel() });
+  const publicHolidays = await all<{ day: string; name: string }>(c.env.DB, "SELECT day, name FROM public_holidays WHERE day >= ? ORDER BY day", todayLocal());
+  return c.json({
+    periods: periods.map((p) => ({ ...p, plans: count.get(p.id) ?? 0 })),
+    publicHolidays,
+    source: holidaySourceLabel(),
+  });
+});
+
+/** Removes a public holiday, e.g. when the club trains on it after all; trainings are generated again. */
+adminRoutes.delete("/public-holidays/:day", async (c) => {
+  requireAdmin(requireActor(c));
+  const day = c.req.param("day");
+  if (!isDate(day)) throw badRequest(t`Invalid date`);
+  await run(c.env.DB, "DELETE FROM public_holidays WHERE day = ?", day);
+  await generateTrainings(c.env.DB);
+  return c.json({ ok: true });
 });
 
 adminRoutes.post("/holidays", async (c) => {
@@ -166,9 +184,19 @@ adminRoutes.get("/age-classes", async (c) => {
     "SELECT id, name, starts_on, ends_on FROM seasons WHERE is_current = 1",
   );
   const rows = season
-    ? await all<{ id: number; code: string; name: string; gender: string; rank: number; is_youth: number; birth_year_min: number | null; birth_year_max: number | null }>(
+    ? await all<{
+        id: number;
+        code: string;
+        name: string;
+        rank: number;
+        is_youth: number;
+        birth_year_min: number | null;
+        birth_year_max: number | null;
+        game_minutes: number;
+        youth_referee: number;
+      }>(
         c.env.DB,
-        "SELECT * FROM age_classes WHERE season_id = ? ORDER BY rank, gender, code",
+        "SELECT * FROM age_classes WHERE season_id = ? ORDER BY rank, code",
         season.id,
       )
     : [];
@@ -177,11 +205,12 @@ adminRoutes.get("/age-classes", async (c) => {
     ageClasses: rows.map((r) => ({
       code: r.code,
       name: r.name,
-      gender: r.gender,
       rank: r.rank,
       isYouth: r.is_youth === 1,
       birthYearMin: r.birth_year_min,
       birthYearMax: r.birth_year_max,
+      gameMinutes: r.game_minutes,
+      youthReferee: r.youth_referee === 1,
     })),
   });
 });
@@ -189,11 +218,12 @@ adminRoutes.get("/age-classes", async (c) => {
 export const ageClassSchema = z.object({
   code: z.string().trim().min(1).max(10),
   name: z.string().trim().min(1).max(60),
-  gender: z.enum(["w", "m", "x"]),
   rank: z.number().int().min(0).max(20),
   isYouth: z.boolean(),
   birthYearMin: z.number().int().min(1900).max(2100).nullable(),
   birthYearMax: z.number().int().min(1900).max(2100).nullable(),
+  gameMinutes: z.number().int().min(15).max(300).default(90),
+  youthReferee: z.boolean().default(false),
 });
 
 adminRoutes.put("/age-classes", async (c) => {
@@ -214,20 +244,48 @@ adminRoutes.put("/age-classes", async (c) => {
     ...ageClasses.map((a) =>
       stmt(
         c.env.DB,
-        `INSERT INTO age_classes (season_id, code, name, gender, rank, is_youth, birth_year_min, birth_year_max)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        `INSERT INTO age_classes (season_id, code, name, rank, is_youth, birth_year_min, birth_year_max, game_minutes, youth_referee)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         season.id,
         a.code,
         a.name,
-        a.gender,
         a.rank,
         a.isYouth ? 1 : 0,
         a.birthYearMin,
         a.birthYearMax,
+        a.gameMinutes,
+        a.youthReferee ? 1 : 0,
       ),
     ),
   ]);
   return c.json({ ok: true });
+});
+
+/** Age classes of a season from the club's sport profile (shared/sports.ts), names in the club language. */
+export function ageClassesFromProfile(sport: SportId, startsOn: string, locale: Locale) {
+  const startYear = Number(startsOn.slice(0, 4));
+  return SPORTS[sport].ageClasses.map((a) => {
+    const years = birthYears(a, startYear);
+    return {
+      code: a.code,
+      name: a.name[locale],
+      rank: a.rank,
+      isYouth: a.youth,
+      birthYearMin: years.min,
+      birthYearMax: years.max,
+      gameMinutes: a.gameMinutes,
+      youthReferee: !!a.youthReferee,
+    };
+  });
+}
+
+/** Proposal for the current season from the sport profile; saving stays with PUT /age-classes. */
+adminRoutes.get("/age-classes/from-profile", async (c) => {
+  requireAdmin(requireActor(c));
+  const season = await first<{ starts_on: string }>(c.env.DB, "SELECT starts_on FROM seasons WHERE is_current = 1");
+  if (!season) throw conflict(t`There is no current season.`);
+  const club = await loadClub(c.env.DB);
+  return c.json({ sport: club.sport, ageClasses: ageClassesFromProfile(club.sport, season.starts_on, club.defaultLocale) });
 });
 
 /**
