@@ -1,4 +1,5 @@
 // Club profile shared by worker and app (GET /api/club).
+import type { Locale } from "./i18n";
 
 export interface ClubProfile {
   /** Full name, e.g. "SV Musterstadt 1900 Handball". */
@@ -21,6 +22,8 @@ export interface ClubProfile {
   privacyText: string | null;
   /** Contact for questions about the app, shown under Help (optional). */
   contact: string | null;
+  /** Language for people who have not chosen one, and for texts outside a request. */
+  defaultLocale: Locale;
   /** The installation wizard has been completed. */
   setupDone: boolean;
 }
@@ -34,6 +37,7 @@ export const DEFAULT_CLUB: ClubProfile = {
   privacyUrl: null,
   privacyText: null,
   contact: null,
+  defaultLocale: "en",
   setupDone: false,
 };
 

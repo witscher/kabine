@@ -1,4 +1,5 @@
 import type { ApiErrorBody } from "../shared/types";
+import { currentLocale } from "./i18n";
 import { noteNetworkError, noteResponse } from "./offline";
 
 export class ApiError extends Error {
@@ -20,7 +21,11 @@ async function request<T>(method: Method, path: string, body?: unknown): Promise
       method,
       credentials: "same-origin",
       // FormData setzt den Content-Type (multipart mit Boundary) selbst
-      headers: body instanceof FormData ? undefined : body instanceof Blob ? { "content-type": body.type } : body !== undefined ? { "content-type": "application/json" } : undefined,
+      headers: {
+        // Language of the app, for server texts when the account has none set
+        "x-kabine-locale": currentLocale(),
+        ...(body instanceof FormData ? {} : body instanceof Blob ? { "content-type": body.type } : body !== undefined ? { "content-type": "application/json" } : {}),
+      },
       body: body instanceof FormData || body instanceof Blob ? body : body !== undefined ? JSON.stringify(body) : undefined,
     });
   } catch {

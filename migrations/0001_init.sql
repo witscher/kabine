@@ -46,7 +46,8 @@ CREATE TABLE accounts (
   webauthn_user_id TEXT NOT NULL UNIQUE,        -- zufälliges User-Handle (base64url)
   created_at       TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
   disabled_at      TEXT
-, email TEXT, email_verified_at TEXT, coach_mode INTEGER NOT NULL DEFAULT 0 CHECK (coach_mode IN (0, 1)), last_seen_on TEXT);
+, email TEXT, email_verified_at TEXT, coach_mode INTEGER NOT NULL DEFAULT 0 CHECK (coach_mode IN (0, 1)), last_seen_on TEXT,
+  locale TEXT);                                 -- chosen language ('en', 'de'), NULL: club default
 CREATE TABLE passkeys (
   id           TEXT PRIMARY KEY,                -- Credential-ID (base64url)
   account_id   INTEGER NOT NULL REFERENCES accounts (id) ON DELETE CASCADE,

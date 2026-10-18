@@ -5,6 +5,8 @@
   "name": "kabine",
   "main": "./worker/index.ts",
   "compatibility_date": "2026-08-20",
+  // AsyncLocalStorage: the language of the current request or recipient (worker/i18n.ts)
+  "compatibility_flags": ["nodejs_als"],
   "assets": {
     "binding": "ASSETS",
     "not_found_handling": "single-page-application",

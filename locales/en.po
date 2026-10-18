@@ -1,0 +1,110 @@
+msgid ""
+msgstr ""
+"POT-Creation-Date: 2026-10-18 09:07+0000\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: @lingui/cli\n"
+"Language: en\n"
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Plural-Forms: \n"
+
+#: src/pages/login.tsx
+msgid "Sign in"
+msgstr "Sign in"
+
+#: worker/lib/http.ts
+msgid "Not found."
+msgstr "Not found."
+
+#: src/pages/login.tsx
+msgid "<0>Tip:</0> In the browser menu, choose <1>Add to Home screen</1> or <2>Install app</2>. Then {club} starts like an app."
+msgstr "<0>Tip:</0> In the browser menu, choose <1>Add to Home screen</1> or <2>Install app</2>. Then {club} starts like an app."
+
+#: src/pages/login.tsx
+msgid "Welcome"
+msgstr "Welcome"
+
+#: worker/lib/http.ts
+msgid "Invalid JSON."
+msgstr "Invalid JSON."
+
+#: src/pages/login.tsx
+msgid "We send a code to the e-mail address you gave for your access."
+msgstr "We send a code to the e-mail address you gave for your access."
+
+#: src/pages/login.tsx
+msgid "{club} is an internal club app. If no code arrives, this address is not on file. Access is only available through an invitation from your coach."
+msgstr "{club} is an internal club app. If no code arrives, this address is not on file. Access is only available through an invitation from your coach."
+
+#: src/pages/login.tsx
+msgid "This browser does not support passkeys. Please use a current smartphone with Safari or Chrome."
+msgstr "This browser does not support passkeys. Please use a current smartphone with Safari or Chrome."
+
+#: src/pages/login.tsx
+msgid "The passkey is the <0>safest way to sign in</0>: Face ID, fingerprint or your screen lock, without a password."
+msgstr "The passkey is the <0>safest way to sign in</0>: Face ID, fingerprint or your screen lock, without a password."
+
+#: src/pages/login.tsx
+msgid "Code by e-mail"
+msgstr "Code by e-mail"
+
+#: worker/lib/http.ts
+msgid "Invalid input."
+msgstr "Invalid input."
+
+#: src/pages/login.tsx
+msgid "Sign in with passkey"
+msgstr "Sign in with passkey"
+
+#: src/pages/login.tsx
+msgid "<0>Install as an app:</0> In Safari, tap <1>Share</1> at the bottom, then <2>Add to Home Screen</2>. Only then do notifications work on the iPhone."
+msgstr "<0>Install as an app:</0> In Safari, tap <1>Share</1> at the bottom, then <2>Add to Home Screen</2>. Only then do notifications work on the iPhone."
+
+#: src/pages/login.tsx
+msgid "Send code"
+msgstr "Send code"
+
+#: worker/lib/http.ts
+msgid "You do not have permission to do this."
+msgstr "You do not have permission to do this."
+
+#: src/pages/login.tsx
+msgid "If you have no access yet or have changed your device, your coach will give you a new invitation link."
+msgstr "If you have no access yet or have changed your device, your coach will give you a new invitation link."
+
+#: src/pages/login.tsx
+msgid "Events, responses and the team chat in one place."
+msgstr "Events, responses and the team chat in one place."
+
+#: src/pages/login.tsx
+msgid "No passkey on this device?"
+msgstr "No passkey on this device?"
+
+#: worker/lib/http.ts
+msgid "Expected JSON."
+msgstr "Expected JSON."
+
+#: src/pages/login.tsx
+msgid "Privacy and sources"
+msgstr "Privacy and sources"
+
+#: worker/lib/http.ts
+msgid "Please sign in."
+msgstr "Please sign in."
+
+#: src/pages/login.tsx
+msgid "<0>No access yet?</0> Your coach sends you an invitation link, for example in the team's WhatsApp group."
+msgstr "<0>No access yet?</0> Your coach sends you an invitation link, for example in the team's WhatsApp group."
+
+#: src/pages/login.tsx
+msgid "E-mail address"
+msgstr "E-mail address"
+
+#: src/pages/login.tsx
+msgid "Sign in by e-mail"
+msgstr "Sign in by e-mail"

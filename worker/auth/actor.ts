@@ -37,6 +37,8 @@ export interface Actor {
   refereeOverride?: boolean;
   /** Admin arbeitet als Trainer (accounts.coach_mode): Admin-Rechte ruhen, Schalter im Profil. */
   adminSuspended?: boolean;
+  /** Language chosen on the account (null: app or club default). */
+  locale?: string | null;
 }
 
 export type ViewMode = "player" | "parent" | "trainer" | "referee";
@@ -69,16 +71,16 @@ interface PermRow {
 export async function loadActor(db: D1Database, session: SessionRow): Promise<Actor | null> {
   const row = await db
     .prepare(
-      `SELECT a.id AS account_id, p.id AS person_id, p.first_name, p.last_name, p.is_admin, a.coach_mode
+      `SELECT a.id AS account_id, p.id AS person_id, p.first_name, p.last_name, p.is_admin, a.coach_mode, a.locale
          FROM accounts a JOIN persons p ON p.id = a.person_id
         WHERE a.id = ? AND a.disabled_at IS NULL AND p.is_former = 0`,
     )
     .bind(session.account_id)
-    .first<ActorRow & { coach_mode: number }>();
+    .first<ActorRow & { coach_mode: number; locale: string | null }>();
   if (!row) return null;
   // Admin im Trainer-Modus: Rechte wie ein Trainer, auch auf dem Server
-  if (row.is_admin === 1 && row.coach_mode === 1) return { ...(await buildActor(db, session, { ...row, is_admin: 0 })), adminSuspended: true };
-  return buildActor(db, session, row);
+  if (row.is_admin === 1 && row.coach_mode === 1) return { ...(await buildActor(db, session, { ...row, is_admin: 0 })), adminSuspended: true, locale: row.locale };
+  return { ...(await buildActor(db, session, row)), locale: row.locale };
 }
 
 /** Actor für eine Person; die Ansichten für Admins nutzen das mit einer anderen Person. */

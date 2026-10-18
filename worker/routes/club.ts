@@ -2,6 +2,7 @@
 import { Hono } from "hono";
 import { z } from "zod";
 import { isHexColor } from "../../shared/club";
+import { LOCALES } from "../../shared/i18n";
 import { type AppEnv, requireActor } from "../app";
 import { requireAdmin } from "../auth/actor";
 import { loadClub, saveClub } from "../domain/club";
@@ -28,6 +29,7 @@ const clubSchema = z.object({
   privacyUrl: z.string().trim().url().max(300).nullable().optional(),
   privacyText: z.string().trim().max(5000).nullable().optional(),
   contact: z.string().trim().max(200).nullable().optional(),
+  defaultLocale: z.enum(LOCALES).optional(),
   setupDone: z.boolean().optional(),
 });
 

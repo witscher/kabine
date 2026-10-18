@@ -1,0 +1,20 @@
+{
+  "<0>Install as an app:</0> In Safari, tap <1>Share</1> at the bottom, then <2>Add to Home Screen</2>. Only then do notifications work on the iPhone.": "<0>Als App installieren:</0> In Safari unten auf <1>Teilen</1> tippen, dann <2>Zum Home-Bildschirm</2>. Nur so funktionieren auf dem iPhone auch Benachrichtigungen.",
+  "<0>Tip:</0> In the browser menu, choose <1>Add to Home screen</1> or <2>Install app</2>. Then {club} starts like an app.": "<0>Tipp:</0> Über das Browsermenü <1>Zum Startbildschirm hinzufügen</1> bzw. <2>App installieren</2> wählen. Dann startet {club} wie eine App.",
+  "Sign in": "Anmelden",
+  "Welcome": "Willkommen",
+  "Events, responses and the team chat in one place.": "Termine, Zu- und Absagen und der Mannschaftschat an einem Ort.",
+  "Sign in with passkey": "Mit Passkey anmelden",
+  "This browser does not support passkeys. Please use a current smartphone with Safari or Chrome.": "Dieser Browser unterstützt keine Passkeys. Bitte nutze ein aktuelles Smartphone mit Safari oder Chrome.",
+  "If you have no access yet or have changed your device, your coach will give you a new invitation link.": "Falls du noch keinen Zugang hast oder dein Gerät gewechselt hast, bekommst du von deinem Trainer einen neuen Einladungslink.",
+  "The passkey is the <0>safest way to sign in</0>: Face ID, fingerprint or your screen lock, without a password.": "Der Passkey ist die <0>sicherste Anmeldung</0>: Face ID, Fingerabdruck oder deine Gerätesperre, ohne Passwort.",
+  "Sign in by e-mail": "Anmeldung per E-Mail",
+  "No passkey on this device?": "Kein Passkey auf diesem Gerät?",
+  "We send a code to the e-mail address you gave for your access.": "Wir schicken dir einen Code an die E-Mail-Adresse, die du bei deinem Zugang angegeben hast.",
+  "Code by e-mail": "Code per E-Mail",
+  "E-mail address": "E-Mail-Adresse",
+  "Send code": "Code senden",
+  "<0>No access yet?</0> Your coach sends you an invitation link, for example in the team's WhatsApp group.": "<0>Noch kein Zugang?</0> Deine Trainerin oder dein Trainer schickt dir einen Einladungslink, zum Beispiel in der WhatsApp-Gruppe der Mannschaft.",
+  "Privacy and sources": "Datenschutz und Quellen",
+  "{club} is an internal club app. If no code arrives, this address is not on file. Access is only available through an invitation from your coach.": "{club} ist eine interne Vereins-App. Kommt kein Code, ist diese Adresse nicht hinterlegt. Einen Zugang gibt es nur über eine Einladung deiner Trainerin oder deines Trainers."
+}

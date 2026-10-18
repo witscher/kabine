@@ -2,6 +2,7 @@
 // and edited in the setup wizard, never in code. One installation serves exactly one club.
 import type { ClubProfile } from "../../shared/club";
 import { clubAbbr, DEFAULT_CLUB } from "../../shared/club";
+import { setClubDefaultLocale } from "../i18n";
 import { first, run } from "../lib/db";
 import { randomToken } from "../lib/crypto";
 
@@ -70,5 +71,6 @@ export async function enterClubContext(db: D1Database): Promise<ClubSettings> {
   const club = await loadClub(db);
   ownAbbr = clubAbbr(club);
   ownShortName = club.shortName;
+  setClubDefaultLocale(club.defaultLocale);
   return club;
 }

@@ -3,6 +3,9 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
+  "imports": {
+    "#i18n": "./worker/i18n.ts"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -26,6 +29,8 @@
   "dependencies": {
     "@fontsource/barlow": "^5.3.0",
     "@fontsource/barlow-condensed": "^5.3.0",
+    "@lingui/core": "^5.9.5",
+    "@lingui/react": "^5.9.5",
     "@simplewebauthn/browser": "^14.0.0",
     "@simplewebauthn/server": "^14.0.3",
     "hono": "^4.13.12",
@@ -35,17 +40,24 @@
     "zod": "^4.6.5"
   },
   "devDependencies": {
-    "vite": "^8.3.2",
-    "@cloudflare/vite-plugin": "^1.62.5",
-    "@preact/preset-vite": "^2.10.6",
     "@babel/core": "^7.28.0",
-    "wrangler": "^4.147.0",
-    "typescript": "5.9.3",
-    "vitest": "~4.1.11",
+    "@cloudflare/vite-plugin": "^1.62.5",
     "@cloudflare/vitest-pool-workers": "^0.22.0",
+    "@lingui/babel-plugin-lingui-macro": "^5.9.5",
+    "@lingui/cli": "^5.9.5",
+    "@lingui/conf": "^5.9.5",
+    "@lingui/format-po": "^5.9.5",
+    "@lingui/vite-plugin": "^5.9.5",
     "@playwright/test": "1.56.1",
+    "@preact/preset-vite": "^2.10.6",
+    "@types/babel__core": "^7.20.5",
     "@types/node": "^22.18.0",
-    "preact-render-to-string": "^6.6.0"
+    "pofile": "^1.1.4",
+    "preact-render-to-string": "^6.6.0",
+    "typescript": "5.9.3",
+    "vite": "^8.3.2",
+    "vitest": "~4.1.11",
+    "wrangler": "^4.147.0"
   },
   "allowScripts": {
     "workerd@1.20260815.1": true,

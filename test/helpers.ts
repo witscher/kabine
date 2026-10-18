@@ -2,11 +2,19 @@
 import { applyD1Migrations, reset } from "cloudflare:test";
 import { env, exports } from "cloudflare:workers";
 import { createSession, SESSION_COOKIE } from "../worker/auth/session";
+import { setClubDefaultLocale } from "../worker/i18n";
 import { addDays, todayLocal } from "../worker/lib/time";
 
 export async function freshDb() {
   await reset();
   await applyD1Migrations(env.DB, env.TEST_MIGRATIONS);
+  await germanClub();
+}
+
+/** Club default language German, as the assertions expect German texts. */
+export async function germanClub() {
+  await env.DB.prepare("INSERT OR REPLACE INTO app_meta (key, value) VALUES ('club', ?)").bind(JSON.stringify({ defaultLocale: "de" })).run();
+  setClubDefaultLocale("de");
 }
 
 export async function exec(sql: string, ...params: unknown[]) {

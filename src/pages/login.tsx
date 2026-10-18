@@ -1,3 +1,5 @@
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 import { ClubMark, clubName } from "../club";
 import { useEffect, useState } from "preact/hooks";
 import { errorMessage } from "../api";
@@ -11,21 +13,25 @@ export function InstallHint() {
   if (isIos()) {
     return (
       <Notice icon="phone">
-        <strong>Als App installieren:</strong> In Safari unten auf <em>Teilen</em> tippen, dann <em>Zum Home-Bildschirm</em>. Nur so funktionieren auf dem iPhone
-        auch Benachrichtigungen.
+        <Trans>
+          <strong>Install as an app:</strong> In Safari, tap <em>Share</em> at the bottom, then <em>Add to Home Screen</em>. Only then do notifications work on
+          the iPhone.
+        </Trans>
       </Notice>
     );
   }
+  const club = clubName();
   return (
     <Notice icon="phone">
-      <strong>Tipp:</strong> Über das Browsermenü <em>Zum Startbildschirm hinzufügen</em> bzw. <em>App installieren</em> wählen. Dann startet {clubName()} wie eine
-      App.
+      <Trans>
+        <strong>Tip:</strong> In the browser menu, choose <em>Add to Home screen</em> or <em>Install app</em>. Then {club} starts like an app.
+      </Trans>
     </Notice>
   );
 }
 
 export function LoginPage() {
-  useDocumentTitle("Anmelden");
+  useDocumentTitle(t`Sign in`);
   const { refresh } = useSession();
   const [error, setError] = useState<string | null>(null);
   const [detail, setDetail] = useState("");
@@ -64,8 +70,12 @@ export function LoginPage() {
       <div class="login-top">
         <ClubMark />
         <div class="kicker">{clubName()}</div>
-        <h1>Willkommen</h1>
-        <p style={{ color: "var(--on-dark-2)", fontSize: "17px" }}>Termine, Zu- und Absagen und der Mannschaftschat an einem Ort.</p>
+        <h1>
+          <Trans>Welcome</Trans>
+        </h1>
+        <p style={{ color: "var(--on-dark-2)", fontSize: "17px" }}>
+          <Trans>Events, responses and the team chat in one place.</Trans>
+        </p>
       </div>
       <main class="login-card">
         {supported ? (
@@ -85,33 +95,39 @@ export function LoginPage() {
               }
             }}
           >
-            Mit Passkey anmelden
+            <Trans>Sign in with passkey</Trans>
           </Button>
         ) : (
           <Notice kind="warn">
-            Dieser Browser unterstützt keine Passkeys. Bitte nutze ein aktuelles Smartphone mit Safari oder Chrome.
+            <Trans>This browser does not support passkeys. Please use a current smartphone with Safari or Chrome.</Trans>
           </Notice>
         )}
         {error ? (
           <div class="notice warn" role="alert">
             <Icon name="alert" />
             <div>
-              {error} Falls du noch keinen Zugang hast oder dein Gerät gewechselt hast, bekommst du von deinem Trainer einen neuen Einladungslink.
+              {error} <Trans>If you have no access yet or have changed your device, your coach will give you a new invitation link.</Trans>
               {detail ? <div class="small muted" style={{ marginTop: "6px" }}>{detail}</div> : null}
             </div>
           </div>
         ) : null}
         <p class="muted">
-          Der Passkey ist die <strong style={{ color: "var(--text)" }}>sicherste Anmeldung</strong>: Face ID, Fingerabdruck oder deine Gerätesperre, ohne
-          Passwort.
+          <Trans>
+            The passkey is the <strong style={{ color: "var(--text)" }}>safest way to sign in</strong>: Face ID, fingerprint or your screen lock, without a
+            password.
+          </Trans>
         </p>
-        <section class="card card-pad stack-sm" aria-label="Anmeldung per E-Mail">
+        <section class="card card-pad stack-sm" aria-label={t`Sign in by e-mail`}>
           {!emailMode ? (
             <>
-              <strong>Kein Passkey auf diesem Gerät?</strong>
-              <p class="small muted">Wir schicken dir einen Code an die E-Mail-Adresse, die du bei deinem Zugang angegeben hast.</p>
+              <strong>
+                <Trans>No passkey on this device?</Trans>
+              </strong>
+              <p class="small muted">
+                <Trans>We send a code to the e-mail address you gave for your access.</Trans>
+              </p>
               <Button icon="mail" onClick={() => setEmailMode(true)}>
-                Code per E-Mail
+                <Trans>Code by e-mail</Trans>
               </Button>
             </>
           ) : requestId ? (
@@ -124,32 +140,43 @@ export function LoginPage() {
                 }}
                 onResend={sendCode}
               />
-              {/* Für alle gleich: verrät nicht, ob die Adresse bekannt ist */}
+              {/* Same for everyone: does not reveal whether the address is known */}
               <Notice icon="info">
-                {clubName()} ist eine interne Vereins-App. Kommt kein Code, ist diese Adresse nicht hinterlegt. Einen Zugang gibt es nur über eine Einladung deiner
-                Trainerin oder deines Trainers.
+                <ClubAppNotice />
               </Notice>
             </>
           ) : (
             <>
-              <TextField label="E-Mail-Adresse" type="email" value={email} onInput={setEmail} autoComplete="email" inputMode="email" maxLength={254} />
+              <TextField label={t`E-mail address`} type="email" value={email} onInput={setEmail} autoComplete="email" inputMode="email" maxLength={254} />
               {emailError ? <p class="small" role="alert">{emailError}</p> : null}
               <Button variant="primary" block disabled={!isEmail(email)} onClick={sendCode}>
-                Code senden
+                <Trans>Send code</Trans>
               </Button>
             </>
           )}
         </section>
         <p class="muted">
-          <strong style={{ color: "var(--text)" }}>Noch kein Zugang?</strong> Deine Trainerin oder dein Trainer schickt dir einen Einladungslink, zum Beispiel in
-          der WhatsApp-Gruppe der Mannschaft.
+          <Trans>
+            <strong style={{ color: "var(--text)" }}>No access yet?</strong> Your coach sends you an invitation link, for example in the team's WhatsApp group.
+          </Trans>
         </p>
         <InstallHint />
         <div class="spacer" />
         <p class="footer-links">
-          <a href="/datenschutz">Datenschutz und Quellen</a>
+          <a href="/datenschutz">
+            <Trans>Privacy and sources</Trans>
+          </a>
         </p>
       </main>
     </div>
+  );
+}
+
+function ClubAppNotice() {
+  const club = clubName();
+  return (
+    <Trans>
+      {club} is an internal club app. If no code arrives, this address is not on file. Access is only available through an invitation from your coach.
+    </Trans>
   );
 }

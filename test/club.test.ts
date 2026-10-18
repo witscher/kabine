@@ -31,7 +31,7 @@ describe("Vereinsprofil", () => {
   it("liefert ohne Anmeldung die Vorgaben, ohne Eigentümer", async () => {
     const res = await api("/club");
     expect(res.status).toBe(200);
-    expect(res.body).toEqual(DEFAULT_CLUB);
+    expect(res.body).toEqual({ ...DEFAULT_CLUB, defaultLocale: "de" });
     expect(res.body.ownerPersonId).toBeUndefined();
   });
 

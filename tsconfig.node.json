@@ -6,5 +6,5 @@
     "lib": ["ES2023"],
     "types": ["node"]
   },
-  "include": ["vite.config.ts", "vitest.config.ts", "playwright.config.ts", "e2e", "shared/motd.ts"]
+  "include": ["vite.config.ts", "vitest.config.ts", "playwright.config.ts", "lingui.config.ts", "lingui.worker.config.ts", "tools", "e2e", "shared/motd.ts"]
 }

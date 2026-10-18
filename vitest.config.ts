@@ -1,10 +1,14 @@
 import { cloudflareTest, readD1Migrations } from "@cloudflare/vitest-pool-workers";
+import { lingui } from "@lingui/vite-plugin";
 import { defineConfig } from "vitest/config";
+import { linguiMacro } from "./tools/lingui-macro";
 
 export default defineConfig(async () => {
   const migrations = await readD1Migrations("./migrations");
   return {
     plugins: [
+      linguiMacro(),
+      lingui(),
       cloudflareTest({
         wrangler: { configPath: "./wrangler.jsonc" },
         miniflare: {

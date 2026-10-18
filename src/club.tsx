@@ -14,7 +14,13 @@ function readCached(): ClubProfile | null {
   }
 }
 
-let current: ClubProfile = (typeof localStorage !== "undefined" && readCached()) || DEFAULT_CLUB;
+const cached = typeof localStorage !== "undefined" ? readCached() : null;
+let current: ClubProfile = cached ?? DEFAULT_CLUB;
+
+/** Profile from the last visit, if any (language before the first request). */
+export function cachedClub(): ClubProfile | null {
+  return cached;
+}
 const listeners = new Set<() => void>();
 
 /** Club colours as CSS variables and browser theme colour. */

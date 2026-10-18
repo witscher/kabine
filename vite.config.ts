@@ -1,6 +1,8 @@
 import { cloudflare } from "@cloudflare/vite-plugin";
 import preact from "@preact/preset-vite";
+import { lingui } from "@lingui/vite-plugin";
 import { defineConfig, type Plugin } from "vite";
+import { linguiMacro } from "./tools/lingui-macro";
 
 // Kennung dieses Builds. Die App vergleicht sie mit /version.json und merkt so,
 // dass eine neue Version deployt wurde (siehe src/update.tsx).
@@ -30,6 +32,8 @@ export default defineConfig({
   define: { __APP_VERSION__: JSON.stringify(appVersion), __SPLASH__: JSON.stringify(!e2e) },
   plugins: [
     versionFile(),
+    linguiMacro(),
+    lingui(),
     preact({ prerender: { enabled: false } }),
     cloudflare(
       e2e

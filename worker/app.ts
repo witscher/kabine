@@ -5,6 +5,8 @@ import { clearedSessionCookie, extendSessionIfDue, findSession, readSessionToken
 import { maintenanceAllowed, maintenanceState } from "./lib/maintenance";
 import { ApiError, forbidden, unauthorized } from "./lib/http";
 import { enterClubContext } from "./domain/club";
+import { currentLocale, withLocale } from "./i18n";
+import { isLocale } from "../shared/i18n";
 
 export type AppEnv = {
   Bindings: Env;
@@ -41,53 +43,60 @@ export function createBaseApp(): Hono<AppEnv> {
   app.notFound((c) => c.json({ error: { code: "not_found", message: "Unbekannter Endpunkt." } }, 404));
 
   app.use("/api/*", async (c, next) => {
-    // Schutz gegen CSRF: Browser senden bei Schreibzugriffen immer Origin mit.
-    const appOrigin = c.env.ORIGIN || new URL(c.req.url).origin;
-    if (UNSAFE.has(c.req.method)) {
-      const origin = c.req.header("origin");
-      if (origin && origin !== appOrigin) {
+    const club = await enterClubContext(c.env.DB);
+    // Language: the account's, else the app's (header), else the club's
+    const asked = c.req.header("x-kabine-locale");
+    return withLocale(isLocale(asked) ? asked : club.defaultLocale, async () => {
+      // Schutz gegen CSRF: Browser senden bei Schreibzugriffen immer Origin mit.
+      const appOrigin = c.env.ORIGIN || new URL(c.req.url).origin;
+      if (UNSAFE.has(c.req.method)) {
+        const origin = c.req.header("origin");
+        if (origin && origin !== appOrigin) {
+          throw forbidden("Ungültige Herkunft der Anfrage.");
+        }
+      }
+      // WebSockets (chat, helper plan) carry the session cookie from any site of the same parent domain, and browsers
+      // always send Origin with them: only the app itself may open one.
+      if (c.req.header("upgrade")?.toLowerCase() === "websocket" && c.req.header("origin") !== appOrigin) {
         throw forbidden("Ungültige Herkunft der Anfrage.");
       }
-    }
-    // WebSockets (chat, helper plan) carry the session cookie from any site of the same parent domain, and browsers
-    // always send Origin with them: only the app itself may open one.
-    if (c.req.header("upgrade")?.toLowerCase() === "websocket" && c.req.header("origin") !== appOrigin) {
-      throw forbidden("Ungültige Herkunft der Anfrage.");
-    }
 
-    await enterClubContext(c.env.DB);
-    const token = readSessionToken(c.req.raw);
-    let actor: Actor | null = null;
-    if (token) {
-      const session = await findSession(c.env.DB, token);
-      if (session) actor = await loadActor(c.env.DB, session);
-      if (actor && session) {
-        const extended = await extendSessionIfDue(c.env.DB, session);
-        if (extended) c.header("Set-Cookie", sessionCookie(token, extended), { append: true });
-      } else {
-        c.header("Set-Cookie", clearedSessionCookie(), { append: true });
+      const token = readSessionToken(c.req.raw);
+      let actor: Actor | null = null;
+      if (token) {
+        const session = await findSession(c.env.DB, token);
+        if (session) actor = await loadActor(c.env.DB, session);
+        if (actor && session) {
+          const extended = await extendSessionIfDue(c.env.DB, session);
+          if (extended) c.header("Set-Cookie", sessionCookie(token, extended), { append: true });
+        } else {
+          c.header("Set-Cookie", clearedSessionCookie(), { append: true });
+        }
       }
-    }
-    const actorToken = actor ? token : null;
-    // Wartungsmodus: nur Admins (auch im Trainer-Modus oder in einer Ansicht)
-    if (!(actor?.isAdmin || actor?.adminSuspended) && !maintenanceAllowed(c.req.path, !!actor)) {
-      if (await maintenanceState(c.env.KV)) {
-        return c.json({ error: { code: "maintenance", message: "Die App wird gerade gewartet und ist gleich wieder da." } }, 503);
-      }
-    }
-    const viewMode = actor?.isAdmin ? readViewMode(c.req.raw) : null;
-    if (actor && viewMode) {
-      actor = (await viewAsActor(c.env.DB, actor, viewMode)) ?? actor;
-      if (actor.readOnly && UNSAFE.has(c.req.method) && !c.req.path.startsWith("/api/auth/logout")) {
-        throw forbidden("In dieser Ansicht kann nichts geändert werden.", "view_read_only");
-      }
-    }
-    c.set("actor", actor);
-    c.set("sessionToken", actorToken);
+      const actorToken = actor ? token : null;
+      const locale = isLocale(actor?.locale) ? actor.locale : currentLocale();
+      return withLocale(locale, async () => {
+        // Wartungsmodus: nur Admins (auch im Trainer-Modus oder in einer Ansicht)
+        if (!(actor?.isAdmin || actor?.adminSuspended) && !maintenanceAllowed(c.req.path, !!actor)) {
+          if (await maintenanceState(c.env.KV)) {
+            return c.json({ error: { code: "maintenance", message: "Die App wird gerade gewartet und ist gleich wieder da." } }, 503);
+          }
+        }
+        const viewMode = actor?.isAdmin ? readViewMode(c.req.raw) : null;
+        if (actor && viewMode) {
+          actor = (await viewAsActor(c.env.DB, actor, viewMode)) ?? actor;
+          if (actor.readOnly && UNSAFE.has(c.req.method) && !c.req.path.startsWith("/api/auth/logout")) {
+            throw forbidden("In dieser Ansicht kann nichts geändert werden.", "view_read_only");
+          }
+        }
+        c.set("actor", actor);
+        c.set("sessionToken", actorToken);
 
-    await next();
-    // Profilbilder setzen ihr eigenes Caching
-    if (!c.res.headers.has("Cache-Control")) c.header("Cache-Control", "no-store");
+        await next();
+        // Profilbilder setzen ihr eigenes Caching
+        if (!c.res.headers.has("Cache-Control")) c.header("Cache-Control", "no-store");
+      });
+    });
   });
 
   return app;
