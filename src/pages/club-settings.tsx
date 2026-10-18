@@ -13,8 +13,13 @@ import { AdminOnly } from "./admin";
 
 const LOGO_TYPES = "image/png,image/jpeg,image/webp,image/svg+xml";
 
-export function ClubProfileForm({ onSaved, submitLabel }: { onSaved?: () => void; submitLabel?: string }) {
+export type ClubFormPart = "name" | "look" | "region" | "modules" | "privacy";
+const ALL_PARTS: ClubFormPart[] = ["name", "look", "region", "modules", "privacy"];
+
+/** The whole club profile, or some parts of it (steps of the setup wizard). Saving sends all fields. */
+export function ClubProfileForm({ onSaved, submitLabel, parts = ALL_PARTS }: { onSaved?: () => void; submitLabel?: string; parts?: ClubFormPart[] }) {
   const club = useClub();
+  const show = (p: ClubFormPart) => parts.includes(p);
   const [name, setName] = useState(club.name);
   const [shortName, setShortName] = useState(club.shortName);
   const [abbr, setAbbr] = useState(club.abbr);
@@ -68,92 +73,100 @@ export function ClubProfileForm({ onSaved, submitLabel }: { onSaved?: () => void
 
   return (
     <div class="stack">
-      <section class="card card-pad stack" aria-label={t`Name`}>
-        <TextField label={t`Name of the club`} value={name} onInput={setName} maxLength={80} hint={t`For example “SV Musterstadt 1900 Handball”`} required />
-        <TextField label={t`Short name`} value={shortName} onInput={setShortName} maxLength={24} hint={t`On the home screen and in notifications`} required />
-        <TextField
-          label={t`Abbreviation`}
-          value={abbr}
-          onInput={setAbbr}
-          maxLength={8}
-          hint={t`Before your own team in game titles, e.g. “SVM wD – HSG Gegner”. Empty: initials of the short name.`}
+      {show("name") ? (
+        <section class="card card-pad stack" aria-label={t`Name`}>
+          <TextField label={t`Name of the club`} value={name} onInput={setName} maxLength={80} hint={t`For example “SV Musterstadt 1900 Handball”`} required />
+          <TextField label={t`Short name`} value={shortName} onInput={setShortName} maxLength={24} hint={t`On the home screen and in notifications`} required />
+          <TextField
+            label={t`Abbreviation`}
+            value={abbr}
+            onInput={setAbbr}
+            maxLength={8}
+            hint={t`Before your own team in game titles, e.g. “SVM wD – HSG Gegner”. Empty: initials of the short name.`}
+          />
+        </section>
+      ) : null}
+      {show("look") ? (
+        <section class="card card-pad stack" aria-label={t`Colours and logo`}>
+          <div class="club-preview" style={{ "--black": primary, "--yellow": accent }}>
+            <ClubMark />
+            <strong>{shortName || t`Short name`}</strong>
+          </div>
+          <div class="club-colors">
+            <Field label={t`Main colour`}>
+              {(id) => <input id={id} type="color" class="color-input" value={primary} onInput={(e) => setPrimary((e.target as HTMLInputElement).value)} />}
+            </Field>
+            <Field label={t`Accent colour`}>
+              {(id) => <input id={id} type="color" class="color-input" value={accent} onInput={(e) => setAccent((e.target as HTMLInputElement).value)} />}
+            </Field>
+          </div>
+          <p class="small muted">
+            <Trans>The main colour should be dark and the accent colour light, so text stays easy to read on both.</Trans>
+          </p>
+          <div class="row-gap">
+            <label class="btn btn-dashed">
+              <Trans>Upload logo</Trans>
+              <input type="file" accept={LOGO_TYPES} class="sr-only" onChange={(e) => void uploadLogo((e.target as HTMLInputElement).files?.[0])} />
+            </label>
+            {club.logoVersion ? (
+              <Button
+                variant="ghost"
+                icon="trash"
+                onClick={async () => {
+                  await api.del("/admin/club/logo");
+                  await loadClub();
+                }}
+              >
+                <Trans>Remove logo</Trans>
+              </Button>
+            ) : null}
+          </div>
+          <p class="small muted">
+            <Trans>PNG, JPEG, WebP or SVG, at most 256 KB. Without a logo the app shows the abbreviation.</Trans>
+          </p>
+        </section>
+      ) : null}
+      {show("region") ? (
+        <RegionSection
+          locale={defaultLocale}
+          onLocale={setDefaultLocale}
+          country={country}
+          onCountry={(c) => {
+            setCountry(c);
+            setSubdivision("");
+          }}
+          subdivision={subdivision}
+          onSubdivision={setSubdivision}
+          timeZone={timeZone}
+          onTimeZone={setTimeZone}
         />
-      </section>
-      <section class="card card-pad stack" aria-label={t`Colours and logo`}>
-        <div class="club-preview" style={{ "--black": primary, "--yellow": accent }}>
-          <ClubMark />
-          <strong>{shortName || t`Short name`}</strong>
-        </div>
-        <div class="club-colors">
-          <Field label={t`Main colour`}>
-            {(id) => <input id={id} type="color" class="color-input" value={primary} onInput={(e) => setPrimary((e.target as HTMLInputElement).value)} />}
+      ) : null}
+      {show("modules") ? <ModulesSection modules={modules} onChange={setModules} /> : null}
+      {show("privacy") ? (
+        <section class="card card-pad stack" aria-label={t`Privacy and contact`}>
+          <TextField
+            label={t`Link to privacy policy and legal notice`}
+            type="url"
+            inputMode="url"
+            value={privacyUrl}
+            onInput={setPrivacyUrl}
+            placeholder="https://"
+            hint={t`Appears under privacy. The notes on the app itself are already there.`}
+          />
+          <Field label={t`Additional privacy notes (optional)`}>
+            {(id) => (
+              <textarea id={id} class="textarea" rows={4} maxLength={5000} value={privacyText} onInput={(e) => setPrivacyText((e.target as HTMLTextAreaElement).value)} />
+            )}
           </Field>
-          <Field label={t`Accent colour`}>
-            {(id) => <input id={id} type="color" class="color-input" value={accent} onInput={(e) => setAccent((e.target as HTMLInputElement).value)} />}
-          </Field>
-        </div>
-        <p class="small muted">
-          <Trans>The main colour should be dark and the accent colour light, so text stays easy to read on both.</Trans>
-        </p>
-        <div class="row-gap">
-          <label class="btn btn-dashed">
-            <Trans>Upload logo</Trans>
-            <input type="file" accept={LOGO_TYPES} class="sr-only" onChange={(e) => void uploadLogo((e.target as HTMLInputElement).files?.[0])} />
-          </label>
-          {club.logoVersion ? (
-            <Button
-              variant="ghost"
-              icon="trash"
-              onClick={async () => {
-                await api.del("/admin/club/logo");
-                await loadClub();
-              }}
-            >
-              <Trans>Remove logo</Trans>
-            </Button>
-          ) : null}
-        </div>
-        <p class="small muted">
-          <Trans>PNG, JPEG, WebP or SVG, at most 256 KB. Without a logo the app shows the abbreviation.</Trans>
-        </p>
-      </section>
-      <RegionSection
-        locale={defaultLocale}
-        onLocale={setDefaultLocale}
-        country={country}
-        onCountry={(c) => {
-          setCountry(c);
-          setSubdivision("");
-        }}
-        subdivision={subdivision}
-        onSubdivision={setSubdivision}
-        timeZone={timeZone}
-        onTimeZone={setTimeZone}
-      />
-      <ModulesSection modules={modules} onChange={setModules} />
-      <section class="card card-pad stack" aria-label={t`Privacy and contact`}>
-        <TextField
-          label={t`Link to privacy policy and legal notice`}
-          type="url"
-          inputMode="url"
-          value={privacyUrl}
-          onInput={setPrivacyUrl}
-          placeholder="https://"
-          hint={t`Appears under privacy. The notes on the app itself are already there.`}
-        />
-        <Field label={t`Additional privacy notes (optional)`}>
-          {(id) => (
-            <textarea id={id} class="textarea" rows={4} maxLength={5000} value={privacyText} onInput={(e) => setPrivacyText((e.target as HTMLTextAreaElement).value)} />
-          )}
-        </Field>
-        <TextField
-          label={t`Contact for the app (optional)`}
-          value={contact}
-          onInput={setContact}
-          maxLength={200}
-          hint={t`Name and e-mail address, appears under help`}
-        />
-      </section>
+          <TextField
+            label={t`Contact for the app (optional)`}
+            value={contact}
+            onInput={setContact}
+            maxLength={200}
+            hint={t`Name and e-mail address, appears under help`}
+          />
+        </section>
+      ) : null}
       {error ? <Notice kind="warn">{error}</Notice> : null}
       <Button variant="primary" block disabled={!name.trim() || !shortName.trim()} onClick={save}>
         {submitLabel ?? t`Save`}

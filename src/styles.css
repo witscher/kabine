@@ -2685,3 +2685,17 @@ button.announcement-head {
   border-radius: 10px;
   background: var(--card);
 }
+
+/* Setup wizard */
+.wizard-progress {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--line, #e5e5e5);
+  overflow: hidden;
+}
+.wizard-progress > span {
+  display: block;
+  height: 100%;
+  background: var(--yellow);
+  transition: width 0.2s ease;
+}

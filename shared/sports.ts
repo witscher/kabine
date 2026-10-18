@@ -136,3 +136,16 @@ export function genderPrefix(locale: Locale, gender: TeamGender): string {
   if (locale === "de") return gender === "f" ? "w" : gender === "m" ? "m" : "g";
   return gender === "f" ? "girls/women" : gender === "m" ? "boys/men" : "mixed";
 }
+
+/** Season around a day from the sport's season start, e.g. 2026-07-01 – 2027-06-30 "2026/27". */
+export function seasonAround(today: string, start: { month: number; day: number }) {
+  const year = Number(today.slice(0, 4));
+  const pad = (n: number) => String(n).padStart(2, "0");
+  const from = today >= `${year}-${pad(start.month)}-${pad(start.day)}` ? year : year - 1;
+  const end = new Date(Date.UTC(from + 1, start.month - 1, start.day - 1));
+  return {
+    name: start.month === 1 && start.day === 1 ? String(from) : `${from}/${pad((from + 1) % 100)}`,
+    startsOn: `${from}-${pad(start.month)}-${pad(start.day)}`,
+    endsOn: `${end.getUTCFullYear()}-${pad(end.getUTCMonth() + 1)}-${pad(end.getUTCDate())}`,
+  };
+}

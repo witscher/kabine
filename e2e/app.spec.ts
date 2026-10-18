@@ -84,6 +84,11 @@ test("Admin richtet den Zugang über den Einrichtungslink ein", async ({ browser
   await page.getByRole("button", { name: "Passkey einrichten" }).click();
   await expect(page.getByText("Geschafft!")).toBeVisible();
   await page.getByRole("button", { name: "Zur App" }).click();
+  // Bis die Einrichtung abgeschlossen ist, öffnet sich für Admins der Assistent
+  await expect(page.getByText("Einrichtung · Schritt 1 von 8")).toBeVisible();
+  await page.getByRole("button", { name: "Später weitermachen" }).click();
+  await expect(page.getByText("Einrichtung nicht abgeschlossen")).toBeVisible();
+  await page.goto("/");
   await expect(page.getByRole("heading", { name: "Hallo Ada" })).toBeVisible();
 
   // Der Einrichtungslink gilt nur einmal
@@ -1214,4 +1219,32 @@ test("Spielplan aus einer Tabelle: Vorschau und Anlegen", async () => {
   await expect(section.getByText("Auswärtsspiel bei SG Tabellenstadt")).toBeVisible();
   await section.getByRole("button", { name: "1 Spiel anlegen" }).click();
   await expect(page.getByText("1 Spiel angelegt.")).toBeVisible();
+});
+
+test("Einrichtungsassistent: Admin geht alle Schritte durch", async () => {
+  const { page } = admin;
+  await page.goto("/verwaltung/einrichtung");
+  await expect(page.getByText("Einrichtung · Schritt 1 von 8")).toBeVisible();
+  await page.getByRole("button", { name: "Speichern und weiter" }).click();
+  await expect(page.getByRole("heading", { name: "Dein Verein" })).toBeVisible();
+  await page.getByRole("button", { name: "Speichern und weiter" }).click();
+  await expect(page.getByRole("heading", { name: "Sportart und Saison" })).toBeVisible();
+  await expect(page.getByText("Aktuelle Saison:")).toBeVisible();
+  await page.getByRole("button", { name: "Speichern und weiter" }).click();
+  await expect(page.getByRole("heading", { name: "Funktionen" })).toBeVisible();
+  await page.getByRole("button", { name: "Speichern und weiter" }).click();
+  await expect(page.getByRole("heading", { name: "E-Mail", exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Überspringen" }).click();
+  await expect(page.getByRole("heading", { name: "Erste Mannschaften" })).toBeVisible();
+  await page.getByLabel("Name", { exact: true }).fill("wE2");
+  await page.getByRole("button", { name: "Mannschaft anlegen" }).click();
+  await expect(page.getByText("Mannschaft angelegt")).toBeVisible();
+  await expect(page.locator(".team-badge", { hasText: "wE2" })).toBeVisible();
+  await page.getByRole("button", { name: "Weiter", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "Datenschutz" })).toBeVisible();
+  await page.getByRole("button", { name: "Speichern und weiter" }).click();
+  await expect(page.getByRole("heading", { name: "Die App ist eingerichtet" })).toBeVisible();
+  await page.goto("/verwaltung");
+  await expect(page.getByRole("link", { name: /Einrichtungsassistent/ })).toBeVisible();
+  await expect(page.getByText("Einrichtung nicht abgeschlossen")).toHaveCount(0);
 });

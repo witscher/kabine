@@ -18,6 +18,7 @@ import { gameImportRoutes } from "./routes/game-import";
 import { gameRoutes } from "./routes/games";
 import { mailRoutes } from "./routes/mail";
 import { smsRoutes } from "./routes/sms";
+import { setupRoutes } from "./routes/setup";
 import { joinRoutes } from "./routes/join";
 import { parentRoutes } from "./routes/parents";
 import { personRoutes } from "./routes/persons";
@@ -53,6 +54,7 @@ for (const routes of [
   gameImportRoutes,
   mailRoutes,
   smsRoutes,
+  setupRoutes,
   seasonRoutes,
   avatarRoutes,
   dutyRoutes,

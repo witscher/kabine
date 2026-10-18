@@ -73,6 +73,7 @@ export function AdminPage() {
       : []),
     { href: "/chat?alle", icon: "chat", title: t`All chats`, sub: t`Team chats in which you are not a coach or parent` },
     { href: "/verwaltung/sondertermine", icon: "calendar", title: t`Special events and games`, sub: t`Upcoming events of other teams, create a special event` },
+    { href: "/verwaltung/einrichtung", icon: "check", title: t`Setup wizard`, sub: t`Go through the setup step by step again` },
     { href: "/verwaltung/verein", icon: "settings", title: t`Club`, sub: t`Name, colours, logo, region, modules` },
     { href: "/verwaltung/mail", icon: "mail", title: t`E-mail`, sub: t`How the app sends e-mails` },
     ...(moduleOn(club.modules, "sms") ? [{ href: "/verwaltung/sms", icon: "phone" as IconName, title: t`SMS`, sub: t`Provider for codes and reminders by SMS` }] : []),
@@ -115,6 +116,19 @@ export function AdminPage() {
                 ))}
               </ul>
             </section>
+          ) : null}
+          {!club.setupDone ? (
+            <a class="card card-pad row-gap" href="/verwaltung/einrichtung" style={{ textDecoration: "none", color: "inherit" }}>
+              <Icon name="info" size={22} />
+              <span class="main">
+                <strong>
+                  <Trans>Setup not finished</Trans>
+                </strong>
+                <span class="small muted" style={{ display: "block" }}>
+                  <Trans>Continue the setup wizard</Trans>
+                </span>
+              </span>
+            </a>
           ) : null}
           {teams.error ? <ErrorBox error={teams.error} /> : null}
           <ul class="list" aria-label={t`Administration`}>

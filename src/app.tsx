@@ -19,6 +19,7 @@ import { PrivacyPage } from "./pages/privacy";
 import { SessionProvider, useSession } from "./session";
 import { Splash } from "./splash";
 import { invalidate, useQuery } from "./store";
+import { useClub } from "./club";
 import { ConfirmHost, Spinner, Toasts } from "./ui";
 
 const HelpersPage = lazyPage(() => import("./pages/helpers").then((m) => m.HelpersPage));
@@ -51,6 +52,7 @@ const AdminLocationsPage = lazyPage(() => import("./pages/admin").then((m) => m.
 const AdminClubPage = lazyPage(() => import("./pages/club-settings").then((m) => m.AdminClubPage));
 const AdminMailPage = lazyPage(() => import("./pages/mail-settings").then((m) => m.AdminMailPage));
 const AdminSmsPage = lazyPage(() => import("./pages/sms-settings").then((m) => m.AdminSmsPage));
+const SetupWizardPage = lazyPage(() => import("./pages/setup-wizard").then((m) => m.SetupWizardPage));
 const SeasonChangePage = lazyPage(() => import("./pages/season").then((m) => m.SeasonChangePage));
 
 const PUBLIC_PATHS = ["/einladung", "/einrichtung", "/datenschutz", "/email"];
@@ -175,10 +177,32 @@ function Shell({ children }: { children: ComponentChildren }) {
       <OfflineBanner />
       <UpdateBanner />
       <ScrollTop />
+      {me ? <SetupRedirect /> : null}
       {children}
       {!hideTabs ? <TabBar /> : null}
     </div>
   );
+}
+
+/**
+ * Opens the setup wizard for admins as long as the setup is not finished, unless they postponed it
+ * in this browser session ("Continue later").
+ */
+function SetupRedirect() {
+  const { me } = useSession();
+  const club = useClub();
+  const { path, route } = useLocation();
+  useEffect(() => {
+    if (!me?.isAdmin || club.setupDone || path !== "/") return;
+    let postponed = false;
+    try {
+      postponed = sessionStorage.getItem("kabine.setup.later") === "1";
+    } catch {
+      // no storage: open the wizard
+    }
+    if (!postponed) route("/verwaltung/einrichtung", true);
+  }, [me?.isAdmin, club.setupDone, path]);
+  return null;
 }
 
 /** Old address /spiele: games are listed under events, the sync in the team. */
@@ -248,6 +272,7 @@ export function App() {
               <Route path="/verwaltung/mail" component={AdminMailPage} />
               <Route path="/verwaltung/sms" component={AdminSmsPage} />
               <Route path="/verwaltung/saisonwechsel" component={SeasonChangePage} />
+              <Route path="/verwaltung/einrichtung" component={SetupWizardPage} />
               <Route path="/verwaltung/termin-neu" component={SpecialEventPage} />
               <Route path="/verwaltung/sondertermine" component={AdminExtraEventsPage} />
               <Route path="/einladung" component={JoinPage} />

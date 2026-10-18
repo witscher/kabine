@@ -598,7 +598,7 @@ function SkillSwitches() {
   const { data, mutate } = useQuery<DutyPrefs>("/profile/duty-prefs");
   if (!data?.skills.length) return null;
   // Timekeeper and scorer are the same qualification: one switch, internally two consents
-  const table = data.skills.filter((sk) => sk.code === "zeitnehmer" || sk.code === "sekretaer");
+  const table = data.skills.filter((sk) => ["timekeeper", "scorer", "zeitnehmer", "sekretaer"].includes(sk.code ?? ""));
   const rows = [
     ...(table.length ? [{ label: joinAnd(table.map((sk) => sk.name)), items: table }] : []),
     ...data.skills.filter((sk) => !table.includes(sk)).map((sk) => ({ label: sk.name, items: [sk] })),

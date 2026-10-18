@@ -41,6 +41,11 @@ msgstr "Im Profil unter „Das kann ich“ einschalten"
 msgid "Your message"
 msgstr "Deine Nachricht"
 
+# ai
+#: src/pages/setup-wizard.tsx
+msgid "Create the teams that start now. Coaches, players and training plans follow in each team; more teams can be added later."
+msgstr "Leg die Mannschaften an, die jetzt starten. Trainer, Spieler und Trainingspläne folgen in der jeweiligen Mannschaft, weitere Mannschaften kannst du später ergänzen."
+
 #: worker/routes/squad.ts
 msgid "Inactive players cannot be nominated."
 msgstr "Inaktive Spieler können nicht nominiert werden."
@@ -220,6 +225,11 @@ msgstr "Bitte einen Dienst wählen."
 msgid "Add organiser"
 msgstr "Organisator hinzufügen"
 
+# ai
+#: src/pages/setup-wizard.tsx
+msgid "School holidays and public holidays of your region are already there."
+msgstr "Schulferien und Feiertage deiner Region sind schon eingetragen."
+
 #: worker/domain/duty-notify.ts
 msgid "A KiHaSL/JuHaSL is still needed for the game {game}."
 msgstr "für das Spiel {game} wird noch ein KiHaSL/JuHaSL gesucht."
@@ -282,6 +292,11 @@ msgstr "Bitte gib kurz einen Grund für die Absage an."
 #: worker/cron.ts
 msgid "Game against {opponent} on {date}, {time}: please enter meeting point and time."
 msgstr "Spiel gegen {opponent} am {date}, {time} Uhr: Bitte Treffpunkt und Uhrzeit eintragen."
+
+# ai
+#: src/pages/setup-wizard.tsx
+msgid "The season has no age groups yet. Choose a sport in the step before, or add them under <0>age groups</0>."
+msgstr "Die Saison hat noch keine Altersklassen. Wähle im Schritt davor eine Sportart oder leg sie unter <0>Altersklassen</0> an."
 
 #: src/duties.tsx
 msgid "Your duty"
@@ -483,6 +498,11 @@ msgstr "Verknüpfte Eltern: {guardians}. Jedes Elternteil kann die Freigaben än
 msgid "Show top helpers"
 msgstr "Top-Helfer anzeigen"
 
+# ai
+#: src/pages/setup-wizard.tsx
+msgid "First teams"
+msgstr "Erste Mannschaften"
+
 #: shared/types.ts
 msgid "Responses by parents or child"
 msgstr "Rückmeldungen durch Eltern bzw. Kind"
@@ -549,6 +569,11 @@ msgstr "Der Link meldet die bisherigen Geräte ab, zum Beispiel nach einem Gerä
 #: src/pages/privacy.tsx
 msgid "Feedback via “Help and feedback” goes by e-mail to the app's maintainer and is not stored in the app."
 msgstr "Rückmeldungen über „Hilfe und Feedback“ gehen per Mail an den Betreuer der App und werden in der App nicht gespeichert."
+
+# ai
+#: src/pages/setup-wizard.tsx
+msgid "Link your club's privacy policy and legal notice, and name a contact for questions about the app."
+msgstr "Verlinke Datenschutzerklärung und Impressum deines Vereins und nenne eine Ansprechperson für Fragen zur App."
 
 #: src/pages/admin.tsx
 msgid "Holiday periods"
@@ -902,6 +927,11 @@ msgstr "zuletzt {lastUsed}"
 msgid "Subscribe in calendar"
 msgstr "Im Kalender abonnieren"
 
+# ai
+#: src/pages/setup-wizard.tsx
+msgid "Name of the season"
+msgstr "Name der Saison"
+
 #: src/respond.tsx
 msgid "by {name}"
 msgstr "von {name}"
@@ -972,7 +1002,13 @@ msgstr "Dieses Gerät ist für ein anderes Konto angemeldet. Bitte schalte Benac
 msgid "{name} declined {what} on {when}."
 msgstr "{name} hat für {what} am {when} abgesagt."
 
+# ai
+#: src/pages/setup-wizard.tsx
+msgid "Add players and training plans"
+msgstr "Spieler und Trainingspläne anlegen"
+
 #: src/pages/admin.tsx
+#: src/pages/setup-wizard.tsx
 msgid "Age group"
 msgstr "Altersklasse"
 
@@ -1105,6 +1141,11 @@ msgstr "Änderungen an Trainingszeiten gelten sofort. Rückmeldungen bleiben erh
 msgid "Notification"
 msgstr "Benachrichtigung"
 
+# ai
+#: src/pages/setup-wizard.tsx
+msgid "A second admin helps when you are away."
+msgstr "Ein zweiter Admin hilft, wenn du mal nicht da bist."
+
 #: src/pages/helpers.tsx
 msgid "{created, plural, one {# time slot applied.} other {# time slots applied.}}"
 msgstr "{created, plural, one {# Zeitblock übernommen.} other {# Zeitblöcke übernommen.}}"
@@ -1148,6 +1189,7 @@ msgid "Confirm a phone number in your profile first; the test message goes there
 msgstr "Bestätige zuerst im Profil eine Handynummer; dorthin geht die Test-SMS."
 
 #: src/pages/admin.tsx
+#: src/pages/setup-wizard.tsx
 msgid "Gender"
 msgstr "Geschlecht"
 
@@ -1182,6 +1224,7 @@ msgstr "Ungültiger Zeitraum."
 
 # ai
 #: src/pages/admin.tsx
+#: src/pages/setup-wizard.tsx
 msgid "female"
 msgstr "weiblich"
 
@@ -1212,10 +1255,12 @@ msgstr "Gerade hat niemand genug Plätze frei."
 #: src/pages/admin.tsx
 #: src/pages/mail-settings.tsx
 #: src/pages/mail-settings.tsx
+#: src/pages/setup-wizard.tsx
 msgid "E-mail"
 msgstr "E-Mail"
 
 #: src/pages/season.tsx
+#: src/pages/setup-wizard.tsx
 msgid "Assign coaches"
 msgstr "Trainer zuordnen"
 
@@ -1433,6 +1478,11 @@ msgctxt "calendar"
 msgid "absent"
 msgstr "abwesend"
 
+# ai
+#: src/pages/setup-wizard.tsx
+msgid "Skip"
+msgstr "Überspringen"
+
 #: worker/routes/events.ts
 msgid "New event: {title}"
 msgstr "Neuer Termin: {title}"
@@ -1455,6 +1505,7 @@ msgstr "Neuer Termin: {title}"
 #: src/pages/plans.tsx
 #: src/pages/plans.tsx
 #: src/pages/season.tsx
+#: src/pages/setup-wizard.tsx
 msgid "Name"
 msgstr "Name"
 
@@ -1743,6 +1794,11 @@ msgstr "Antwort: {reply}"
 msgid "Mandatory for admins. With it you can also get into the app by code without a passkey."
 msgstr "Für Admins Pflicht. Damit kommst du auch ohne Passkey per Code in die App."
 
+# ai
+#: src/pages/setup-wizard.tsx
+msgid "Coaches and players come next. These are the usual steps."
+msgstr "Als Nächstes kommen Trainer und Spieler dazu. Das sind die üblichen Schritte."
+
 #: src/pages/helpers.tsx
 #: src/pages/special.tsx
 msgid "– Choose template –"
@@ -1902,6 +1958,11 @@ msgstr "KiHaSL/JuHaSL gesucht: {team} {opponent}"
 msgid "There are no teams yet."
 msgstr "Es gibt noch keine Mannschaft."
 
+# ai
+#: src/pages/setup-wizard.tsx
+msgid "Your club"
+msgstr "Dein Verein"
+
 #: src/pages/helpers.tsx
 msgid "KiHaSL list"
 msgstr "KiHaSL-Liste"
@@ -1933,6 +1994,11 @@ msgstr "Sie ist gleich wieder da. Die Seite lädt automatisch neu, sobald die Wa
 #: src/pages/admin.tsx
 msgid "Has no access yet."
 msgstr "Hat noch keinen Zugang."
+
+# ai
+#: src/pages/setup-wizard.tsx
+msgid "Check holidays"
+msgstr "Ferien prüfen"
 
 #: src/live.tsx
 msgid "The live ticker opens in a new window on handball4all."
@@ -2656,6 +2722,7 @@ msgstr "Der Platz ist leider schon vergeben."
 #: src/pages/chat.tsx
 #: src/pages/helpers.tsx
 #: src/pages/plans.tsx
+#: src/pages/setup-wizard.tsx
 #: src/pages/special.tsx
 #: src/pages/special.tsx
 msgid "Teams"
@@ -2762,6 +2829,11 @@ msgstr "Wie die App E-Mails verschickt"
 msgid "{name} accepted training on {when}."
 msgstr "{name} hat für das Training am {when} zugesagt."
 
+# ai
+#: src/pages/setup-wizard.tsx
+msgid "Ready"
+msgstr "Fertig"
+
 #: src/pages/admin.tsx
 msgid "To all teams"
 msgstr "An alle Mannschaften"
@@ -2781,6 +2853,11 @@ msgstr "Dich selbst kannst du nicht löschen."
 #: worker/routes/events.ts
 msgid "{actorName} declined training on {when} for {name}."
 msgstr "{actorName} hat für {name} das Training am {when} abgesagt."
+
+# ai
+#: src/pages/setup-wizard.tsx
+msgid "Last day"
+msgstr "Letzter Tag"
 
 #: src/pages/group.tsx
 msgid "Create special events, send reminders and moderate the chat (including @alle)."
@@ -2813,6 +2890,11 @@ msgstr "Mannschaft löschen?"
 #: src/pages/season.tsx
 msgid "Public holidays (no training)"
 msgstr "Feiertage (kein Training)"
+
+# ai
+#: src/pages/setup-wizard.tsx
+msgid "Progress"
+msgstr "Fortschritt"
 
 #: src/pages/help.tsx
 msgid "Reply by e-mail wanted"
@@ -3285,6 +3367,12 @@ msgstr "Meine Mannschaften"
 msgid "Access for {firstName}"
 msgstr "Zugang für {firstName}"
 
+# ai
+#: src/pages/setup-wizard.tsx
+#: src/pages/setup-wizard.tsx
+msgid "Sport"
+msgstr "Sportart"
+
 #: src/carpool.tsx
 #: src/pages/helpers.tsx
 msgid "full"
@@ -3296,6 +3384,7 @@ msgstr "Eine Begleitperson"
 
 # ai
 #: src/pages/club-settings.tsx
+#: src/pages/setup-wizard.tsx
 msgid "Language and region"
 msgstr "Sprache und Region"
 
@@ -3354,6 +3443,7 @@ msgid "{label} by push"
 msgstr "{label} per Push"
 
 #: src/pages/event.tsx
+#: worker/routes/setup.ts
 msgid "Away game"
 msgstr "Auswärtsspiel"
 
@@ -3394,6 +3484,11 @@ msgstr "Altersklassen gespeichert."
 #: src/email.tsx
 msgid "Code from the e-mail"
 msgstr "Code aus der E-Mail"
+
+# ai
+#: src/pages/setup-wizard.tsx
+msgid "Team created"
+msgstr "Mannschaft angelegt"
 
 #: src/pages/admin.tsx
 msgid "{name} has been deleted."
@@ -3498,6 +3593,11 @@ msgstr "{from} bis {to}: noch kein Ferienplan, der reguläre Plan läuft weiter.
 msgid "Details saved."
 msgstr "Angaben gespeichert."
 
+# ai
+#: src/pages/setup-wizard.tsx
+msgid "Under teams → coaches. Each coach gets a personal link to sign in."
+msgstr "Unter Mannschaften → Trainer. Jeder Trainer bekommt einen persönlichen Link zur Anmeldung."
+
 #: src/pages/admin.tsx
 #: src/pages/event.tsx
 #: src/pages/plans.tsx
@@ -3534,6 +3634,11 @@ msgstr "Keine eigenen Termine"
 #: src/pages/help.tsx
 msgid "The image could not be converted."
 msgstr "Das Bild konnte nicht umgewandelt werden."
+
+# ai
+#: src/pages/setup-wizard.tsx
+msgid "Add more admins"
+msgstr "Weitere Admins ernennen"
 
 # ai
 #: src/pages/club-settings.tsx
@@ -3755,6 +3860,7 @@ msgstr "– Dienst wählen –"
 
 # ai
 #: src/pages/admin.tsx
+#: src/pages/setup-wizard.tsx
 msgid "male"
 msgstr "männlich"
 
@@ -4051,6 +4157,7 @@ msgstr "App installieren"
 
 # ai
 #: src/pages/admin.tsx
+#: src/pages/setup-wizard.tsx
 msgid "mixed"
 msgstr "gemischt"
 
@@ -4588,6 +4695,7 @@ msgid "Home games of the marked age groups get a youth referee duty, with a role
 msgstr "Heimspiele der markierten Altersklassen bekommen einen Dienst für Jugendschiedsrichter, die Rolle wird per Link vergeben. Setzt Helferdienste voraus."
 
 #: src/pages/admin.tsx
+#: src/pages/setup-wizard.tsx
 msgid "e.g. wC1, wC2, Damen 2"
 msgstr "z. B. wC1, wC2, Damen 2"
 
@@ -5026,6 +5134,11 @@ msgstr "{firstName} ist als KiHaSL/JuHaSL freigeschaltet."
 msgid "Accepted."
 msgstr "Zugesagt."
 
+# ai
+#: src/pages/setup-wizard.tsx
+msgid "Continue later"
+msgstr "Später weitermachen"
+
 #: src/carpool.tsx
 msgid "Assign"
 msgstr "Eintragen"
@@ -5146,6 +5259,7 @@ msgstr "Diese Person verwaltest du nicht."
 msgid "Throw-off and hall come from the schedule and cannot be changed here."
 msgstr "Anwurf und Halle kommen aus dem Spielplan und lassen sich hier nicht ändern."
 
+#: src/pages/setup-wizard.tsx
 #: src/respond.tsx
 msgid "Other sport"
 msgstr "Andere Sportart"
@@ -5177,6 +5291,11 @@ msgstr "Altersklassen prüfen"
 #: src/carpool.tsx
 msgid "You are driving"
 msgstr "Du fährst"
+
+# ai
+#: src/pages/setup-wizard.tsx
+msgid "Next steps"
+msgstr "Nächste Schritte"
 
 #: src/pages/group.tsx
 msgid "Create a group, for example for the coaching team."
@@ -5480,6 +5599,11 @@ msgstr "Erinnerung 3 Tage vor meinem Dienst"
 msgid "Signed-in devices"
 msgstr "Angemeldete Geräte"
 
+# ai
+#: src/pages/setup-wizard.tsx
+msgid "First day"
+msgstr "Erster Tag"
+
 #: src/pages/group.tsx
 msgid "Short, shown like a team name, e.g. JT"
 msgstr "Kurz, erscheint wie ein Mannschaftsname, z. B. JT"
@@ -5741,6 +5865,11 @@ msgstr "Warst du das nicht, melde dich bitte sofort bei deinem Trainer oder eine
 msgid "At least one passenger is not riding with this driver."
 msgstr "Mindestens ein Mitfahrer fährt nicht bei diesem Fahrer mit."
 
+# ai
+#: src/pages/setup-wizard.tsx
+msgid "Coaches do this in their team: import players from a list, enter training times, send invitations."
+msgstr "Das machen die Trainer in ihrer Mannschaft: Spieler aus einer Liste übernehmen, Trainingszeiten eintragen, Einladungen verschicken."
+
 #: src/carpool.tsx
 #: src/carpool.tsx
 msgid "{seats} free"
@@ -5796,6 +5925,11 @@ msgid "Title"
 msgstr "Titel"
 
 # ai
+#: src/pages/setup-wizard.tsx
+msgid "The sport brings suitable age groups, playing times and helper duties. You adjust them later under administration."
+msgstr "Die Sportart bringt passende Altersklassen, Spielzeiten und Helferdienste mit. Anpassen kannst du sie später in der Verwaltung."
+
+# ai
 #: src/pages/profile.tsx
 msgid "Mobile number confirmed."
 msgstr "Handynummer bestätigt."
@@ -5820,6 +5954,11 @@ msgstr "Eine <0>Gruppe</0> hat nur einen Chat und Sondertermine mit Zu- und Absa
 #: src/pages/team.tsx
 msgid "Link for new passkey"
 msgstr "Link für neuen Passkey"
+
+# ai
+#: src/pages/setup-wizard.tsx
+msgid "Switch on what your club needs. You can change this at any time under administration → club."
+msgstr "Schalte ein, was dein Verein braucht. Ändern kannst du das jederzeit unter Verwaltung → Verein."
 
 #: worker/routes/persons.ts
 msgid "A link already exists the other way round: the child is registered as a parent of this person."
@@ -5979,8 +6118,14 @@ msgstr "{name} ist danach nicht mehr Verantwortlich in der Gruppe {teamName}. Di
 msgid "The passkey could not be verified."
 msgstr "Der Passkey konnte nicht bestätigt werden."
 
+# ai
+#: src/pages/setup-wizard.tsx
+msgid "The app is set up"
+msgstr "Die App ist eingerichtet"
+
 #: src/pages/event.tsx
 #: src/pages/special.tsx
+#: worker/routes/setup.ts
 msgid "Home game"
 msgstr "Heimspiel"
 
@@ -6326,6 +6471,11 @@ msgstr "Neue, geänderte und abgesagte Termine"
 msgid "Members are automatically all people with the KiHaSL/JuHaSL role, leads all admins. If someone joins or loses the role, the group adjusts."
 msgstr "Mitglieder sind automatisch alle Personen mit der Rolle KiHaSL/JuHaSL, Verantwortliche alle Admins. Kommt jemand dazu oder verliert die Rolle, passt sich die Gruppe an."
 
+# ai
+#: src/pages/admin.tsx
+msgid "Continue the setup wizard"
+msgstr "Einrichtungsassistent fortsetzen"
+
 #: src/pages/home.tsx
 msgid "Past events"
 msgstr "Vergangene Termine"
@@ -6363,6 +6513,11 @@ msgstr "Derzeit inaktiv gemeldet. Bitte sprich mit deinem Trainer."
 #: src/pages/chat.tsx
 msgid "Write the first message to {teamName}."
 msgstr "Schreib die erste Nachricht an die {teamName}."
+
+# ai
+#: src/pages/setup-wizard.tsx
+msgid "Current season: <0>{seasonName}</0>, {seasonFrom} to {seasonTo}"
+msgstr "Aktuelle Saison: <0>{seasonName}</0>, {seasonFrom} bis {seasonTo}"
 
 #: src/pages/club-settings.tsx
 msgid "Remove logo"
@@ -6414,6 +6569,11 @@ msgstr "Trainer/in"
 #: src/pages/event.tsx
 msgid "Helper plan · {text}"
 msgstr "Helferplan · {text}"
+
+# ai
+#: src/pages/setup-wizard.tsx
+msgid "The club's language applies to everyone who has not chosen one, and to e-mails. The region decides school holidays and public holidays."
+msgstr "Die Sprache des Vereins gilt für alle, die keine gewählt haben, und für E-Mails. Nach der Region richten sich Schulferien und Feiertage."
 
 #: src/calendar.tsx
 #: src/pages/admin.tsx
@@ -6719,6 +6879,12 @@ msgstr "Diese Vorlage ist leer oder gibt es nicht."
 msgid "Responses are now visible to coaches only."
 msgstr "Zu- und Absagen sehen jetzt nur die Trainer."
 
+# ai
+#: src/pages/setup-wizard.tsx
+#: src/pages/setup-wizard.tsx
+msgid "Your language"
+msgstr "Deine Sprache"
+
 #: src/pages/duty-admin.tsx
 msgid "Needs prior knowledge"
 msgstr "Braucht Vorkenntnisse"
@@ -6841,6 +7007,11 @@ msgstr "Termin anlegen"
 msgid "Recipients see this address. Replies to it are not read by the app."
 msgstr "Empfänger sehen diese Adresse. Antworten darauf liest die App nicht."
 
+# ai
+#: src/pages/admin.tsx
+msgid "Go through the setup step by step again"
+msgstr "Die Einrichtung noch einmal Schritt für Schritt durchgehen"
+
 #: worker/routes/squad.ts
 msgid "The game is over or cancelled."
 msgstr "Das Spiel ist vorbei oder abgesagt."
@@ -6910,6 +7081,11 @@ msgstr "nicht erbeten"
 #: src/pages/admin.tsx
 msgid "Add period"
 msgstr "Zeitraum hinzufügen"
+
+# ai
+#: src/pages/setup-wizard.tsx
+msgid "Setup · step {number} of {total}"
+msgstr "Einrichtung · Schritt {number} von {total}"
 
 #: src/pages/plans.tsx
 #: worker/routes/plans.ts
@@ -7274,6 +7450,7 @@ msgstr "{name} ist jetzt KiHaSL/JuHaSL. Im Reiter Helfer stehen alle Jugend-Heim
 
 #: src/pages/join.tsx
 #: src/pages/join.tsx
+#: src/pages/setup-wizard.tsx
 msgid "Setup"
 msgstr "Einrichtung"
 
@@ -7328,6 +7505,7 @@ msgid "All players of all teams"
 msgstr "Alle Spielerinnen und Spieler aller Mannschaften"
 
 #: src/pages/privacy.tsx
+#: src/pages/setup-wizard.tsx
 msgid "Privacy"
 msgstr "Datenschutz"
 
@@ -7514,6 +7692,7 @@ msgid "Cancelled."
 msgstr "Abgesagt."
 
 #: src/pages/admin.tsx
+#: src/pages/setup-wizard.tsx
 msgid "New team"
 msgstr "Neue Mannschaft"
 
@@ -7813,6 +7992,7 @@ msgstr "Entfernen"
 
 #: src/email.tsx
 #: src/pages/join.tsx
+#: src/pages/setup-wizard.tsx
 msgid "Go to the app"
 msgstr "Zur App"
 
@@ -8134,6 +8314,11 @@ msgstr "Schreib die erste Nachricht an die Gruppe {teamName}."
 msgid "Helpers needed"
 msgstr "Helfer benötigt"
 
+# ai
+#: src/pages/setup-wizard.tsx
+msgid "The app stores only first name, last name and birth year of players and parents, plus e-mail address and mobile number if someone enters them for signing in. Profile pictures of minors need their parents' consent. The privacy page of the app explains this to everyone."
+msgstr "Die App speichert von Spielern und Eltern nur Vorname, Nachname und Geburtsjahr, dazu E-Mail-Adresse und Handynummer, wenn jemand sie für die Anmeldung einträgt. Profilbilder von Minderjährigen brauchen die Freigabe der Eltern. Die Datenschutzseite der App erklärt das allen."
+
 #: worker/routes/push.ts
 msgid "Push is not set up on the server yet (VAPID keys missing)."
 msgstr "Push ist auf dem Server noch nicht eingerichtet (VAPID-Schlüssel fehlen)."
@@ -8293,6 +8478,15 @@ msgstr "Urlaub"
 #: worker/routes/game-import.ts
 msgid "The game schedule is in the app. Please check when you can play."
 msgstr "Der Spielplan ist in der App. Bitte schau nach, wann du spielen kannst."
+
+# ai
+#: src/pages/setup-wizard.tsx
+#: src/pages/setup-wizard.tsx
+#: src/pages/setup-wizard.tsx
+#: src/pages/setup-wizard.tsx
+#: src/pages/setup-wizard.tsx
+msgid "Save and continue"
+msgstr "Speichern und weiter"
 
 #: src/pages/event.tsx
 msgid "There are no participants for this event."
@@ -8496,6 +8690,11 @@ msgstr "Trainer {teamName}"
 #: src/pages/team.tsx
 msgid "{count} without year of birth"
 msgstr "{count} ohne Geburtsjahr"
+
+# ai
+#: src/pages/setup-wizard.tsx
+msgid "Welcome! A few steps and your club can start. Everything can be changed later under administration."
+msgstr "Willkommen! Nach ein paar Schritten kann dein Verein loslegen. Alles lässt sich später in der Verwaltung ändern."
 
 #: src/pages/plans.tsx
 msgid "Break {holiday}"
@@ -8825,6 +9024,11 @@ msgstr "Angebot zurückgezogen."
 msgid "Please open this link in <0>Safari</0>. Passkeys created in another browser often cannot be used by the app on the home screen. Copy the link, open Safari and paste it into the address bar."
 msgstr "Bitte öffne diesen Link in <0>Safari</0>. Passkeys, die in einem anderen Browser angelegt werden, kann die App auf dem Home-Bildschirm oft nicht nutzen. Link kopieren, Safari öffnen und in die Adresszeile einfügen."
 
+# ai
+#: src/pages/admin.tsx
+msgid "Setup not finished"
+msgstr "Einrichtung nicht abgeschlossen"
+
 #: src/pages/event.tsx
 msgid "Nobody nominated yet."
 msgstr "Noch niemand nominiert."
@@ -8875,6 +9079,11 @@ msgstr "{from} bis {to} · aktuell"
 msgid "{assigned} players assigned, {deletedPersons} former persons and {deletedParents} parent accesses without a child deleted."
 msgstr "{assigned} Spieler zugeordnet, {deletedPersons} ehemalige Personen und {deletedParents} Elternzugänge ohne Kind gelöscht."
 
+# ai
+#: src/pages/admin.tsx
+msgid "Setup wizard"
+msgstr "Einrichtungsassistent"
+
 #: src/pages/admin.tsx
 msgid "This cannot be undone. This deletes {name} and:"
 msgstr "Das lässt sich nicht rückgängig machen. Gelöscht werden {name} und:"
@@ -8911,6 +9120,11 @@ msgstr "Aushilfe-Anfrage"
 #: worker/routes/events.ts
 msgid "{name} declined training on {when}."
 msgstr "{name} hat für das Training am {when} abgesagt."
+
+# ai
+#: src/pages/setup-wizard.tsx
+msgid "The app sends e-mails for sign-in codes, access links and helper plan reminders. Without e-mail, people sign in with passkeys and links you hand out."
+msgstr "Die App verschickt E-Mails für Anmeldecodes, Zugangslinks und Erinnerungen aus dem Helferplan. Ohne E-Mail melden sich alle mit Passkeys und den Links an, die ihr weitergebt."
 
 #: src/pages/special.tsx
 msgid "Opponent or tournament"
@@ -8968,6 +9182,11 @@ msgstr "Aushilfe"
 #: worker/routes/carpool.ts
 msgid "{name} is riding with {driver}: {game} (entered by {coach})."
 msgstr "{name} fährt bei {driver} mit: {game} (eingetragen von {coach})."
+
+# ai
+#: src/pages/setup-wizard.tsx
+msgid "Sport and season"
+msgstr "Sportart und Saison"
 
 #: worker/routes/squad.ts
 msgid "{playerName} will help out {teamName} on {date}."
@@ -9157,6 +9376,11 @@ msgstr "<0>Inaktiv</0> gilt für alle Termine, etwa bei Verletzung oder Auslands
 msgid "Accept again"
 msgstr "Wieder zusagen"
 
+# ai
+#: src/pages/setup-wizard.tsx
+msgid "Trainings are created up to the end of the season. The season change at the end prepares the next one."
+msgstr "Trainings werden bis zum Saisonende angelegt. Der Saisonwechsel am Ende bereitet die nächste Saison vor."
+
 #: src/pages/event.tsx
 msgid "Cancel and inform"
 msgstr "Absagen und informieren"
@@ -9170,6 +9394,11 @@ msgstr "Hallo,"
 #: worker/routes/events.ts
 msgid "Past events cannot be cancelled."
 msgstr "Vergangene Termine können nicht abgesagt werden."
+
+# ai
+#: src/pages/setup-wizard.tsx
+msgid "Functions"
+msgstr "Funktionen"
 
 #: src/duty-blocks.tsx
 #: src/duty-blocks.tsx
@@ -9185,6 +9414,11 @@ msgstr "Aushilfen kommen aus der 2. Mannschaft derselben Altersklasse oder der n
 #: src/carpool.tsx
 msgid "Nobody is offering seats yet"
 msgstr "Noch niemand bietet Plätze an"
+
+# ai
+#: src/pages/setup-wizard.tsx
+msgid "Season"
+msgstr "Saison"
 
 # ai
 #: src/pages/club-settings.tsx
@@ -9237,6 +9471,7 @@ msgid "Only people with the KiHaSL/JuHaSL role."
 msgstr "Nur Personen mit KiHaSL/JuHaSL-Rolle."
 
 #: src/pages/season.tsx
+#: src/pages/setup-wizard.tsx
 msgid "Continue"
 msgstr "Weiter"
 
@@ -9523,6 +9758,7 @@ msgid "The event must be in the future."
 msgstr "Der Termin muss in der Zukunft liegen."
 
 #: src/pages/admin.tsx
+#: src/pages/setup-wizard.tsx
 msgid "Create team"
 msgstr "Mannschaft anlegen"
 
@@ -9599,6 +9835,11 @@ msgstr "Loslassen zum Aktualisieren"
 #: src/pages/team.tsx
 msgid "Game schedule (handball4all)"
 msgstr "Spielplan (handball4all)"
+
+# ai
+#: src/pages/setup-wizard.tsx
+msgid "The season already has age groups. They stay as they are."
+msgstr "Die Saison hat schon Altersklassen. Sie bleiben, wie sie sind."
 
 #: src/pages/profile.tsx
 msgid "Profile picture and permissions"
@@ -9915,6 +10156,11 @@ msgstr "Jg. {year}"
 msgid "Carry out season change"
 msgstr "Saisonwechsel durchführen"
 
+# ai
+#: src/pages/setup-wizard.tsx
+msgid "Name, colours and logo appear on the home screen, in notifications and in e-mails."
+msgstr "Name, Farben und Logo erscheinen auf dem Startbildschirm, in Benachrichtigungen und in E-Mails."
+
 #: worker/domain/carpool.ts
 msgid "{name} ({seats} seats)"
 msgstr "{name} ({seats} Plätze)"
@@ -9994,6 +10240,7 @@ msgstr "noch nie"
 #: worker/routes/plans.ts
 #: worker/routes/plans.ts
 #: worker/routes/season.ts
+#: worker/routes/setup.ts
 msgid "The end must be after the start."
 msgstr "Das Ende muss nach dem Beginn liegen."
 
@@ -10072,4 +10319,3 @@ msgstr "Chat schreiben"
 #: worker/routes/events.ts
 msgid "In one time block the end is before the start."
 msgstr "Bei einem Zeitblock liegt das Ende vor dem Beginn."
-
