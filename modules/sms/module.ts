@@ -4,6 +4,7 @@ import { defineModule } from "../../shared/module-api";
 export default defineModule({
   id: "sms",
   kind: "provider",
+  vendor: "seven.io",
   status: "stable",
   defaultOn: false,
   paths: [/^\/api\/(admin\/sms|auth\/sms|me\/phone)/],

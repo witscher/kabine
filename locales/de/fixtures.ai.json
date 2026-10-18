@@ -1,0 +1,16 @@
+{
+  "Game schedule ({name})": "Spielplan ({name})",
+  "Table on {tableSource}": "Tabelle bei {tableSource}",
+  "No game schedule is linked for this team.": "Für diese Mannschaft ist kein Spielplan verknüpft.",
+  "Game no longer in the schedule ({name})": "Spiel nicht mehr im Spielplan ({name})",
+  "Please paste the link to your team's page at {names}.": "Bitte füge den Link zur Seite deiner Mannschaft bei {names} ein.",
+  "Unexpected format from {name}: {detail}": "Unerwartetes Format von {name}: {detail}",
+  "Fetch failed: {detail}": "Abruf fehlgeschlagen: {detail}",
+  "Association {orgId}, league {leagueId}, team {teamId}": "Verband {orgId}, Liga {leagueId}, Team {teamId}",
+  "{name} responded with status {status}": "{name} antwortet mit Status {status}",
+  "Syncing only happens at the press of a button, on a coach's or admin's device or by the app's server, never automatically.": "Abgeglichen wird nur auf Knopfdruck, auf dem Gerät eines Trainers oder Admins oder durch den Server der App, nie automatisch.",
+  "Linked: {description}.": "Verknüpft: {description}.",
+  "{name} cannot be reached right now ({detail}).": "{name} ist gerade nicht erreichbar ({detail}).",
+  "Games from a game schedule cannot be deleted, only hidden.": "Spiele aus einem Spielplan lassen sich nicht löschen, nur ausblenden.",
+  "Game schedules: {scheduleSources}. They are only fetched at the press of a button by a coach or admin.": "Spielpläne: {scheduleSources}. Sie werden nur auf Knopfdruck von einem Trainer oder Admin abgerufen."
+}

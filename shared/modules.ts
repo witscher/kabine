@@ -27,7 +27,7 @@ export function moduleOn(modules: ClubModules, id: ModuleId): boolean {
 /** The module an API path belongs to, null for paths of the base. The first matching module wins. */
 export function moduleOfPath(path: string): ModuleId | null {
   if (BASE_PATHS.some((re) => re.test(path))) return null;
-  return MODULES.find((m) => m.paths.some((re) => re.test(path)))?.id ?? null;
+  return MODULES.find((m) => "paths" in m && m.paths.some((re) => re.test(path)))?.id ?? null;
 }
 
 /** Notification topics the modules add to the core ones (shared/types.ts). */

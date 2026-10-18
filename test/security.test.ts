@@ -1,5 +1,5 @@
 // Security checklist (docs/security.md): each case recreates the misuse and checks that it fails. Invented names.
-// Finding 1 (schedule import links foreign games) is tested in h4a.test.ts.
+// Finding 1 (schedule import links foreign games) is tested in modules/handball4all/test/handball4all.test.ts.
 import { env, exports } from "cloudflare:workers";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { type MailMessage, mailer } from "../worker/domain/email-login";
@@ -228,7 +228,7 @@ describe("Sicherheitsfunde", () => {
     await member(kid, wd);
     await guardian(mum, kid);
     const game = await eventIn(wd, 5, { kind: "game", time: "14:00" });
-    await exec("UPDATE events SET h4a_game_id = 'g1', is_home = 1, home_team = 'SV Musterstadt', guest_team = 'SG Gegner' WHERE id = ?", game);
+    await exec("UPDATE events SET external_ref = 'handball4all:g1', is_home = 1, home_team = 'SV Musterstadt', guest_team = 'SG Gegner' WHERE id = ?", game);
     const mumCookie = await loginAs(mum);
     const list = await api(`/duties?teamId=${wd}`, { cookie: mumCookie });
     const block = list.body.games[0].blocks[0];

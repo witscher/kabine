@@ -10,6 +10,11 @@ export interface AppModule {
   routes?: { path: string; page: ComponentType<Record<string, string>> }[];
   /** One line on event cards (home), from `event.modules[<id>]` (worker hook eventSummaries). */
   eventCardLine?: ComponentType<{ event: EventSummary; data: unknown }>;
+  /**
+   * Links for a game of a fixture module (live ticker while it is played, report afterwards), on the
+   * "In progress" card and the event page. Show nothing for games of other sources (`event.game.source`).
+   */
+  gameLinks?: ComponentType<{ event: EventSummary; phase: "live" | "after" }>;
   /** A section on the event page, from `event.modules[<id>]` (worker hook eventDetail). */
   eventSection?: ComponentType<{ event: EventDetail; data: unknown; reload: () => void }>;
 }

@@ -13,6 +13,8 @@ export function PrivacyPage() {
   const clubName = club.name;
   const host = club.privacyUrl ? new URL(club.privacyUrl).host : "";
   const on = (m: Parameters<typeof moduleOn>[1]) => moduleOn(club.modules, m);
+  // Brand names of the switched-on game schedule sources (fixture modules), e.g. "handball4all"
+  const scheduleSources = MODULES.flatMap((m) => (m.kind === "fixtures" && "vendor" in m && on(m.id) ? [m.vendor] : [])).join(", ");
   return (
     <main class={`page ${me ? "" : "no-tabs"}`}>
       <TopBar title={t`Privacy and sources`} back={me ? "/profil" : "/"} />
@@ -110,9 +112,9 @@ export function PrivacyPage() {
               <a href="https://opendatacommons.org/licenses/odbl/">Open Database License (ODbL)</a>.
             </Trans>
           </p>
-          {on("handball4all") ? (
+          {scheduleSources ? (
             <p>
-              <Trans>Game schedules: handball4all. They are only fetched from the device of a coach or admin.</Trans>
+              <Trans>Game schedules: {scheduleSources}. They are only fetched at the press of a button by a coach or admin.</Trans>
             </p>
           ) : null}
           <p>

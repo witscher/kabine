@@ -1,0 +1,39 @@
+[
+  {
+    "head": { "name": "weibliche D-Jugend Bezirksliga" },
+    "content": {
+      "teamsList": [
+        { "teamID": "999", "teamName": "TV Heimverein" },
+        { "teamID": "998", "teamName": "HSG Nachbarort" },
+        { "teamID": "997", "teamName": "SG Beispielstadt" }
+      ],
+      "actualGames": [
+        {
+          "gClassID": "555",
+          "games": [
+            {
+              "gID": "100001", "gNo": "70101", "gDate": "26.09.26", "gWDay": "Sa", "gTime": "12:45",
+              "gGymnasiumID": "10", "gGymnasiumName": "Sporthalle Musterstadt", "gGymnasiumStreet": "Hallenweg 1", "gGymnasiumPostal": "76000", "gGymnasiumTown": "Musterstadt",
+              "gHomeTeam": "TV Heimverein", "gGuestTeam": "HSG Nachbarort", "gHomeGoals": "18", "gGuestGoals": "15"
+            }
+          ]
+        }
+      ],
+      "futureGames": {
+        "gClassID": "555",
+        "games": [
+          {
+            "gID": "100002", "gNo": "70102", "gDate": "07.11.26", "gWDay": "Sa", "gTime": "14:00",
+            "gGymnasiumID": "20", "gGymnasiumName": "Gasthalle", "gGymnasiumStreet": "Am Sportplatz 3", "gGymnasiumPostal": "76001", "gGymnasiumTown": "Nachbarort",
+            "gHomeTeam": "HSG Nachbarort", "gGuestTeam": "TV Heimverein", "gHomeGoals": " ", "gGuestGoals": " "
+          },
+          {
+            "gID": "100003", "gNo": "70103", "gDate": "21.11.26", "gWDay": "Sa", "gTime": "10:00",
+            "gGymnasiumID": "10", "gGymnasiumName": "Sporthalle Musterstadt", "gGymnasiumStreet": "Hallenweg 1", "gGymnasiumPostal": "76000", "gGymnasiumTown": "Musterstadt",
+            "gHomeTeam": "TV Heimverein", "gGuestTeam": "SG Beispielstadt", "gHomeGoals": " ", "gGuestGoals": " "
+          }
+        ]
+      }
+    }
+  }
+]

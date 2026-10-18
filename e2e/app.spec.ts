@@ -932,7 +932,7 @@ test("Liveticker und Spielbericht: erst beim Antippen ein Abruf, Seite öffnet i
   const q = berlin(300);
   const done = { ...game, gID: "777002", gNo: "2", gDate: `${q.day}.${q.month}.${q.year!.slice(2)}`, gTime: `${q.hour}:${q.minute}`, gGuestTeam: "SG Beispielstadt" };
   const payload = [{ head: { name: "Testliga" }, content: { actualGames: [], futureGames: { gClassID: "555", games: [game, done] }, teamsList: [{ teamID: "999", teamName: "SV Musterstadt" }] } }];
-  expect((await page.request.put("/api/teams/1/games/source", { data: { portalUrl: "https://www.handball4all.de/home/portal/baden-wuerttembergischer-hv#/league?ogId=216&lId=555&tId=999" } })).ok()).toBe(true);
+  expect((await page.request.put("/api/teams/1/games/source", { data: { link: "https://www.handball4all.de/home/portal/baden-wuerttembergischer-hv#/league?ogId=216&lId=555&tId=999" } })).ok()).toBe(true);
   expect((await page.request.post("/api/teams/1/games/claim", { data: { manual: true } })).ok()).toBe(true);
   expect((await page.request.post("/api/teams/1/games/import", { data: { data: payload } })).ok()).toBe(true);
 
@@ -988,7 +988,7 @@ test("Liveticker und Spielbericht: erst beim Antippen ein Abruf, Seite öffnet i
   await ctx.unroute("https://spo.handball4all.de/service/if_g_json.php*");
   await ctx.unroute("https://spo.handball4all.de/service/ticker/**");
   // Aufräumen: Spielplan-Link wieder entfernen
-  await page.request.put("/api/teams/1/games/source", { data: { portalUrl: null } });
+  await page.request.put("/api/teams/1/games/source", { data: { link: null } });
 });
 
 test("Spiele der eigenen Mannschaft auch ohne Nominierung sichtbar, mit Marke „Nominiert“", async () => {

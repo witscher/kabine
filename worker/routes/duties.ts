@@ -58,7 +58,7 @@ interface EventRow {
   title: string | null;
   cancelled_at: string | null;
   duty_hidden: number;
-  h4a_game_id: string | null;
+  external_ref: string | null;
   location_name: string | null;
   team_id?: number;
   team_name?: string;
@@ -151,7 +151,7 @@ function eventView(e: EventRow, now: string) {
     location: e.location_name,
     cancelled: e.cancelled_at != null,
     hidden: e.duty_hidden === 1,
-    manual: e.kind === "game" && e.h4a_game_id == null,
+    manual: e.kind === "game" && e.external_ref == null,
   };
 }
 
@@ -167,7 +167,7 @@ dutyRoutes.get("/duties", async (c) => {
   const helperPlan = (await first<{ helper_plan: number }>(db, "SELECT helper_plan FROM teams WHERE id = ?", teamId))?.helper_plan === 1;
   const events = await all<EventRow>(
     db,
-    `SELECT e.id, e.kind, e.starts_at, e.ends_at, e.is_home, e.home_team, e.guest_team, e.title, e.cancelled_at, e.duty_hidden, e.h4a_game_id,
+    `SELECT e.id, e.kind, e.starts_at, e.ends_at, e.is_home, e.home_team, e.guest_team, e.title, e.cancelled_at, e.duty_hidden, e.external_ref,
             l.name AS location_name
        FROM events e JOIN event_teams et ON et.event_id = e.id AND et.team_id = ?1
        LEFT JOIN locations l ON l.id = e.location_id
@@ -364,7 +364,7 @@ dutyRoutes.get("/duties/referee", async (c) => {
   await ensureEventDuties(db, candidates.map((x) => x.id), today);
   const events = await all<EventRow>(
     db,
-    `SELECT e.id, e.kind, e.starts_at, e.ends_at, e.is_home, e.home_team, e.guest_team, e.title, e.cancelled_at, e.duty_hidden, e.h4a_game_id,
+    `SELECT e.id, e.kind, e.starts_at, e.ends_at, e.is_home, e.home_team, e.guest_team, e.title, e.cancelled_at, e.duty_hidden, e.external_ref,
             l.name AS location_name, t.id AS team_id, t.name AS team_name
        FROM events e
        JOIN teams t ON t.id = (SELECT et.team_id FROM event_teams et WHERE et.event_id = e.id ORDER BY et.team_id LIMIT 1)
@@ -769,9 +769,9 @@ dutyRoutes.post("/duties/teams/:id/games", async (c) => {
 dutyRoutes.delete("/duties/games/:id", async (c) => {
   const actor = requireActor(c);
   const event = await managedEvent(c.env.DB, actor, intParam(c, "id"));
-  const row = await first<{ kind: string; h4a_game_id: string | null }>(c.env.DB, "SELECT kind, h4a_game_id FROM events WHERE id = ?", event.id);
+  const row = await first<{ kind: string; external_ref: string | null }>(c.env.DB, "SELECT kind, external_ref FROM events WHERE id = ?", event.id);
   if (row?.kind !== "game") throw notFound();
-  if (row.h4a_game_id) throw badRequest(t`Games from handball4all cannot be deleted, only hidden.`);
+  if (row.external_ref) throw badRequest(t`Games from a game schedule cannot be deleted, only hidden.`);
   await run(c.env.DB, "DELETE FROM events WHERE id = ?", event.id);
   for (const t of event.teamIds) c.executionCtx.waitUntil(notifyDutyChange(c.env, t));
   return c.json({ ok: true });

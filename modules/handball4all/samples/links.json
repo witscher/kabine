@@ -1,0 +1,10 @@
+[
+  {
+    "link": "https://www.handball4all.de/home/portal/baden-wuerttembergischer-hv#/league?ogId=216&lId=555&tId=999",
+    "source": { "orgId": 216, "leagueId": 555, "teamId": 999, "portal": "baden-wuerttembergischer-hv" }
+  },
+  {
+    "link": "https://spo.handball4all.de/service/if_g_json.php?cmd=ps&og=216&cl=555&ct=999",
+    "source": { "orgId": 216, "leagueId": 555, "teamId": 999, "portal": null }
+  }
+]

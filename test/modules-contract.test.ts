@@ -21,7 +21,6 @@ describe("module manifests", () => {
     expect(new Set(ids).size, "ids unique").toBe(ids.length);
     for (const m of manifests) {
       expect(m.id, "camelCase id").toMatch(/^[a-z][a-zA-Z0-9]*$/);
-      expect(m.paths.length, `${m.id}: paths`).toBeGreaterThan(0);
       if (m.requires) expect(ids, `${m.id}: requires`).toContain(m.requires);
       if (m.status === "beta") expect(m.defaultOn, `${m.id}: beta modules start switched off`).toBe(false);
       expect(m.label().trim(), `${m.id}: label`).not.toBe("");
@@ -37,7 +36,11 @@ describe("module manifests", () => {
   it("every worker part belongs to a registered module", () => {
     const ids = WORKER_MODULES.map((m) => m.manifest.id);
     expect(new Set(ids).size).toBe(ids.length);
-    for (const m of WORKER_MODULES) expect(manifests, `${m.manifest.id} is listed in modules/index.ts`).toContain(m.manifest);
+    for (const m of WORKER_MODULES) {
+      expect(manifests, `${m.manifest.id} is listed in modules/index.ts`).toContain(m.manifest);
+      if (m.routes) expect(m.manifest.paths?.length, `${m.manifest.id}: routes need paths in the manifest`).toBeGreaterThan(0);
+      if (m.fixtures) expect(m.manifest.kind, `${m.manifest.id}: a connector is a module of kind "fixtures"`).toBe("fixtures");
+    }
   });
 });
 

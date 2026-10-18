@@ -1,9 +1,10 @@
 import { t } from "@lingui/core/macro";
-import { h4aFetchUrl, h4aTableUrl, matchdayHost } from "./h4a";
+import { matchdayHost, splitRef, teamScheduleUrl, teamTableUrl } from "./fixtures";
 import type {
   EventCounts,
   EventDetail,
   EventSummary,
+  GameInfo,
   MyParticipation,
   ParticipantDetail,
   ParticipationStatus,
@@ -34,8 +35,8 @@ export interface EventRow {
   cancelled_by: number | null;
   cancel_reason: string | null;
   reminder_sent_at: string | null;
-  h4a_game_id: string | null;
-  h4a_game_no: string | null;
+  external_ref: string | null;
+  game_no: string | null;
   home_team: string | null;
   guest_team: string | null;
   is_home: number | null;
@@ -80,10 +81,8 @@ export interface TeamInfo {
   decline_hours_game: number;
   max_squad: number;
   auto_squad: number;
-  h4a_org_id: number | null;
-  h4a_league_id: number | null;
-  h4a_team_id: number | null;
-  h4a_portal: string | null;
+  fixture_connector: string | null;
+  fixture_source: string | null;
   show_responses: number;
 }
 
@@ -198,7 +197,7 @@ export async function loadEventContext(db: D1Database, events: EventRow[]): Prom
     db
       .prepare(
         `SELECT et.event_id, et.optional AS et_optional, t.id, t.name, t.age_class_code, COALESCE(ac.game_minutes, 120) AS game_minutes, t.decline_hours_training,
-                t.decline_hours_game, t.max_squad, t.auto_squad, t.h4a_org_id, t.h4a_league_id, t.h4a_team_id, t.h4a_portal, t.show_responses
+                t.decline_hours_game, t.max_squad, t.auto_squad, t.fixture_connector, t.fixture_source, t.show_responses
            FROM event_teams et JOIN teams t ON t.id = et.team_id
            ${CURRENT_AGE_CLASS_JOIN("t", "ac")}
           WHERE et.event_id IN (SELECT value FROM json_each(?)) ORDER BY t.name`,
@@ -371,11 +370,12 @@ export async function loadEventContext(db: D1Database, events: EventRow[]): Prom
   };
 }
 
-/** Table at handball4all for the team with a linked schedule. */
-function gameLiveUrl(e: EventRow, teams: TeamInfo[]): string | null {
-  if (!e.h4a_game_id) return null;
-  const t = teams.find((x) => x.h4a_org_id && x.h4a_league_id && x.h4a_team_id);
-  return t ? h4aFetchUrl(t.h4a_org_id!, t.h4a_league_id!, t.h4a_team_id!) : null;
+/** Imported game: the connector, the game's id at the source and what the team's connector fetches. */
+function gameSource(e: EventRow, teams: TeamInfo[]): GameInfo["source"] {
+  const ref = splitRef(e.external_ref);
+  if (!ref) return null;
+  const team = teams.find((x) => x.fixture_connector === ref.connector);
+  return { connector: ref.connector, externalId: ref.id, scheduleUrl: team ? teamScheduleUrl(team) : null };
 }
 
 /** Age class of a team in the current season (alias for teams, alias for the class). */
@@ -399,9 +399,13 @@ export function gameLiveMinutes(minutes: number[]): number {
   return minutes.length ? Math.max(...minutes) : 120;
 }
 
-function gameTableUrl(teams: TeamInfo[]): string | null {
-  const t = teams.find((x) => x.h4a_org_id && x.h4a_league_id);
-  return t ? h4aTableUrl(t.h4a_org_id!, t.h4a_league_id!, t.h4a_team_id, t.h4a_portal) : null;
+/** League table of the first team with a linked schedule. */
+function gameTable(teams: TeamInfo[]): GameInfo["table"] {
+  for (const team of teams) {
+    const table = teamTableUrl(team);
+    if (table) return table;
+  }
+  return null;
 }
 
 export function eventTeams(e: EventRow, ctx: EventContext): TeamInfo[] {
@@ -554,15 +558,14 @@ export function toSummary(e: EventRow, ctx: EventContext, actor: Actor, now: num
             isHome: e.is_home == null ? null : e.is_home === 1,
             homeGoals: e.home_goals,
             guestGoals: e.guest_goals,
-            gameNo: e.h4a_game_no,
+            gameNo: e.game_no,
             meetingPoint: e.meeting_point,
             meetingTime: e.meeting_time,
             coachNotes: e.coach_notes,
             squadPublished: e.squad_published_at != null,
             nominatedCount: parts.length,
-            tableUrl: gameTableUrl(teams),
-            h4aGameId: e.h4a_game_id,
-            liveUrl: gameLiveUrl(e, teams),
+            table: gameTable(teams),
+            source: gameSource(e, teams),
             liveMinutes: gameLiveMinutes(teams.map((t) => t.game_minutes)),
           }
         : null,

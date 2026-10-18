@@ -109,16 +109,15 @@ CREATE TABLE teams (
   decline_hours_training INTEGER NOT NULL DEFAULT 6 CHECK (decline_hours_training BETWEEN 0 AND 168),
   decline_hours_game     INTEGER NOT NULL DEFAULT 6 CHECK (decline_hours_game BETWEEN 0 AND 168),
   max_squad              INTEGER NOT NULL DEFAULT 14 CHECK (max_squad BETWEEN 1 AND 40),
-  h4a_org_id             INTEGER,
-  h4a_league_id          INTEGER,
-  h4a_team_id            INTEGER,
-  h4a_imported_at        TEXT,
-  h4a_import_error       TEXT,
-  h4a_claimed_at         TEXT,                  -- a coach's device is fetching right now
+  fixture_connector      TEXT,                  -- module id of the game schedule source, e.g. 'handball4all'
+  fixture_source         TEXT,                  -- JSON: the team at that source (connector-specific)
+  fixture_synced_at      TEXT,
+  fixture_error          TEXT,
+  fixture_claimed_at     TEXT,                  -- a device or the server is fetching right now
   created_at             TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
 , parents_enabled INTEGER NOT NULL DEFAULT 1 CHECK (parents_enabled IN (0, 1)), auto_squad INTEGER NOT NULL DEFAULT 0 CHECK (auto_squad IN (0, 1)), helper_plan INTEGER NOT NULL DEFAULT 0 CHECK (helper_plan IN (0, 1)), show_responses INTEGER NOT NULL DEFAULT 0 CHECK (show_responses IN (0, 1)), kind TEXT NOT NULL DEFAULT 'team' CHECK (kind IN ('team', 'group')), auto_members TEXT CHECK (auto_members IS NULL OR auto_members = 'referees'), home_template_id INTEGER REFERENCES duty_templates (id) ON DELETE SET NULL, away_template_id INTEGER REFERENCES duty_templates (id) ON DELETE SET NULL,
-  gender TEXT NOT NULL DEFAULT 'x' CHECK (gender IN ('f', 'm', 'x')),
-  h4a_portal TEXT);                             -- association portal of the handball4all link (table link)      -- female, male, mixed (age classes have no gender)
+  gender TEXT NOT NULL DEFAULT 'x' CHECK (gender IN ('f', 'm', 'x'))  -- female, male, mixed (age classes have no gender)
+);
 CREATE TABLE team_memberships (
   person_id        INTEGER NOT NULL REFERENCES persons (id) ON DELETE CASCADE,
   team_id          INTEGER NOT NULL REFERENCES teams (id) ON DELETE CASCADE,
@@ -138,7 +137,7 @@ CREATE TABLE locations (
   address    TEXT,
   map_url    TEXT,
   kind       TEXT NOT NULL CHECK (kind IN ('hall', 'custom', 'external')),
-  h4a_gym_id INTEGER UNIQUE,
+  external_ref TEXT UNIQUE,                     -- '<connector>:<id>' of a hall from a game schedule
   created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
 );
 CREATE TABLE training_plans (
@@ -186,9 +185,9 @@ CREATE TABLE events (
   cancelled_by       INTEGER REFERENCES persons (id) ON DELETE SET NULL,
   cancel_reason      TEXT,
   reminder_sent_at   TEXT,
-  -- Spiele (Import handball4all)
-  h4a_game_id        TEXT UNIQUE,
-  h4a_game_no        TEXT,
+  -- Games (imported from a fixture connector: external_ref '<connector>:<game id>')
+  external_ref       TEXT UNIQUE,
+  game_no            TEXT,
   home_team          TEXT,
   guest_team         TEXT,
   is_home            INTEGER CHECK (is_home IS NULL OR is_home IN (0, 1)),

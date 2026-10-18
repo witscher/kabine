@@ -61,7 +61,7 @@ msgstr "no year of birth"
 msgid "Game {teams} {vs}"
 msgstr "Game {teams} {vs}"
 
-#: worker/domain/h4a.ts
+#: modules/handball4all/worker/connector.ts
 msgid "Response is not an object"
 msgstr "Response is not an object"
 
@@ -202,7 +202,7 @@ msgstr "Nobody found."
 msgid "Open helper places · {team}"
 msgstr "Open helper places · {team}"
 
-#: src/pages/team.tsx
+#: modules/handball4all/worker/connector.ts
 msgid "Link from the handball4all portal"
 msgstr "Link from the handball4all portal"
 
@@ -337,6 +337,7 @@ msgid "Hide news"
 msgstr "Hide news"
 
 #: worker/app.ts
+#: worker/routes/games.ts
 msgid "This function is switched off for this club."
 msgstr "This function is switched off for this club."
 
@@ -654,10 +655,6 @@ msgstr "Open"
 msgid "Please do not give details about illnesses, “ill” is enough. Only the coaches see the reason."
 msgstr "Please do not give details about illnesses, “ill” is enough. Only the coaches see the reason."
 
-#: worker/routes/games.ts
-msgid "Game no longer in the schedule (handball4all)"
-msgstr "Game no longer in the schedule (handball4all)"
-
 #: src/howto.tsx
 msgid "Install as an app"
 msgstr "Install as an app"
@@ -665,6 +662,10 @@ msgstr "Install as an app"
 #: modules/carpools/app/card.tsx
 msgid "Getting a ride"
 msgstr "Getting a ride"
+
+#: src/pages/games.tsx
+msgid "Game schedule ({name})"
+msgstr "Game schedule ({name})"
 
 #: src/pages/event.tsx
 #: src/pages/squad.tsx
@@ -843,7 +844,7 @@ msgstr "I am {playerName} – set up passkey"
 msgid "Club halls"
 msgstr "Club halls"
 
-#: worker/routes/games.ts
+#: worker/domain/fixtures.ts
 msgid "Hall"
 msgstr "Hall"
 
@@ -883,6 +884,10 @@ msgstr "The person stays in their current team and also plays for {teamName}. Th
 #: src/pages/admin.tsx
 msgid "Youth"
 msgstr "Youth"
+
+#: src/pages/event.tsx
+msgid "Table on {tableSource}"
+msgstr "Table on {tableSource}"
 
 #: src/pages/home.tsx
 msgid "Other events"
@@ -1203,7 +1208,7 @@ msgstr "Last active: {date} ({ago})"
 msgid "{missing}. Tap a person to add it."
 msgstr "{missing}. Tap a person to add it."
 
-#: src/pages/team.tsx
+#: src/pages/games.tsx
 msgid "Linked. Use \"Sync now\" to fetch the game schedule."
 msgstr "Linked. Use \"Sync now\" to fetch the game schedule."
 
@@ -1378,7 +1383,7 @@ msgstr "One parent"
 msgid "in {weeks} weeks"
 msgstr "in {weeks} weeks"
 
-#: worker/routes/games.ts
+#: modules/handball4all/worker/connector.ts
 msgid "The data belongs to another league"
 msgstr "The data belongs to another league"
 
@@ -1678,7 +1683,7 @@ msgstr "Choose reaction"
 msgid "The duty also appears for {linkedChild}'s other parent."
 msgstr "The duty also appears for {linkedChild}'s other parent."
 
-#: worker/domain/h4a.ts
+#: modules/handball4all/worker/connector.ts
 msgid "Field content is missing"
 msgstr "Field content is missing"
 
@@ -2025,7 +2030,7 @@ msgstr "Has no access yet."
 msgid "Check holidays"
 msgstr "Check holidays"
 
-#: src/live.tsx
+#: modules/handball4all/app/index.tsx
 msgid "The live ticker opens in a new window on handball4all."
 msgstr "The live ticker opens in a new window on handball4all."
 
@@ -2315,6 +2320,11 @@ msgstr "This child is not in the team."
 msgid "a new device has just been set up for your access via a personal link. Your previous devices have been signed out."
 msgstr "a new device has just been set up for your access via a personal link. Your previous devices have been signed out."
 
+#: worker/routes/games.ts
+#: worker/routes/games.ts
+msgid "No game schedule is linked for this team."
+msgstr "No game schedule is linked for this team."
+
 #: src/pages/privacy.tsx
 msgid "Visible to:"
 msgstr "Visible to:"
@@ -2369,7 +2379,7 @@ msgstr "Someone in this family is already looking for a lift. Further family mem
 msgid "{waiting, plural, one {# is looking ({seatsNeeded})} other {# are looking ({seatsNeeded})}}"
 msgstr "{waiting, plural, one {# is looking ({seatsNeeded})} other {# are looking ({seatsNeeded})}}"
 
-#: src/pages/team.tsx
+#: src/pages/games.tsx
 msgid "Not linked yet."
 msgstr "Not linked yet."
 
@@ -2569,6 +2579,10 @@ msgstr "by {firstName} themselves"
 msgid "The event has already started, date, time and venue can no longer be changed."
 msgstr "The event has already started, date, time and venue can no longer be changed."
 
+#: worker/domain/fixtures.ts
+msgid "Game no longer in the schedule ({name})"
+msgstr "Game no longer in the schedule ({name})"
+
 #: src/pages/season.tsx
 msgid "From a mixed team. Please choose the right team."
 msgstr "From a mixed team. Please choose the right team."
@@ -2724,11 +2738,11 @@ msgstr "Refreshing"
 msgid "has access set up"
 msgstr "has access set up"
 
-#: src/live.tsx
+#: modules/handball4all/app/live.tsx
 msgid "Opening {title} …"
 msgstr "Opening {title} …"
 
-#: src/live.tsx
+#: modules/handball4all/app/live.tsx
 msgid "The game report has not been published yet. handball4all usually puts it online 20 to 30 minutes after the final whistle. Please try again later."
 msgstr "The game report has not been published yet. handball4all usually puts it online 20 to 30 minutes after the final whistle. Please try again later."
 
@@ -2803,7 +2817,7 @@ msgstr "Send test message"
 msgid "Not active for over {staleDays} days"
 msgstr "Not active for over {staleDays} days"
 
-#: src/live.tsx
+#: modules/handball4all/app/live.tsx
 msgid "Game report"
 msgstr "Game report"
 
@@ -2962,11 +2976,7 @@ msgstr "Confirmed. You can use it to sign in with a code."
 msgid "The setup link has already been used. Sign in with your passkey."
 msgstr "The setup link has already been used. Sign in with your passkey."
 
-#: src/pages/team.tsx
-msgid "Linked: association {orgId}, league {leagueId}, team {teamId}."
-msgstr "Linked: association {orgId}, league {leagueId}, team {teamId}."
-
-#: worker/routes/games.ts
+#: worker/domain/fixtures.ts
 msgid "Game moved ({teamName})"
 msgstr "Game moved ({teamName})"
 
@@ -3016,7 +3026,7 @@ msgstr "You cannot sign up for this team."
 msgid "allowed"
 msgstr "allowed"
 
-#: src/pages/team.tsx
+#: modules/handball4all/worker/connector.ts
 msgid "Open the team in the portal and paste the link from the address bar. It contains ogId, lId and tId."
 msgstr "Open the team in the portal and paste the link from the address bar. It contains ogId, lId and tId."
 
@@ -3208,6 +3218,10 @@ msgstr "All data as a JSON file, for backup"
 msgid "Revoke link"
 msgstr "Revoke link"
 
+#: worker/routes/games.ts
+msgid "Please paste the link to your team's page at {names}."
+msgstr "Please paste the link to your team's page at {names}."
+
 #: src/pages/chat.tsx
 #: src/pages/chat.tsx
 msgid "Announcement · {author}"
@@ -3244,10 +3258,6 @@ msgstr "{count, plural, one {New game for {teamName}} other {# new games for {te
 #: src/calendar.tsx
 msgid "Calendar link removed."
 msgstr "Calendar link removed."
-
-#: worker/routes/duties.ts
-msgid "Games from handball4all cannot be deleted, only hidden."
-msgstr "Games from handball4all cannot be deleted, only hidden."
 
 #: worker/routes/duties.ts
 msgid "This person is not enabled as KiHaSL/JuHaSL."
@@ -3353,6 +3363,10 @@ msgstr "Hide in helper plan"
 #: src/pages/team.tsx
 msgid "{firstName} does not have their own access yet."
 msgstr "{firstName} does not have their own access yet."
+
+#: src/pages/privacy.tsx
+msgid "Game schedules: {scheduleSources}. They are only fetched at the press of a button by a coach or admin."
+msgstr "Game schedules: {scheduleSources}. They are only fetched at the press of a button by a coach or admin."
 
 #: src/pages/join.tsx
 msgid "Please select your name."
@@ -3558,10 +3572,6 @@ msgstr "The passkey is the safest way to sign in: Face ID, fingerprint or screen
 #: src/pages/admin.tsx
 msgid "Linked holiday plans keep their dates but no longer follow changes."
 msgstr "Linked holiday plans keep their dates but no longer follow changes."
-
-#: worker/routes/games.ts
-msgid "Please paste the link to the team page from the handball4all portal (with ogId, lId and tId)."
-msgstr "Please paste the link to the team page from the handball4all portal (with ogId, lId and tId)."
 
 #: src/pages/team.tsx
 msgid "Without notifications people only see changes when they open the app. The guide under help shows how to switch them on. Parents count for their child."
@@ -4479,7 +4489,7 @@ msgstr "Meet at {meetingTime}"
 msgid "Main navigation"
 msgstr "Main navigation"
 
-#: src/live.tsx
+#: modules/handball4all/app/live.tsx
 msgid "The window was blocked. Please allow pop-ups for the app."
 msgstr "The window was blocked. Please allow pop-ups for the app."
 
@@ -4661,10 +4671,6 @@ msgstr "Going ahead: {label}"
 msgid "The event is in the past."
 msgstr "The event is in the past."
 
-#: src/pages/event.tsx
-msgid "Table on handball4all"
-msgstr "Table on handball4all"
-
 #: src/pages/club-settings.tsx
 #: src/pages/mail-settings.tsx
 #: src/pages/sms-settings.tsx
@@ -4735,6 +4741,10 @@ msgstr "{date}, {time}. The coach will announce the squad."
 #: src/pages/event.tsx
 msgid "“{text}”"
 msgstr "“{text}”"
+
+#: worker/routes/games.ts
+msgid "Unexpected format from {name}: {detail}"
+msgstr "Unexpected format from {name}: {detail}"
 
 #: src/pages/privacy.tsx
 msgid "Of players and parents only first name, last name and (for players) the year of birth. No phone number, no address. Admins can additionally be identified by their e-mail address."
@@ -4973,6 +4983,15 @@ msgstr "Sign-in codes and helper plan reminders by text message, for people who 
 #: src/pages/season.tsx
 msgid "New season started"
 msgstr "New season started"
+
+#: worker/routes/games.ts
+#: worker/routes/games.ts
+msgid "Fetch failed: {detail}"
+msgstr "Fetch failed: {detail}"
+
+#: modules/handball4all/worker/connector.ts
+msgid "Association {orgId}, league {leagueId}, team {teamId}"
+msgstr "Association {orgId}, league {leagueId}, team {teamId}"
 
 #: worker/routes/duties.ts
 #: worker/routes/game-import.ts
@@ -5398,7 +5417,7 @@ msgstr "Next steps"
 msgid "Create a group, for example for the coaching team."
 msgstr "Create a group, for example for the coaching team."
 
-#: src/live.tsx
+#: modules/handball4all/app/live.tsx
 msgid "There is no live ticker for this game (yet). You will be taken to the team's page on handball4all."
 msgstr "There is no live ticker for this game (yet). You will be taken to the team's page on handball4all."
 
@@ -5406,7 +5425,7 @@ msgstr "There is no live ticker for this game (yet). You will be taken to the te
 msgid "{fullName} will then no longer be {memberRole} in {name}. The person is kept."
 msgstr "{fullName} will then no longer be {memberRole} in {name}. The person is kept."
 
-#: src/live.tsx
+#: modules/handball4all/app/live.tsx
 msgid "Continue to handball4all"
 msgstr "Continue to handball4all"
 
@@ -5558,10 +5577,6 @@ msgstr "{occurrences} events will be created for the next {weeks} weeks."
 msgid "as admin · last message {when}"
 msgstr "as admin · last message {when}"
 
-#: src/pages/privacy.tsx
-msgid "Game schedules: handball4all. They are only fetched from the device of a coach or admin."
-msgstr "Game schedules: handball4all. They are only fetched from the device of a coach or admin."
-
 #: src/pages/admin.tsx
 msgid "Group"
 msgstr "Group"
@@ -5598,7 +5613,7 @@ msgstr "Duty {range}"
 msgid "Language: {language}"
 msgstr "Language: {language}"
 
-#: worker/routes/games.ts
+#: modules/handball4all/worker/connector.ts
 msgid "The data names no league"
 msgstr "The data names no league"
 
@@ -5919,10 +5934,6 @@ msgstr "Your passkey is set up. From now on you sign in with it."
 #: src/pages/admin.tsx
 msgid "No holidays"
 msgstr "No holidays"
-
-#: worker/routes/games.ts
-msgid "Unexpected format from handball4all: {detail}"
-msgstr "Unexpected format from handball4all: {detail}"
 
 #: src/pages/squad.tsx
 msgid "Automatic: the core squad is nominated for this game. If you change anything here, your selection only applies to this game."
@@ -6772,7 +6783,7 @@ msgstr "plays in {teams}: add under “From another team”, skipped here"
 msgid "Team {level}"
 msgstr "Team {level}"
 
-#: src/live.tsx
+#: modules/handball4all/app/live.tsx
 msgid "Live ticker"
 msgstr "Live ticker"
 
@@ -6916,6 +6927,10 @@ msgstr "Teams at this training"
 msgid "Plan saved. {created} events created."
 msgstr "Plan saved. {created} events created."
 
+#: src/pages/games.tsx
+msgid "{name} responded with status {status}"
+msgstr "{name} responded with status {status}"
+
 #: worker/routes/squad.ts
 msgid "You have been nominated"
 msgstr "You have been nominated"
@@ -6961,7 +6976,7 @@ msgstr "Season change"
 msgid "Device"
 msgstr "Device"
 
-#: src/live.tsx
+#: modules/handball4all/app/live.tsx
 msgid "Game report on handball4all"
 msgstr "Game report on handball4all"
 
@@ -6984,6 +6999,10 @@ msgstr "Send code"
 #: src/pages/admin.tsx
 msgid "Delete {periodName}?"
 msgstr "Delete {periodName}?"
+
+#: src/pages/games.tsx
+msgid "Syncing only happens at the press of a button, on a coach's or admin's device or by the app's server, never automatically."
+msgstr "Syncing only happens at the press of a button, on a coach's or admin's device or by the app's server, never automatically."
 
 #: src/pages/group.tsx
 msgid "Delete group {teamName}?"
@@ -7080,7 +7099,7 @@ msgstr "{yes} of {total} accepted"
 msgid "Only with free slots"
 msgstr "Only with free slots"
 
-#: worker/routes/games.ts
+#: worker/domain/fixtures.ts
 msgid "New throw-off: {date}, {time}."
 msgstr "New throw-off: {date}, {time}."
 
@@ -7159,7 +7178,7 @@ msgstr "Go through the setup step by step again"
 msgid "The game is over or cancelled."
 msgstr "The game is over or cancelled."
 
-#: worker/domain/h4a.ts
+#: modules/handball4all/worker/connector.ts
 msgid "No game lists found"
 msgstr "No game lists found"
 
@@ -7189,7 +7208,7 @@ msgstr "Task"
 msgid "Invalid colour."
 msgstr "Invalid colour."
 
-#: src/pages/team.tsx
+#: src/pages/games.tsx
 msgid "Game schedule"
 msgstr "Game schedule"
 
@@ -7288,7 +7307,7 @@ msgstr "Test notification is on its way."
 msgid "KiHaSL/JuHaSL is not part of any template: for youth home games F to C the duty is always added automatically (1 slot, 15 min before throw-off until the end of the game)."
 msgstr "KiHaSL/JuHaSL is not part of any template: for youth home games F to C the duty is always added automatically (1 slot, 15 min before throw-off until the end of the game)."
 
-#: worker/routes/games.ts
+#: worker/domain/fixtures.ts
 msgid "New throw-off: {date}, {time}, {location}."
 msgstr "New throw-off: {date}, {time}, {location}."
 
@@ -7708,7 +7727,7 @@ msgstr "Game duration in minutes"
 msgid "Helper duty {label} · {game} · for {child}"
 msgstr "Helper duty {label} · {game} · for {child}"
 
-#: src/pages/team.tsx
+#: src/pages/games.tsx
 msgid "Unlink schedule"
 msgstr "Unlink schedule"
 
@@ -7828,7 +7847,7 @@ msgstr "Cancelled."
 msgid "New team"
 msgstr "New team"
 
-#: src/pages/team.tsx
+#: src/pages/games.tsx
 msgid "Last synced on {importedDate}."
 msgstr "Last synced on {importedDate}."
 
@@ -8165,6 +8184,10 @@ msgstr "Absent"
 #: src/pages/chat.tsx
 msgid "Messages"
 msgstr "Messages"
+
+#: src/pages/games.tsx
+msgid "Linked: {description}."
+msgstr "Linked: {description}."
 
 #: src/pages/admin.tsx
 msgid "{sent, plural, one {Sent to one chat.} other {Sent to # chats.}}"
@@ -8633,6 +8656,10 @@ msgstr "Set up passkey (recommended)"
 msgid "Holiday"
 msgstr "Holiday"
 
+#: src/pages/games.tsx
+msgid "{name} cannot be reached right now ({detail})."
+msgstr "{name} cannot be reached right now ({detail})."
+
 #: worker/routes/game-import.ts
 msgid "The game schedule is in the app. Please check when you can play."
 msgstr "The game schedule is in the app. Please check when you can play."
@@ -8730,7 +8757,7 @@ msgstr "Link for a new passkey"
 msgid "Admin view on."
 msgstr "Admin view on."
 
-#: src/pages/team.tsx
+#: src/pages/games.tsx
 msgid "Not synced yet."
 msgstr "Not synced yet."
 
@@ -8826,10 +8853,6 @@ msgstr "Passkeys"
 #: worker/routes/squad.ts
 msgid "At most {max} players can be nominated."
 msgstr "At most {max} players can be nominated."
-
-#: src/pages/games.tsx
-msgid "handball4all responded with status {status}"
-msgstr "handball4all responded with status {status}"
 
 #: src/pages/admin.tsx
 #: src/pages/admin.tsx
@@ -9063,10 +9086,6 @@ msgstr "For parents"
 msgid "No. You are in automatically. You only decline if you cannot come."
 msgstr "No. You are in automatically. You only decline if you cannot come."
 
-#: src/pages/games.tsx
-msgid "handball4all cannot be reached right now ({detail})."
-msgstr "handball4all cannot be reached right now ({detail})."
-
 #: src/pages/group.tsx
 msgid "Player"
 msgstr "Player"
@@ -9200,7 +9219,7 @@ msgstr "Setup not finished"
 msgid "Nobody nominated yet."
 msgstr "Nobody nominated yet."
 
-#: src/live.tsx
+#: modules/handball4all/app/live.tsx
 msgid "Live ticker on handball4all"
 msgstr "Live ticker on handball4all"
 
@@ -10027,10 +10046,6 @@ msgstr "No upcoming events"
 msgid "Release to refresh"
 msgstr "Release to refresh"
 
-#: src/pages/team.tsx
-msgid "Game schedule (handball4all)"
-msgstr "Game schedule (handball4all)"
-
 #: src/pages/setup-wizard.tsx
 msgid "The season already has age groups. They stay as they are."
 msgstr "The season already has age groups. They stay as they are."
@@ -10052,10 +10067,6 @@ msgstr "Optional, not joining"
 msgctxt "training"
 msgid "optional"
 msgstr "optional"
-
-#: worker/routes/games.ts
-msgid "No handball4all link is set for this team."
-msgstr "No handball4all link is set for this team."
 
 #: src/pages/plans.tsx
 msgid "Valid from"
@@ -10257,7 +10268,7 @@ msgstr "Your parents take care of declining."
 msgid "Saved. The other parent will be notified."
 msgstr "Saved. The other parent will be notified."
 
-#: src/pages/team.tsx
+#: src/pages/games.tsx
 msgid "Link schedule"
 msgstr "Link schedule"
 
@@ -10295,10 +10306,6 @@ msgstr "Syncing …"
 #: src/pages/group.tsx
 msgid "At the season change the members of a group are kept."
 msgstr "At the season change the members of a group are kept."
-
-#: src/pages/team.tsx
-msgid "Syncing only happens at the press of a button, on a coach's or admin's device. handball4all only allows individual requests, so never automatically."
-msgstr "Syncing only happens at the press of a button, on a coach's or admin's device. handball4all only allows individual requests, so never automatically."
 
 #: src/pages/join.tsx
 msgid "Set up your passkey now. The setup link only works a single time."
@@ -10470,6 +10477,10 @@ msgstr "Group created."
 #: src/pages/profile.tsx
 msgid "{label} by mail"
 msgstr "{label} by mail"
+
+#: worker/routes/duties.ts
+msgid "Games from a game schedule cannot be deleted, only hidden."
+msgstr "Games from a game schedule cannot be deleted, only hidden."
 
 #: worker/routes/squad.ts
 msgid "Request withdrawn"

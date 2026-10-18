@@ -1,4 +1,4 @@
-// Events created by hand: special events and games without handball4all. For the list under
+// Events created by hand: special events and games not from a game schedule. For the list under
 // Administration (all teams) and under Team → Events (one team).
 import type { Actor } from "../auth/actor";
 import { all } from "../lib/db";
@@ -25,7 +25,7 @@ export async function listExtraEvents(db: D1Database, actor: Actor, opts: { team
   }
   const rows = await all<EventRow>(
     db,
-    `${EVENT_SELECT} WHERE e.starts_at >= ?1 AND (e.kind = 'special' OR (e.kind = 'game' AND e.h4a_game_id IS NULL))${teamFilter}
+    `${EVENT_SELECT} WHERE e.starts_at >= ?1 AND (e.kind = 'special' OR (e.kind = 'game' AND e.external_ref IS NULL))${teamFilter}
       ORDER BY e.starts_at, e.id`,
     ...params,
   );

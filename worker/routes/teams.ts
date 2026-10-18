@@ -144,11 +144,6 @@ interface TeamRow {
   auto_squad: number;
   helper_plan: number;
   show_responses: number;
-  h4a_org_id: number | null;
-  h4a_league_id: number | null;
-  h4a_team_id: number | null;
-  h4a_imported_at: string | null;
-  h4a_import_error: string | null;
 }
 
 teamRoutes.get("/teams/:id", async (c) => {
@@ -255,13 +250,6 @@ teamRoutes.get("/teams/:id", async (c) => {
     showResponses: team.show_responses === 1,
     homeTemplateId: team.home_template_id,
     awayTemplateId: team.away_template_id,
-    h4a: {
-      orgId: team.h4a_org_id,
-      leagueId: team.h4a_league_id,
-      teamId: team.h4a_team_id,
-      importedAt: team.h4a_imported_at,
-      error: team.h4a_import_error,
-    },
     coaches: members
       .filter((m) => m.role === "coach")
       .map((m) => ({ person: { id: m.person_id, firstName: m.first_name, lastName: m.last_name }, hasAccount: m.has_account === 1 })),

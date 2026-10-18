@@ -217,12 +217,13 @@ export interface GameInfo {
   coachNotes: string | null;
   squadPublished: boolean;
   nominatedCount: number;
-  /** League table at handball4all if a schedule is set up. */
-  tableUrl: string | null;
-  /** Game ID at handball4all (imported games only). */
-  h4aGameId: string | null;
-  /** The team's schedule fetch URL; only when tapping "Liveticker", to read the ticker token. */
-  liveUrl: string | null;
+  /** League table at the team's schedule source (fixture connector), if one is linked. */
+  table: { url: string; name: string; connector: string } | null;
+  /**
+   * Imported games: the connector module, the game's id there and what the team's connector fetches
+   * (modules use it for links such as a live ticker, fetched only when tapped).
+   */
+  source: { connector: string; externalId: string; scheduleUrl: string | null } | null;
   /** For this many minutes after throw-off the game counts as "in progress", after that there is the game report. */
   liveMinutes: number;
 }

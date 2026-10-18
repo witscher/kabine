@@ -29,12 +29,14 @@ export interface ModuleManifest {
   readonly status: "stable" | "beta";
   /** State for a club that has not chosen yet (beta modules: false). */
   readonly defaultOn: boolean;
+  /** Name of the outside system it talks to (kinds "fixtures" and "provider"), e.g. "handball4all". */
+  readonly vendor?: string;
   /** Needs this other module to be on. */
   readonly requires?: string;
   /** Only offered to clubs of these sports (shared/sports.ts); missing: every sport. */
   readonly sports?: readonly SportId[];
-  /** API paths that only exist while the module is on; they answer 404 otherwise. */
-  readonly paths: readonly RegExp[];
+  /** API paths of its routes; they answer 404 while the module is off. Needed when the module has routes. */
+  readonly paths?: readonly RegExp[];
   /** Name of the switch in administration. */
   label(): string;
   /** One or two sentences under the switch: what it does and for whom. */

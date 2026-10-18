@@ -1,9 +1,9 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { env } from "cloudflare:workers";
-import { ownTeamName, parsePortalUrl, parseSchedule } from "../worker/domain/h4a";
-import { addDays, todayLocal } from "../worker/lib/time";
-import { importGames } from "../worker/routes/games";
-import { api, exec, freshDb, loginAs, member, one, person, rows, season, team } from "./helpers";
+import { importGames, ownTeamName } from "../../../worker/domain/fixtures";
+import { addDays, todayLocal } from "../../../worker/lib/time";
+import { api, exec, freshDb, loginAs, member, one, person, rows, season, team } from "../../../test/helpers";
+import { parsePortalUrl, parseSchedule } from "../worker/connector";
 
 function ddmmyy(date: string) {
   const [y, m, d] = date.split("-");
@@ -42,6 +42,15 @@ function payload(games: object[], past: object[] = []) {
   ];
 }
 
+/** The team linked to league 555 at handball4all (association 1). */
+async function linkTeam(teamId: number, h4aTeamId: number) {
+  await exec(
+    "UPDATE teams SET fixture_connector = 'handball4all', fixture_source = ? WHERE id = ?",
+    JSON.stringify({ orgId: 1, leagueId: 555, teamId: h4aTeamId, portal: null }),
+    teamId,
+  );
+}
+
 describe("handball4all", () => {
   it("liest Portal- und API-Links", () => {
     expect(parsePortalUrl("https://www.handball4all.de/home/portal/baden-wuerttembergischer-hv#/league?ogId=216&lId=164621&tId=1489086")).toEqual({
@@ -63,7 +72,7 @@ describe("handball4all", () => {
       ),
     );
     expect(s.leagueId).toBe("555");
-    expect(s.games.map((g) => [g.gameId, g.date, g.time])).toEqual([
+    expect(s.games.map((g) => [g.externalId, g.date, g.time])).toEqual([
       ["1", "2026-09-26", "12:45"],
       ["2", "2026-11-07", "14:00"],
     ]);
@@ -81,8 +90,8 @@ describe("handball4all", () => {
       await freshDb();
       await season();
       wd = await team("wD", "wD");
-      await exec("UPDATE teams SET h4a_org_id = 1, h4a_league_id = 555, h4a_team_id = 999 WHERE id = ?", wd);
-      await exec("INSERT INTO locations (id, name, kind, h4a_gym_id) VALUES (1, 'Vereinshalle', 'hall', 10)");
+      await linkTeam(wd, 999);
+      await exec("INSERT INTO locations (id, name, kind, external_ref) VALUES (1, 'Vereinshalle', 'hall', 'handball4all:10')");
     });
 
     async function teamRow() {
@@ -101,10 +110,10 @@ describe("handball4all", () => {
         ]),
       );
       expect(res).toMatchObject({ created: 3, skipped: 0 });
-      expect(await rows("SELECT h4a_game_id, is_home FROM events ORDER BY h4a_game_id")).toEqual([
-        { h4a_game_id: "1", is_home: 0 },
-        { h4a_game_id: "2", is_home: 1 },
-        { h4a_game_id: "3", is_home: 1 },
+      expect(await rows("SELECT external_ref, is_home FROM events ORDER BY external_ref")).toEqual([
+        { external_ref: "handball4all:1", is_home: 0 },
+        { external_ref: "handball4all:2", is_home: 1 },
+        { external_ref: "handball4all:3", is_home: 1 },
       ]);
       const coach = await person("Tina");
       await member(coach, wd, "coach");
@@ -124,27 +133,27 @@ describe("handball4all", () => {
         ]),
       );
       expect(first).toMatchObject({ created: 2, updated: 0, cancelled: 0 });
-      const games = await rows<any>("SELECT h4a_game_id, is_home, location_id, starts_at FROM events ORDER BY h4a_game_id");
-      expect(games[0]).toMatchObject({ h4a_game_id: "1", is_home: 1, location_id: 1 });
-      expect(games[1]).toMatchObject({ h4a_game_id: "2", is_home: 0 });
-      const external = await one<any>("SELECT kind, name, address FROM locations WHERE h4a_gym_id = 20");
+      const games = await rows<any>("SELECT external_ref, is_home, location_id, starts_at FROM events ORDER BY external_ref");
+      expect(games[0]).toMatchObject({ external_ref: "handball4all:1", is_home: 1, location_id: 1 });
+      expect(games[1]).toMatchObject({ external_ref: "handball4all:2", is_home: 0 });
+      const external = await one<any>("SELECT kind, name, address FROM locations WHERE external_ref = 'handball4all:20'");
       expect(external).toEqual({ kind: "external", name: "Gasthalle", address: "Hallenweg 1, 76000 Musterstadt" });
 
       // Trainer-Ergänzungen bleiben beim erneuten Import erhalten
-      await exec("UPDATE events SET meeting_point = 'Parkplatz' WHERE h4a_game_id = '2'");
+      await exec("UPDATE events SET meeting_point = 'Parkplatz' WHERE external_ref = 'handball4all:2'");
       const second = await importGames(env, await teamRow(), payload([game("2", d2, "17:30", "SG Gast", "TV Heimverein", "20", "Gasthalle")]));
       expect(second).toMatchObject({ created: 0, updated: 1, moved: 1, cancelled: 1 });
-      const moved = await one<any>("SELECT starts_at, meeting_point FROM events WHERE h4a_game_id = '2'");
+      const moved = await one<any>("SELECT starts_at, meeting_point FROM events WHERE external_ref = 'handball4all:2'");
       expect(moved).toEqual({ starts_at: `${d2}T17:30`, meeting_point: "Parkplatz" });
-      const cancelled = await one<any>("SELECT cancelled_at, cancel_reason FROM events WHERE h4a_game_id = '1'");
+      const cancelled = await one<any>("SELECT cancelled_at, cancel_reason FROM events WHERE external_ref = 'handball4all:1'");
       expect(cancelled.cancel_reason).toContain("nicht mehr im Spielplan");
 
       // Die Spielansicht verlinkt die Ligatabelle bei handball4all
-      const id = (await one<{ id: number }>("SELECT id FROM events WHERE h4a_game_id = '2'")).id;
+      const id = (await one<{ id: number }>("SELECT id FROM events WHERE external_ref = 'handball4all:2'")).id;
       const coach = await person("Trainerin");
       await member(coach, wd, "coach");
       const detail = await api(`/events/${id}`, { cookie: await loginAs(coach) });
-      expect(detail.body.game.tableUrl).toBe("https://www.handball4all.de/home/portal/baden-wuerttembergischer-hv#/league?ogId=1&lId=555&tId=999");
+      expect(detail.body.game.table.url).toBe("https://www.handball4all.de/home/portal/baden-wuerttembergischer-hv#/league?ogId=1&lId=555&tId=999");
     });
 
     it("Abruf muss reserviert sein, und nur einmal gleichzeitig", async () => {
@@ -168,14 +177,14 @@ describe("handball4all", () => {
     it("verknüpft kein Spiel einer fremden Mannschaft und sagt es nicht ab", async () => {
       const d = addDays(todayLocal(), 10);
       const wc = await team("wC", "wC");
-      await exec("UPDATE teams SET h4a_org_id = 1, h4a_league_id = 555, h4a_team_id = 998 WHERE id = ?", wc);
+      await linkTeam(wc, 998);
       const rowOf = (id: number) => one<any>("SELECT * FROM teams WHERE id = ?", id);
       // Das Spiel gehört schon der wC
       await importGames(env, await rowOf(wc), payload([game("50", d, "14:00", "TV Heimverein", "HSG Andere", "10", "Vereinshalle")]));
       const teamsOf = async () =>
-        (await rows<{ team_id: number }>("SELECT team_id FROM event_teams et JOIN events e ON e.id = et.event_id WHERE e.h4a_game_id = '50'")).map((r) => r.team_id);
+        (await rows<{ team_id: number }>("SELECT team_id FROM event_teams et JOIN events e ON e.id = et.event_id WHERE e.external_ref = 'handball4all:50'")).map((r) => r.team_id);
       // Der Trainer der wD schickt dieselbe Spiel-ID: wird übersprungen
-      const res = await importGames(env, await teamRow(), payload([game("50", d, "14:00", "TV Heimverein", "HSG Andere", "10", "Vereinshalle")]), Date.now(), (id) => id === wd);
+      const res = await importGames(env, await teamRow(), payload([game("50", d, "14:00", "TV Heimverein", "HSG Andere", "10", "Vereinshalle")]), Date.now(), (id: number) => id === wd);
       expect(res).toMatchObject({ created: 0, updated: 0, foreign: 1 });
       expect(await teamsOf()).toEqual([wc]);
       // Trainer beider Mannschaften (oder Admin) darf verknüpfen
@@ -185,7 +194,7 @@ describe("handball4all", () => {
       // Ein späterer Import der wD ohne das Spiel sagt das gemeinsame Spiel nicht ab
       const later = await importGames(env, await teamRow(), payload([]));
       expect(later.cancelled).toBe(0);
-      expect((await one<any>("SELECT cancelled_at FROM events WHERE h4a_game_id = '50'")).cancelled_at).toBeNull();
+      expect((await one<any>("SELECT cancelled_at FROM events WHERE external_ref = 'handball4all:50'")).cancelled_at).toBeNull();
     });
 
     it("verlangt die Liga in den Daten", async () => {
@@ -206,7 +215,7 @@ describe("handball4all", () => {
 
 describe("Dauer „Läuft gerade“", () => {
   it("richtet sich nach der Spieldauer der Altersklasse, bei mehreren Mannschaften die längste", async () => {
-    const { gameLiveMinutes } = await import("../worker/domain/events");
+    const { gameLiveMinutes } = await import("../../../worker/domain/events");
     expect(gameLiveMinutes([90])).toBe(90);
     expect(gameLiveMinutes([90, 120])).toBe(120);
     expect(gameLiveMinutes([])).toBe(120);

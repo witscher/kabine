@@ -9,7 +9,7 @@ import { api, errorMessage } from "../api";
 import type { DutyTypeInfo, TemplateInfo } from "../duty-blocks";
 import { fullDate, isoToLocalDate, personName } from "../format";
 import { PersonAvatar } from "../avatar";
-import { SourceBar } from "./games";
+import { ScheduleSection } from "./games";
 import { Icon } from "../icons";
 import { ExtraEventList } from "../extra-events";
 import { GroupPage } from "./group";
@@ -55,7 +55,6 @@ export interface TeamDetail {
   homeTemplateId: number | null;
   awayTemplateId: number | null;
   showResponses: boolean;
-  h4a: { orgId: number | null; leagueId: number | null; teamId: number | null; importedAt: string | null; error: string | null };
   coaches: { person: PersonRef; hasAccount: boolean }[];
   /** Team staff (physio, manager): see everything of the team, take no part */
   staff: { person: PersonRef; hasAccount: boolean; hasPush: boolean }[];
@@ -968,14 +967,7 @@ function SettingsTab({ team, onChanged }: { team: TeamDetail; onChanged: () => v
   const [training, setTraining] = useState(String(team.declineHoursTraining));
   const [game, setGame] = useState(String(team.declineHoursGame));
   const [maxSquad, setMaxSquad] = useState(String(team.maxSquad));
-  const [portal, setPortal] = useState("");
   const dutiesOn = useModule("duties");
-  const fixturesOn = useModule("handball4all");
-  const h4aSet = team.h4a.orgId != null;
-  const orgId = team.h4a.orgId ?? "";
-  const leagueId = team.h4a.leagueId ?? "";
-  const teamId = team.h4a.teamId ?? "";
-  const importedDate = team.h4a.importedAt ? fullDate(isoToLocalDate(team.h4a.importedAt)) : "";
   return (
     <>
       <section class="card card-body" aria-label={t`Decline deadlines`}>
@@ -1067,71 +1059,7 @@ function SettingsTab({ team, onChanged }: { team: TeamDetail; onChanged: () => v
       </section>
       ) : null}
 
-      {fixturesOn ? (
-      <section class="card card-body" aria-label={t`Game schedule`}>
-        <h2 class="section-title" style={{ margin: 0 }}>
-          <Trans>Game schedule (handball4all)</Trans>
-        </h2>
-        {h4aSet ? (
-          <p>
-            <Trans>
-              Linked: association {orgId}, league {leagueId}, team {teamId}.
-            </Trans>
-            {team.h4a.importedAt ? " " + t`Last synced on ${importedDate}.` : " " + t`Not synced yet.`}
-          </p>
-        ) : (
-          <p class="muted">
-            <Trans>Not linked yet.</Trans>
-          </p>
-        )}
-        {team.h4a.error ? <p class="small warn-text">{team.h4a.error}</p> : null}
-        <Field
-          label={t`Link from the handball4all portal`}
-          hint={t`Open the team in the portal and paste the link from the address bar. It contains ogId, lId and tId.`}
-        >
-          {(id) => (
-            <input
-              id={id}
-              class="input"
-              type="url"
-              value={portal}
-              placeholder="https://www.handball4all.de/home/portal/…#/league?ogId=…"
-              onInput={(e) => setPortal((e.target as HTMLInputElement).value)}
-            />
-          )}
-        </Field>
-        <div class="btn-row">
-          <Button
-            variant="primary"
-            disabled={!portal.trim()}
-            onClick={async () => {
-              await api.put(`/teams/${team.id}/games/source`, { portalUrl: portal.trim() });
-              setPortal("");
-              toast(t`Linked. Use "Sync now" to fetch the game schedule.`);
-              invalidate(`/teams/${team.id}`);
-              onChanged();
-            }}
-          >
-            <Trans>Link schedule</Trans>
-          </Button>
-          {h4aSet ? (
-            <Button
-              variant="ghost"
-              onClick={async () => {
-                await api.put(`/teams/${team.id}/games/source`, { portalUrl: null });
-                onChanged();
-              }}
-            >
-              <Trans>Unlink schedule</Trans>
-            </Button>
-          ) : null}
-        </div>
-        {h4aSet ? <SourceBar team={{ id: team.id, name: team.name }} /> : null}
-        <p class="small muted">
-          <Trans>Syncing only happens at the press of a button, on a coach's or admin's device. handball4all only allows individual requests, so never automatically.</Trans>
-        </p>
-      </section>
-      ) : null}
+      <ScheduleSection team={{ id: team.id, name: team.name }} onChanged={onChanged} />
 
       <section class="card card-body" aria-label={t`Import games`}>
         <h2 class="section-title" style={{ margin: 0 }}>

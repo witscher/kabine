@@ -392,7 +392,7 @@ seasonRoutes.post("/season-change/execute", async (c) => {
     stmt(db, "DELETE FROM persons WHERE is_former = 1 OR id IN (SELECT value FROM json_each(?))", list(formerIds)),
     stmt(db, "UPDATE seasons SET is_current = 0 WHERE is_current = 1"),
     stmt(db, "UPDATE seasons SET is_current = 1 WHERE id = ?", next.id),
-    stmt(db, "UPDATE teams SET h4a_league_id = NULL, h4a_team_id = NULL, h4a_imported_at = NULL, h4a_import_error = NULL, h4a_claimed_at = NULL"),
+    stmt(db, "UPDATE teams SET fixture_source = NULL, fixture_synced_at = NULL, fixture_error = NULL, fixture_claimed_at = NULL"),
     stmt(db, "DELETE FROM chat_state"),
     stmt(db, "DELETE FROM chat_reads"),
     stmt(db, "DELETE FROM chat_mutes"),

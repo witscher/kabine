@@ -43,6 +43,7 @@ modules/carpools/
 | `participantsDropped` | SQL cleanup in the core's batch (automatic squads, withdrawn stand-ins) | yes |
 | `personLeaves` | SQL cleanup when someone leaves the club | yes |
 | `exportTables` | the module's tables in the admin's data export | yes |
+| `fixtures` | a fixture connector (kind `fixtures`, [connectors.md](connectors.md)) | no |
 
 ### App part (`app/index.tsx`, [`src/module-api.ts`](../src/module-api.ts))
 
@@ -51,6 +52,7 @@ modules/carpools/
 | `routes` | own pages (lazy with `lazyPage` from `src/update.tsx`) |
 | `eventCardLine` | a line on event cards on the start page |
 | `eventSection` | a section on the event page |
+| `gameLinks` | links of a fixture module for a game (live ticker, game report) on the "In progress" card and the event page |
 
 [`modules/carpools/`](../modules/carpools/) uses all of the event hooks and is the reference module.
 
@@ -63,7 +65,7 @@ modules/carpools/
 | `duties` | Helper duties | on | `worker/routes/duties.ts`, `worker/domain/duties.ts`, `worker/domain/duty-notify.ts`, `worker/duties/hub.ts`, `src/pages/helpers.tsx`, `src/pages/duty-admin.tsx` (moving to `modules/duties/`) |
 | `youthReferees` | Youth referees (needs `duties`) | on | `worker/routes/referees.ts`, `src/pages/referees.tsx` (moving to `modules/youth-referees/`) |
 | `carpools` | Carpools | on | `modules/carpools/` |
-| `handball4all` | Game schedule from handball4all | on | `worker/domain/h4a.ts`, `worker/routes/games.ts`, `src/pages/games.tsx` (moving to `modules/handball4all/`) |
+| `handball4all` | Game schedule from handball4all | on | `modules/handball4all/` (fixture connector, see [connectors.md](connectors.md)) |
 | `sms` | SMS | off | `worker/routes/sms.ts`, `worker/domain/sms.ts`, `worker/lib/sms.ts`, `src/pages/sms-settings.tsx` (moving to `modules/sms/`) |
 
 ## Adding a module
@@ -82,5 +84,5 @@ modules/carpools/
 
 - **Sport:** see `shared/sports.ts` (age classes, playing times, duty types and templates).
 - **SMS provider:** `worker/lib/sms.ts`.
-- **Fixture connector** for another league system (handball360, nuLiga, SAMS, …): only through permitted access (official API, public export or the association's permission). The connector interface is being built on handball4all.
+- **Fixture connector** for another league system (handball360, nuLiga, SAMS, …): a module of kind `fixtures`, see [connectors.md](connectors.md). Only through permitted access (official API, public export or the association's permission).
 - **Language:** see [translation.md](translation.md).

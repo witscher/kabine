@@ -23,7 +23,7 @@ let homeD: number;
 
 async function game(teamId: number, days: number, isHome: 0 | 1) {
   const id = await eventIn(teamId, days, { kind: "game", time: "11:00" });
-  await exec("UPDATE events SET h4a_game_id = 'g' || id, is_home = ?, home_team = 'SV Musterstadt', guest_team = 'SG Gegner' WHERE id = ?", isHome, id);
+  await exec("UPDATE events SET external_ref = 'handball4all:g' || id, is_home = ?, home_team = 'SV Musterstadt', guest_team = 'SG Gegner' WHERE id = ?", isHome, id);
   return id;
 }
 

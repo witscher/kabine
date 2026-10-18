@@ -28,7 +28,8 @@ describe("Module", () => {
     expect(moduleOfPath("/api/duties/referee")).toBe("youthReferees");
     expect(moduleOfPath("/api/admin/referee-links")).toBe("youthReferees");
     expect(moduleOfPath("/api/events/12/carpool/offers/3")).toBe("carpools");
-    expect(moduleOfPath("/api/teams/4/games/claim")).toBe("handball4all");
+    // Schedule routes are the core's; they answer 404 while no fixtures module is on (worker/routes/games.ts)
+    expect(moduleOfPath("/api/teams/4/games/claim")).toBeNull();
     expect(moduleOfPath("/api/events")).toBeNull();
     expect(moduleOfPath("/api/duties/teams/4/games")).toBeNull();
     expect(moduleOfPath("/api/duties/games/9")).toBeNull();

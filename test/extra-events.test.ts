@@ -25,8 +25,8 @@ describe("Spiel ohne handball4all", () => {
     const date = addDays(todayLocal(), 5);
     const res = await api(`/duties/teams/${wd}/games`, { cookie, body: { opponent: "HSG Musterstadt", isHome: false, date, time: "11:00" } });
     expect(res.status).toBe(201);
-    expect(await rows("SELECT kind, starts_at, ends_at, home_team, is_home, h4a_game_id FROM events WHERE id = ?", res.body.id)).toEqual([
-      { kind: "game", starts_at: `${date}T11:00`, ends_at: `${date}T12:30`, home_team: "HSG Musterstadt", is_home: 0, h4a_game_id: null },
+    expect(await rows("SELECT kind, starts_at, ends_at, home_team, is_home, external_ref FROM events WHERE id = ?", res.body.id)).toEqual([
+      { kind: "game", starts_at: `${date}T11:00`, ends_at: `${date}T12:30`, home_team: "HSG Musterstadt", is_home: 0, external_ref: null },
     ]);
     const past = await api(`/duties/teams/${wd}/games`, { cookie, body: { opponent: "HSG Musterstadt", isHome: true, date: addDays(todayLocal(), -1), time: "11:00" } });
     expect(past.status).toBe(400);
@@ -66,7 +66,7 @@ describe("Verwaltung → Sondertermine und Spiele", () => {
     const manual = await eventIn(wd, 6, { kind: "game" });
     await exec("UPDATE events SET is_home = 1, home_team = 'SV Musterstadt', guest_team = 'HSG Musterstadt' WHERE id = ?", manual);
     const h4a = await eventIn(wd, 7, { kind: "game" });
-    await exec("UPDATE events SET h4a_game_id = '123' WHERE id = ?", h4a);
+    await exec("UPDATE events SET external_ref = 'handball4all:123' WHERE id = ?", h4a);
     await eventIn(wd, -2, { kind: "special", title: "Vorbei" });
     await eventIn(wd, 2); // Training
     const own = await eventIn(mb, 5, { kind: "special", title: "Eigene Feier" });

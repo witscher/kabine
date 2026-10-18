@@ -7,7 +7,7 @@ import { dutyLines, neededText } from "../duties";
 import { BlockSheet } from "../duty-blocks";
 import { longDate, personName, shortName, stamp, time, timeRange, weekdayPlural } from "../format";
 import { Icon } from "../icons";
-import { GameReportLink, isLiveWindow, isReportWindow, LiveTickerLink } from "../live";
+import { GameLinks, isLiveWindow, isReportWindow } from "../live";
 import { byGuardianText, DeclineSheet, deadlineText, PersonResponseRow, quickReasons, ResponseButtons, respondedByText, sendResponse } from "../respond";
 import { useActiveModules } from "../modules";
 import { useMe, useSession } from "../session";
@@ -234,6 +234,7 @@ function GameInfo({ event }: { event: EventDetail }) {
   const me = useMe();
   const g = event.game!;
   const helperPlan = event.teams.some((t) => me.helperTeams.some((h) => h.id === t.id));
+  const tableSource = g.table?.name ?? "";
   const result = g.homeGoals != null && g.guestGoals != null ? `${g.homeGoals}:${g.guestGoals}` : null;
   const gameNo = g.gameNo;
   const text = event.myDuties.length ? dutyLines(event.myDuties).join(" · ") : event.helpersNeeded ? neededText(event.helpersNeeded) : null;
@@ -254,7 +255,7 @@ function GameInfo({ event }: { event: EventDetail }) {
         {g.homeTeam} – {g.guestTeam}
         {result ? <span style={{ marginLeft: "8px", fontFamily: "var(--font-cond)", fontSize: "22px" }}>{result}</span> : null}
       </div>
-      {isLiveWindow(event) ? <LiveTickerLink event={event} /> : isReportWindow(event) ? <GameReportLink event={event} /> : null}
+      {isLiveWindow(event) ? <GameLinks event={event} phase="live" /> : isReportWindow(event) ? <GameLinks event={event} phase="after" /> : null}
       {event.location?.address ? (
         <p class="small muted row-gap" style={{ gap: "6px", alignItems: "center" }}>
           <span>{event.location.address}</span>
@@ -269,10 +270,10 @@ function GameInfo({ event }: { event: EventDetail }) {
           {text ? t`Helper plan · ${text}` : t`Helper plan: duties for this game`}
         </a>
       ) : null}
-      {g.tableUrl ? (
-        <a class="ext-link" href={g.tableUrl} target="_blank" rel="noopener noreferrer">
+      {g.table ? (
+        <a class="ext-link" href={g.table.url} target="_blank" rel="noopener noreferrer">
           <Icon name="link" size={16} />
-          <Trans>Table on handball4all</Trans>
+          <Trans>Table on {tableSource}</Trans>
         </a>
       ) : null}
       {g.meetingPoint || g.meetingTime ? (

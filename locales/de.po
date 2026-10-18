@@ -63,7 +63,7 @@ msgstr "ohne Jahrgang"
 msgid "Game {teams} {vs}"
 msgstr "Spiel {teams} {vs}"
 
-#: worker/domain/h4a.ts
+#: modules/handball4all/worker/connector.ts
 msgid "Response is not an object"
 msgstr "Antwort ist kein Objekt"
 
@@ -207,7 +207,7 @@ msgstr "Niemand gefunden."
 msgid "Open helper places · {team}"
 msgstr "Noch offene Helferplätze · {team}"
 
-#: src/pages/team.tsx
+#: modules/handball4all/worker/connector.ts
 msgid "Link from the handball4all portal"
 msgstr "Link aus dem handball4all-Portal"
 
@@ -346,6 +346,7 @@ msgstr "Neuigkeit ausblenden"
 
 # ai
 #: worker/app.ts
+#: worker/routes/games.ts
 msgid "This function is switched off for this club."
 msgstr "Diese Funktion ist für diesen Verein ausgeschaltet."
 
@@ -671,10 +672,6 @@ msgstr "Öffnen"
 msgid "Please do not give details about illnesses, “ill” is enough. Only the coaches see the reason."
 msgstr "Bitte keine Details zu Erkrankungen angeben, „krank“ genügt. Den Grund sehen nur die Trainer."
 
-#: worker/routes/games.ts
-msgid "Game no longer in the schedule (handball4all)"
-msgstr "Spiel nicht mehr im Spielplan (handball4all)"
-
 #: src/howto.tsx
 msgid "Install as an app"
 msgstr "Als App installieren"
@@ -682,6 +679,11 @@ msgstr "Als App installieren"
 #: modules/carpools/app/card.tsx
 msgid "Getting a ride"
 msgstr "Mitfahrgelegenheit"
+
+# ai
+#: src/pages/games.tsx
+msgid "Game schedule ({name})"
+msgstr "Spielplan ({name})"
 
 #: src/pages/event.tsx
 #: src/pages/squad.tsx
@@ -863,7 +865,7 @@ msgstr "Ich bin {playerName} – Passkey einrichten"
 msgid "Club halls"
 msgstr "Vereinshallen"
 
-#: worker/routes/games.ts
+#: worker/domain/fixtures.ts
 msgid "Hall"
 msgstr "Halle"
 
@@ -903,6 +905,11 @@ msgstr "Die Person bleibt in ihrer bisherigen Mannschaft und spielt zusätzlich 
 #: src/pages/admin.tsx
 msgid "Youth"
 msgstr "Jugend"
+
+# ai
+#: src/pages/event.tsx
+msgid "Table on {tableSource}"
+msgstr "Tabelle bei {tableSource}"
 
 #: src/pages/home.tsx
 msgid "Other events"
@@ -1230,7 +1237,7 @@ msgstr "Zuletzt aktiv: {date} ({ago})"
 msgid "{missing}. Tap a person to add it."
 msgstr "{missing}. Tippe auf eine Person, um es zu ergänzen."
 
-#: src/pages/team.tsx
+#: src/pages/games.tsx
 msgid "Linked. Use \"Sync now\" to fetch the game schedule."
 msgstr "Verknüpft. Mit „Jetzt abgleichen“ holst du den Spielplan."
 
@@ -1410,7 +1417,7 @@ msgstr "Ein Elternteil"
 msgid "in {weeks} weeks"
 msgstr "in {weeks} Wochen"
 
-#: worker/routes/games.ts
+#: modules/handball4all/worker/connector.ts
 msgid "The data belongs to another league"
 msgstr "Die Daten gehören zu einer anderen Liga"
 
@@ -1716,7 +1723,7 @@ msgstr "Reaktion wählen"
 msgid "The duty also appears for {linkedChild}'s other parent."
 msgstr "Der Dienst erscheint auch bei {linkedChild}s anderem Elternteil."
 
-#: worker/domain/h4a.ts
+#: modules/handball4all/worker/connector.ts
 msgid "Field content is missing"
 msgstr "Feld content fehlt"
 
@@ -2071,7 +2078,7 @@ msgstr "Hat noch keinen Zugang."
 msgid "Check holidays"
 msgstr "Ferien prüfen"
 
-#: src/live.tsx
+#: modules/handball4all/app/index.tsx
 msgid "The live ticker opens in a new window on handball4all."
 msgstr "Der Liveticker öffnet sich in einem neuen Fenster bei handball4all."
 
@@ -2371,6 +2378,12 @@ msgid "a new device has just been set up for your access via a personal link. Yo
 msgstr "über einen persönlichen Link wurde gerade ein neues Gerät für deinen Zugang eingerichtet. Deine bisherigen Geräte sind dabei abgemeldet worden."
 
 # ai
+#: worker/routes/games.ts
+#: worker/routes/games.ts
+msgid "No game schedule is linked for this team."
+msgstr "Für diese Mannschaft ist kein Spielplan verknüpft."
+
+# ai
 #: src/pages/privacy.tsx
 msgid "Visible to:"
 msgstr "Sichtbar für:"
@@ -2425,7 +2438,7 @@ msgstr "Aus dieser Familie sucht schon jemand eine Mitfahrgelegenheit. Weitere F
 msgid "{waiting, plural, one {# is looking ({seatsNeeded})} other {# are looking ({seatsNeeded})}}"
 msgstr "{waiting, plural, one {# sucht ({seatsNeeded})} other {# suchen ({seatsNeeded})}}"
 
-#: src/pages/team.tsx
+#: src/pages/games.tsx
 msgid "Not linked yet."
 msgstr "Noch nicht verknüpft."
 
@@ -2628,6 +2641,11 @@ msgstr "von {firstName} selbst"
 msgid "The event has already started, date, time and venue can no longer be changed."
 msgstr "Der Termin hat schon begonnen, Datum, Uhrzeit und Ort lassen sich nicht mehr ändern."
 
+# ai
+#: worker/domain/fixtures.ts
+msgid "Game no longer in the schedule ({name})"
+msgstr "Spiel nicht mehr im Spielplan ({name})"
+
 #: src/pages/season.tsx
 msgid "From a mixed team. Please choose the right team."
 msgstr "Aus einer gemischten Mannschaft. Bitte die passende Mannschaft wählen."
@@ -2785,11 +2803,11 @@ msgstr "Wird aktualisiert"
 msgid "has access set up"
 msgstr "hat einen Zugang"
 
-#: src/live.tsx
+#: modules/handball4all/app/live.tsx
 msgid "Opening {title} …"
 msgstr "{title} wird geöffnet …"
 
-#: src/live.tsx
+#: modules/handball4all/app/live.tsx
 msgid "The game report has not been published yet. handball4all usually puts it online 20 to 30 minutes after the final whistle. Please try again later."
 msgstr "Der Spielbericht ist noch nicht veröffentlicht. handball4all stellt ihn meist 20 bis 30 Minuten nach Spielende online. Bitte später noch einmal versuchen."
 
@@ -2866,7 +2884,7 @@ msgstr "Test-SMS schicken"
 msgid "Not active for over {staleDays} days"
 msgstr "Über {staleDays} Tage nicht aktiv"
 
-#: src/live.tsx
+#: modules/handball4all/app/live.tsx
 msgid "Game report"
 msgstr "Spielbericht"
 
@@ -3031,11 +3049,7 @@ msgstr "Bestätigt. Du kannst dich damit per Code anmelden."
 msgid "The setup link has already been used. Sign in with your passkey."
 msgstr "Der Einrichtungslink wurde bereits verwendet. Melde dich mit deinem Passkey an."
 
-#: src/pages/team.tsx
-msgid "Linked: association {orgId}, league {leagueId}, team {teamId}."
-msgstr "Verknüpft: Verband {orgId}, Liga {leagueId}, Team {teamId}."
-
-#: worker/routes/games.ts
+#: worker/domain/fixtures.ts
 msgid "Game moved ({teamName})"
 msgstr "Spiel verlegt ({teamName})"
 
@@ -3088,7 +3102,7 @@ msgstr "Für diese Mannschaft kannst du dich nicht eintragen."
 msgid "allowed"
 msgstr "erlaubt"
 
-#: src/pages/team.tsx
+#: modules/handball4all/worker/connector.ts
 msgid "Open the team in the portal and paste the link from the address bar. It contains ogId, lId and tId."
 msgstr "Im Portal die Mannschaft öffnen und den Link aus der Adresszeile einfügen. Er enthält ogId, lId und tId."
 
@@ -3282,6 +3296,11 @@ msgstr "Alle Daten als JSON-Datei, zur Datensicherung"
 msgid "Revoke link"
 msgstr "Zurückziehen"
 
+# ai
+#: worker/routes/games.ts
+msgid "Please paste the link to your team's page at {names}."
+msgstr "Bitte füge den Link zur Seite deiner Mannschaft bei {names} ein."
+
 #: src/pages/chat.tsx
 #: src/pages/chat.tsx
 msgid "Announcement · {author}"
@@ -3320,10 +3339,6 @@ msgstr "{count, plural, one {Neues Spiel für {teamName}} other {# neue Spiele f
 #: src/calendar.tsx
 msgid "Calendar link removed."
 msgstr "Kalender-Link entfernt."
-
-#: worker/routes/duties.ts
-msgid "Games from handball4all cannot be deleted, only hidden."
-msgstr "Spiele aus handball4all lassen sich nicht löschen, nur ausblenden."
 
 #: worker/routes/duties.ts
 msgid "This person is not enabled as KiHaSL/JuHaSL."
@@ -3432,6 +3447,11 @@ msgstr "Im Helferplan ausblenden"
 #: src/pages/team.tsx
 msgid "{firstName} does not have their own access yet."
 msgstr "{firstName} hat noch keinen eigenen Zugang."
+
+# ai
+#: src/pages/privacy.tsx
+msgid "Game schedules: {scheduleSources}. They are only fetched at the press of a button by a coach or admin."
+msgstr "Spielpläne: {scheduleSources}. Sie werden nur auf Knopfdruck von einem Trainer oder Admin abgerufen."
 
 #: src/pages/join.tsx
 msgid "Please select your name."
@@ -3643,10 +3663,6 @@ msgstr "Der Passkey ist die sicherste Anmeldung: Face ID, Fingerabdruck oder Ger
 #: src/pages/admin.tsx
 msgid "Linked holiday plans keep their dates but no longer follow changes."
 msgstr "Verknüpfte Ferienpläne bleiben mit ihren Daten bestehen, ziehen aber nicht mehr mit."
-
-#: worker/routes/games.ts
-msgid "Please paste the link to the team page from the handball4all portal (with ogId, lId and tId)."
-msgstr "Bitte füge den Link zur Mannschaftsseite aus dem handball4all-Portal ein (mit ogId, lId und tId)."
 
 # ai
 #: src/pages/team.tsx
@@ -4583,7 +4599,7 @@ msgstr "Treffen {meetingTime} Uhr"
 msgid "Main navigation"
 msgstr "Hauptnavigation"
 
-#: src/live.tsx
+#: modules/handball4all/app/live.tsx
 msgid "The window was blocked. Please allow pop-ups for the app."
 msgstr "Das Fenster wurde blockiert. Bitte Pop-ups für die App erlauben."
 
@@ -4771,10 +4787,6 @@ msgstr "Findet statt: {label}"
 msgid "The event is in the past."
 msgstr "Der Termin liegt in der Vergangenheit."
 
-#: src/pages/event.tsx
-msgid "Table on handball4all"
-msgstr "Tabelle bei handball4all"
-
 #: src/pages/club-settings.tsx
 #: src/pages/mail-settings.tsx
 #: src/pages/sms-settings.tsx
@@ -4845,6 +4857,11 @@ msgstr "{date}, {time}. Den Kader gibt der Trainer bekannt."
 #: src/pages/event.tsx
 msgid "“{text}”"
 msgstr "„{text}“"
+
+# ai
+#: worker/routes/games.ts
+msgid "Unexpected format from {name}: {detail}"
+msgstr "Unerwartetes Format von {name}: {detail}"
 
 #: src/pages/privacy.tsx
 msgid "Of players and parents only first name, last name and (for players) the year of birth. No phone number, no address. Admins can additionally be identified by their e-mail address."
@@ -5089,6 +5106,17 @@ msgstr "Anmeldecodes und Erinnerungen zum Helferplan per SMS, für alle, die ein
 #: src/pages/season.tsx
 msgid "New season started"
 msgstr "Neue Saison gestartet"
+
+# ai
+#: worker/routes/games.ts
+#: worker/routes/games.ts
+msgid "Fetch failed: {detail}"
+msgstr "Abruf fehlgeschlagen: {detail}"
+
+# ai
+#: modules/handball4all/worker/connector.ts
+msgid "Association {orgId}, league {leagueId}, team {teamId}"
+msgstr "Verband {orgId}, Liga {leagueId}, Team {teamId}"
 
 #: worker/routes/duties.ts
 #: worker/routes/game-import.ts
@@ -5526,7 +5554,7 @@ msgstr "Nächste Schritte"
 msgid "Create a group, for example for the coaching team."
 msgstr "Lege eine Gruppe an, etwa für das Trainerteam."
 
-#: src/live.tsx
+#: modules/handball4all/app/live.tsx
 msgid "There is no live ticker for this game (yet). You will be taken to the team's page on handball4all."
 msgstr "Den Liveticker zu diesem Spiel gibt es (noch) nicht. Du kommst zur Seite der Mannschaft bei handball4all."
 
@@ -5534,7 +5562,7 @@ msgstr "Den Liveticker zu diesem Spiel gibt es (noch) nicht. Du kommst zur Seite
 msgid "{fullName} will then no longer be {memberRole} in {name}. The person is kept."
 msgstr "{fullName} ist danach nicht mehr {memberRole} in {name}. Die Person bleibt erhalten."
 
-#: src/live.tsx
+#: modules/handball4all/app/live.tsx
 msgid "Continue to handball4all"
 msgstr "Weiter zu handball4all"
 
@@ -5689,10 +5717,6 @@ msgstr "Für die nächsten {weeks} Wochen werden {occurrences} Termine erzeugt."
 msgid "as admin · last message {when}"
 msgstr "als Admin · letzte Nachricht {when}"
 
-#: src/pages/privacy.tsx
-msgid "Game schedules: handball4all. They are only fetched from the device of a coach or admin."
-msgstr "Spielpläne: handball4all. Der Abruf erfolgt nur vom Gerät eines Trainers oder Admins."
-
 #: src/pages/admin.tsx
 msgid "Group"
 msgstr "Gruppe"
@@ -5731,7 +5755,7 @@ msgstr "Dienst {range} Uhr"
 msgid "Language: {language}"
 msgstr "Sprache: {language}"
 
-#: worker/routes/games.ts
+#: modules/handball4all/worker/connector.ts
 msgid "The data names no league"
 msgstr "Die Daten nennen keine Liga"
 
@@ -6060,10 +6084,6 @@ msgstr "Dein Passkey ist eingerichtet. Ab jetzt meldest du dich damit an."
 #: src/pages/admin.tsx
 msgid "No holidays"
 msgstr "Keine Ferien"
-
-#: worker/routes/games.ts
-msgid "Unexpected format from handball4all: {detail}"
-msgstr "Unerwartetes Format von handball4all: {detail}"
 
 #: src/pages/squad.tsx
 msgid "Automatic: the core squad is nominated for this game. If you change anything here, your selection only applies to this game."
@@ -6935,7 +6955,7 @@ msgstr "spielt in {teams}: unter „Aus anderer Mannschaft“ aufnehmen, wird hi
 msgid "Team {level}"
 msgstr "{level}. Mannschaft"
 
-#: src/live.tsx
+#: modules/handball4all/app/live.tsx
 msgid "Live ticker"
 msgstr "Liveticker"
 
@@ -7081,6 +7101,11 @@ msgstr "Mannschaften bei diesem Training"
 msgid "Plan saved. {created} events created."
 msgstr "Plan gespeichert. {created} Termine erzeugt."
 
+# ai
+#: src/pages/games.tsx
+msgid "{name} responded with status {status}"
+msgstr "{name} antwortet mit Status {status}"
+
 #: worker/routes/squad.ts
 msgid "You have been nominated"
 msgstr "Du bist nominiert"
@@ -7127,7 +7152,7 @@ msgstr "Saisonwechsel"
 msgid "Device"
 msgstr "Gerät"
 
-#: src/live.tsx
+#: modules/handball4all/app/live.tsx
 msgid "Game report on handball4all"
 msgstr "Spielbericht bei handball4all"
 
@@ -7150,6 +7175,11 @@ msgstr "Code senden"
 #: src/pages/admin.tsx
 msgid "Delete {periodName}?"
 msgstr "{periodName} löschen?"
+
+# ai
+#: src/pages/games.tsx
+msgid "Syncing only happens at the press of a button, on a coach's or admin's device or by the app's server, never automatically."
+msgstr "Abgeglichen wird nur auf Knopfdruck, auf dem Gerät eines Trainers oder Admins oder durch den Server der App, nie automatisch."
 
 #: src/pages/group.tsx
 msgid "Delete group {teamName}?"
@@ -7248,7 +7278,7 @@ msgstr "{yes} von {total} zugesagt"
 msgid "Only with free slots"
 msgstr "Nur mit freien Plätzen"
 
-#: worker/routes/games.ts
+#: worker/domain/fixtures.ts
 msgid "New throw-off: {date}, {time}."
 msgstr "Neuer Anwurf: {date}, {time} Uhr."
 
@@ -7330,7 +7360,7 @@ msgstr "Die Einrichtung noch einmal Schritt für Schritt durchgehen"
 msgid "The game is over or cancelled."
 msgstr "Das Spiel ist vorbei oder abgesagt."
 
-#: worker/domain/h4a.ts
+#: modules/handball4all/worker/connector.ts
 msgid "No game lists found"
 msgstr "Keine Spiellisten gefunden"
 
@@ -7362,7 +7392,7 @@ msgstr "Aufgabe"
 msgid "Invalid colour."
 msgstr "Ungültige Farbe."
 
-#: src/pages/team.tsx
+#: src/pages/games.tsx
 msgid "Game schedule"
 msgstr "Spielplan"
 
@@ -7464,7 +7494,7 @@ msgstr "Test-Benachrichtigung ist unterwegs."
 msgid "KiHaSL/JuHaSL is not part of any template: for youth home games F to C the duty is always added automatically (1 slot, 15 min before throw-off until the end of the game)."
 msgstr "KiHaSL/JuHaSL steht in keiner Vorlage: Bei Heimspielen der Jugend F bis C kommt der Dienst immer automatisch dazu (1 Platz, 15 min vor Anpfiff bis Spielende)."
 
-#: worker/routes/games.ts
+#: worker/domain/fixtures.ts
 msgid "New throw-off: {date}, {time}, {location}."
 msgstr "Neuer Anwurf: {date}, {time} Uhr, {location}."
 
@@ -7890,7 +7920,7 @@ msgstr "Spieldauer in Minuten"
 msgid "Helper duty {label} · {game} · for {child}"
 msgstr "Helferdienst {label} · {game} · für {child}"
 
-#: src/pages/team.tsx
+#: src/pages/games.tsx
 msgid "Unlink schedule"
 msgstr "Lösen"
 
@@ -8013,7 +8043,7 @@ msgstr "Abgesagt."
 msgid "New team"
 msgstr "Neue Mannschaft"
 
-#: src/pages/team.tsx
+#: src/pages/games.tsx
 msgid "Last synced on {importedDate}."
 msgstr "Zuletzt abgeglichen am {importedDate}."
 
@@ -8353,6 +8383,11 @@ msgstr "Abwesend"
 #: src/pages/chat.tsx
 msgid "Messages"
 msgstr "Nachrichten"
+
+# ai
+#: src/pages/games.tsx
+msgid "Linked: {description}."
+msgstr "Verknüpft: {description}."
 
 #: src/pages/admin.tsx
 msgid "{sent, plural, one {Sent to one chat.} other {Sent to # chats.}}"
@@ -8832,6 +8867,11 @@ msgid "Holiday"
 msgstr "Urlaub"
 
 # ai
+#: src/pages/games.tsx
+msgid "{name} cannot be reached right now ({detail})."
+msgstr "{name} ist gerade nicht erreichbar ({detail})."
+
+# ai
 #: worker/routes/game-import.ts
 msgid "The game schedule is in the app. Please check when you can play."
 msgstr "Der Spielplan ist in der App. Bitte schau nach, wann du spielen kannst."
@@ -8931,7 +8971,7 @@ msgstr "Link für neuen Passkey"
 msgid "Admin view on."
 msgstr "Admin-Ansicht an."
 
-#: src/pages/team.tsx
+#: src/pages/games.tsx
 msgid "Not synced yet."
 msgstr "Noch nicht abgeglichen."
 
@@ -9028,10 +9068,6 @@ msgstr "Passkeys"
 #: worker/routes/squad.ts
 msgid "At most {max} players can be nominated."
 msgstr "Höchstens {max} Spieler können nominiert werden."
-
-#: src/pages/games.tsx
-msgid "handball4all responded with status {status}"
-msgstr "handball4all antwortet mit Status {status}"
 
 #: src/pages/admin.tsx
 #: src/pages/admin.tsx
@@ -9270,10 +9306,6 @@ msgstr "Für Eltern"
 msgid "No. You are in automatically. You only decline if you cannot come."
 msgstr "Nein. Du bist automatisch dabei. Nur wenn du nicht kommen kannst, sagst du ab."
 
-#: src/pages/games.tsx
-msgid "handball4all cannot be reached right now ({detail})."
-msgstr "handball4all ist gerade nicht erreichbar ({detail})."
-
 #: src/pages/group.tsx
 msgid "Player"
 msgstr "Spieler"
@@ -9408,7 +9440,7 @@ msgstr "Einrichtung nicht abgeschlossen"
 msgid "Nobody nominated yet."
 msgstr "Noch niemand nominiert."
 
-#: src/live.tsx
+#: modules/handball4all/app/live.tsx
 msgid "Live ticker on handball4all"
 msgstr "Liveticker bei handball4all"
 
@@ -10258,10 +10290,6 @@ msgstr "Keine kommenden Termine"
 msgid "Release to refresh"
 msgstr "Loslassen zum Aktualisieren"
 
-#: src/pages/team.tsx
-msgid "Game schedule (handball4all)"
-msgstr "Spielplan (handball4all)"
-
 # ai
 #: src/pages/setup-wizard.tsx
 msgid "The season already has age groups. They stay as they are."
@@ -10286,10 +10314,6 @@ msgstr "Optional, nicht dabei"
 msgctxt "training"
 msgid "optional"
 msgstr "optional"
-
-#: worker/routes/games.ts
-msgid "No handball4all link is set for this team."
-msgstr "Für diese Mannschaft ist kein handball4all-Link hinterlegt."
 
 #: src/pages/plans.tsx
 msgid "Valid from"
@@ -10495,7 +10519,7 @@ msgstr "Deine Eltern kümmern sich um Absagen."
 msgid "Saved. The other parent will be notified."
 msgstr "Gespeichert. Das andere Elternteil wird informiert."
 
-#: src/pages/team.tsx
+#: src/pages/games.tsx
 msgid "Link schedule"
 msgstr "Verknüpfen"
 
@@ -10533,10 +10557,6 @@ msgstr "Wird abgeglichen …"
 #: src/pages/group.tsx
 msgid "At the season change the members of a group are kept."
 msgstr "Beim Saisonwechsel bleiben die Mitglieder einer Gruppe erhalten."
-
-#: src/pages/team.tsx
-msgid "Syncing only happens at the press of a button, on a coach's or admin's device. handball4all only allows individual requests, so never automatically."
-msgstr "Abgeglichen wird nur auf Knopfdruck, auf dem Gerät eines Trainers oder Admins. handball4all erlaubt nur Einzelabrufe, deshalb nie automatisch."
 
 #: src/pages/join.tsx
 msgid "Set up your passkey now. The setup link only works a single time."
@@ -10712,6 +10732,11 @@ msgstr "Gruppe angelegt."
 msgid "{label} by mail"
 msgstr "{label} per Mail"
 
+# ai
+#: worker/routes/duties.ts
+msgid "Games from a game schedule cannot be deleted, only hidden."
+msgstr "Spiele aus einem Spielplan lassen sich nicht löschen, nur ausblenden."
+
 #: worker/routes/squad.ts
 msgid "Request withdrawn"
 msgstr "Anfrage zurückgezogen"
@@ -10779,4 +10804,3 @@ msgstr "Chat schreiben"
 #: worker/routes/events.ts
 msgid "In one time block the end is before the start."
 msgstr "Bei einem Zeitblock liegt das Ende vor dem Beginn."
-

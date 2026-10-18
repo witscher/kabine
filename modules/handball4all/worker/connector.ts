@@ -1,4 +1,4 @@
-// Game schedule from handball4all.
+// Game schedule from handball4all (German handball associations).
 //
 // The interface is protected against automated access. It is therefore queried
 // only from the device of a coach or admin (CORS is allowed), sparingly and
@@ -6,6 +6,7 @@
 // calls handball4all itself.
 
 import { t } from "@lingui/core/macro";
+import { type FixtureConnector, FixtureFormatError, type FixtureGame, type FixtureSchedule, type FixtureSource } from "../../../worker/module-api";
 
 export const H4A_ENDPOINT = "https://spo.handball4all.de/service/if_g_json.php";
 
@@ -59,30 +60,6 @@ export function parsePortalUrl(input: string): H4aIds | null {
   return orgId && leagueId && teamId ? { orgId, leagueId, teamId, portal } : null;
 }
 
-export interface H4aGame {
-  gameId: string;
-  gameNo: string | null;
-  date: string; // YYYY-MM-DD
-  time: string; // HH:MM
-  home: string;
-  guest: string;
-  gymId: number | null;
-  gymName: string | null;
-  gymAddress: string | null;
-  homeGoals: number | null;
-  guestGoals: number | null;
-}
-
-export interface H4aSchedule {
-  leagueId: string | null;
-  leagueName: string | null;
-  teams: { teamId: string; teamName: string }[];
-  games: H4aGame[];
-  skipped: number;
-}
-
-export class H4aFormatError extends Error {}
-
 const str = (v: unknown): string | null => (typeof v === "string" && v.trim() !== "" ? v.trim() : typeof v === "number" ? String(v) : null);
 
 function goals(v: unknown): number | null {
@@ -109,18 +86,19 @@ function groups(v: unknown): Record<string, unknown>[] {
   return [];
 }
 
-export function parseSchedule(data: unknown): H4aSchedule {
+/** The raw schedule of handball4all, with the league and the team list it names. */
+export function parseSchedule(data: unknown): { leagueId: string | null; leagueName: string | null; teams: { teamId: string; teamName: string }[]; games: FixtureGame[]; skipped: number } {
   const root = Array.isArray(data) ? data[0] : data;
-  if (typeof root !== "object" || root === null) throw new H4aFormatError(t`Response is not an object`);
+  if (typeof root !== "object" || root === null) throw new FixtureFormatError(t`Response is not an object`);
   const content = (root as Record<string, unknown>).content;
-  if (typeof content !== "object" || content === null) throw new H4aFormatError(t`Field content is missing`);
+  if (typeof content !== "object" || content === null) throw new FixtureFormatError(t`Field content is missing`);
   const c = content as Record<string, unknown>;
-  if (!("actualGames" in c) && !("futureGames" in c)) throw new H4aFormatError(t`No game lists found`);
+  if (!("actualGames" in c) && !("futureGames" in c)) throw new FixtureFormatError(t`No game lists found`);
 
   const head = (root as Record<string, unknown>).head as Record<string, unknown> | undefined;
   const allGroups = [...groups(c.actualGames), ...groups(c.futureGames)];
   const seen = new Set<string>();
-  const games: H4aGame[] = [];
+  const games: FixtureGame[] = [];
   let skipped = 0;
   let leagueId: string | null = null;
 
@@ -150,15 +128,20 @@ export function parseSchedule(data: unknown): H4aSchedule {
       const postal = str(r.gGymnasiumPostal);
       const town = str(r.gGymnasiumTown);
       games.push({
-        gameId,
-        gameNo: str(r.gNo),
+        externalId: gameId,
+        number: str(r.gNo),
         date: d,
         time: clock,
         home: home.slice(0, 80),
         guest: guest.slice(0, 80),
-        gymId: gymIdRaw && /^\d{1,10}$/.test(gymIdRaw) ? Number(gymIdRaw) : null,
-        gymName: str(r.gGymnasiumName)?.slice(0, 120) ?? null,
-        gymAddress: [street, [postal, town].filter(Boolean).join(" ")].filter(Boolean).join(", ").slice(0, 200) || null,
+        venue:
+          gymIdRaw && /^\d{1,10}$/.test(gymIdRaw)
+            ? {
+                externalId: gymIdRaw,
+                name: str(r.gGymnasiumName)?.slice(0, 120) ?? null,
+                address: [street, [postal, town].filter(Boolean).join(" ")].filter(Boolean).join(", ").slice(0, 200) || null,
+              }
+            : null,
         homeGoals: goals(r.gHomeGoals),
         guestGoals: goals(r.gGuestGoals),
       });
@@ -177,48 +160,46 @@ export function parseSchedule(data: unknown): H4aSchedule {
   return { leagueId, leagueName: str(head?.name), teams, games, skipped };
 }
 
-/**
- * Matchday instead of a single game (F youth and younger): handball4all lists it as
- * a game of the host against the placeholder "Spieltag gF"; all teams of the
- * division take part.
- */
-export function isMatchdayName(name: string | null | undefined): boolean {
-  return /^Spieltag\b/i.test(name?.trim() ?? "");
-}
+const ids = (source: FixtureSource) => ({
+  orgId: Number(source.orgId),
+  leagueId: Number(source.leagueId),
+  teamId: Number(source.teamId),
+  portal: typeof source.portal === "string" ? source.portal : null,
+});
 
-/** For matchdays: the host (the other side of the placeholder), else null. */
-export function matchdayHost(g: Pick<H4aGame, "home" | "guest">): string | null {
-  if (isMatchdayName(g.guest)) return g.home;
-  if (isMatchdayName(g.home)) return g.guest;
-  return null;
-}
-
-/** Matchday: home matchday if the own club hosts or it is played in an own hall. */
-export function matchdayIsHome(g: H4aGame, hint: string | null, homeGymIds: Set<number>): boolean {
-  const host = matchdayHost(g)?.toLowerCase() ?? "";
-  const own = hint?.toLowerCase() ?? "";
-  if (own && host && (host === own || own.startsWith(host) || host.startsWith(own))) return true;
-  return g.gymId != null && homeGymIds.has(g.gymId);
-}
-
-/**
- * Which name in the games is the own team? When queried with the team filter
- * it appears in every game.
- */
-export function ownTeamName(games: H4aGame[], hint: string | null, homeGymIds: Set<number>): string | null {
-  if (!games.length) return null;
-  const counts = new Map<string, number>();
-  for (const g of games) {
-    counts.set(g.home, (counts.get(g.home) ?? 0) + 1);
-    if (g.guest !== g.home) counts.set(g.guest, (counts.get(g.guest) ?? 0) + 1);
-  }
-  const inAll = [...counts.entries()].filter(([, n]) => n === games.length).map(([name]) => name);
-  if (inAll.length === 1) return inAll[0]!;
-  if (hint) {
-    const lower = hint.toLowerCase();
-    const match = [...counts.keys()].find((n) => n.toLowerCase() === lower || lower.startsWith(n.toLowerCase()));
-    if (match) return match;
-  }
-  const atHome = games.find((g) => g.gymId != null && homeGymIds.has(g.gymId));
-  return atHome?.home ?? null;
-}
+export const handball4all: FixtureConnector = {
+  name: "handball4all",
+  fetchFrom: "device",
+  // Fair use: at the push of a button, at most every 10 minutes per team
+  minIntervalMs: 10 * 60_000,
+  linkField: () => ({
+    label: t`Link from the handball4all portal`,
+    hint: t`Open the team in the portal and paste the link from the address bar. It contains ogId, lId and tId.`,
+    placeholder: "https://www.handball4all.de/home/portal/…#/league?ogId=…",
+  }),
+  parseLink: (input) => {
+    const found = parsePortalUrl(input);
+    return found ? { ...found } : null;
+  },
+  describe: (source) => {
+    const { orgId, leagueId, teamId } = ids(source);
+    return t`Association ${orgId}, league ${leagueId}, team ${teamId}`;
+  },
+  request: (source) => {
+    const { orgId, leagueId, teamId } = ids(source);
+    return { url: h4aFetchUrl(orgId, leagueId, teamId) };
+  },
+  parse: (data, source): FixtureSchedule => {
+    const schedule = parseSchedule(data);
+    // The schedule comes from the coach's browser and is not trusted: it must name the team's league
+    if (schedule.leagueId !== String(ids(source).leagueId)) {
+      throw new FixtureFormatError(schedule.leagueId ? t`The data belongs to another league` : t`The data names no league`);
+    }
+    const hint = schedule.teams.find((x) => x.teamId === String(ids(source).teamId))?.teamName ?? null;
+    return { games: schedule.games, ownTeamHint: hint, skipped: schedule.skipped };
+  },
+  tableUrl: (source) => {
+    const { orgId, leagueId, teamId, portal } = ids(source);
+    return h4aTableUrl(orgId, leagueId, teamId, portal);
+  },
+};
