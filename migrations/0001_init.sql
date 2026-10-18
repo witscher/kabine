@@ -163,8 +163,10 @@ CREATE TABLE training_rules (
   CHECK (starts_at < ends_at)
 );
 CREATE TABLE rule_teams (
-  rule_id INTEGER NOT NULL REFERENCES training_rules (id) ON DELETE CASCADE,
-  team_id INTEGER NOT NULL REFERENCES teams (id) ON DELETE CASCADE,
+  rule_id  INTEGER NOT NULL REFERENCES training_rules (id) ON DELETE CASCADE,
+  team_id  INTEGER NOT NULL REFERENCES teams (id) ON DELETE CASCADE,
+  -- 1: the team may join this training ("together with"), players accept by hand
+  optional INTEGER NOT NULL DEFAULT 0 CHECK (optional IN (0, 1)),
   PRIMARY KEY (rule_id, team_id)
 );
 CREATE TABLE events (
@@ -201,8 +203,12 @@ CREATE TABLE events (
   updated_at         TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
 , squad_manual INTEGER NOT NULL DEFAULT 0 CHECK (squad_manual IN (0, 1)), game_reminder_sent_at TEXT, duty_hidden INTEGER NOT NULL DEFAULT 0 CHECK (duty_hidden IN (0, 1)), attendance_recorded_at TEXT, duties_anchor TEXT, duties_generated INTEGER NOT NULL DEFAULT 0 CHECK (duties_generated BETWEEN 0 AND 3), created_by INTEGER REFERENCES persons (id) ON DELETE SET NULL);
 CREATE TABLE event_teams (
-  event_id INTEGER NOT NULL REFERENCES events (id) ON DELETE CASCADE,
-  team_id  INTEGER NOT NULL REFERENCES teams (id) ON DELETE CASCADE,
+  event_id        INTEGER NOT NULL REFERENCES events (id) ON DELETE CASCADE,
+  team_id         INTEGER NOT NULL REFERENCES teams (id) ON DELETE CASCADE,
+  -- Optional for this team (from the training rule, or set for this event by a coach)
+  optional        INTEGER NOT NULL DEFAULT 0 CHECK (optional IN (0, 1)),
+  -- 1: set by hand for this event, the generation keeps it
+  optional_manual INTEGER NOT NULL DEFAULT 0 CHECK (optional_manual IN (0, 1)),
   PRIMARY KEY (event_id, team_id)
 );
 CREATE TABLE responses (

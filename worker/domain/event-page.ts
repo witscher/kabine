@@ -54,7 +54,8 @@ async function summarize(db: D1Database, actor: Actor, rows: EventRow[], now: nu
 
 /** Event for the large card ("Your next event"), as in the event overview. */
 function nextCardCandidate(s: EventSummary): boolean {
-  return !s.cancelled && s.mine.some((m) => m.participant || m.helpRequest?.status === "open");
+  // Optional trainings only once accepted
+  return !s.cancelled && s.mine.some((m) => (m.participant && (!m.optional || m.status === "yes")) || m.helpRequest?.status === "open");
 }
 
 const day = (s: EventSummary) => s.startsAt.slice(0, 10);

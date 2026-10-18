@@ -2,6 +2,12 @@
 
 Decisions not covered by `docs/plan.md`, with reasons. Newest first.
 
+## Optional joint training (October 2026)
+
+Some coaches let their team join another team's training by choice. In a joint training time ("together with") each team is mandatory or optional; a coach can change it for a single training, and that choice stays when the plan is generated again (`event_teams.optional_manual`). At least one team always trains as usual.
+
+For players whose teams all join optionally: no automatic acceptance (they accept by hand), withdrawing needs no reason and is never "at short notice", no reminders, no "absent without excuse", and they are told about cancellations and moves only once they accepted. In the attendance record and the season statistics they appear only when they accepted, so not joining never counts as missing. A player who is also in a mandatory team of the same training counts as mandatory. The event shows the mark "Optional"; the big "Up next" card only shows an optional training once it is accepted. Coaches see the optional players without acceptance in their own group "Optional, not joining". If a coach switches a team to mandatory after someone withdrew, that withdrawal counts as a decline.
+
 ## README in German first (October 2026)
 
 `README.md` is German, `README.en.md` English, each linked at the top of the other. Kabine is made for German clubs (holidays per state, handball4all, the name itself), and the people who find it on GitHub are mostly club admins in Germany. Code, comments and the technical documentation stay in English so others can contribute.

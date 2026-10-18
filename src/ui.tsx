@@ -382,8 +382,15 @@ export function Notice(props: { kind?: "info" | "warn" | "yellow"; icon?: IconNa
 
 // Status ------------------------------------------------------------------------
 
-export function StatusPill(props: { status: ParticipationStatus | null; late?: boolean; nominated?: boolean; game?: boolean }) {
+export function StatusPill(props: { status: ParticipationStatus | null; late?: boolean; nominated?: boolean; game?: boolean; optional?: boolean }) {
   const { status } = props;
+  // Optional training without acceptance: neither open nor declined
+  if (props.optional && (status === "open" || status === "no"))
+    return (
+      <span class="pill pill-muted">
+        <Trans context="training">Optional</Trans>
+      </span>
+    );
   if (status === "yes")
     return (
       <span class="pill pill-yes">

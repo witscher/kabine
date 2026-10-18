@@ -63,7 +63,7 @@ Each milestone ends with typecheck, unit tests and e2e green, a commit on `main`
 ## Requested for the end (also for the original club app)
 
 - **Holiday plans visible:** done in Kabine (notes in the timeline, see `docs/decisions.md`). Still to port to the original club app.
-- **Optional joint training:** a training time shared with other teams ("together with") can be mandatory or optional per team. Mandatory: everyone counts as accepted (as today). Optional: players accept by hand. Needs a column on the rule–team link, a switch per team in the training plan, and rules for reminders and "absent without excuse" (to be clarified before building).
+- **Optional joint training:** done in Kabine (see `docs/decisions.md`). Still to port to the original club app.
 
 ## Design notes K3–K6 (October 2026)
 

@@ -228,11 +228,12 @@ export async function respond(
   // Accepting means withdrawing a decline. Whoever has already accepted (also automatically) stays so.
   if (status === "yes" && participant.status === "yes") return toSummary(event, ctx, actor, now);
 
-  const reason = status === "no" ? (reasonInput ?? "").trim() : null;
-  if (status === "no" && !reason) throw badRequest(t`Please give a short reason for declining.`, "reason_required");
+  // Optional training: "no" just withdraws an acceptance, without reason and never at short notice
+  const reason = status === "no" ? (reasonInput ?? "").trim() || null : null;
+  if (status === "no" && !reason && !participant.optional) throw badRequest(t`Please give a short reason for declining.`, "reason_required");
 
   const teams = eventTeams(event, ctx);
-  const isLate = status === "no" && now > deadlineInstant(event, teams);
+  const isLate = status === "no" && !participant.optional && now > deadlineInstant(event, teams);
   await run(
     env.DB,
     `INSERT INTO responses (event_id, person_id, status, reason, is_late, by_account, by_person, responded_at)
@@ -329,7 +330,8 @@ async function managedEvent(db: D1Database, actor: Actor, eventId: number) {
 /** Persons who are informed about changes to an event. */
 async function affectedPersons(db: D1Database, event: EventRow, ctx: Awaited<ReturnType<typeof loadEventContext>>): Promise<number[]> {
   const parts = ctx.participants.get(event.id) ?? [];
-  const ids = new Set(parts.filter((p) => p.status !== "inactive" && p.status !== "standing").map((p) => p.person.id));
+  // Optional participants only once they accepted
+  const ids = new Set(parts.filter((p) => p.status !== "inactive" && p.status !== "standing" && (!p.optional || p.status === "yes")).map((p) => p.person.id));
   if (event.kind === "game") {
     for (const m of ctx.members.get(event.id)?.values() ?? []) if (m.is_active === 1) ids.add(m.person_id);
   }
@@ -337,6 +339,27 @@ async function affectedPersons(db: D1Database, event: EventRow, ctx: Awaited<Ret
   for (const id of await staffOf(db, teamIds)) ids.add(id);
   return [...ids];
 }
+
+/**
+ * Mandatory or optional for one team at one training ("together with"). Set by hand, it stays
+ * when the training plan is generated again.
+ */
+eventRoutes.put("/events/:id/teams/:teamId/optional", async (c) => {
+  const actor = requireActor(c);
+  const teamId = intParam(c, "teamId");
+  const { optional } = parse(z.object({ optional: z.boolean() }), await readJson(c.req.raw));
+  const { event, ctx } = await managedEvent(c.env.DB, actor, intParam(c, "id"));
+  if (event.kind !== "training") throw badRequest(t`Only trainings can be optional.`, "not_training");
+  if (event.cancelled_at || localToInstant(event.starts_at) <= Date.now()) throw conflict(t`This is no longer possible for this event.`);
+  const teamIds = ctx.eventTeams.get(event.id) ?? [];
+  if (!teamIds.includes(teamId)) throw notFound(t`This team does not take part in the event.`);
+  if (optional && teamIds.every((id) => id === teamId || ctx.optional.has(`${event.id}:${id}`))) {
+    throw badRequest(t`At least one team must train here as usual.`, "all_optional");
+  }
+  await run(c.env.DB, "UPDATE event_teams SET optional = ?, optional_manual = 1 WHERE event_id = ? AND team_id = ?", optional ? 1 : 0, event.id, teamId);
+  const fresh = (await loadEvent(c.env.DB, event.id))!;
+  return c.json(toDetail(fresh, await loadEventContext(c.env.DB, [fresh]), actor, Date.now()));
+});
 
 /** After the start: coaches mark who was absent without excuse despite accepting. */
 eventRoutes.put("/events/:id/unexcused/:personId", async (c) => {
@@ -348,6 +371,7 @@ eventRoutes.put("/events/:id/unexcused/:personId", async (c) => {
   if (localToInstant(event.starts_at) > Date.now()) throw conflict(t`This is only possible once the event has started.`);
   const part = (ctx.participants.get(event.id) ?? []).find((p) => p.person.id === personId);
   if (!part) throw notFound(t`This person does not take part in the event.`);
+  if (unexcused && part.optional) throw conflict(t`The training was optional for this person.`, "optional");
   if (unexcused && part.status !== "yes" && part.status !== "open") {
     throw conflict(t`Anyone who declined, is permanently absent or inactive is excused.`);
   }
@@ -531,7 +555,7 @@ eventRoutes.post("/events/:id/remind", async (c) => {
   const { personIds } = parse(remindSchema, await readJson(c.req.raw));
   const { event, ctx, teams } = await managedEvent(c.env.DB, actor, intParam(c, "id"));
   if (event.cancelled_at || localToInstant(event.starts_at) <= Date.now()) throw conflict(t`Reminders are no longer possible for this event.`);
-  const open = (ctx.participants.get(event.id) ?? []).filter((p) => p.status === "open").map((p) => p.person.id);
+  const open = (ctx.participants.get(event.id) ?? []).filter((p) => p.status === "open" && !p.optional).map((p) => p.person.id);
   const targets = personIds ? open.filter((id) => personIds.includes(id)) : open;
   if (!targets.length) return c.json({ sent: 0, persons: 0 });
   // No more than one group reminder per event and quarter of an hour.

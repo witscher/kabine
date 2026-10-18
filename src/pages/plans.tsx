@@ -16,7 +16,8 @@ interface RuleView {
   startsAt: string;
   endsAt: string;
   location: { id: number; name: string };
-  teams: TeamRef[];
+  /** optional: the team joins by choice ("together with"), players accept by hand */
+  teams: (TeamRef & { optional?: boolean })[];
 }
 
 interface PlanView {
@@ -63,8 +64,11 @@ function RuleCard({ rule, ownTeamId, onEdit, onDelete }: { rule: RuleView; ownTe
           </span>
         </div>
         <div class="row-gap" style={{ gap: "6px", marginTop: "4px" }}>
-          {rule.teams.map((t) => (
-            <span class={`badge team ${t.id === ownTeamId ? "" : "other"}`}>{t.name}</span>
+          {rule.teams.map((team) => (
+            <span class={`badge team ${team.id === ownTeamId ? "" : "other"}`}>
+              {team.name}
+              {team.optional ? ` · ${t({ message: "optional", context: "training" })}` : ""}
+            </span>
           ))}
           {rule.teams.length > 1 ? (
             <span class="small muted">
@@ -249,6 +253,8 @@ interface DraftRule {
   endsAt: string;
   locationId: number;
   teamIds: number[];
+  /** Teams joining by choice */
+  optionalTeamIds: number[];
 }
 
 function RuleEditor(props: { initial: DraftRule | null; ownTeamId: number; allTeams: TeamRef[]; onSave: (r: DraftRule) => Promise<void>; onCancel?: () => void; title: string }) {
@@ -259,6 +265,7 @@ function RuleEditor(props: { initial: DraftRule | null; ownTeamId: number; allTe
   const [end, setEnd] = useState(props.initial?.endsAt ?? "18:30");
   const [locationId, setLocationId] = useState<number | null>(props.initial?.locationId ?? null);
   const [teams, setTeams] = useState<number[]>(props.initial?.teamIds.filter((t) => t !== props.ownTeamId) ?? []);
+  const [optional, setOptional] = useState<number[]>(props.initial?.optionalTeamIds ?? []);
   const [newLoc, setNewLoc] = useState(false);
   const [teamPicker, setTeamPicker] = useState(false);
 
@@ -307,18 +314,48 @@ function RuleEditor(props: { initial: DraftRule | null; ownTeamId: number; allTe
         </span>
         <div class="row-gap" style={{ gap: "6px" }}>
           <span class="badge team">{props.allTeams.find((x) => x.id === props.ownTeamId)?.name}</span>
-          {teams.map((tid) => {
-            const teamName = props.allTeams.find((x) => x.id === tid)?.name ?? "";
-            return (
-              <button type="button" class="badge team other" style={{ border: 0, minHeight: "32px" }} onClick={() => setTeams(teams.filter((x) => x !== tid))} aria-label={t`Remove ${teamName}`}>
-                {props.allTeams.find((x) => x.id === tid)?.name} ✕
-              </button>
-            );
-          })}
           <button type="button" class="btn btn-sm btn-dashed" onClick={() => setTeamPicker(true)}>
             <Trans>+ together with …</Trans>
           </button>
         </div>
+        {teams.length ? (
+          <ul class="list rule-teams" aria-label={t`Together with`}>
+            {teams.map((tid) => {
+              const teamName = props.allTeams.find((x) => x.id === tid)?.name ?? "";
+              const isOptional = optional.includes(tid);
+              return (
+                <li class="list-row">
+                  <span class="main">
+                    <span class="title">{teamName}</span>
+                    <span class="sub">
+                      {isOptional ? t`Players accept by hand if they want to join.` : t`Everyone counts as accepted, as in their own training.`}
+                    </span>
+                  </span>
+                  <Segmented
+                    label={t`Joining for ${teamName}`}
+                    value={isOptional ? "optional" : "mandatory"}
+                    options={[
+                      { value: "mandatory", label: t`Mandatory` },
+                      { value: "optional", label: t({ message: "Optional", context: "training" }) },
+                    ]}
+                    onChange={(v) => setOptional(v === "optional" ? [...optional, tid] : optional.filter((x) => x !== tid))}
+                  />
+                  <button
+                    type="button"
+                    class="icon-btn"
+                    aria-label={t`Remove ${teamName}`}
+                    onClick={() => {
+                      setTeams(teams.filter((x) => x !== tid));
+                      setOptional(optional.filter((x) => x !== tid));
+                    }}
+                  >
+                    <Icon name="x" size={18} />
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        ) : null}
       </div>
       <div class="btn-row">
         {props.onCancel ? (
@@ -337,7 +374,15 @@ function RuleEditor(props: { initial: DraftRule | null; ownTeamId: number; allTe
               toast(t`The end must be after the start.`, "error");
               return;
             }
-            await props.onSave({ id: props.initial?.id, weekday, startsAt: start, endsAt: end, locationId, teamIds: teams });
+            await props.onSave({
+              id: props.initial?.id,
+              weekday,
+              startsAt: start,
+              endsAt: end,
+              locationId,
+              teamIds: teams,
+              optionalTeamIds: optional.filter((x) => teams.includes(x)),
+            });
           }}
         >
           {props.initial?.id ? t`Save` : t`Add`}
@@ -438,7 +483,7 @@ export function PlanEditorPage({ id, planId }: { id: string; planId: string }) {
     setTo(existing.validTo);
     setPeriodId(existing.holidayPeriodId);
     setDeclineHours(existing.declineHours != null ? String(existing.declineHours) : "");
-    setRules(existing.rules.map((r) => ({ id: r.id, weekday: r.weekday, startsAt: r.startsAt, endsAt: r.endsAt, locationId: r.location.id, teamIds: r.teams.map((t) => t.id) })));
+    setRules(existing.rules.map((r) => ({ id: r.id, weekday: r.weekday, startsAt: r.startsAt, endsAt: r.endsAt, locationId: r.location.id, teamIds: r.teams.map((t) => t.id), optionalTeamIds: r.teams.filter((t) => t.optional).map((t) => t.id) })));
   }, [existing?.id, data]);
 
   useEffect(() => {
@@ -467,7 +512,7 @@ export function PlanEditorPage({ id, planId }: { id: string; planId: string }) {
       setEditing(null);
       return;
     }
-    const body = { weekday: r.weekday, startsAt: r.startsAt, endsAt: r.endsAt, locationId: r.locationId, teamIds: r.teamIds };
+    const body = { weekday: r.weekday, startsAt: r.startsAt, endsAt: r.endsAt, locationId: r.locationId, teamIds: r.teamIds, optionalTeamIds: r.optionalTeamIds };
     if (r.id) await api.patch(`/rules/${r.id}`, body);
     else await api.post(`/plans/${existing!.id}/rules`, body);
     invalidate("/events", `/teams/${id}/plans`);
@@ -591,7 +636,10 @@ export function PlanEditorPage({ id, planId }: { id: string; planId: string }) {
                   startsAt: r.startsAt,
                   endsAt: r.endsAt,
                   location: { id: r.locationId, name: locName(r.locationId) ?? t`Location` },
-                  teams: [ownTeamId, ...r.teamIds.filter((t) => t !== ownTeamId)].map((t) => allTeams.find((x) => x.id === t) ?? { id: t, name: "?" }),
+                  teams: [ownTeamId, ...r.teamIds.filter((t) => t !== ownTeamId)].map((t) => ({
+                    ...(allTeams.find((x) => x.id === t) ?? { id: t, name: "?" }),
+                    optional: r.optionalTeamIds.includes(t),
+                  })),
                 }}
                 ownTeamId={ownTeamId}
                 onEdit={() => setEditing(i)}

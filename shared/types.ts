@@ -96,6 +96,8 @@ export interface MyParticipation {
   participant: boolean;
   nominated: boolean;
   isHelper: boolean;
+  /** Optional training for this person: no automatic acceptance, accepting is voluntary. */
+  optional: boolean;
   status: ParticipationStatus | null;
   reason: string | null;
   isLate: boolean;
@@ -117,6 +119,8 @@ export interface EventCounts {
   open: number;
   standing: number;
   inactive: number;
+  /** Optional participants who have not accepted (not counted as open or declined). */
+  optional: number;
 }
 
 /**
@@ -157,6 +161,8 @@ export interface EventSummary {
   endsAt: string | null;
   location: LocationRef | null;
   teams: TeamRef[];
+  /** Teams for which this training is optional ("together with"). */
+  optionalTeamIds: number[];
   clubWide: boolean;
   cancelled: { at: string; byName: string | null; reason: string | null } | null;
   notes: string | null;
@@ -221,6 +227,8 @@ export interface ParticipantDetail {
   /** All of the person's teams involved (players in two teams) */
   teamIds: number[];
   isHelper: boolean;
+  /** Takes part optionally (joint training of another team) */
+  optional: boolean;
   status: ParticipationStatus;
   reason: string | null;
   isLate: boolean;

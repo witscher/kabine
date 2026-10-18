@@ -127,6 +127,43 @@ export function ResponseButtons(props: { event: EventSummary; p: MyParticipation
   const hint = !p.canAccept && !p.canDecline ? p.blockedReason : null;
   if (hint) return <p class="small muted">{hint}</p>;
   const size = props.compact ? "sm" : "md";
+  // Optional training: joining is voluntary, withdrawing needs no reason
+  if (p.optional) {
+    return (
+      <div class="stack-sm">
+        <div class="btn-row">
+          {status === "yes" ? (
+            <Button
+              size={size}
+              disabled={!p.canDecline}
+              onClick={async () => {
+                await sendResponse(event, p.person.id, "no");
+                toast(t`Not joining.`);
+              }}
+            >
+              {isSelf ? t`Not joining after all` : t`Withdraw`}
+            </Button>
+          ) : (
+            <Button
+              variant="primary"
+              size={size}
+              icon="check"
+              disabled={!p.canAccept}
+              onClick={async () => {
+                await sendResponse(event, p.person.id, "yes");
+                toast(t`Accepted.`);
+              }}
+            >
+              {isSelf ? t`I'll join` : t`Join`}
+            </Button>
+          )}
+        </div>
+        <p class="small muted">
+          <Trans>Optional training: accept if you want to join. Nobody counts as missing.</Trans>
+        </p>
+      </div>
+    );
+  }
   const showAccept = status !== "yes";
   const acceptLabel =
     status === "no" ? (isSelf ? t`I'm in after all` : t`Accept again`) : status === "standing" ? t`In this time` : isSelf ? t`I'm in` : t`Accept`;
@@ -236,7 +273,7 @@ export function PersonResponseRow(props: { event: EventSummary; p: MyParticipati
     <div class="stack-sm" style={{ paddingTop: "4px" }}>
       <div class="row-gap" style={{ justifyContent: "space-between" }}>
         <strong>{me?.person.id === p.person.id ? t`You` : personName(p.person)}</strong>
-        <StatusPill status={p.status} late={p.isLate} nominated={p.nominated} game={event.kind === "game"} />
+        <StatusPill status={p.status} late={p.isLate} nominated={p.nominated} game={event.kind === "game"} optional={p.optional} />
       </div>
       {p.unexcused ? (
         <span class="badge warn" style={{ alignSelf: "flex-start" }}>
@@ -250,7 +287,7 @@ export function PersonResponseRow(props: { event: EventSummary; p: MyParticipati
         </p>
       ) : null}
       <ResponseButtons event={event} p={p} onDecline={props.onDecline} compact />
-      {p.status === "no" && reason ? (
+      {p.status === "no" && reason && !p.optional ? (
         <p class="small muted">
           <Trans>Reason: “{reason}”</Trans>
         </p>

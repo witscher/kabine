@@ -37,6 +37,8 @@ export async function recordAttendance(db: D1Database, now = Date.now()): Promis
   const statements: D1PreparedStatement[] = [];
   for (const e of rows) {
     for (const p of ctx.participants.get(e.id) ?? []) {
+      // Optional training: only who accepted is in the record (so missing it never counts as absence)
+      if (p.optional && p.status !== "yes") continue;
       statements.push(
         stmt(
           db,

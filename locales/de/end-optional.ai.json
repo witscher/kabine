@@ -1,0 +1,23 @@
+{
+  "Not joining after all": "Doch nicht",
+  "Join": "Mitmachen",
+  "This team does not take part in the event.": "Diese Mannschaft ist bei dem Termin nicht dabei.",
+  "Not joining.": "Nicht dabei.",
+  "Joining for {teamName}": "Teilnahme für {teamName}",
+  "Only trainings can be optional.": "Nur Trainings können optional sein.",
+  "This is no longer possible for this event.": "Das ist bei diesem Termin nicht mehr möglich.",
+  "They may join this training if they want to. Nobody counts as missing.": "Sie dürfen bei diesem Training mitmachen, wenn sie wollen. Niemand gilt als fehlend.",
+  "The training was optional for this person.": "Das Training war für diese Person optional.",
+  "Mandatory": "Pflicht",
+  "Optional  [context: training]": "Optional",
+  "Optional training: accept if you want to join. Nobody counts as missing.": "Optionales Training: Sag zu, wenn du mitmachen willst. Niemand gilt als fehlend.",
+  "Only teams of this training time can join optionally.": "Optional mitmachen können nur Mannschaften dieser Trainingszeit.",
+  "Teams at this training": "Mannschaften bei diesem Training",
+  "Applies to this training only. The training plan sets it for all trainings.": "Gilt nur für dieses Training. Für alle Trainings legt es der Trainingsplan fest.",
+  "Players accept by hand if they want to join.": "Wer mitmachen will, sagt selbst zu.",
+  "I'll join": "Ich mache mit",
+  "Optional, not joining": "Optional, nicht dabei",
+  "optional  [context: training]": "optional",
+  "At least one team must train here as usual.": "Mindestens eine Mannschaft muss hier regulär trainieren.",
+  "Everyone counts as accepted, as in their own training.": "Alle gelten als zugesagt, wie im eigenen Training."
+}

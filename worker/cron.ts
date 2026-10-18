@@ -69,7 +69,8 @@ export async function sendDeadlineReminders(env: Env, now = Date.now()): Promise
   for (const e of events) {
     const deadline = deadlineInstant(e, eventTeams(e, ctx));
     if (deadline <= now || deadline - now > REMIND_BEFORE_DEADLINE_MS) continue;
-    const open = (ctx.participants.get(e.id) ?? []).filter((p) => p.status === "open").map((p) => p.person.id);
+    // Optional participants decide themselves and get no reminder
+    const open = (ctx.participants.get(e.id) ?? []).filter((p) => p.status === "open" && !p.optional).map((p) => p.person.id);
     const teams = eventTeams(e, ctx).map((tm) => ({ id: tm.id, name: tm.name }));
     if (open.length) {
       const deadlineLocal = toLocal(deadline);

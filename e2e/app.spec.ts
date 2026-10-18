@@ -1297,3 +1297,43 @@ test("Ferienplan: Trainingspause erscheint als Hinweis in der Terminübersicht",
   await expect(note).toContainText("kein Training für wT");
   expect((await coach.page.request.delete(`/api/plans/${id}`)).ok()).toBe(true);
 });
+
+test("Optionales Mittrainieren: Spielerin macht freiwillig mit, Trainer stellt den Termin auf Pflicht", async () => {
+  const day = (n: number) => new Date(Date.now() + n * 86_400_000).toLocaleDateString("sv-SE", { timeZone: "Europe/Berlin" });
+  const weekday = ((new Date(`${day(2)}T12:00:00Z`).getUTCDay() + 6) % 7) + 1;
+  const { id: other } = await (await admin.page.request.post("/api/teams", { data: { name: "wO", ageClassCode: "wD", level: 3 } })).json();
+  const { me } = (await (await coach.page.request.get("/api/session")).json()) as { me: { person: { id: number } } };
+  expect((await admin.page.request.post(`/api/teams/${other}/members`, { data: { personId: me.person.id, role: "coach" } })).ok()).toBe(true);
+  const plan = await coach.page.request.post(`/api/teams/${other}/plans`, {
+    data: {
+      name: "Zusatztraining",
+      kind: "regular",
+      validFrom: day(1),
+      validTo: day(3),
+      rules: [{ weekday, startsAt: "10:00", endsAt: "11:30", locationId: 1, teamIds: [1], optionalTeamIds: [1] }],
+    },
+  });
+  expect(plan.ok()).toBe(true);
+  const { id: planId } = (await plan.json()) as { id: number };
+
+  const { page } = player;
+  await page.goto("/");
+  const row = page.locator("a.event-row", { hasText: "10:00" }).first();
+  await expect(row).toContainText("Optional");
+  await row.click();
+  await page.getByRole("button", { name: "Ich mache mit" }).click();
+  await expect(page.getByText("Zugesagt").first()).toBeVisible();
+  await page.getByRole("button", { name: "Doch nicht" }).click();
+  await expect(page.getByRole("button", { name: "Ich mache mit" })).toBeVisible();
+  const eventUrl = page.url();
+
+  await coach.page.goto(eventUrl);
+  await expect(coach.page.getByRole("region", { name: "Optional, nicht dabei" })).toContainText("Ida");
+  const teams = coach.page.getByRole("region", { name: "Mannschaften bei diesem Training" });
+  await teams.getByRole("group", { name: "Teilnahme für wT" }).getByRole("button", { name: "Pflicht" }).click();
+  await expect(coach.page.getByRole("region", { name: "Abgesagt" })).toContainText("Ida");
+
+  expect((await coach.page.request.delete(`/api/plans/${planId}`)).ok()).toBe(true);
+  await admin.page.request.delete(`/api/teams/${other}/members/${me.person.id}?role=coach`);
+  await admin.page.request.delete(`/api/teams/${other}`);
+});

@@ -139,6 +139,11 @@ export interface Participant {
   /** All teams of the person involved, e.g. wC1 and wC2 at a joint training */
   teamIds: number[];
   isHelper: boolean;
+  /**
+   * Optional training for this person: all their teams at the event join optionally. No automatic
+   * acceptance, no reminders, no "absent without excuse", in the statistics only when accepted.
+   */
+  optional: boolean;
   isActive: boolean;
   status: ParticipationStatus;
   response: ResponseRow | null;
@@ -156,6 +161,8 @@ export interface EventContext {
   guardianOf: Set<string>; // `${guardianId}:${childId}`
   /** "Unexcused absence": `${eventId}:${personId}` */
   unexcused: Set<string>;
+  /** Teams joining optionally: `${eventId}:${teamId}` */
+  optional: Set<string>;
 }
 
 function push<K, V>(map: Map<K, V[]>, key: K, value: V) {
@@ -190,7 +197,7 @@ export async function loadEventContext(db: D1Database, events: EventRow[]): Prom
   const [teamRows, responses, nominations, helps, unexcusedRows] = await db.batch([
     db
       .prepare(
-        `SELECT et.event_id, t.id, t.name, t.age_class_code, COALESCE(ac.game_minutes, 120) AS game_minutes, t.decline_hours_training,
+        `SELECT et.event_id, et.optional AS et_optional, t.id, t.name, t.age_class_code, COALESCE(ac.game_minutes, 120) AS game_minutes, t.decline_hours_training,
                 t.decline_hours_game, t.max_squad, t.auto_squad, t.h4a_org_id, t.h4a_league_id, t.h4a_team_id, t.h4a_portal, t.show_responses
            FROM event_teams et JOIN teams t ON t.id = et.team_id
            ${CURRENT_AGE_CLASS_JOIN("t", "ac")}
@@ -224,9 +231,11 @@ export async function loadEventContext(db: D1Database, events: EventRow[]): Prom
 
   const teams = new Map<number, TeamInfo>();
   const eventTeams = new Map<number, number[]>();
-  for (const r of teamRows!.results as (TeamInfo & { event_id: number })[]) {
+  const optional = new Set<string>();
+  for (const { et_optional, ...r } of teamRows!.results as (TeamInfo & { event_id: number; et_optional: number })[]) {
     teams.set(r.id, r);
     push(eventTeams, r.event_id, r.id);
+    if (et_optional === 1) optional.add(`${r.event_id}:${r.id}`);
   }
   const teamIds = [...teams.keys()];
 
@@ -304,18 +313,22 @@ export async function loadEventContext(db: D1Database, events: EventRow[]): Prom
     const add = (personId: number, first: string, last: string | null, isActive: number, teamId: number, isHelper: boolean) => {
       const response = resp.get(personId) ?? null;
       const hasStanding = standingRows.some((s) => s.person_id === personId && standingApplies(s, e));
+      // Optional only if every team of the person at this training joins optionally
+      const ownTeams = memberTeams.get(personId) ?? [teamId];
+      const isOptional = e.kind === "training" && ownTeams.every((t) => optional.has(`${e.id}:${t}`));
       let status: ParticipationStatus;
       if (isActive !== 1) status = "inactive";
       else if (response) status = response.status;
       else if (hasStanding) status = "standing";
-      // Players count as accepted until they decline. Helpers accept themselves.
-      else status = isHelper ? "open" : "yes";
+      // Players count as accepted until they decline. Helpers and optional participants accept themselves.
+      else status = isHelper || isOptional ? "open" : "yes";
       personIds.add(personId);
       list.push({
         person: { id: personId, firstName: first, lastName: last },
         teamId,
         teamIds: [teamId, ...(memberTeams.get(personId) ?? []).filter((t) => t !== teamId).sort((a, b) => teamName(a).localeCompare(teamName(b)))],
         isHelper,
+        optional: isOptional,
         isActive: isActive === 1,
         status,
         response,
@@ -354,6 +367,7 @@ export async function loadEventContext(db: D1Database, events: EventRow[]): Prom
     helpRequests: helpByEvent,
     guardianOf: new Set(guardianRows.map((g) => `${g.guardian_id}:${g.child_id}`)),
     unexcused,
+    optional,
   };
 }
 
@@ -416,8 +430,12 @@ function respondedBy(ctx: EventContext, personId: number, response: ResponseRow 
 }
 
 export function countsOf(list: Participant[]): EventCounts {
-  const c: EventCounts = { yes: 0, no: 0, open: 0, standing: 0, inactive: 0 };
-  for (const p of list) c[p.status]++;
+  const c: EventCounts = { yes: 0, no: 0, open: 0, standing: 0, inactive: 0, optional: 0 };
+  for (const p of list) {
+    // Optional participants count once they accept; otherwise they are neither open nor declined
+    if (p.optional && p.status !== "yes" && p.status !== "inactive") c.optional++;
+    else c[p.status]++;
+  }
   return c;
 }
 
@@ -469,6 +487,7 @@ function myParticipations(e: EventRow, ctx: EventContext, actor: Actor, now: num
       participant: !!part,
       nominated: e.kind === "game" ? !!part : false,
       isHelper: part?.isHelper ?? member?.role === "helper",
+      optional: part?.optional ?? false,
       status: part?.status ?? null,
       reason: response?.reason ?? null,
       isLate: response?.is_late === 1,
@@ -510,6 +529,7 @@ export function toSummary(e: EventRow, ctx: EventContext, actor: Actor, now: num
         ? { id: e.location_id, name: e.loc_name, address: e.loc_address, mapUrl: e.loc_map_url, kind: e.loc_kind ?? "custom" }
         : null,
     teams: teamRefs,
+    optionalTeamIds: teamRefs.filter((tm) => ctx.optional.has(`${e.id}:${tm.id}`)).map((tm) => tm.id),
     clubWide: e.club_wide === 1,
     cancelled: e.cancelled_at
       ? {
@@ -565,6 +585,7 @@ export function toDetail(e: EventRow, ctx: EventContext, actor: Actor, now: numb
         teamId: p.teamId,
         teamIds: p.teamIds,
         isHelper: p.isHelper,
+        optional: p.optional,
         status: p.status,
         reason: p.response?.reason ?? null,
         isLate: p.response?.is_late === 1,
@@ -741,6 +762,7 @@ export function mergeContexts(a: EventContext, b: EventContext): EventContext {
     helpRequests: new Map([...a.helpRequests, ...b.helpRequests]),
     guardianOf: new Set([...a.guardianOf, ...b.guardianOf]),
     unexcused: new Set([...a.unexcused, ...b.unexcused]),
+    optional: new Set([...a.optional, ...b.optional]),
   };
 }
 

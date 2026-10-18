@@ -132,7 +132,7 @@ function NextCard({ event, onDecline, later = false }: { event: EventSummary; on
           <>
             {mine[0]!.participant ? (
               <div class="row-gap">
-                <StatusPill status={mine[0]!.status} late={mine[0]!.isLate} />
+                <StatusPill status={mine[0]!.status} late={mine[0]!.isLate} optional={mine[0]!.optional} />
               </div>
             ) : null}
             <ResponseButtons event={event} p={mine[0]!} onDecline={onDecline} />
@@ -310,7 +310,7 @@ function EventRow({ event }: { event: EventSummary }) {
             <Trans>Nominated</Trans>
           </span>
         ) : (
-          <StatusPill status={single.status} late={single.isLate} nominated={single.nominated} game={event.kind === "game"} />
+          <StatusPill status={single.status} late={single.isLate} nominated={single.nominated} game={event.kind === "game"} optional={single.optional} />
         )
       ) : null}
       {!cancelled && !single && mine.length > 1 ? (
@@ -433,7 +433,8 @@ export function HomePage() {
   // The next event always, further ones on the same day only if they are games
   const sameDayAs = (first: EventSummary | undefined, list: EventSummary[]) =>
     first ? list.filter((e) => e === first || (e.kind === "game" && e.startsAt.slice(0, 10) === first.startsAt.slice(0, 10))) : [];
-  const isMine = (e: EventSummary) => !e.cancelled && e.mine.some((m) => m.participant || m.helpRequest?.status === "open");
+  // Optional trainings only once accepted; otherwise they stay in the list with their "Optional" mark
+  const isMine = (e: EventSummary) => !e.cancelled && e.mine.some((m) => (m.participant && (!m.optional || m.status === "yes")) || m.helpRequest?.status === "open");
   const mineCards = sameDayAs(pool.find(isMine), pool.filter(isMine));
   const mineIds = new Set(mineCards.map((e) => e.id));
   const next = mineCards[0];

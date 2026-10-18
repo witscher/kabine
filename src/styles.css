@@ -2716,3 +2716,12 @@ button.announcement-head {
   flex: none;
   margin-top: 1px;
 }
+
+/* Teams of a joint training time: mandatory or optional per team */
+.rule-teams .list-row {
+  flex-wrap: wrap;
+}
+.rule-teams .list-row > .segmented {
+  order: 3;
+  flex: 1 1 100%;
+}

@@ -22,6 +22,8 @@ const ruleSchema = z
     endsAt: z.string().refine(isTime, { error: () => t`Invalid time` }),
     locationId: z.number().int().positive(),
     teamIds: z.array(z.number().int().positive()).max(10).default([]),
+    /** Teams that join optionally ("together with"): players accept by hand, no automatic acceptance */
+    optionalTeamIds: z.array(z.number().int().positive()).max(10).default([]),
   })
   .refine((r) => r.startsAt < r.endsAt, { error: () => t`The end must be after the start.` });
 
@@ -67,14 +69,19 @@ interface RuleView {
   location_name: string;
   team_ids: string | null;
   team_names: string | null;
+  optional_ids: string | null;
 }
+
+const OPTIONAL_IDS = (rule: string) =>
+  `(SELECT group_concat(team_id) FROM rule_teams WHERE rule_id = ${rule}.id AND optional = 1) AS optional_ids`;
 
 async function rulesOf(db: D1Database, planIds: number[]): Promise<RuleView[]> {
   return all<RuleView>(
     db,
     `SELECT r.id, r.plan_id, r.weekday, r.starts_at, r.ends_at, r.location_id, l.name AS location_name,
             (SELECT group_concat(t.id) FROM rule_teams rt JOIN teams t ON t.id = rt.team_id WHERE rt.rule_id = r.id) AS team_ids,
-            (SELECT group_concat(t.name, ', ') FROM rule_teams rt JOIN teams t ON t.id = rt.team_id WHERE rt.rule_id = r.id) AS team_names
+            (SELECT group_concat(t.name, ', ') FROM rule_teams rt JOIN teams t ON t.id = rt.team_id WHERE rt.rule_id = r.id) AS team_names,
+            ${OPTIONAL_IDS("r")}
        FROM training_rules r JOIN locations l ON l.id = r.location_id
       WHERE r.plan_id IN (SELECT value FROM json_each(?))
       ORDER BY r.weekday, r.starts_at`,
@@ -85,13 +92,14 @@ async function rulesOf(db: D1Database, planIds: number[]): Promise<RuleView[]> {
 function ruleOut(r: RuleView) {
   const ids = (r.team_ids ?? "").split(",").filter(Boolean).map(Number);
   const names = (r.team_names ?? "").split(", ").filter(Boolean);
+  const optional = new Set((r.optional_ids ?? "").split(",").filter(Boolean).map(Number));
   return {
     id: r.id,
     weekday: r.weekday,
     startsAt: r.starts_at,
     endsAt: r.ends_at,
     location: { id: r.location_id, name: r.location_name },
-    teams: ids.map((id, i) => ({ id, name: names[i] ?? "" })),
+    teams: ids.map((id, i) => ({ id, name: names[i] ?? "", optional: optional.has(id) })),
   };
 }
 
@@ -108,7 +116,8 @@ planRoutes.get("/teams/:id/plans", async (c) => {
     `SELECT r.id, r.plan_id, r.weekday, r.starts_at, r.ends_at, r.location_id, l.name AS location_name,
             tp.name AS plan_name, ot.name AS owner_team, tp.valid_from, tp.valid_to,
             (SELECT group_concat(t.id) FROM rule_teams rt2 JOIN teams t ON t.id = rt2.team_id WHERE rt2.rule_id = r.id) AS team_ids,
-            (SELECT group_concat(t.name, ', ') FROM rule_teams rt2 JOIN teams t ON t.id = rt2.team_id WHERE rt2.rule_id = r.id) AS team_names
+            (SELECT group_concat(t.name, ', ') FROM rule_teams rt2 JOIN teams t ON t.id = rt2.team_id WHERE rt2.rule_id = r.id) AS team_names,
+            ${OPTIONAL_IDS("r")}
        FROM rule_teams rt JOIN training_rules r ON r.id = rt.rule_id JOIN training_plans tp ON tp.id = r.plan_id
        JOIN teams ot ON ot.id = tp.team_id JOIN locations l ON l.id = r.location_id
       WHERE rt.team_id = ? AND tp.team_id <> ? AND tp.valid_to >= ?
@@ -156,6 +165,10 @@ async function checkRuleInputs(db: D1Database, actor: Actor, ownTeamId: number, 
   }
   for (const rule of rules) {
     const after = new Set([ownTeamId, ...rule.teamIds]);
+    if (rule.optionalTeamIds.some((id) => !after.has(id))) throw badRequest(t`Only teams of this training time can join optionally.`);
+    if (after.size > 0 && [...after].every((id) => rule.optionalTeamIds.includes(id))) {
+      throw badRequest(t`At least one team must train here as usual.`);
+    }
     const changed = [...[...after].filter((t) => !before.includes(t) && t !== ownTeamId), ...before.filter((t) => !after.has(t))];
     if (changed.some((t) => !isCoachOf(actor, t))) throw forbidden(t`You can only add or remove other teams if you coach them too.`);
   }
@@ -174,7 +187,9 @@ function ruleStatements(db: D1Database, planId: number, teamId: number, rule: z.
       rule.endsAt,
       rule.locationId,
     ),
-    ...teamIds.map((t) => stmt(db, "INSERT INTO rule_teams (rule_id, team_id) VALUES ((SELECT max(id) FROM training_rules), ?)", t)),
+    ...teamIds.map((t) =>
+      stmt(db, "INSERT INTO rule_teams (rule_id, team_id, optional) VALUES ((SELECT max(id) FROM training_rules), ?, ?)", t, rule.optionalTeamIds.includes(t) ? 1 : 0),
+    ),
   ];
 }
 
@@ -288,7 +303,7 @@ planRoutes.patch("/rules/:id", async (c) => {
   await c.env.DB.batch([
     stmt(c.env.DB, "UPDATE training_rules SET weekday = ?, starts_at = ?, ends_at = ?, location_id = ? WHERE id = ?", input.weekday, input.startsAt, input.endsAt, input.locationId, rule.id),
     stmt(c.env.DB, "DELETE FROM rule_teams WHERE rule_id = ?", rule.id),
-    ...teamIds.map((t) => stmt(c.env.DB, "INSERT INTO rule_teams (rule_id, team_id) VALUES (?, ?)", rule.id, t)),
+    ...teamIds.map((t) => stmt(c.env.DB, "INSERT INTO rule_teams (rule_id, team_id, optional) VALUES (?, ?, ?)", rule.id, t, input.optionalTeamIds.includes(t) ? 1 : 0)),
   ]);
   await generateTrainings(c.env.DB);
   const changed = input.weekday !== rule.weekday || input.startsAt !== rule.starts_at || input.endsAt !== rule.ends_at || input.locationId !== rule.location_id;

@@ -61,6 +61,10 @@ msgstr "Game {teams} {vs}"
 msgid "Response is not an object"
 msgstr "Response is not an object"
 
+#: src/respond.tsx
+msgid "Not joining after all"
+msgstr "Not joining after all"
+
 #: worker/routes/events.ts
 #: worker/routes/events.ts
 #: worker/routes/events.ts
@@ -520,6 +524,10 @@ msgstr "Cancel for everyone"
 msgid "Holiday plan {holiday}"
 msgstr "Holiday plan {holiday}"
 
+#: src/respond.tsx
+msgid "Join"
+msgstr "Join"
+
 #: worker/routes/email.ts
 msgid "The address has been changed in the meantime. Please confirm the new address."
 msgstr "The address has been changed in the meantime. Please confirm the new address."
@@ -750,6 +758,10 @@ msgstr "The season change resets team memberships, training plans, events, respo
 #: src/pages/home.tsx
 msgid "Carpools ({taken}/{seats})"
 msgstr "Carpools ({taken}/{seats})"
+
+#: worker/routes/events.ts
+msgid "This team does not take part in the event."
+msgstr "This team does not take part in the event."
 
 #: src/pages/home.tsx
 msgid "Then: event"
@@ -1321,6 +1333,10 @@ msgstr "One seat fewer"
 msgid "Appears under privacy. The notes on the app itself are already there."
 msgstr "Appears under privacy. The notes on the app itself are already there."
 
+#: src/respond.tsx
+msgid "Not joining."
+msgstr "Not joining."
+
 #: worker/routes/season.ts
 msgid "The school holidays could not be loaded just now. You can enter them after the change under Administration → Holidays or try again later."
 msgstr "The school holidays could not be loaded just now. You can enter them after the change under Administration → Holidays or try again later."
@@ -1767,6 +1783,11 @@ msgstr "{reachable} reachable via the app"
 msgid "Delete plan?"
 msgstr "Delete plan?"
 
+#: src/pages/event.tsx
+#: src/pages/plans.tsx
+msgid "Joining for {teamName}"
+msgstr "Joining for {teamName}"
+
 #: src/pages/admin.tsx
 msgid "Signed in as admin {firstName}"
 msgstr "Signed in as admin {firstName}"
@@ -2099,6 +2120,10 @@ msgstr "Chat"
 #: src/avatar.tsx
 msgid "Profile picture removed."
 msgstr "Profile picture removed."
+
+#: worker/routes/events.ts
+msgid "Only trainings can be optional."
+msgstr "Only trainings can be optional."
 
 #: src/pages/team.tsx
 msgid "The core squad is now nominated for all future games."
@@ -2945,6 +2970,10 @@ msgstr "Afterwards, open the person and create a personal link for the access."
 msgid "Entered as driver"
 msgstr "Entered as driver"
 
+#: worker/routes/events.ts
+msgid "This is no longer possible for this event."
+msgstr "This is no longer possible for this event."
+
 #: worker/routes/squad.ts
 msgid "You are no longer in the squad for {title} on {when}."
 msgstr "You are no longer in the squad for {title} on {when}."
@@ -3247,6 +3276,10 @@ msgstr "Parent link"
 #: src/pages/privacy.tsx
 msgid "What data does the app store?"
 msgstr "What data does the app store?"
+
+#: src/pages/event.tsx
+msgid "They may join this training if they want to. Nobody counts as missing."
+msgstr "They may join this training if they want to. Nobody counts as missing."
 
 #: src/pages/admin.tsx
 msgid "Replaces the rows above with the age groups of the club's sport for this season. Nothing is saved until you tap Save."
@@ -3710,6 +3743,10 @@ msgstr "The link must start with https://."
 msgid "This link has already been used. Please ask for a new link."
 msgstr "This link has already been used. Please ask for a new link."
 
+#: worker/routes/events.ts
+msgid "The training was optional for this person."
+msgstr "The training was optional for this person."
+
 #: src/pages/chat.tsx
 msgid "notify everyone in the chat"
 msgstr "notify everyone in the chat"
@@ -4055,6 +4092,11 @@ msgstr "Upcoming events created by hand. Tap one to open it for editing, cancell
 #: src/respond.tsx
 msgid "I'm in"
 msgstr "I'm in"
+
+#: src/pages/event.tsx
+#: src/pages/plans.tsx
+msgid "Mandatory"
+msgstr "Mandatory"
 
 #: src/pages/join.tsx
 msgid "All done!"
@@ -5130,6 +5172,13 @@ msgstr "<0>Declined:</0> {declinedNames}."
 msgid "Load older messages"
 msgstr "Load older messages"
 
+#: src/pages/event.tsx
+#: src/pages/plans.tsx
+#: src/ui.tsx
+msgctxt "training"
+msgid "Optional"
+msgstr "Optional"
+
 #: src/email.tsx
 #: src/pages/join.tsx
 msgid "Go to sign-in"
@@ -5147,6 +5196,7 @@ msgstr "<0>Meeting point:</0> {point}, {meetTime}"
 msgid "{firstName} is now enabled as KiHaSL/JuHaSL."
 msgstr "{firstName} is now enabled as KiHaSL/JuHaSL."
 
+#: src/respond.tsx
 #: src/respond.tsx
 msgid "Accepted."
 msgstr "Accepted."
@@ -5340,6 +5390,7 @@ msgstr "Only applies to this event."
 msgid "All games of your teams, with meeting point if you are nominated"
 msgstr "All games of your teams, with meeting point if you are nominated"
 
+#: src/pages/plans.tsx
 #: src/pages/plans.tsx
 msgid "Together with"
 msgstr "Together with"
@@ -5775,6 +5826,10 @@ msgstr "Game"
 #: src/pages/admin.tsx
 msgid "{firstName} is now a coach of {teamName}."
 msgstr "{firstName} is now a coach of {teamName}."
+
+#: src/respond.tsx
+msgid "Optional training: accept if you want to join. Nobody counts as missing."
+msgstr "Optional training: accept if you want to join. Nobody counts as missing."
 
 #: src/pages/group.tsx
 msgid "Create group"
@@ -6258,6 +6313,10 @@ msgstr "Copied."
 msgid "For the whole club"
 msgstr "For the whole club"
 
+#: worker/routes/plans.ts
+msgid "Only teams of this training time can join optionally."
+msgstr "Only teams of this training time can join optionally."
+
 #: src/pages/profile.tsx
 msgid "For {firstName}"
 msgstr "For {firstName}"
@@ -6717,6 +6776,7 @@ msgstr "{driver} is not driving: {game}. The search for a lift for {rider} conti
 #: src/carpool.tsx
 #: src/pages/team.tsx
 #: src/pages/team.tsx
+#: src/respond.tsx
 msgid "Withdraw"
 msgstr "Withdraw"
 
@@ -6802,6 +6862,11 @@ msgstr "An admin assigns coaches."
 #: worker/chat/room.ts
 msgid "Chat {teamName}"
 msgstr "Chat {teamName}"
+
+#: src/pages/event.tsx
+#: src/pages/event.tsx
+msgid "Teams at this training"
+msgstr "Teams at this training"
 
 #: src/pages/plans.tsx
 msgid "Plan saved. {created} events created."
@@ -7018,6 +7083,10 @@ msgstr "until end of event"
 #: worker/domain/calendar.ts
 msgid "Cancelled: {entry}"
 msgstr "Cancelled: {entry}"
+
+#: src/pages/event.tsx
+msgid "Applies to this training only. The training plan sets it for all trainings."
+msgstr "Applies to this training only. The training plan sets it for all trainings."
 
 #: src/pages/event.tsx
 msgid "Undo cancellation"
@@ -9319,6 +9388,10 @@ msgstr "Under <0>Team → Invitations</0>, create the player or parent link and 
 msgid "Notifications in the helper plan"
 msgstr "Notifications in the helper plan"
 
+#: src/pages/plans.tsx
+msgid "Players accept by hand if they want to join."
+msgstr "Players accept by hand if they want to join."
+
 #: src/carpool.tsx
 msgid "Saved. As soon as someone offers seats, you will get a notification."
 msgstr "Saved. As soon as someone offers seats, you will get a notification."
@@ -9388,6 +9461,10 @@ msgstr "Free seats"
 msgctxt "short"
 msgid "Players"
 msgstr "Players"
+
+#: src/respond.tsx
+msgid "I'll join"
+msgstr "I'll join"
 
 #: src/pages/team.tsx
 msgid "Remove access?"
@@ -9895,6 +9972,16 @@ msgstr "Profile picture and permissions"
 msgid "Remove {label} {at}"
 msgstr "Remove {label} {at}"
 
+#: src/pages/event.tsx
+#: src/pages/event.tsx
+msgid "Optional, not joining"
+msgstr "Optional, not joining"
+
+#: src/pages/plans.tsx
+msgctxt "training"
+msgid "optional"
+msgstr "optional"
+
 #: worker/routes/games.ts
 msgid "No handball4all link is set for this team."
 msgstr "No handball4all link is set for this team."
@@ -9902,6 +9989,11 @@ msgstr "No handball4all link is set for this team."
 #: src/pages/plans.tsx
 msgid "Valid from"
 msgstr "Valid from"
+
+#: worker/routes/events.ts
+#: worker/routes/plans.ts
+msgid "At least one team must train here as usual."
+msgstr "At least one team must train here as usual."
 
 #: src/email.tsx
 msgid "Send a new code"
@@ -10224,6 +10316,10 @@ msgstr "Withdraw offer"
 #: src/pages/chat.tsx
 msgid "as admin"
 msgstr "as admin"
+
+#: src/pages/plans.tsx
+msgid "Everyone counts as accepted, as in their own training."
+msgstr "Everyone counts as accepted, as in their own training."
 
 #: src/pages/join.tsx
 msgid "Who are you?"

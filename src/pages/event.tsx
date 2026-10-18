@@ -12,7 +12,7 @@ import { GameReportLink, isLiveWindow, isReportWindow, LiveTickerLink } from "..
 import { byGuardianText, DeclineSheet, deadlineText, PersonResponseRow, quickReasons, ResponseButtons, respondedByText, sendResponse } from "../respond";
 import { useMe, useSession } from "../session";
 import { invalidate, useQuery } from "../store";
-import { Button, confirmDialog, copyText, ErrorBox, Field, Notice, Sheet, Spinner, StatusPill, SwitchRow, TextField, toast, useDocumentTitle } from "../ui";
+import { Button, confirmDialog, copyText, ErrorBox, Field, Notice, Segmented, Sheet, Spinner, StatusPill, SwitchRow, TextField, toast, useDocumentTitle } from "../ui";
 
 const kindLabel = (kind: EventDetail["kind"]) => ({ training: t`Training`, game: t`Game`, special: t`Event` })[kind];
 
@@ -157,7 +157,7 @@ export function EventPage({ id }: { id: string }) {
             {single && !single.helpRequest ? (
               <>
                 <div class="row-gap">
-                  <StatusPill status={single.status} late={single.isLate} nominated={single.nominated} game={event.kind === "game"} />
+                  <StatusPill status={single.status} late={single.isLate} nominated={single.nominated} game={event.kind === "game"} optional={single.optional} />
                   {single.unexcused ? (
                     <span class="badge warn">
                       <Trans>Missed without excuse</Trans>
@@ -308,9 +308,11 @@ function CoachView({ event, onChanged }: { event: EventDetail; onChanged: () => 
   const [person, setPerson] = useState<ParticipantDetail | null>(null);
   const missed = parts.filter((p) => p.unexcused);
   const yes = parts.filter((p) => p.status === "yes" && !p.unexcused);
-  const no = parts.filter((p) => p.status === "no");
+  const no = parts.filter((p) => p.status === "no" && !p.optional);
   const away = parts.filter((p) => p.status === "standing" || p.status === "inactive");
-  const open = parts.filter((p) => p.status === "open" && !p.unexcused);
+  const open = parts.filter((p) => p.status === "open" && !p.unexcused && !p.optional);
+  // Optional training: who could join but has not accepted (not missing, no reminder)
+  const optionalOut = parts.filter((p) => p.optional && (p.status === "open" || p.status === "no"));
   const grouped = event.teams.length > 1;
   const editable = !event.isPast;
   const deadline = deadlineText(event);
@@ -532,6 +534,26 @@ function CoachView({ event, onChanged }: { event: EventDetail; onChanged: () => 
           ))}
         </section>
       ) : null}
+
+      {optionalOut.length ? (
+        <section class="card card-body" aria-label={t`Optional, not joining`}>
+          <h2 class="section-title" style={{ margin: 0 }}>
+            <Trans>Optional, not joining</Trans> · {optionalOut.length}
+          </h2>
+          <p class="small muted">
+            <Trans>They may join this training if they want to. Nobody counts as missing.</Trans>
+          </p>
+          <div class="chips">
+            {optionalOut.map((p) => (
+              <button type="button" class="chip" onClick={() => setPerson(p)}>
+                {nameFor(p)}
+              </button>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      {event.kind === "training" && grouped && editable && !event.cancelled ? <JoiningTeams event={event} onChanged={refresh} /> : null}
 
       {!parts.length ? (
         <Notice>{event.kind === "game" ? t`Nobody nominated yet.` : t`There are no participants for this event.`}</Notice>
@@ -848,6 +870,45 @@ function CoachResponse({ event, p, onDone }: { event: EventDetail; p: Participan
   );
 }
 
+/** Joint training: mandatory or optional per team, for this event only. */
+function JoiningTeams({ event, onChanged }: { event: EventDetail; onChanged: () => void }) {
+  return (
+    <section class="card card-body stack-sm" aria-label={t`Teams at this training`}>
+      <h2 class="section-title" style={{ margin: 0 }}>
+        <Trans>Teams at this training</Trans>
+      </h2>
+      {event.teams.map((team) => {
+        const teamName = team.name;
+        const optional = event.optionalTeamIds.includes(team.id);
+        return (
+          <div class="row-gap" style={{ justifyContent: "space-between" }}>
+            <span class="team-badge">{teamName}</span>
+            <Segmented
+              label={t`Joining for ${teamName}`}
+              value={optional ? "optional" : "mandatory"}
+              options={[
+                { value: "mandatory", label: t`Mandatory` },
+                { value: "optional", label: t({ message: "Optional", context: "training" }) },
+              ]}
+              onChange={async (v) => {
+                try {
+                  await api.put(`/events/${event.id}/teams/${team.id}/optional`, { optional: v === "optional" });
+                  onChanged();
+                } catch (err) {
+                  toast(errorMessage(err), "error");
+                }
+              }}
+            />
+          </div>
+        );
+      })}
+      <p class="small muted">
+        <Trans>Applies to this training only. The training plan sets it for all trainings.</Trans>
+      </p>
+    </section>
+  );
+}
+
 function ParticipantSheet({ event, p, onClose, onDone }: { event: EventDetail; p: ParticipantDetail; onClose: () => void; onDone: () => void }) {
   const wd = weekdayOf(event.startsAt);
   const teamId = p.teamId;
@@ -856,7 +917,7 @@ function ParticipantSheet({ event, p, onClose, onDone }: { event: EventDetail; p
   return (
     <Sheet open onClose={onClose} title={personName(p.person)}>
       <div class="row-gap">
-        <StatusPill status={p.status} late={p.isLate} />
+        <StatusPill status={p.status} late={p.isLate} optional={p.optional} />
         {p.isHelper ? <span class="badge muted">{t`Stand-in`}</span> : null}
         {p.unexcused ? (
           <span class="badge warn">
@@ -865,7 +926,7 @@ function ParticipantSheet({ event, p, onClose, onDone }: { event: EventDetail; p
         ) : null}
       </div>
       {p.reason ? <p>{quoted(p.reason)}</p> : null}
-      {event.isPast && !event.cancelled && (p.unexcused || p.status === "yes" || p.status === "open") ? (
+      {event.isPast && !event.cancelled && !p.optional && (p.unexcused || p.status === "yes" || p.status === "open") ? (
         <div class="list">
           <SwitchRow
             label={t`Absent without excuse`}

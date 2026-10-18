@@ -210,6 +210,22 @@ export async function generateTrainings(db: D1Database, now = Date.now()): Promi
     result.created++;
   }
 
+  // Optional or mandatory per team, as in the rule; a setting made by hand for one event stays
+  statements.push(
+    stmt(
+      db,
+      `UPDATE event_teams
+          SET optional = (SELECT rt.optional FROM events e JOIN rule_teams rt ON rt.rule_id = e.rule_id
+                           WHERE e.id = event_teams.event_id AND rt.team_id = event_teams.team_id)
+        WHERE optional_manual = 0
+          AND event_id IN (SELECT id FROM events WHERE rule_id IS NOT NULL AND is_detached = 0 AND starts_at > ?)
+          AND optional IS NOT (SELECT rt.optional FROM events e JOIN rule_teams rt ON rt.rule_id = e.rule_id
+                                WHERE e.id = event_teams.event_id AND rt.team_id = event_teams.team_id)
+          AND EXISTS (SELECT 1 FROM events e JOIN rule_teams rt ON rt.rule_id = e.rule_id
+                       WHERE e.id = event_teams.event_id AND rt.team_id = event_teams.team_id)`,
+      nowL,
+    ),
+  );
   statements.push(
     stmt(
       db,
