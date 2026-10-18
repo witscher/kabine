@@ -1,0 +1,14 @@
+# Core areas the maintainer reviews in every pull request. Modules (modules/), sports (sports/),
+# translations (locales/) and docs can be reviewed by any maintainer.
+/worker/auth/            @witscher
+/worker/app.ts           @witscher
+/worker/lib/             @witscher
+/worker/module-api.ts    @witscher
+/shared/module-api.ts    @witscher
+/shared/club.ts          @witscher
+/src/module-api.ts       @witscher
+/migrations/             @witscher
+/wrangler.jsonc          @witscher
+/package.json            @witscher
+/package-lock.json       @witscher
+/.github/                @witscher

@@ -1,0 +1,40 @@
+name: Sport profile
+description: Defaults for another sport (age classes, playing times, helper duties)
+labels: ["sport"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        A sport profile is one file in `sports/`. `npm run new -- sport <id>` creates it. Guide: [docs/sports.md](https://github.com/witscher/kabine/blob/main/docs/sports.md).
+  - type: input
+    id: sport
+    attributes:
+      label: Sport and country or federation
+      placeholder: Volleyball, Deutscher Volleyball-Verband
+    validations:
+      required: true
+  - type: textarea
+    id: classes
+    attributes:
+      label: Age classes
+      description: Name and ages (reached in the year the season starts), from young to old
+      placeholder: |
+        U12: up to 11
+        U14: 12–13
+        ...
+    validations:
+      required: true
+  - type: textarea
+    id: minutes
+    attributes:
+      label: How long a game blocks the hall, per age class
+  - type: textarea
+    id: duties
+    attributes:
+      label: Typical helper duties at a home game
+      placeholder: Scorers' table, line judges, cake stand
+  - type: input
+    id: season
+    attributes:
+      label: Season start
+      placeholder: 1 August

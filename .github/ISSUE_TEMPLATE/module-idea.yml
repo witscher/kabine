@@ -1,0 +1,52 @@
+name: Module idea
+description: A function clubs could switch on (polls, documents, statistics, …)
+labels: ["module"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Modules are switched on per club and live in `modules/<name>/`. See [docs/modules.md](https://github.com/witscher/kabine/blob/main/docs/modules.md) and [AGENTS.md](https://github.com/witscher/kabine/blob/main/AGENTS.md). Kabine stays a team app: membership management, fees and bookkeeping are out of scope.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What does a team or club struggle with today?
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: What the module would do
+    validations:
+      required: true
+  - type: checkboxes
+    id: who
+    attributes:
+      label: Who uses it
+      options:
+        - label: Players
+        - label: Parents
+        - label: Coaches
+        - label: Admins
+  - type: textarea
+    id: data
+    attributes:
+      label: Personal data it would store
+      description: Kabine stores only what a team needs. Which data, who would see it, when would it be deleted? "None" is a fine answer.
+    validations:
+      required: true
+  - type: input
+    id: sports
+    attributes:
+      label: Sports
+      description: All sports, or only some?
+  - type: dropdown
+    id: build
+    attributes:
+      label: Will you build it?
+      options:
+        - Yes, I (or my coding agent) will send a pull request
+        - Maybe, with some help
+        - No, it is only an idea
+    validations:
+      required: true

@@ -40,4 +40,4 @@ npm run e2e                # end-to-end tests (for changes to screens)
 - **Invented names** in tests, fixtures and the demo.
 - Never commit secrets.
 
-Security problems: please do not open a public issue; write to the maintainer (see the profile of the repository).
+Security problems: please do not open a public issue, see [SECURITY.md](SECURITY.md).

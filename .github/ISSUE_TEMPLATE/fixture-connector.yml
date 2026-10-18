@@ -1,0 +1,56 @@
+name: Fixture connector
+description: Game schedules from another association system (handball360, nuLiga, SAMS, basketball-bund, …)
+labels: ["connector"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        A connector reads the game schedule of one team from an association's system. Only **permitted access** is accepted: an official API, a public JSON or iCal export, or written permission from the association. No reading of HTML pages against the terms of use. Guide: [docs/connectors.md](https://github.com/witscher/kabine/blob/main/docs/connectors.md).
+  - type: input
+    id: source
+    attributes:
+      label: Source
+      description: Name and address of the system
+      placeholder: nuLiga, https://example-association.liga.nu
+    validations:
+      required: true
+  - type: input
+    id: scope
+    attributes:
+      label: Sports and regions
+      placeholder: Handball, Bavaria
+    validations:
+      required: true
+  - type: dropdown
+    id: access
+    attributes:
+      label: Kind of access
+      options:
+        - Official API
+        - Public JSON or iCal export
+        - Permission from the association
+        - Not known yet
+    validations:
+      required: true
+  - type: input
+    id: terms
+    attributes:
+      label: Terms of use or API documentation
+      description: Link to the terms or the documentation that allows the access
+  - type: input
+    id: example
+    attributes:
+      label: Example link to one team's schedule
+      description: Coaches will paste a link like this into Kabine
+    validations:
+      required: true
+  - type: dropdown
+    id: build
+    attributes:
+      label: Will you build it?
+      options:
+        - Yes, I (or my coding agent) will send a pull request
+        - Maybe, with some help
+        - No, it is only a request
+    validations:
+      required: true
