@@ -1203,3 +1203,15 @@ test("Sprache: Spielerin stellt auf Englisch um und wieder zurück", async () =>
   await page.getByRole("combobox", { name: "Language" }).selectOption("de");
   await expect(page.getByRole("link", { name: "Profil" })).toBeVisible();
 });
+
+test("Spielplan aus einer Tabelle: Vorschau und Anlegen", async () => {
+  const { page } = coach;
+  await page.goto("/team/1");
+  await page.getByRole("button", { name: "Einstellungen" }).click();
+  const section = page.getByRole("region", { name: "Spiele übernehmen" });
+  await section.getByLabel("Spielplan als Tabelle").fill("Datum;Uhrzeit;Gegner;Heim;Halle\n05.05.2099;15:00;SG Tabellenstadt;A;Halle West");
+  await section.getByRole("button", { name: "Vorschau" }).click();
+  await expect(section.getByText("Auswärtsspiel bei SG Tabellenstadt")).toBeVisible();
+  await section.getByRole("button", { name: "1 Spiel anlegen" }).click();
+  await expect(page.getByText("1 Spiel angelegt.")).toBeVisible();
+});

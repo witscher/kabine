@@ -359,6 +359,11 @@ msgstr "Das Bild von {name} wird gelöscht."
 msgid "Helper plan icon: <0>Lucide</0> (ISC licence)."
 msgstr "Icon Helferplan: <0>Lucide</0> (ISC-Lizenz)."
 
+# ai
+#: src/game-import.tsx
+msgid "Choose file"
+msgstr "Datei wählen"
+
 #: worker/routes/season.ts
 msgid "This season is already running."
 msgstr "Diese Saison läuft bereits."
@@ -752,6 +757,11 @@ msgstr "Fahrgemeinschaften (Mitfahrer, freie Plätze)"
 #: worker/domain/email-login.ts
 msgid "The e-mail address is too long."
 msgstr "Die E-Mail-Adresse ist zu lang."
+
+# ai
+#: src/game-import.tsx
+msgid "Date;Time;Opponent;Home;Venue"
+msgstr "Datum;Uhrzeit;Gegner;Heim;Halle"
 
 #: src/pages/group.tsx
 msgid "An admin assigns members."
@@ -1936,6 +1946,11 @@ msgstr "Du kannst dir die Admin-Rechte nicht selbst entziehen."
 msgid "Zoom"
 msgstr "Zoom"
 
+# ai
+#: src/pages/team.tsx
+msgid "Import games from a table"
+msgstr "Spiele aus einer Tabelle übernehmen"
+
 #: src/pages/referees.tsx
 msgid "Activation link"
 msgstr "Freischalt-Link"
@@ -2895,9 +2910,19 @@ msgstr "Laufende Saison"
 msgid "Only chat and special events, e.g. coaching team"
 msgstr "Nur Chat und Sondertermine, z. B. Trainerteam"
 
+# ai
+#: src/game-import.tsx
+msgid "Away game at {opponent}"
+msgstr "Auswärtsspiel bei {opponent}"
+
 #: src/pages/home.tsx
 msgid "Please decline in good time by {deadline} so that your coaches can plan better."
 msgstr "Bitte sage rechtzeitig bis {deadline} ab, damit deine Trainer besser planen können."
+
+# ai
+#: src/game-import.tsx
+msgid "{created, plural, one {# game created.} other {# games created.}}"
+msgstr "{created, plural, one {# Spiel angelegt.} other {# Spiele angelegt.}}"
 
 #: src/pages/admin.tsx
 msgid "the link to the children"
@@ -2983,6 +3008,11 @@ msgstr "Fahrer bieten Plätze zu Auswärtsspielen an, Spieler buchen sie."
 #: src/carpool.tsx
 msgid "Second companion"
 msgstr "Zweite Begleitperson"
+
+# ai
+#: worker/routes/game-import.ts
+msgid "{count, plural, one {New game for {teamName}} other {# new games for {teamName}}}"
+msgstr "{count, plural, one {Neues Spiel für {teamName}} other {# neue Spiele für {teamName}}}"
 
 #: src/calendar.tsx
 msgid "Calendar link removed."
@@ -4038,6 +4068,11 @@ msgstr "inaktiv"
 msgid "Joint trainings from other plans"
 msgstr "Gemeinsame Trainings anderer Pläne"
 
+# ai
+#: src/game-import.tsx
+msgid "past"
+msgstr "vorbei"
+
 #: worker/routes/carpool.ts
 msgid "{rider} is not riding with you after all: {game} (entered by {coach})."
 msgstr "{rider} fährt doch nicht mit dir mit: {game} (eingetragen von {coach})."
@@ -4597,6 +4632,7 @@ msgid "New season started"
 msgstr "Neue Saison gestartet"
 
 #: worker/routes/duties.ts
+#: worker/routes/game-import.ts
 msgid "Only coaches of this team can do this."
 msgstr "Das dürfen nur Trainer dieser Mannschaft."
 
@@ -5054,6 +5090,11 @@ msgstr "Auf dem iPhone funktionieren Benachrichtigungen nur, wenn die App auf de
 #: worker/routes/admin.ts
 msgid "There is no current season."
 msgstr "Es gibt keine laufende Saison."
+
+# ai
+#: src/game-import.tsx
+msgid "Without a connection to the association: paste a table (for example from a spreadsheet) with the columns date, time, opponent, home or away and venue, or choose a CSV file."
+msgstr "Ohne Anbindung an den Verband: Füge eine Tabelle ein (zum Beispiel aus einer Tabellenkalkulation) mit den Spalten Datum, Uhrzeit, Gegner, Heim oder auswärts und Halle, oder wähle eine CSV-Datei."
 
 #: worker/cron.ts
 msgid "Are you coming?"
@@ -5800,6 +5841,11 @@ msgstr "Spiele ohne handball4all legst du in der Mannschaft an (Team → Termin 
 msgid "After"
 msgstr "Danach"
 
+# ai
+#: src/pages/team.tsx
+msgid "Import games"
+msgstr "Spiele übernehmen"
+
 #: src/pages/home.tsx
 msgid "by {byName}"
 msgstr "von {byName}"
@@ -6043,6 +6089,11 @@ msgstr "Automatischer Kader ausgeschaltet. Bereits nominierte Kader bleiben."
 #: src/pages/admin.tsx
 msgid "Delete venue"
 msgstr "Ort löschen"
+
+# ai
+#: src/game-import.tsx
+msgid "{fresh, plural, one {Create # game} other {Create # games}}"
+msgstr "{fresh, plural, one {# Spiel anlegen} other {# Spiele anlegen}}"
 
 #: src/pages/duty-admin.tsx
 msgid "e.g. home game with barbecue"
@@ -6979,6 +7030,7 @@ msgstr "{name} ist jetzt KiHaSL/JuHaSL. Im Reiter Helfer stehen alle Jugend-Heim
 msgid "Setup"
 msgstr "Einrichtung"
 
+#: src/game-import.tsx
 #: src/pages/plans.tsx
 msgid "Preview"
 msgstr "Vorschau"
@@ -7039,6 +7091,11 @@ msgstr "Angebot zurückgezogen"
 #: src/pages/plans.tsx
 msgid "The dates follow the holiday period, even if it is changed under Administration → Holidays."
 msgstr "Die Daten folgen dem Ferienzeitraum, auch wenn er unter Verwaltung → Ferien geändert wird."
+
+# ai
+#: src/game-import.tsx
+msgid "Line {line} skipped"
+msgstr "Zeile {line} übersprungen"
 
 #: src/avatar.tsx
 msgid "No picture yet. Until then, the initial is shown here."
@@ -7958,6 +8015,11 @@ msgstr "Passkey einrichten (empfohlen)"
 msgid "Holiday"
 msgstr "Urlaub"
 
+# ai
+#: worker/routes/game-import.ts
+msgid "The game schedule is in the app. Please check when you can play."
+msgstr "Der Spielplan ist in der App. Bitte schau nach, wann du spielen kannst."
+
 #: src/pages/event.tsx
 msgid "There are no participants for this event."
 msgstr "Für diesen Termin gibt es keine Teilnehmer."
@@ -8341,6 +8403,11 @@ msgstr "{name} hat für {childName} „{label}“ ausgeschaltet."
 #: src/pages/privacy.tsx
 msgid "The app is an internal service of {clubName}."
 msgstr "Die App ist ein internes Angebot von {clubName}."
+
+# ai
+#: src/game-import.tsx
+msgid "already there"
+msgstr "schon da"
 
 #: src/pages/event.tsx
 #: src/pages/event.tsx
@@ -9374,6 +9441,11 @@ msgstr "Dauerhafte Aushilfe"
 msgid "with note"
 msgstr "mit Notiz"
 
+# ai
+#: src/game-import.tsx
+msgid "Home game vs {opponent}"
+msgstr "Heimspiel gegen {opponent}"
+
 #: src/app.tsx
 msgid "Loading app"
 msgstr "App wird geladen"
@@ -9424,6 +9496,11 @@ msgstr "Wer braucht eine Mitfahrgelegenheit?"
 #: src/pages/login.tsx
 msgid "Sign in by e-mail"
 msgstr "Anmeldung per E-Mail"
+
+# ai
+#: src/game-import.tsx
+msgid "Game schedule as a table"
+msgstr "Spielplan als Tabelle"
 
 #: worker/routes/games.ts
 msgid "The schedule could not be processed."

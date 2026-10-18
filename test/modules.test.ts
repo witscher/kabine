@@ -30,6 +30,8 @@ describe("Module", () => {
     expect(moduleOfPath("/api/events/12/carpool/offers/3")).toBe("carpools");
     expect(moduleOfPath("/api/teams/4/games/claim")).toBe("handball4all");
     expect(moduleOfPath("/api/events")).toBeNull();
+    expect(moduleOfPath("/api/duties/teams/4/games")).toBeNull();
+    expect(moduleOfPath("/api/duties/games/9")).toBeNull();
     expect(moduleOfPath("/api/admin/club-members/3")).toBeNull();
   });
 

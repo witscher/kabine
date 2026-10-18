@@ -14,6 +14,7 @@ import { dutyRoutes } from "./routes/duties";
 import { emailRoutes } from "./routes/email";
 import { eventRoutes } from "./routes/events";
 import { feedbackRoutes } from "./routes/feedback";
+import { gameImportRoutes } from "./routes/game-import";
 import { gameRoutes } from "./routes/games";
 import { joinRoutes } from "./routes/join";
 import { parentRoutes } from "./routes/parents";
@@ -47,6 +48,7 @@ for (const routes of [
   pushRoutes,
   chatRoutes,
   gameRoutes,
+  gameImportRoutes,
   seasonRoutes,
   avatarRoutes,
   dutyRoutes,

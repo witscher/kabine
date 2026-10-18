@@ -14,6 +14,7 @@ import { Icon } from "../icons";
 import { ExtraEventList } from "../extra-events";
 import { GroupPage } from "./group";
 import { useMe, useSession } from "../session";
+import { GameImport } from "../game-import";
 import { invalidate, useQuery } from "../store";
 import {
   Button,
@@ -955,6 +956,13 @@ function SettingsTab({ team, onChanged }: { team: TeamDetail; onChanged: () => v
         </p>
       </section>
       ) : null}
+
+      <section class="card card-body" aria-label={t`Import games`}>
+        <h2 class="section-title" style={{ margin: 0 }}>
+          <Trans>Import games from a table</Trans>
+        </h2>
+        <GameImport teamId={team.id} />
+      </section>
     </>
   );
 }

@@ -368,6 +368,15 @@ function gameLiveUrl(e: EventRow, teams: TeamInfo[]): string | null {
 export const CURRENT_AGE_CLASS_JOIN = (team: string, ac: string) =>
   `LEFT JOIN age_classes ${ac} ON ${ac}.code = ${team}.age_class_code AND ${ac}.season_id = (SELECT id FROM seasons WHERE is_current = 1)`;
 
+/** Playing time of a team's age class in the current season (90 if unknown). */
+export async function teamGameMinutes(db: D1Database, teamId: number): Promise<number> {
+  const row = await db
+    .prepare(`SELECT ac.game_minutes FROM teams t ${CURRENT_AGE_CLASS_JOIN("t", "ac")} WHERE t.id = ?`)
+    .bind(teamId)
+    .first<{ game_minutes: number | null }>();
+  return row?.game_minutes ?? 90;
+}
+
 /**
  * Duration of the "In progress" card, after that there is the game report: the playing time of the
  * age class (sport profile, editable by admins). With several teams the longest applies.

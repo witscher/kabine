@@ -358,6 +358,10 @@ msgstr "The picture of {name} will be deleted."
 msgid "Helper plan icon: <0>Lucide</0> (ISC licence)."
 msgstr "Helper plan icon: <0>Lucide</0> (ISC licence)."
 
+#: src/game-import.tsx
+msgid "Choose file"
+msgstr "Choose file"
+
 #: worker/routes/season.ts
 msgid "This season is already running."
 msgstr "This season is already running."
@@ -748,6 +752,10 @@ msgstr "Carpools (passengers, free seats)"
 #: worker/domain/email-login.ts
 msgid "The e-mail address is too long."
 msgstr "The e-mail address is too long."
+
+#: src/game-import.tsx
+msgid "Date;Time;Opponent;Home;Venue"
+msgstr "Date;Time;Opponent;Home;Venue"
 
 #: src/pages/group.tsx
 msgid "An admin assigns members."
@@ -1929,6 +1937,10 @@ msgstr "You cannot remove your own admin rights."
 msgid "Zoom"
 msgstr "Zoom"
 
+#: src/pages/team.tsx
+msgid "Import games from a table"
+msgstr "Import games from a table"
+
 #: src/pages/referees.tsx
 msgid "Activation link"
 msgstr "Activation link"
@@ -2884,9 +2896,17 @@ msgstr "Current season"
 msgid "Only chat and special events, e.g. coaching team"
 msgstr "Only chat and special events, e.g. coaching team"
 
+#: src/game-import.tsx
+msgid "Away game at {opponent}"
+msgstr "Away game at {opponent}"
+
 #: src/pages/home.tsx
 msgid "Please decline in good time by {deadline} so that your coaches can plan better."
 msgstr "Please decline in good time by {deadline} so that your coaches can plan better."
+
+#: src/game-import.tsx
+msgid "{created, plural, one {# game created.} other {# games created.}}"
+msgstr "{created, plural, one {# game created.} other {# games created.}}"
 
 #: src/pages/admin.tsx
 msgid "the link to the children"
@@ -2971,6 +2991,10 @@ msgstr "Drivers offer seats for away games, players book them."
 #: src/carpool.tsx
 msgid "Second companion"
 msgstr "Second companion"
+
+#: worker/routes/game-import.ts
+msgid "{count, plural, one {New game for {teamName}} other {# new games for {teamName}}}"
+msgstr "{count, plural, one {New game for {teamName}} other {# new games for {teamName}}}"
 
 #: src/calendar.tsx
 msgid "Calendar link removed."
@@ -4019,6 +4043,10 @@ msgstr "inactive"
 msgid "Joint trainings from other plans"
 msgstr "Joint trainings from other plans"
 
+#: src/game-import.tsx
+msgid "past"
+msgstr "past"
+
 #: worker/routes/carpool.ts
 msgid "{rider} is not riding with you after all: {game} (entered by {coach})."
 msgstr "{rider} is not riding with you after all: {game} (entered by {coach})."
@@ -4574,6 +4602,7 @@ msgid "New season started"
 msgstr "New season started"
 
 #: worker/routes/duties.ts
+#: worker/routes/game-import.ts
 msgid "Only coaches of this team can do this."
 msgstr "Only coaches of this team can do this."
 
@@ -5029,6 +5058,10 @@ msgstr "On the iPhone, notifications only work if the app is installed on the Ho
 #: worker/routes/admin.ts
 msgid "There is no current season."
 msgstr "There is no current season."
+
+#: src/game-import.tsx
+msgid "Without a connection to the association: paste a table (for example from a spreadsheet) with the columns date, time, opponent, home or away and venue, or choose a CSV file."
+msgstr "Without a connection to the association: paste a table (for example from a spreadsheet) with the columns date, time, opponent, home or away and venue, or choose a CSV file."
 
 #: worker/cron.ts
 msgid "Are you coming?"
@@ -5772,6 +5805,10 @@ msgstr "You create games without handball4all in the team (Team → Create event
 msgid "After"
 msgstr "After"
 
+#: src/pages/team.tsx
+msgid "Import games"
+msgstr "Import games"
+
 #: src/pages/home.tsx
 msgid "by {byName}"
 msgstr "by {byName}"
@@ -6015,6 +6052,10 @@ msgstr "Automatic squad switched off. Squads already nominated remain."
 #: src/pages/admin.tsx
 msgid "Delete venue"
 msgstr "Delete venue"
+
+#: src/game-import.tsx
+msgid "{fresh, plural, one {Create # game} other {Create # games}}"
+msgstr "{fresh, plural, one {Create # game} other {Create # games}}"
 
 #: src/pages/duty-admin.tsx
 msgid "e.g. home game with barbecue"
@@ -6949,6 +6990,7 @@ msgstr "{name} is now KiHaSL/JuHaSL. The Helpers tab lists all youth home games 
 msgid "Setup"
 msgstr "Setup"
 
+#: src/game-import.tsx
 #: src/pages/plans.tsx
 msgid "Preview"
 msgstr "Preview"
@@ -7009,6 +7051,10 @@ msgstr "Offer withdrawn"
 #: src/pages/plans.tsx
 msgid "The dates follow the holiday period, even if it is changed under Administration → Holidays."
 msgstr "The dates follow the holiday period, even if it is changed under Administration → Holidays."
+
+#: src/game-import.tsx
+msgid "Line {line} skipped"
+msgstr "Line {line} skipped"
 
 #: src/avatar.tsx
 msgid "No picture yet. Until then, the initial is shown here."
@@ -7923,6 +7969,10 @@ msgstr "Set up passkey (recommended)"
 msgid "Holiday"
 msgstr "Holiday"
 
+#: worker/routes/game-import.ts
+msgid "The game schedule is in the app. Please check when you can play."
+msgstr "The game schedule is in the app. Please check when you can play."
+
 #: src/pages/event.tsx
 msgid "There are no participants for this event."
 msgstr "There are no participants for this event."
@@ -8304,6 +8354,10 @@ msgstr "{name} has turned off “{label}” for {childName}."
 #: src/pages/privacy.tsx
 msgid "The app is an internal service of {clubName}."
 msgstr "The app is an internal service of {clubName}."
+
+#: src/game-import.tsx
+msgid "already there"
+msgstr "already there"
 
 #: src/pages/event.tsx
 #: src/pages/event.tsx
@@ -9333,6 +9387,10 @@ msgstr "Permanent stand-in"
 msgid "with note"
 msgstr "with note"
 
+#: src/game-import.tsx
+msgid "Home game vs {opponent}"
+msgstr "Home game vs {opponent}"
+
 #: src/app.tsx
 msgid "Loading app"
 msgstr "Loading app"
@@ -9383,6 +9441,10 @@ msgstr "Who needs a ride?"
 #: src/pages/login.tsx
 msgid "Sign in by e-mail"
 msgstr "Sign in by e-mail"
+
+#: src/game-import.tsx
+msgid "Game schedule as a table"
+msgstr "Game schedule as a table"
 
 #: worker/routes/games.ts
 msgid "The schedule could not be processed."

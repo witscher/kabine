@@ -31,6 +31,7 @@ import { dutyHubStub, notifyDutyChange } from "../duties/hub";
 import { notifyPersons, shortDate, shortTime } from "../domain/notify";
 import { all, first, run, stmt } from "../lib/db";
 import { badRequest, conflict, forbidden, notFound, parse, readJson } from "../lib/http";
+import { teamGameMinutes } from "../domain/events";
 import { addDays, addMinutesLocal, isDate, isLocalDateTime, isTime, nowLocal, todayLocal } from "../lib/time";
 
 export const dutyRoutes = new Hono<AppEnv>();
@@ -723,7 +724,7 @@ dutyRoutes.post("/duties/teams/:id/games", async (c) => {
     `INSERT INTO events (kind, starts_at, ends_at, location_id, home_team, guest_team, is_home)
      VALUES ('game', ?, ?, ?, ?, ?, ?) RETURNING id`,
     startsAt,
-    addMinutesLocal(startsAt, 90),
+    addMinutesLocal(startsAt, await teamGameMinutes(c.env.DB, teamId)),
     input.locationId ?? null,
     input.isHome ? own : input.opponent,
     input.isHome ? input.opponent : own,

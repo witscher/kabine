@@ -1,0 +1,17 @@
+{
+  "Choose file": "Datei wählen",
+  "Date;Time;Opponent;Home;Venue": "Datum;Uhrzeit;Gegner;Heim;Halle",
+  "Import games from a table": "Spiele aus einer Tabelle übernehmen",
+  "Away game at {opponent}": "Auswärtsspiel bei {opponent}",
+  "{created, plural, one {# game created.} other {# games created.}}": "{created, plural, one {# Spiel angelegt.} other {# Spiele angelegt.}}",
+  "{count, plural, one {New game for {teamName}} other {# new games for {teamName}}}": "{count, plural, one {Neues Spiel für {teamName}} other {# neue Spiele für {teamName}}}",
+  "past": "vorbei",
+  "Without a connection to the association: paste a table (for example from a spreadsheet) with the columns date, time, opponent, home or away and venue, or choose a CSV file.": "Ohne Anbindung an den Verband: Füge eine Tabelle ein (zum Beispiel aus einer Tabellenkalkulation) mit den Spalten Datum, Uhrzeit, Gegner, Heim oder auswärts und Halle, oder wähle eine CSV-Datei.",
+  "Import games": "Spiele übernehmen",
+  "{fresh, plural, one {Create # game} other {Create # games}}": "{fresh, plural, one {# Spiel anlegen} other {# Spiele anlegen}}",
+  "Line {line} skipped": "Zeile {line} übersprungen",
+  "The game schedule is in the app. Please check when you can play.": "Der Spielplan ist in der App. Bitte schau nach, wann du spielen kannst.",
+  "already there": "schon da",
+  "Home game vs {opponent}": "Heimspiel gegen {opponent}",
+  "Game schedule as a table": "Spielplan als Tabelle"
+}
