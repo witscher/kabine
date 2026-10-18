@@ -2,9 +2,11 @@ import { t } from "@lingui/core/macro";
 import { Hono } from "hono";
 import { z } from "zod";
 import type { ChildPermission, ChildPermissions, NotificationTopic } from "../../shared/types";
-import { childPermissionLabels } from "../../shared/types";
+import { childPermissionLabels, CORE_NOTIFICATION_TOPICS } from "../../shared/types";
+import { MODULES, moduleTopics } from "../../shared/modules";
 import { type AppEnv, intParam, requireActor } from "../app";
 import { ALL_PERMISSIONS, type Actor, parentsInCharge } from "../auth/actor";
+import { isModuleOn } from "../domain/club";
 import { enqueuePush } from "../domain/notify";
 import { all, first, stmt } from "../lib/db";
 import { forbidden, parse, readJson } from "../lib/http";
@@ -104,7 +106,11 @@ parentRoutes.put("/children/:id/permissions", async (c) => {
 
 // Notification settings -----------------------------------------------------------
 
-const TOPICS: NotificationTopic[] = ["events", "reminders", "squad", "responses", "chat", "mentions", "coach", "carpool"];
+/** Core topics and those of all modules (settings of switched-off modules are kept, but not shown). */
+const TOPICS = [...CORE_NOTIFICATION_TOPICS, ...MODULES.flatMap((m) => moduleTopics(m.id))] as NotificationTopic[];
+
+/** Topics shown now: core topics and those of active modules. */
+const shownTopics = () => [...CORE_NOTIFICATION_TOPICS, ...MODULES.filter((m) => isModuleOn(m.id)).flatMap((m) => moduleTopics(m.id))] as NotificationTopic[];
 
 parentRoutes.get("/me/notifications", async (c) => {
   const actor = requireActor(c);
@@ -122,7 +128,7 @@ parentRoutes.get("/me/notifications", async (c) => {
   const selfInCharge = actor.hasGuardians && parentsInCharge(actor, actor.personId);
   return c.json({
     persons: persons.map((p) => {
-      const topics = TOPICS.filter((t) => (t === "coach" ? p.self && isCoach : true)).filter((t) => !(t === "responses" && p.self && !selfInCharge));
+      const topics = shownTopics().filter((t) => (t === "coach" ? p.self && isCoach : true)).filter((t) => !(t === "responses" && p.self && !selfInCharge));
       return {
         person: { id: p.id, firstName: p.firstName, lastName: p.lastName },
         self: p.self,

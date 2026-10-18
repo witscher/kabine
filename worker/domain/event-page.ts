@@ -7,7 +7,6 @@ import type { EventPage, EventSummary, TrainingBreak } from "../../shared/types"
 import type { Actor } from "../auth/actor";
 import { all, list } from "../lib/db";
 import { addDays, nowLocal, todayLocal } from "../lib/time";
-import { loadCarpoolCounts } from "./carpool";
 import { dutyManagers, loadHelpersNeeded, loadMyDuties } from "./duties";
 import {
   type EventContext,
@@ -20,6 +19,7 @@ import {
   visibleEventBatch,
 } from "./events";
 import { HORIZON_DAYS } from "./generate";
+import { moduleEventSummaries } from "../modules";
 
 /** How far the server looks for the next own event for the large card (like the former 70 days). */
 const NEXT_CARD_DAYS = 70;
@@ -165,11 +165,11 @@ export async function loadEventPage(db: D1Database, actor: Actor, opts: { limit:
       .sort((a, b) => a.summary.startsAt.localeCompare(b.summary.startsAt) || a.row.id - b.row.id);
   }
 
-  // Helpers needed and carpools only for what the app shows
+  // Helpers needed and module data only for what the app shows
   const shown = [...new Map([...page, ...live, ...next, ...openHelp].map((i) => [i.row.id, i.row])).values()];
-  const [needed, carpool] =
+  const [needed, extras] =
     opts.past || !ctx
-      ? [new Map<number, number>(), new Map<number, { taken: number; seats: number; waiting: number }>()]
+      ? [new Map<number, number>(), new Map<number, Record<string, unknown>>()]
       : await Promise.all([
           loadHelpersNeeded(
             db,
@@ -177,13 +177,13 @@ export async function loadEventPage(db: D1Database, actor: Actor, opts: { limit:
             shown.filter((e) => e.kind !== "training").map((e) => e.id),
             nowL,
           ),
-          loadCarpoolCounts(db, actor, shown, ctx, now),
+          moduleEventSummaries(db, actor, shown, ctx, now),
         ]);
   const finish = ({ row, summary }: Item): EventSummary => ({
     ...summary,
     // Whoever (or whose family) already has a duty gets no call
     helpersNeeded: summary.myDuties.length ? 0 : (needed.get(row.id) ?? 0),
-    carpoolCount: carpool.get(row.id) ?? null,
+    modules: extras.get(row.id) ?? {},
   });
   return {
     events: page.map(finish),

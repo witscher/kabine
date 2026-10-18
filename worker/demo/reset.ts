@@ -134,8 +134,8 @@ async function scenes(env: Env, fetchApp: Fetch, now: number): Promise<void> {
     // Carpool to the away game: Petra drives, Lea has booked a seat, Emma is still looking
     await call(PETRA, "PUT", `/events/${away}/carpool/offers/${PETRA}`, { seats: 3 });
     await call(LEA, "PUT", `/events/${away}/carpool/requests/${LEA}`, { companions: 0 });
-    const detail = await call<{ carpool: { offers: { id: number }[] } }>(LEA, "GET", `/events/${away}`);
-    await call(LEA, "PUT", `/events/${away}/carpool/requests/${LEA}/booking`, { offerId: detail.carpool.offers[0]!.id });
+    const detail = await call<{ modules: { carpools: { offers: { id: number }[] } } }>(LEA, "GET", `/events/${away}`);
+    await call(LEA, "PUT", `/events/${away}/carpool/requests/${LEA}/booking`, { offerId: detail.modules.carpools.offers[0]!.id });
     await call(203, "PUT", `/events/${away}/carpool/requests/203`, { companions: 0 });
 
     // Chat of the wD

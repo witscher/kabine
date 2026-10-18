@@ -4,6 +4,7 @@
 // visibility, overlaps and reminders work as with hand-picked squads.
 import { list, stmt } from "../lib/db";
 import { nowLocal, utcIso } from "../lib/time";
+import { moduleParticipantsDropped } from "../modules";
 
 /** Future games with an automatic squad (?1 now, ?2 teams or NULL for all) and the target line-up. */
 const AUTO = `
@@ -39,7 +40,7 @@ export async function syncAutoSquads(db: D1Database, teamIds: number[] | null, n
       ...params,
     ),
     stmt(db, `WITH ${AUTO} DELETE FROM responses WHERE (event_id, person_id) IN (SELECT event_id, person_id FROM stale)`, ...params),
-    stmt(db, `WITH ${AUTO} DELETE FROM carpool_requests WHERE (event_id, player_id) IN (SELECT event_id, person_id FROM stale)`, ...params),
+    ...moduleParticipantsDropped(db, { with: `WITH ${AUTO}`, select: "SELECT event_id, person_id FROM stale", params: [...params] }),
     stmt(db, `WITH ${AUTO} DELETE FROM nominations WHERE (event_id, person_id) IN (SELECT event_id, person_id FROM stale)`, ...params),
     stmt(
       db,

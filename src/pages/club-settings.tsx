@@ -4,11 +4,11 @@ import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { useState } from "preact/hooks";
 import { type ClubModules, type ClubProfile, isHexColor, KABINE_SOURCE } from "../../shared/club";
+import type { ModuleManifest } from "../../shared/module-api";
 import { MODULES, type ModuleId } from "../../shared/modules";
 import { LOCALE_NAMES, LOCALES, type Locale } from "../../shared/i18n";
 import { useQuery } from "../store";
 import { api, errorMessage } from "../api";
-import { moduleTexts } from "../../shared/module-texts";
 import { ClubMark, loadClub, setClub, useClub } from "../club";
 import { Button, Field, Notice, SwitchRow, TextField, toast, TopBar, useDocumentTitle } from "../ui";
 import { AdminOnly } from "./admin";
@@ -265,18 +265,30 @@ export function RegionSection(props: {
   );
 }
 
-/** Functions the club uses; switched-off modules disappear from the app and the API. */
+/**
+ * Functions the club uses; switched-off modules disappear from the app and the API. The switches come from
+ * the module manifests (modules/<id>/module.ts); modules made for other sports are not offered.
+ */
 export function ModulesSection({ modules, onChange }: { modules: ClubModules; onChange: (m: ClubModules) => void }) {
-  const texts = moduleTexts();
+  const { sport } = useClub();
+  const offered = MODULES.filter((m) => !("sports" in m) || (m.sports as readonly string[]).includes(sport) || modules[m.id]);
   return (
     <section class="card card-pad stack-sm" aria-label={t`Modules`}>
       <h2 class="section-title" style={{ margin: 0 }}>
         <Trans>Modules</Trans>
       </h2>
-      {MODULES.map((m) => (
+      {offered.map((m) => (
         <SwitchRow
-          label={texts[m.id].label}
-          sub={texts[m.id].sub}
+          label={
+            (m as ModuleManifest).status === "beta" ? (
+              <>
+                {m.label()} <span class="pill pill-muted">{t`Beta`}</span>
+              </>
+            ) : (
+              m.label()
+            )
+          }
+          sub={m.description()}
           checked={modules[m.id]}
           disabled={"requires" in m && !modules[m.requires as ModuleId]}
           onChange={(v) => onChange({ ...modules, [m.id]: v })}

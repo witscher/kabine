@@ -1,5 +1,6 @@
 // Shared types for API responses (worker and frontend).
 import { t } from "@lingui/core/macro";
+import { MODULES, type ModuleNotificationTopic } from "./modules";
 
 /** staff: team staff such as physio or manager, sees everything of the team but does not take part. */
 export type Role = "player" | "coach" | "helper" | "staff";
@@ -27,7 +28,9 @@ export const childPermissionLabels = (): Record<ChildPermission, string> => ({
   may_answer_help: t`Answer stand-in requests on their own`,
 });
 
-export type NotificationTopic = "events" | "reminders" | "squad" | "responses" | "chat" | "mentions" | "coach" | "carpool";
+export const CORE_NOTIFICATION_TOPICS = ["events", "reminders", "squad", "responses", "chat", "mentions", "coach"] as const;
+/** Topics people can switch off; modules add their own (manifest `notificationTopics`). */
+export type NotificationTopic = (typeof CORE_NOTIFICATION_TOPICS)[number] | ModuleNotificationTopic;
 
 export const notificationTopicLabels = (): Record<NotificationTopic, string> => ({
   events: t`New, changed and cancelled events`,
@@ -37,7 +40,10 @@ export const notificationTopicLabels = (): Record<NotificationTopic, string> => 
   chat: t`Chat messages`,
   mentions: t`Mentions in the chat (@name)`,
   coach: t`Coach notes (short-notice declines, stand-ins)`,
-  carpool: t`Carpools (passengers, free seats)`,
+  ...(Object.fromEntries(MODULES.flatMap((m) => ("notificationTopics" in m ? m.notificationTopics : []).map((topic) => [topic.id, topic.label()]))) as Record<
+    ModuleNotificationTopic,
+    string
+  >),
 });
 
 export interface Me {
@@ -181,8 +187,8 @@ export interface EventSummary {
   organizing: boolean;
   /** Staff of one of the event's teams: sees the event and who takes part, without responding. */
   staff: boolean;
-  /** Carpool summary (only upcoming away games with entries, only for those involved): taken/offered seats, people searching without a seat. */
-  carpoolCount: { taken: number; seats: number; waiting: number } | null;
+  /** Data of the active modules for this event, by module id (worker/module-api.ts, eventSummaries). */
+  modules: Record<string, unknown>;
   /** Free helper slots one could take on (or for the child); 0 = none or already signed up. */
   helpersNeeded: number;
   /** "Absent without excuse" at this event, only for coaches and admins (otherwise 0). */
@@ -249,62 +255,6 @@ export interface EventDetail extends EventSummary {
   dutyManage: boolean;
   /** Special events only: creator and organisers ("First name L."). */
   organizers: { creator: { id: number; name: string } | null; people: { id: number; name: string }[]; editable: boolean } | null;
-  /** Away games only and only for those involved (nominated players, their parents, coaches), otherwise null. */
-  carpool: CarpoolInfo | null;
-}
-
-/** Search for a ride for a player; seats needed = 1 + companions. */
-export interface CarpoolRequest {
-  id: number;
-  playerId: number;
-  /** "First name L." */
-  name: string;
-  companions: number;
-  seats: number;
-  /** Booked with this offer, null = still searching */
-  offerId: number | null;
-  /** Own player or own child */
-  mine: boolean;
-  canEdit: boolean;
-}
-
-export interface CarpoolOffer {
-  id: number;
-  personId: number;
-  /** "First name L." of the driver */
-  name: string;
-  seats: number;
-  free: number;
-  riders: CarpoolRequest[];
-  /** Own offer */
-  mine: boolean;
-  canEdit: boolean;
-}
-
-export interface CarpoolPersonRef {
-  id: number;
-  name: string;
-}
-
-/** Who can ride along: nominated players and the coaches (coach). */
-export interface CarpoolRider extends CarpoolPersonRef {
-  coach: boolean;
-  /** Parents ("First name L.") as possible companions; only for the own family and for coaches */
-  guardians: CarpoolPersonRef[];
-}
-
-export interface CarpoolInfo {
-  /** Sign-up possible (game not cancelled and not started yet). */
-  open: boolean;
-  offers: CarpoolOffer[];
-  /** People searching without a seat */
-  waiting: CarpoolRequest[];
-  /** Riders one searches for (own person, children), with their search */
-  mine: { player: CarpoolRider & { self: boolean }; request: CarpoolRequest | null }[];
-  /** The own person may offer to drive (no offer yet, family is not searching). */
-  canOffer: boolean;
-  /** Coaches and admins: sign up others. */
-  coach: { drivers: CarpoolPersonRef[]; riders: CarpoolRider[] } | null;
 }
 
 export interface RosterEntry {

@@ -15,6 +15,7 @@ import { isDate, nowLocal, utcIso } from "../lib/time";
 import { ageClassSchema } from "./admin";
 import { canManagePerson } from "./persons";
 import { syncAutoGroups } from "../domain/groups";
+import { MODULE_EXPORT_TABLES, modulePersonLeaves } from "../modules";
 
 export const seasonRoutes = new Hono<AppEnv>();
 
@@ -411,7 +412,7 @@ seasonRoutes.post("/season-change/execute", async (c) => {
 // Export: backup once per season and before the reset ---------------------------
 
 /** Tables with club data, exported in full. */
-export const EXPORT_TABLES = [
+const CORE_EXPORT_TABLES = [
   "app_meta",
   "seasons",
   "age_classes",
@@ -454,9 +455,10 @@ export const EXPORT_TABLES = [
   "skill_consents",
   "duty_notifications",
   "referees",
-  "carpool_offers",
-  "carpool_requests",
 ];
+
+/** Tables in the admin's data export: the core's and those of every module (worker/module-api.ts). */
+export const EXPORT_TABLES = [...CORE_EXPORT_TABLES, ...MODULE_EXPORT_TABLES];
 
 /**
  * Deliberately not or only partly in the export: access data that is created
@@ -538,8 +540,7 @@ async function retirePerson(db: D1Database, personId: number, now: number): Prom
     stmt(db, "DELETE FROM standing_absences WHERE person_id = ?", personId),
     stmt(db, "DELETE FROM nominations WHERE person_id = ? AND event_id IN (SELECT id FROM events WHERE starts_at > ?)", personId, nowL),
     stmt(db, "DELETE FROM responses WHERE person_id = ? AND event_id IN (SELECT id FROM events WHERE starts_at > ?)", personId, nowL),
-    stmt(db, "DELETE FROM carpool_requests WHERE player_id = ? AND event_id IN (SELECT id FROM events WHERE starts_at > ?)", personId, nowL),
-    stmt(db, "DELETE FROM carpool_offers WHERE person_id = ? AND event_id IN (SELECT id FROM events WHERE starts_at > ?)", personId, nowL),
+    ...modulePersonLeaves(db, personId, nowL),
     stmt(db, "UPDATE help_requests SET status = 'withdrawn' WHERE person_id = ? AND status = 'open'", personId),
   ];
 }

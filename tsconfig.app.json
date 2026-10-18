@@ -8,5 +8,5 @@
     "jsxImportSource": "preact",
     "types": ["vite/client"]
   },
-  "include": ["src", "shared"]
+  "include": ["src", "shared", "modules/index.ts", "modules/*/module.ts", "modules/*/types.ts", "modules/*/app"]
 }

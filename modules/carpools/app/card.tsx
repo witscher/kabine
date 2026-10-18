@@ -1,14 +1,15 @@
 // Carpools for away games: card in the event detail view.
-// Rules in the worker (worker/domain/carpool.ts), decisions in docs/design.md, Carpools.
+// Rules in the worker (../worker/domain.ts), decisions in docs/design.md, Carpools.
 import { plural, t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { useState } from "preact/hooks";
-import type { CarpoolInfo, CarpoolOffer, CarpoolPersonRef, CarpoolRequest, EventDetail } from "../shared/types";
-import { api } from "./api";
-import { Icon } from "./icons";
-import { useMe } from "./session";
-import { invalidate } from "./store";
-import { Button, confirmDialog, Sheet, toast } from "./ui";
+import type { EventDetail } from "../../../shared/types";
+import type { CarpoolInfo, CarpoolOffer, CarpoolPersonRef, CarpoolRequest } from "../types";
+import { api } from "../../../src/api";
+import { Icon } from "../../../src/icons";
+import { useMe } from "../../../src/session";
+import { invalidate } from "../../../src/store";
+import { Button, confirmDialog, Sheet, toast } from "../../../src/ui";
 
 const MAX_SEATS = 8;
 

@@ -1,4 +1,4 @@
-import { plural, t } from "@lingui/core/macro";
+import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { clubName } from "../club";
 import { useLocation } from "preact-iso";
@@ -9,6 +9,7 @@ import { dayMonth, dayOfMonth, longDate, monthLabel, monthShort, relativeDay, ti
 import { FirstStepsCard, InstallBanner, MotdBanner, PushSetupBanner } from "../howto";
 import { Ball, Icon } from "../icons";
 import { DeclineSheet, deadlineText, HelpRequestCard, PersonResponseRow, ResponseButtons } from "../respond";
+import { useActiveModules } from "../modules";
 import { useMe } from "../session";
 import { useOffline } from "../offline";
 import { useQuery } from "../store";
@@ -46,11 +47,18 @@ function nextHeading(kind: EventSummary["kind"], later: boolean): string {
   return kind === "game" ? t`Up next: game` : kind === "training" ? t`Up next: training` : t`Up next: event`;
 }
 
-/** Carpool summary on the card: "Carpools (2/5) · 1 is still looking". */
-function carpoolLine(c: { taken: number; seats: number; waiting: number }): string {
-  const { taken, seats, waiting } = c;
-  const head = t`Carpools (${taken}/${seats})`;
-  return waiting ? `${head} · ${plural(waiting, { one: "# is still looking", other: "# are still looking" })}` : head;
+/** Lines of the active modules on an event card (e.g. carpools). */
+function ModuleCardLines({ event }: { event: EventSummary }) {
+  const modules = useActiveModules();
+  return (
+    <>
+      {modules.map((m) => {
+        const Line = m.eventCardLine;
+        const data = event.modules[m.manifest.id];
+        return Line && data != null ? <Line key={m.manifest.id} event={event} data={data} /> : null;
+      })}
+    </>
+  );
 }
 
 /** Name the team(s) of the event when you deal with more than one team (your own or your children's). */
@@ -100,12 +108,7 @@ function NextCard({ event, onDecline, later = false }: { event: EventSummary; on
         </div>
         <MeetingLine event={event} />
         <DutyChips event={event} />
-        {event.carpoolCount ? (
-          <a class="carpool-line" href={`/termine/${event.id}`}>
-            <Icon name="car" size={16} />
-            {carpoolLine(event.carpoolCount)}
-          </a>
-        ) : null}
+        <ModuleCardLines event={event} />
         {counts ? (
           <div class="stats">
             <div class="stat">

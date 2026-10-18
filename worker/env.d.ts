@@ -1,3 +1,4 @@
+/// <reference path="../node_modules/vite/types/importMeta.d.ts" />
 // Secrets that are not in wrangler.jsonc (wrangler secret put / .dev.vars).
 interface AppSecrets {
   ADMIN_BOOTSTRAP_TOKEN?: string;

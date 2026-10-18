@@ -2,12 +2,12 @@
 import { createExecutionContext, waitOnExecutionContext } from "cloudflare:test";
 import { env } from "cloudflare:workers";
 import { beforeEach, describe, expect, it } from "vitest";
-import worker from "../worker/index";
-import { sendCarpoolChatReminders } from "../worker/domain/carpool";
-import type { PushJob } from "../worker/domain/notify";
-import { handleScheduled } from "../worker/cron";
-import { addDays, localToInstant, todayLocal } from "../worker/lib/time";
-import { exec, freshDb, guardian, loginAs, member, one, person, rows, season, team } from "./helpers";
+import worker from "../../../worker/index";
+import { sendCarpoolChatReminders } from "../worker/domain";
+import type { PushJob } from "../../../worker/domain/notify";
+import { handleScheduled } from "../../../worker/cron";
+import { addDays, localToInstant, todayLocal } from "../../../worker/lib/time";
+import { exec, freshDb, guardian, loginAs, member, one, person, rows, season, team } from "../../../test/helpers";
 
 let pushes: PushJob[] = [];
 let chat: { teamId: number; text: string }[] = [];
@@ -117,13 +117,13 @@ describe("Sichtbarkeit", () => {
   it("nur bei Auswärtsspielen und nur für Beteiligte", async () => {
     const away = await game(5);
     const home = await game(6, { isHome: 1 });
-    expect((await call(`/events/${away}`, { cookie: paulaC })).body.carpool).toMatchObject({ open: true, offers: [], waiting: [], canOffer: true });
-    expect((await call(`/events/${away}`, { cookie: miaC })).body.carpool.mine).toEqual([{ player: { id: mia, name: "Mia M.", self: true, coach: false, guardians: [{ id: paula, name: "Paula M." }] }, request: null }]);
-    expect((await call(`/events/${home}`, { cookie: paulaC })).body.carpool).toBeNull();
+    expect((await call(`/events/${away}`, { cookie: paulaC })).body.modules.carpools).toMatchObject({ open: true, offers: [], waiting: [], canOffer: true });
+    expect((await call(`/events/${away}`, { cookie: miaC })).body.modules.carpools.mine).toEqual([{ player: { id: mia, name: "Mia M.", self: true, coach: false, guardians: [{ id: paula, name: "Paula M." }] }, request: null }]);
+    expect((await call(`/events/${home}`, { cookie: paulaC })).body.modules.carpools).toBeUndefined();
     // Nicht nominiert: sieht das Spiel, aber keine Fahrgemeinschaften (keine Namen)
     const idaView = await call(`/events/${away}`, { cookie: idaC });
     expect(idaView.status).toBe(200);
-    expect(idaView.body.carpool).toBeNull();
+    expect(idaView.body.modules.carpools).toBeUndefined();
     // Trainer einer fremden Mannschaft sieht das Spiel gar nicht
     expect((await call(`/events/${away}`, { cookie: otherCoachC })).status).toBe(404);
     expect((await call(`/events/${away}/carpool/offers/${coach}`, { method: "PUT", body: { seats: 2 }, cookie: idaC })).status).toBe(403);
@@ -131,8 +131,8 @@ describe("Sichtbarkeit", () => {
 
   it("vor Veröffentlichung des Kaders nur für Trainer", async () => {
     const g = await game(5, { published: false });
-    expect((await call(`/events/${g}`, { cookie: paulaC })).body.carpool).toBeNull();
-    const coachView = (await call(`/events/${g}`, { cookie: coachC })).body.carpool;
+    expect((await call(`/events/${g}`, { cookie: paulaC })).body.modules.carpools).toBeUndefined();
+    const coachView = (await call(`/events/${g}`, { cookie: coachC })).body.modules.carpools;
     expect(coachView.coach.riders.map((r: { name: string }) => r.name).sort()).toEqual(["Lea B.", "Mia M.", "Nora P.", "Tina T."]);
     expect(coachView.coach.riders.find((r: { name: string }) => r.name === "Tina T.").coach).toBe(true);
     expect(coachView.coach.drivers.map((d: { name: string }) => d.name)).toEqual(
@@ -148,7 +148,7 @@ describe("Anbieten, suchen, buchen", () => {
     // Peter sucht für Lea mit einer Begleitperson; freie Plätze sieht er direkt, daher kein Match-Push
     expect((await call(`/events/${g}/carpool/requests/${lea}`, { method: "PUT", body: { companions: 1 }, cookie: peterC })).status).toBe(201);
     expect(await pushesTo(peter)).toEqual([]);
-    const view = (await call(`/events/${g}`, { cookie: peterC })).body.carpool;
+    const view = (await call(`/events/${g}`, { cookie: peterC })).body.modules.carpools;
     expect(view.offers[0]).toMatchObject({ name: "Paula M.", seats: 3, free: 3, mine: false, canEdit: false });
     expect(view.mine[0].request).toMatchObject({ name: "Lea B.", seats: 2, offerId: null, canEdit: true });
     expect(view.canOffer).toBe(false); // sucht schon für das Kind
@@ -160,7 +160,7 @@ describe("Anbieten, suchen, buchen", () => {
     expect(toPaula[0]!.payload).toMatchObject({ title: "Neuer Mitfahrer", url: `/termine/${g}` });
     expect(toPaula[0]!.payload.body).toMatch(/^Lea B\. \+ 1 fährt mit dir mit: HSG Gegnerstadt – K wD am .+, 14:00 Uhr\.$/);
 
-    const after = (await call(`/events/${g}`, { cookie: paulaC })).body.carpool;
+    const after = (await call(`/events/${g}`, { cookie: paulaC })).body.modules.carpools;
     expect(after.offers[0]).toMatchObject({ free: 1, mine: true, canEdit: true });
     expect(after.offers[0].riders.map((r: { name: string; seats: number }) => [r.name, r.seats])).toEqual([["Lea B.", 2]]);
     expect(after.waiting).toEqual([]);
@@ -169,45 +169,45 @@ describe("Anbieten, suchen, buchen", () => {
   it("Terminübersicht: Kurzinfo (belegt/angeboten, wer noch sucht) nur für Beteiligte", async () => {
     const g = await game(5);
     const summary = async (cookie: string) => (await call("/events?to=2099-12-31", { cookie })).body.events.find((e: { id: number }) => e.id === g);
-    expect((await summary(paulaC)).carpoolCount).toBeNull();
+    expect((await summary(paulaC)).modules.carpools).toBeUndefined();
     await call(`/events/${g}/carpool/offers/${paula}`, { method: "PUT", body: { seats: 2 }, cookie: paulaC });
     await call(`/events/${g}/carpool/requests/${lea}`, { method: "PUT", body: { companions: 1 }, cookie: peterC });
     await call(`/events/${g}/carpool/requests/${nora}`, { method: "PUT", body: { companions: 0 }, cookie: coachC });
-    expect((await summary(paulaC)).carpoolCount).toEqual({ taken: 0, seats: 2, waiting: 2 });
-    const offerId = (await call(`/events/${g}`, { cookie: peterC })).body.carpool.offers[0].id;
+    expect((await summary(paulaC)).modules.carpools).toEqual({ taken: 0, seats: 2, waiting: 2 });
+    const offerId = (await call(`/events/${g}`, { cookie: peterC })).body.modules.carpools.offers[0].id;
     await call(`/events/${g}/carpool/requests/${lea}/booking`, { method: "PUT", body: { offerId }, cookie: peterC });
-    expect((await summary(peterC)).carpoolCount).toEqual({ taken: 2, seats: 2, waiting: 1 });
+    expect((await summary(peterC)).modules.carpools).toEqual({ taken: 2, seats: 2, waiting: 1 });
     // Nicht nominiert: keine Kurzinfo
-    expect((await summary(idaC)).carpoolCount).toBeNull();
+    expect((await summary(idaC)).modules.carpools).toBeUndefined();
   });
 
   it("wer fährt, bekommt für sich und das eigene Kind keine Suche angeboten", async () => {
     const g = await game(5);
-    expect((await call(`/events/${g}`, { cookie: paulaC })).body.carpool.mine.map((m: { player: { id: number } }) => m.player.id)).toEqual([mia]);
+    expect((await call(`/events/${g}`, { cookie: paulaC })).body.modules.carpools.mine.map((m: { player: { id: number } }) => m.player.id)).toEqual([mia]);
     await call(`/events/${g}/carpool/offers/${paula}`, { method: "PUT", body: { seats: 2 }, cookie: paulaC });
-    expect((await call(`/events/${g}`, { cookie: paulaC })).body.carpool.mine).toEqual([]);
+    expect((await call(`/events/${g}`, { cookie: paulaC })).body.modules.carpools.mine).toEqual([]);
     // Auch Mia selbst sieht keine Suche, ihre Mutter fährt
-    expect((await call(`/events/${g}`, { cookie: miaC })).body.carpool.mine).toEqual([]);
+    expect((await call(`/events/${g}`, { cookie: miaC })).body.modules.carpools.mine).toEqual([]);
     // Andere Familien weiter
-    expect((await call(`/events/${g}`, { cookie: peterC })).body.carpool.mine.map((m: { player: { id: number } }) => m.player.id)).toEqual([lea]);
+    expect((await call(`/events/${g}`, { cookie: peterC })).body.modules.carpools.mine.map((m: { player: { id: number } }) => m.player.id)).toEqual([lea]);
   });
 
   it("sucht jemand aus der Familie, gibt es keine zweite Suche; die Eltern stehen mit Namen als Begleitung", async () => {
     // Paula ist Trainerin und Mutter von Mia: beide könnten mitfahren
     await member(paula, wd, "coach");
     const g = await game(5);
-    const before = (await call(`/events/${g}`, { cookie: paulaC })).body.carpool.mine;
+    const before = (await call(`/events/${g}`, { cookie: paulaC })).body.modules.carpools.mine;
     expect(before.map((m: { player: { id: number } }) => m.player.id).sort()).toEqual([mia, paula].sort());
     expect(before.find((m: { player: { id: number } }) => m.player.id === mia).player.guardians).toEqual([{ id: paula, name: "Paula M." }]);
     expect((await call(`/events/${g}/carpool/requests/${mia}`, { method: "PUT", body: { companions: 1 }, cookie: paulaC })).status).toBe(201);
     // Danach nur noch Mias Suche, keine eigene für Paula
-    const after = (await call(`/events/${g}`, { cookie: paulaC })).body.carpool;
+    const after = (await call(`/events/${g}`, { cookie: paulaC })).body.modules.carpools;
     expect(after.mine.map((m: { player: { id: number } }) => m.player.id)).toEqual([mia]);
     expect(after.canOffer).toBe(false);
     const second = await call(`/events/${g}/carpool/requests/${paula}`, { method: "PUT", body: { companions: 0 }, cookie: paulaC });
     expect(second.body.error.code).toBe("carpool_family");
     // Andere Familien sehen keine fremden Elternnamen
-    expect((await call(`/events/${g}`, { cookie: peterC })).body.carpool.mine.map((m: { player: { guardians: { name: string }[] } }) => m.player.guardians)).toEqual([
+    expect((await call(`/events/${g}`, { cookie: peterC })).body.modules.carpools.mine.map((m: { player: { guardians: { name: string }[] } }) => m.player.guardians)).toEqual([
       [{ id: peter, name: "Peter B." }],
     ]);
   });
@@ -220,7 +220,7 @@ describe("Anbieten, suchen, buchen", () => {
     await exec("INSERT OR IGNORE INTO nominations (event_id, person_id) VALUES (?, ?)", g, mila);
     // Mia (minderjährig) bietet zwei Plätze an, gefahren wird von der Familie
     expect((await call(`/events/${g}/carpool/offers/${mia}`, { method: "PUT", body: { seats: 2 }, cookie: miaC })).status).toBe(201);
-    expect((await call(`/events/${g}`, { cookie: paulaC })).body.carpool.mine).toEqual([]);
+    expect((await call(`/events/${g}`, { cookie: paulaC })).body.modules.carpools.mine).toEqual([]);
     // Die Schwester sucht nicht, der Server lehnt es ebenfalls ab
     const res = await call(`/events/${g}/carpool/requests/${mila}`, { method: "PUT", body: { companions: 0 }, cookie: paulaC });
     expect(res.body.error.code).toBe("carpool_family");
@@ -358,7 +358,7 @@ describe("Trainer fahren mit", () => {
     await member(carl, wd, "coach");
     const carlC = await loginAs(carl);
     await exec("INSERT INTO push_subscriptions (account_id, endpoint, p256dh, auth) VALUES (?, 'https://push.example/carl', 'k', 'a')", await accountOf(carl));
-    const before = (await call(`/events/${g}`, { cookie: carlC })).body.carpool;
+    const before = (await call(`/events/${g}`, { cookie: carlC })).body.modules.carpools;
     expect(before.mine).toEqual([{ player: { id: carl, name: "Carl C.", self: true, coach: true, guardians: [] }, request: null }]);
     expect(before.canOffer).toBe(true);
 

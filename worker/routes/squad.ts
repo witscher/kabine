@@ -5,10 +5,10 @@ import type { PersonRef } from "../../shared/types";
 import { type AppEnv, intParam, requireActor } from "../app";
 import { type Actor, isCoachOf, isCoachOfAny, requireActFor } from "../auth/actor";
 import { syncAutoSquads } from "../domain/auto-squad";
-import { releaseRequests } from "../domain/carpool";
 import { type EventRow, eventTeams, eventTitle, loadEvent, loadEventContext, toSummary } from "../domain/events";
 import { notifyCoaches, notifyPersons, shortDate, shortTime } from "../domain/notify";
 import { all, first, list, run, stmt } from "../lib/db";
+import { moduleParticipantsDropped, moduleParticipantsLeft } from "../modules";
 import { badRequest, conflict, forbidden, notFound, parse, readJson } from "../lib/http";
 import { addMinutesLocal, isoWeekday, localToInstant, utcIso } from "../lib/time";
 import { isoWeekdayShort } from "../../shared/dates";
@@ -261,7 +261,7 @@ squadRoutes.put("/events/:id/squad", async (c) => {
     stmt(db, "UPDATE events SET squad_published_at = coalesce(squad_published_at, ?), squad_manual = 1 WHERE id = ?", utcIso(), event.id),
   ];
   await db.batch(statements);
-  await releaseRequests(c.env, { event, ctx, teamIds: ctx.eventTeams.get(event.id) ?? [] }, removed, [actor.accountId]);
+  await moduleParticipantsLeft(c.env, { event, ctx, teamIds: ctx.eventTeams.get(event.id) ?? [], personIds: removed, exclude: [actor.accountId] });
 
   const teamRefs = [{ id: team.id, name: team.name }];
   const texts = () => ({ title: eventTitle(event, teamRefs), when: `${shortDate(event.starts_at)}, ${shortTime(event.starts_at)}` });
@@ -527,7 +527,7 @@ squadRoutes.delete("/help-requests/:id", async (c) => {
     stmt(c.env.DB, "UPDATE help_requests SET status = 'withdrawn' WHERE id = ?", help.id),
     stmt(c.env.DB, "DELETE FROM nominations WHERE event_id = ? AND person_id = ? AND is_helper = 1", help.event_id, help.person_id),
     stmt(c.env.DB, "DELETE FROM responses WHERE event_id = ? AND person_id = ?", help.event_id, help.person_id),
-    stmt(c.env.DB, "DELETE FROM carpool_requests WHERE event_id = ? AND player_id = ?", help.event_id, help.person_id),
+    ...moduleParticipantsDropped(c.env.DB, { select: "SELECT ?, ?", params: [help.event_id, help.person_id] }),
   ]);
   if (localToInstant(event.starts_at) > Date.now()) {
     const teamName = help.team_name;

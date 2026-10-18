@@ -273,8 +273,7 @@ export function opponentOf(e: { is_home: number | null; home_team: string | null
   return e.title ?? `${e.home_team ?? "?"} – ${e.guest_team ?? "?"}`;
 }
 
-/** "First name L." as in the chat. */
-export const SHORT_NAME_SQL = (alias: string) => `${alias}.first_name || CASE WHEN ${alias}.last_name IS NOT NULL AND ${alias}.last_name <> '' THEN ' ' || substr(${alias}.last_name, 1, 1) || '.' ELSE '' END`;
+export { SHORT_NAME_SQL } from "../lib/db";
 
 /** Duty types needing skills that the account has enabled in the profile (“I can do this”). */
 export async function skillConsents(db: D1Database, accountId: number): Promise<Set<number>> {

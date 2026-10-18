@@ -43,3 +43,7 @@ export async function batch(db: D1Database, statements: D1PreparedStatement[], c
 export function list(values: readonly (number | string)[]): string {
   return JSON.stringify(values);
 }
+
+/** SQL for "First name L." (as in the chat) of the persons row `alias`. */
+export const SHORT_NAME_SQL = (alias: string) =>
+  `${alias}.first_name || CASE WHEN ${alias}.last_name IS NOT NULL AND ${alias}.last_name <> '' THEN ' ' || substr(${alias}.last_name, 1, 1) || '.' ELSE '' END`;

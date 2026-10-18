@@ -4,6 +4,7 @@ import { demoGuard, demoRoutes } from "./demo/routes";
 import { demoLocalHour, resetDemo } from "./demo/reset";
 import type { PushJob } from "./domain/notify";
 import { maintenanceState } from "./lib/maintenance";
+import { WORKER_MODULES } from "./modules";
 import { handleQueue } from "./queue";
 import { adminRoutes } from "./routes/admin";
 import { authRoutes } from "./routes/auth";
@@ -11,7 +12,6 @@ import { avatarRoutes } from "./routes/avatars";
 import { chatRoutes } from "./routes/chat";
 import { clubRoutes } from "./routes/club";
 import { calendarRoutes } from "./routes/calendar";
-import { carpoolRoutes } from "./routes/carpool";
 import { dutyRoutes } from "./routes/duties";
 import { emailRoutes } from "./routes/email";
 import { eventRoutes } from "./routes/events";
@@ -45,7 +45,6 @@ for (const routes of [
   emailRoutes,
   joinRoutes,
   eventRoutes,
-  carpoolRoutes,
   squadRoutes,
   teamRoutes,
   personRoutes,
@@ -68,6 +67,8 @@ for (const routes of [
 ]) {
   app.route("/api", routes);
 }
+// Routes of the modules; worker/app.ts answers 404 while a module is off (paths in its manifest)
+for (const m of WORKER_MODULES) if (m.routes) app.route("/api", m.routes);
 
 /** The public demo (APP_ENV "demo") starts over at 3:00 local time, before the usual hourly run. */
 async function runScheduled(env: Env, ctx: ExecutionContext, scheduledTime: number): Promise<void> {

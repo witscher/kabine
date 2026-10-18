@@ -114,8 +114,8 @@ test.beforeAll(async () => {
   await json(await petra.put(`/api/events/${awayGame}/carpool/offers/${PETRA}`, { data: { seats: 3 } }));
   const lea = await apiAs(LEA);
   await json(await lea.put(`/api/events/${awayGame}/carpool/requests/${LEA}`, { data: { companions: 0 } }));
-  const detail = await json<{ carpool: { offers: { id: number }[] } }>(await lea.get(`/api/events/${awayGame}`));
-  await json(await lea.put(`/api/events/${awayGame}/carpool/requests/${LEA}/booking`, { data: { offerId: detail.carpool.offers[0]!.id } }));
+  const detail = await json<{ modules: { carpools: { offers: { id: number }[] } } }>(await lea.get(`/api/events/${awayGame}`));
+  await json(await lea.put(`/api/events/${awayGame}/carpool/requests/${LEA}/booking`, { data: { offerId: detail.modules.carpools.offers[0]!.id } }));
   const emma = await apiAs(203);
   await json(await emma.put(`/api/events/${awayGame}/carpool/requests/203`, { data: { companions: 0 } }));
 });

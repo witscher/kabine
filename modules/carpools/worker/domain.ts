@@ -1,19 +1,18 @@
 // Carpools for away games (see docs/design.md, Carpools).
 // Drivers offer free seats, passengers book themselves. The system assigns nothing, it only notifies.
 import { plural, t } from "@lingui/core/macro";
-import type { CarpoolInfo, CarpoolOffer, CarpoolPersonRef, CarpoolRequest } from "../../shared/types";
-import { type Actor, actsFor, isCoachOfAny, parentsInChargeSql, scopePersonIds } from "../auth/actor";
-import { all, list, run } from "../lib/db";
-import { conflict } from "../lib/http";
-import { addDays, localToInstant, toLocal, todayLocal } from "../lib/time";
-import { clockTimeIn } from "../../shared/dates";
-import { currentLocale } from "../i18n";
-import { postSystemMessage } from "./chat";
-import { SHORT_NAME_SQL } from "./duties";
-import type { PersonRef } from "../../shared/types";
-import { type EventContext, type EventRow, EVENT_SELECT, eventTeams, eventTitle, loadEventContext } from "./events";
-import { notifyPersons, shortDate, shortTime } from "./notify";
-import { isModuleOn } from "./club";
+import type { CarpoolInfo, CarpoolOffer, CarpoolPersonRef, CarpoolRequest } from "../types";
+import { type Actor, actsFor, isCoachOfAny, parentsInChargeSql, scopePersonIds } from "../../../worker/auth/actor";
+import { all, list, run, SHORT_NAME_SQL } from "../../../worker/lib/db";
+import { conflict } from "../../../worker/lib/http";
+import { addDays, localToInstant, toLocal, todayLocal } from "../../../worker/lib/time";
+import { clockTimeIn } from "../../../shared/dates";
+import { currentLocale } from "../../../worker/i18n";
+import { postSystemMessage } from "../../../worker/domain/chat";
+import type { PersonRef } from "../../../shared/types";
+import { type EventContext, type EventRow, EVENT_SELECT, eventTeams, eventTitle, loadEventContext } from "../../../worker/domain/events";
+import { notifyPersons, shortDate, shortTime } from "../../../worker/domain/notify";
+import { isModuleOn } from "../../../worker/domain/club";
 
 /** At most this many free seats per driver. */
 export const MAX_SEATS = 8;

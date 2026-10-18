@@ -571,7 +571,7 @@ export function toSummary(e: EventRow, ctx: EventContext, actor: Actor, now: num
     myDuties: [],
     organizing: false,
     staff: !canManage && isStaffOfAny(actor, teamRefs.map((t) => t.id)),
-    carpoolCount: null,
+    modules: {},
     helpersNeeded: 0,
   };
 }
@@ -619,7 +619,7 @@ export function toDetail(e: EventRow, ctx: EventContext, actor: Actor, now: numb
         }))
         .sort((a, b) => a.name.localeCompare(b.name, "de"))
     : null;
-  return { ...summary, participants, roster, dutyManage: false, organizers: null, carpool: null };
+  return { ...summary, participants, roster, dutyManage: false, organizers: null };
 }
 
 /** SQL: the person (expression) takes part in event e, is nominated, requested or referees there as KiHaSL/JuHaSL. */

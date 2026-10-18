@@ -29,6 +29,10 @@ msgstr "Please upload a picture in JPEG or WebP format."
 msgid "No upcoming special events or games without handball4all yet."
 msgstr "No upcoming special events or games without handball4all yet."
 
+#: modules/sms/module.ts
+msgid "The mobile number of people who enter one themselves, and whether it is confirmed."
+msgstr "The mobile number of people who enter one themselves, and whether it is confirmed."
+
 #: worker/routes/events.ts
 msgid "A reminder was just sent. Please wait a few minutes."
 msgstr "A reminder was just sent. Please wait a few minutes."
@@ -140,7 +144,7 @@ msgstr "{actorName} withdrew the cancellation: {label} on {date} is going ahead 
 msgid "Valid until {validUntil}, can only be used once."
 msgstr "Valid until {validUntil}, can only be used once."
 
-#: worker/routes/carpool.ts
+#: modules/carpools/worker/routes.ts
 msgid "{driver} no longer has enough free seats."
 msgstr "{driver} no longer has enough free seats."
 
@@ -215,7 +219,7 @@ msgstr "Training time changed. Future events have been adjusted."
 msgid "No messages yet"
 msgstr "No messages yet"
 
-#: src/carpool.tsx
+#: modules/carpools/app/card.tsx
 msgid "{name} (you)"
 msgstr "{name} (you)"
 
@@ -256,8 +260,8 @@ msgstr "Your coach maintains the birth year."
 msgid "What is the difference between a group and a team?"
 msgstr "What is the difference between a group and a team?"
 
-#: src/carpool.tsx
-#: src/carpool.tsx
+#: modules/carpools/app/card.tsx
+#: modules/carpools/app/card.tsx
 msgid "Add passenger"
 msgstr "Add passenger"
 
@@ -315,7 +319,7 @@ msgstr "Your duty"
 msgid "How do I get my events into my calendar?"
 msgstr "How do I get my events into my calendar?"
 
-#: src/carpool.tsx
+#: modules/carpools/app/card.tsx
 msgid "{name} is riding with {driver}. {driverFirstName} will be notified."
 msgstr "{name} is riding with {driver}. {driverFirstName} will be notified."
 
@@ -359,7 +363,7 @@ msgstr "Profile picture approved"
 msgid "Valid until {until}. The link only works once."
 msgstr "Valid until {until}. The link only works once."
 
-#: src/carpool.tsx
+#: modules/carpools/app/card.tsx
 msgid "All passengers will be notified and will look again."
 msgstr "All passengers will be notified and will look again."
 
@@ -469,7 +473,7 @@ msgstr "{name} now also plays for {teamName}."
 msgid "People with the role"
 msgstr "People with the role"
 
-#: src/carpool.tsx
+#: modules/carpools/app/card.tsx
 msgid "FOR COACHES"
 msgstr "FOR COACHES"
 
@@ -532,7 +536,7 @@ msgstr "Join"
 msgid "The address has been changed in the meantime. Please confirm the new address."
 msgstr "The address has been changed in the meantime. Please confirm the new address."
 
-#: worker/domain/carpool.ts
+#: modules/carpools/worker/domain.ts
 msgid "{seats, plural, one {{driver} has one free seat: {game}. Book it in the app.} other {{driver} has # free seats: {game}. Book it in the app.}}"
 msgstr "{seats, plural, one {{driver} has one free seat: {game}. Book it in the app.} other {{driver} has # free seats: {game}. Book it in the app.}}"
 
@@ -580,7 +584,7 @@ msgstr "Link your club's privacy policy and legal notice, and name a contact for
 msgid "Holiday periods"
 msgstr "Holiday periods"
 
-#: worker/domain/carpool.ts
+#: modules/carpools/worker/domain.ts
 msgid "{title} on {date}, {time}"
 msgstr "{title} on {date}, {time}"
 
@@ -634,7 +638,7 @@ msgstr "Grant the referee role by link, list"
 msgid "No device is registered for push on this account yet."
 msgstr "No device is registered for push on this account yet."
 
-#: worker/routes/carpool.ts
+#: modules/carpools/worker/routes.ts
 msgid "{seats, plural, one {{coach} entered you as a driver with one free seat: {game}.} other {{coach} entered you as a driver with # free seats: {game}.}}"
 msgstr "{seats, plural, one {{coach} entered you as a driver with one free seat: {game}.} other {{coach} entered you as a driver with # free seats: {game}.}}"
 
@@ -658,7 +662,7 @@ msgstr "Game no longer in the schedule (handball4all)"
 msgid "Install as an app"
 msgstr "Install as an app"
 
-#: src/carpool.tsx
+#: modules/carpools/app/card.tsx
 msgid "Getting a ride"
 msgstr "Getting a ride"
 
@@ -755,7 +759,7 @@ msgstr "Your access is set up. You sign in with an e-mail code."
 msgid "The season change resets team memberships, training plans, events, responses, nominations, core squads and chat histories. Persons, accesses, parent links, teams and training locations remain."
 msgstr "The season change resets team memberships, training plans, events, responses, nominations, core squads and chat histories. Persons, accesses, parent links, teams and training locations remain."
 
-#: src/pages/home.tsx
+#: modules/carpools/app/index.tsx
 msgid "Carpools ({taken}/{seats})"
 msgstr "Carpools ({taken}/{seats})"
 
@@ -787,11 +791,11 @@ msgstr "Start season {nextName}?"
 msgid "Nominated for {games} at the same time"
 msgstr "Nominated for {games} at the same time"
 
-#: worker/routes/carpool.ts
+#: modules/carpools/worker/routes.ts
 msgid "Passengers can be nominated players who have not declined, and the coaches."
 msgstr "Passengers can be nominated players who have not declined, and the coaches."
 
-#: shared/types.ts
+#: modules/carpools/module.ts
 msgid "Carpools (passengers, free seats)"
 msgstr "Carpools (passengers, free seats)"
 
@@ -807,7 +811,7 @@ msgstr "Date;Time;Opponent;Home;Venue"
 msgid "An admin assigns members."
 msgstr "An admin assigns members."
 
-#: src/carpool.tsx
+#: modules/carpools/app/card.tsx
 msgid "Not after all"
 msgstr "Not after all"
 
@@ -819,7 +823,7 @@ msgstr "The app is currently under maintenance"
 msgid "One-off event."
 msgstr "One-off event."
 
-#: worker/routes/carpool.ts
+#: modules/carpools/worker/routes.ts
 msgid "At most {max} free seats."
 msgstr "At most {max} free seats."
 
@@ -991,7 +995,7 @@ msgstr "Code by SMS"
 msgid "The new season must begin after the start of the current season {name}."
 msgstr "The new season must begin after the start of the current season {name}."
 
-#: worker/routes/carpool.ts
+#: modules/carpools/worker/routes.ts
 msgid "This offer does not exist."
 msgstr "This offer does not exist."
 
@@ -1069,11 +1073,15 @@ msgstr "Send request"
 msgid "Set {name} to inactive?"
 msgstr "Set {name} to inactive?"
 
+#: modules/youth-referees/module.ts
+msgid "Who has the youth referee role and who referees which home game."
+msgstr "Who has the youth referee role and who referees which home game."
+
 #: src/pages/team.tsx
 msgid "Remove connection?"
 msgstr "Remove connection?"
 
-#: src/carpool.tsx
+#: modules/carpools/app/card.tsx
 msgid "Thanks! Anyone who wants to ride along can now book."
 msgstr "Thanks! Anyone who wants to ride along can now book."
 
@@ -1174,7 +1182,7 @@ msgstr "This entry does not exist."
 msgid "Privacy and contact"
 msgstr "Privacy and contact"
 
-#: worker/domain/carpool.ts
+#: modules/carpools/worker/domain.ts
 msgid "Lift available"
 msgstr "Lift available"
 
@@ -1224,7 +1232,7 @@ msgstr "Invalid period."
 msgid "female"
 msgstr "female"
 
-#: worker/routes/carpool.ts
+#: modules/carpools/worker/routes.ts
 msgid "The driver does not have enough free seats. Please cancel the lift and book again."
 msgstr "The driver does not have enough free seats. Please cancel the lift and book again."
 
@@ -1242,7 +1250,7 @@ msgstr "Not nominated for this game."
 msgid "{name} will then no longer be a permanent stand-in for {teamName}."
 msgstr "{name} will then no longer be a permanent stand-in for {teamName}."
 
-#: src/carpool.tsx
+#: modules/carpools/app/card.tsx
 msgid "Nobody has enough free seats right now."
 msgstr "Nobody has enough free seats right now."
 
@@ -1325,7 +1333,7 @@ msgstr "{persons, plural, one {Reminder sent to # person.} other {Reminder sent 
 msgid "View accompanying text"
 msgstr "View accompanying text"
 
-#: src/carpool.tsx
+#: modules/carpools/app/card.tsx
 msgid "One seat fewer"
 msgstr "One seat fewer"
 
@@ -1350,6 +1358,10 @@ msgstr "Together with others"
 msgid "Parents are not involved in this team."
 msgstr "Parents are not involved in this team."
 
+#: src/pages/privacy.tsx
+msgid "Deleted:"
+msgstr "Deleted:"
+
 #: worker/routes/events.ts
 msgid "The event is already cancelled."
 msgstr "The event is already cancelled."
@@ -1358,7 +1370,7 @@ msgstr "The event is already cancelled."
 msgid "<0>Tip:</0> In the browser menu, choose <1>Add to Home screen</1> or <2>Install app</2>. Then {club} starts like an app."
 msgstr "<0>Tip:</0> In the browser menu, choose <1>Add to Home screen</1> or <2>Install app</2>. Then {club} starts like an app."
 
-#: src/carpool.tsx
+#: modules/carpools/app/card.tsx
 msgid "One parent"
 msgstr "One parent"
 
@@ -1767,7 +1779,7 @@ msgstr "Carry out permanently"
 msgid "Page not found"
 msgstr "Page not found"
 
-#: src/carpool.tsx
+#: modules/carpools/app/card.tsx
 msgid "Add driver"
 msgstr "Add driver"
 
@@ -1855,14 +1867,18 @@ msgstr "Remove {firstName} as a stand-in"
 msgid "Info (optional)"
 msgstr "Info (optional)"
 
-#: worker/routes/carpool.ts
+#: modules/carpools/worker/routes.ts
 msgid "{coach} withdrew your offer as a driver: {game}."
 msgstr "{coach} withdrew your offer as a driver: {game}."
 
+#: modules/carpools/worker/domain.ts
 #: src/pages/admin.tsx
-#: worker/domain/carpool.ts
 msgid "{total, plural, one {# person} other {# people}}"
 msgstr "{total, plural, one {# person} other {# people}}"
+
+#: modules/carpools/module.ts
+msgid "Who offers how many seats for an away game, who is looking for one and who rides with whom."
+msgstr "Who offers how many seats for an away game, who is looking for one and who rides with whom."
 
 #: src/pages/helpers.tsx
 msgid "{label}: one slot fewer"
@@ -1876,9 +1892,9 @@ msgstr "This is only possible once the event has started."
 msgid "Absent without excuse {unexcused}× this season. You can change this in the respective event under <0>Events → Past</0>."
 msgstr "Absent without excuse {unexcused}× this season. You can change this in the respective event under <0>Events → Past</0>."
 
-#: shared/module-texts.ts
-#: src/carpool.tsx
-#: src/carpool.tsx
+#: modules/carpools/app/card.tsx
+#: modules/carpools/app/card.tsx
+#: modules/carpools/module.ts
 msgid "Carpools"
 msgstr "Carpools"
 
@@ -1937,7 +1953,7 @@ msgstr "Kind of plan"
 msgid "Parents are not involved in this team. An admin can change that."
 msgstr "Parents are not involved in this team. An admin can change that."
 
-#: worker/routes/carpool.ts
+#: modules/carpools/worker/routes.ts
 msgid "Only nominated players, their parents and the coaches see carpools."
 msgstr "Only nominated players, their parents and the coaches see carpools."
 
@@ -2035,7 +2051,7 @@ msgstr "Frequently asked questions"
 msgid "Please enter a mobile number, e.g. +49 151 23456789."
 msgstr "Please enter a mobile number, e.g. +49 151 23456789."
 
-#: src/carpool.tsx
+#: modules/carpools/app/card.tsx
 msgid "How many seats are free? Not counting you and your own passengers."
 msgstr "How many seats are free? Not counting you and your own passengers."
 
@@ -2173,7 +2189,7 @@ msgstr "Check your internet connection and reload the app."
 msgid "{code} is your code for {app}. It is valid for 15 minutes."
 msgstr "{code} is your code for {app}. It is valid for 15 minutes."
 
-#: worker/routes/carpool.ts
+#: modules/carpools/worker/routes.ts
 msgid "{takenAfter} people are already riding along. Please choose whom you can no longer take."
 msgstr "{takenAfter} people are already riding along. Please choose whom you can no longer take."
 
@@ -2239,7 +2255,7 @@ msgstr "Your e-mail address is confirmed. You can now also sign in with an e-mai
 msgid "Helpers are still needed for {game}. Still free: {open}."
 msgstr "Helpers are still needed for {game}. Still free: {open}."
 
-#: src/carpool.tsx
+#: modules/carpools/app/card.tsx
 msgid "Not riding after all?"
 msgstr "Not riding after all?"
 
@@ -2299,6 +2315,10 @@ msgstr "This child is not in the team."
 msgid "a new device has just been set up for your access via a personal link. Your previous devices have been signed out."
 msgstr "a new device has just been set up for your access via a personal link. Your previous devices have been signed out."
 
+#: src/pages/privacy.tsx
+msgid "Visible to:"
+msgstr "Visible to:"
+
 #: src/pages/season.tsx
 msgid "Birth year missing"
 msgstr "Birth year missing"
@@ -2341,11 +2361,11 @@ msgstr "Google Calendar: on a computer, go to calendar.google.com → Other cale
 msgid "Events for {childNames}"
 msgstr "Events for {childNames}"
 
-#: worker/domain/carpool.ts
+#: modules/carpools/worker/domain.ts
 msgid "Someone in this family is already looking for a lift. Further family members ride along there as companions."
 msgstr "Someone in this family is already looking for a lift. Further family members ride along there as companions."
 
-#: src/carpool.tsx
+#: modules/carpools/app/card.tsx
 msgid "{waiting, plural, one {# is looking ({seatsNeeded})} other {# are looking ({seatsNeeded})}}"
 msgstr "{waiting, plural, one {# is looking ({seatsNeeded})} other {# are looking ({seatsNeeded})}}"
 
@@ -2357,7 +2377,7 @@ msgstr "Not linked yet."
 msgid "Minutes before start"
 msgstr "Minutes before start"
 
-#: src/carpool.tsx
+#: modules/carpools/app/card.tsx
 msgid "is looking for a ride ({seats})"
 msgstr "is looking for a ride ({seats})"
 
@@ -2605,7 +2625,7 @@ msgstr "e.g. invitation to the end-of-season party on …"
 msgid "Link for {linkFor}"
 msgstr "Link for {linkFor}"
 
-#: src/carpool.tsx
+#: modules/carpools/app/card.tsx
 msgid "Offer seats"
 msgstr "Offer seats"
 
@@ -2966,7 +2986,7 @@ msgstr "Sender address"
 msgid "Afterwards, open the person and create a personal link for the access."
 msgstr "Afterwards, open the person and create a personal link for the access."
 
-#: worker/routes/carpool.ts
+#: modules/carpools/worker/routes.ts
 msgid "Entered as driver"
 msgstr "Entered as driver"
 
@@ -3209,11 +3229,11 @@ msgstr "For players"
 msgid "vs {opponent}"
 msgstr "vs {opponent}"
 
-#: shared/module-texts.ts
+#: modules/carpools/module.ts
 msgid "Drivers offer seats for away games, players book them."
 msgstr "Drivers offer seats for away games, players book them."
 
-#: src/carpool.tsx
+#: modules/carpools/app/card.tsx
 msgid "Second companion"
 msgstr "Second companion"
 
@@ -3245,7 +3265,7 @@ msgstr "Upcoming special events and games without handball4all of all teams. Eve
 msgid "to"
 msgstr "to"
 
-#: worker/routes/carpool.ts
+#: modules/carpools/worker/routes.ts
 msgid "Carpools only exist for away games."
 msgstr "Carpools only exist for away games."
 
@@ -3350,6 +3370,10 @@ msgstr "The code is valid for {minutes} minutes. Instead of entering the code, y
 msgid "Messages can be at most {max} characters long."
 msgstr "Messages can be at most {max} characters long."
 
+#: modules/youth-referees/module.ts
+msgid "The role when an admin removes it or the person leaves the club; assignments at the season change."
+msgstr "The role when an admin removes it or the person leaves the club; assignments at the season change."
+
 #: src/pages/event.tsx
 #: src/pages/home.tsx
 msgid "declined"
@@ -3388,12 +3412,12 @@ msgstr "Access for {firstName}"
 msgid "Sport"
 msgstr "Sport"
 
-#: src/carpool.tsx
+#: modules/carpools/app/card.tsx
 #: src/pages/helpers.tsx
 msgid "full"
 msgstr "full"
 
-#: src/carpool.tsx
+#: modules/carpools/app/card.tsx
 msgid "One companion"
 msgstr "One companion"
 
@@ -3426,7 +3450,7 @@ msgstr "{code} is your code for access to {app}"
 msgid "Holiday period deleted."
 msgstr "Holiday period deleted."
 
-#: worker/routes/carpool.ts
+#: modules/carpools/worker/routes.ts
 msgid "Lift booked"
 msgstr "Lift booked"
 
@@ -3605,7 +3629,7 @@ msgstr "Before"
 msgid "Saved. Trainings have been adjusted."
 msgstr "Saved. Trainings have been adjusted."
 
-#: worker/routes/carpool.ts
+#: modules/carpools/worker/routes.ts
 msgid "At least one free seat."
 msgstr "At least one free seat."
 
@@ -3631,8 +3655,8 @@ msgstr "Edit"
 msgid "Organisers are changed by coaches, admins and whoever created the event."
 msgstr "Organisers are changed by coaches, admins and whoever created the event."
 
-#: src/carpool.tsx
-#: worker/routes/carpool.ts
+#: modules/carpools/app/card.tsx
+#: modules/carpools/worker/routes.ts
 msgid "The game has been cancelled or has already started."
 msgstr "The game has been cancelled or has already started."
 
@@ -3662,7 +3686,7 @@ msgstr "The image could not be converted."
 msgid "Add more admins"
 msgstr "Add more admins"
 
-#: shared/module-texts.ts
+#: modules/youth-referees/module.ts
 msgid "Youth referees"
 msgstr "Youth referees"
 
@@ -3731,7 +3755,7 @@ msgstr "Chat histories are deleted at the season change. After someone leaves th
 msgid "Signed in on"
 msgstr "Signed in on"
 
-#: worker/routes/carpool.ts
+#: modules/carpools/worker/routes.ts
 msgid "You can only look for a lift for yourself or your children."
 msgstr "You can only look for a lift for yourself or your children."
 
@@ -3864,7 +3888,7 @@ msgstr "Acceptance entered for {name}."
 msgid "Your parents take care of withdrawing declines."
 msgstr "Your parents take care of withdrawing declines."
 
-#: src/carpool.tsx
+#: modules/carpools/app/card.tsx
 msgid "Delete ride request"
 msgstr "Delete ride request"
 
@@ -4060,7 +4084,7 @@ msgctxt "coach"
 msgid "My teams"
 msgstr "My teams"
 
-#: src/carpool.tsx
+#: modules/carpools/app/card.tsx
 msgid "{ownTaken} of {ownSeats} taken"
 msgstr "{ownTaken} of {ownSeats} taken"
 
@@ -4122,7 +4146,7 @@ msgstr "Leaving the club"
 msgid "Helper plan switched off. Entries are kept."
 msgstr "Helper plan switched off. Entries are kept."
 
-#: src/carpool.tsx
+#: modules/carpools/app/card.tsx
 msgid "Save change"
 msgstr "Save change"
 
@@ -4138,7 +4162,7 @@ msgstr "{name} is now co-organising."
 msgid "As soon as there are youth home games F to C, they appear here."
 msgstr "As soon as there are youth home games F to C, they appear here."
 
-#: src/carpool.tsx
+#: modules/carpools/app/card.tsx
 msgid "You are riding with {driver}. {driverFirstName} will be notified."
 msgstr "You are riding with {driver}. {driverFirstName} will be notified."
 
@@ -4175,7 +4199,7 @@ msgstr "Born {birthYear}: too old for {ageClass}"
 msgid "Inactive or away long-term: what is the difference?"
 msgstr "Inactive or away long-term: what is the difference?"
 
-#: worker/routes/carpool.ts
+#: modules/carpools/worker/routes.ts
 msgid "Looking for a lift"
 msgstr "Looking for a lift"
 
@@ -4349,7 +4373,7 @@ msgstr "Joint trainings from other plans"
 msgid "past"
 msgstr "past"
 
-#: worker/routes/carpool.ts
+#: modules/carpools/worker/routes.ts
 msgid "{rider} is not riding with you after all: {game} (entered by {coach})."
 msgstr "{rider} is not riding with you after all: {game} (entered by {coach})."
 
@@ -4396,7 +4420,7 @@ msgstr "E-mail for signing in"
 msgid "{name} has been asked."
 msgstr "{name} has been asked."
 
-#: worker/routes/carpool.ts
+#: modules/carpools/worker/routes.ts
 msgid "{rider} is riding with you: {game}."
 msgstr "{rider} is riding with you: {game}."
 
@@ -4413,8 +4437,8 @@ msgstr "Training {teams}"
 msgid "{from} to {to}"
 msgstr "{from} to {to}"
 
-#: src/carpool.tsx
-#: src/carpool.tsx
+#: modules/carpools/app/card.tsx
+#: modules/carpools/app/card.tsx
 msgid "Another companion"
 msgstr "Another companion"
 
@@ -4438,6 +4462,10 @@ msgstr "Subscribe to your events in the calendar app of your phone."
 #: src/pages/profile.tsx
 msgid "<0>Set up a passkey.</0> It is the safest way to sign in: Face ID, fingerprint or screen lock, without a password and without a code by e-mail."
 msgstr "<0>Set up a passkey.</0> It is the safest way to sign in: Face ID, fingerprint or screen lock, without a password and without a code by e-mail."
+
+#: modules/sms/module.ts
+msgid "Nobody else, not even admins. Text messages go through the club's SMS provider."
+msgstr "Nobody else, not even admins. Text messages go through the club's SMS provider."
 
 #: worker/routes/squad.ts
 msgid "Declined training {day} at short notice"
@@ -4737,7 +4765,7 @@ msgstr "First add the players."
 msgid "{loggedInAs} is currently signed in on this device. If you continue, an access will be created for the selected person and they will be signed in."
 msgstr "{loggedInAs} is currently signed in on this device. If you continue, an access will be created for the selected person and they will be signed in."
 
-#: shared/module-texts.ts
+#: modules/youth-referees/module.ts
 msgid "Home games of the marked age groups get a youth referee duty, with a role granted by link. Needs helper duties."
 msgstr "Home games of the marked age groups get a youth referee duty, with a role granted by link. Needs helper duties."
 
@@ -4755,7 +4783,7 @@ msgstr "Team"
 msgid "API key"
 msgstr "API key"
 
-#: src/carpool.tsx
+#: modules/carpools/app/card.tsx
 msgid "{name} is no longer riding with {driver}. The driver will be notified."
 msgstr "{name} is no longer riding with {driver}. The driver will be notified."
 
@@ -4876,7 +4904,7 @@ msgctxt "feedback"
 msgid "Player"
 msgstr "Player"
 
-#: worker/domain/carpool.ts
+#: modules/carpools/worker/domain.ts
 msgid "{list} and {last}"
 msgstr "{list} and {last}"
 
@@ -4904,10 +4932,6 @@ msgstr "Your response"
 #: worker/routes/duties.ts
 msgid "Helpers only exist for events of teams."
 msgstr "Helpers only exist for events of teams."
-
-#: src/pages/privacy.tsx
-msgid "For carpools to away games, the nominated players and their parents see drivers and those looking for a seat as “First name L.”."
-msgstr "For carpools to away games, the nominated players and their parents see drivers and those looking for a seat as “First name L.”."
 
 #: src/pages/season.tsx
 msgctxt "date"
@@ -4942,7 +4966,7 @@ msgstr "Coming up"
 msgid "Activated"
 msgstr "Activated"
 
-#: shared/module-texts.ts
+#: modules/sms/module.ts
 msgid "Sign-in codes and helper plan reminders by text message, for people who enter a mobile number. Needs a provider account (costs per message)."
 msgstr "Sign-in codes and helper plan reminders by text message, for people who enter a mobile number. Needs a provider account (costs per message)."
 
@@ -4963,13 +4987,17 @@ msgstr "There is already a group for all KiHaSL/JuHaSL."
 msgid "Group · {members} · {leads}"
 msgstr "Group · {members} · {leads}"
 
-#: worker/routes/carpool.ts
+#: modules/carpools/worker/routes.ts
 msgid "New passenger"
 msgstr "New passenger"
 
 #: worker/domain/email-login.ts
 msgid "here is your code to sign in:"
 msgstr "here is your code to sign in:"
+
+#: modules/sms/module.ts
+msgid "When removed in the profile or when the person leaves the club."
+msgstr "When removed in the profile or when the person leaves the club."
 
 #: src/pages/chat.tsx
 msgid "As soon as you belong to a team, you will find its chat here."
@@ -5012,7 +5040,7 @@ msgstr "Remove public holiday {name}"
 msgid "Everyone in the squad can be reached with notifications."
 msgstr "Everyone in the squad can be reached with notifications."
 
-#: worker/routes/carpool.ts
+#: modules/carpools/worker/routes.ts
 msgid "This offer no longer exists."
 msgstr "This offer no longer exists."
 
@@ -5136,7 +5164,7 @@ msgstr "How do I sign up in the helper plan?"
 msgid "To confirm, please enter exactly “{name}”."
 msgstr "To confirm, please enter exactly “{name}”."
 
-#: src/carpool.tsx
+#: modules/carpools/app/card.tsx
 msgid "{n, plural, one {# seat} other {# seats}}"
 msgstr "{n, plural, one {# seat} other {# seats}}"
 
@@ -5205,7 +5233,7 @@ msgstr "Accepted."
 msgid "Continue later"
 msgstr "Continue later"
 
-#: src/carpool.tsx
+#: modules/carpools/app/card.tsx
 msgid "Assign"
 msgstr "Assign"
 
@@ -5358,7 +5386,7 @@ msgstr "at {home}"
 msgid "Check age classes"
 msgstr "Check age classes"
 
-#: src/carpool.tsx
+#: modules/carpools/app/card.tsx
 msgid "You are driving"
 msgstr "You are driving"
 
@@ -5458,7 +5486,7 @@ msgstr "Without a connection to the association: paste a table (for example from
 msgid "Are you coming?"
 msgstr "Are you coming?"
 
-#: src/carpool.tsx
+#: modules/carpools/app/card.tsx
 #: src/respond.tsx
 msgid "You"
 msgstr "You"
@@ -5495,8 +5523,8 @@ msgstr "{code}: Please confirm your e-mail address"
 msgid "Default for away games"
 msgstr "Default for away games"
 
-#: src/carpool.tsx
-#: src/carpool.tsx
+#: modules/carpools/app/card.tsx
+#: modules/carpools/app/card.tsx
 msgid "Ride request deleted."
 msgstr "Ride request deleted."
 
@@ -5722,7 +5750,7 @@ msgstr "Task · after"
 msgid "Add to squad"
 msgstr "Add to squad"
 
-#: src/carpool.tsx
+#: modules/carpools/app/card.tsx
 msgid "Riding along. Deselect anyone you can no longer take; the family will be notified and will look again."
 msgstr "Riding along. Deselect anyone you can no longer take; the family will be notified and will look again."
 
@@ -5754,7 +5782,7 @@ msgstr "If that does not work and you have stored an e-mail address, use <0>Code
 msgid "OpenHolidays API (openholidaysapi.org), licence ODbL"
 msgstr "OpenHolidays API (openholidaysapi.org), licence ODbL"
 
-#: src/carpool.tsx
+#: modules/carpools/app/card.tsx
 msgid "are riding with {driver} ({seats})"
 msgstr "are riding with {driver} ({seats})"
 
@@ -5800,11 +5828,15 @@ msgstr "Parents then don't see the game, e.g. for a game without catering."
 msgid "as parent of {children}"
 msgstr "as parent of {children}"
 
+#: modules/youth-referees/module.ts
+msgid "The youth referees and the admins; at the game as a helper duty."
+msgstr "The youth referees and the admins; at the game as a helper duty."
+
 #: src/pages/admin.tsx
 msgid "{shown} of {total} people"
 msgstr "{shown} of {total} people"
 
-#: worker/routes/carpool.ts
+#: modules/carpools/worker/routes.ts
 msgid "Lift changed"
 msgstr "Lift changed"
 
@@ -5922,11 +5954,11 @@ msgstr "Stand-in requests"
 msgid "This event does not exist."
 msgstr "This event does not exist."
 
-#: src/carpool.tsx
+#: modules/carpools/app/card.tsx
 msgid "Wait until someone offers seats"
 msgstr "Wait until someone offers seats"
 
-#: worker/routes/carpool.ts
+#: modules/carpools/worker/routes.ts
 msgid "{driver} can no longer take {rider}: {game}. The search continues."
 msgstr "{driver} can no longer take {rider}: {game}. The search continues."
 
@@ -5946,7 +5978,7 @@ msgstr "The profile picture cannot be changed here right now."
 msgid "If this was not you, please contact your coach or an admin immediately."
 msgstr "If this was not you, please contact your coach or an admin immediately."
 
-#: worker/routes/carpool.ts
+#: modules/carpools/worker/routes.ts
 msgid "At least one passenger is not riding with this driver."
 msgstr "At least one passenger is not riding with this driver."
 
@@ -5954,8 +5986,8 @@ msgstr "At least one passenger is not riding with this driver."
 msgid "Coaches do this in their team: import players from a list, enter training times, send invitations."
 msgstr "Coaches do this in their team: import players from a list, enter training times, send invitations."
 
-#: src/carpool.tsx
-#: src/carpool.tsx
+#: modules/carpools/app/card.tsx
+#: modules/carpools/app/card.tsx
 msgid "{seats} free"
 msgstr "{seats} free"
 
@@ -6064,6 +6096,10 @@ msgstr "Personal access"
 #: src/pages/special.tsx
 msgid "No location"
 msgstr "No location"
+
+#: modules/duties/module.ts
+msgid "The helpers of the team see who takes on which duty as “First name L.”; coaches and admins in full. The personal calendar link only contains your own duties and those of your children."
+msgstr "The helpers of the team see who takes on which duty as “First name L.”; coaches and admins in full. The personal calendar link only contains your own duties and those of your children."
 
 #: src/pages/admin.tsx
 #: src/pages/admin.tsx
@@ -6362,7 +6398,7 @@ msgstr "Please enter a year such as 2015."
 msgid "Address (optional)"
 msgstr "Address (optional)"
 
-#: worker/domain/carpool.ts
+#: modules/carpools/worker/domain.ts
 msgid "This family is already looking for a lift. Please delete the search first."
 msgstr "This family is already looking for a lift. Please delete the search first."
 
@@ -6430,7 +6466,7 @@ msgstr "<0>Install as an app:</0> In Safari, tap <1>Share</1> at the bottom, the
 msgid "Test"
 msgstr "Test"
 
-#: worker/routes/carpool.ts
+#: modules/carpools/worker/routes.ts
 msgid "At most {max} companions."
 msgstr "At most {max} companions."
 
@@ -6451,7 +6487,7 @@ msgstr "Inactive"
 msgid "KiHaSL/JuHaSL wanted · {team}"
 msgstr "KiHaSL/JuHaSL wanted · {team}"
 
-#: worker/domain/carpool.ts
+#: modules/carpools/worker/domain.ts
 msgid "{rider} is not riding with you: {game}."
 msgstr "{rider} is not riding with you: {game}."
 
@@ -6520,7 +6556,7 @@ msgstr "Thumbs up"
 msgid "Permanently absent on Fridays"
 msgstr "Permanently absent on Fridays"
 
-#: src/carpool.tsx
+#: modules/carpools/app/card.tsx
 msgid "Withdraw offer?"
 msgstr "Withdraw offer?"
 
@@ -6568,8 +6604,8 @@ msgstr "Past events"
 msgid "New info on {label} on {date} at {meetAt}."
 msgstr "New info on {label} on {date} at {meetAt}."
 
-#: src/carpool.tsx
-#: src/carpool.tsx
+#: modules/carpools/app/card.tsx
+#: modules/carpools/app/card.tsx
 #: src/pages/event.tsx
 #: src/pages/profile.tsx
 #: src/pages/profile.tsx
@@ -6605,12 +6641,12 @@ msgstr "Current season: <0>{seasonName}</0>, {seasonFrom} to {seasonTo}"
 msgid "Remove logo"
 msgstr "Remove logo"
 
-#: worker/routes/carpool.ts
+#: modules/carpools/worker/routes.ts
 msgid "Only coaches enter offers for others."
 msgstr "Only coaches enter offers for others."
 
-#: src/carpool.tsx
-#: src/carpool.tsx
+#: modules/carpools/app/card.tsx
+#: modules/carpools/app/card.tsx
 msgid "Ride along"
 msgstr "Ride along"
 
@@ -6660,7 +6696,7 @@ msgstr "Helper plan · {text}"
 msgid "The club's language applies to everyone who has not chosen one, and to e-mails. The region decides school holidays and public holidays."
 msgstr "The club's language applies to everyone who has not chosen one, and to e-mails. The region decides school holidays and public holidays."
 
-#: shared/module-texts.ts
+#: modules/duties/module.ts
 #: src/calendar.tsx
 #: src/pages/admin.tsx
 #: src/pages/duty-admin.tsx
@@ -6702,6 +6738,10 @@ msgstr "Helpers wanted · {team}"
 msgid "KiHaSL role"
 msgstr "KiHaSL role"
 
+#: modules/duties/module.ts
+msgid "Who takes on which duty at which game or event, optional notes (e.g. which cake) and duty preferences."
+msgstr "Who takes on which duty at which game or event, optional notes (e.g. which cake) and duty preferences."
+
 #: src/pages/team.tsx
 msgid "For training and special events, players (and included parents) see who has accepted or declined. Reasons remain visible to coaches only. Better left off for youth teams, so that nobody is swayed by others declining."
 msgstr "For training and special events, players (and included parents) see who has accepted or declined. Reasons remain visible to coaches only. Better left off for youth teams, so that nobody is swayed by others declining."
@@ -6718,7 +6758,7 @@ msgstr "Tell your coach. They will set you inactive or away long-term for this w
 msgid "All future events of this training time and their responses will be deleted."
 msgstr "All future events of this training time and their responses will be deleted."
 
-#: worker/routes/carpool.ts
+#: modules/carpools/worker/routes.ts
 msgid "Looking for a lift for {name}: {game} (entered by {coach})."
 msgstr "Looking for a lift for {name}: {game} (entered by {coach})."
 
@@ -6773,11 +6813,11 @@ msgstr "No access"
 msgid "My duties"
 msgstr "My duties"
 
-#: worker/routes/carpool.ts
+#: modules/carpools/worker/routes.ts
 msgid "{driver} is not driving: {game}. The search for a lift for {rider} continues."
 msgstr "{driver} is not driving: {game}. The search for a lift for {rider} continues."
 
-#: src/carpool.tsx
+#: modules/carpools/app/card.tsx
 #: src/pages/team.tsx
 #: src/pages/team.tsx
 #: src/respond.tsx
@@ -6885,7 +6925,7 @@ msgstr "You have been nominated"
 msgid "Personal data"
 msgstr "Personal data"
 
-#: src/pages/home.tsx
+#: modules/carpools/app/index.tsx
 msgid "{waiting, plural, one {# is still looking} other {# are still looking}}"
 msgstr "{waiting, plural, one {# is still looking} other {# are still looking}}"
 
@@ -6897,7 +6937,7 @@ msgstr "active {days} days ago"
 msgid "Sign-in by passkey or e-mail, devices"
 msgstr "Sign-in by passkey or e-mail, devices"
 
-#: src/carpool.tsx
+#: modules/carpools/app/card.tsx
 msgid "{taken} people are riding along. Please enter more seats or deselect passengers."
 msgstr "{taken} people are riding along. Please enter more seats or deselect passengers."
 
@@ -7196,6 +7236,10 @@ msgstr "This plan does not exist."
 msgid "Test mail from Kabine"
 msgstr "Test mail from Kabine"
 
+#: modules/carpools/module.ts
+msgid "At the season change; future entries when someone leaves the club or the squad."
+msgstr "At the season change; future entries when someone leaves the club or the squad."
+
 #: src/howto.tsx
 msgid "News"
 msgstr "News"
@@ -7244,10 +7288,6 @@ msgstr "Test notification is on its way."
 msgid "KiHaSL/JuHaSL is not part of any template: for youth home games F to C the duty is always added automatically (1 slot, 15 min before throw-off until the end of the game)."
 msgstr "KiHaSL/JuHaSL is not part of any template: for youth home games F to C the duty is always added automatically (1 slot, 15 min before throw-off until the end of the game)."
 
-#: src/pages/privacy.tsx
-msgid "In the helper plan, the helpers of a team see who takes on which duty, as “First name L.”. The personal calendar link only contains your own duties and those of your children."
-msgstr "In the helper plan, the helpers of a team see who takes on which duty, as “First name L.”. The personal calendar link only contains your own duties and those of your children."
-
 #: worker/routes/games.ts
 msgid "New throw-off: {date}, {time}, {location}."
 msgstr "New throw-off: {date}, {time}, {location}."
@@ -7260,7 +7300,7 @@ msgstr "already linked to you"
 msgid "Team staff such as a physio or team manager see who accepted or declined, without reasons. If a team switches on “responses visible to everyone”, its players and parents see the same for trainings and special events."
 msgstr "Team staff such as a physio or team manager see who accepted or declined, without reasons. If a team switches on “responses visible to everyone”, its players and parents see the same for trainings and special events."
 
-#: src/carpool.tsx
+#: modules/carpools/app/card.tsx
 msgid "{drivers, plural, one {# driver · {freeSeats} free} other {# drivers · {freeSeats} free}}"
 msgstr "{drivers, plural, one {# driver · {freeSeats} free} other {# drivers · {freeSeats} free}}"
 
@@ -7268,7 +7308,7 @@ msgstr "{drivers, plural, one {# driver · {freeSeats} free} other {# drivers ·
 msgid "The game schedule was only just synced. Please try again in a few minutes."
 msgstr "The game schedule was only just synced. Please try again in a few minutes."
 
-#: src/carpool.tsx
+#: modules/carpools/app/card.tsx
 msgid "For whom?"
 msgstr "For whom?"
 
@@ -7351,11 +7391,11 @@ msgstr "Manage duties"
 msgid "Players, coaches and parents"
 msgstr "Players, coaches and parents"
 
-#: worker/routes/carpool.ts
+#: modules/carpools/worker/routes.ts
 msgid "{rider} is not riding with you after all: {game}."
 msgstr "{rider} is not riding with you after all: {game}."
 
-#: src/carpool.tsx
+#: modules/carpools/app/card.tsx
 msgid "I need a ride"
 msgstr "I need a ride"
 
@@ -7573,7 +7613,7 @@ msgstr "Notifications for this app are blocked in your device settings. Allow th
 msgid "Remove training time"
 msgstr "Remove training time"
 
-#: src/carpool.tsx
+#: modules/carpools/app/card.tsx
 msgid "DRIVERS"
 msgstr "DRIVERS"
 
@@ -7586,7 +7626,7 @@ msgstr "Each code may appear only once."
 msgid "Only parents can opt out."
 msgstr "Only parents can opt out."
 
-#: src/carpool.tsx
+#: modules/carpools/app/card.tsx
 msgid "is riding with {driver} ({seats})"
 msgstr "is riding with {driver} ({seats})"
 
@@ -7607,7 +7647,7 @@ msgstr "All players of all teams"
 msgid "Privacy"
 msgstr "Privacy"
 
-#: worker/routes/carpool.ts
+#: modules/carpools/worker/routes.ts
 msgid "Offer withdrawn"
 msgstr "Offer withdrawn"
 
@@ -7644,7 +7684,7 @@ msgstr "Use the sport's age groups?"
 msgid "Kabine is free software under the AGPL-3.0 licence. <0>Source code</0>"
 msgstr "Kabine is free software under the AGPL-3.0 licence. <0>Source code</0>"
 
-#: src/carpool.tsx
+#: modules/carpools/app/card.tsx
 msgid "Needed: {needed}"
 msgstr "Needed: {needed}"
 
@@ -7698,7 +7738,7 @@ msgstr "You are now linked to {names} and see all events of the {teamName}."
 msgid "yesterday"
 msgstr "yesterday"
 
-#: src/carpool.tsx
+#: modules/carpools/app/card.tsx
 msgid "Delete ride request for {name}"
 msgstr "Delete ride request for {name}"
 
@@ -7767,11 +7807,11 @@ msgstr "This person is not (or no longer) part of {teamName}."
 msgid "Cancelled by {cancelledBy}."
 msgstr "Cancelled by {cancelledBy}."
 
-#: worker/routes/carpool.ts
+#: modules/carpools/worker/routes.ts
 msgid "{name} is no longer riding with {driver}: {game}. The search continues (entered by {coach})."
 msgstr "{name} is no longer riding with {driver}: {game}. The search continues (entered by {coach})."
 
-#: shared/module-texts.ts
+#: modules/handball4all/module.ts
 msgid "Coaches sync the games of their team from the handball4all portal (German handball associations)."
 msgstr "Coaches sync the games of their team from the handball4all portal (German handball associations)."
 
@@ -7825,7 +7865,7 @@ msgstr "Unambiguous by year of birth."
 msgid "The picture could not be converted."
 msgstr "The picture could not be converted."
 
-#: src/carpool.tsx
+#: modules/carpools/app/card.tsx
 msgid "The offer will be deleted."
 msgstr "The offer will be deleted."
 
@@ -7833,7 +7873,7 @@ msgstr "The offer will be deleted."
 msgid "You cannot unlink your own access here."
 msgstr "You cannot unlink your own access here."
 
-#: src/carpool.tsx
+#: modules/carpools/app/card.tsx
 msgid "Ride cancelled."
 msgstr "Ride cancelled."
 
@@ -7860,6 +7900,10 @@ msgstr "Sources"
 #: src/pages/duty-admin.tsx
 msgid "All, members"
 msgstr "All, members"
+
+#: modules/carpools/module.ts
+msgid "The nominated players and their parents (names as “First name L.”) and the coaches."
+msgstr "The nominated players and their parents (names as “First name L.”) and the coaches."
 
 #: src/respond.tsx
 msgid "Accepted. Thanks for helping out!"
@@ -7893,7 +7937,7 @@ msgstr "A player should also play in the second team."
 msgid "Marked as permanently absent."
 msgstr "Marked as permanently absent."
 
-#: src/carpool.tsx
+#: modules/carpools/app/card.tsx
 msgid "One seat more"
 msgstr "One seat more"
 
@@ -7942,7 +7986,7 @@ msgstr "Passkeys and devices"
 msgid "Edit team"
 msgstr "Edit team"
 
-#: worker/routes/carpool.ts
+#: modules/carpools/worker/routes.ts
 msgid "Drivers can be nominated players, their parents and the coaches."
 msgstr "Drivers can be nominated players, their parents and the coaches."
 
@@ -7962,9 +8006,9 @@ msgstr "My name is missing from the invitation link or is already taken."
 msgid "Game deleted."
 msgstr "Game deleted."
 
-#: worker/domain/carpool.ts
-#: worker/routes/carpool.ts
-#: worker/routes/carpool.ts
+#: modules/carpools/worker/domain.ts
+#: modules/carpools/worker/routes.ts
+#: modules/carpools/worker/routes.ts
 msgid "Lift is off"
 msgstr "Lift is off"
 
@@ -7972,7 +8016,7 @@ msgstr "Lift is off"
 msgid "Cancel game"
 msgstr "Cancel game"
 
-#: worker/routes/carpool.ts
+#: modules/carpools/worker/routes.ts
 msgid "Someone has booked in the meantime. Please try again."
 msgstr "Someone has booked in the meantime. Please try again."
 
@@ -7991,7 +8035,7 @@ msgstr "Important: everyone uses the link only once, for themselves. Please sele
 msgid "Unknown endpoint."
 msgstr "Unknown endpoint."
 
-#: worker/routes/carpool.ts
+#: modules/carpools/worker/routes.ts
 msgid "There is no search for this person."
 msgstr "There is no search for this person."
 
@@ -8158,7 +8202,7 @@ msgstr "Please decline in good time, by {deadline} ({hours} hrs before), so your
 msgid "Permanently absent from training {day}"
 msgstr "Permanently absent from training {day}"
 
-#: worker/routes/carpool.ts
+#: modules/carpools/worker/routes.ts
 msgid "You cannot ride with yourself."
 msgstr "You cannot ride with yourself."
 
@@ -8179,7 +8223,7 @@ msgstr "Events, responses and the team chat in one place."
 msgid "This person does not belong to the teams of this training time."
 msgstr "This person does not belong to the teams of this training time."
 
-#: shared/module-texts.ts
+#: modules/sms/module.ts
 #: src/pages/admin.tsx
 #: src/pages/profile.tsx
 #: src/pages/sms-settings.tsx
@@ -8187,7 +8231,7 @@ msgstr "This person does not belong to the teams of this training time."
 msgid "SMS"
 msgstr "SMS"
 
-#: src/carpool.tsx
+#: modules/carpools/app/card.tsx
 #: src/duty-blocks.tsx
 #: src/pages/admin.tsx
 #: src/pages/admin.tsx
@@ -8213,6 +8257,10 @@ msgstr "Save"
 msgid "Format 2027/28"
 msgstr "Format 2027/28"
 
+#: src/pages/privacy.tsx
+msgid "Functions of this club"
+msgstr "Functions of this club"
+
 #: src/pages/team.tsx
 #: src/pages/team.tsx
 msgid "Birth year"
@@ -8234,6 +8282,10 @@ msgstr "You have rejoined the chat."
 #: src/pages/profile.tsx
 msgid "What should I receive?"
 msgstr "What should I receive?"
+
+#: src/pages/privacy.tsx
+msgid "Stored:"
+msgstr "Stored:"
 
 #: src/pages/chat.tsx
 msgid "Last message {when}"
@@ -8281,7 +8333,7 @@ msgstr "Test message from Kabine: SMS works."
 msgid "Past events cannot be moved."
 msgstr "Past events cannot be moved."
 
-#: worker/domain/carpool.ts
+#: modules/carpools/worker/domain.ts
 msgid "{count, plural, one {Carpool for tomorrow, {title} ({time}): {names} is still looking for a lift. If you have free seats, please add them in the event.} other {Carpool for tomorrow, {title} ({time}): {names} are still looking for a lift. If you have free seats, please add them in the event.}}"
 msgstr "{count, plural, one {Carpool for tomorrow, {title} ({time}): {names} is still looking for a lift. If you have free seats, please add them in the event.} other {Carpool for tomorrow, {title} ({time}): {names} are still looking for a lift. If you have free seats, please add them in the event.}}"
 
@@ -8293,7 +8345,7 @@ msgstr "{title}, {weekday} {day} at {clock}"
 msgid "Reactions: {list}. Who reacted?"
 msgstr "Reactions: {list}. Who reacted?"
 
-#: src/carpool.tsx
+#: modules/carpools/app/card.tsx
 msgid "Your offer"
 msgstr "Your offer"
 
@@ -8361,7 +8413,7 @@ msgstr "Decline entered for {name}."
 msgid "Events"
 msgstr "Events"
 
-#: shared/module-texts.ts
+#: modules/handball4all/module.ts
 msgid "Game schedule from handball4all"
 msgstr "Game schedule from handball4all"
 
@@ -8456,8 +8508,8 @@ msgstr "synced"
 msgid "Create special event"
 msgstr "Create special event"
 
-#: worker/routes/carpool.ts
-#: worker/routes/carpool.ts
+#: modules/carpools/worker/routes.ts
+#: modules/carpools/worker/routes.ts
 msgid "Lift cancelled"
 msgstr "Lift cancelled"
 
@@ -8503,7 +8555,7 @@ msgstr "Default language"
 msgid "Expected JSON."
 msgstr "Expected JSON."
 
-#: worker/routes/carpool.ts
+#: modules/carpools/worker/routes.ts
 #: worker/routes/events.ts
 msgid "This event does not exist or you cannot see it."
 msgstr "This event does not exist or you cannot see it."
@@ -8617,7 +8669,7 @@ msgstr "Opponent"
 msgid "Too many failed attempts. Please request a new code."
 msgstr "Too many failed attempts. Please request a new code."
 
-#: worker/routes/carpool.ts
+#: modules/carpools/worker/routes.ts
 msgid "{driver} can no longer take {rider}: {game}. The search continues (entered by {coach})."
 msgstr "{driver} can no longer take {rider}: {game}. The search continues (entered by {coach})."
 
@@ -8646,7 +8698,7 @@ msgstr "Record leaving"
 msgid "{players, plural, one {# member} other {# members}}"
 msgstr "{players, plural, one {# member} other {# members}}"
 
-#: worker/routes/carpool.ts
+#: modules/carpools/worker/routes.ts
 msgid "{rider} is riding with you: {game} (entered by {coach})."
 msgstr "{rider} is riding with you: {game} (entered by {coach})."
 
@@ -8682,11 +8734,11 @@ msgstr "Admin view on."
 msgid "Not synced yet."
 msgstr "Not synced yet."
 
-#: src/carpool.tsx
+#: modules/carpools/app/card.tsx
 msgid "Me"
 msgstr "Me"
 
-#: src/carpool.tsx
+#: modules/carpools/app/card.tsx
 msgid "Who is driving?"
 msgstr "Who is driving?"
 
@@ -8702,7 +8754,7 @@ msgstr "uses the app"
 msgid "changed"
 msgstr "changed"
 
-#: src/carpool.tsx
+#: modules/carpools/app/card.tsx
 msgid "Cancel ride"
 msgstr "Cancel ride"
 
@@ -8804,7 +8856,7 @@ msgstr "Welcome! A few steps and your club can start. Everything can be changed 
 msgid "Break {holiday}"
 msgstr "Break {holiday}"
 
-#: worker/routes/carpool.ts
+#: modules/carpools/worker/routes.ts
 msgid "Please cancel the current lift first."
 msgstr "Please cancel the current lift first."
 
@@ -8826,7 +8878,7 @@ msgstr "Core squad"
 msgid "Not assigned to any team yet."
 msgstr "Not assigned to any team yet."
 
-#: src/carpool.tsx
+#: modules/carpools/app/card.tsx
 msgid "Offer changed."
 msgstr "Offer changed."
 
@@ -9132,7 +9184,7 @@ msgstr "Only the upcoming season that has not started yet can be changed or disc
 msgid "Language"
 msgstr "Language"
 
-#: src/carpool.tsx
+#: modules/carpools/app/card.tsx
 msgid "Offer withdrawn."
 msgstr "Offer withdrawn."
 
@@ -9174,7 +9226,7 @@ msgstr "Profile picture, permissions and notifications"
 msgid "Decline deadlines"
 msgstr "Decline deadlines"
 
-#: src/carpool.tsx
+#: modules/carpools/app/card.tsx
 msgid "Offer from {driver}"
 msgstr "Offer from {driver}"
 
@@ -9291,7 +9343,7 @@ msgctxt "role"
 msgid "Stand-in"
 msgstr "Stand-in"
 
-#: worker/routes/carpool.ts
+#: modules/carpools/worker/routes.ts
 msgid "{name} is riding with {driver}: {game} (entered by {coach})."
 msgstr "{name} is riding with {driver}: {game} (entered by {coach})."
 
@@ -9403,7 +9455,7 @@ msgstr "Notifications in the helper plan"
 msgid "Players accept by hand if they want to join."
 msgstr "Players accept by hand if they want to join."
 
-#: src/carpool.tsx
+#: modules/carpools/app/card.tsx
 msgid "Saved. As soon as someone offers seats, you will get a notification."
 msgstr "Saved. As soon as someone offers seats, you will get a notification."
 
@@ -9462,7 +9514,7 @@ msgstr "today"
 msgid "Profile picture saved."
 msgstr "Profile picture saved."
 
-#: src/carpool.tsx
+#: modules/carpools/app/card.tsx
 msgid "Free seats"
 msgstr "Free seats"
 
@@ -9531,7 +9583,7 @@ msgstr "Start time"
 msgid "Stand-ins come from the 2nd team of the same age class or the next younger youth."
 msgstr "Stand-ins come from the 2nd team of the same age class or the next younger youth."
 
-#: src/carpool.tsx
+#: modules/carpools/app/card.tsx
 msgid "Nobody is offering seats yet"
 msgstr "Nobody is offering seats yet"
 
@@ -9605,7 +9657,7 @@ msgstr "{name} has approved your new profile picture."
 msgid "How do players and parents get into the app?"
 msgstr "How do players and parents get into the app?"
 
-#: worker/domain/carpool.ts
+#: modules/carpools/worker/domain.ts
 msgid "Someone in this family is already driving. Please withdraw the offer first."
 msgstr "Someone in this family is already driving. Please withdraw the offer first."
 
@@ -9721,7 +9773,7 @@ msgstr "Confirm an e-mail address in your profile first; the test mail goes ther
 msgid "In Safari, tap <0>Share</0> at the bottom, then <1>Add to Home Screen</1> and <2>Add</2>. After that you start {club} from the icon on the home screen. Only then do notifications work on the iPhone."
 msgstr "In Safari, tap <0>Share</0> at the bottom, then <1>Add to Home Screen</1> and <2>Add</2>. After that you start {club} from the icon on the home screen. Only then do notifications work on the iPhone."
 
-#: src/carpool.tsx
+#: modules/carpools/app/card.tsx
 msgid "STILL LOOKING"
 msgstr "STILL LOOKING"
 
@@ -9733,7 +9785,7 @@ msgstr "{teamName} (without parents)"
 msgid "Special events and own games"
 msgstr "Special events and own games"
 
-#: shared/module-texts.ts
+#: modules/duties/module.ts
 msgid "Parents or players sign up for duties at games and special events (cake, timekeeping, washing shirts)."
 msgstr "Parents or players sign up for duties at games and special events (cake, timekeeping, washing shirts)."
 
@@ -9841,6 +9893,10 @@ msgstr "This person no longer exists."
 msgid "You are in the chat as a parent of {parentOf}. If you leave, you will no longer get messages or chat notifications. You can rejoin at any time."
 msgstr "You are in the chat as a parent of {parentOf}. If you leave, you will no longer get messages or chat notifications. You can rejoin at any time."
 
+#: src/pages/club-settings.tsx
+msgid "Beta"
+msgstr "Beta"
+
 #: src/pages/profile.tsx
 msgid "{firstName} has their own access. Here you decide what {firstName} may do on their own. You can always accept and decline for {firstName}."
 msgstr "{firstName} has their own access. Here you decide what {firstName} may do on their own. You can always accept and decline for {firstName}."
@@ -9937,6 +9993,10 @@ msgstr "You are not assigned to any team. You can find the teams and their event
 #: src/pages/team.tsx
 msgid "Record leaving the club?"
 msgstr "Record leaving the club?"
+
+#: modules/duties/module.ts
+msgid "At the season change; future duties when someone leaves the club."
+msgstr "At the season change; future duties when someone leaves the club."
 
 #: src/pages/team.tsx
 msgid "How it works: open the link, enter your own name, select your child (siblings in the same team right away too) and set up a passkey."
@@ -10071,7 +10131,7 @@ msgstr "Info: {label}"
 msgid "Only for signing in. Neither coaches nor admins see the address."
 msgstr "Only for signing in. Neither coaches nor admins see the address."
 
-#: src/carpool.tsx
+#: modules/carpools/app/card.tsx
 msgid "Who is riding along?"
 msgstr "Who is riding along?"
 
@@ -10173,7 +10233,7 @@ msgstr "Without team"
 msgid "Share"
 msgstr "Share"
 
-#: src/carpool.tsx
+#: modules/carpools/app/card.tsx
 msgid "Who needs a ride?"
 msgstr "Who needs a ride?"
 
@@ -10211,7 +10271,7 @@ msgstr "Link schedule"
 msgid "Invalid date"
 msgstr "Invalid date"
 
-#: worker/routes/carpool.ts
+#: modules/carpools/worker/routes.ts
 msgid "This person is not riding here."
 msgstr "This person is not riding here."
 
@@ -10252,7 +10312,7 @@ msgstr "Access for"
 msgid "The app belongs to our club only and runs on its own address. If it were in the App Store, the whole world would have access to the app. That is unnecessary and we do not want it either."
 msgstr "The app belongs to our club only and runs on its own address. If it were in the App Store, the whole world would have access to the app. That is unnecessary and we do not want it either."
 
-#: src/carpool.tsx
+#: modules/carpools/app/card.tsx
 msgid "Second parent"
 msgstr "Second parent"
 
@@ -10294,12 +10354,12 @@ msgstr "Template saved."
 msgid "{created, plural, one {# player added} other {# players added}}"
 msgstr "{created, plural, one {# player added} other {# players added}}"
 
-#: src/carpool.tsx
-#: src/carpool.tsx
+#: modules/carpools/app/card.tsx
+#: modules/carpools/app/card.tsx
 msgid "I'm driving"
 msgstr "I'm driving"
 
-#: src/carpool.tsx
+#: modules/carpools/app/card.tsx
 msgid "are looking for a ride ({seats})"
 msgstr "are looking for a ride ({seats})"
 
@@ -10316,11 +10376,11 @@ msgstr "Carry out season change"
 msgid "Name, colours and logo appear on the home screen, in notifications and in e-mails."
 msgstr "Name, colours and logo appear on the home screen, in notifications and in e-mails."
 
-#: worker/domain/carpool.ts
+#: modules/carpools/worker/domain.ts
 msgid "{name} ({seats} seats)"
 msgstr "{name} ({seats} seats)"
 
-#: src/carpool.tsx
+#: modules/carpools/app/card.tsx
 msgid "Withdraw offer"
 msgstr "Withdraw offer"
 
@@ -10450,7 +10510,7 @@ msgstr "The event is not cancelled."
 msgid "Only possible when nobody is assigned any more."
 msgstr "Only possible when nobody is assigned any more."
 
-#: worker/domain/carpool.ts
+#: modules/carpools/worker/domain.ts
 msgid "{rest, plural, one {{listAll} and # other person} other {{listAll} and # others}}"
 msgstr "{rest, plural, one {{listAll} and # other person} other {{listAll} and # others}}"
 
@@ -10462,7 +10522,7 @@ msgstr "Sad"
 msgid "all responses and nominations"
 msgstr "all responses and nominations"
 
-#: worker/routes/carpool.ts
+#: modules/carpools/worker/routes.ts
 msgid "{driver} is not driving: {game}. The search for a lift for {rider} continues (entered by {coach})."
 msgstr "{driver} is not driving: {game}. The search for a lift for {rider} continues (entered by {coach})."
 

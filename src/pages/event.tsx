@@ -3,13 +3,13 @@ import { Trans } from "@lingui/react/macro";
 import { useState } from "preact/hooks";
 import type { EventDetail, LocationRef, MyParticipation, ParticipantDetail, RosterEntry } from "../../shared/types";
 import { api, errorMessage } from "../api";
-import { CarpoolCard } from "../carpool";
 import { dutyLines, neededText } from "../duties";
 import { BlockSheet } from "../duty-blocks";
 import { longDate, personName, shortName, stamp, time, timeRange, weekdayPlural } from "../format";
 import { Icon } from "../icons";
 import { GameReportLink, isLiveWindow, isReportWindow, LiveTickerLink } from "../live";
 import { byGuardianText, DeclineSheet, deadlineText, PersonResponseRow, quickReasons, ResponseButtons, respondedByText, sendResponse } from "../respond";
+import { useActiveModules } from "../modules";
 import { useMe, useSession } from "../session";
 import { invalidate, useQuery } from "../store";
 import { Button, confirmDialog, copyText, ErrorBox, Field, Notice, Segmented, Sheet, Spinner, StatusPill, SwitchRow, TextField, toast, useDocumentTitle } from "../ui";
@@ -71,6 +71,7 @@ export function EventPage({ id }: { id: string }) {
   const me = useMe();
   const { data: event, error, loading, reload } = useQuery<EventDetail>(`/events/${id}`, { refreshMs: 10_000 });
   const [declineFor, setDeclineFor] = useState<MyParticipation | null>(null);
+  const modules = useActiveModules();
   useDocumentTitle(event ? `${kindLabel(event.kind)} ${longDate(event.startsAt)}` : t`Event`);
 
   if (loading) return <Spinner />;
@@ -192,7 +193,11 @@ export function EventPage({ id }: { id: string }) {
           </section>
         ) : null}
 
-        {event.carpool ? <CarpoolCard event={event} carpool={event.carpool} onChanged={reload} /> : null}
+        {modules.map((m) => {
+          const Section = m.eventSection;
+          const data = event.modules[m.manifest.id];
+          return Section && data != null ? <Section key={m.manifest.id} event={event} data={data} reload={reload} /> : null;
+        })}
 
         {event.counts && !event.participants ? (
           <section class="stats" aria-label={t`Team responses`}>

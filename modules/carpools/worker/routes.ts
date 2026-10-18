@@ -1,9 +1,9 @@
-// Carpool API. Rules in worker/domain/carpool.ts.
+// Carpool API. Rules in domain.ts.
 import { plural, t } from "@lingui/core/macro";
 import { type Context, Hono } from "hono";
 import { z } from "zod";
-import { type AppEnv, intParam, requireActor } from "../app";
-import { type Actor, actsFor, isCoachOfAny } from "../auth/actor";
+import { type AppEnv, intParam, requireActor } from "../../../worker/app";
+import { type Actor, actsFor, isCoachOfAny } from "../../../worker/auth/actor";
 import {
   assertNoConflict,
   type CarpoolEvent,
@@ -25,11 +25,11 @@ import {
   seatsOf,
   suppressMatches,
   takenSeats,
-} from "../domain/carpool";
-import { loadEventContext, loadVisibleEvent } from "../domain/events";
-import { all, list, run, stmt } from "../lib/db";
-import { badRequest, conflict, forbidden, notFound, parse, readJson } from "../lib/http";
-import { utcIso } from "../lib/time";
+} from "./domain";
+import { loadEventContext, loadVisibleEvent } from "../../../worker/domain/events";
+import { all, list, run, stmt } from "../../../worker/lib/db";
+import { badRequest, conflict, forbidden, notFound, parse, readJson } from "../../../worker/lib/http";
+import { utcIso } from "../../../worker/lib/time";
 
 export const carpoolRoutes = new Hono<AppEnv>();
 

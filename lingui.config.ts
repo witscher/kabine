@@ -7,7 +7,7 @@ export default defineConfig({
   sourceLocale: "en",
   locales: ["en", "de"],
   fallbackLocales: { default: "en" },
-  catalogs: [{ path: "<rootDir>/locales/{locale}", include: ["<rootDir>/src", "<rootDir>/worker", "<rootDir>/shared"], exclude: ["**/node_modules/**", "**/worker-configuration.d.ts"] }],
+  catalogs: [{ path: "<rootDir>/locales/{locale}", include: ["<rootDir>/src", "<rootDir>/worker", "<rootDir>/shared", "<rootDir>/modules"], exclude: ["**/node_modules/**", "**/worker-configuration.d.ts"] }],
   format: formatter({ lineNumbers: false }),
   orderBy: "messageId",
 });

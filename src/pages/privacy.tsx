@@ -2,6 +2,7 @@ import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { moduleOn } from "../../shared/club";
 import { useClub } from "../club";
+import { MODULES } from "../../shared/modules";
 import { useSession } from "../session";
 import { TopBar, useDocumentTitle } from "../ui";
 
@@ -88,19 +89,6 @@ export function PrivacyPage() {
               its players and parents see the same for trainings and special events.
             </Trans>
           </p>
-          {on("duties") ? (
-            <p>
-              <Trans>
-                In the helper plan, the helpers of a team see who takes on which duty, as “First name L.”. The personal calendar link only contains your own duties
-                and those of your children.
-              </Trans>
-            </p>
-          ) : null}
-          {on("carpools") ? (
-            <p>
-              <Trans>For carpools to away games, the nominated players and their parents see drivers and those looking for a seat as “First name L.”.</Trans>
-            </p>
-          ) : null}
           <p>
             <Trans>Feedback via “Help and feedback” goes by e-mail to the people who run the app for the club and is not stored in the app.</Trans>
           </p>
@@ -111,6 +99,7 @@ export function PrivacyPage() {
             <Trans>Chat histories are deleted at the season change. After someone leaves the club, all their data is deleted at the next season change at the latest.</Trans>
           </p>
         </section>
+        <ModulePrivacy />
         <section class="card card-pad stack">
           <h2 style={{ fontSize: "22px" }}>
             <Trans>Sources</Trans>
@@ -137,5 +126,44 @@ export function PrivacyPage() {
         </section>
       </div>
     </main>
+  );
+}
+
+/** What the club's active modules store, from their manifests (modules/<id>/module.ts, privacy()). */
+function ModulePrivacy() {
+  const club = useClub();
+  const list = MODULES.filter((m) => moduleOn(club.modules, m.id))
+    .map((m) => ({ label: m.label(), privacy: m.privacy() }))
+    .filter((m) => m.privacy);
+  if (!list.length) return null;
+  return (
+    <section class="card card-pad stack">
+      <h2 style={{ fontSize: "22px" }}>
+        <Trans>Functions of this club</Trans>
+      </h2>
+      {list.map(({ label, privacy }) => (
+        <div class="stack-sm">
+          <h3 style={{ fontSize: "18px" }}>{label}</h3>
+          <p>
+            <strong>
+              <Trans>Stored:</Trans>
+            </strong>{" "}
+            {privacy!.stores}
+          </p>
+          <p>
+            <strong>
+              <Trans>Visible to:</Trans>
+            </strong>{" "}
+            {privacy!.visibleTo}
+          </p>
+          <p>
+            <strong>
+              <Trans>Deleted:</Trans>
+            </strong>{" "}
+            {privacy!.deleted}
+          </p>
+        </div>
+      ))}
+    </section>
   );
 }

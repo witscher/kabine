@@ -2,7 +2,6 @@ import { t } from "@lingui/core/macro";
 import { appOrigin, enterClubContext } from "./domain/club";
 import { ensureInstanceSecrets } from "./lib/instance-secrets";
 import { recordAttendance } from "./domain/attendance";
-import { sendCarpoolChatReminders } from "./domain/carpool";
 import { syncAutoSquads } from "./domain/auto-squad";
 import { sendDutyNotifications } from "./domain/duty-notify";
 import { deadlineInstant, type EventRow, EVENT_SELECT, eventTeams, eventTitle, loadEventContext } from "./domain/events";
@@ -11,6 +10,7 @@ import { syncAutoGroups } from "./domain/groups";
 import { notifyCoaches, notifyPersons, shortDate, shortTime } from "./domain/notify";
 import { all, run } from "./lib/db";
 import { maintenanceState } from "./lib/maintenance";
+import { activeWorkerModules } from "./modules";
 import { addDays, addMinutesLocal, localToInstant, nowLocal, todayLocal, toLocal, utcIso } from "./lib/time";
 
 /** Reasons for declines are deleted 60 days after the event. */
@@ -38,8 +38,9 @@ export async function handleScheduled(baseEnv: Env, scheduledTime: number): Prom
     ["Helper plan", () => sendDutyNotifications(env, scheduledTime)],
     ["Attendance", () => recordAttendance(env.DB, scheduledTime)],
     ["Meeting point", () => sendMeetingReminders(env, scheduledTime)],
-    ["Carpools", () => sendCarpoolChatReminders(env, scheduledTime)],
   ];
+  // Modules decide themselves what is due
+  for (const m of activeWorkerModules()) if (m.cron) tasks.push([m.manifest.id, () => m.cron!(env, scheduledTime)]);
   const hour = Number(toLocal(scheduledTime).slice(11, 13));
   if (hour === 3) tasks.push(["Cleanup", () => cleanup(env.DB, scheduledTime)]);
   // Safety net: the KiHaSL/JuHaSL group follows role and admins (otherwise synced on every change)

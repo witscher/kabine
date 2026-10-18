@@ -4,7 +4,6 @@ import { z } from "zod";
 import type { EventSummary, MyDuty } from "../../shared/types";
 import { type AppEnv, intParam, requireActor } from "../app";
 import { type Actor, isCoachOfAny, PARENTS_HANDLE_IT, requireActFor, requireAdmin } from "../auth/actor";
-import { carpoolGame, loadCarpool, loadCarpoolCounts, releaseRequests } from "../domain/carpool";
 import { postSystemMessage } from "../domain/chat";
 import {
   deadlineInstant,
@@ -25,6 +24,7 @@ import { loadEventPage } from "../domain/event-page";
 import { ensureGenerated } from "../domain/generate";
 import { eventLabel, notifyCoaches, notifyPersons, recipientsForPersons, enqueuePush, shortDate, shortTime, staffOf } from "../domain/notify";
 import { all, first, list, run, stmt } from "../lib/db";
+import { moduleEventDetail, moduleEventSummaries, moduleParticipantsLeft } from "../modules";
 import { badRequest, conflict, forbidden, notFound, parse, readJson } from "../lib/http";
 import { addDays, isDate, isLocalDateTime, isTime, localToInstant, nowLocal, todayLocal, utcIso } from "../lib/time";
 
@@ -68,15 +68,15 @@ eventRoutes.get("/events", async (c) => {
     q.past ? Promise.resolve(new Map<number, number>()) : loadHelpersNeeded(c.env.DB, actor, gameIds, nowLocal()),
   ]);
   const now = Date.now();
-  const [managers, carpool] = await Promise.all([
+  const [managers, extras] = await Promise.all([
     dutyManagers(c.env.DB, rows.filter((e) => e.kind === "special").map((e) => e.id)),
-    q.past ? Promise.resolve(new Map()) : loadCarpoolCounts(c.env.DB, actor, rows, ctx, now),
+    q.past ? Promise.resolve(new Map<number, Record<string, unknown>>()) : moduleEventSummaries(c.env.DB, actor, rows, ctx, now),
   ]);
   return c.json({
     events: rows.map((e) => ({
       ...withDuties(toSummary(e, ctx, actor, now), duties, needed),
       organizing: !!managers.get(e.id)?.has(actor.personId),
-      carpoolCount: carpool.get(e.id) ?? null,
+      modules: extras.get(e.id) ?? {},
     })),
   });
 });
@@ -105,12 +105,12 @@ eventRoutes.get("/events/:id", async (c) => {
   ]);
   const now = Date.now();
   const detail = withDuties(toDetail(event, ctx, actor, now), duties, needed);
-  const [info, carpool] = await Promise.all([
+  const [info, modules] = await Promise.all([
     organizerInfo(c.env.DB, actor, event.id, event.kind, detail.teams.map((t) => t.id)),
-    loadCarpool(c.env.DB, actor, event, ctx, now),
+    moduleEventDetail(c.env.DB, actor, event, ctx, now),
   ]);
   const organizing = !!info.organizers && (info.organizers.creator?.id === actor.personId || info.organizers.people.some((p) => p.id === actor.personId));
-  return c.json({ ...detail, ...info, organizing, carpool });
+  return c.json({ ...detail, ...info, organizing, modules });
 });
 
 /** Creator and organisers of a special event; they manage the helper duties. */
@@ -251,8 +251,8 @@ export async function respond(
     utcIso(now),
   );
 
-  // Whoever declines no longer looks for a ride
-  if (status === "no" && carpoolGame(event)) await releaseRequests(env, { event, ctx, teamIds }, [personId], [actor.accountId]);
+  // Whoever declines is out for the modules too (e.g. no longer looks for a ride)
+  if (status === "no") await moduleParticipantsLeft(env, { event, ctx, teamIds, personIds: [personId], exclude: [actor.accountId] });
 
   // Notifications: texts per recipient language
   const name = participant.person.firstName;
