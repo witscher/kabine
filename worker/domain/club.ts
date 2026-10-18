@@ -1,7 +1,7 @@
 // Club profile: name, colours, logo, privacy notice and owner. Stored in the database (app_meta)
 // and edited in the setup wizard, never in code. One installation serves exactly one club.
 import type { ClubProfile } from "../../shared/club";
-import { clubAbbr, DEFAULT_CLUB } from "../../shared/club";
+import { clubAbbr, type ClubModules, DEFAULT_CLUB, DEFAULT_MODULES, type ModuleId, moduleOn } from "../../shared/club";
 import { setClubDefaultLocale } from "../i18n";
 import { setTimeZone } from "../lib/time";
 import { first, run } from "../lib/db";
@@ -18,7 +18,13 @@ const KEY = "club";
 export async function loadClub(db: D1Database): Promise<ClubSettings> {
   const row = await first<{ value: string }>(db, "SELECT value FROM app_meta WHERE key = ?", KEY);
   const stored = row ? (JSON.parse(row.value) as Partial<ClubSettings>) : {};
-  return { ...DEFAULT_CLUB, ownerPersonId: null, ...stored, colors: { ...DEFAULT_CLUB.colors, ...stored.colors } };
+  return {
+    ...DEFAULT_CLUB,
+    ownerPersonId: null,
+    ...stored,
+    colors: { ...DEFAULT_CLUB.colors, ...stored.colors },
+    modules: { ...DEFAULT_MODULES, ...stored.modules },
+  };
 }
 
 export async function saveClub(db: D1Database, patch: Partial<ClubSettings>): Promise<ClubSettings> {
@@ -31,6 +37,7 @@ export async function saveClub(db: D1Database, patch: Partial<ClubSettings>): Pr
   );
   ownAbbr = clubAbbr(next);
   ownShortName = next.shortName;
+  ownModules = next.modules;
   return next;
 }
 
@@ -59,6 +66,12 @@ export async function rememberOrigin(db: D1Database, origin: string): Promise<vo
 // helper notifications, which have no database at hand.
 let ownAbbr = clubAbbr(DEFAULT_CLUB);
 let ownShortName = DEFAULT_CLUB.shortName;
+let ownModules: ClubModules = DEFAULT_MODULES;
+
+/** Is a module of this club on? (set with the club context of the request or cron run) */
+export function isModuleOn(id: ModuleId): boolean {
+  return moduleOn(ownModules, id);
+}
 
 export function ownClubAbbr(): string {
   return ownAbbr;
@@ -72,6 +85,7 @@ export async function enterClubContext(db: D1Database): Promise<ClubSettings> {
   const club = await loadClub(db);
   ownAbbr = clubAbbr(club);
   ownShortName = club.shortName;
+  ownModules = club.modules;
   setClubDefaultLocale(club.defaultLocale);
   setTimeZone(club.timeZone);
   return club;

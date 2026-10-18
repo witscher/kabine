@@ -9,6 +9,7 @@ import type { MyDuty } from "../../shared/types";
 import { all, first, stmt } from "../lib/db";
 import { addMinutesLocal, localToInstant } from "../lib/time";
 import { CURRENT_AGE_CLASS_JOIN } from "./events";
+import { isModuleOn } from "./club";
 
 /** Code of the KiHaSL/JuHaSL duty type (initial data of migration 0018). */
 export const REFEREE_CODE = "referee";
@@ -140,6 +141,7 @@ export function rolesFor(team: HelperTeam, type: DutyType): HelperRole[] {
  * the person can help or which they can manage.
  */
 export async function helperTeams(db: D1Database, actor: Actor, types?: Map<number, DutyType>): Promise<HelperTeam[]> {
+  if (!isModuleOn("duties")) return [];
   const [teams, typeMap, member, organized] = await Promise.all([
     all<{ id: number; name: string; parents_enabled: number }>(
       db,
@@ -247,6 +249,7 @@ export function publicHelperTeam(t: HelperTeam) {
  * children with the role. In the admin view “referee” oneself always counts.
  */
 export async function refereeRoles(db: D1Database, actor: Actor): Promise<HelperRole[]> {
+  if (!isModuleOn("youthReferees")) return [];
   const ids = [actor.personId, ...actor.children.map((c) => c.id)];
   const rows = await all<{ person_id: number }>(db, "SELECT person_id FROM referees WHERE person_id IN (SELECT value FROM json_each(?))", JSON.stringify(ids));
   const set = new Set(rows.map((r) => r.person_id));
@@ -328,7 +331,7 @@ function minutesBetween(from: string, to: string): number {
  * Without eventIds: all games from today minus 90 days.
  */
 export async function ensureEventDuties(db: D1Database, eventIds: number[] | null, from: string): Promise<void> {
-  if (eventIds && !eventIds.length) return;
+  if ((eventIds && !eventIds.length) || !isModuleOn("duties")) return;
   const games = await all<{
     id: number;
     starts_at: string;
@@ -394,7 +397,7 @@ export async function ensureEventDuties(db: D1Database, eventIds: number[] | nul
       }
       generated |= 1;
     }
-    if (g.is_home === 1 && g.youth_referee === 1 && (generated & 2) === 0 && referee) {
+    if (g.is_home === 1 && g.youth_referee === 1 && (generated & 2) === 0 && referee && isModuleOn("youthReferees")) {
       statements.push(
         stmt(
           db,
@@ -441,7 +444,7 @@ export async function resetTeamDuties(db: D1Database, teamId: number, now: strin
  */
 export async function loadMyDuties(db: D1Database, actor: Actor, eventIds: number[]): Promise<Map<number, MyDuty[]>> {
   const out = new Map<number, MyDuty[]>();
-  if (!eventIds.length) return out;
+  if (!eventIds.length || !isModuleOn("duties")) return out;
   const rows = await all<{ event_id: number; type_id: number; name: string; who_referees: number; person_id: number | null; child_name: string | null }>(
     db,
     `SELECT d.event_id, dt.id AS type_id, dt.name, dt.who_referees, d.person_id, ch.first_name AS child_name
@@ -478,7 +481,7 @@ export async function loadMyDuties(db: D1Database, actor: Actor, eventIds: numbe
  */
 export async function loadHelpersNeeded(db: D1Database, actor: Actor, eventIds: number[], now: string): Promise<Map<number, number>> {
   const out = new Map<number, number>();
-  if (!eventIds.length) return out;
+  if (!eventIds.length || !isModuleOn("duties")) return out;
   const types = await loadDutyTypes(db, eventIds);
   const teams = (await helperTeams(db, actor, types)).filter((t) => t.childRoles.length > 0 || t.isPlayer || (t.isCoach && !t.canManage));
   if (!teams.length) return out;

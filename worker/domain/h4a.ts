@@ -9,10 +9,13 @@ import { t } from "@lingui/core/macro";
 
 export const H4A_ENDPOINT = "https://spo.handball4all.de/service/if_g_json.php";
 
-/** League with table in the handball4all portal (ogId is in the link, the BWHV portal shows every association). */
-export function h4aTableUrl(orgId: number, leagueId: number, teamId: number | null): string {
+/** Portal used when the team's link named none; every portal shows every association (ogId). */
+const DEFAULT_PORTAL = "baden-wuerttembergischer-hv";
+
+/** League with table in the handball4all portal of the association the coach linked. */
+export function h4aTableUrl(orgId: number, leagueId: number, teamId: number | null, portal: string | null = null): string {
   const team = teamId ? `&tId=${teamId}` : "";
-  return `https://www.handball4all.de/home/portal/baden-wuerttembergischer-hv#/league?ogId=${orgId}&lId=${leagueId}${team}`;
+  return `https://www.handball4all.de/home/portal/${portal ?? DEFAULT_PORTAL}#/league?ogId=${orgId}&lId=${leagueId}${team}`;
 }
 
 export function h4aFetchUrl(orgId: number, leagueId: number, teamId: number): string {
@@ -23,6 +26,8 @@ export interface H4aIds {
   orgId: number;
   leagueId: number;
   teamId: number;
+  /** Association portal from the link (…/home/portal/<portal>#/…), if any. */
+  portal: string | null;
 }
 
 /**
@@ -50,7 +55,8 @@ export function parsePortalUrl(input: string): H4aIds | null {
   const orgId = num("ogId", "og");
   const leagueId = num("lId", "cl");
   const teamId = num("tId", "ct");
-  return orgId && leagueId && teamId ? { orgId, leagueId, teamId } : null;
+  const portal = /^\/home\/portal\/([a-z0-9-]{2,60})\/?$/.exec(url.pathname)?.[1] ?? null;
+  return orgId && leagueId && teamId ? { orgId, leagueId, teamId, portal } : null;
 }
 
 export interface H4aGame {

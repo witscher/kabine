@@ -5,7 +5,8 @@ import { readViewMode, viewAsActor } from "./auth/view-as";
 import { clearedSessionCookie, extendSessionIfDue, findSession, readSessionToken, sessionCookie } from "./auth/session";
 import { maintenanceAllowed, maintenanceState } from "./lib/maintenance";
 import { ApiError, forbidden, unauthorized } from "./lib/http";
-import { enterClubContext } from "./domain/club";
+import { enterClubContext, isModuleOn } from "./domain/club";
+import { moduleOfPath } from "./lib/modules";
 import { currentLocale, withLocale } from "./i18n";
 import { isLocale } from "../shared/i18n";
 
@@ -99,6 +100,9 @@ export function createBaseApp(): Hono<AppEnv> {
         }
         c.set("actor", actor);
         c.set("sessionToken", actorToken);
+        // Switched-off modules do not exist for this club
+        const module = moduleOfPath(c.req.path);
+        if (module && !isModuleOn(module)) throw new ApiError(404, "module_off", t`This function is switched off for this club.`);
 
         await next();
         // Profile pictures set their own caching

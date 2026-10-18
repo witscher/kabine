@@ -83,6 +83,7 @@ export interface TeamInfo {
   h4a_org_id: number | null;
   h4a_league_id: number | null;
   h4a_team_id: number | null;
+  h4a_portal: string | null;
   show_responses: number;
 }
 
@@ -190,7 +191,7 @@ export async function loadEventContext(db: D1Database, events: EventRow[]): Prom
     db
       .prepare(
         `SELECT et.event_id, t.id, t.name, t.age_class_code, COALESCE(ac.game_minutes, 120) AS game_minutes, t.decline_hours_training,
-                t.decline_hours_game, t.max_squad, t.auto_squad, t.h4a_org_id, t.h4a_league_id, t.h4a_team_id, t.show_responses
+                t.decline_hours_game, t.max_squad, t.auto_squad, t.h4a_org_id, t.h4a_league_id, t.h4a_team_id, t.h4a_portal, t.show_responses
            FROM event_teams et JOIN teams t ON t.id = et.team_id
            ${CURRENT_AGE_CLASS_JOIN("t", "ac")}
           WHERE et.event_id IN (SELECT value FROM json_each(?)) ORDER BY t.name`,
@@ -377,7 +378,7 @@ export function gameLiveMinutes(minutes: number[]): number {
 
 function gameTableUrl(teams: TeamInfo[]): string | null {
   const t = teams.find((x) => x.h4a_org_id && x.h4a_league_id);
-  return t ? h4aTableUrl(t.h4a_org_id!, t.h4a_league_id!, t.h4a_team_id) : null;
+  return t ? h4aTableUrl(t.h4a_org_id!, t.h4a_league_id!, t.h4a_team_id, t.h4a_portal) : null;
 }
 
 export function eventTeams(e: EventRow, ctx: EventContext): TeamInfo[] {

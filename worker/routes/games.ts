@@ -68,17 +68,18 @@ gameRoutes.put("/teams/:id/games/source", async (c) => {
   await requireTeam(c.env.DB, teamId);
   const { portalUrl } = parse(z.object({ portalUrl: z.string().max(500).nullable() }), await readJson(c.req.raw));
   if (portalUrl === null) {
-    await run(c.env.DB, "UPDATE teams SET h4a_org_id = NULL, h4a_league_id = NULL, h4a_team_id = NULL, h4a_import_error = NULL WHERE id = ?", teamId);
+    await run(c.env.DB, "UPDATE teams SET h4a_org_id = NULL, h4a_league_id = NULL, h4a_team_id = NULL, h4a_portal = NULL, h4a_import_error = NULL WHERE id = ?", teamId);
     return c.json(sourceView(await teamH4a(c.env.DB, teamId)));
   }
   const ids = parsePortalUrl(portalUrl);
   if (!ids) throw badRequest(t`Please paste the link to the team page from the handball4all portal (with ogId, lId and tId).`);
   await run(
     c.env.DB,
-    "UPDATE teams SET h4a_org_id = ?, h4a_league_id = ?, h4a_team_id = ?, h4a_imported_at = NULL, h4a_import_error = NULL WHERE id = ?",
+    "UPDATE teams SET h4a_org_id = ?, h4a_league_id = ?, h4a_team_id = ?, h4a_portal = ?, h4a_imported_at = NULL, h4a_import_error = NULL WHERE id = ?",
     ids.orgId,
     ids.leagueId,
     ids.teamId,
+    ids.portal,
     teamId,
   );
   return c.json(sourceView(await teamH4a(c.env.DB, teamId)));

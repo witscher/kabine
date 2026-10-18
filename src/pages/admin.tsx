@@ -4,6 +4,7 @@ import { useLocation } from "preact-iso";
 import { useEffect, useMemo, useState } from "preact/hooks";
 import type { LocationRef, PersonRef } from "../../shared/types";
 import { api } from "../api";
+import { moduleOn } from "../../shared/club";
 import { clubName, useClub } from "../club";
 import { daysBetween, fullDate, isoToLocalDate, personName, todayLocal } from "../format";
 import { downloadExport } from "../export";
@@ -64,11 +65,15 @@ export function AdminPage() {
     { href: "/verwaltung/ferien", icon: "sun", title: t`Holidays`, sub: t`Edit periods (e.g. carnival)` },
     { href: "/verwaltung/orte", icon: "pin", title: t`Training venues`, sub: t`Club halls and other venues` },
     { href: "/verwaltung/rundnachricht", icon: "bell", title: t`Broadcast`, sub: t`Announcement in all or selected team chats` },
-    { href: "/verwaltung/helferdienste", icon: "helping", title: t`Helper duties`, sub: t`Duty types and templates for games and special events` },
-    { href: "/verwaltung/kihasl", icon: "whistle", title: "KiHaSL/JuHaSL", sub: t`Grant the referee role by link, list` },
+    ...(moduleOn(club.modules, "duties")
+      ? [{ href: "/verwaltung/helferdienste", icon: "helping" as IconName, title: t`Helper duties`, sub: t`Duty types and templates for games and special events` }]
+      : []),
+    ...(moduleOn(club.modules, "youthReferees")
+      ? [{ href: "/verwaltung/kihasl", icon: "whistle" as IconName, title: "KiHaSL/JuHaSL", sub: t`Grant the referee role by link, list` }]
+      : []),
     { href: "/chat?alle", icon: "chat", title: t`All chats`, sub: t`Team chats in which you are not a coach or parent` },
     { href: "/verwaltung/sondertermine", icon: "calendar", title: t`Special events and games`, sub: t`Upcoming events of other teams, create a special event` },
-    { href: "/verwaltung/verein", icon: "settings", title: t`Club`, sub: t`Name, colours, logo, privacy` },
+    { href: "/verwaltung/verein", icon: "settings", title: t`Club`, sub: t`Name, colours, logo, region, modules` },
     { href: "/verwaltung/saisonwechsel", icon: "refresh", title: t`Season change`, sub: t`Once a year, with preview` },
     { href: "/api/admin/export", icon: "download", title: t`Export`, sub: t`All data as a JSON file, for backup`, download: true },
     { href: "/hilfe", icon: "info", title: t`Help and feedback`, sub: t`Send feedback about the app` },

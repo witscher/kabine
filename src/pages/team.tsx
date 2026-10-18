@@ -1,6 +1,6 @@
 import { plural, t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
-import { clubName } from "../club";
+import { clubName, useModule } from "../club";
 import { useLocation } from "preact-iso";
 import { useEffect, useState } from "preact/hooks";
 import { renderSVG } from "uqr";
@@ -792,6 +792,8 @@ function SettingsTab({ team, onChanged }: { team: TeamDetail; onChanged: () => v
   const [game, setGame] = useState(String(team.declineHoursGame));
   const [maxSquad, setMaxSquad] = useState(String(team.maxSquad));
   const [portal, setPortal] = useState("");
+  const dutiesOn = useModule("duties");
+  const fixturesOn = useModule("handball4all");
   const h4aSet = team.h4a.orgId != null;
   const orgId = team.h4a.orgId ?? "";
   const leagueId = team.h4a.leagueId ?? "";
@@ -863,6 +865,7 @@ function SettingsTab({ team, onChanged }: { team: TeamDetail; onChanged: () => v
         />
       </section>
 
+      {dutiesOn ? (
       <section class="card card-body" aria-label={t`Helper plan`}>
         <h2 class="section-title" style={{ margin: 0 }}>
           <Trans>Helper plan</Trans>
@@ -885,7 +888,9 @@ function SettingsTab({ team, onChanged }: { team: TeamDetail; onChanged: () => v
         />
         {team.helperPlan ? <TemplateChoice team={team} onChanged={onChanged} /> : null}
       </section>
+      ) : null}
 
+      {fixturesOn ? (
       <section class="card card-body" aria-label={t`Game schedule`}>
         <h2 class="section-title" style={{ margin: 0 }}>
           <Trans>Game schedule (handball4all)</Trans>
@@ -949,6 +954,7 @@ function SettingsTab({ team, onChanged }: { team: TeamDetail; onChanged: () => v
           <Trans>Syncing only happens at the press of a button, on a coach's or admin's device. handball4all only allows individual requests, so never automatically.</Trans>
         </p>
       </section>
+      ) : null}
     </>
   );
 }

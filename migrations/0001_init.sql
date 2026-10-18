@@ -109,7 +109,8 @@ CREATE TABLE teams (
   h4a_claimed_at         TEXT,                  -- Abruf läuft gerade auf einem Trainergerät
   created_at             TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
 , parents_enabled INTEGER NOT NULL DEFAULT 1 CHECK (parents_enabled IN (0, 1)), auto_squad INTEGER NOT NULL DEFAULT 0 CHECK (auto_squad IN (0, 1)), helper_plan INTEGER NOT NULL DEFAULT 0 CHECK (helper_plan IN (0, 1)), show_responses INTEGER NOT NULL DEFAULT 0 CHECK (show_responses IN (0, 1)), kind TEXT NOT NULL DEFAULT 'team' CHECK (kind IN ('team', 'group')), auto_members TEXT CHECK (auto_members IS NULL OR auto_members = 'referees'), home_template_id INTEGER REFERENCES duty_templates (id) ON DELETE SET NULL, away_template_id INTEGER REFERENCES duty_templates (id) ON DELETE SET NULL,
-  gender TEXT NOT NULL DEFAULT 'x' CHECK (gender IN ('f', 'm', 'x')));      -- female, male, mixed (age classes have no gender)
+  gender TEXT NOT NULL DEFAULT 'x' CHECK (gender IN ('f', 'm', 'x')),
+  h4a_portal TEXT);                             -- association portal of the handball4all link (table link)      -- female, male, mixed (age classes have no gender)
 CREATE TABLE team_memberships (
   person_id        INTEGER NOT NULL REFERENCES persons (id) ON DELETE CASCADE,
   team_id          INTEGER NOT NULL REFERENCES teams (id) ON DELETE CASCADE,

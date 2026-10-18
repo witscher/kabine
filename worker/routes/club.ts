@@ -2,7 +2,7 @@ import { t } from "@lingui/core/macro";
 // Club profile: public read (login page, splash, manifest) and admin edit.
 import { Hono } from "hono";
 import { z } from "zod";
-import { isHexColor, isTimeZone } from "../../shared/club";
+import { type ClubModules, isHexColor, isTimeZone, type ModuleId } from "../../shared/club";
 import { LOCALES } from "../../shared/i18n";
 import { type AppEnv, requireActor } from "../app";
 import { requireAdmin } from "../auth/actor";
@@ -37,6 +37,10 @@ const clubSchema = z.object({
   country: z.string().regex(/^[A-Z]{2}$/).optional(),
   subdivision: z.string().regex(/^[A-Z]{2}-[A-Z0-9]{1,4}$/).nullable().optional(),
   timeZone: z.string().max(64).refine(isTimeZone, { error: () => t`Unknown time zone.` }).optional(),
+  modules: z
+    .object({ duties: z.boolean(), carpools: z.boolean(), youthReferees: z.boolean(), handball4all: z.boolean(), sms: z.boolean() })
+    .partial()
+    .optional(),
   setupDone: z.boolean().optional(),
 });
 
@@ -45,7 +49,11 @@ clubRoutes.put("/admin/club", async (c) => {
   requireAdmin(actor);
   const input = parse(clubSchema, await readJson(c.req.raw));
   if (input.privacyUrl && !/^https:\/\//.test(input.privacyUrl)) throw badRequest(t`The link must start with https://.`);
-  const { ownerPersonId: _, ...club } = await saveClub(c.env.DB, input);
+  const current = await loadClub(c.env.DB);
+  const { modules: changed, ...rest } = input;
+  const modules: ClubModules = { ...current.modules };
+  for (const [k, v] of Object.entries(changed ?? {})) if (typeof v === "boolean") modules[k as ModuleId] = v;
+  const { ownerPersonId: _, ...club } = await saveClub(c.env.DB, { ...rest, modules });
   return c.json(club);
 });
 

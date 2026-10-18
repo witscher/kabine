@@ -48,8 +48,9 @@ describe("handball4all", () => {
       orgId: 216,
       leagueId: 164621,
       teamId: 1489086,
+      portal: "baden-wuerttembergischer-hv",
     });
-    expect(parsePortalUrl("https://spo.handball4all.de/service/if_g_json.php?cmd=ps&og=1&cl=2&ct=3")).toEqual({ orgId: 1, leagueId: 2, teamId: 3 });
+    expect(parsePortalUrl("https://spo.handball4all.de/service/if_g_json.php?cmd=ps&og=1&cl=2&ct=3")).toEqual({ orgId: 1, leagueId: 2, teamId: 3, portal: null });
     expect(parsePortalUrl("https://example.org/#/league?ogId=1&lId=2&tId=3")).toBeNull();
     expect(parsePortalUrl("kein link")).toBeNull();
   });

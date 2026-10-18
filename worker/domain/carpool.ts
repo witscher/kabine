@@ -13,6 +13,7 @@ import { SHORT_NAME_SQL } from "./duties";
 import type { PersonRef } from "../../shared/types";
 import { type EventContext, type EventRow, EVENT_SELECT, eventTeams, eventTitle, loadEventContext } from "./events";
 import { notifyPersons, shortDate, shortTime } from "./notify";
+import { isModuleOn } from "./club";
 
 /** At most this many free seats per driver. */
 export const MAX_SEATS = 8;
@@ -38,7 +39,7 @@ export interface RequestRow {
 
 /** Carpools exist for away games. */
 export function carpoolGame(e: EventRow): boolean {
-  return e.kind === "game" && e.is_home === 0;
+  return e.kind === "game" && e.is_home === 0 && isModuleOn("carpools");
 }
 
 export function carpoolOpen(e: EventRow, now: number): boolean {
@@ -434,6 +435,7 @@ export function assertNoConflict(kind: "driving" | "searching" | null, side: "dr
  * team chat. Once per game, team and hour, only if someone is looking.
  */
 export async function sendCarpoolChatReminders(env: Env, now = Date.now()): Promise<number> {
+  if (!isModuleOn("carpools")) return 0;
   const hour = Number(toLocal(now).slice(11, 13));
   const slot = [...CHAT_REMINDER_HOURS].reverse().find((h) => hour >= h);
   if (slot == null) return 0;

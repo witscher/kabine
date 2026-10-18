@@ -11,7 +11,7 @@ import { type DutyType, ensureEventDuties, loadAllDutyTypes, opponentOf } from "
 import { mailer } from "./email-login";
 import { enqueuePush, shortDate, shortTime } from "./notify";
 import { all, list, run } from "../lib/db";
-import { ownClubAbbr, ownClubShortName } from "./club";
+import { isModuleOn, ownClubAbbr, ownClubShortName } from "./club";
 import { withLocale } from "../i18n";
 import { addDays, todayLocal, toLocal } from "../lib/time";
 
@@ -407,6 +407,7 @@ async function openSlotsToCoaches(env: Env, today: string, days: 5 | 2, types: M
 
 /** Called hourly, sends once a day from 8 am. */
 export async function sendDutyNotifications(env: Env, now = Date.now()): Promise<number> {
+  if (!isModuleOn("duties")) return 0;
   const hour = Number(toLocal(now).slice(11, 13));
   if (hour < DUTY_NOTIFY_HOUR) return 0;
   const today = todayLocal(now);

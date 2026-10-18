@@ -3,12 +3,12 @@
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { useState } from "preact/hooks";
-import { type ClubProfile, isHexColor } from "../../shared/club";
+import { type ClubModules, type ClubProfile, isHexColor } from "../../shared/club";
 import { LOCALE_NAMES, LOCALES, type Locale } from "../../shared/i18n";
 import { useQuery } from "../store";
 import { api, errorMessage } from "../api";
 import { ClubMark, loadClub, setClub, useClub } from "../club";
-import { Button, Field, Notice, TextField, toast, TopBar, useDocumentTitle } from "../ui";
+import { Button, Field, Notice, SwitchRow, TextField, toast, TopBar, useDocumentTitle } from "../ui";
 import { AdminOnly } from "./admin";
 
 const LOGO_TYPES = "image/png,image/jpeg,image/webp,image/svg+xml";
@@ -27,6 +27,7 @@ export function ClubProfileForm({ onSaved, submitLabel }: { onSaved?: () => void
   const [country, setCountry] = useState(club.country);
   const [subdivision, setSubdivision] = useState(club.subdivision ?? "");
   const [timeZone, setTimeZone] = useState(club.timeZone);
+  const [modules, setModules] = useState<ClubModules>(club.modules);
   const [error, setError] = useState<string | null>(null);
 
   const save = async () => {
@@ -45,6 +46,7 @@ export function ClubProfileForm({ onSaved, submitLabel }: { onSaved?: () => void
         country,
         subdivision: subdivision || null,
         timeZone,
+        modules,
       });
       setClub(saved);
       toast(t`Saved`);
@@ -128,6 +130,7 @@ export function ClubProfileForm({ onSaved, submitLabel }: { onSaved?: () => void
         timeZone={timeZone}
         onTimeZone={setTimeZone}
       />
+      <ModulesSection modules={modules} onChange={setModules} />
       <section class="card card-pad stack" aria-label={t`Privacy and contact`}>
         <TextField
           label={t`Link to privacy policy and legal notice`}
@@ -232,6 +235,38 @@ export function RegionSection(props: {
           </select>
         )}
       </Field>
+    </section>
+  );
+}
+
+/** Functions the club uses; switched-off modules disappear from the app and the API. */
+export function ModulesSection({ modules, onChange }: { modules: ClubModules; onChange: (m: ClubModules) => void }) {
+  const set = (patch: Partial<ClubModules>) => onChange({ ...modules, ...patch });
+  return (
+    <section class="card card-pad stack-sm" aria-label={t`Modules`}>
+      <h2 class="section-title" style={{ margin: 0 }}>
+        <Trans>Modules</Trans>
+      </h2>
+      <SwitchRow
+        label={t`Helper duties`}
+        sub={t`Parents or players sign up for duties at games and special events (cake, timekeeping, washing shirts).`}
+        checked={modules.duties}
+        onChange={(v) => set({ duties: v })}
+      />
+      <SwitchRow
+        label={t`Youth referees`}
+        sub={t`Home games of the marked age groups get a youth referee duty, with a role granted by link. Needs helper duties.`}
+        checked={modules.youthReferees}
+        disabled={!modules.duties}
+        onChange={(v) => set({ youthReferees: v })}
+      />
+      <SwitchRow label={t`Carpools`} sub={t`Drivers offer seats for away games, players book them.`} checked={modules.carpools} onChange={(v) => set({ carpools: v })} />
+      <SwitchRow
+        label={t`Game schedule from handball4all`}
+        sub={t`Coaches sync the games of their team from the handball4all portal (German handball associations).`}
+        checked={modules.handball4all}
+        onChange={(v) => set({ handball4all: v })}
+      />
     </section>
   );
 }

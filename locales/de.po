@@ -303,6 +303,11 @@ msgstr "Diese Zuordnung gibt es nicht."
 msgid "Hide news"
 msgstr "Neuigkeit ausblenden"
 
+# ai
+#: worker/app.ts
+msgid "This function is switched off for this club."
+msgstr "Diese Funktion ist für diesen Verein ausgeschaltet."
+
 #: worker/routes/events.ts
 msgid "Please enter a title."
 msgstr "Bitte gib einen Titel ein."
@@ -1748,6 +1753,7 @@ msgstr "In dieser Saison {unexcused}× unentschuldigt gefehlt. Ändern lässt si
 
 #: src/carpool.tsx
 #: src/carpool.tsx
+#: src/pages/club-settings.tsx
 msgid "Carpools"
 msgstr "Fahrgemeinschaften"
 
@@ -2969,6 +2975,11 @@ msgstr "Für Spielerinnen und Spieler"
 msgid "vs {opponent}"
 msgstr "gegen {opponent}"
 
+# ai
+#: src/pages/club-settings.tsx
+msgid "Drivers offer seats for away games, players book them."
+msgstr "Fahrer bieten Plätze zu Auswärtsspielen an, Spieler buchen sie."
+
 #: src/carpool.tsx
 msgid "Second companion"
 msgstr "Zweite Begleitperson"
@@ -3376,6 +3387,11 @@ msgstr "Keine eigenen Termine"
 #: src/pages/help.tsx
 msgid "The image could not be converted."
 msgstr "Das Bild konnte nicht umgewandelt werden."
+
+# ai
+#: src/pages/club-settings.tsx
+msgid "Youth referees"
+msgstr "Jugendschiedsrichter"
 
 #: src/pages/team.tsx
 msgid "Stand-in from {homeTeam}"
@@ -4386,6 +4402,11 @@ msgstr "Lege zuerst die Spielerinnen und Spieler an."
 msgid "{loggedInAs} is currently signed in on this device. If you continue, an access will be created for the selected person and they will be signed in."
 msgstr "Auf diesem Gerät ist gerade {loggedInAs} angemeldet. Wenn du fortfährst, wird ein Zugang für die ausgewählte Person angelegt und diese angemeldet."
 
+# ai
+#: src/pages/club-settings.tsx
+msgid "Home games of the marked age groups get a youth referee duty, with a role granted by link. Needs helper duties."
+msgstr "Heimspiele der markierten Altersklassen bekommen einen Dienst für Jugendschiedsrichter, die Rolle wird per Link vergeben. Setzt Helferdienste voraus."
+
 #: src/pages/admin.tsx
 msgid "e.g. wC1, wC2, Damen 2"
 msgstr "z. B. wC1, wC2, Damen 2"
@@ -4678,10 +4699,6 @@ msgstr "Du bist bei keiner Mannschaft als Trainer eingetragen."
 #: src/pages/duty-admin.tsx
 msgid "Minutes after end"
 msgstr "Minuten nach Ende"
-
-#: src/pages/admin.tsx
-msgid "Name, colours, logo, privacy"
-msgstr "Name, Farben, Logo, Datenschutz"
 
 #: worker/routes/feedback.ts
 msgid "Role: {roleList}"
@@ -6066,6 +6083,11 @@ msgstr "Ankündigung im Chat {teamName}"
 msgid "Additional team for {name}"
 msgstr "Weitere Mannschaft für {name}"
 
+# ai
+#: src/pages/admin.tsx
+msgid "Name, colours, logo, region, modules"
+msgstr "Name, Farben, Logo, Region, Module"
+
 #: worker/domain/events.ts
 #: worker/routes/events.ts
 msgid "Currently marked as inactive. Please talk to your coach."
@@ -6128,6 +6150,7 @@ msgstr "Helferplan · {text}"
 
 #: src/calendar.tsx
 #: src/pages/admin.tsx
+#: src/pages/club-settings.tsx
 #: src/pages/duty-admin.tsx
 #: src/pages/duty-admin.tsx
 #: src/pages/duty-admin.tsx
@@ -7168,6 +7191,11 @@ msgstr "Abgesagt von {cancelledBy}."
 msgid "{name} is no longer riding with {driver}: {game}. The search continues (entered by {coach})."
 msgstr "{name} fährt nicht mehr bei {driver} mit: {game}. Die Suche läuft weiter (eingetragen von {coach})."
 
+# ai
+#: src/pages/club-settings.tsx
+msgid "Coaches sync the games of their team from the handball4all portal (German handball associations)."
+msgstr "Trainer gleichen die Spiele ihrer Mannschaft mit dem handball4all-Portal ab (deutsche Handballverbände)."
+
 #: src/pages/team.tsx
 msgid "Stand-in from the other team"
 msgstr "Aushilfe aus der anderen Mannschaft"
@@ -7720,6 +7748,11 @@ msgstr "Absage für {name} eingetragen."
 #: src/pages/home.tsx
 msgid "Events"
 msgstr "Termine"
+
+# ai
+#: src/pages/club-settings.tsx
+msgid "Game schedule from handball4all"
+msgstr "Spielplan von handball4all"
 
 #: worker/routes/events.ts
 msgid "Please choose at least one team."
@@ -8802,6 +8835,12 @@ msgstr "Aushilfen kommen aus der 2. Mannschaft derselben Altersklasse oder der n
 msgid "Nobody is offering seats yet"
 msgstr "Noch niemand bietet Plätze an"
 
+# ai
+#: src/pages/club-settings.tsx
+#: src/pages/club-settings.tsx
+msgid "Modules"
+msgstr "Module"
+
 #: src/pages/admin.tsx
 msgid "Message"
 msgstr "Nachricht"
@@ -8974,6 +9013,11 @@ msgstr "{teamName} (ohne Eltern)"
 #: src/pages/team.tsx
 msgid "Special events and own games"
 msgstr "Sondertermine und eigene Spiele"
+
+# ai
+#: src/pages/club-settings.tsx
+msgid "Parents or players sign up for duties at games and special events (cake, timekeeping, washing shirts)."
+msgstr "Eltern oder Spieler tragen sich für Dienste bei Spielen und Sonderterminen ein (Kuchen, Zeitnehmer, Trikots waschen)."
 
 #: src/pages/helpers.tsx
 msgid "You can take on duties that need prior knowledge (e.g. timekeeper) once you turn them on in your <0>profile</0> under “I can do this”."

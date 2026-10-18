@@ -1,14 +1,16 @@
 // Club profile (name, colours, logo) for the whole app. Loaded once at start, cached on the
 // device so the first paint and offline use show the right club.
 import { useEffect, useState } from "preact/hooks";
-import { type ClubProfile, clubAbbr, DEFAULT_CLUB } from "../shared/club";
+import { type ClubProfile, clubAbbr, DEFAULT_CLUB, DEFAULT_MODULES, type ModuleId, moduleOn } from "../shared/club";
 
 const CACHE_KEY = "kabine-club";
 
 function readCached(): ClubProfile | null {
   try {
     const raw = localStorage.getItem(CACHE_KEY);
-    return raw ? { ...DEFAULT_CLUB, ...(JSON.parse(raw) as Partial<ClubProfile>) } : null;
+    if (!raw) return null;
+    const stored = JSON.parse(raw) as Partial<ClubProfile>;
+    return { ...DEFAULT_CLUB, ...stored, modules: { ...DEFAULT_MODULES, ...stored.modules } };
   } catch {
     return null;
   }
@@ -90,4 +92,9 @@ export function ClubMark({ class: cls = "logo-mark" }: { class?: string }) {
 /** IANA time zone of the club, for dates and "now". */
 export function clubTimeZone(): string {
   return current.timeZone;
+}
+
+/** Is a module of the club on? Re-renders when the profile changes. */
+export function useModule(id: ModuleId): boolean {
+  return moduleOn(useClub().modules, id);
 }
