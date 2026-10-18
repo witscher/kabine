@@ -2,6 +2,7 @@ import { t } from "@lingui/core/macro";
 // Sign-in by e-mail: one-time code and link. The passkey remains the most secure
 // option; e-mail is the way for devices without a passkey and for recovery.
 import { loadClub } from "./club";
+import { deliver, MailNotConfigured } from "./mail";
 import { z } from "zod";
 import { hmacB64url, randomToken, sha256Hex } from "../lib/crypto";
 import { first, run } from "../lib/db";
@@ -26,32 +27,26 @@ export interface MailMessage {
   to: string;
   subject: string;
   text: string;
-  /** Different display name, e.g. "SVM Helferplan" (address always MAIL_FROM). */
-  from?: { email: string; name: string };
+  /** Different display name, e.g. "SVM helper plan" (the address comes from the mail settings). */
+  fromName?: string;
   replyTo?: string;
   attachments?: { content: ArrayBuffer | Uint8Array; filename: string; type: string }[];
 }
 
-/** Sending via Cloudflare Email Service. An object so tests can replace it. */
+/** Sending through the club's mail settings (domain/mail.ts). An object so tests can replace it. */
 export const mailer = {
   async send(env: Env, msg: MailMessage): Promise<void> {
-    if (!env.EMAIL) {
+    try {
+      await deliver(env, msg);
+    } catch (err) {
       // Test installations may run without mail. Logs are kept, so they get neither the text (codes, feedback,
       // names) nor the address, only the subject and a short hash of the recipient.
-      if (env.APP_ENV === "staging") {
+      if (err instanceof MailNotConfigured && env.APP_ENV === "staging") {
         console.log(`E-mail not sent (no sending set up): ${msg.subject} to ${(await sha256Hex(msg.to)).slice(0, 12)}`);
         return;
       }
-      throw new Error("E-mail sending is not set up (binding EMAIL missing).");
+      throw err;
     }
-    await env.EMAIL.send({
-      from: msg.from ?? { email: env.MAIL_FROM, name: (await loadClub(env.DB)).shortName },
-      to: msg.to,
-      subject: msg.subject,
-      text: msg.text,
-      ...(msg.replyTo ? { replyTo: msg.replyTo } : {}),
-      ...(msg.attachments?.length ? { attachments: msg.attachments.map((a) => ({ ...a, disposition: "attachment" as const })) } : {}),
-    });
   },
 };
 

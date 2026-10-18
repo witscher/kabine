@@ -85,7 +85,7 @@ async function deliver(env: Env, accountIds: number[], topic: DutyTopic, msg: ()
         const club = ownClubShortName();
         return { subject: m.mailSubject, text: m.mailText, name: t`${club} helper plan` };
       });
-      await mailer.send(env, { to: r.email!, subject, text, from: { email: env.MAIL_FROM, name } });
+      await mailer.send(env, { to: r.email!, subject, text, fromName: name });
       sent++;
     } catch (err) {
       console.warn("Helper plan mail failed", err instanceof Error ? err.message : err);

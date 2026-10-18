@@ -98,7 +98,7 @@ describe("Helferplan-Benachrichtigungen", () => {
     expect(reminders.map((p) => p.payload.title).sort()).toEqual(["Dein Helferdienst in 3 Tagen", "Dein Helferdienst morgen"]);
     expect(reminders.every((p) => p.accountIds.includes(monaAccount))).toBe(true);
     expect(mails).toHaveLength(1);
-    expect(mails[0]).toMatchObject({ to: `p${mona}@example.org`, subject: "Erinnerung: Trikots waschen morgen", from: { email: "no-reply@example.org", name: "Kabine Helferplan" } });
+    expect(mails[0]).toMatchObject({ to: `p${mona}@example.org`, subject: "Erinnerung: Trikots waschen morgen", fromName: "Kabine Helferplan" });
     expect(mails[0]!.text).toContain("(für Kim)");
 
     pushes = [];

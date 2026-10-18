@@ -49,6 +49,7 @@ const AdminExtraEventsPage = lazyPage(() => import("./pages/admin").then((m) => 
 const AdminAgeClassesPage = lazyPage(() => import("./pages/admin").then((m) => m.AdminAgeClassesPage));
 const AdminLocationsPage = lazyPage(() => import("./pages/admin").then((m) => m.AdminLocationsPage));
 const AdminClubPage = lazyPage(() => import("./pages/club-settings").then((m) => m.AdminClubPage));
+const AdminMailPage = lazyPage(() => import("./pages/mail-settings").then((m) => m.AdminMailPage));
 const SeasonChangePage = lazyPage(() => import("./pages/season").then((m) => m.SeasonChangePage));
 
 const PUBLIC_PATHS = ["/einladung", "/einrichtung", "/datenschutz", "/email"];
@@ -243,6 +244,7 @@ export function App() {
               <Route path="/verwaltung/altersklassen" component={AdminAgeClassesPage} />
               <Route path="/verwaltung/orte" component={AdminLocationsPage} />
               <Route path="/verwaltung/verein" component={AdminClubPage} />
+              <Route path="/verwaltung/mail" component={AdminMailPage} />
               <Route path="/verwaltung/saisonwechsel" component={SeasonChangePage} />
               <Route path="/verwaltung/termin-neu" component={SpecialEventPage} />
               <Route path="/verwaltung/sondertermine" component={AdminExtraEventsPage} />

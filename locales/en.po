@@ -249,6 +249,10 @@ msgstr "Born from"
 msgid "Parents sign up for their child. In teams without parents, the players do this themselves. Members: full members of the club who belong to the team (admins set this under People)."
 msgstr "Parents sign up for their child. In teams without parents, the players do this themselves. Members: full members of the club who belong to the team (admins set this under People)."
 
+#: src/pages/mail-settings.tsx
+msgid "Own server"
+msgstr "Own server"
+
 #: src/pages/event.tsx
 msgid "Decline this event"
 msgstr "Decline this event"
@@ -781,6 +785,10 @@ msgstr "At most {max} free seats."
 msgid "{actorName} accepted {what} on {when} for {name}."
 msgstr "{actorName} accepted {what} on {when} for {name}."
 
+#: worker/routes/mail.ts
+msgid "Please enter the password of the mail account."
+msgstr "Please enter the password of the mail account."
+
 #: src/pages/join.tsx
 msgid "I am {playerName} – set up passkey"
 msgstr "I am {playerName} – set up passkey"
@@ -1135,6 +1143,10 @@ msgstr "Sign in"
 msgid "For example for an injury, illness or a school exchange. The app does not store a reason. All events then count as “absent (inactive)” and reminders stop."
 msgstr "For example for an injury, illness or a school exchange. The app does not store a reason. All events then count as “absent (inactive)” and reminders stop."
 
+#: src/pages/mail-settings.tsx
+msgid "Cloudflare Email Sending sends from an address of a domain in your Cloudflare account. Set up the domain under Email in the Cloudflare dashboard."
+msgstr "Cloudflare Email Sending sends from an address of a domain in your Cloudflare account. Set up the domain under Email in the Cloudflare dashboard."
+
 #: worker/routes/events.ts
 msgid "Invalid period."
 msgstr "Invalid period."
@@ -1167,6 +1179,9 @@ msgstr "Nobody has enough free seats right now."
 
 #: src/email.tsx
 #: src/email.tsx
+#: src/pages/admin.tsx
+#: src/pages/mail-settings.tsx
+#: src/pages/mail-settings.tsx
 msgid "E-mail"
 msgstr "E-mail"
 
@@ -1429,6 +1444,10 @@ msgstr "Parents see their children's events, respond for them and are in the tea
 msgid "with access"
 msgstr "with access"
 
+#: src/pages/mail-settings.tsx
+msgid "No e-mail"
+msgstr "No e-mail"
+
 #: src/avatar.tsx
 msgid "Choose picture"
 msgstr "Choose picture"
@@ -1456,6 +1475,10 @@ msgstr "School"
 #: src/pages/profile.tsx
 msgid "The settings apply to all your devices. Whether a device gets notifications at all is set in your profile."
 msgstr "The settings apply to all your devices. Whether a device gets notifications at all is set in your profile."
+
+#: src/pages/mail-settings.tsx
+msgid "This installation has no e-mail binding."
+msgstr "This installation has no e-mail binding."
 
 #: src/pages/join.tsx
 msgid "Your e-mail address"
@@ -1624,6 +1647,7 @@ msgstr "Several accesses belong to this address. Which one do you want to sign i
 #: src/pages/club-settings.tsx
 #: src/pages/duty-admin.tsx
 #: src/pages/group.tsx
+#: src/pages/mail-settings.tsx
 #: src/pages/referees.tsx
 #: src/pages/season.tsx
 msgid "Administration"
@@ -1767,6 +1791,10 @@ msgstr "Correct"
 #: src/pages/special.tsx
 msgid "A game that is not on handball4all, e.g. a friendly or a tournament. With squad, meeting point and helper duties like every game."
 msgstr "A game that is not on handball4all, e.g. a friendly or a tournament. With squad, meeting point and helper duties like every game."
+
+#: src/pages/mail-settings.tsx
+msgid "Password"
+msgstr "Password"
 
 #: src/pages/join.tsx
 msgid "This browser does not support passkeys. Please open the link in Safari (iPhone) or Chrome (Android)."
@@ -1981,6 +2009,10 @@ msgstr "Profile picture removed."
 #: src/pages/team.tsx
 msgid "The core squad is now nominated for all future games."
 msgstr "The core squad is now nominated for all future games."
+
+#: worker/routes/mail.ts
+msgid "Test mail sent to {to}."
+msgstr "Test mail sent to {to}."
 
 #: src/pages/admin.tsx
 msgid "Coaches add stand-ins in their own team."
@@ -2224,6 +2256,10 @@ msgstr "Please select the new season."
 #: src/pages/special.tsx
 msgid "Game created. The team has been notified."
 msgstr "Game created. The team has been notified."
+
+#: worker/routes/mail.ts
+msgid "The test mail could not be sent: {detail}"
+msgstr "The test mail could not be sent: {detail}"
 
 #: src/pages/team.tsx
 msgid "Add player"
@@ -2639,6 +2675,11 @@ msgstr "Remove {label}?"
 msgid "at {opponent}"
 msgstr "at {opponent}"
 
+#: src/pages/admin.tsx
+#: src/pages/mail-settings.tsx
+msgid "How the app sends e-mails"
+msgstr "How the app sends e-mails"
+
 #: worker/routes/events.ts
 msgid "{name} accepted training on {when}."
 msgstr "{name} accepted training on {when}."
@@ -2747,6 +2788,10 @@ msgstr "No parents are involved in the teams of {firstName}. {firstName} accepts
 #: src/pages/duty-admin.tsx
 msgid "Whoever signs up can add something, e.g. which cake."
 msgstr "Whoever signs up can add something, e.g. which cake."
+
+#: src/pages/mail-settings.tsx
+msgid "Sender address"
+msgstr "Sender address"
 
 #: worker/routes/carpool.ts
 msgid "Entered as driver"
@@ -3508,6 +3553,10 @@ msgstr "The passkey was not created because the dialog was cancelled. Please tap
 msgid "Stand-in"
 msgstr "Stand-in"
 
+#: src/pages/mail-settings.tsx
+msgid "Without e-mail there is no sign-in by code and no e-mail reminders. Passkeys and personal links still work."
+msgstr "Without e-mail there is no sign-in by code and no e-mail reminders. Passkeys and personal links still work."
+
 #: src/pages/profile.tsx
 #: src/pages/team.tsx
 msgid "Active"
@@ -4191,6 +4240,10 @@ msgstr "Create"
 msgid "The squad follows the core squad again."
 msgstr "The squad follows the core squad again."
 
+#: src/pages/mail-settings.tsx
+msgid "Port"
+msgstr "Port"
+
 #: worker/routes/join.ts
 msgid "and"
 msgstr "and"
@@ -4312,6 +4365,7 @@ msgid "Table on handball4all"
 msgstr "Table on handball4all"
 
 #: src/pages/club-settings.tsx
+#: src/pages/mail-settings.tsx
 msgid "Saved"
 msgstr "Saved"
 
@@ -4675,6 +4729,10 @@ msgstr "The code is wrong."
 msgid "This game does not exist."
 msgstr "This game does not exist."
 
+#: src/pages/mail-settings.tsx
+msgid "Send test mail"
+msgstr "Send test mail"
+
 #: src/email.tsx
 msgid "The link is incomplete. Please open it again in full or enter the code."
 msgstr "The link is incomplete. Please open it again in full or enter the code."
@@ -4682,6 +4740,10 @@ msgstr "The link is incomplete. Please open it again in full or enter the code."
 #: src/pages/club-settings.tsx
 msgid "Country"
 msgstr "Country"
+
+#: worker/routes/mail.ts
+msgid "Please enter the sender address."
+msgstr "Please enter the sender address."
 
 #: src/pages/home.tsx
 msgid "Then: game"
@@ -5088,6 +5150,14 @@ msgstr "This link has expired. Please ask for a new link."
 msgid "Team chats in which you are not a coach or parent"
 msgstr "Team chats in which you are not a coach or parent"
 
+#: src/pages/mail-settings.tsx
+msgid "Cloudflare"
+msgstr "Cloudflare"
+
+#: worker/routes/mail.ts
+msgid "Please enter the SMTP server."
+msgstr "Please enter the SMTP server."
+
 #: worker/domain/email-login.ts
 msgid "{code}: Please confirm your e-mail address"
 msgstr "{code}: Please confirm your e-mail address"
@@ -5208,6 +5278,10 @@ msgstr "This chat does not exist or you have no access."
 msgid "Cancel event"
 msgstr "Cancel event"
 
+#: src/pages/mail-settings.tsx
+msgid "Stored encrypted. Leave empty to keep it."
+msgstr "Stored encrypted. Leave empty to keep it."
+
 #: src/pages/group.tsx
 #: src/pages/group.tsx
 msgid "Leads"
@@ -5237,6 +5311,10 @@ msgstr "Coach / in charge"
 #: src/pages/season.tsx
 msgid "4 · Holidays of the new season"
 msgstr "4 · Holidays of the new season"
+
+#: src/pages/mail-settings.tsx
+msgid "Stored encrypted."
+msgstr "Stored encrypted."
 
 #: worker/routes/parents.ts
 msgid "Former parent"
@@ -5804,6 +5882,10 @@ msgstr "You create games without handball4all in the team (Team → Create event
 #: src/pages/duty-admin.tsx
 msgid "After"
 msgstr "After"
+
+#: worker/routes/mail.ts
+msgid "Please enter the server name only, e.g. smtp.example.org."
+msgstr "Please enter the server name only, e.g. smtp.example.org."
 
 #: src/pages/team.tsx
 msgid "Import games"
@@ -6387,6 +6469,10 @@ msgstr "Sign-in by passkey or e-mail, devices"
 msgid "{taken} people are riding along. Please enter more seats or deselect passengers."
 msgstr "{taken} people are riding along. Please enter more seats or deselect passengers."
 
+#: src/pages/mail-settings.tsx
+msgid "SMTP server"
+msgstr "SMTP server"
+
 #: src/email.tsx
 msgid "Checking link"
 msgstr "Checking link"
@@ -6575,6 +6661,10 @@ msgstr "Short-notice decline"
 msgid "Create event"
 msgstr "Create event"
 
+#: src/pages/mail-settings.tsx
+msgid "Recipients see this address. Replies to it are not read by the app."
+msgstr "Recipients see this address. Replies to it are not read by the app."
+
 #: worker/routes/squad.ts
 msgid "The game is over or cancelled."
 msgstr "The game is over or cancelled."
@@ -6590,6 +6680,10 @@ msgstr "Players · {playerCount}"
 #: src/pages/event.tsx
 msgid "Cancel this training session for everyone?"
 msgstr "Cancel this training session for everyone?"
+
+#: src/pages/mail-settings.tsx
+msgid "Encryption"
+msgstr "Encryption"
 
 #: src/avatar.tsx
 msgid "Crop picture"
@@ -6643,6 +6737,10 @@ msgstr "Add period"
 #: worker/routes/plans.ts
 msgid "This plan does not exist."
 msgstr "This plan does not exist."
+
+#: worker/routes/mail.ts
+msgid "Test mail from Kabine"
+msgstr "Test mail from Kabine"
 
 #: src/pages/chat.tsx
 #: src/pages/profile.tsx
@@ -6910,6 +7008,10 @@ msgstr "Parents"
 #: worker/routes/chat.ts
 msgid "You have opted out of this chat."
 msgstr "You have opted out of this chat."
+
+#: worker/routes/mail.ts
+msgid "Hello, this test shows that the app can send e-mails. Nothing else to do."
+msgstr "Hello, this test shows that the app can send e-mails. Nothing else to do."
 
 #: src/pages/admin.tsx
 msgid "Add row"
@@ -7330,6 +7432,10 @@ msgstr "Marked as permanently absent."
 msgid "One seat more"
 msgstr "One seat more"
 
+#: src/pages/mail-settings.tsx
+msgid "Server"
+msgstr "Server"
+
 #: src/pages/squad.tsx
 #: src/pages/team.tsx
 #: src/pages/team.tsx
@@ -7606,6 +7712,7 @@ msgstr "This person does not belong to the teams of this training time."
 #: src/pages/event.tsx
 #: src/pages/event.tsx
 #: src/pages/group.tsx
+#: src/pages/mail-settings.tsx
 #: src/pages/plans.tsx
 #: src/pages/profile.tsx
 #: src/pages/season.tsx
@@ -9013,6 +9120,10 @@ msgstr "needs prior knowledge"
 msgid "With this link you set up your access. Your login is a passkey: Face ID, fingerprint or the screen lock."
 msgstr "With this link you set up your access. Your login is a passkey: Face ID, fingerprint or the screen lock."
 
+#: worker/routes/mail.ts
+msgid "Confirm an e-mail address in your profile first; the test mail goes there."
+msgstr "Confirm an e-mail address in your profile first; the test mail goes there."
+
 #: src/howto.tsx
 msgid "In Safari, tap <0>Share</0> at the bottom, then <1>Add to Home Screen</1> and <2>Add</2>. After that you start {club} from the icon on the home screen. Only then do notifications work on the iPhone."
 msgstr "In Safari, tap <0>Share</0> at the bottom, then <1>Add to Home Screen</1> and <2>Add</2>. After that you start {club} from the icon on the home screen. Only then do notifications work on the iPhone."
@@ -9359,6 +9470,7 @@ msgid "Link"
 msgstr "Link"
 
 #: worker/domain/email-login.ts
+#: worker/routes/mail.ts
 msgid "Please type in a valid e-mail address."
 msgstr "Please type in a valid e-mail address."
 
@@ -9662,6 +9774,10 @@ msgstr "{label} by mail"
 #: worker/routes/squad.ts
 msgid "Request withdrawn"
 msgstr "Request withdrawn"
+
+#: src/pages/mail-settings.tsx
+msgid "User name"
+msgstr "User name"
 
 #: src/pages/home.tsx
 msgid "Training · {at}"
