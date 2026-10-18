@@ -1,15 +1,15 @@
 // KiHaSL/JuHaSL: administration (admins) and redeeming the activation link.
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
-import { clubName } from "../club";
+import { clubName } from "../../../src/club";
 import { useEffect, useState } from "preact/hooks";
-import { api, errorMessage } from "../api";
-import { fullDate, isoToLocalDate, personName } from "../format";
-import { Icon } from "../icons";
-import { useMe, useSession } from "../session";
-import { useQuery } from "../store";
-import { Button, confirmDialog, copyText, Empty, ErrorBox, Notice, shareLink, Spinner, toast, TopBar, useDocumentTitle } from "../ui";
-import { QrLink } from "./team";
+import { api, errorMessage } from "../../../src/api";
+import { fullDate, isoToLocalDate, personName } from "../../../src/format";
+import { Icon } from "../../../src/icons";
+import { useMe, useSession } from "../../../src/session";
+import { useQuery } from "../../../src/store";
+import { Button, confirmDialog, copyText, Empty, ErrorBox, Notice, shareLink, Spinner, toast, TopBar, useDocumentTitle } from "../../../src/ui";
+import { QrLink } from "../../../src/pages/team";
 
 interface RefereeLink {
   id: number;

@@ -3,15 +3,15 @@
 import { t } from "@lingui/core/macro";
 import { Hono } from "hono";
 import { z } from "zod";
-import { type AppEnv, requireActor } from "../app";
-import { requireAdmin } from "../auth/actor";
-import { relyingParty } from "../auth/webauthn";
-import { issueEmailCode } from "../domain/email-login";
-import { loadSmsSettings, saveSmsSettings, sendSmsTo } from "../domain/sms";
-import { randomToken } from "../lib/crypto";
-import { first, run } from "../lib/db";
-import { ApiError, badRequest, conflict, parse, readJson } from "../lib/http";
-import { normalizePhone, SmsError, validSender } from "../lib/sms";
+import { type AppEnv, requireActor } from "../../../worker/app";
+import { requireAdmin } from "../../../worker/auth/actor";
+import { relyingParty } from "../../../worker/auth/webauthn";
+import { issueEmailCode } from "../../../worker/domain/email-login";
+import { loadSmsSettings, saveSmsSettings, sendSmsTo } from "./settings";
+import { randomToken } from "../../../worker/lib/crypto";
+import { first, run } from "../../../worker/lib/db";
+import { ApiError, badRequest, conflict, parse, readJson } from "../../../worker/lib/http";
+import { normalizePhone, SmsError, validSender } from "./provider";
 
 export const smsRoutes = new Hono<AppEnv>();
 

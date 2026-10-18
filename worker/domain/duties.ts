@@ -6,6 +6,7 @@ import { t } from "@lingui/core/macro";
 import type { Actor } from "../auth/actor";
 import { isCoachOf, isCoachOfAny } from "../auth/actor";
 import type { MyDuty } from "../../shared/types";
+import { badRequest, forbidden, notFound } from "../lib/http";
 import { all, first, stmt } from "../lib/db";
 import { addMinutesLocal, localToInstant } from "../lib/time";
 import { CURRENT_AGE_CLASS_JOIN } from "./events";
@@ -474,7 +475,7 @@ export async function loadMyDuties(db: D1Database, actor: Actor, eventIds: numbe
 
 /**
  * Free places per event that the actor could take as a helping parent (or as a player).
- * Same rules as “helpers wanted” in worker/domain/duty-notify.ts: who helps per duty type,
+ * Same rules as “helpers wanted” in modules/duties/worker/notify.ts: who helps per duty type,
  * skills only with consent. Coaches and admins only count through their own children
  * or as players.
  */
@@ -539,4 +540,20 @@ export async function loadBlock(db: D1Database, id: number): Promise<(BlockRow &
     id,
   );
   return row ? { ...row, teamIds: JSON.parse(row.team_ids) as number[] } : null;
+}
+
+/** An event whose helper duties the actor may manage (coaches of its teams, organisers); else 404/403. */
+export async function managedEvent(db: D1Database, actor: Actor, eventId: number) {
+  const e = await first<{ id: number; kind: string; starts_at: string; ends_at: string | null; team_ids: string }>(
+    db,
+    `SELECT e.id, e.kind, e.starts_at, e.ends_at,
+            (SELECT json_group_array(team_id) FROM (SELECT et.team_id FROM event_teams et WHERE et.event_id = e.id ORDER BY et.team_id)) AS team_ids
+       FROM events e WHERE e.id = ?`,
+    eventId,
+  );
+  if (!e || (e.kind !== "game" && e.kind !== "special")) throw notFound(t`This event does not exist.`);
+  const teamIds = JSON.parse(e.team_ids) as number[];
+  if (!teamIds.length) throw badRequest(t`Helpers only exist for events of teams.`);
+  if (!mayManageDuties(actor, teamIds, (await dutyManagers(db, [e.id])).get(e.id))) throw forbidden(t`Only coaches of this team and the organisers of the event can do this.`);
+  return { ...e, teamIds };
 }

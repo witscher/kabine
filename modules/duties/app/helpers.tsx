@@ -2,13 +2,13 @@
 import { plural, t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { useEffect, useRef, useState } from "preact/hooks";
-import { api, errorMessage } from "../api";
-import { dayOfMonth, monthShort, shortDate, time, todayLocal, weekdayShort } from "../format";
-import { Icon } from "../icons";
-import { useMe } from "../session";
-import { useQuery } from "../store";
-import { BlockEditSheet, BlockSheet, blockTime, type TemplateInfo } from "../duty-blocks";
-import { Button, confirmDialog, Empty, ErrorBox, Field, Segmented, Sheet, Spinner, SwitchRow, TextField, toast, TopBar, useDocumentTitle } from "../ui";
+import { api, errorMessage } from "../../../src/api";
+import { dayOfMonth, monthShort, shortDate, time, todayLocal, weekdayShort } from "../../../src/format";
+import { Icon } from "../../../src/icons";
+import { useMe } from "../../../src/session";
+import { useQuery } from "../../../src/store";
+import { BlockEditSheet, BlockSheet, blockTime, type TemplateInfo } from "../../../src/duty-blocks";
+import { Button, confirmDialog, Empty, ErrorBox, Field, Segmented, Sheet, Spinner, SwitchRow, TextField, toast, TopBar, useDocumentTitle } from "../../../src/ui";
 
 interface Entry {
   id: number;

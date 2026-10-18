@@ -2127,7 +2127,7 @@ button.announcement-head {
   border: 1px solid var(--line);
 }
 
-/* Helferplan (src/pages/helpers.tsx) */
+/* Helferplan (modules/duties/app/helpers.tsx) */
 /* Eigene Dienste an Spielen in der Terminübersicht (src/duties.tsx), auch auf dunklen Zeilen lesbar */
 .duty-chips {
   display: flex;
@@ -2528,7 +2528,7 @@ button.announcement-head {
   pointer-events: none;
 }
 
-/* Laufendes Spiel mit Link zum Liveticker bei handball4all (src/live.tsx) */
+/* Laufendes Spiel mit Link zum Liveticker bei handball4all (src/live.tsx, modules/handball4all/app/live.tsx) */
 .live-card .card-head {
   background: var(--black);
   color: var(--yellow);

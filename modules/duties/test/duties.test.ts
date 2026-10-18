@@ -1,7 +1,7 @@
 // Helferplan: Sichtbarkeit, Eintragen, Plätze, Verwaltung, Kalender. Alle Namen erfunden.
 import { exports } from "cloudflare:workers";
 import { beforeEach, describe, expect, it } from "vitest";
-import { api, eventIn, exec, freshDb, guardian, loginAs, member, one, person, rows, season, team } from "./helpers";
+import { api, eventIn, exec, freshDb, guardian, loginAs, member, one, person, rows, season, team } from "../../../test/helpers";
 
 let wd: number;
 let wb: number;

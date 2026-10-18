@@ -20,13 +20,10 @@ import { SessionProvider, useSession } from "./session";
 import { Splash } from "./splash";
 import { invalidate, useQuery } from "./store";
 import { useClub } from "./club";
+import { APP_MODULES, useActiveModules } from "./modules";
 import { ConfirmHost, Spinner, Toasts } from "./ui";
 
-const HelpersPage = lazyPage(() => import("./pages/helpers").then((m) => m.HelpersPage));
 const HelpPage = lazyPage(() => import("./pages/help").then((m) => m.HelpPage));
-const AdminRefereesPage = lazyPage(() => import("./pages/referees").then((m) => m.AdminRefereesPage));
-const AdminDutiesPage = lazyPage(() => import("./pages/duty-admin").then((m) => m.AdminDutiesPage));
-const RefereeJoinPage = lazyPage(() => import("./pages/referees").then((m) => m.RefereeJoinPage));
 const SquadPage = lazyPage(() => import("./pages/squad").then((m) => m.SquadPage));
 const ChatListPage = lazyPage(() => import("./pages/chat").then((m) => m.ChatListPage));
 const ChatRoomPage = lazyPage(() => import("./pages/chat").then((m) => m.ChatRoomPage));
@@ -51,7 +48,6 @@ const AdminAgeClassesPage = lazyPage(() => import("./pages/admin").then((m) => m
 const AdminLocationsPage = lazyPage(() => import("./pages/admin").then((m) => m.AdminLocationsPage));
 const AdminClubPage = lazyPage(() => import("./pages/club-settings").then((m) => m.AdminClubPage));
 const AdminMailPage = lazyPage(() => import("./pages/mail-settings").then((m) => m.AdminMailPage));
-const AdminSmsPage = lazyPage(() => import("./pages/sms-settings").then((m) => m.AdminSmsPage));
 const SetupWizardPage = lazyPage(() => import("./pages/setup-wizard").then((m) => m.SetupWizardPage));
 const SeasonChangePage = lazyPage(() => import("./pages/season").then((m) => m.SeasonChangePage));
 
@@ -59,6 +55,7 @@ const PUBLIC_PATHS = ["/einladung", "/einrichtung", "/datenschutz", "/email"];
 
 function TabBar() {
   const { me } = useSession();
+  const modules = useActiveModules();
   const { path } = useLocation();
   const rooms = useQuery<{ rooms: { unread: boolean }[] }>(me ? "/chat/rooms" : null, { refreshMs: 60_000 });
   if (!me) return null;
@@ -67,7 +64,11 @@ function TabBar() {
     { href: "/", label: t`Events`, icon: "calendar", match: (p) => p === "/" || p.startsWith("/termine") },
     { href: "/chat", label: t`Chat`, icon: "chat", match: (p) => p.startsWith("/chat"), dot: unread },
   ];
-  if (me.helperTeams.length || me.referee) tabs.push({ href: "/helfer", label: t`Helpers`, icon: "helping", match: (p) => p.startsWith("/helfer") });
+  // Tabs of the switched-on modules (modules/<id>/app, tab), e.g. the helper plan
+  for (const m of modules) {
+    const tab = m.tab?.(me);
+    if (tab) tabs.push(tab);
+  }
   if (me.isAdmin) tabs.push({ href: "/verwaltung", label: t({ message: "Admin", context: "navigation" }), icon: "settings", match: (p) => p.startsWith("/verwaltung") || p.startsWith("/team") });
   else if (me.manageableTeams.length) tabs.push({ href: "/team", label: t`Team`, icon: "users", match: (p) => p.startsWith("/team") });
   // Players and parents need no administration: help and feedback go there
@@ -240,8 +241,11 @@ export function App() {
           <Shell>
             <Router>
               <Route path="/" component={HomePage} />
+              {/* Pages of the modules (modules/<id>/app, routes) */}
+              {APP_MODULES.flatMap((m) => m.routes ?? []).map((r) => (
+                <Route key={r.path} path={r.path} component={r.page} />
+              ))}
               <Route path="/termine/:id" component={EventPage} />
-              <Route path="/helfer" component={HelpersPage} />
               <Route path="/spiele" component={RedirectHome} />
               <Route path="/spiele/:id/kader" component={SquadPage} />
               <Route path="/chat" component={ChatListPage} />
@@ -260,9 +264,6 @@ export function App() {
               <Route path="/verwaltung" component={AdminPage} />
               <Route path="/verwaltung/personen" component={AdminPersonsPage} />
               <Route path="/verwaltung/rundnachricht" component={AdminBroadcastPage} />
-              <Route path="/verwaltung/kihasl" component={AdminRefereesPage} />
-              <Route path="/verwaltung/helferdienste" component={AdminDutiesPage} />
-              <Route path="/kihasl" component={RefereeJoinPage} />
               <Route path="/verwaltung/mannschaften" component={AdminTeamsPage} />
               <Route path="/verwaltung/gruppen" component={AdminGroupsPage} />
               <Route path="/verwaltung/ferien" component={AdminHolidaysPage} />
@@ -270,7 +271,6 @@ export function App() {
               <Route path="/verwaltung/orte" component={AdminLocationsPage} />
               <Route path="/verwaltung/verein" component={AdminClubPage} />
               <Route path="/verwaltung/mail" component={AdminMailPage} />
-              <Route path="/verwaltung/sms" component={AdminSmsPage} />
               <Route path="/verwaltung/saisonwechsel" component={SeasonChangePage} />
               <Route path="/verwaltung/einrichtung" component={SetupWizardPage} />
               <Route path="/verwaltung/termin-neu" component={SpecialEventPage} />

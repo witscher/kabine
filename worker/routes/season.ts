@@ -445,16 +445,8 @@ const CORE_EXPORT_TABLES = [
   "chat_state",
   "chat_reads",
   "chat_mentions",
-  "duty_types",
-  "duty_templates",
-  "duty_template_items",
-  "event_duties",
   "event_organizers",
   "club_members",
-  "duties",
-  "skill_consents",
-  "duty_notifications",
-  "referees",
 ];
 
 /** Tables in the admin's data export: the core's and those of every module (worker/module-api.ts). */

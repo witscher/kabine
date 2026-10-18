@@ -2,12 +2,12 @@
 import { plural, t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { useState } from "preact/hooks";
-import { api } from "../api";
-import type { DutyTypeInfo, TemplateInfo } from "../duty-blocks";
-import { Icon } from "../icons";
-import { useMe } from "../session";
-import { invalidate, useQuery } from "../store";
-import { Button, confirmDialog, ErrorBox, Field, Notice, Segmented, Sheet, Spinner, SwitchRow, TextField, toast, TopBar, useDocumentTitle } from "../ui";
+import { api } from "../../../src/api";
+import type { DutyTypeInfo, TemplateInfo } from "../../../src/duty-blocks";
+import { Icon } from "../../../src/icons";
+import { useMe } from "../../../src/session";
+import { invalidate, useQuery } from "../../../src/store";
+import { Button, confirmDialog, ErrorBox, Field, Notice, Segmented, Sheet, Spinner, SwitchRow, TextField, toast, TopBar, useDocumentTitle } from "../../../src/ui";
 
 type TemplateItem = TemplateInfo["items"][number];
 

@@ -1,10 +1,10 @@
-// Helper plan API. Rules in worker/domain/duties.ts.
+// Helper plan API. Rules in worker/domain/duties.ts (core: the event views use them too).
 import { t } from "@lingui/core/macro";
-import { isModuleOn, loadClub } from "../domain/club";
+import { isModuleOn, loadClub } from "../../../worker/domain/club";
 import { type Context, Hono } from "hono";
 import { z } from "zod";
-import { type AppEnv, intParam, requireActor } from "../app";
-import { type Actor, isCoachOf, isCoachOfAny, requireAdmin } from "../auth/actor";
+import { type AppEnv, intParam, requireActor } from "../../../worker/app";
+import { type Actor, isCoachOf, isCoachOfAny, requireAdmin } from "../../../worker/auth/actor";
 import {
   blockFromItem,
   dutyManagers,
@@ -15,6 +15,7 @@ import {
   loadBlock,
   loadDutyTypes,
   mayManageDuties,
+  managedEvent,
   mayTake,
   resetTeamDuties,
   publicHelperTeam,
@@ -25,14 +26,15 @@ import {
   SHORT_NAME_SQL,
   skillConsents,
   templateItems,
-} from "../domain/duties";
-import { requireTeam } from "../domain/groups";
-import { dutyHubStub, notifyDutyChange } from "../duties/hub";
-import { notifyPersons, shortDate, shortTime } from "../domain/notify";
-import { all, first, run, stmt } from "../lib/db";
-import { badRequest, conflict, forbidden, notFound, parse, readJson } from "../lib/http";
-import { teamGameMinutes } from "../domain/events";
-import { addDays, addMinutesLocal, isDate, isLocalDateTime, isTime, nowLocal, todayLocal } from "../lib/time";
+} from "../../../worker/domain/duties";
+import { requireTeam } from "../../../worker/domain/groups";
+import { dutyHubStub, notifyDutyChange } from "../../../worker/duties/hub";
+import { notifyPersons, shortDate, shortTime } from "../../../worker/domain/notify";
+import { textsOn } from "../../../worker/domain/texts";
+import { all, first, run, stmt } from "../../../worker/lib/db";
+import { badRequest, conflict, forbidden, notFound, parse, readJson } from "../../../worker/lib/http";
+import { teamGameMinutes } from "../../../worker/domain/events";
+import { addDays, addMinutesLocal, isDate, isLocalDateTime, isTime, nowLocal, todayLocal } from "../../../worker/lib/time";
 
 export const dutyRoutes = new Hono<AppEnv>();
 
@@ -40,14 +42,14 @@ export const dutyRoutes = new Hono<AppEnv>();
 const PAST_DAYS = 90;
 
 /** Live channel of the KiHaSL/JuHaSL view (team IDs are always > 0). */
-const REFEREE_HUB = 0;
+export const REFEREE_HUB = 0;
 
 dutyRoutes.get("/duties/teams", async (c) => {
   const actor = requireActor(c);
   return c.json({ teams: (await helperTeams(c.env.DB, actor)).map(publicHelperTeam) });
 });
 
-interface EventRow {
+export interface EventRow {
   id: number;
   kind: "game" | "special";
   starts_at: string;
@@ -84,7 +86,7 @@ interface EntryRow {
   note: string | null;
 }
 
-async function loadBlocksAndEntries(db: D1Database, eventIds: number[]) {
+export async function loadBlocksAndEntries(db: D1Database, eventIds: number[]) {
   if (!eventIds.length) return { blocks: [] as BlockOut[], entries: [] as EntryRow[] };
   const ids = JSON.stringify(eventIds);
   const [blocks, entries] = await Promise.all([
@@ -101,7 +103,7 @@ async function loadBlocksAndEntries(db: D1Database, eventIds: number[]) {
 }
 
 /** A block for the client: duty type, time, places, entries and whether/as whom one can sign up. */
-function blockView(
+export function blockView(
   b: BlockOut,
   type: DutyType,
   entries: EntryRow[],
@@ -137,7 +139,7 @@ function blockView(
   };
 }
 
-function eventView(e: EventRow, now: string) {
+export function eventView(e: EventRow, now: string) {
   return {
     id: e.id,
     kind: e.kind,
@@ -345,71 +347,6 @@ async function refereeSignup(c: Context<AppEnv>, actor: Actor, block: NonNullabl
   return c.json({ ok: true }, 201);
 }
 
-/**
- * KiHaSL/JuHaSL: all upcoming youth home games F–C of all teams, with the block.
- * For everyone with the role (oneself or a child), coaches and admins.
- */
-dutyRoutes.get("/duties/referee", async (c) => {
-  const actor = requireActor(c);
-  const db = c.env.DB;
-  const refRoles = await refereeRoles(db, actor);
-  if (!refRoles.length && !actor.isAdmin && !actor.coachTeamIds.length) throw forbidden();
-  const today = `${todayLocal()}T00:00`;
-  const candidates = await all<{ id: number }>(
-    db,
-    `SELECT e.id FROM events e JOIN teams t ON t.id = (SELECT et.team_id FROM event_teams et WHERE et.event_id = e.id ORDER BY et.team_id LIMIT 1)
-      WHERE e.kind = 'game' AND e.is_home = 1 AND ${REFEREE_TEAM_SQL("t")} AND e.starts_at >= ? AND e.cancelled_at IS NULL`,
-    today,
-  );
-  await ensureEventDuties(db, candidates.map((x) => x.id), today);
-  const events = await all<EventRow>(
-    db,
-    `SELECT e.id, e.kind, e.starts_at, e.ends_at, e.is_home, e.home_team, e.guest_team, e.title, e.cancelled_at, e.duty_hidden, e.external_ref,
-            l.name AS location_name, t.id AS team_id, t.name AS team_name
-       FROM events e
-       JOIN teams t ON t.id = (SELECT et.team_id FROM event_teams et WHERE et.event_id = e.id ORDER BY et.team_id LIMIT 1)
-       LEFT JOIN locations l ON l.id = e.location_id
-      WHERE e.starts_at >= ? AND e.cancelled_at IS NULL
-        AND EXISTS (SELECT 1 FROM event_duties ed JOIN duty_types dt ON dt.id = ed.duty_type_id AND dt.who_referees = 1 WHERE ed.event_id = e.id)
-      ORDER BY e.starts_at`,
-    today,
-  );
-  const eventIds = events.map((e) => e.id);
-  const [{ blocks, entries }, types] = await Promise.all([loadBlocksAndEntries(db, eventIds), loadDutyTypes(db, eventIds)]);
-  const now = nowLocal();
-  return c.json({
-    team: { teamId: 0, teamName: "KiHaSL/JuHaSL", canManage: actor.isAdmin, roles: refRoles, own: true },
-    games: events.map((e) => ({
-      ...eventView(e, now),
-      teamId: e.team_id,
-      teamName: e.team_name,
-      canManage: isCoachOf(actor, e.team_id!),
-      hidden: false,
-      blocks: blocks
-        .filter((b) => b.event_id === e.id && types.get(b.duty_type_id)?.whoReferees && (b.slots > 0 || isCoachOf(actor, e.team_id!)))
-        .map((b) => blockView(b, types.get(b.duty_type_id)!, entries, actor, { team: null, refRoles, consents: new Set(), past: e.starts_at < now })),
-    })),
-  });
-});
-
-/** Everyone with the role, for “sign someone up” (coaches and admins). */
-dutyRoutes.get("/duties/referee/people", async (c) => {
-  const actor = requireActor(c);
-  if (!actor.isAdmin && !actor.coachTeamIds.length) throw forbidden();
-  const people = await all<{ id: number; name: string }>(
-    c.env.DB,
-    `SELECT p.id, ${SHORT_NAME_SQL("p")} AS name FROM referees r JOIN persons p ON p.id = r.person_id AND p.is_former = 0 ORDER BY 2`,
-  );
-  return c.json({ people: people.map((p) => ({ personId: p.id, name: p.name, childId: null, childName: null })) });
-});
-
-dutyRoutes.get("/duties/referee/live", async (c) => {
-  const actor = requireActor(c);
-  if (c.req.header("upgrade")?.toLowerCase() !== "websocket") throw badRequest(t`Expected a WebSocket connection.`);
-  if (!(await refereeRoles(c.env.DB, actor)).length && !actor.isAdmin && !actor.coachTeamIds.length) throw forbidden();
-  return dutyHubStub(c.env, REFEREE_HUB).fetch(new Request("https://duties.internal/connect", { headers: c.req.raw.headers }));
-});
-
 async function loadEntry(db: D1Database, id: number) {
   const row = await first<{
     id: number;
@@ -463,20 +400,6 @@ dutyRoutes.delete("/duties/:id", async (c) => {
 
 // Managing blocks (coaches and admins) -------------------------------------------
 
-async function managedEvent(db: D1Database, actor: Actor, eventId: number) {
-  const e = await first<{ id: number; kind: string; starts_at: string; ends_at: string | null; team_ids: string }>(
-    db,
-    `SELECT e.id, e.kind, e.starts_at, e.ends_at,
-            (SELECT json_group_array(team_id) FROM (SELECT et.team_id FROM event_teams et WHERE et.event_id = e.id ORDER BY et.team_id)) AS team_ids
-       FROM events e WHERE e.id = ?`,
-    eventId,
-  );
-  if (!e || (e.kind !== "game" && e.kind !== "special")) throw notFound(t`This event does not exist.`);
-  const teamIds = JSON.parse(e.team_ids) as number[];
-  if (!teamIds.length) throw badRequest(t`Helpers only exist for events of teams.`);
-  if (!mayManageDuties(actor, teamIds, (await dutyManagers(db, [e.id])).get(e.id))) throw forbidden(t`Only coaches of this team and the organisers of the event can do this.`);
-  return { ...e, teamIds };
-}
 
 const blockTimeSchema = z.string().refine(isLocalDateTime, { error: () => t`Invalid time.` });
 const slotsSchema = z.number().int().min(0).max(20);
@@ -590,15 +513,6 @@ dutyRoutes.post("/duties/events/:id/apply-template", async (c) => {
   return c.json({ ok: true, created: statements.length });
 });
 
-dutyRoutes.patch("/duties/games/:id", async (c) => {
-  const actor = requireActor(c);
-  const event = await managedEvent(c.env.DB, actor, intParam(c, "id"));
-  const { hidden } = parse(z.object({ hidden: z.boolean() }), await readJson(c.req.raw));
-  await run(c.env.DB, "UPDATE events SET duty_hidden = ? WHERE id = ?", hidden ? 1 : 0, event.id);
-  for (const t of event.teamIds) c.executionCtx.waitUntil(notifyDutyChange(c.env, t));
-  return c.json({ ok: true });
-});
-
 /** Possible persons for "sign someone up": parents of the players, players, coaches. */
 dutyRoutes.get("/duties/teams/:id/people", async (c) => {
   const actor = requireActor(c);
@@ -701,82 +615,6 @@ dutyRoutes.get("/duties/teams/:id/top", async (c) => {
   return c.json({ top: rows.map((r) => ({ name: r.name, count: r.n, star: r.n === best })) });
 });
 
-const manualGameSchema = z.object({
-  opponent: z.string().trim().min(1).max(80),
-  isHome: z.boolean(),
-  date: z.string().refine(isDate, { error: () => t`Invalid date.` }),
-  time: z.string().refine(isTime, { error: () => t`Invalid time.` }),
-  locationId: z.number().int().positive().nullable().optional(),
-});
-
-/** Game without handball4all (friendlies, tournaments, Bambinis, Minis). The team is notified. */
-dutyRoutes.post("/duties/teams/:id/games", async (c) => {
-  const actor = requireActor(c);
-  const teamId = intParam(c, "id");
-  if (!isCoachOf(actor, teamId)) throw forbidden(t`Only coaches of this team can do this.`);
-  await requireTeam(c.env.DB, teamId);
-  const input = parse(manualGameSchema, await readJson(c.req.raw));
-  const startsAt = `${input.date}T${input.time}`;
-  if (startsAt <= nowLocal()) throw badRequest(t`The game must be in the future.`);
-  const own = (await loadClub(c.env.DB)).name;
-  const row = await first<{ id: number }>(
-    c.env.DB,
-    `INSERT INTO events (kind, starts_at, ends_at, location_id, home_team, guest_team, is_home)
-     VALUES ('game', ?, ?, ?, ?, ?, ?) RETURNING id`,
-    startsAt,
-    addMinutesLocal(startsAt, await teamGameMinutes(c.env.DB, teamId)),
-    input.locationId ?? null,
-    input.isHome ? own : input.opponent,
-    input.isHome ? input.opponent : own,
-    input.isHome ? 1 : 0,
-  );
-  await run(c.env.DB, "INSERT INTO event_teams (event_id, team_id) VALUES (?, ?)", row!.id, teamId);
-  c.executionCtx.waitUntil(notifyDutyChange(c.env, teamId));
-
-  const team = await first<{ name: string }>(c.env.DB, "SELECT name FROM teams WHERE id = ?", teamId);
-  const loc = input.locationId ? await first<{ name: string }>(c.env.DB, "SELECT name FROM locations WHERE id = ?", input.locationId) : null;
-  const players = await all<{ person_id: number }>(
-    c.env.DB,
-    `SELECT tm.person_id FROM team_memberships tm JOIN persons p ON p.id = tm.person_id
-      WHERE tm.team_id = ? AND tm.role = 'player' AND p.is_active = 1 AND p.is_former = 0`,
-    teamId,
-  );
-  const opponent = input.opponent;
-  const place = loc?.name;
-  c.executionCtx.waitUntil(
-    notifyPersons(
-      c.env,
-      players.map((p) => p.person_id),
-      "events",
-      () => {
-        const teamName = team?.name ?? t`Game`;
-        const date = shortDate(startsAt);
-        const time = shortTime(startsAt);
-        return {
-          title: input.isHome ? t`New game: ${teamName} vs ${opponent}` : t`New game: ${teamName} at ${opponent}`,
-          body: place
-            ? t`${date}, ${time}, ${place}. The coach will announce the squad.`
-            : t`${date}, ${time}. The coach will announce the squad.`,
-          url: `/termine/${row!.id}`,
-        };
-      },
-      { teamIds: [teamId], exclude: [actor.accountId] },
-    ),
-  );
-  return c.json({ id: row!.id }, 201);
-});
-
-dutyRoutes.delete("/duties/games/:id", async (c) => {
-  const actor = requireActor(c);
-  const event = await managedEvent(c.env.DB, actor, intParam(c, "id"));
-  const row = await first<{ kind: string; external_ref: string | null }>(c.env.DB, "SELECT kind, external_ref FROM events WHERE id = ?", event.id);
-  if (row?.kind !== "game") throw notFound();
-  if (row.external_ref) throw badRequest(t`Games from a game schedule cannot be deleted, only hidden.`);
-  await run(c.env.DB, "DELETE FROM events WHERE id = ?", event.id);
-  for (const t of event.teamIds) c.executionCtx.waitUntil(notifyDutyChange(c.env, t));
-  return c.json({ ok: true });
-});
-
 dutyRoutes.get("/duties/teams/:id/live", async (c) => {
   const actor = requireActor(c);
   const teamId = intParam(c, "id");
@@ -816,7 +654,7 @@ dutyRoutes.get("/profile/duty-prefs", async (c) => {
     ),
     mailAddressVerified: !!email?.email && !!email.email_verified_at,
     // SMS only with the module on and a confirmed number
-    smsAvailable: isModuleOn("sms") && !!email?.phone && !!email.phone_verified_at,
+    smsAvailable: textsOn() && !!email?.phone && !!email.phone_verified_at,
   });
 });
 

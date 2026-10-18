@@ -12,21 +12,20 @@ import { avatarRoutes } from "./routes/avatars";
 import { chatRoutes } from "./routes/chat";
 import { clubRoutes } from "./routes/club";
 import { calendarRoutes } from "./routes/calendar";
-import { dutyRoutes } from "./routes/duties";
+import { clubMemberRoutes } from "./routes/club-members";
 import { emailRoutes } from "./routes/email";
 import { eventRoutes } from "./routes/events";
 import { feedbackRoutes } from "./routes/feedback";
 import { gameImportRoutes } from "./routes/game-import";
 import { gameRoutes } from "./routes/games";
 import { mailRoutes } from "./routes/mail";
-import { smsRoutes } from "./routes/sms";
 import { setupRoutes } from "./routes/setup";
 import { joinRoutes } from "./routes/join";
 import { parentRoutes } from "./routes/parents";
 import { personRoutes } from "./routes/persons";
 import { planRoutes } from "./routes/plans";
 import { pushRoutes } from "./routes/push";
-import { refereeRoutes } from "./routes/referees";
+import { manualGameRoutes } from "./routes/manual-games";
 import { seasonRoutes } from "./routes/season";
 import { squadRoutes } from "./routes/squad";
 import { teamRoutes } from "./routes/teams";
@@ -56,14 +55,13 @@ for (const routes of [
   gameRoutes,
   gameImportRoutes,
   mailRoutes,
-  smsRoutes,
   setupRoutes,
   seasonRoutes,
   avatarRoutes,
-  dutyRoutes,
+  manualGameRoutes,
   calendarRoutes,
   feedbackRoutes,
-  refereeRoutes,
+  clubMemberRoutes,
 ]) {
   app.route("/api", routes);
 }

@@ -1,11 +1,11 @@
 // KiHaSL/JuHaSL: Rolle per Link oder Admin, Dienst bei Jugend-Heimspielen F–C. Namen erfunden.
 import { env } from "cloudflare:workers";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { sendDutyNotifications } from "../worker/domain/duty-notify";
-import { type MailMessage, mailer } from "../worker/domain/email-login";
-import type { PushJob } from "../worker/domain/notify";
-import { localToInstant, todayLocal } from "../worker/lib/time";
-import { api, eventIn, exec, freshDb, guardian, loginAs, member, one, person, rows, season, team } from "./helpers";
+import { sendDutyNotifications } from "../../duties/worker/notify";
+import { type MailMessage, mailer } from "../../../worker/domain/email-login";
+import type { PushJob } from "../../../worker/domain/notify";
+import { localToInstant, todayLocal } from "../../../worker/lib/time";
+import { api, eventIn, exec, freshDb, guardian, loginAs, member, one, person, rows, season, team } from "../../../test/helpers";
 
 let wd: number;
 let wb: number;

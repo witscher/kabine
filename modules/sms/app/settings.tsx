@@ -2,10 +2,10 @@
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { useEffect, useState } from "preact/hooks";
-import { api, errorMessage } from "../api";
-import { useQuery } from "../store";
-import { Button, ErrorBox, Notice, Spinner, TextField, toast, TopBar, useDocumentTitle } from "../ui";
-import { AdminOnly } from "./admin";
+import { api, errorMessage } from "../../../src/api";
+import { useQuery } from "../../../src/store";
+import { Button, ErrorBox, Notice, Spinner, TextField, toast, TopBar, useDocumentTitle } from "../../../src/ui";
+import { AdminOnly } from "../../../src/pages/admin";
 
 interface SmsView {
   provider: "seven";

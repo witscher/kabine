@@ -7,14 +7,14 @@
 // Channel (push, mail) per account and topic, see notification_channels.
 // Texts are built per recipient language: pushes once per language, mails per account (withLocale).
 import { plural, t } from "@lingui/core/macro";
-import { type DutyType, ensureEventDuties, loadAllDutyTypes, opponentOf } from "./duties";
-import { mailer } from "./email-login";
-import { enqueuePush, shortDate, shortTime } from "./notify";
-import { all, list, run } from "../lib/db";
-import { isModuleOn, ownClubAbbr, ownClubShortName } from "./club";
-import { withLocale } from "../i18n";
-import { sendSmsTo } from "./sms";
-import { addDays, todayLocal, toLocal } from "../lib/time";
+import { type DutyType, ensureEventDuties, loadAllDutyTypes, opponentOf } from "../../../worker/domain/duties";
+import { mailer } from "../../../worker/domain/email-login";
+import { enqueuePush, shortDate, shortTime } from "../../../worker/domain/notify";
+import { all, list, run } from "../../../worker/lib/db";
+import { isModuleOn, ownClubAbbr, ownClubShortName } from "../../../worker/domain/club";
+import { withLocale } from "../../../worker/i18n";
+import { sendText, textsOn } from "../../../worker/domain/texts";
+import { addDays, todayLocal, toLocal } from "../../../worker/lib/time";
 
 export type DutyTopic = "duty_remind_3d" | "duty_remind_1d" | "duty_open" | "duty_coach_open" | "duty_referee_open";
 
@@ -83,7 +83,7 @@ async function deliver(env: Env, accountIds: number[], topic: DutyTopic, msg: ()
   );
   const push = rows.filter((r) => (r.push ?? DEFAULT.push) === 1).map((r) => r.id);
   const mail = rows.filter((r) => (r.mail ?? DEFAULT.mail) === 1 && r.email && r.verified === 1);
-  const sms = isModuleOn("sms") ? rows.filter((r) => r.sms === 1 && r.phone && r.phone_verified === 1) : [];
+  const sms = textsOn() ? rows.filter((r) => r.sms === 1 && r.phone && r.phone_verified === 1) : [];
   let sent = 0;
   if (push.length) {
     sent += await enqueuePush(env, push, () => {
@@ -110,7 +110,7 @@ async function deliver(env: Env, accountIds: number[], topic: DutyTopic, msg: ()
         const m = msg();
         return `${m.title}: ${m.body}`;
       });
-      await sendSmsTo(env, r.phone!, text);
+      await sendText(env, r.phone!, text);
       sent++;
     } catch (err) {
       console.warn("Helper plan SMS failed", err instanceof Error ? err.message : err);

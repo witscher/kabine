@@ -4,14 +4,14 @@
 import { t } from "@lingui/core/macro";
 import { Hono } from "hono";
 import { z } from "zod";
-import { type AppEnv, intParam, requireActor } from "../app";
-import { parentsInCharge, requireAdmin } from "../auth/actor";
-import { syncAutoGroups } from "../domain/groups";
-import { relyingParty } from "../auth/webauthn";
-import { randomToken, sha256Hex } from "../lib/crypto";
-import { all, first, run } from "../lib/db";
-import { badRequest, notFound, parse, readJson } from "../lib/http";
-import { utcIso } from "../lib/time";
+import { type AppEnv, intParam, requireActor } from "../../../worker/app";
+import { parentsInCharge, requireAdmin } from "../../../worker/auth/actor";
+import { syncAutoGroups } from "../../../worker/domain/groups";
+import { relyingParty } from "../../../worker/auth/webauthn";
+import { randomToken, sha256Hex } from "../../../worker/lib/crypto";
+import { all, first, run } from "../../../worker/lib/db";
+import { badRequest, notFound, parse, readJson } from "../../../worker/lib/http";
+import { utcIso } from "../../../worker/lib/time";
 
 export const refereeRoutes = new Hono<AppEnv>();
 
@@ -90,23 +90,6 @@ refereeRoutes.delete("/admin/referees/:personId", async (c) => {
   requireAdmin(requireActor(c));
   await run(c.env.DB, "DELETE FROM referees WHERE person_id = ?", intParam(c, "personId"));
   await syncAutoGroups(c.env.DB);
-  return c.json({ ok: true });
-});
-
-// Full club members (hidden flag, admins only) --------------------------------------
-
-refereeRoutes.put("/admin/club-members/:personId", async (c) => {
-  const actor = requireActor(c);
-  requireAdmin(actor);
-  const personId = intParam(c, "personId");
-  if (!(await first(c.env.DB, "SELECT 1 AS ok FROM persons WHERE id = ? AND is_former = 0", personId))) throw notFound(t`This person does not exist.`);
-  await run(c.env.DB, "INSERT OR IGNORE INTO club_members (person_id, added_by) VALUES (?, ?)", personId, actor.personId);
-  return c.json({ ok: true });
-});
-
-refereeRoutes.delete("/admin/club-members/:personId", async (c) => {
-  requireAdmin(requireActor(c));
-  await run(c.env.DB, "DELETE FROM club_members WHERE person_id = ?", intParam(c, "personId"));
   return c.json({ ok: true });
 });
 

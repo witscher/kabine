@@ -106,6 +106,12 @@ export interface WorkerModule {
   participantsDropped?: (db: D1Database, pairs: DroppedPairs) => D1PreparedStatement[];
   /** Cleanup in the core's batch when a person leaves the club (`nowLocal`: keep the past, remove the future). */
   personLeaves?: (db: D1Database, personId: number, nowLocal: string) => D1PreparedStatement[];
+  /** Text messages (SMS) to a phone number, for sign-in codes and reminders (worker/domain/texts.ts). */
+  texts?: {
+    /** Set up and ready to send (e.g. a provider key is stored). */
+    available(db: D1Database): Promise<boolean>;
+    send(env: Env, to: string, text: string): Promise<void>;
+  };
   /** Game schedules from an association's system (manifest kind "fixtures"). */
   fixtures?: FixtureConnector;
   /** Tables of the module in the admin's data export (every table must be listed somewhere, test/export.test.ts). */

@@ -38,7 +38,7 @@ msgstr "Die Handynummer von Personen, die selbst eine eintragen, und ob sie best
 msgid "A reminder was just sent. Please wait a few minutes."
 msgstr "Gerade wurde schon erinnert. Bitte warte ein paar Minuten."
 
-#: src/pages/helpers.tsx
+#: modules/duties/app/helpers.tsx
 msgid "Turn on in your profile under “I can do this”"
 msgstr "Im Profil unter „Das kann ich“ einschalten"
 
@@ -124,10 +124,10 @@ msgstr "{withoutCount, plural, one {# ohne Zugang} other {# ohne Zugang}}"
 msgid "{name} until {to}: holiday training times for {teams}."
 msgstr "{name} bis {to}: Ferien-Trainingszeiten für {teams}."
 
+#: modules/duties/app/admin.tsx
+#: modules/duties/app/admin.tsx
 #: src/pages/admin.tsx
 #: src/pages/admin.tsx
-#: src/pages/duty-admin.tsx
-#: src/pages/duty-admin.tsx
 #: src/pages/team.tsx
 msgctxt "short"
 msgid "Coaches"
@@ -137,7 +137,7 @@ msgstr "Trainer"
 msgid "To"
 msgstr "Bis"
 
-#: src/pages/referees.tsx
+#: modules/youth-referees/app/referees.tsx
 msgid "by {by} · valid until {until}"
 msgstr "von {by} · gültig bis {until}"
 
@@ -157,11 +157,11 @@ msgstr "Bei {driver} ist nicht mehr genug Platz frei."
 msgid "no access yet – create a link under People"
 msgstr "noch kein Zugang – Link unter Personen erzeugen"
 
-#: worker/routes/duties.ts
-#: worker/routes/duties.ts
-#: worker/routes/duties.ts
-#: worker/routes/duties.ts
-#: worker/routes/duties.ts
+#: modules/duties/worker/routes.ts
+#: modules/duties/worker/routes.ts
+#: modules/duties/worker/routes.ts
+#: modules/duties/worker/routes.ts
+#: modules/duties/worker/routes.ts
 #: worker/routes/events.ts
 msgid "This duty does not exist."
 msgstr "Diesen Dienst gibt es nicht."
@@ -186,7 +186,7 @@ msgstr "Bild wird geladen"
 msgid "There is no training during the {holiday}."
 msgstr "In den {holiday} findet kein Training statt."
 
-#: src/pages/duty-admin.tsx
+#: modules/duties/app/admin.tsx
 msgid "Add duty"
 msgstr "Dienst hinzufügen"
 
@@ -203,7 +203,7 @@ msgstr "Elternteil von {children}"
 msgid "Nobody found."
 msgstr "Niemand gefunden."
 
-#: worker/domain/duty-notify.ts
+#: modules/duties/worker/notify.ts
 msgid "Open helper places · {team}"
 msgstr "Noch offene Helferplätze · {team}"
 
@@ -232,11 +232,11 @@ msgstr "{name} (du)"
 msgid "e.g. hall car park"
 msgstr "z. B. Parkplatz Halle"
 
-#: worker/routes/duties.ts
+#: modules/duties/worker/routes.ts
 msgid "Others take on this duty."
 msgstr "Diesen Dienst übernehmen andere."
 
-#: worker/routes/duties.ts
+#: modules/duties/worker/routes.ts
 msgid "Please choose a duty."
 msgstr "Bitte einen Dienst wählen."
 
@@ -250,7 +250,7 @@ msgstr "Organisator hinzufügen"
 msgid "School holidays and public holidays of your region are already there."
 msgstr "Schulferien und Feiertage deiner Region sind schon eingetragen."
 
-#: worker/domain/duty-notify.ts
+#: modules/duties/worker/notify.ts
 msgid "A KiHaSL/JuHaSL is still needed for the game {game}."
 msgstr "für das Spiel {game} wird noch ein KiHaSL/JuHaSL gesucht."
 
@@ -275,7 +275,7 @@ msgstr "Mitfahrer eintragen"
 msgid "Born from"
 msgstr "Jg. von"
 
-#: src/pages/duty-admin.tsx
+#: modules/duties/app/admin.tsx
 msgid "Parents sign up for their child. In teams without parents, the players do this themselves. Members: full members of the club who belong to the team (admins set this under People)."
 msgstr "Eltern tragen sich für ihr Kind ein. In Mannschaften ohne Eltern übernehmen das die Spieler selbst. Mitglieder: ordentliche Mitglieder des Vereins, die zur Mannschaft gehören (Merkmal setzen Admins unter Personen)."
 
@@ -331,8 +331,8 @@ msgstr "Wie bekomme ich meine Termine in meinen Kalender?"
 msgid "{name} is riding with {driver}. {driverFirstName} will be notified."
 msgstr "{name} fährt bei {driver} mit. {driverFirstName} wird benachrichtigt."
 
+#: modules/youth-referees/app/referees.tsx
 #: src/calendar.tsx
-#: src/pages/referees.tsx
 msgid "Create new link"
 msgstr "Neuen Link erzeugen"
 
@@ -382,7 +382,7 @@ msgid "Stand-in from the other team. Their coach maintains the personal data."
 msgstr "Aushilfe aus der anderen Mannschaft. Stammdaten pflegt deren Trainer."
 
 # ai
-#: worker/routes/sms.ts
+#: modules/sms/worker/routes.ts
 msgid "The test message could not be sent: {detail}"
 msgstr "Die Test-SMS konnte nicht verschickt werden: {detail}"
 
@@ -433,7 +433,7 @@ msgstr "Kürzel"
 msgid "Former (will be deleted)"
 msgstr "Ehemalig (wird gelöscht)"
 
-#: src/pages/referees.tsx
+#: modules/youth-referees/app/referees.tsx
 msgid "No one yet"
 msgstr "Noch niemand"
 
@@ -462,7 +462,7 @@ msgstr "Aktive"
 msgid "Discard season change?"
 msgstr "Saisonwechsel verwerfen?"
 
-#: src/pages/duty-admin.tsx
+#: modules/duties/app/admin.tsx
 msgid "Which duties a game needs, with slots and time span around the event. Coaches choose the template for home and away games in their team."
 msgstr "Welche Dienste ein Spiel braucht, mit Plätzen und Zeitraum rund um den Termin. Trainer wählen in ihrer Mannschaft die Vorlage für Heim- und Auswärtsspiele."
 
@@ -482,7 +482,7 @@ msgstr "Grund (Pflicht)"
 msgid "{name} now also plays for {teamName}."
 msgstr "{name} spielt jetzt auch in der {teamName}."
 
-#: src/pages/referees.tsx
+#: modules/youth-referees/app/referees.tsx
 msgid "People with the role"
 msgstr "Personen mit Rolle"
 
@@ -494,10 +494,10 @@ msgstr "FÜR TRAINER"
 msgid "Automatic again"
 msgstr "Wieder automatisch"
 
+#: modules/duties/app/helpers.tsx
 #: src/pages/event.tsx
 #: src/pages/event.tsx
 #: src/pages/event.tsx
-#: src/pages/helpers.tsx
 #: src/pages/home.tsx
 #: worker/domain/events.ts
 #: worker/routes/events.ts
@@ -516,7 +516,7 @@ msgstr "Trainingszeit geändert"
 msgid "Linked parents: {guardians}. Each parent can change the permissions."
 msgstr "Verknüpfte Eltern: {guardians}. Jedes Elternteil kann die Freigaben ändern."
 
-#: src/pages/helpers.tsx
+#: modules/duties/app/helpers.tsx
 msgid "Show top helpers"
 msgstr "Top-Helfer anzeigen"
 
@@ -606,7 +606,7 @@ msgstr "Ferienzeiträume"
 msgid "{title} on {date}, {time}"
 msgstr "{title} am {date}, {time}"
 
-#: src/pages/duty-admin.tsx
+#: modules/duties/app/admin.tsx
 msgid "New duty type"
 msgstr "Neue Dienstart"
 
@@ -648,7 +648,7 @@ msgstr "Inaktive Spieler können nicht angefragt werden."
 msgid "Remind"
 msgstr "Erinnern"
 
-#: src/pages/admin.tsx
+#: modules/youth-referees/app/index.tsx
 msgid "Grant the referee role by link, list"
 msgstr "Schiedsrichter-Rolle per Link vergeben, Liste"
 
@@ -691,11 +691,11 @@ msgstr "Spielplan ({name})"
 msgid "Nominate squad"
 msgstr "Kader nominieren"
 
+#: modules/duties/app/helpers.tsx
 #: src/pages/admin.tsx
 #: src/pages/admin.tsx
 #: src/pages/admin.tsx
 #: src/pages/event.tsx
-#: src/pages/helpers.tsx
 msgid "People"
 msgstr "Personen"
 
@@ -716,15 +716,15 @@ msgstr "Nachname"
 msgid "Save · {count}"
 msgstr "Speichern · {count}"
 
+#: modules/duties/app/admin.tsx
 #: src/duty-blocks.tsx
-#: src/pages/duty-admin.tsx
 msgid "When"
 msgstr "Wann"
 
+#: modules/duties/worker/routes.ts
+#: modules/duties/worker/routes.ts
 #: worker/routes/admin.ts
 #: worker/routes/admin.ts
-#: worker/routes/duties.ts
-#: worker/routes/duties.ts
 #: worker/routes/join.ts
 #: worker/routes/persons.ts
 #: worker/routes/plans.ts
@@ -928,7 +928,7 @@ msgstr "Seit {created}"
 msgid "Venue to follow"
 msgstr "Halle folgt"
 
-#: src/pages/helpers.tsx
+#: modules/duties/app/helpers.tsx
 msgid "me"
 msgstr "ich"
 
@@ -949,7 +949,7 @@ msgstr "Rang"
 msgid "Take photo"
 msgstr "Foto machen"
 
-#: src/pages/helpers.tsx
+#: modules/duties/app/helpers.tsx
 msgid "{label}: one slot more"
 msgstr "{label}: ein Platz mehr"
 
@@ -995,11 +995,11 @@ msgstr "Offline – verbinde neu …"
 msgid "There is no team for the new age class. Please assign or leave without a team for now."
 msgstr "Für die neue Altersklasse gibt es keine Mannschaft. Bitte zuordnen oder vorerst ohne Mannschaft lassen."
 
-#: worker/domain/duty-notify.ts
+#: modules/duties/worker/notify.ts
 msgid "There are still free places at {game}: {open}."
 msgstr "bei {game} sind noch Plätze frei: {open}."
 
-#: src/pages/referees.tsx
+#: modules/youth-referees/app/referees.tsx
 msgid "With this link you (or your child) are activated as KiHaSL/JuHaSL and can then sign up for the youth home games F to C."
 msgstr "Mit diesem Link wirst du (oder dein Kind) als KiHaSL/JuHaSL freigeschaltet und kannst dich dann bei den Jugend-Heimspielen F bis C eintragen."
 
@@ -1149,7 +1149,7 @@ msgstr "Name des Vereins"
 msgid "The parent"
 msgstr "Das Elternteil"
 
-#: worker/routes/duties.ts
+#: modules/duties/worker/routes.ts
 msgid "This game does not need a KiHaSL/JuHaSL."
 msgstr "Für dieses Spiel braucht es keinen KiHaSL/JuHaSL."
 
@@ -1182,7 +1182,7 @@ msgstr "Benachrichtigung"
 msgid "A second admin helps when you are away."
 msgstr "Ein zweiter Admin hilft, wenn du mal nicht da bist."
 
-#: src/pages/helpers.tsx
+#: modules/duties/app/helpers.tsx
 msgid "{created, plural, one {# time slot applied.} other {# time slots applied.}}"
 msgstr "{created, plural, one {# Zeitblock übernommen.} other {# Zeitblöcke übernommen.}}"
 
@@ -1206,8 +1206,8 @@ msgstr "Ohne Mannschaft"
 msgid "Only special events can be deleted. Please cancel trainings and games instead."
 msgstr "Nur Sondertermine können gelöscht werden. Trainings und Spiele bitte absagen."
 
-#: worker/routes/duties.ts
-#: worker/routes/duties.ts
+#: modules/duties/worker/routes.ts
+#: modules/duties/worker/routes.ts
 msgid "This entry does not exist."
 msgstr "Diesen Eintrag gibt es nicht."
 
@@ -1220,7 +1220,7 @@ msgid "Lift available"
 msgstr "Mitfahrgelegenheit frei"
 
 # ai
-#: worker/routes/sms.ts
+#: modules/sms/worker/routes.ts
 msgid "Confirm a phone number in your profile first; the test message goes there."
 msgstr "Bestätige zuerst im Profil eine Handynummer; dorthin geht die Test-SMS."
 
@@ -1425,13 +1425,13 @@ msgstr "Die Daten gehören zu einer anderen Liga"
 msgid "A profile picture is optional. Everyone signed in to the app can see it. For minors, a parent approves the picture before others see it. You can remove your picture at any time; it is deleted when you leave the club."
 msgstr "Ein Profilbild ist freiwillig. Es sehen alle, die in der App angemeldet sind. Bei Minderjährigen gibt ein Elternteil das Bild frei, bevor andere es sehen. Du kannst dein Bild jederzeit entfernen, beim Austritt aus dem Verein wird es gelöscht."
 
-#: worker/routes/duties.ts
+#: modules/duties/worker/routes.ts
+#: modules/youth-referees/worker/admin-routes.ts
+#: worker/routes/club-members.ts
 #: worker/routes/persons.ts
 #: worker/routes/persons.ts
 #: worker/routes/persons.ts
 #: worker/routes/persons.ts
-#: worker/routes/referees.ts
-#: worker/routes/referees.ts
 #: worker/routes/season.ts
 #: worker/routes/teams.ts
 msgid "This person does not exist."
@@ -1539,6 +1539,8 @@ msgstr "Überspringen"
 msgid "New event: {title}"
 msgstr "Neuer Termin: {title}"
 
+#: modules/duties/app/admin.tsx
+#: modules/duties/app/admin.tsx
 #: src/pages/admin.tsx
 #: src/pages/admin.tsx
 #: src/pages/admin.tsx
@@ -1549,8 +1551,6 @@ msgstr "Neuer Termin: {title}"
 #: src/pages/admin.tsx
 #: src/pages/admin.tsx
 #: src/pages/club-settings.tsx
-#: src/pages/duty-admin.tsx
-#: src/pages/duty-admin.tsx
 #: src/pages/group.tsx
 #: src/pages/group.tsx
 #: src/pages/group.tsx
@@ -1629,11 +1629,11 @@ msgstr "Diese Installation hat keine E-Mail-Anbindung."
 msgid "Your e-mail address"
 msgstr "Deine E-Mail-Adresse"
 
-#: src/pages/helpers.tsx
+#: modules/duties/app/helpers.tsx
 msgid "e.g. marble cake"
 msgstr "z. B. Marmorkuchen"
 
-#: worker/domain/duty-notify.ts
+#: modules/duties/worker/notify.ts
 msgid "Reminder: {label} in {days} days"
 msgstr "Erinnerung: {label} in {days} Tagen"
 
@@ -1662,7 +1662,7 @@ msgstr "selbst"
 msgid "Events of the {team}"
 msgstr "Termine der {team}"
 
-#: src/pages/referees.tsx
+#: modules/youth-referees/app/referees.tsx
 msgid "The role can be given via the link or under Admin → People."
 msgstr "Über den Link oder unter Verwaltung → Personen lässt sich die Rolle vergeben."
 
@@ -1687,7 +1687,7 @@ msgstr "Die Mannschaft hat noch Mitglieder. Bitte zuerst alle entfernen."
 msgid "New training location"
 msgstr "Neuer Trainingsort"
 
-#: worker/routes/duties.ts
+#: modules/duties/worker/routes.ts
 msgid "This duty type does not fit into a template."
 msgstr "Diese Dienstart passt nicht in eine Vorlage."
 
@@ -1699,7 +1699,7 @@ msgstr "der Zugang mit allen Geräten und Benachrichtigungen"
 msgid "Applies only in the chosen holidays and replaces the regular plan there. Without training times it means a training break."
 msgstr "Gilt nur in den gewählten Ferien und ersetzt dort den regulären Plan. Ohne Trainingszeiten bedeutet er Trainingspause."
 
-#: src/pages/helpers.tsx
+#: modules/duties/app/helpers.tsx
 msgid "{label}: change time"
 msgstr "{label}: Uhrzeit ändern"
 
@@ -1719,7 +1719,7 @@ msgstr "{list} ist noch kein Ferienplan hinterlegt."
 msgid "Choose reaction"
 msgstr "Reaktion wählen"
 
-#: src/pages/helpers.tsx
+#: modules/duties/app/helpers.tsx
 msgid "The duty also appears for {linkedChild}'s other parent."
 msgstr "Der Dienst erscheint auch bei {linkedChild}s anderem Elternteil."
 
@@ -1779,6 +1779,9 @@ msgstr "Du kannst dich nicht selbst als Kind verknüpfen."
 msgid "Several accesses belong to this address. Which one do you want to sign in with?"
 msgstr "Zu dieser Adresse gehören mehrere Zugänge. Mit welchem möchtest du dich anmelden?"
 
+#: modules/duties/app/admin.tsx
+#: modules/sms/app/settings.tsx
+#: modules/youth-referees/app/referees.tsx
 #: src/pages/admin.tsx
 #: src/pages/admin.tsx
 #: src/pages/admin.tsx
@@ -1791,12 +1794,9 @@ msgstr "Zu dieser Adresse gehören mehrere Zugänge. Mit welchem möchtest du di
 #: src/pages/admin.tsx
 #: src/pages/chat.tsx
 #: src/pages/club-settings.tsx
-#: src/pages/duty-admin.tsx
 #: src/pages/group.tsx
 #: src/pages/mail-settings.tsx
-#: src/pages/referees.tsx
 #: src/pages/season.tsx
-#: src/pages/sms-settings.tsx
 msgid "Administration"
 msgstr "Verwaltung"
 
@@ -1828,7 +1828,7 @@ msgstr "Seite nicht gefunden"
 msgid "Add driver"
 msgstr "Fahrer eintragen"
 
-#: src/pages/referees.tsx
+#: modules/youth-referees/app/referees.tsx
 msgid "After that it can no longer be redeemed."
 msgstr "Danach lässt er sich nicht mehr einlösen."
 
@@ -1867,7 +1867,7 @@ msgstr "Für Admins Pflicht. Damit kommst du auch ohne Passkey per Code in die A
 msgid "Coaches and players come next. These are the usual steps."
 msgstr "Als Nächstes kommen Trainer und Spieler dazu. Das sind die üblichen Schritte."
 
-#: src/pages/helpers.tsx
+#: modules/duties/app/helpers.tsx
 #: src/pages/special.tsx
 msgid "– Choose template –"
 msgstr "– Vorlage wählen –"
@@ -1896,12 +1896,12 @@ msgstr "der Mannschaft"
 msgid "Only coaches and admins can mute people."
 msgstr "Stummschalten dürfen Trainer und Admins."
 
-#: worker/routes/duties.ts
+#: modules/duties/worker/routes.ts
 msgid "This duty type does not exist."
 msgstr "Diese Dienstart gibt es nicht."
 
-#: src/pages/duty-admin.tsx
-#: src/pages/duty-admin.tsx
+#: modules/duties/app/admin.tsx
+#: modules/duties/app/admin.tsx
 msgid "Duty types"
 msgstr "Dienstarten"
 
@@ -1928,7 +1928,7 @@ msgstr "{total, plural, one {# Personen} other {# Personen}}"
 msgid "Who offers how many seats for an away game, who is looking for one and who rides with whom."
 msgstr "Wer für ein Auswärtsspiel wie viele Plätze anbietet, wer einen sucht und wer mit wem fährt."
 
-#: src/pages/helpers.tsx
+#: modules/duties/app/helpers.tsx
 msgid "{label}: one slot fewer"
 msgstr "{label}: ein Platz weniger"
 
@@ -1968,7 +1968,7 @@ msgstr "Dieser Browser unterstützt keine Passkeys. Bitte öffne den Link in Saf
 msgid "More events"
 msgstr "Mehr Termine"
 
-#: src/pages/referees.tsx
+#: modules/youth-referees/app/referees.tsx
 msgid "valid until {until}"
 msgstr "gültig bis {until}"
 
@@ -2015,7 +2015,7 @@ msgstr "die Verknüpfung zu den Eltern"
 msgid "Edit venue"
 msgstr "Ort bearbeiten"
 
-#: worker/routes/duties.ts
+#: modules/duties/worker/routes.ts
 msgid "Who are you signing up for?"
 msgstr "Für wen trägst du dich ein?"
 
@@ -2023,7 +2023,7 @@ msgstr "Für wen trägst du dich ein?"
 msgid "Only nominated players can respond."
 msgstr "Rückmeldungen sind nur für nominierte Spieler möglich."
 
-#: worker/domain/duty-notify.ts
+#: modules/duties/worker/notify.ts
 msgid "KiHaSL/JuHaSL wanted: {team} {opponent}"
 msgstr "KiHaSL/JuHaSL gesucht: {team} {opponent}"
 
@@ -2041,7 +2041,7 @@ msgstr "Dein Verein"
 msgid "Source code (optional)"
 msgstr "Quellcode (optional)"
 
-#: src/pages/helpers.tsx
+#: modules/duties/app/helpers.tsx
 msgid "KiHaSL list"
 msgstr "KiHaSL-Liste"
 
@@ -2049,7 +2049,7 @@ msgstr "KiHaSL-Liste"
 msgid "{label} on {oldDate} is now on {date} at {time}."
 msgstr "{label} am {oldDate} ist jetzt am {date} um {time}."
 
-#: worker/routes/duties.ts
+#: worker/routes/manual-games.ts
 msgid "New game: {teamName} vs {opponent}"
 msgstr "Neues Spiel: {teamName} gegen {opponent}"
 
@@ -2101,7 +2101,7 @@ msgid "Frequently asked questions"
 msgstr "Häufige Fragen"
 
 # ai
-#: worker/routes/sms.ts
+#: modules/sms/worker/routes.ts
 msgid "Please enter a mobile number, e.g. +49 151 23456789."
 msgstr "Bitte gib eine Handynummer ein, z. B. +49 151 23456789."
 
@@ -2138,7 +2138,7 @@ msgstr "vor {months} Monaten"
 msgid "The file contains personal data of people, including minors. It is only for the club's data backup and must not be passed on. Delete it from your computer after 30 days at the latest. The club's backup belongs encrypted in the storage intended for it. If a storage location, for example your computer, has become accessible to unauthorised persons through a virus or similar, inform the board immediately."
 msgstr "Die Datei enthält persönliche Daten von Personen, auch von Minderjährigen. Sie dient nur der Datensicherung des Vereins und darf nicht weitergegeben werden. Lösche sie nach spätestens 30 Tagen von deinem Rechner. Die Sicherung des Vereins gehört verschlüsselt in den dafür vorgesehenen Speicher. Ist ein Speicherort, zum Beispiel dein Rechner, durch einen Virus oder Ähnliches für Unbefugte zugänglich geworden, informiere unverzüglich die Vorstandschaft."
 
-#: src/pages/helpers.tsx
+#: modules/duties/app/helpers.tsx
 msgid "Withdraw from {label}"
 msgstr "{label} austragen"
 
@@ -2155,15 +2155,15 @@ msgstr "Zoom"
 msgid "Import games from a table"
 msgstr "Spiele aus einer Tabelle übernehmen"
 
-#: src/pages/referees.tsx
+#: modules/youth-referees/app/referees.tsx
 msgid "Activation link"
 msgstr "Freischalt-Link"
 
-#: src/pages/helpers.tsx
+#: modules/duties/app/helpers.tsx
 msgid "Remove all entries first"
 msgstr "Erst alle Einträge entfernen"
 
-#: src/pages/duty-admin.tsx
+#: modules/duties/app/admin.tsx
 msgid "Add duty type"
 msgstr "Dienstart hinzufügen"
 
@@ -2175,7 +2175,7 @@ msgstr "Aus der A-Jugend herausgewachsen. Den Aktiven zuordnen oder als ehemalig
 msgid "In this time"
 msgstr "Diesmal dabei"
 
-#: worker/domain/duty-notify.ts
+#: modules/duties/worker/notify.ts
 msgid "Helper plan: {link}"
 msgstr "Helferplan: {link}"
 
@@ -2300,7 +2300,7 @@ msgstr "Unter <0>Profil → dein Kind</0> auf <1>Zugang für … einrichten</1> 
 msgid "For minors, the parents approve the picture. Until then only you and your parents see it."
 msgstr "Bei Minderjährigen geben die Eltern das Bild frei. Bis dahin sehen es nur du und deine Eltern."
 
-#: src/pages/helpers.tsx
+#: modules/duties/app/helpers.tsx
 msgid "No one found."
 msgstr "Niemand gefunden."
 
@@ -2312,7 +2312,7 @@ msgstr "Warum kann ich die App nicht aus dem App Store installieren?"
 msgid "Your e-mail address is confirmed. You can now also sign in with an e-mail code."
 msgstr "Deine E-Mail-Adresse ist bestätigt. Du kannst dich jetzt auch per E-Mail-Code anmelden."
 
-#: worker/domain/duty-notify.ts
+#: modules/duties/worker/notify.ts
 msgid "Helpers are still needed for {game}. Still free: {open}."
 msgstr "für {game} werden noch Helfer gesucht. Noch frei: {open}."
 
@@ -2369,7 +2369,7 @@ msgstr "Nächstes Spiel"
 msgid "{actorName} declined {what} on {when} for {name}."
 msgstr "{actorName} hat für {name} {what} am {when} abgesagt."
 
-#: worker/routes/duties.ts
+#: modules/duties/worker/routes.ts
 msgid "This child is not in the team."
 msgstr "Dieses Kind gehört nicht zur Mannschaft."
 
@@ -2442,7 +2442,7 @@ msgstr "{waiting, plural, one {# sucht ({seatsNeeded})} other {# suchen ({seatsN
 msgid "Not linked yet."
 msgstr "Noch nicht verknüpft."
 
-#: src/pages/duty-admin.tsx
+#: modules/duties/app/admin.tsx
 msgid "Minutes before start"
 msgstr "Minuten vor Beginn"
 
@@ -2463,7 +2463,7 @@ msgid "Meeting point: {point}"
 msgstr "Treffpunkt: {point}"
 
 # ai
-#: worker/routes/sms.ts
+#: modules/sms/worker/routes.ts
 msgid "There is no phone number on your access."
 msgstr "An deinem Zugang ist keine Handynummer hinterlegt."
 
@@ -2564,7 +2564,7 @@ msgstr "Nach Mannschaft filtern"
 msgid "KiHaSL/JuHaSL needed"
 msgstr "KiHaSL/JuHaSL gesucht"
 
-#: src/pages/referees.tsx
+#: modules/youth-referees/app/referees.tsx
 msgid "Active links"
 msgstr "Aktive Links"
 
@@ -2607,8 +2607,8 @@ msgstr "Anleitungen"
 msgid "Born {birthYear}: does not fit {ageClass}"
 msgstr "Jahrgang {birthYear} passt nicht zur {ageClass}"
 
-#: src/pages/helpers.tsx
-#: src/pages/helpers.tsx
+#: modules/duties/app/helpers.tsx
+#: modules/duties/app/helpers.tsx
 msgid "Top helpers"
 msgstr "Top-Helfer"
 
@@ -2654,7 +2654,7 @@ msgstr "Aus einer gemischten Mannschaft. Bitte die passende Mannschaft wählen."
 msgid "Reminders about pending responses"
 msgstr "Erinnerungen an offene Rückmeldungen"
 
-#: src/pages/duty-admin.tsx
+#: modules/duties/app/admin.tsx
 msgid "No longer available for new templates and time slots. Existing duties remain."
 msgstr "Nicht mehr für neue Vorlagen und Zeitblöcke wählbar. Bestehende Dienste bleiben."
 
@@ -2756,7 +2756,7 @@ msgstr "hier ist dein Code, um deinen Zugang einzurichten:"
 msgid "Groups only have chat and special events."
 msgstr "Gruppen haben nur Chat und Sondertermine."
 
-#: src/pages/helpers.tsx
+#: modules/duties/app/helpers.tsx
 msgid "Withdrawn."
 msgstr "Ausgetragen."
 
@@ -2781,7 +2781,7 @@ msgid "New info on {label} on {date}: meeting point {point} at {meetAt}."
 msgstr "Neue Infos zu {label} am {date}: Treffpunkt {point} um {meetAt}."
 
 # ai
-#: src/pages/sms-settings.tsx
+#: modules/sms/app/settings.tsx
 msgid "At most 11 letters and digits, e.g. the club's short name."
 msgstr "Höchstens 11 Buchstaben und Ziffern, z. B. der Kurzname des Vereins."
 
@@ -2820,17 +2820,17 @@ msgstr "Name ändern"
 msgid "Events for several teams are created by admins or the coaches of all those teams."
 msgstr "Termine für mehrere Mannschaften legen Admins oder die Trainer aller Mannschaften an."
 
-#: worker/routes/duties.ts
+#: modules/duties/worker/routes.ts
 msgid "Sorry, this place has already been taken."
 msgstr "Der Platz ist leider schon vergeben."
 
+#: modules/duties/app/helpers.tsx
 #: src/pages/admin.tsx
 #: src/pages/admin.tsx
 #: src/pages/admin.tsx
 #: src/pages/admin.tsx
 #: src/pages/admin.tsx
 #: src/pages/chat.tsx
-#: src/pages/helpers.tsx
 #: src/pages/plans.tsx
 #: src/pages/setup-wizard.tsx
 #: src/pages/special.tsx
@@ -2842,7 +2842,7 @@ msgstr "Mannschaften"
 msgid "Coach notes (short-notice declines, stand-ins)"
 msgstr "Trainer-Hinweise (kurzfristige Absagen, Aushilfen)"
 
-#: worker/routes/duties.ts
+#: modules/duties/worker/routes.ts
 msgid "More people are already signed up. Please remove someone first."
 msgstr "Es sind schon mehr Personen eingetragen. Bitte zuerst jemanden austragen."
 
@@ -2862,7 +2862,7 @@ msgstr "{name} (ohne Zugang)"
 msgid "Set up notifications"
 msgstr "Benachrichtigungen einrichten"
 
-#: src/pages/helpers.tsx
+#: modules/duties/app/helpers.tsx
 msgid "No entries in this team yet."
 msgstr "Noch keine Einträge in dieser Mannschaft."
 
@@ -2876,7 +2876,7 @@ msgid "Game · {title}"
 msgstr "Spiel · {title}"
 
 # ai
-#: src/pages/sms-settings.tsx
+#: modules/sms/app/settings.tsx
 msgid "Send test message"
 msgstr "Test-SMS schicken"
 
@@ -2921,7 +2921,7 @@ msgstr "Ohne Passkey: Code per E-Mail"
 msgid "New info on {label} on {date}."
 msgstr "Neue Infos zu {label} am {date}."
 
-#: src/pages/helpers.tsx
+#: modules/duties/app/helpers.tsx
 msgid "Remove {label}?"
 msgstr "{label} entfernen?"
 
@@ -2948,11 +2948,11 @@ msgstr "Fertig"
 msgid "To all teams"
 msgstr "An alle Mannschaften"
 
-#: src/pages/duty-admin.tsx
+#: modules/duties/app/admin.tsx
 msgid "min after end"
 msgstr "min nach Ende"
 
-#: src/pages/referees.tsx
+#: modules/youth-referees/app/referees.tsx
 msgid "This link is incomplete."
 msgstr "Dieser Link ist unvollständig."
 
@@ -2973,11 +2973,11 @@ msgstr "Letzter Tag"
 msgid "Create special events, send reminders and moderate the chat (including @alle)."
 msgstr "Legen Sondertermine an, erinnern und moderieren den Chat (auch @alle)."
 
+#: modules/duties/app/admin.tsx
 #: src/pages/admin.tsx
 #: src/pages/admin.tsx
 #: src/pages/admin.tsx
 #: src/pages/admin.tsx
-#: src/pages/duty-admin.tsx
 #: src/pages/event.tsx
 #: src/pages/group.tsx
 #: src/pages/plans.tsx
@@ -3033,7 +3033,7 @@ msgstr "Neuer Ferienzeitraum"
 msgid "Remove additional team"
 msgstr "Weitere Mannschaft entfernen"
 
-#: src/pages/helpers.tsx
+#: modules/duties/app/helpers.tsx
 msgid "Time slot {label} added."
 msgstr "Zeitblock {label} hinzugefügt."
 
@@ -3057,7 +3057,7 @@ msgstr "Spiel verlegt ({teamName})"
 msgid "No parents are involved in the teams of {firstName}. {firstName} accepts and declines on their own and is alone in the chat. So there are no permissions or notifications for {firstName}."
 msgstr "In den Mannschaften von {firstName} sind keine Eltern eingebunden. {firstName} sagt selbst zu und ab und ist allein im Chat. Freigaben und Benachrichtigungen für {firstName} gibt es deshalb nicht."
 
-#: src/pages/duty-admin.tsx
+#: modules/duties/app/admin.tsx
 msgid "Whoever signs up can add something, e.g. which cake."
 msgstr "Wer sich einträgt, kann etwas dazuschreiben, z. B. welcher Kuchen."
 
@@ -3094,7 +3094,7 @@ msgstr "Dieser Browser unterstützt keine Passkeys. Bitte nutze ein aktuelles Sm
 msgid "no access yet"
 msgstr "noch kein Zugang"
 
-#: worker/routes/duties.ts
+#: modules/duties/worker/routes.ts
 msgid "You cannot sign up for this team."
 msgstr "Für diese Mannschaft kannst du dich nicht eintragen."
 
@@ -3106,7 +3106,7 @@ msgstr "erlaubt"
 msgid "Open the team in the portal and paste the link from the address bar. It contains ogId, lId and tId."
 msgstr "Im Portal die Mannschaft öffnen und den Link aus der Adresszeile einfügen. Er enthält ogId, lId und tId."
 
-#: worker/routes/duties.ts
+#: modules/duties/worker/routes.ts
 msgid "The default template cannot be deleted."
 msgstr "Die Standardvorlage lässt sich nicht löschen."
 
@@ -3128,7 +3128,7 @@ msgstr "Hinweis ausblenden"
 msgid "{firstName} is now {roleName} in {teamName}."
 msgstr "{firstName} ist jetzt {roleName} in {teamName}."
 
-#: src/pages/helpers.tsx
+#: modules/duties/app/helpers.tsx
 msgid "Hidden"
 msgstr "Ausgeblendet"
 
@@ -3195,7 +3195,7 @@ msgstr "Treffen {meetAt} Uhr · {point}"
 msgid "Team <0>{teamName}</0>"
 msgstr "Team <0>{teamName}</0>"
 
-#: src/pages/helpers.tsx
+#: modules/duties/app/helpers.tsx
 msgid "You are not signed up for any upcoming duty."
 msgstr "Du bist für keinen kommenden Dienst eingetragen."
 
@@ -3208,8 +3208,8 @@ msgstr "Aushilfe anfragen"
 msgid "Child's access"
 msgstr "Zugang des Kindes"
 
+#: modules/duties/app/helpers.tsx
 #: src/avatar.tsx
-#: src/pages/helpers.tsx
 #: src/pages/special.tsx
 msgid "Apply"
 msgstr "Übernehmen"
@@ -3257,7 +3257,7 @@ msgstr "die Verknüpfung zu den Kindern"
 msgid "Cancel"
 msgstr "Abbrechen"
 
-#: src/pages/duty-admin.tsx
+#: modules/duties/app/admin.tsx
 msgid "min before start"
 msgstr "min vor Beginn"
 
@@ -3274,11 +3274,11 @@ msgstr "Live"
 msgid "Fonts: Barlow and Barlow Condensed (SIL Open Font License), served directly by this app."
 msgstr "Schriften: Barlow und Barlow Condensed (SIL Open Font License), direkt von dieser App ausgeliefert."
 
-#: src/pages/duty-admin.tsx
+#: modules/duties/app/admin.tsx
 msgid "Delete template"
 msgstr "Vorlage löschen"
 
-#: src/pages/helpers.tsx
+#: modules/duties/app/helpers.tsx
 msgid "Search name"
 msgstr "Name suchen"
 
@@ -3291,8 +3291,8 @@ msgstr "Trainingszeit bearbeiten"
 msgid "All data as a JSON file, for backup"
 msgstr "Alle Daten als JSON-Datei, zur Datensicherung"
 
-#: src/pages/referees.tsx
-#: src/pages/referees.tsx
+#: modules/youth-referees/app/referees.tsx
+#: modules/youth-referees/app/referees.tsx
 msgid "Revoke link"
 msgstr "Zurückziehen"
 
@@ -3340,7 +3340,7 @@ msgstr "{count, plural, one {Neues Spiel für {teamName}} other {# neue Spiele f
 msgid "Calendar link removed."
 msgstr "Kalender-Link entfernt."
 
-#: worker/routes/duties.ts
+#: modules/duties/worker/routes.ts
 msgid "This person is not enabled as KiHaSL/JuHaSL."
 msgstr "Diese Person ist nicht als KiHaSL/JuHaSL freigeschaltet."
 
@@ -3352,7 +3352,7 @@ msgstr "Ohne Angabe"
 msgid "Upcoming special events and games without handball4all of all teams. Events you already see under Events are not listed here. Tap to open the event, where you can edit, cancel or delete it."
 msgstr "Kommende Sondertermine und Spiele ohne handball4all aller Mannschaften. Termine, die du ohnehin unter Termine siehst, stehen nicht hier. Antippen öffnet den Termin, dort kannst du ihn bearbeiten, absagen oder löschen."
 
-#: src/pages/duty-admin.tsx
+#: modules/duties/app/admin.tsx
 msgid "to"
 msgstr "bis"
 
@@ -3424,7 +3424,7 @@ msgstr "Adresse"
 msgid "Your child (one or more)"
 msgstr "Dein Kind (eins oder mehrere)"
 
-#: src/pages/referees.tsx
+#: modules/youth-referees/app/referees.tsx
 msgid "{name} is no longer KiHaSL/JuHaSL."
 msgstr "{name} ist kein KiHaSL/JuHaSL mehr."
 
@@ -3440,7 +3440,7 @@ msgstr "Du bist für dieses Spiel nicht nominiert."
 msgid "Already have a parent access?"
 msgstr "Schon einen Elternzugang?"
 
-#: src/pages/helpers.tsx
+#: modules/duties/app/helpers.tsx
 msgid "Hide in helper plan"
 msgstr "Im Helferplan ausblenden"
 
@@ -3487,8 +3487,8 @@ msgstr "Adresse kopieren"
 msgid "Moderation"
 msgstr "Moderation"
 
-#: src/pages/helpers.tsx
-#: src/pages/helpers.tsx
+#: modules/duties/app/helpers.tsx
+#: modules/duties/app/helpers.tsx
 msgid "Sign up"
 msgstr "Eintragen"
 
@@ -3514,7 +3514,7 @@ msgid "Sport"
 msgstr "Sportart"
 
 #: modules/carpools/app/card.tsx
-#: src/pages/helpers.tsx
+#: modules/duties/app/helpers.tsx
 msgid "full"
 msgstr "voll"
 
@@ -3561,12 +3561,12 @@ msgstr "Mitfahrt eingetragen"
 msgid "Hall unavailable"
 msgstr "Halle belegt"
 
-#: worker/routes/duties.ts
-#: worker/routes/duties.ts
+#: modules/duties/worker/routes.ts
+#: worker/routes/manual-games.ts
 msgid "Invalid time."
 msgstr "Ungültige Uhrzeit."
 
-#: worker/routes/referees.ts
+#: modules/youth-referees/worker/admin-routes.ts
 msgid "This link is invalid."
 msgstr "Dieser Link ist ungültig."
 
@@ -3578,8 +3578,8 @@ msgstr "Wird in einem Plan verwendet"
 msgid "A period may be at most {days} days long."
 msgstr "Ein Zeitraum darf höchstens {days} Tage lang sein."
 
+#: modules/duties/app/admin.tsx
 #: src/duty-blocks.tsx
-#: src/pages/duty-admin.tsx
 msgid "One slot more"
 msgstr "Ein Platz mehr"
 
@@ -3605,20 +3605,20 @@ msgid "Today"
 msgstr "Heute"
 
 # ai
-#: src/pages/sms-settings.tsx
+#: modules/sms/app/settings.tsx
 msgid "Test message sent."
 msgstr "Test-SMS verschickt."
 
-#: src/app.tsx
+#: modules/duties/app/helpers.tsx
+#: modules/duties/app/helpers.tsx
+#: modules/duties/app/helpers.tsx
+#: modules/duties/app/index.tsx
 #: src/pages/event.tsx
-#: src/pages/helpers.tsx
-#: src/pages/helpers.tsx
-#: src/pages/helpers.tsx
 msgid "Helpers"
 msgstr "Helfer"
 
+#: modules/duties/app/helpers.tsx
 #: src/duty-blocks.tsx
-#: src/pages/helpers.tsx
 msgid "Add time slot"
 msgstr "Zeitblock hinzufügen"
 
@@ -3639,8 +3639,8 @@ msgstr "Mannschaft angelegt"
 msgid "{name} has been deleted."
 msgstr "{name} wurde gelöscht."
 
-#: src/pages/helpers.tsx
-#: src/pages/helpers.tsx
+#: modules/duties/app/helpers.tsx
+#: modules/duties/app/helpers.tsx
 msgid "Entries"
 msgstr "Einträge"
 
@@ -3681,7 +3681,7 @@ msgstr "Von"
 msgid "The passkey is the <0>safest way to sign in</0>: Face ID, fingerprint or your screen lock, without a password."
 msgstr "Der Passkey ist die <0>sicherste Anmeldung</0>: Face ID, Fingerabdruck oder deine Gerätesperre, ohne Passwort."
 
-#: src/pages/helpers.tsx
+#: modules/duties/app/helpers.tsx
 msgid "{title}, {weekday} {day} {month}"
 msgstr "{title}, {weekday} {day}. {month}"
 
@@ -3702,7 +3702,7 @@ msgstr "Keine Termine"
 msgid "This is not a parent link."
 msgstr "Das ist kein Elternlink."
 
-#: worker/domain/duty-notify.ts
+#: modules/duties/worker/notify.ts
 msgid "{club} helper plan"
 msgstr "{club} Helferplan"
 
@@ -3722,8 +3722,8 @@ msgstr "Dein Admin-Zugang ist eingerichtet. Der Einrichtungslink ist jetzt ungü
 msgid "Game no. {gameNo}"
 msgstr "Spiel-Nr. {gameNo}"
 
+#: modules/duties/app/admin.tsx
 #: src/duty-blocks.tsx
-#: src/pages/duty-admin.tsx
 msgid "Before"
 msgstr "Davor"
 
@@ -3763,8 +3763,8 @@ msgstr "Organisatoren ändern Trainer, Admins und wer den Termin angelegt hat."
 msgid "The game has been cancelled or has already started."
 msgstr "Das Spiel ist abgesagt oder hat schon begonnen."
 
+#: modules/youth-referees/app/referees.tsx
 #: src/pages/admin.tsx
-#: src/pages/referees.tsx
 #: src/pages/team.tsx
 msgid "No team"
 msgstr "Keine Mannschaft"
@@ -3828,7 +3828,7 @@ msgstr "{name} hat für {what} am {when} zugesagt."
 msgid "Contact for the app: {contact}"
 msgstr "Ansprechpartner für die App: {contact}"
 
-#: src/pages/referees.tsx
+#: modules/youth-referees/app/referees.tsx
 msgid "Activation as KiHaSL/JuHaSL in the Appball app"
 msgstr "Freischaltung als KiHaSL/JuHaSL in der Appball App"
 
@@ -3895,7 +3895,7 @@ msgstr "Der Trainingstermin fällt für alle aus und alle Beteiligten werden ben
 msgid "Game · {date}, {at}"
 msgstr "Spiel · {date}, {at}"
 
-#: worker/routes/referees.ts
+#: modules/youth-referees/worker/admin-routes.ts
 msgid "You can only enable yourself or one of your children."
 msgstr "Freischalten kannst du nur dich selbst oder eines deiner Kinder."
 
@@ -4056,15 +4056,15 @@ msgid "to follow"
 msgstr "folgt"
 
 # ai
-#: worker/routes/sms.ts
+#: modules/sms/worker/routes.ts
 msgid "Sender: at most 11 letters and digits, or a phone number."
 msgstr "Absender: höchstens 11 Buchstaben und Ziffern oder eine Telefonnummer."
 
-#: worker/domain/duty-notify.ts
+#: modules/duties/worker/notify.ts
 msgid "You can choose which notifications you get by push or mail in the app under Profile → Notifications."
 msgstr "Welche Benachrichtigungen du per Push oder Mail bekommst, stellst du in der App unter Profil → Benachrichtigungen ein."
 
-#: src/pages/referees.tsx
+#: modules/youth-referees/app/referees.tsx
 msgid "Year of birth {year}"
 msgstr "Jahrgang {year}"
 
@@ -4080,7 +4080,7 @@ msgstr "Noch kein Stammkader festgelegt. Das geht unter <0>Team → Kader</0>."
 msgid "This invitation link is no longer valid. Please ask for a new link."
 msgstr "Dieser Einladungslink gilt nicht mehr. Bitte frag nach einem neuen Link."
 
-#: worker/domain/duty-notify.ts
+#: modules/duties/worker/notify.ts
 msgid "Your helper duty tomorrow"
 msgstr "Dein Helferdienst morgen"
 
@@ -4088,11 +4088,11 @@ msgstr "Dein Helferdienst morgen"
 msgid "Parents are not involved in this team. The parent link is therefore not valid."
 msgstr "In dieser Mannschaft sind keine Eltern eingebunden. Der Elternlink gilt deshalb nicht."
 
-#: src/pages/helpers.tsx
+#: modules/duties/app/helpers.tsx
 msgid "Team selection"
 msgstr "Mannschaft"
 
-#: src/pages/referees.tsx
+#: modules/youth-referees/app/referees.tsx
 msgid "KiHaSL/JuHaSL referee the youth home games F to C. Whoever has the role sees all these games in the Helpers tab and signs up there. The link only activates people who are already in the app: you open it while signed in and choose yourself or your own child."
 msgstr "KiHaSL/JuHaSL pfeifen die Jugend-Heimspiele F bis C. Wer die Rolle hat, sieht im Reiter Helfer alle diese Spiele und trägt sich dort ein. Der Link schaltet nur Personen frei, die schon in der App sind: Man öffnet ihn angemeldet und wählt sich selbst oder ein eigenes Kind."
 
@@ -4113,11 +4113,11 @@ msgstr "Nur für Admins"
 msgid "The game has been cancelled."
 msgstr "Das Spiel wurde abgesagt."
 
-#: src/pages/duty-admin.tsx
+#: modules/duties/app/admin.tsx
 msgid "New template"
 msgstr "Neue Vorlage"
 
-#: src/pages/helpers.tsx
+#: modules/duties/app/helpers.tsx
 #: src/pages/special.tsx
 msgid "Time slots"
 msgstr "Zeitblöcke"
@@ -4127,7 +4127,7 @@ msgstr "Zeitblöcke"
 msgid "A team with this name already exists."
 msgstr "Eine Mannschaft mit diesem Namen gibt es schon."
 
-#: src/pages/referees.tsx
+#: modules/youth-referees/app/referees.tsx
 msgid "Revoke link?"
 msgstr "Link zurückziehen?"
 
@@ -4156,7 +4156,7 @@ msgstr "Themen pro Person einstellen"
 msgid "Organisers manage the helper duties of this event."
 msgstr "Organisatoren verwalten die Helferdienste dieses Termins."
 
-#: src/pages/referees.tsx
+#: modules/youth-referees/app/referees.tsx
 msgid "Go to the games"
 msgstr "Zu den Spielen"
 
@@ -4169,7 +4169,7 @@ msgstr "Aushilfe"
 msgid "Other training venues"
 msgstr "Weitere Trainingsorte"
 
-#: src/pages/helpers.tsx
+#: modules/duties/app/helpers.tsx
 msgid "All teams"
 msgstr "Alle Mannschaften"
 
@@ -4199,7 +4199,7 @@ msgstr "Meine Mannschaften"
 msgid "{ownTaken} of {ownSeats} taken"
 msgstr "{ownTaken} von {ownSeats} belegt"
 
-#: worker/domain/duty-notify.ts
+#: modules/duties/worker/notify.ts
 msgid "{label} (for {child})"
 msgstr "{label} (für {child})"
 
@@ -4271,7 +4271,7 @@ msgstr "{name} bis {to}: kein Training für {teams}."
 msgid "{name} is now co-organising."
 msgstr "{name} organisiert jetzt mit."
 
-#: src/pages/helpers.tsx
+#: modules/duties/app/helpers.tsx
 msgid "As soon as there are youth home games F to C, they appear here."
 msgstr "Sobald es Jugend-Heimspiele F bis C gibt, erscheinen sie hier."
 
@@ -4406,7 +4406,7 @@ msgstr "Chatnachrichten bleiben stehen und erscheinen als „Gelöschte Person�
 msgid "Under <0>Profile</0>, at <1>Notifications</1>, tap <2>Enable on this device</2> and allow the request. With <3>Test</3> you check that everything arrives. Under <4>What should I receive?</4> you choose the topics."
 msgstr "Unter <0>Profil</0> bei <1>Benachrichtigungen</1> auf <2>Auf diesem Gerät aktivieren</2> tippen und die Nachfrage erlauben. Mit <3>Testen</3> prüfst du, ob alles ankommt. Unter <4>Was soll ich bekommen?</4> wählst du die Themen."
 
-#: src/pages/duty-admin.tsx
+#: modules/duties/app/admin.tsx
 msgid "The duty is only offered to those who turn it on in their profile under “I can do this”."
 msgstr "Angeboten wird der Dienst nur, wer ihn im Profil unter „Das kann ich“ einschaltet."
 
@@ -4415,9 +4415,9 @@ msgstr "Angeboten wird der Dienst nur, wer ihn im Profil unter „Das kann ich�
 msgid "The link is valid until {expires}:"
 msgstr "Der Link gilt bis {expires}:"
 
+#: modules/duties/app/admin.tsx
+#: modules/youth-referees/app/referees.tsx
 #: src/pages/admin.tsx
-#: src/pages/duty-admin.tsx
-#: src/pages/referees.tsx
 msgid "This area is for admins only."
 msgstr "Dieser Bereich ist nur für Admins."
 
@@ -4467,9 +4467,9 @@ msgstr "Du arbeitest jetzt als Trainer."
 msgid "Help and feedback"
 msgstr "Hilfe und Feedback"
 
+#: modules/youth-referees/app/referees.tsx
 #: src/pages/admin.tsx
 #: src/pages/profile.tsx
-#: src/pages/referees.tsx
 #: src/pages/team.tsx
 #: src/pages/team.tsx
 msgid "Copy"
@@ -4521,7 +4521,7 @@ msgstr "Wir haben dir einen sechsstelligen Code per SMS an <0>{email}</0> geschi
 msgid "In the <0>Helpers</0> tab, on the card <1>Manage</1>: change time and slots per duty (0 hides it), add or remove a time block, sign someone up or hide the game. Friendlies, tournaments or match days without handball4all you create under <2>Team → Create event → Game</2>, the team then gets a message."
 msgstr "Im Reiter <0>Helfer</0> auf der Karte <1>Verwalten</1>: Uhrzeit und Plätze je Dienst ändern (0 blendet ihn aus), einen Zeitblock hinzufügen oder entfernen, jemanden eintragen oder das Spiel ausblenden. Freundschaftsspiele, Turniere oder Spieltage ohne handball4all legst du unter <2>Team → Termin anlegen → Spiel</2> an, die Mannschaft bekommt dann eine Nachricht."
 
-#: worker/domain/duty-notify.ts
+#: modules/duties/worker/notify.ts
 msgid "{free, plural, one {{game}. # place still free.} other {{game}. # places still free.}}"
 msgstr "{free, plural, one {{game}. Noch # Platz frei.} other {{game}. Noch # Plätze frei.}}"
 
@@ -4560,8 +4560,8 @@ msgstr "{from} bis {to}"
 msgid "Another companion"
 msgstr "Weitere Begleitperson"
 
-#: src/pages/duty-admin.tsx
-#: src/pages/helpers.tsx
+#: modules/duties/app/admin.tsx
+#: modules/duties/app/helpers.tsx
 msgid "Remove {label}"
 msgstr "{label} entfernen"
 
@@ -4695,7 +4695,7 @@ msgstr "Treffen um"
 msgid "Your first name"
 msgstr "Dein Vorname"
 
-#: src/pages/helpers.tsx
+#: modules/duties/app/helpers.tsx
 msgid "Home"
 msgstr "Heim"
 
@@ -4707,7 +4707,7 @@ msgstr "Ist das neue Handy mit demselben Apple- bzw. Google-Konto angemeldet, is
 msgid "Venue (optional)"
 msgstr "Ort (optional)"
 
-#: worker/routes/duties.ts
+#: modules/duties/worker/routes.ts
 msgid "You are already signed up for this duty."
 msgstr "Du bist für diesen Dienst schon eingetragen."
 
@@ -4781,15 +4781,15 @@ msgstr "Reaktionen schließen"
 msgid "Going ahead: {label}"
 msgstr "Findet statt: {label}"
 
-#: worker/routes/duties.ts
-#: worker/routes/duties.ts
+#: modules/duties/worker/routes.ts
+#: modules/duties/worker/routes.ts
 #: worker/routes/events.ts
 msgid "The event is in the past."
 msgstr "Der Termin liegt in der Vergangenheit."
 
+#: modules/sms/app/settings.tsx
 #: src/pages/club-settings.tsx
 #: src/pages/mail-settings.tsx
-#: src/pages/sms-settings.tsx
 msgid "Saved"
 msgstr "Gespeichert"
 
@@ -4834,7 +4834,7 @@ msgstr "Zu- und Absagen sehen jetzt nur die Verantwortlichen."
 msgid "by {name} (parent)"
 msgstr "von {name} (Elternteil)"
 
-#: src/pages/helpers.tsx
+#: modules/duties/app/helpers.tsx
 msgid "All slots are taken."
 msgstr "Alle Plätze sind vergeben."
 
@@ -4850,7 +4850,7 @@ msgstr "Ohne Geburtsjahr keine automatische Zuordnung. Vorschlag: bisherige Mann
 msgid "Lead"
 msgstr "Verantwortlich"
 
-#: worker/routes/duties.ts
+#: worker/routes/manual-games.ts
 msgid "{date}, {time}. The coach will announce the squad."
 msgstr "{date}, {time}. Den Kader gibt der Trainer bekannt."
 
@@ -4908,7 +4908,7 @@ msgid "Team"
 msgstr "Mannschaft"
 
 # ai
-#: src/pages/sms-settings.tsx
+#: modules/sms/app/settings.tsx
 msgid "API key"
 msgstr "API-Schlüssel"
 
@@ -4954,8 +4954,8 @@ msgstr "Nicht abgesagt und trotzdem nicht da. Sehen nur Trainer, die Person selb
 msgid "Turn on for this device"
 msgstr "Auf diesem Gerät aktivieren"
 
-#: src/pages/duty-admin.tsx
-#: src/pages/duty-admin.tsx
+#: modules/duties/app/admin.tsx
+#: modules/duties/app/admin.tsx
 msgid "Templates"
 msgstr "Vorlagen"
 
@@ -5060,7 +5060,7 @@ msgstr "nehmen teil"
 msgid "Your response"
 msgstr "Deine Rückmeldung"
 
-#: worker/routes/duties.ts
+#: worker/domain/duties.ts
 msgid "Helpers only exist for events of teams."
 msgstr "Helfer gibt es nur bei Terminen von Mannschaften."
 
@@ -5093,8 +5093,8 @@ msgstr "Freiwillig: Mit einer bestätigten Handynummer kannst du dich per SMS-Co
 msgid "Coming up"
 msgstr "Demnächst"
 
-#: src/pages/referees.tsx
-#: src/pages/referees.tsx
+#: modules/youth-referees/app/referees.tsx
+#: modules/youth-referees/app/referees.tsx
 msgid "Activated"
 msgstr "Freigeschaltet"
 
@@ -5118,8 +5118,8 @@ msgstr "Abruf fehlgeschlagen: {detail}"
 msgid "Association {orgId}, league {leagueId}, team {teamId}"
 msgstr "Verband {orgId}, Liga {leagueId}, Team {teamId}"
 
-#: worker/routes/duties.ts
 #: worker/routes/game-import.ts
+#: worker/routes/manual-games.ts
 msgid "Only coaches of this team can do this."
 msgstr "Das dürfen nur Trainer dieser Mannschaft."
 
@@ -5244,7 +5244,7 @@ msgstr "Ansicht"
 msgid "You are not registered as a coach for any team."
 msgstr "Du bist bei keiner Mannschaft als Trainer eingetragen."
 
-#: src/pages/duty-admin.tsx
+#: modules/duties/app/admin.tsx
 msgid "Minutes after end"
 msgstr "Minuten nach Ende"
 
@@ -5278,7 +5278,7 @@ msgstr "Profilbild entfernen?"
 msgid "Send decline"
 msgstr "Absage senden"
 
-#: src/pages/referees.tsx
+#: modules/youth-referees/app/referees.tsx
 msgid "Link from {date}"
 msgstr "Link vom {date}"
 
@@ -5391,9 +5391,9 @@ msgstr "Später weitermachen"
 msgid "Assign"
 msgstr "Eintragen"
 
-#: worker/routes/duties.ts
-#: worker/routes/duties.ts
-#: worker/routes/duties.ts
+#: modules/duties/worker/routes.ts
+#: modules/duties/worker/routes.ts
+#: worker/domain/duties.ts
 msgid "Only coaches of this team and the organisers of the event can do this."
 msgstr "Das dürfen nur Trainer dieser Mannschaft und die Organisatoren des Termins."
 
@@ -5436,11 +5436,11 @@ msgstr "Den Kader nominieren nur Trainer dieser Mannschaft."
 msgid "Invitation"
 msgstr "Einladung"
 
-#: src/pages/helpers.tsx
+#: modules/duties/app/helpers.tsx
 msgid "The time slot is only removed from this event."
 msgstr "Der Zeitblock wird nur bei diesem Termin entfernt."
 
-#: src/pages/helpers.tsx
+#: modules/duties/app/helpers.tsx
 msgid "vs {guest}"
 msgstr "gegen {guest}"
 
@@ -5533,7 +5533,7 @@ msgstr "Die folgenden Hinweise beschreiben, was speziell in dieser App gespeiche
 msgid "The club's halls cannot be deleted."
 msgstr "Die Vereinshallen können nicht gelöscht werden."
 
-#: src/pages/helpers.tsx
+#: modules/duties/app/helpers.tsx
 msgid "at {home}"
 msgstr "bei {home}"
 
@@ -5579,12 +5579,12 @@ msgstr "Alle Spiele deiner Mannschaften, mit Treffpunkt, wenn du nominiert bist"
 msgid "Together with"
 msgstr "Gemeinsam mit"
 
-#: src/pages/duty-admin.tsx
+#: modules/duties/app/admin.tsx
 msgid "Kind"
 msgstr "Art"
 
-#: src/pages/helpers.tsx
-#: src/pages/helpers.tsx
+#: modules/duties/app/helpers.tsx
+#: modules/duties/app/helpers.tsx
 #: src/pages/profile.tsx
 #: src/pages/profile.tsx
 #: src/pages/team.tsx
@@ -5617,7 +5617,7 @@ msgstr "Der Code stimmt nicht oder ist abgelaufen. Bitte fordere einen neuen an.
 msgid "Your parents are linked to your access. They decide what you can do yourself in the app."
 msgstr "Deine Eltern sind mit deinem Zugang verknüpft. Sie legen fest, was du selbst in der App machen kannst."
 
-#: worker/domain/duty-notify.ts
+#: modules/duties/worker/notify.ts
 msgid "You are signed up in {days} days at {game}: {what}."
 msgstr "du bist in {days} Tagen bei {game} eingetragen: {what}."
 
@@ -5656,7 +5656,7 @@ msgstr "Push ist auf dem Server noch nicht eingerichtet."
 msgid "e.g. end of season, tournament, photo shoot"
 msgstr "z. B. Saisonabschluss, Turnier, Fotoshooting"
 
-#: worker/routes/referees.ts
+#: modules/youth-referees/worker/admin-routes.ts
 msgid "This link has expired. Please ask for a new link."
 msgstr "Dieser Link ist abgelaufen. Bitte frag nach einem neuen Link."
 
@@ -5678,7 +5678,7 @@ msgstr "Bitte gib den SMTP-Server ein."
 msgid "{code}: Please confirm your e-mail address"
 msgstr "{code}: Bitte bestätige deine E-Mail-Adresse"
 
-#: src/pages/duty-admin.tsx
+#: modules/duties/app/admin.tsx
 msgid "Default for away games"
 msgstr "Standard für Auswärtsspiele"
 
@@ -5734,7 +5734,7 @@ msgstr "Jetzt abgleichen"
 msgid "active over a year ago"
 msgstr "vor über einem Jahr aktiv"
 
-#: src/pages/duty-admin.tsx
+#: modules/duties/app/admin.tsx
 msgid "Add template"
 msgstr "Vorlage hinzufügen"
 
@@ -5742,11 +5742,11 @@ msgstr "Vorlage hinzufügen"
 msgid "Parents enter their name, select their child (or several) and set up a passkey. The link takes effect immediately."
 msgstr "Eltern geben ihren Namen ein, wählen ihr Kind (oder mehrere) und richten einen Passkey ein. Die Verknüpfung gilt sofort."
 
-#: worker/domain/duty-notify.ts
+#: modules/duties/worker/notify.ts
 msgid "You can sign off or change your entry in the app: {link}"
 msgstr "Austragen oder ändern kannst du dich in der App: {link}"
 
-#: src/pages/helpers.tsx
+#: modules/duties/app/helpers.tsx
 msgid "Duty {range}"
 msgstr "Dienst {range} Uhr"
 
@@ -5776,7 +5776,7 @@ msgid "Invalid selection."
 msgstr "Ungültige Auswahl."
 
 # ai
-#: src/pages/sms-settings.tsx
+#: modules/sms/app/settings.tsx
 msgid "Sender name"
 msgstr "Absendername"
 
@@ -5806,8 +5806,8 @@ msgid "Cancel event"
 msgstr "Termin absagen"
 
 # ai
+#: modules/sms/app/settings.tsx
 #: src/pages/mail-settings.tsx
-#: src/pages/sms-settings.tsx
 msgid "Stored encrypted. Leave empty to keep it."
 msgstr "Wird verschlüsselt gespeichert. Leer lassen, um es zu behalten."
 
@@ -5816,7 +5816,7 @@ msgstr "Wird verschlüsselt gespeichert. Leer lassen, um es zu behalten."
 msgid "Leads"
 msgstr "Verantwortliche"
 
-#: src/pages/duty-admin.tsx
+#: modules/duties/app/admin.tsx
 msgid "Times refer to the start and end of the event. For games, the start is the throw-off and the end follows from the game length of the age group. For special events, the start and end of the event apply."
 msgstr "Zeiten beziehen sich auf Beginn und Ende des Termins. Bei Spielen ist der Beginn der Anpfiff, das Ende ergibt sich aus der Spieldauer der Altersklasse. Bei Sonderterminen gelten Beginn und Ende des Termins."
 
@@ -5842,8 +5842,8 @@ msgid "4 · Holidays of the new season"
 msgstr "4 · Ferien der neuen Saison"
 
 # ai
+#: modules/sms/app/settings.tsx
 #: src/pages/mail-settings.tsx
-#: src/pages/sms-settings.tsx
 msgid "Stored encrypted."
 msgstr "Wird verschlüsselt gespeichert."
 
@@ -5948,7 +5948,7 @@ msgstr "OpenHolidays API (openholidaysapi.org), Lizenz ODbL"
 msgid "are riding with {driver} ({seats})"
 msgstr "fährst bei {driver} mit ({seats})"
 
-#: src/pages/helpers.tsx
+#: modules/duties/app/helpers.tsx
 msgid "Myself"
 msgstr "Ich selbst"
 
@@ -5982,7 +5982,7 @@ msgstr "Helferplan für diese Mannschaft"
 msgid "Please enter your e-mail address. We will send the code there."
 msgstr "Bitte gib deine E-Mail-Adresse an. Dorthin schicken wir den Code."
 
-#: src/pages/helpers.tsx
+#: modules/duties/app/helpers.tsx
 msgid "Parents then don't see the game, e.g. for a game without catering."
 msgstr "Eltern sehen das Spiel dann nicht, z. B. bei einem Spiel ohne Bewirtung."
 
@@ -6014,7 +6014,7 @@ msgstr "Trainingspläne"
 #: src/pages/home.tsx
 #: src/pages/special.tsx
 #: worker/domain/calendar.ts
-#: worker/routes/duties.ts
+#: worker/routes/manual-games.ts
 msgid "Game"
 msgstr "Spiel"
 
@@ -6059,7 +6059,7 @@ msgstr "{playerName} spielt jetzt auch in der anderen Mannschaft (aufgenommen vo
 msgid "Add"
 msgstr "Hinzufügen"
 
-#: src/pages/admin.tsx
+#: modules/duties/app/index.tsx
 msgid "Duty types and templates for games and special events"
 msgstr "Dienstarten und Vorlagen für Spiele und Sondertermine"
 
@@ -6102,7 +6102,7 @@ msgstr "Kommende Saison"
 msgid "Switch"
 msgstr "Wechseln"
 
-#: worker/routes/duties.ts
+#: modules/duties/worker/routes.ts
 msgid "This duty does not exist for this event."
 msgstr "Für diesen Termin gibt es diesen Dienst nicht."
 
@@ -6110,7 +6110,7 @@ msgstr "Für diesen Termin gibt es diesen Dienst nicht."
 msgid "Stand-in requests"
 msgstr "Aushilfe-Anfragen"
 
-#: worker/routes/duties.ts
+#: worker/domain/duties.ts
 #: worker/routes/events.ts
 msgid "This event does not exist."
 msgstr "Diesen Termin gibt es nicht."
@@ -6164,7 +6164,7 @@ msgstr "{seats} frei"
 msgid "Holidays"
 msgstr "Ferien"
 
-#: worker/routes/duties.ts
+#: modules/duties/worker/routes.ts
 msgid "People have already signed up for this duty. Please remove them first."
 msgstr "Für diesen Dienst haben sich schon Personen eingetragen. Bitte zuerst austragen."
 
@@ -6172,7 +6172,7 @@ msgstr "Für diesen Dienst haben sich schon Personen eingetragen. Bitte zuerst a
 msgid "Personal one-time link, valid until {linkExpires}. Please pass it on directly to {linkFor} only."
 msgstr "Persönlicher Einmal-Link, gültig bis {linkExpires}. Bitte nur direkt an {linkFor} weitergeben."
 
-#: worker/routes/duties.ts
+#: modules/duties/worker/routes.ts
 msgid "Only people enabled for it can sign up as KiHaSL/JuHaSL."
 msgstr "Als KiHaSL/JuHaSL eintragen kann sich nur, wer dafür freigeschaltet ist."
 
@@ -6269,9 +6269,9 @@ msgstr "Kein Ort"
 msgid "The helpers of the team see who takes on which duty as “First name L.”; coaches and admins in full. The personal calendar link only contains your own duties and those of your children."
 msgstr "Die Helfer der Mannschaft sehen, wer welchen Dienst übernimmt, als „Vorname N.“; Trainer und Admins vollständig. Der persönliche Kalender-Link enthält nur die eigenen Dienste und die der eigenen Kinder."
 
+#: modules/duties/app/admin.tsx
 #: src/pages/admin.tsx
 #: src/pages/admin.tsx
-#: src/pages/duty-admin.tsx
 #: src/pages/event.tsx
 #: src/pages/group.tsx
 #: src/pages/profile.tsx
@@ -6285,7 +6285,7 @@ msgstr "Gespeichert."
 msgid "Unmuted."
 msgstr "Stummschaltung aufgehoben."
 
-#: src/pages/helpers.tsx
+#: modules/duties/app/helpers.tsx
 msgid "Delete game"
 msgstr "Spiel löschen"
 
@@ -6433,12 +6433,12 @@ msgstr "Aufgabe {label} · {game}"
 msgid "Year of birth missing"
 msgstr "Jahrgang fehlt"
 
+#: modules/duties/app/admin.tsx
+#: modules/duties/app/admin.tsx
 #: src/pages/admin.tsx
 #: src/pages/admin.tsx
 #: src/pages/admin.tsx
 #: src/pages/admin.tsx
-#: src/pages/duty-admin.tsx
-#: src/pages/duty-admin.tsx
 msgid "All"
 msgstr "Alle"
 
@@ -6475,8 +6475,8 @@ msgstr "Etwas funktioniert nicht, ist unklar oder du hast eine Idee? Schreib uns
 msgid "You create games without handball4all in the team (Team → Create event)."
 msgstr "Spiele ohne handball4all legst du in der Mannschaft an (Team → Termin anlegen)."
 
+#: modules/duties/app/admin.tsx
 #: src/duty-blocks.tsx
-#: src/pages/duty-admin.tsx
 msgid "After"
 msgstr "Danach"
 
@@ -6494,7 +6494,7 @@ msgstr "Spiele übernehmen"
 msgid "by {byName}"
 msgstr "von {byName}"
 
-#: src/pages/helpers.tsx
+#: modules/duties/app/helpers.tsx
 msgid "As soon as a team of your child or your own team uses the helper plan, you can sign up here for duties at games and events."
 msgstr "Sobald eine Mannschaft deines Kindes oder deine Mannschaft den Helferplan nutzt, kannst du dich hier für Dienste bei Spielen und Terminen eintragen."
 
@@ -6506,11 +6506,11 @@ msgstr "Aufgabe {label} · {game} · für {child}"
 msgid "Kind of event"
 msgstr "Art des Termins"
 
-#: src/pages/duty-admin.tsx
+#: modules/duties/app/admin.tsx
 msgid "Who takes on this duty is set by the KiHaSL/JuHaSL role. Only the name can be changed here."
 msgstr "Wer diesen Dienst übernimmt, legt die KiHaSL/JuHaSL-Rolle fest. Hier lässt sich nur der Name ändern."
 
-#: worker/routes/duties.ts
+#: worker/routes/manual-games.ts
 msgid "New game: {teamName} at {opponent}"
 msgstr "Neues Spiel: {teamName} bei {opponent}"
 
@@ -6552,7 +6552,7 @@ msgstr "Eltern sagen für ihr Kind zu und ab, sind im Chat dabei und bekommen Be
 msgid "{slots, plural, one {# slot} other {# slots}}"
 msgstr "{slots, plural, one {# Platz} other {# Plätze}}"
 
-#: src/pages/helpers.tsx
+#: modules/duties/app/helpers.tsx
 msgid "{open} free"
 msgstr "{open} frei"
 
@@ -6620,7 +6620,7 @@ msgstr "Auf diesem Gerät gibt es schon einen Passkey für diesen Zugang. Melde 
 msgid "On the iPhone, tap <0>Share</0> at the bottom in Safari and then <1>Add to Home Screen</1>; on Android, choose <2>Install app</2> in the browser menu. The guides further down explain it step by step."
 msgstr "Auf dem iPhone in Safari unten auf <0>Teilen</0> und <1>Zum Home-Bildschirm</1> tippen, auf Android im Browsermenü <2>App installieren</2>. Weiter unten unter Anleitungen steht es Schritt für Schritt."
 
-#: src/pages/duty-admin.tsx
+#: modules/duties/app/admin.tsx
 msgid "Task: done before or after the event, for example washing the shirts."
 msgstr "Aufgabe: wird vor oder nach dem Termin erledigt, etwa Trikots waschen."
 
@@ -6657,7 +6657,7 @@ msgstr "{actorName} hat für {name} das Training am {when} zugesagt."
 msgid "Inactive"
 msgstr "Inaktiv"
 
-#: worker/domain/duty-notify.ts
+#: modules/duties/worker/notify.ts
 msgid "KiHaSL/JuHaSL wanted · {team}"
 msgstr "KiHaSL/JuHaSL gesucht · {team}"
 
@@ -6685,9 +6685,9 @@ msgstr "Ort"
 msgid "{days, plural, one {# day} other {# days}}"
 msgstr "{days, plural, one {# Tag} other {# Tage}}"
 
+#: modules/duties/worker/routes.ts
+#: modules/youth-referees/worker/plan-routes.ts
 #: worker/routes/chat.ts
-#: worker/routes/duties.ts
-#: worker/routes/duties.ts
 msgid "Expected a WebSocket connection."
 msgstr "Erwarte eine WebSocket-Verbindung."
 
@@ -6707,7 +6707,7 @@ msgstr "Export herunterladen"
 msgid "Mobile number"
 msgstr "Handynummer"
 
-#: src/pages/helpers.tsx
+#: modules/duties/app/helpers.tsx
 msgid "Add “{name}” as a name without access"
 msgstr "„{name}“ als Name ohne Zugang eintragen"
 
@@ -6752,11 +6752,11 @@ msgstr "Ort löschen"
 msgid "{fresh, plural, one {Create # game} other {Create # games}}"
 msgstr "{fresh, plural, one {# Spiel anlegen} other {# Spiele anlegen}}"
 
-#: src/pages/duty-admin.tsx
+#: modules/duties/app/admin.tsx
 msgid "e.g. home game with barbecue"
 msgstr "z. B. Heimspiel mit Grill"
 
-#: src/pages/duty-admin.tsx
+#: modules/duties/app/admin.tsx
 msgid "archived"
 msgstr "archiviert"
 
@@ -6877,12 +6877,12 @@ msgstr "Helferplan · {text}"
 msgid "The club's language applies to everyone who has not chosen one, and to e-mails. The region decides school holidays and public holidays."
 msgstr "Die Sprache des Vereins gilt für alle, die keine gewählt haben, und für E-Mails. Nach der Region richten sich Schulferien und Feiertage."
 
+#: modules/duties/app/admin.tsx
+#: modules/duties/app/admin.tsx
+#: modules/duties/app/admin.tsx
+#: modules/duties/app/index.tsx
 #: modules/duties/module.ts
 #: src/calendar.tsx
-#: src/pages/admin.tsx
-#: src/pages/duty-admin.tsx
-#: src/pages/duty-admin.tsx
-#: src/pages/duty-admin.tsx
 msgid "Helper duties"
 msgstr "Helferdienste"
 
@@ -6911,11 +6911,11 @@ msgstr "In dieser Ansicht kann nichts geändert werden."
 msgid "Frequently asked questions: {title}"
 msgstr "Häufige Fragen: {title}"
 
-#: worker/domain/duty-notify.ts
+#: modules/duties/worker/notify.ts
 msgid "Helpers wanted · {team}"
 msgstr "Helfer gesucht · {team}"
 
-#: src/pages/duty-admin.tsx
+#: modules/duties/app/admin.tsx
 msgid "KiHaSL role"
 msgstr "KiHaSL-Rolle"
 
@@ -6984,7 +6984,7 @@ msgstr "Betreuer · {staffCount}"
 msgid "Anyone who declined, is permanently absent or inactive is excused."
 msgstr "Wer abgesagt hat, dauerhaft abwesend oder inaktiv ist, fehlt entschuldigt."
 
-#: src/pages/helpers.tsx
+#: modules/duties/app/helpers.tsx
 msgid "Signed up: {label}."
 msgstr "Eingetragen: {label}."
 
@@ -6992,8 +6992,8 @@ msgstr "Eingetragen: {label}."
 msgid "No access"
 msgstr "Kein Zugang"
 
-#: src/pages/helpers.tsx
-#: src/pages/helpers.tsx
+#: modules/duties/app/helpers.tsx
+#: modules/duties/app/helpers.tsx
 msgid "My duties"
 msgstr "Meine Dienste"
 
@@ -7012,7 +7012,7 @@ msgstr "Zurückziehen"
 msgid "You are offline. You are seeing the last loaded state."
 msgstr "Du bist gerade offline. Du siehst den zuletzt geladenen Stand."
 
-#: src/pages/duty-admin.tsx
+#: modules/duties/app/admin.tsx
 msgid "On site: present during a time span, for example at the counter."
 msgstr "Vor Ort: anwesend in einem Zeitraum, etwa an der Theke."
 
@@ -7033,11 +7033,11 @@ msgstr "Mitglied"
 msgid "Please enter your e-mail address. It is required for admins."
 msgstr "Bitte gib deine E-Mail-Adresse an. Für Admins ist sie Pflicht."
 
-#: src/pages/helpers.tsx
+#: modules/duties/app/helpers.tsx
 msgid "“{note}”"
 msgstr "„{note}“"
 
-#: src/pages/helpers.tsx
+#: modules/duties/app/helpers.tsx
 msgid "Without input: people of the team. From 2 letters: everyone in the club."
 msgstr "Ohne Eingabe: Personen der Mannschaft. Ab 2 Buchstaben: alle im Verein."
 
@@ -7210,7 +7210,7 @@ msgstr "Export gestartet ({today}). Bitte prüfen, ob die Datei gespeichert wurd
 msgid "This device"
 msgstr "Dieses Gerät"
 
-#: worker/routes/duties.ts
+#: modules/duties/worker/routes.ts
 msgid "This template is empty or does not exist."
 msgstr "Diese Vorlage ist leer oder gibt es nicht."
 
@@ -7224,7 +7224,7 @@ msgstr "Zu- und Absagen sehen jetzt nur die Trainer."
 msgid "Your language"
 msgstr "Deine Sprache"
 
-#: src/pages/duty-admin.tsx
+#: modules/duties/app/admin.tsx
 msgid "Needs prior knowledge"
 msgstr "Braucht Vorkenntnisse"
 
@@ -7248,8 +7248,8 @@ msgstr "Eine Mannschaft oder Gruppe mit diesem Namen gibt es schon."
 msgid "You sign in with Face ID, fingerprint or your screen lock, without a password. This is safer than a password because it cannot be guessed or intercepted. The app never sees any biometric data."
 msgstr "Du meldest dich mit Face ID, Fingerabdruck oder der Gerätesperre an, ohne Passwort. Das ist sicherer als ein Passwort, weil es nicht erraten oder abgefangen werden kann. Die App bekommt dabei nie biometrische Daten zu sehen."
 
-#: src/pages/duty-admin.tsx
-#: src/pages/duty-admin.tsx
+#: modules/duties/app/admin.tsx
+#: modules/duties/app/admin.tsx
 msgid "Who helps"
 msgstr "Wer hilft"
 
@@ -7262,7 +7262,7 @@ msgstr "Gruppe · nur Chat und Sondertermine"
 msgid "{label} on {date}, {time}. You can still decline until {untilDate}, {untilTime}."
 msgstr "{label} am {date}, {time} Uhr. Absagen noch bis {untilDate}, {untilTime} Uhr."
 
-#: src/pages/helpers.tsx
+#: modules/duties/app/helpers.tsx
 msgid "All events"
 msgstr "Alle Termine"
 
@@ -7274,7 +7274,7 @@ msgstr "Training {day} zugesagt"
 msgid "{yes} of {total} accepted"
 msgstr "{yes} von {total} zugesagt"
 
-#: src/pages/helpers.tsx
+#: modules/duties/app/helpers.tsx
 msgid "Only with free slots"
 msgstr "Nur mit freien Plätzen"
 
@@ -7381,8 +7381,8 @@ msgstr "Verschlüsselung"
 msgid "Crop picture"
 msgstr "Bild zuschneiden"
 
-#: src/pages/duty-admin.tsx
-#: src/pages/duty-admin.tsx
+#: modules/duties/app/admin.tsx
+#: modules/duties/app/admin.tsx
 #: src/pages/special.tsx
 msgid "Task"
 msgstr "Aufgabe"
@@ -7400,8 +7400,8 @@ msgstr "Spielplan"
 msgid "Message from {selAuthor}: “{excerpt}”"
 msgstr "Nachricht von {selAuthor}: „{excerpt}“"
 
-#: src/pages/helpers.tsx
-#: src/pages/referees.tsx
+#: modules/duties/app/helpers.tsx
+#: modules/youth-referees/app/referees.tsx
 msgid "Who referees?"
 msgstr "Wer pfeift?"
 
@@ -7454,7 +7454,7 @@ msgstr "Neuigkeit"
 msgid "Message to {teamName}"
 msgstr "Nachricht an {teamName}"
 
-#: worker/routes/duties.ts
+#: modules/duties/worker/routes.ts
 msgid "This team has no helper plan, or you are not part of it."
 msgstr "Für diese Mannschaft gibt es keinen Helferplan, oder du gehörst nicht dazu."
 
@@ -7462,7 +7462,7 @@ msgstr "Für diese Mannschaft gibt es keinen Helferplan, oder du gehörst nicht 
 msgid "Deleted person"
 msgstr "Gelöschte Person"
 
-#: src/pages/helpers.tsx
+#: modules/duties/app/helpers.tsx
 msgid "for {child}"
 msgstr "für {child}"
 
@@ -7474,7 +7474,7 @@ msgstr "Laufende Saison: {name} ({from} – {to})"
 msgid "Upload logo"
 msgstr "Logo hochladen"
 
-#: src/pages/referees.tsx
+#: modules/youth-referees/app/referees.tsx
 msgid "already activated"
 msgstr "schon freigeschaltet"
 
@@ -7490,7 +7490,7 @@ msgstr "Wie eine normale Chatnachricht: gebündelte Chat-Benachrichtigung für a
 msgid "Test notification is on its way."
 msgstr "Test-Benachrichtigung ist unterwegs."
 
-#: src/pages/duty-admin.tsx
+#: modules/duties/app/admin.tsx
 msgid "KiHaSL/JuHaSL is not part of any template: for youth home games F to C the duty is always added automatically (1 slot, 15 min before throw-off until the end of the game)."
 msgstr "KiHaSL/JuHaSL steht in keiner Vorlage: Bei Heimspielen der Jugend F bis C kommt der Dienst immer automatisch dazu (1 Platz, 15 min vor Anpfiff bis Spielende)."
 
@@ -7557,7 +7557,7 @@ msgstr "das Profilbild"
 msgid "Your access to the {club} app"
 msgstr "Dein Zugang zur App {club}"
 
-#: src/pages/helpers.tsx
+#: modules/duties/app/helpers.tsx
 msgid "First place"
 msgstr "Platz 1"
 
@@ -7578,11 +7578,11 @@ msgstr "Keine Rückmeldung"
 msgid "No address on file yet. With a confirmed address you can get back into the app with a code if your passkey is missing."
 msgstr "Noch keine Adresse hinterlegt. Mit einer bestätigten Adresse kommst du per Code wieder in die App, falls dein Passkey fehlt."
 
+#: modules/duties/app/admin.tsx
+#: modules/duties/app/admin.tsx
+#: modules/duties/app/helpers.tsx
 #: src/duties.tsx
 #: src/duty-blocks.tsx
-#: src/pages/duty-admin.tsx
-#: src/pages/duty-admin.tsx
-#: src/pages/helpers.tsx
 msgid "Duty"
 msgstr "Dienst"
 
@@ -7590,7 +7590,7 @@ msgstr "Dienst"
 msgid "Follow-on"
 msgstr "Anschluss"
 
-#: src/pages/helpers.tsx
+#: modules/duties/app/helpers.tsx
 msgid "Manage duties"
 msgstr "Dienste verwalten"
 
@@ -7614,7 +7614,7 @@ msgstr "Ohne Rolle"
 msgid "Decline at short notice"
 msgstr "Kurzfristig absagen"
 
-#: worker/domain/duty-notify.ts
+#: modules/duties/worker/notify.ts
 msgid "Your helper duty in {days} days"
 msgstr "Dein Helferdienst in {days} Tagen"
 
@@ -7695,11 +7695,11 @@ msgstr "nominiert"
 msgid "Your upcoming events"
 msgstr "Deine nächsten Termine"
 
+#: modules/duties/app/admin.tsx
+#: modules/duties/app/admin.tsx
 #: src/faq.tsx
 #: src/pages/admin.tsx
 #: src/pages/admin.tsx
-#: src/pages/duty-admin.tsx
-#: src/pages/duty-admin.tsx
 #: src/pages/team.tsx
 #: src/pages/team.tsx
 msgid "Parents"
@@ -7718,7 +7718,7 @@ msgstr "Hallo, dieser Test zeigt, dass die App E-Mails verschicken kann. Sonst i
 msgid "Add row"
 msgstr "Zeile hinzufügen"
 
-#: src/pages/helpers.tsx
+#: modules/duties/app/helpers.tsx
 msgid "No helper plan"
 msgstr "Kein Helferplan"
 
@@ -7768,7 +7768,7 @@ msgstr "Dauerhafte Aushilfen aus der jüngeren Jugend oder der 2. Mannschaft seh
 msgid "Choose teams"
 msgstr "Mannschaften wählen"
 
-#: src/pages/duty-admin.tsx
+#: modules/duties/app/admin.tsx
 msgid "Delete template {templateName}?"
 msgstr "Vorlage {templateName} löschen?"
 
@@ -7789,7 +7789,7 @@ msgstr "Zu jedem Zugang speichert die App den Tag der letzten Nutzung, ohne Uhrz
 msgid "Please select at least one child."
 msgstr "Bitte wähle mindestens ein Kind aus."
 
-#: src/pages/referees.tsx
+#: modules/youth-referees/app/referees.tsx
 msgid "{name} is now KiHaSL/JuHaSL. The Helpers tab lists all youth home games that need a referee."
 msgstr "{name} ist jetzt KiHaSL/JuHaSL. Im Reiter Helfer stehen alle Jugend-Heimspiele, bei denen ein Schiedsrichter gebraucht wird."
 
@@ -8100,7 +8100,7 @@ msgstr "Diese Person hat keinen Zugang."
 msgid "End (optional)"
 msgstr "Ende (optional)"
 
-#: worker/routes/duties.ts
+#: modules/duties/worker/routes.ts
 msgid "Only coaches and admins can sign up others."
 msgstr "Andere eintragen dürfen nur Trainer und Admins."
 
@@ -8112,7 +8112,7 @@ msgstr "Verantwortlich {name}"
 msgid "Sources"
 msgstr "Quellen"
 
-#: src/pages/duty-admin.tsx
+#: modules/duties/app/admin.tsx
 msgid "All, members"
 msgstr "Alle, Mitglieder"
 
@@ -8172,7 +8172,7 @@ msgstr "Stamm"
 msgid "The picture could not be opened. Please choose a photo in JPEG, PNG, WebP or HEIC format."
 msgstr "Das Bild konnte nicht geöffnet werden. Bitte ein Foto im Format JPEG, PNG, WebP oder HEIC wählen."
 
-#: src/pages/helpers.tsx
+#: modules/duties/app/helpers.tsx
 msgid "No duties have been set up for this event."
 msgstr "Für diesen Termin sind keine Dienste eingetragen."
 
@@ -8184,7 +8184,7 @@ msgstr "Zum Aktualisieren ziehen"
 msgid "Go to person"
 msgstr "Zur Person"
 
-#: src/pages/helpers.tsx
+#: modules/duties/app/helpers.tsx
 #: src/pages/home.tsx
 msgid "Event cancelled"
 msgstr "Termin abgesagt"
@@ -8219,7 +8219,7 @@ msgstr "Als Admin arbeiten"
 msgid "My name is missing from the invitation link or is already taken."
 msgstr "Mein Name fehlt im Einladungslink oder ist schon vergeben."
 
-#: src/pages/helpers.tsx
+#: modules/duties/app/helpers.tsx
 msgid "Game deleted."
 msgstr "Spiel gelöscht."
 
@@ -8327,6 +8327,9 @@ msgstr "Technisch notwendig sind außerdem: Passkeys (nur ein öffentlicher Schl
 msgid "Push notifications"
 msgstr "Push-Benachrichtigungen"
 
+#: modules/duties/app/helpers.tsx
+#: modules/duties/app/helpers.tsx
+#: modules/youth-referees/app/referees.tsx
 #: src/avatar.tsx
 #: src/avatar.tsx
 #: src/avatar.tsx
@@ -8337,14 +8340,11 @@ msgstr "Push-Benachrichtigungen"
 #: src/pages/admin.tsx
 #: src/pages/group.tsx
 #: src/pages/group.tsx
-#: src/pages/helpers.tsx
-#: src/pages/helpers.tsx
 #: src/pages/plans.tsx
 #: src/pages/profile.tsx
 #: src/pages/profile.tsx
 #: src/pages/profile.tsx
 #: src/pages/profile.tsx
-#: src/pages/referees.tsx
 #: src/pages/team.tsx
 #: src/pages/team.tsx
 #: src/pages/team.tsx
@@ -8370,7 +8370,7 @@ msgstr "An: Verwaltung und alle Mannschaften. Aus: nur deine Mannschaften, wie e
 msgid "Born {year}"
 msgstr "Jg. {year}"
 
-#: worker/routes/duties.ts
+#: modules/duties/worker/routes.ts
 msgid "Please choose who can help."
 msgstr "Bitte wähle, wer helfen kann."
 
@@ -8435,7 +8435,7 @@ msgstr "Mit sich selbst kann man nicht mitfahren."
 msgid "The sign-in could not be verified."
 msgstr "Die Anmeldung konnte nicht bestätigt werden."
 
-#: src/pages/duty-admin.tsx
+#: modules/duties/app/admin.tsx
 msgid "Archived"
 msgstr "Archiviert"
 
@@ -8448,23 +8448,24 @@ msgid "This person does not belong to the teams of this training time."
 msgstr "Diese Person gehört nicht zu den Mannschaften dieser Trainingszeit."
 
 # ai
+#: modules/sms/app/index.tsx
+#: modules/sms/app/settings.tsx
+#: modules/sms/app/settings.tsx
 #: modules/sms/module.ts
-#: src/pages/admin.tsx
 #: src/pages/profile.tsx
-#: src/pages/sms-settings.tsx
-#: src/pages/sms-settings.tsx
 msgid "SMS"
 msgstr "SMS"
 
 #: modules/carpools/app/card.tsx
+#: modules/duties/app/admin.tsx
+#: modules/duties/app/admin.tsx
+#: modules/sms/app/settings.tsx
 #: src/duty-blocks.tsx
 #: src/pages/admin.tsx
 #: src/pages/admin.tsx
 #: src/pages/admin.tsx
 #: src/pages/admin.tsx
 #: src/pages/club-settings.tsx
-#: src/pages/duty-admin.tsx
-#: src/pages/duty-admin.tsx
 #: src/pages/event.tsx
 #: src/pages/event.tsx
 #: src/pages/group.tsx
@@ -8472,7 +8473,6 @@ msgstr "SMS"
 #: src/pages/plans.tsx
 #: src/pages/profile.tsx
 #: src/pages/season.tsx
-#: src/pages/sms-settings.tsx
 #: src/pages/team.tsx
 #: src/pages/team.tsx
 msgid "Save"
@@ -8497,7 +8497,7 @@ msgstr "Geburtsjahr"
 msgid "You have been muted in this chat."
 msgstr "Du wurdest in diesem Chat stummgeschaltet."
 
-#: worker/routes/duties.ts
+#: modules/duties/worker/routes.ts
 msgid "This duty has no note."
 msgstr "Bei diesem Dienst gibt es keine Notiz."
 
@@ -8518,8 +8518,8 @@ msgstr "Gespeichert:"
 msgid "Last message {when}"
 msgstr "Letzte Nachricht {when}"
 
-#: worker/domain/duty-notify.ts
-#: worker/domain/duty-notify.ts
+#: modules/duties/worker/notify.ts
+#: modules/duties/worker/notify.ts
 msgid "Sign up: {link}"
 msgstr "Eintragen: {link}"
 
@@ -8553,7 +8553,7 @@ msgid "Create a training plan in the Team section, then the events will appear h
 msgstr "Lege im Bereich Team einen Trainingsplan an, dann erscheinen hier die Termine."
 
 # ai
-#: worker/routes/sms.ts
+#: modules/sms/worker/routes.ts
 msgid "Test message from Kabine: SMS works."
 msgstr "Test-SMS von Kabine: SMS funktioniert."
 
@@ -8565,7 +8565,7 @@ msgstr "Vergangene Termine können nicht verschoben werden."
 msgid "{count, plural, one {Carpool for tomorrow, {title} ({time}): {names} is still looking for a lift. If you have free seats, please add them in the event.} other {Carpool for tomorrow, {title} ({time}): {names} are still looking for a lift. If you have free seats, please add them in the event.}}"
 msgstr "{count, plural, one {Fahrgemeinschaft für morgen, {title} ({time}): Es sucht noch {names} eine Mitfahrgelegenheit. Wer Plätze frei hat, bitte im Termin eintragen.} other {Fahrgemeinschaft für morgen, {title} ({time}): Es suchen noch {names} eine Mitfahrgelegenheit. Wer Plätze frei hat, bitte im Termin eintragen.}}"
 
-#: src/pages/helpers.tsx
+#: modules/duties/app/helpers.tsx
 msgid "{title}, {weekday} {day} at {clock}"
 msgstr "{title}, {weekday} {day}. um {clock}"
 
@@ -8586,7 +8586,7 @@ msgstr "Inaktiv, nicht nominierbar"
 msgid "from the other team · sees games"
 msgstr "aus der anderen Mannschaft · sieht Spiele"
 
-#: src/pages/helpers.tsx
+#: modules/duties/app/helpers.tsx
 msgid "Signed up."
 msgstr "Eingetragen."
 
@@ -8594,7 +8594,7 @@ msgstr "Eingetragen."
 msgid "No passkey on this device?"
 msgstr "Kein Passkey auf diesem Gerät?"
 
-#: worker/domain/duty-notify.ts
+#: modules/duties/worker/notify.ts
 msgid "{game}. Still free: {open}"
 msgstr "{game}. Noch frei: {open}"
 
@@ -8602,11 +8602,11 @@ msgstr "{game}. Noch frei: {open}"
 msgid "New info on {label} on {date}: meeting point {point}."
 msgstr "Neue Infos zu {label} am {date}: Treffpunkt {point}."
 
-#: worker/domain/duty-notify.ts
+#: modules/duties/worker/notify.ts
 msgid "Helpers wanted: {team} {opponent}"
 msgstr "Helfer gesucht: {team} {opponent}"
 
-#: src/pages/duty-admin.tsx
+#: modules/duties/app/admin.tsx
 msgid "Teams with this template will then use the default again."
 msgstr "Mannschaften mit dieser Vorlage nutzen danach wieder den Standard."
 
@@ -8618,7 +8618,7 @@ msgstr "Bis zur Absagefrist, meist 6 Stunden vor Beginn. Die genaue Frist steht 
 msgid "Cancel or move training, or pause it during the holidays."
 msgstr "Training absagen, verschieben oder in den Ferien aussetzen."
 
-#: src/pages/duty-admin.tsx
+#: modules/duties/app/admin.tsx
 msgid "0 means exactly at the start or end. Changes apply to upcoming games where no one has signed up yet."
 msgstr "0 heißt genau zum Beginn bzw. Ende. Änderungen gelten für kommende Spiele, bei denen sich noch niemand eingetragen hat."
 
@@ -8635,8 +8635,8 @@ msgstr "Lachen"
 msgid "Decline entered for {name}."
 msgstr "Absage für {name} eingetragen."
 
+#: modules/duties/app/helpers.tsx
 #: src/app.tsx
-#: src/pages/helpers.tsx
 #: src/pages/home.tsx
 msgid "Events"
 msgstr "Termine"
@@ -8654,7 +8654,7 @@ msgstr "Bitte wähle mindestens eine Mannschaft."
 msgid "Please give a short reason."
 msgstr "Bitte gib kurz einen Grund an."
 
-#: worker/routes/duties.ts
+#: modules/duties/worker/routes.ts
 msgid "Only coaches, admins and the organisers of the event can sign up others."
 msgstr "Andere eintragen dürfen nur Trainer, Admins und die Organisatoren des Termins."
 
@@ -8667,7 +8667,7 @@ msgstr "Bitte gib Vorname, Nachname und E-Mail-Adresse an."
 msgid "Start"
 msgstr "Beginn"
 
-#: src/pages/referees.tsx
+#: modules/youth-referees/app/referees.tsx
 msgctxt "referee"
 msgid "Activate"
 msgstr "Freischalten"
@@ -8678,7 +8678,7 @@ msgstr "Freischalten"
 msgid "Settings"
 msgstr "Einstellungen"
 
-#: src/pages/duty-admin.tsx
+#: modules/duties/app/admin.tsx
 msgid "e.g. barbecue"
 msgstr "z. B. Grill"
 
@@ -8817,7 +8817,7 @@ msgstr "{firstName} hat noch keinen eigenen Zugang. Die Freigaben gelten, sobald
 msgid "Please wait …"
 msgstr "Bitte warten …"
 
-#: src/pages/duty-admin.tsx
+#: modules/duties/app/admin.tsx
 msgid "Template deleted."
 msgstr "Vorlage gelöscht."
 
@@ -8825,7 +8825,7 @@ msgstr "Vorlage gelöscht."
 msgid "No parents linked yet. Parents link themselves via the parent link."
 msgstr "Noch keine Eltern verknüpft. Eltern verknüpfen sich selbst über den Elternlink."
 
-#: worker/domain/duty-notify.ts
+#: modules/duties/worker/notify.ts
 msgid "{club} {team} {opponent} on {date} at {time}"
 msgstr "{club} {team} {opponent} am {date} um {time}"
 
@@ -8845,7 +8845,7 @@ msgstr "Person dauerhaft löschen"
 msgid "Response: declined"
 msgstr "Rückmeldung: abgesagt"
 
-#: src/pages/helpers.tsx
+#: modules/duties/app/helpers.tsx
 msgid "No one signed up yet."
 msgstr "Noch niemand eingetragen."
 
@@ -8898,8 +8898,8 @@ msgstr "Persönlichen Einladungslink"
 msgid "Only serves to identify the admin. Everyone sets the address for signing in themselves in their profile."
 msgstr "Dient nur als Kennung des Admins. Die Adresse für die Anmeldung legt jede Person selbst im Profil fest."
 
-#: src/pages/helpers.tsx
-#: src/pages/helpers.tsx
+#: modules/duties/app/helpers.tsx
+#: modules/duties/app/helpers.tsx
 #: worker/domain/events.ts
 #: worker/domain/events.ts
 msgid "Opponent"
@@ -9007,11 +9007,11 @@ msgstr "Abgelehnt."
 msgid "School holidays: <0>OpenHolidays API</0>, data under the <1>Open Database License (ODbL)</1>."
 msgstr "Ferientermine: <0>OpenHolidays API</0>, Daten unter der <1>Open Database License (ODbL)</1>."
 
-#: src/pages/helpers.tsx
+#: modules/duties/app/helpers.tsx
 msgid "Search KiHaSL/JuHaSL"
 msgstr "KiHaSL/JuHaSL suchen"
 
-#: worker/routes/duties.ts
+#: modules/duties/worker/routes.ts
 msgid "You can take on {duty} once you switch it on in your profile under “I can do this”."
 msgstr "{duty} kannst du übernehmen, wenn du es in deinem Profil unter „Das kann ich“ einschaltest."
 
@@ -9099,7 +9099,7 @@ msgstr "Pause {holiday}"
 msgid "Please cancel the current lift first."
 msgstr "Bitte die bisherige Mitfahrt zuerst absagen."
 
-#: src/pages/duty-admin.tsx
+#: modules/duties/app/admin.tsx
 msgid "Default for home games"
 msgstr "Standard für Heimspiele"
 
@@ -9152,18 +9152,18 @@ msgstr "In der {teamName} sind keine Eltern eingebunden. Die Spieler sagen selbs
 msgid "There is now an access for this person. Please ask for a new link."
 msgstr "Für diese Person gibt es inzwischen einen Zugang. Bitte frag nach einem neuen Link."
 
+#: modules/duties/app/helpers.tsx
 #: src/app.tsx
-#: src/pages/helpers.tsx
 #: src/pages/profile.tsx
 #: src/pages/profile.tsx
 msgid "Profile"
 msgstr "Profil"
 
-#: src/pages/duty-admin.tsx
+#: modules/duties/app/admin.tsx
 msgid "Note allowed"
 msgstr "Notiz erlaubt"
 
-#: worker/routes/duties.ts
+#: worker/routes/manual-games.ts
 msgid "{date}, {time}, {place}. The coach will announce the squad."
 msgstr "{date}, {time}, {place}. Den Kader gibt der Trainer bekannt."
 
@@ -9184,7 +9184,7 @@ msgstr "Speichern und informieren"
 msgid "No coach assigned yet."
 msgstr "Noch kein Trainer zugeordnet."
 
-#: src/pages/helpers.tsx
+#: modules/duties/app/helpers.tsx
 #: src/pages/special.tsx
 msgid "Away"
 msgstr "Auswärts"
@@ -9202,8 +9202,8 @@ msgstr "Nächstes Training"
 msgid "Reason"
 msgstr "Grund"
 
-#: src/pages/helpers.tsx
-#: src/pages/helpers.tsx
+#: modules/duties/app/helpers.tsx
+#: modules/duties/app/helpers.tsx
 msgid "Sign someone up"
 msgstr "Jemanden eintragen"
 
@@ -9219,7 +9219,7 @@ msgstr "Noch keine kommenden Sondertermine."
 msgid "Thank you, your message has arrived. For a reply by e-mail, your access lacks a confirmed address (profile)."
 msgstr "Danke, deine Nachricht ist angekommen. Für eine Antwort per E-Mail fehlt an deinem Zugang eine bestätigte Adresse (Profil)."
 
-#: src/pages/helpers.tsx
+#: modules/duties/app/helpers.tsx
 msgid "Own teams"
 msgstr "Meine Teams"
 
@@ -9257,7 +9257,7 @@ msgstr "Die Dienste eines Spiels kommen aus einer Vorlage. Unter <0>Team → Ein
 msgid "Accent colour"
 msgstr "Akzentfarbe"
 
-#: src/pages/duty-admin.tsx
+#: modules/duties/app/admin.tsx
 msgid "What the club has and who may help."
 msgstr "Was es im Verein gibt und wer helfen darf."
 
@@ -9269,8 +9269,8 @@ msgstr "Verletzt"
 msgid "Upcoming events of other teams, create a special event"
 msgstr "Kommende Termine anderer Mannschaften, Sondertermin anlegen"
 
+#: modules/duties/app/admin.tsx
 #: src/duty-blocks.tsx
-#: src/pages/duty-admin.tsx
 msgid "Slots"
 msgstr "Plätze"
 
@@ -9359,7 +9359,7 @@ msgstr "Mit diesem Link richtest du auf diesem Gerät einen neuen Passkey für d
 msgid "{firstName} is inactive."
 msgstr "{firstName} ist inaktiv."
 
-#: src/pages/helpers.tsx
+#: modules/duties/app/helpers.tsx
 msgid "The games come from the team's fixture list. Special events appear here as soon as helpers are needed for them."
 msgstr "Die Spiele kommen aus dem Spielplan der Mannschaft. Sondertermine erscheinen hier, sobald Helfer dafür gesucht werden."
 
@@ -9380,8 +9380,8 @@ msgstr "Organisator kann nur ein ordentliches Mitglied mit Zugang zur App sein."
 msgid "Templates define which duties there are at every game, with slots and times. Admins maintain them under Administration → Helper duties. KiHaSL/JuHaSL is always added automatically for youth home games F to C."
 msgstr "Vorlagen legen fest, welche Dienste es bei jedem Spiel gibt, mit Plätzen und Uhrzeit. Admins pflegen sie unter Verwaltung → Helferdienste. KiHaSL/JuHaSL kommt bei Jugend-Heimspielen F bis C immer automatisch dazu."
 
+#: modules/duties/app/admin.tsx
 #: src/duty-blocks.tsx
-#: src/pages/duty-admin.tsx
 msgid "One slot fewer"
 msgstr "Ein Platz weniger"
 
@@ -9474,7 +9474,7 @@ msgstr "Angebot von {driver}"
 msgid "Assigned automatically"
 msgstr "Automatisch zugeordnet"
 
-#: worker/domain/duty-notify.ts
+#: modules/duties/worker/notify.ts
 msgid "You are signed up tomorrow at {game}: {what}."
 msgstr "du bist morgen bei {game} eingetragen: {what}."
 
@@ -9508,7 +9508,7 @@ msgid "This person does not (or no longer) belong to this team."
 msgstr "Diese Person gehört nicht (mehr) zu dieser Mannschaft."
 
 # ai
-#: src/pages/sms-settings.tsx
+#: modules/sms/app/settings.tsx
 msgid "SMS go through seven.io (a German provider with servers in the EU). Create an account there, top up credit and copy the API key. Each message costs a few cents, paid by the club."
 msgstr "SMS laufen über seven.io (ein deutscher Anbieter mit Servern in der EU). Lege dort ein Konto an, lade Guthaben auf und kopiere den API-Schlüssel. Jede Nachricht kostet ein paar Cent, die der Verein bezahlt."
 
@@ -9537,11 +9537,11 @@ msgstr "Die App verschickt E-Mails für Anmeldecodes, Zugangslinks und Erinnerun
 msgid "Opponent or tournament"
 msgstr "Gegner oder Turnier"
 
-#: src/pages/referees.tsx
+#: modules/youth-referees/app/referees.tsx
 msgid "Activation"
 msgstr "Freischaltung"
 
-#: src/pages/helpers.tsx
+#: modules/duties/app/helpers.tsx
 msgid "Manage"
 msgstr "Verwalten"
 
@@ -9549,7 +9549,7 @@ msgstr "Verwalten"
 msgid "Permanent absence removed."
 msgstr "Dauerabwesenheit entfernt."
 
-#: src/pages/duty-admin.tsx
+#: modules/duties/app/admin.tsx
 msgid "{count, plural, one {# duty} other {# duties}}"
 msgstr "{count, plural, one {# Dienst} other {# Dienste}}"
 
@@ -9611,7 +9611,7 @@ msgstr "Zugang für {firstName} einrichten"
 msgid "New phone? With this link {firstName} sets up a new passkey. The previous one stays valid."
 msgstr "Neues Handy? Mit diesem Link richtet {firstName} einen neuen Passkey ein. Der bisherige bleibt gültig."
 
-#: worker/domain/duty-notify.ts
+#: modules/duties/worker/notify.ts
 msgid "Open helper places: {team} {opponent}"
 msgstr "Noch offene Helferplätze: {team} {opponent}"
 
@@ -9643,8 +9643,8 @@ msgstr "<0>Aushilfe-Anfrage:</0> Die {team} fragt, ob du bei diesem Spiel aushel
 msgid "<0>No access yet?</0> Your coach sends you an invitation link, for example in the team's WhatsApp group."
 msgstr "<0>Noch kein Zugang?</0> Deine Trainerin oder dein Trainer schickt dir einen Einladungslink, zum Beispiel in der WhatsApp-Gruppe der Mannschaft."
 
-#: src/pages/duty-admin.tsx
-#: src/pages/duty-admin.tsx
+#: modules/duties/app/admin.tsx
+#: modules/duties/app/admin.tsx
 #: src/pages/group.tsx
 #: src/pages/group.tsx
 #: src/pages/group.tsx
@@ -9652,7 +9652,7 @@ msgid "Members"
 msgstr "Mitglieder"
 
 # ai
-#: src/pages/admin.tsx
+#: modules/sms/app/index.tsx
 msgid "Provider for codes and reminders by SMS"
 msgstr "Anbieter für Codes und Erinnerungen per SMS"
 
@@ -9681,7 +9681,7 @@ msgstr "Nutzt du die App vom Home-Bildschirm, gib den Code am besten direkt dort
 msgid "Demo · invented club, data is reset every night at 3:00"
 msgstr "Demo · erfundener Verein, die Daten werden jede Nacht um 3:00 Uhr zurückgesetzt"
 
-#: src/pages/duty-admin.tsx
+#: modules/duties/app/admin.tsx
 msgid "Who helps: {who}"
 msgstr "Wer hilft: {who}"
 
@@ -9744,7 +9744,7 @@ msgstr "Ungültige Herkunft der Anfrage."
 msgid "The help request from {teamName} for {date} has been withdrawn."
 msgstr "Die Aushilfe-Anfrage der {teamName} für {date} wurde zurückgezogen."
 
-#: worker/domain/duty-notify.ts
+#: modules/duties/worker/notify.ts
 msgid "Reminder: {label} tomorrow"
 msgstr "Erinnerung: {label} morgen"
 
@@ -9765,9 +9765,9 @@ msgstr "Profilbild gespeichert."
 msgid "Free seats"
 msgstr "Freie Plätze"
 
+#: modules/duties/app/admin.tsx
+#: modules/duties/app/admin.tsx
 #: src/pages/admin.tsx
-#: src/pages/duty-admin.tsx
-#: src/pages/duty-admin.tsx
 msgctxt "short"
 msgid "Players"
 msgstr "Spieler"
@@ -9785,7 +9785,7 @@ msgstr "Zugang lösen?"
 msgid "Team responses"
 msgstr "Rückmeldungen der Mannschaft"
 
-#: src/pages/helpers.tsx
+#: modules/duties/app/helpers.tsx
 msgid "What are you bringing? (optional)"
 msgstr "Was bringst du mit? (optional)"
 
@@ -9807,7 +9807,7 @@ msgstr "Trainings werden bis zum Saisonende angelegt. Der Saisonwechsel am Ende 
 msgid "Cancel and inform"
 msgstr "Absagen und informieren"
 
-#: worker/domain/duty-notify.ts
+#: modules/duties/worker/notify.ts
 #: worker/domain/email-login.ts
 #: worker/routes/join.ts
 msgid "Hello,"
@@ -9893,7 +9893,7 @@ msgstr "Aus der 2. Mannschaft derselben Altersklasse oder der nächstjüngeren J
 msgid "Same names in the squad: <0>{names}</0>. Please add the last names before you share the player link, otherwise the selection is ambiguous."
 msgstr "Gleiche Namen im Kader: <0>{names}</0>. Bitte ergänze die Nachnamen, bevor du den Spielerlink teilst, sonst ist die Auswahl nicht eindeutig."
 
-#: src/pages/helpers.tsx
+#: modules/duties/app/helpers.tsx
 msgid "Only people with the KiHaSL/JuHaSL role."
 msgstr "Nur Personen mit KiHaSL/JuHaSL-Rolle."
 
@@ -9914,7 +9914,7 @@ msgstr "Wie kommen Spieler und Eltern in die App?"
 msgid "Someone in this family is already driving. Please withdraw the offer first."
 msgstr "In dieser Familie fährt schon jemand. Bitte das Angebot zuerst zurückziehen."
 
-#: src/pages/helpers.tsx
+#: modules/duties/app/helpers.tsx
 msgid "No duties yet."
 msgstr "Noch keine Dienste."
 
@@ -9978,8 +9978,8 @@ msgstr "Nur nötig, wenn du dich ohne Passkey per Code anmelden möchtest. In de
 msgid "Save details"
 msgstr "Angaben speichern"
 
-#: worker/routes/duties.ts
-#: worker/routes/duties.ts
+#: modules/duties/worker/routes.ts
+#: modules/duties/worker/routes.ts
 #: worker/routes/teams.ts
 msgid "This template does not exist."
 msgstr "Diese Vorlage gibt es nicht."
@@ -9993,7 +9993,7 @@ msgstr "gerade eben"
 msgid "For school holidays and public holidays."
 msgstr "Für Schulferien und Feiertage."
 
-#: src/pages/referees.tsx
+#: modules/youth-referees/app/referees.tsx
 msgid "{candidate} (me)"
 msgstr "{candidate} (ich)"
 
@@ -10013,7 +10013,7 @@ msgstr "Nächstes Event"
 msgid "Additional passkey set up."
 msgstr "Weiterer Passkey eingerichtet."
 
-#: src/pages/duty-admin.tsx
+#: modules/duties/app/admin.tsx
 msgid "needs prior knowledge"
 msgstr "braucht Vorkenntnisse"
 
@@ -10047,11 +10047,11 @@ msgstr "Sondertermine und eigene Spiele"
 msgid "Parents or players sign up for duties at games and special events (cake, timekeeping, washing shirts)."
 msgstr "Eltern oder Spieler tragen sich für Dienste bei Spielen und Sonderterminen ein (Kuchen, Zeitnehmer, Trikots waschen)."
 
-#: src/pages/helpers.tsx
+#: modules/duties/app/helpers.tsx
 msgid "You can take on duties that need prior knowledge (e.g. timekeeper) once you turn them on in your <0>profile</0> under “I can do this”."
 msgstr "Dienste, die Vorkenntnisse brauchen (z. B. Zeitnehmer), kannst du übernehmen, wenn du sie in deinem <0>Profil</0> unter „Das kann ich“ einschaltest."
 
-#: src/pages/helpers.tsx
+#: modules/duties/app/helpers.tsx
 msgid "free"
 msgstr "frei"
 
@@ -10059,7 +10059,7 @@ msgstr "frei"
 msgid "Former player"
 msgstr "Ehemalige/r Spieler/in"
 
-#: worker/routes/duties.ts
+#: worker/routes/manual-games.ts
 msgid "The game must be in the future."
 msgstr "Das Spiel muss in der Zukunft liegen."
 
@@ -10085,12 +10085,12 @@ msgstr "wird gesendet …"
 msgid "QR code of the link"
 msgstr "QR-Code des Links"
 
-#: src/pages/helpers.tsx
+#: modules/duties/app/helpers.tsx
 #: src/pages/special.tsx
 msgid "Apply from template"
 msgstr "Aus Vorlage übernehmen"
 
-#: src/pages/duty-admin.tsx
+#: modules/duties/app/admin.tsx
 msgid "On site"
 msgstr "Vor Ort"
 
@@ -10102,7 +10102,7 @@ msgstr "Link kopieren"
 msgid "{foreign} games already belong to another team and were skipped."
 msgstr "{foreign} Spiele gehören schon einer anderen Mannschaft und wurden übersprungen."
 
-#: worker/routes/referees.ts
+#: modules/youth-referees/worker/admin-routes.ts
 msgid "This link has been withdrawn. Please ask for a new link."
 msgstr "Dieser Link wurde zurückgezogen. Bitte frag nach einem neuen Link."
 
@@ -10118,7 +10118,7 @@ msgstr "Winken"
 msgid "A holiday plan takes precedence in its period. After that this plan applies again."
 msgstr "Ein Ferienplan hat in seinem Zeitraum Vorrang. Danach gilt wieder dieser Plan."
 
-#: src/pages/referees.tsx
+#: modules/youth-referees/app/referees.tsx
 msgid "Valid until {createdUntil}, can be used several times."
 msgstr "Gültig bis {createdUntil}, mehrfach verwendbar."
 
@@ -10187,7 +10187,7 @@ msgstr "Gruppenchat {teamName}"
 msgid "Missed without excuse"
 msgstr "Unentschuldigt gefehlt"
 
-#: worker/routes/duties.ts
+#: worker/routes/manual-games.ts
 msgid "Invalid date."
 msgstr "Ungültiges Datum."
 
@@ -10282,7 +10282,7 @@ msgstr "Ferien"
 msgid "automatically all KiHaSL/JuHaSL"
 msgstr "automatisch alle KiHaSL/JuHaSL"
 
-#: src/pages/helpers.tsx
+#: modules/duties/app/helpers.tsx
 msgid "No upcoming events"
 msgstr "Keine kommenden Termine"
 
@@ -10406,7 +10406,7 @@ msgstr "{chatCount, plural, one {# Mannschaftschats} other {# Mannschaftschats}}
 msgid "Close"
 msgstr "Schließen"
 
-#: src/pages/referees.tsx
+#: modules/youth-referees/app/referees.tsx
 msgid "Link"
 msgstr "Link"
 
@@ -10436,7 +10436,7 @@ msgstr "Du hast das nicht angefordert? Dann ignoriere diese E-Mail einfach."
 msgid "Permanent stand-in"
 msgstr "Dauerhafte Aushilfe"
 
-#: src/pages/duty-admin.tsx
+#: modules/duties/app/admin.tsx
 msgid "with note"
 msgstr "mit Notiz"
 
@@ -10486,9 +10486,9 @@ msgstr "Feedback Kabine von {name}"
 msgid "Without team"
 msgstr "Ohne Mannschaft"
 
+#: modules/youth-referees/app/referees.tsx
 #: src/pages/admin.tsx
 #: src/pages/profile.tsx
-#: src/pages/referees.tsx
 #: src/pages/team.tsx
 #: src/pages/team.tsx
 msgid "Share"
@@ -10604,7 +10604,7 @@ msgstr "Zeitblöcke erscheinen im Reiter Helfer, dort tragen sich Eltern bzw. Sp
 msgid "Please let us know"
 msgstr "Bitte gib Bescheid"
 
-#: src/pages/duty-admin.tsx
+#: modules/duties/app/admin.tsx
 msgid "Template saved."
 msgstr "Vorlage gespeichert."
 
@@ -10693,7 +10693,7 @@ msgstr "Unbekannter Ort."
 msgid "Declined"
 msgstr "Abgesagt"
 
-#: src/pages/helpers.tsx
+#: modules/duties/app/helpers.tsx
 #: src/pages/special.tsx
 #: src/pages/special.tsx
 msgid "Special event"
@@ -10707,13 +10707,13 @@ msgstr "Reaktionen"
 msgid "never"
 msgstr "noch nie"
 
+#: modules/duties/worker/routes.ts
+#: modules/duties/worker/routes.ts
 #: src/pages/admin.tsx
 #: src/pages/event.tsx
 #: src/pages/plans.tsx
 #: src/pages/special.tsx
 #: worker/routes/admin.ts
-#: worker/routes/duties.ts
-#: worker/routes/duties.ts
 #: worker/routes/events.ts
 #: worker/routes/events.ts
 #: worker/routes/plans.ts
@@ -10733,7 +10733,7 @@ msgid "{label} by mail"
 msgstr "{label} per Mail"
 
 # ai
-#: worker/routes/duties.ts
+#: worker/routes/manual-games.ts
 msgid "Games from a game schedule cannot be deleted, only hidden."
 msgstr "Spiele aus einem Spielplan lassen sich nicht löschen, nur ausblenden."
 
@@ -10804,3 +10804,4 @@ msgstr "Chat schreiben"
 #: worker/routes/events.ts
 msgid "In one time block the end is before the start."
 msgstr "Bei einem Zeitblock liegt das Ende vor dem Beginn."
+

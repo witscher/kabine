@@ -1,12 +1,12 @@
 // Helferplan-Benachrichtigungen: Erinnerungen, Helfer gesucht, offene Plätze, Kanäle. Namen erfunden.
 import { env } from "cloudflare:workers";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { ensureEventDuties } from "../worker/domain/duties";
-import { sendDutyNotifications } from "../worker/domain/duty-notify";
-import { type MailMessage, mailer } from "../worker/domain/email-login";
-import type { PushJob } from "../worker/domain/notify";
-import { addDays, localToInstant, todayLocal } from "../worker/lib/time";
-import { exec, freshDb, guardian, loginAs, member, one, person, rows, season, team } from "./helpers";
+import { ensureEventDuties } from "../../../worker/domain/duties";
+import { sendDutyNotifications } from "../worker/notify";
+import { type MailMessage, mailer } from "../../../worker/domain/email-login";
+import type { PushJob } from "../../../worker/domain/notify";
+import { addDays, localToInstant, todayLocal } from "../../../worker/lib/time";
+import { exec, freshDb, guardian, loginAs, member, one, person, rows, season, team } from "../../../test/helpers";
 
 let mails: MailMessage[] = [];
 let pushes: PushJob[] = [];

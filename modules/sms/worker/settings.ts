@@ -1,9 +1,9 @@
 // SMS module: provider settings (API key stored encrypted) and sending. Phone numbers are stored only
 // for people who enter one themselves, and only while the module is on.
-import { isModuleOn } from "./club";
-import { first, run } from "../lib/db";
-import { open, seal } from "../lib/secret-box";
-import { type SmsConfig, sendSms } from "../lib/sms";
+import { isModuleOn } from "../../../worker/domain/club";
+import { first, run } from "../../../worker/lib/db";
+import { open, seal } from "../../../worker/lib/secret-box";
+import { type SmsConfig, sendSms } from "./provider";
 
 export interface SmsSettings {
   provider: "seven";

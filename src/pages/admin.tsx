@@ -6,6 +6,7 @@ import type { LocationRef, PersonRef } from "../../shared/types";
 import { api } from "../api";
 import { moduleOn } from "../../shared/club";
 import { clubName, useClub } from "../club";
+import { useActiveModules } from "../modules";
 import { daysBetween, fullDate, isoToLocalDate, personName, todayLocal } from "../format";
 import { downloadExport } from "../export";
 import { ExtraEventList } from "../extra-events";
@@ -38,6 +39,7 @@ export function AdminPage() {
   useDocumentTitle(t`Administration`);
   const me = useMe();
   const club = useClub();
+  const modules = useActiveModules();
   const teamsQuery = useQuery<{ teams: { id: number; name: string; kind: "team" | "group"; players: number; coaches: number }[] }>("/teams");
   const teams = { ...teamsQuery, data: teamsQuery.data && { teams: teamsQuery.data.teams.filter((x) => x.kind === "team") } };
   const groupCount = (teamsQuery.data?.teams ?? []).filter((x) => x.kind === "group").length;
@@ -65,18 +67,13 @@ export function AdminPage() {
     { href: "/verwaltung/ferien", icon: "sun", title: t`Holidays`, sub: t`Edit periods (e.g. carnival)` },
     { href: "/verwaltung/orte", icon: "pin", title: t`Training venues`, sub: t`Club halls and other venues` },
     { href: "/verwaltung/rundnachricht", icon: "bell", title: t`Broadcast`, sub: t`Announcement in all or selected team chats` },
-    ...(moduleOn(club.modules, "duties")
-      ? [{ href: "/verwaltung/helferdienste", icon: "helping" as IconName, title: t`Helper duties`, sub: t`Duty types and templates for games and special events` }]
-      : []),
-    ...(moduleOn(club.modules, "youthReferees")
-      ? [{ href: "/verwaltung/kihasl", icon: "whistle" as IconName, title: "KiHaSL/JuHaSL", sub: t`Grant the referee role by link, list` }]
-      : []),
+    // Pages of the switched-on modules (modules/<id>/app, adminMenu)
+    ...modules.flatMap((m) => m.adminMenu?.() ?? []),
     { href: "/chat?alle", icon: "chat", title: t`All chats`, sub: t`Team chats in which you are not a coach or parent` },
     { href: "/verwaltung/sondertermine", icon: "calendar", title: t`Special events and games`, sub: t`Upcoming events of other teams, create a special event` },
     { href: "/verwaltung/einrichtung", icon: "check", title: t`Setup wizard`, sub: t`Go through the setup step by step again` },
     { href: "/verwaltung/verein", icon: "settings", title: t`Club`, sub: t`Name, colours, logo, region, modules` },
     { href: "/verwaltung/mail", icon: "mail", title: t`E-mail`, sub: t`How the app sends e-mails` },
-    ...(moduleOn(club.modules, "sms") ? [{ href: "/verwaltung/sms", icon: "phone" as IconName, title: t`SMS`, sub: t`Provider for codes and reminders by SMS` }] : []),
     { href: "/verwaltung/saisonwechsel", icon: "refresh", title: t`Season change`, sub: t`Once a year, with preview` },
     { href: "/api/admin/export", icon: "download", title: t`Export`, sub: t`All data as a JSON file, for backup`, download: true },
     { href: "/hilfe", icon: "info", title: t`Help and feedback`, sub: t`Send feedback about the app` },

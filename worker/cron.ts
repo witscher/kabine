@@ -3,7 +3,6 @@ import { appOrigin, enterClubContext } from "./domain/club";
 import { ensureInstanceSecrets } from "./lib/instance-secrets";
 import { recordAttendance } from "./domain/attendance";
 import { syncAutoSquads } from "./domain/auto-squad";
-import { sendDutyNotifications } from "./domain/duty-notify";
 import { deadlineInstant, type EventRow, EVENT_SELECT, eventTeams, eventTitle, loadEventContext } from "./domain/events";
 import { ensureGenerated } from "./domain/generate";
 import { syncAutoGroups } from "./domain/groups";
@@ -35,7 +34,6 @@ export async function handleScheduled(baseEnv: Env, scheduledTime: number): Prom
     ["Automatic squads", () => syncAutoSquads(env.DB, null, scheduledTime)],
     ["Reminders", () => sendDeadlineReminders(env, scheduledTime)],
     ["Game reminders", () => sendGameReminders(env, scheduledTime)],
-    ["Helper plan", () => sendDutyNotifications(env, scheduledTime)],
     ["Attendance", () => recordAttendance(env.DB, scheduledTime)],
     ["Meeting point", () => sendMeetingReminders(env, scheduledTime)],
   ];

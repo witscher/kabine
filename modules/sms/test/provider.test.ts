@@ -1,6 +1,6 @@
 // SMS adapter with a fake provider. Numbers invented.
 import { describe, expect, it } from "vitest";
-import { normalizePhone, sendSms, SmsError, validSender } from "../worker/lib/sms";
+import { normalizePhone, sendSms, SmsError, validSender } from "../worker/provider";
 
 describe("SMS", () => {
   it("normalisiert Telefonnummern", () => {

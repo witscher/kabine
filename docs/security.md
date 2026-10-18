@@ -14,9 +14,9 @@ Threat model: a club installation has a few hundred people. Most damage would co
 | 6 | Logs never contain mail texts or addresses (login codes, feedback, names). | `worker/domain/email-login.ts` | 6 |
 | 7 | Read-only admin views change nothing, also not over WebSockets (deleting chat messages). | `worker/chat/room.ts`, `worker/routes/chat.ts` | 7 |
 | 8 | Invalid input is a 400 with a message, never a 500: validate with `parse()` from `worker/lib/http.ts`. | `worker/routes/teams.ts` | 8 |
-| 9 | Parents act for a child only in teams where parents are involved (`parentsInCharge`), including roles such as referee. | `worker/routes/referees.ts` | 9 |
+| 9 | Parents act for a child only in teams where parents are involved (`parentsInCharge`), including roles such as referee. | `modules/youth-referees/worker/admin-routes.ts` | 9 |
 | 10 | Invitation links show short names ("Lina B.", with the birth year only to tell equal names apart). | `worker/routes/join.ts` | 10 |
-| 11 | People outside the coaching staff see other people's children as short names (helper plan). | `worker/routes/duties.ts` | 11 |
+| 11 | People outside the coaching staff see other people's children as short names (helper plan). | `modules/duties/worker/routes.ts` | 11 |
 | 12 | A push subscription moves to another account only with the same keys, i.e. from the same browser. | `worker/routes/push.ts` | 12 |
 
 General rules, also checked by the existing tests: permissions on the server only; names and decline reasons leave the API only to coaches and admins; the owner's access cannot be taken by other admins (`test/owner-protection.test.ts`); unsafe requests need the app's origin (CSRF).

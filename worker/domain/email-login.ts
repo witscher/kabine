@@ -3,7 +3,7 @@ import { t } from "@lingui/core/macro";
 // option; e-mail is the way for devices without a passkey and for recovery.
 import { loadClub } from "./club";
 import { deliver, MailNotConfigured } from "./mail";
-import { sendSmsTo } from "./sms";
+import { sendText } from "./texts";
 import { z } from "zod";
 import { hmacB64url, randomToken, sha256Hex } from "../lib/crypto";
 import { first, run } from "../lib/db";
@@ -158,7 +158,7 @@ export async function issueEmailCode(
   const club = await loadClub(env.DB);
   if (channel === "sms") {
     const app = club.shortName;
-    await sendSmsTo(env, input.email, t`${code} is your code for ${app}. It is valid for 15 minutes.`);
+    await sendText(env, input.email, t`${code} is your code for ${app}. It is valid for 15 minutes.`);
     return requestId;
   }
   await mailer.send(env, {

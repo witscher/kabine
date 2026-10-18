@@ -16,7 +16,7 @@ modules/carpools/
   README.md          what it does, for whom, what it stores
 ```
 
-`modules/index.ts` lists the manifests, one line per module. The worker and app parts are found by the build (`import.meta.glob`), so nothing else in the core needs to change. Code in `worker/` may only import from the worker, `shared/` and the module itself; code in `app/` only from `src/`, `shared/` and the module itself.
+`modules/index.ts` lists the manifests, one line per module. A module may import from a module it `requires` (youth referees build on the helper plan), never from others. The worker and app parts are found by the build (`import.meta.glob`), so nothing else in the core needs to change. Code in `worker/` may only import from the worker, `shared/` and the module itself; code in `app/` only from `src/`, `shared/` and the module itself.
 
 ### Manifest (`module.ts`, [`shared/module-api.ts`](../shared/module-api.ts))
 
@@ -44,12 +44,15 @@ modules/carpools/
 | `personLeaves` | SQL cleanup when someone leaves the club | yes |
 | `exportTables` | the module's tables in the admin's data export | yes |
 | `fixtures` | a fixture connector (kind `fixtures`, [connectors.md](connectors.md)) | no |
+| `texts` | text messages (SMS) for sign-in codes and reminders (`worker/domain/texts.ts`) | no |
 
 ### App part (`app/index.tsx`, [`src/module-api.ts`](../src/module-api.ts))
 
 | Hook | Shows |
 | --- | --- |
 | `routes` | own pages (lazy with `lazyPage` from `src/update.tsx`) |
+| `tab` | a tab in the bottom navigation |
+| `adminMenu` | entries under *Administration* |
 | `eventCardLine` | a line on event cards on the start page |
 | `eventSection` | a section on the event page |
 | `gameLinks` | links of a fixture module for a game (live ticker, game report) on the "In progress" card and the event page |
@@ -62,11 +65,11 @@ modules/carpools/
 
 | Id | Switch | Default | Code |
 | --- | --- | --- | --- |
-| `duties` | Helper duties | on | `worker/routes/duties.ts`, `worker/domain/duties.ts`, `worker/domain/duty-notify.ts`, `worker/duties/hub.ts`, `src/pages/helpers.tsx`, `src/pages/duty-admin.tsx` (moving to `modules/duties/`) |
-| `youthReferees` | Youth referees (needs `duties`) | on | `worker/routes/referees.ts`, `src/pages/referees.tsx` (moving to `modules/youth-referees/`) |
+| `duties` | Helper duties | on | `modules/duties/` (duty rules and live channel stay in the core, see its README) |
+| `youthReferees` | Youth referees (needs `duties`) | on | `modules/youth-referees/` |
 | `carpools` | Carpools | on | `modules/carpools/` |
 | `handball4all` | Game schedule from handball4all | on | `modules/handball4all/` (fixture connector, see [connectors.md](connectors.md)) |
-| `sms` | SMS | off | `worker/routes/sms.ts`, `worker/domain/sms.ts`, `worker/lib/sms.ts`, `src/pages/sms-settings.tsx` (moving to `modules/sms/`) |
+| `sms` | SMS | off | `modules/sms/` (text channel for the core, see its README) |
 
 ## Adding a module
 
@@ -83,6 +86,6 @@ modules/carpools/
 ## Other extension points
 
 - **Sport:** see `shared/sports.ts` (age classes, playing times, duty types and templates).
-- **SMS provider:** `worker/lib/sms.ts`.
+- **SMS provider:** `modules/sms/worker/provider.ts`, see `modules/sms/README.md`.
 - **Fixture connector** for another league system (handball360, nuLiga, SAMS, …): a module of kind `fixtures`, see [connectors.md](connectors.md). Only through permitted access (official API, public export or the association's permission).
 - **Language:** see [translation.md](translation.md).

@@ -2,9 +2,9 @@
 // reminders by SMS. Numbers invented, provider replaced.
 import { env } from "cloudflare:workers";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { saveClub } from "../worker/domain/club";
-import { smsTransport } from "../worker/domain/sms";
-import { api, freshDb, loginAs, person, rows, season } from "./helpers";
+import { saveClub } from "../../../worker/domain/club";
+import { smsTransport } from "../worker/settings";
+import { api, freshDb, loginAs, person, rows, season } from "../../../test/helpers";
 
 let texts: { to: string; text: string; key: string }[];
 let adminCookie: string;
