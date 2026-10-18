@@ -1,6 +1,6 @@
 // Club profile: name, abbreviation, colours, logo, privacy notice, contact. The form is also a
 // step of the setup wizard.
-import { t } from "@lingui/core/macro";
+import { plural, t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { useState } from "preact/hooks";
 import { type ClubModules, type ClubProfile, isHexColor, KABINE_SOURCE } from "../../shared/club";
@@ -271,33 +271,69 @@ export function RegionSection(props: {
 
 /**
  * Functions the club uses; switched-off modules disappear from the app and the API. The switches come from
- * the module manifests (modules/<id>/module.ts); modules made for other sports are not offered.
+ * the module manifests (modules/<id>/module.ts); modules made for other sports are not offered. Game
+ * schedule sources (kind "fixtures") form their own group: the club may switch on several, each team picks
+ * one of them.
  */
 export function ModulesSection({ modules, onChange }: { modules: ClubModules; onChange: (m: ClubModules) => void }) {
-  const { sport } = useClub();
+  const club = useClub();
   // Modules the admin has not been told about yet (src/news.tsx) get a "New" badge
   const fresh = new Set(useSession().me?.news?.newModules.map((m) => m.id) ?? []);
-  const offered = MODULES.filter((m) => !("sports" in m) || (m.sports as readonly string[]).includes(sport) || modules[m.id]);
-  return (
-    <section class="card card-pad stack-sm" aria-label={t`Modules`}>
-      <h2 class="section-title" style={{ margin: 0 }}>
-        <Trans>Modules</Trans>
-      </h2>
-      {offered.map((m) => (
+  // How many teams use each source, to warn before one is switched off
+  const usage = useQuery<{ sources: { id: string; teams: number }[] }>("/admin/fixture-sources");
+  const offered = (MODULES as readonly ModuleManifest[]).filter(
+    (m) => !m.sports || (m.sports as readonly string[]).includes(club.sport) || modules[m.id as ModuleId],
+  );
+  const row = (m: ModuleManifest) => {
+    const id = m.id as ModuleId;
+    const teams = usage.data?.sources.find((x) => x.id === m.id)?.teams ?? 0;
+    // Switched off here while the saved profile has it on and teams use it
+    const losing = m.kind === "fixtures" && !modules[id] && club.modules[id] && teams > 0;
+    return (
+      <div>
         <SwitchRow
           label={
             <>
               {m.label()}
               {fresh.has(m.id) ? <span class="pill pill-yes">{t({ message: "New", context: "module" })}</span> : null}
-              {(m as ModuleManifest).status === "beta" ? <span class="pill pill-muted">{t`Beta`}</span> : null}
+              {m.status === "beta" ? <span class="pill pill-muted">{t`Beta`}</span> : null}
             </>
           }
           sub={m.description()}
-          checked={modules[m.id]}
-          disabled={"requires" in m && !modules[m.requires as ModuleId]}
-          onChange={(v) => onChange({ ...modules, [m.id]: v })}
+          checked={modules[id]}
+          disabled={!!m.requires && !modules[m.requires as ModuleId]}
+          onChange={(v) => onChange({ ...modules, [id]: v })}
         />
-      ))}
+        {losing ? (
+          <p class="small warn-text">
+            {plural(teams, {
+              one: "# team takes its games from this source. Its games stay, but they are no longer synced.",
+              other: "# teams take their games from this source. Their games stay, but they are no longer synced.",
+            })}
+          </p>
+        ) : null}
+      </div>
+    );
+  };
+  const features = offered.filter((m) => m.kind !== "fixtures");
+  const sources = offered.filter((m) => m.kind === "fixtures");
+  return (
+    <section class="card card-pad stack-sm" aria-label={t`Modules`}>
+      <h2 class="section-title" style={{ margin: 0 }}>
+        <Trans>Modules</Trans>
+      </h2>
+      {features.map(row)}
+      {sources.length ? (
+        <>
+          <h3 class="section-title" style={{ margin: "12px 0 0", fontSize: "16px" }}>
+            <Trans>Game schedule sources</Trans>
+          </h3>
+          <p class="small muted">
+            <Trans>Each team takes its games from one of the switched-on sources (Team → Settings). Teams without one enter games by hand or from a table.</Trans>
+          </p>
+          {sources.map(row)}
+        </>
+      ) : null}
     </section>
   );
 }

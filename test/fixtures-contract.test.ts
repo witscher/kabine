@@ -2,6 +2,7 @@
 // records in modules/<folder>/samples/: links.json (links a coach would paste, with the expected source)
 // and any other *.json (responses of the source). A new connector only has to pass it.
 import { describe, expect, it } from "vitest";
+import connectorTemplate from "../templates/connector/module.ts?raw";
 import type { WorkerModule } from "../worker/module-api";
 
 const workers = import.meta.glob<{ default: WorkerModule }>("../modules/*/worker/index.ts", { eager: true });
@@ -65,4 +66,9 @@ describe.each(connectors)("fixture connector $id", ({ folder, id, vendor, connec
 
 it("finds the connectors", () => {
   expect(connectors.map((c) => c.id)).toContain("handball4all");
+});
+
+it("the generator's connector template is a fixtures module, so it joins the group of sources", () => {
+  expect(connectorTemplate).toMatch(/kind: "fixtures"/);
+  expect(connectorTemplate).toMatch(/vendor: "__VENDOR__"/);
 });

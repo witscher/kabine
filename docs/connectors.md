@@ -2,6 +2,10 @@
 
 A fixture connector brings a team's game schedule from an association's system into Kabine: handball4all today; handball360, nuLiga, SAMS (volleyball), basketball-bund.net or others tomorrow. A connector is a module of kind `fixtures` (see [modules.md](modules.md)) that only knows its source. Linking, syncing, halls, home and away, moved and cancelled games and the notifications are the same for every source and live in the core (`worker/domain/fixtures.ts`, `worker/routes/games.ts`).
 
+## One source per team
+
+A club may switch on several sources (they form the group "Game schedule sources" under *Administration → Club*); each team takes its games from exactly one of them or from none (`teams.fixture_connector`, games by hand or from a table). With one source switched on, the coach only pastes the link; with several, the coach picks the source first. Changing or removing a team's source leaves its games as they are: they keep their `external_ref`, so they are neither changed nor cancelled by the new source, only no longer synced. Switching a source off for the club pauses the sync of its teams; their games stay, and the settings say how many teams are affected before saving. This follows from the kind `fixtures`, a connector needs nothing for it.
+
 ## Rules for sources
 
 - **Only permitted access:** an official API, a public export (JSON, iCal, CSV) or written permission of the association. No reading of HTML pages against the terms of use, no getting around protection against automated access. Name the access and link the terms in the module's `README.md`.

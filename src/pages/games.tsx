@@ -1,11 +1,11 @@
-import { t } from "@lingui/core/macro";
+import { plural, t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { useState } from "preact/hooks";
 import type { TeamRef } from "../../shared/types";
 import { api, errorMessage } from "../api";
 import { ago, fullDate, isoToLocalDate } from "../format";
 import { invalidate, useQuery } from "../store";
-import { Button, Field, toast } from "../ui";
+import { Button, confirmDialog, Field, toast } from "../ui";
 
 export interface Source {
   configured: boolean;
@@ -14,7 +14,11 @@ export interface Source {
   fetchUrl: string | null;
   importedAt: string | null;
   error: string | null;
-  /** Sources a coach can link (switched-on fixture modules). */
+  /** The team's source while its module is switched off (sync paused). */
+  paused: { id: string; name: string } | null;
+  /** Upcoming games from the team's source; they stay, unsynced, when the source changes. */
+  linkedGames: number;
+  /** Sources a coach can choose (switched-on fixture modules); a team has one or none. */
   connectors: { id: string; name: string; link: { label: string; hint: string; placeholder: string } }[];
 }
 
@@ -98,64 +102,108 @@ export function SourceBar({ team }: { team: TeamRef }) {
 }
 
 /**
- * Team → Settings: link the team's page at a game schedule source and sync it. The link the coach pastes
- * picks the source (the first switched-on fixture module that recognises it).
+ * Team → Settings: the team's game schedule source (one or none) and the link to its page there. With
+ * several sources switched on, the coach picks one; changing it leaves the games of the old source as
+ * they are, only no longer synced.
  */
 export function ScheduleSection({ team, onChanged }: { team: TeamRef; onChanged: () => void }) {
   const source = useQuery<Source>(`/teams/${team.id}/games/source`);
   const [link, setLink] = useState("");
+  const [picked, setPicked] = useState<string | null>(null);
   const data = source.data;
   if (!data || !data.connectors.length) return null;
   const linked = data.configured ? data.connector : null;
-  const field = data.connectors.find((c) => c.id === linked?.id)?.link ?? data.connectors[0]!.link;
-  const names = data.connectors.map((c) => c.name).join(", ");
-  const name = linked?.name ?? names;
+  // The choice: what the coach picked, else the linked source, else the only one there is
+  const choice = picked ?? linked?.id ?? (data.connectors.length === 1 ? data.connectors[0]!.id : "");
+  const chosen = data.connectors.find((c) => c.id === choice) ?? null;
   const description = data.description ?? "";
   const importedDate = data.importedAt ? fullDate(isoToLocalDate(data.importedAt)) : "";
   const reload = () => {
     void source.reload();
     onChanged();
   };
+  /** Games of the current source stay but are no longer synced: ask first. */
+  const confirmLeave = async (next: string | null) => {
+    if (!linked || linked.id === next || !data.linkedGames) return true;
+    const count = data.linkedGames;
+    const old = linked.name;
+    return confirmDialog({
+      title: t`Change the game schedule source?`,
+      message: plural(count, {
+        one: `# upcoming game from ${old} stays in the app, but it is no longer synced.`,
+        other: `# upcoming games from ${old} stay in the app, but they are no longer synced.`,
+      }),
+      confirmLabel: t`Change source`,
+    });
+  };
+  const linkedName = linked?.name ?? "";
+  const pausedName = data.paused?.name ?? "";
   return (
     <section class="card card-body" aria-label={t`Game schedule`}>
       <h2 class="section-title" style={{ margin: 0 }}>
-        <Trans>Game schedule ({name})</Trans>
+        <Trans>Game schedule</Trans>
       </h2>
       {linked ? (
         <p>
-          <Trans>Linked: {description}.</Trans>
+          <Trans>
+            Linked with {linkedName}: {description}.
+          </Trans>
           {data.importedAt ? " " + t`Last synced on ${importedDate}.` : " " + t`Not synced yet.`}
+        </p>
+      ) : data.paused ? (
+        <p class="small warn-text">
+          <Trans>The source {pausedName} is switched off for the club. The games stay, but they are not synced.</Trans>
         </p>
       ) : (
         <p class="muted">
           <Trans>Not linked yet.</Trans>
         </p>
       )}
-      {data.error ? <p class="small warn-text">{data.error}</p> : null}
-      <Field label={field.label} hint={field.hint}>
-        {(id) => (
-          <input id={id} class="input" type="url" value={link} placeholder={field.placeholder} onInput={(e) => setLink((e.target as HTMLInputElement).value)} />
-        )}
-      </Field>
+      {data.error && linked ? <p class="small warn-text">{data.error}</p> : null}
+      {data.connectors.length > 1 ? (
+        <Field label={t({ message: "Source", context: "game schedule" })} hint={t`Each team takes its games from one source.`}>
+          {(id) => (
+            <select id={id} class="select" value={choice} onChange={(e) => setPicked((e.target as HTMLSelectElement).value)}>
+              {data.connectors.map((c) => (
+                <option value={c.id}>{c.name}</option>
+              ))}
+              <option value="">{t`None (games from a table or by hand)`}</option>
+            </select>
+          )}
+        </Field>
+      ) : null}
+      {chosen ? (
+        <Field label={chosen.link.label} hint={chosen.link.hint}>
+          {(id) => (
+            <input id={id} class="input" type="url" value={link} placeholder={chosen.link.placeholder} onInput={(e) => setLink((e.target as HTMLInputElement).value)} />
+          )}
+        </Field>
+      ) : null}
       <div class="btn-row">
-        <Button
-          variant="primary"
-          disabled={!link.trim()}
-          onClick={async () => {
-            await api.put(`/teams/${team.id}/games/source`, { link: link.trim() });
-            setLink("");
-            toast(t`Linked. Use "Sync now" to fetch the game schedule.`);
-            invalidate(`/teams/${team.id}`);
-            reload();
-          }}
-        >
-          <Trans>Link schedule</Trans>
-        </Button>
-        {linked ? (
+        {chosen ? (
+          <Button
+            variant="primary"
+            disabled={!link.trim()}
+            onClick={async () => {
+              if (!(await confirmLeave(chosen.id))) return;
+              await api.put(`/teams/${team.id}/games/source`, { connector: chosen.id, link: link.trim() });
+              setLink("");
+              setPicked(null);
+              toast(t`Linked. Use "Sync now" to fetch the game schedule.`);
+              invalidate(`/teams/${team.id}`);
+              reload();
+            }}
+          >
+            <Trans>Link schedule</Trans>
+          </Button>
+        ) : null}
+        {linked || data.paused ? (
           <Button
             variant="ghost"
             onClick={async () => {
+              if (!(await confirmLeave(null))) return;
               await api.put(`/teams/${team.id}/games/source`, { link: null });
+              setPicked(null);
               reload();
             }}
           >
@@ -163,7 +211,7 @@ export function ScheduleSection({ team, onChanged }: { team: TeamRef; onChanged:
           </Button>
         ) : null}
       </div>
-      {linked ? <SourceBar team={team} /> : null}
+      {linked && choice === linked.id ? <SourceBar team={team} /> : null}
       <p class="small muted">
         <Trans>Syncing only happens at the press of a button, on a coach's or admin's device or by the app's server, never automatically.</Trans>
       </p>

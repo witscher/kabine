@@ -1,0 +1,14 @@
+{
+  "Each team takes its games from one source.": "Jede Mannschaft übernimmt ihre Spiele aus einer Quelle.",
+  "{teams, plural, one {# team takes its games from this source. Its games stay, but they are no longer synced.} other {# teams take their games from this source. Their games stay, but they are no longer synced.}}": "{teams, plural, one {# Mannschaft übernimmt ihre Spiele aus dieser Quelle. Ihre Spiele bleiben, werden aber nicht mehr abgeglichen.} other {# Mannschaften übernehmen ihre Spiele aus dieser Quelle. Ihre Spiele bleiben, werden aber nicht mehr abgeglichen.}}",
+  "The source {pausedName} is switched off for the club. The games stay, but they are not synced.": "Die Quelle {pausedName} ist für den Verein ausgeschaltet. Die Spiele bleiben, werden aber nicht abgeglichen.",
+  "Each team takes its games from one of the switched-on sources (Team → Settings). Teams without one enter games by hand or from a table.": "Jede Mannschaft übernimmt ihre Spiele aus einer der eingeschalteten Quellen (Team → Einstellungen). Mannschaften ohne Quelle tragen Spiele von Hand oder aus einer Tabelle ein.",
+  "Linked with {linkedName}: {description}.": "Verknüpft mit {linkedName}: {description}.",
+  "Change source": "Quelle wechseln",
+  "Game schedule sources": "Spielplan-Quellen",
+  "This game schedule source is not switched on.": "Diese Spielplan-Quelle ist nicht eingeschaltet.",
+  "None (games from a table or by hand)": "Keine (Spiele aus einer Tabelle oder von Hand)",
+  "{count, plural, one {# upcoming game from {old} stays in the app, but it is no longer synced.} other {# upcoming games from {old} stay in the app, but they are no longer synced.}}": "{count, plural, one {# kommendes Spiel aus {old} bleibt in der App, wird aber nicht mehr abgeglichen.} other {# kommende Spiele aus {old} bleiben in der App, werden aber nicht mehr abgeglichen.}}",
+  "Change the game schedule source?": "Spielplan-Quelle wechseln?",
+  "Source  [context: game schedule]": "Quelle"
+}

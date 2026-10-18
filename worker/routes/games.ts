@@ -5,12 +5,12 @@ import { t } from "@lingui/core/macro";
 import { Hono } from "hono";
 import { z } from "zod";
 import { type AppEnv, intParam, requireActor } from "../app";
-import { isCoachOf, requireCoach } from "../auth/actor";
-import { activeConnectors, type Connector, connectorById, importGames, TEAM_FIXTURES_SELECT, type TeamFixtures, teamSource } from "../domain/fixtures";
+import { isCoachOf, requireAdmin, requireCoach } from "../auth/actor";
+import { activeConnectors, allConnectors, type Connector, connectorById, importGames, TEAM_FIXTURES_SELECT, type TeamFixtures, teamSource } from "../domain/fixtures";
 import { requireTeam } from "../domain/groups";
-import { first, run } from "../lib/db";
+import { all, first, run } from "../lib/db";
 import { ApiError, badRequest, conflict, notFound, parse, readJson } from "../lib/http";
-import { utcIso } from "../lib/time";
+import { nowLocal, utcIso } from "../lib/time";
 import { FixtureFormatError } from "../module-api";
 
 export const gameRoutes = new Hono<AppEnv>();
@@ -37,8 +37,23 @@ function linked(team: TeamFixtures): { connector: Connector; source: NonNullable
   return connector && source ? { connector, source } : null;
 }
 
-function sourceView(team: TeamFixtures) {
+/** Upcoming games of the team that came from its source (they stay, unsynced, when the source changes). */
+async function linkedGames(db: D1Database, team: TeamFixtures): Promise<number> {
+  if (!team.fixture_connector) return 0;
+  const row = await first<{ n: number }>(
+    db,
+    `SELECT count(*) AS n FROM events e JOIN event_teams et ON et.event_id = e.id
+      WHERE et.team_id = ? AND e.kind = 'game' AND e.external_ref LIKE ? ESCAPE '\\' AND e.starts_at > ?`,
+    team.id,
+    `${team.fixture_connector.replace(/[\\%_]/g, (ch) => `\\${ch}`)}:%`,
+    nowLocal(),
+  );
+  return row?.n ?? 0;
+}
+
+async function sourceView(db: D1Database, team: TeamFixtures) {
   const link = linked(team);
+  const stored = connectorById(team.fixture_connector);
   return {
     configured: !!link,
     connector: link ? { id: link.connector.id, name: link.connector.name, fetchFrom: link.connector.fetchFrom } : null,
@@ -46,7 +61,11 @@ function sourceView(team: TeamFixtures) {
     fetchUrl: link && link.connector.fetchFrom === "device" ? link.connector.request(link.source).url : null,
     importedAt: team.fixture_synced_at,
     error: team.fixture_error,
-    /** Sources a coach can link (active fixture modules), with the texts for the link field. */
+    /** The team's source while its module is switched off (sync paused), else null. */
+    paused: !link && stored && teamSource(team) ? { id: stored.id, name: stored.name } : null,
+    /** Upcoming games from the team's source; switching or removing the source leaves them unsynced. */
+    linkedGames: await linkedGames(db, team),
+    /** Sources a coach can choose (switched-on fixture modules), with the texts for the link field. One per team. */
     connectors: activeConnectors().map((x) => ({ id: x.id, name: x.name, link: x.linkField() })),
   };
 }
@@ -55,7 +74,7 @@ gameRoutes.get("/teams/:id/games/source", async (c) => {
   const actor = requireActor(c);
   const teamId = intParam(c, "id");
   requireCoach(actor, teamId);
-  return c.json(sourceView(await teamFixtures(c.env.DB, teamId)));
+  return c.json(await sourceView(c.env.DB, await teamFixtures(c.env.DB, teamId)));
 });
 
 gameRoutes.put("/teams/:id/games/source", async (c) => {
@@ -63,23 +82,24 @@ gameRoutes.put("/teams/:id/games/source", async (c) => {
   const teamId = intParam(c, "id");
   requireCoach(actor, teamId);
   await requireTeam(c.env.DB, teamId);
-  const { link } = parse(z.object({ link: z.string().max(500).nullable() }), await readJson(c.req.raw));
+  // A team has one source: the chosen connector (or, without a choice, the first that recognises the link)
+  const { link, connector: chosen } = parse(
+    z.object({ link: z.string().max(500).nullable(), connector: z.string().max(40).optional() }),
+    await readJson(c.req.raw),
+  );
   if (link === null) {
     await run(
       c.env.DB,
       "UPDATE teams SET fixture_connector = NULL, fixture_source = NULL, fixture_synced_at = NULL, fixture_error = NULL WHERE id = ?",
       teamId,
     );
-    return c.json(sourceView(await teamFixtures(c.env.DB, teamId)));
+    return c.json(await sourceView(c.env.DB, await teamFixtures(c.env.DB, teamId)));
   }
-  // The first active connector that recognises the link
-  const match = activeConnectors()
-    .map((connector) => ({ connector, source: connector.parseLink(link) }))
-    .find((x) => x.source);
+  const candidates = activeConnectors().filter((x) => !chosen || x.id === chosen);
+  if (chosen && !candidates.length) throw badRequest(t`This game schedule source is not switched on.`);
+  const match = candidates.map((connector) => ({ connector, source: connector.parseLink(link) })).find((x) => x.source);
   if (!match) {
-    const names = activeConnectors()
-      .map((x) => x.name)
-      .join(", ");
+    const names = candidates.map((x) => x.name).join(", ");
     throw badRequest(t`Please paste the link to your team's page at ${names}.`);
   }
   await run(
@@ -89,7 +109,17 @@ gameRoutes.put("/teams/:id/games/source", async (c) => {
     JSON.stringify(match.source),
     teamId,
   );
-  return c.json(sourceView(await teamFixtures(c.env.DB, teamId)));
+  return c.json(await sourceView(c.env.DB, await teamFixtures(c.env.DB, teamId)));
+});
+
+/** Administration → Club: how many teams use each game schedule source, also while it is switched off. */
+gameRoutes.get("/admin/fixture-sources", async (c) => {
+  requireAdmin(requireActor(c));
+  const rows = await all<{ fixture_connector: string; n: number }>(
+    c.env.DB,
+    "SELECT fixture_connector, count(*) AS n FROM teams WHERE fixture_connector IS NOT NULL GROUP BY fixture_connector",
+  );
+  return c.json({ sources: allConnectors().map((x) => ({ id: x.id, name: x.name, teams: rows.find((r) => r.fixture_connector === x.id)?.n ?? 0 })) });
 });
 
 /**

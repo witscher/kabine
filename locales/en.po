@@ -667,10 +667,6 @@ msgstr "Install as an app"
 msgid "Getting a ride"
 msgstr "Getting a ride"
 
-#: src/pages/games.tsx
-msgid "Game schedule ({name})"
-msgstr "Game schedule ({name})"
-
 #: src/pages/event.tsx
 #: src/pages/squad.tsx
 #: src/pages/squad.tsx
@@ -1945,6 +1941,10 @@ msgstr "This link does not exist."
 msgid "Not signed in"
 msgstr "Not signed in"
 
+#: src/pages/club-settings.tsx
+msgid "{teams, plural, one {# team takes its games from this source. Its games stay, but they are no longer synced.} other {# teams take their games from this source. Their games stay, but they are no longer synced.}}"
+msgstr "{teams, plural, one {# team takes its games from this source. Its games stay, but they are no longer synced.} other {# teams take their games from this source. Their games stay, but they are no longer synced.}}"
+
 #: worker/routes/events.ts
 msgid "Only special events have a title."
 msgstr "Only special events have a title."
@@ -2033,6 +2033,10 @@ msgstr "Has no access yet."
 #: src/pages/setup-wizard.tsx
 msgid "Check holidays"
 msgstr "Check holidays"
+
+#: src/pages/games.tsx
+msgid "The source {pausedName} is switched off for the club. The games stay, but they are not synced."
+msgstr "The source {pausedName} is switched off for the club. The games stay, but they are not synced."
 
 #: modules/handball4all/app/index.tsx
 msgid "The live ticker opens in a new window on handball4all."
@@ -3523,6 +3527,11 @@ msgstr "Parents are not included in this team."
 msgid "The page could not be loaded"
 msgstr "The page could not be loaded"
 
+#: src/pages/games.tsx
+msgctxt "game schedule"
+msgid "Source"
+msgstr "Source"
+
 #: src/format.ts
 msgid "Today"
 msgstr "Today"
@@ -3768,6 +3777,10 @@ msgstr "Only for codes and reminders you choose. Neither coaches nor admins see 
 #: src/pages/squad.tsx
 msgid "Save changes · {count}"
 msgstr "Save changes · {count}"
+
+#: src/pages/club-settings.tsx
+msgid "Each team takes its games from one of the switched-on sources (Team → Settings). Teams without one enter games by hand or from a table."
+msgstr "Each team takes its games from one of the switched-on sources (Team → Settings). Teams without one enter games by hand or from a table."
 
 #: src/pages/privacy.tsx
 msgid "Chat histories are deleted at the season change. After someone leaves the club, all their data is deleted at the next season change at the latest."
@@ -4208,6 +4221,10 @@ msgstr "Invalid key"
 #: src/pages/team.tsx
 msgid "Core squad saved ({count})."
 msgstr "Core squad saved ({count})."
+
+#: src/pages/games.tsx
+msgid "Linked with {linkedName}: {description}."
+msgstr "Linked with {linkedName}: {description}."
 
 #: src/pages/special.tsx
 msgid "No time slots yet."
@@ -5488,6 +5505,10 @@ msgstr "This training time does not exist."
 msgid "The code is wrong or has expired. Please request a new one."
 msgstr "The code is wrong or has expired. Please request a new one."
 
+#: src/pages/games.tsx
+msgid "Change source"
+msgstr "Change source"
+
 #: src/pages/profile.tsx
 msgid "Your parents are linked to your access. They decide what you can do yourself in the app."
 msgstr "Your parents are linked to your access. They decide what you can do yourself in the app."
@@ -6595,6 +6616,10 @@ msgstr "Withdraw offer?"
 msgid "Tell your coach. They will add you or check who signed up with your name."
 msgstr "Tell your coach. They will add you or check who signed up with your name."
 
+#: src/pages/club-settings.tsx
+msgid "Game schedule sources"
+msgstr "Game schedule sources"
+
 #: src/pages/team.tsx
 msgid "Automatic squad switched off. Squads already nominated remain."
 msgstr "Automatic squad switched off. Squads already nominated remain."
@@ -7229,6 +7254,7 @@ msgid "Invalid colour."
 msgstr "Invalid colour."
 
 #: src/pages/games.tsx
+#: src/pages/games.tsx
 msgid "Game schedule"
 msgstr "Game schedule"
 
@@ -7302,6 +7328,10 @@ msgstr "for {child}"
 #: src/pages/season.tsx
 msgid "Current season: {name} ({from} – {to})"
 msgstr "Current season: {name} ({from} – {to})"
+
+#: worker/routes/games.ts
+msgid "This game schedule source is not switched on."
+msgstr "This game schedule source is not switched on."
 
 #: src/pages/club-settings.tsx
 msgid "Upload logo"
@@ -8209,10 +8239,6 @@ msgstr "Absent"
 msgid "Messages"
 msgstr "Messages"
 
-#: src/pages/games.tsx
-msgid "Linked: {description}."
-msgstr "Linked: {description}."
-
 #: src/pages/admin.tsx
 msgid "{sent, plural, one {Sent to one chat.} other {Sent to # chats.}}"
 msgstr "{sent, plural, one {Sent to one chat.} other {Sent to # chats.}}"
@@ -8797,6 +8823,10 @@ msgstr "Me"
 msgid "Who is driving?"
 msgstr "Who is driving?"
 
+#: src/pages/games.tsx
+msgid "None (games from a table or by hand)"
+msgstr "None (games from a table or by hand)"
+
 #: src/pages/club-settings.tsx
 msgctxt "module"
 msgid "New"
@@ -8899,6 +8929,10 @@ msgstr "First name"
 #: src/pages/admin.tsx
 msgid "Coaches of {teamName}"
 msgstr "Coaches of {teamName}"
+
+#: src/pages/games.tsx
+msgid "{count, plural, one {# upcoming game from {old} stays in the app, but it is no longer synced.} other {# upcoming games from {old} stay in the app, but they are no longer synced.}}"
+msgstr "{count, plural, one {# upcoming game from {old} stays in the app, but it is no longer synced.} other {# upcoming games from {old} stay in the app, but they are no longer synced.}}"
 
 #: src/pages/team.tsx
 msgid "{count} without year of birth"
@@ -9168,6 +9202,10 @@ msgstr "Rename group"
 msgid "With this link you set up a new passkey on this device for your existing access."
 msgstr "With this link you set up a new passkey on this device for your existing access."
 
+#: src/pages/games.tsx
+msgid "Change the game schedule source?"
+msgstr "Change the game schedule source?"
+
 #: src/pages/team.tsx
 msgid "{firstName} is inactive."
 msgstr "{firstName} is inactive."
@@ -9179,6 +9217,10 @@ msgstr "The games come from the team's fixture list. Special events appear here 
 #: src/pages/team.tsx
 msgid "Lost device or new passkey: open the person in the squad overview and create a personal one-time link."
 msgstr "Lost device or new passkey: open the person in the squad overview and create a personal one-time link."
+
+#: src/pages/games.tsx
+msgid "Each team takes its games from one source."
+msgstr "Each team takes its games from one source."
 
 #: src/calendar.tsx
 #: src/pages/team.tsx
