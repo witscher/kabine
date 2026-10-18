@@ -1,0 +1,57 @@
+{
+  "name": "kabine",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc -b",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "e2e": "playwright test",
+    "check": "npm run typecheck && npm run test",
+    "cf-typegen": "wrangler types --strict-vars=false worker/worker-configuration.d.ts",
+    "db:migrate:local": "wrangler d1 migrations apply DB --local",
+    "db:seed:local": "wrangler d1 execute DB --local --file seed/demo.sql",
+    "db:reset:local": "node scripts/reset-local.mjs",
+    "db:migrate:remote": "wrangler d1 migrations apply DB --remote",
+    "secrets:generate": "node scripts/generate-secrets.mjs",
+    "deploy": "npm run build && wrangler d1 migrations apply DB --remote && wrangler deploy",
+    "maintenance:on": "node scripts/maintenance.mjs on",
+    "maintenance:off": "node scripts/maintenance.mjs off",
+    "maintenance:status": "node scripts/maintenance.mjs status"
+  },
+  "dependencies": {
+    "@fontsource/barlow": "^5.3.0",
+    "@fontsource/barlow-condensed": "^5.3.0",
+    "@simplewebauthn/browser": "^14.0.0",
+    "@simplewebauthn/server": "^14.0.3",
+    "hono": "^4.13.12",
+    "preact": "^10.29.8",
+    "preact-iso": "^2.12.2",
+    "uqr": "^0.1.3",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "vite": "^8.3.2",
+    "@cloudflare/vite-plugin": "^1.62.5",
+    "@preact/preset-vite": "^2.10.6",
+    "@babel/core": "^7.28.0",
+    "wrangler": "^4.147.0",
+    "typescript": "5.9.3",
+    "vitest": "~4.1.11",
+    "@cloudflare/vitest-pool-workers": "^0.22.0",
+    "@playwright/test": "1.56.1",
+    "@types/node": "^22.18.0",
+    "preact-render-to-string": "^6.6.0"
+  },
+  "allowScripts": {
+    "workerd@1.20260815.1": true,
+    "workerd@1.20261001.1": true,
+    "esbuild@0.28.1": true
+  },
+  "license": "AGPL-3.0-only",
+  "description": "Team app for sports clubs: events, attendance, squads, chat, push, helper duties. One installation per club on Cloudflare."
+}

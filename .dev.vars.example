@@ -1,0 +1,5 @@
+# Lokale Secrets. Erzeugen mit: npm run secrets:generate -- --dev
+APP_SECRET=
+ADMIN_BOOTSTRAP_TOKEN=
+VAPID_PUBLIC_KEY=
+VAPID_PRIVATE_KEY=

@@ -1,0 +1,257 @@
+import { ErrorBoundary, LocationProvider, Route, Router, useLocation } from "preact-iso";
+import type { ComponentChildren } from "preact";
+import { useEffect } from "preact/hooks";
+import { EnvBanner } from "./env-banner";
+import { MaintenanceBanner, MaintenancePage, useIsAdmin, useMaintenance } from "./maintenance";
+import { ViewAsBanner } from "./view-as";
+import { OfflineBanner } from "./offline";
+import { PullToRefresh, ResumeRefresh } from "./pull-refresh";
+import { checkForUpdate, lazyPage, UpdateBanner } from "./update";
+import { Icon, type IconName } from "./icons";
+import { HomePage } from "./pages/home";
+import { EventPage } from "./pages/event";
+import { LoginPage } from "./pages/login";
+import { JoinPage, BootstrapPage } from "./pages/join";
+import { EmailLinkPage } from "./email";
+import { PrivacyPage } from "./pages/privacy";
+import { SessionProvider, useSession } from "./session";
+import { Splash } from "./splash";
+import { invalidate, useQuery } from "./store";
+import { ConfirmHost, Spinner, Toasts } from "./ui";
+
+const HelpersPage = lazyPage(() => import("./pages/helpers").then((m) => m.HelpersPage));
+const HelpPage = lazyPage(() => import("./pages/help").then((m) => m.HelpPage));
+const AdminRefereesPage = lazyPage(() => import("./pages/referees").then((m) => m.AdminRefereesPage));
+const AdminDutiesPage = lazyPage(() => import("./pages/duty-admin").then((m) => m.AdminDutiesPage));
+const RefereeJoinPage = lazyPage(() => import("./pages/referees").then((m) => m.RefereeJoinPage));
+const SquadPage = lazyPage(() => import("./pages/squad").then((m) => m.SquadPage));
+const ChatListPage = lazyPage(() => import("./pages/chat").then((m) => m.ChatListPage));
+const ChatRoomPage = lazyPage(() => import("./pages/chat").then((m) => m.ChatRoomPage));
+const ProfilePage = lazyPage(() => import("./pages/profile").then((m) => m.ProfilePage));
+const ChildPage = lazyPage(() => import("./pages/profile").then((m) => m.ChildPage));
+const NotificationsPage = lazyPage(() => import("./pages/profile").then((m) => m.NotificationsPage));
+const DevicesPage = lazyPage(() => import("./pages/profile").then((m) => m.DevicesPage));
+const TeamIndexPage = lazyPage(() => import("./pages/team").then((m) => m.TeamIndexPage));
+const TeamPage = lazyPage(() => import("./pages/team").then((m) => m.TeamPage));
+const PersonPage = lazyPage(() => import("./pages/team").then((m) => m.PersonPage));
+const PlansPage = lazyPage(() => import("./pages/plans").then((m) => m.PlansPage));
+const PlanEditorPage = lazyPage(() => import("./pages/plans").then((m) => m.PlanEditorPage));
+const SpecialEventPage = lazyPage(() => import("./pages/special").then((m) => m.SpecialEventPage));
+const AdminPage = lazyPage(() => import("./pages/admin").then((m) => m.AdminPage));
+const AdminPersonsPage = lazyPage(() => import("./pages/admin").then((m) => m.AdminPersonsPage));
+const AdminBroadcastPage = lazyPage(() => import("./pages/admin").then((m) => m.AdminBroadcastPage));
+const AdminTeamsPage = lazyPage(() => import("./pages/admin").then((m) => m.AdminTeamsPage));
+const AdminGroupsPage = lazyPage(() => import("./pages/group").then((m) => m.AdminGroupsPage));
+const AdminHolidaysPage = lazyPage(() => import("./pages/admin").then((m) => m.AdminHolidaysPage));
+const AdminExtraEventsPage = lazyPage(() => import("./pages/admin").then((m) => m.AdminExtraEventsPage));
+const AdminAgeClassesPage = lazyPage(() => import("./pages/admin").then((m) => m.AdminAgeClassesPage));
+const AdminLocationsPage = lazyPage(() => import("./pages/admin").then((m) => m.AdminLocationsPage));
+const AdminClubPage = lazyPage(() => import("./pages/club-settings").then((m) => m.AdminClubPage));
+const SeasonChangePage = lazyPage(() => import("./pages/season").then((m) => m.SeasonChangePage));
+
+const PUBLIC_PATHS = ["/einladung", "/einrichtung", "/datenschutz", "/email"];
+
+function TabBar() {
+  const { me } = useSession();
+  const { path } = useLocation();
+  const rooms = useQuery<{ rooms: { unread: boolean }[] }>(me ? "/chat/rooms" : null, { refreshMs: 60_000 });
+  if (!me) return null;
+  const unread = rooms.data?.rooms.some((r) => r.unread) ?? false;
+  const tabs: { href: string; label: string; icon: IconName; match: (p: string) => boolean; dot?: boolean }[] = [
+    { href: "/", label: "Termine", icon: "calendar", match: (p) => p === "/" || p.startsWith("/termine") },
+    { href: "/chat", label: "Chat", icon: "chat", match: (p) => p.startsWith("/chat"), dot: unread },
+  ];
+  if (me.helperTeams.length || me.referee) tabs.push({ href: "/helfer", label: "Helfer", icon: "helping", match: (p) => p.startsWith("/helfer") });
+  if (me.isAdmin) tabs.push({ href: "/verwaltung", label: "Verwaltung", icon: "settings", match: (p) => p.startsWith("/verwaltung") || p.startsWith("/team") });
+  else if (me.manageableTeams.length) tabs.push({ href: "/team", label: "Team", icon: "users", match: (p) => p.startsWith("/team") });
+  // Spieler und Eltern brauchen keine Verwaltung: dort steht Hilfe und Feedback
+  else tabs.push({ href: "/hilfe", label: "Hilfe", icon: "info", match: (p) => p.startsWith("/hilfe") });
+  tabs.push({ href: "/profil", label: "Profil", icon: "user", match: (p) => p.startsWith("/profil") });
+  return (
+    <nav class="tabbar" aria-label="Hauptnavigation">
+      {tabs.map((t) => (
+        <a class="tab" href={t.href} aria-current={t.match(path) ? "page" : undefined}>
+          <Icon name={t.icon} size={22} />
+          {t.label}
+          {t.dot ? (
+            <>
+              <span class="dot" aria-hidden="true" />
+              <span class="sr-only">(ungelesen)</span>
+            </>
+          ) : null}
+        </a>
+      ))}
+    </nav>
+  );
+}
+
+function ScrollTop() {
+  const { path } = useLocation();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [path]);
+  return null;
+}
+
+/** Zurück online: alles Sichtbare neu laden und nach einer neuen Version sehen. */
+function OnlineRefresh() {
+  useEffect(() => {
+    const onOnline = () => {
+      invalidate("/");
+      void checkForUpdate();
+    };
+    window.addEventListener("kabine:online", onOnline);
+    return () => window.removeEventListener("kabine:online", onOnline);
+  }, []);
+  return null;
+}
+
+/**
+ * iOS, installierte App: Nach dem Schließen der Tastatur bleiben fest positionierte Elemente
+ * (Navigationsleiste unten) manchmal um die Tastaturhöhe nach oben verschoben, bis neu gescrollt
+ * wird. Wird der sichtbare Bereich wieder deutlich größer, einmal minimal scrollen und zurück.
+ */
+function KeyboardViewportFix() {
+  useEffect(() => {
+    const vv = window.visualViewport;
+    if (!vv) return;
+    let last = vv.height;
+    let timer: number | undefined;
+    const nudge = () => {
+      const y = window.scrollY;
+      window.scrollTo(window.scrollX, y > 0 ? y - 1 : 1);
+      window.scrollTo(window.scrollX, y);
+    };
+    const onResize = () => {
+      const grew = vv.height > last + 80;
+      last = vv.height;
+      if (!grew) return;
+      window.clearTimeout(timer);
+      timer = window.setTimeout(nudge, 50);
+    };
+    vv.addEventListener("resize", onResize);
+    return () => {
+      vv.removeEventListener("resize", onResize);
+      window.clearTimeout(timer);
+    };
+  }, []);
+  return null;
+}
+
+function Shell({ children }: { children: ComponentChildren }) {
+  const { me, loading } = useSession();
+  const { path } = useLocation();
+  const isPublic = PUBLIC_PATHS.some((p) => path.startsWith(p));
+  const maintenance = useMaintenance();
+  const isAdmin = useIsAdmin();
+  if (maintenance && !isAdmin) {
+    return (
+      <div class="app">
+        <MaintenancePage />
+      </div>
+    );
+  }
+  if (loading && !isPublic) {
+    return (
+      <div class="app">
+        <Spinner label="App wird geladen" />
+      </div>
+    );
+  }
+  if (!me && !isPublic) return <LoginPage />;
+  const hideTabs = isPublic || /^\/chat\/\d+/.test(path);
+  return (
+    <div class="app">
+      <OnlineRefresh />
+      <ResumeRefresh />
+      <KeyboardViewportFix />
+      {me ? <PullToRefresh /> : null}
+      <OfflineBanner />
+      <UpdateBanner />
+      <ScrollTop />
+      {children}
+      {!hideTabs ? <TabBar /> : null}
+    </div>
+  );
+}
+
+/** Alte Adresse /spiele: die Spiele stehen unter Termine, der Abgleich in der Mannschaft. */
+function RedirectHome() {
+  const { route } = useLocation();
+  useEffect(() => route("/", true), []);
+  return null;
+}
+
+function NotFound() {
+  return (
+    <main class="page">
+      <div class="content">
+        <div class="empty">
+          <div class="title">Seite nicht gefunden</div>
+          <a class="btn btn-primary" href="/">
+            Zu den Terminen
+          </a>
+        </div>
+      </div>
+    </main>
+  );
+}
+
+export function App() {
+  return (
+    <LocationProvider>
+      <SessionProvider>
+        <EnvBanner />
+        <MaintenanceBanner />
+        <ViewAsBanner />
+        <ErrorBoundary>
+          <Shell>
+            <Router>
+              <Route path="/" component={HomePage} />
+              <Route path="/termine/:id" component={EventPage} />
+              <Route path="/helfer" component={HelpersPage} />
+              <Route path="/spiele" component={RedirectHome} />
+              <Route path="/spiele/:id/kader" component={SquadPage} />
+              <Route path="/chat" component={ChatListPage} />
+              <Route path="/chat/:teamId" component={ChatRoomPage} />
+              <Route path="/profil" component={ProfilePage} />
+              <Route path="/profil/kind/:id" component={ChildPage} />
+              <Route path="/profil/benachrichtigungen" component={NotificationsPage} />
+              <Route path="/profil/geraete" component={DevicesPage} />
+              <Route path="/team" component={TeamIndexPage} />
+              <Route path="/team/:id" component={TeamPage} />
+              <Route path="/team/:id/person/:personId" component={PersonPage} />
+              <Route path="/team/:id/plaene" component={PlansPage} />
+              <Route path="/team/:id/plaene/:planId" component={PlanEditorPage} />
+              <Route path="/team/:id/termin-neu" component={SpecialEventPage} />
+              <Route path="/hilfe" component={HelpPage} />
+              <Route path="/verwaltung" component={AdminPage} />
+              <Route path="/verwaltung/personen" component={AdminPersonsPage} />
+              <Route path="/verwaltung/rundnachricht" component={AdminBroadcastPage} />
+              <Route path="/verwaltung/kihasl" component={AdminRefereesPage} />
+              <Route path="/verwaltung/helferdienste" component={AdminDutiesPage} />
+              <Route path="/kihasl" component={RefereeJoinPage} />
+              <Route path="/verwaltung/mannschaften" component={AdminTeamsPage} />
+              <Route path="/verwaltung/gruppen" component={AdminGroupsPage} />
+              <Route path="/verwaltung/ferien" component={AdminHolidaysPage} />
+              <Route path="/verwaltung/altersklassen" component={AdminAgeClassesPage} />
+              <Route path="/verwaltung/orte" component={AdminLocationsPage} />
+              <Route path="/verwaltung/verein" component={AdminClubPage} />
+              <Route path="/verwaltung/saisonwechsel" component={SeasonChangePage} />
+              <Route path="/verwaltung/termin-neu" component={SpecialEventPage} />
+              <Route path="/verwaltung/sondertermine" component={AdminExtraEventsPage} />
+              <Route path="/einladung" component={JoinPage} />
+              <Route path="/email" component={EmailLinkPage} />
+              <Route path="/einrichtung" component={BootstrapPage} />
+              <Route path="/datenschutz" component={PrivacyPage} />
+              <Route default component={NotFound} />
+            </Router>
+          </Shell>
+        </ErrorBoundary>
+        <Toasts />
+        <ConfirmHost />
+        <Splash />
+      </SessionProvider>
+    </LocationProvider>
+  );
+}

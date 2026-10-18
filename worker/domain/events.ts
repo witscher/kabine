@@ -1,0 +1,749 @@
+import { h4aFetchUrl, h4aTableUrl, matchdayHost } from "./h4a";
+import type {
+  EventCounts,
+  EventDetail,
+  EventSummary,
+  MyParticipation,
+  ParticipantDetail,
+  ParticipationStatus,
+  PersonRef,
+  RespondedBy,
+  RosterEntry,
+  TeamRef,
+} from "../../shared/types";
+import { type Actor, isCoachOfAny, mayActFor, PARENTS_HANDLE_IT, parentsInCharge, parentsInChargeSql, scopePersonIds } from "../auth/actor";
+import { all, list } from "../lib/db";
+import { ownClubAbbr } from "./club";
+import { localToInstant, toLocal } from "../lib/time";
+
+export interface EventRow {
+  id: number;
+  kind: "training" | "game" | "special";
+  title: string | null;
+  starts_at: string;
+  ends_at: string | null;
+  location_id: number | null;
+  notes: string | null;
+  rule_id: number | null;
+  rule_date: string | null;
+  is_detached: number;
+  club_wide: number;
+  decline_hours: number | null;
+  cancelled_at: string | null;
+  cancelled_by: number | null;
+  cancel_reason: string | null;
+  reminder_sent_at: string | null;
+  h4a_game_id: string | null;
+  h4a_game_no: string | null;
+  home_team: string | null;
+  guest_team: string | null;
+  is_home: number | null;
+  home_goals: number | null;
+  guest_goals: number | null;
+  meeting_point: string | null;
+  meeting_time: string | null;
+  coach_notes: string | null;
+  squad_published_at: string | null;
+  squad_manual: number;
+  game_reminder_sent_at: string | null;
+  loc_name: string | null;
+  loc_address: string | null;
+  loc_map_url: string | null;
+  loc_kind: "hall" | "custom" | "external" | null;
+  plan_decline_hours: number | null;
+  cancelled_by_first: string | null;
+  cancelled_by_last: string | null;
+}
+
+const EVENT_COLUMNS = `e.*, l.name AS loc_name, l.address AS loc_address, l.map_url AS loc_map_url, l.kind AS loc_kind,
+         tp.decline_hours AS plan_decline_hours,
+         cp.first_name AS cancelled_by_first, cp.last_name AS cancelled_by_last`;
+
+const EVENT_JOINS = `
+    LEFT JOIN locations l ON l.id = e.location_id
+    LEFT JOIN training_rules tr ON tr.id = e.rule_id
+    LEFT JOIN training_plans tp ON tp.id = tr.plan_id
+    LEFT JOIN persons cp ON cp.id = e.cancelled_by`;
+
+export const EVENT_SELECT = `
+  SELECT ${EVENT_COLUMNS}
+    FROM events e${EVENT_JOINS}`;
+
+export interface TeamInfo {
+  id: number;
+  name: string;
+  age_class_code: string;
+  decline_hours_training: number;
+  decline_hours_game: number;
+  max_squad: number;
+  auto_squad: number;
+  h4a_org_id: number | null;
+  h4a_league_id: number | null;
+  h4a_team_id: number | null;
+  show_responses: number;
+}
+
+interface MemberRow {
+  team_id: number;
+  person_id: number;
+  role: "player" | "helper";
+  helper_trainings: number;
+  first_name: string;
+  last_name: string | null;
+  is_active: number;
+}
+
+interface ResponseRow {
+  event_id: number;
+  person_id: number;
+  status: "yes" | "no";
+  reason: string | null;
+  is_late: number;
+  by_person: number | null;
+  by_first: string | null;
+  responded_at: string;
+}
+
+interface NominationRow {
+  event_id: number;
+  person_id: number;
+  is_helper: number;
+  first_name: string;
+  last_name: string | null;
+  is_active: number;
+}
+
+export interface HelpRow {
+  id: number;
+  event_id: number;
+  person_id: number;
+  team_id: number;
+  team_name: string;
+  status: "open" | "accepted" | "declined" | "withdrawn";
+}
+
+interface StandingRow {
+  person_id: number;
+  rule_id: number;
+  valid_from: string | null;
+  valid_to: string | null;
+}
+
+export interface Participant {
+  person: PersonRef;
+  teamId: number;
+  /** Alle beteiligten Mannschaften der Person, z. B. wC1 und wC2 bei einem gemeinsamen Training */
+  teamIds: number[];
+  isHelper: boolean;
+  isActive: boolean;
+  status: ParticipationStatus;
+  response: ResponseRow | null;
+  hasStandingAbsence: boolean;
+}
+
+export interface EventContext {
+  teams: Map<number, TeamInfo>;
+  eventTeams: Map<number, number[]>;
+  participants: Map<number, Participant[]>;
+  /** Mannschaftsmitglieder je Termin (auch ohne Nominierung), für "nicht nominiert". */
+  members: Map<number, Map<number, MemberRow>>;
+  nominations: Map<number, Map<number, NominationRow>>;
+  helpRequests: Map<number, HelpRow[]>;
+  guardianOf: Set<string>; // `${guardianId}:${childId}`
+  /** „Fehlt unentschuldigt“: `${eventId}:${personId}` */
+  unexcused: Set<string>;
+}
+
+function push<K, V>(map: Map<K, V[]>, key: K, value: V) {
+  const arr = map.get(key);
+  if (arr) arr.push(value);
+  else map.set(key, [value]);
+}
+
+export function deadlineHours(e: EventRow, teams: TeamInfo[]): number {
+  if (e.decline_hours != null) return e.decline_hours;
+  if (e.kind === "game") return Math.max(0, ...teams.map((t) => t.decline_hours_game)) || (teams.length ? 0 : 6);
+  if (e.kind === "training" && e.plan_decline_hours != null) return e.plan_decline_hours;
+  if (!teams.length) return 6;
+  return Math.max(...teams.map((t) => t.decline_hours_training));
+}
+
+export function deadlineInstant(e: EventRow, teams: TeamInfo[]): number {
+  return localToInstant(e.starts_at) - deadlineHours(e, teams) * 3_600_000;
+}
+
+function standingApplies(s: StandingRow, e: EventRow): boolean {
+  const day = e.starts_at.slice(0, 10);
+  return (!s.valid_from || s.valid_from <= day) && (!s.valid_to || day <= s.valid_to);
+}
+
+/** Lädt alles, was für Status, Zahlen und Rechte einer Terminliste nötig ist. */
+export async function loadEventContext(db: D1Database, events: EventRow[]): Promise<EventContext> {
+  const ids = events.map((e) => e.id);
+  const ruleIds = [...new Set(events.map((e) => e.rule_id).filter((r): r is number => r != null))];
+  const hasClubWide = events.some((e) => e.club_wide === 1);
+
+  const [teamRows, responses, nominations, helps, unexcusedRows] = await db.batch([
+    db
+      .prepare(
+        `SELECT et.event_id, t.id, t.name, t.age_class_code, t.decline_hours_training, t.decline_hours_game, t.max_squad, t.auto_squad,
+                t.h4a_org_id, t.h4a_league_id, t.h4a_team_id, t.show_responses
+           FROM event_teams et JOIN teams t ON t.id = et.team_id
+          WHERE et.event_id IN (SELECT value FROM json_each(?)) ORDER BY t.name`,
+      )
+      .bind(list(ids)),
+    db
+      .prepare(
+        `SELECT r.event_id, r.person_id, r.status, r.reason, r.is_late, r.by_person, bp.first_name AS by_first, r.responded_at
+           FROM responses r LEFT JOIN persons bp ON bp.id = r.by_person
+          WHERE r.event_id IN (SELECT value FROM json_each(?))`,
+      )
+      .bind(list(ids)),
+    db
+      .prepare(
+        `SELECT n.event_id, n.person_id, n.is_helper, p.first_name, p.last_name, p.is_active
+           FROM nominations n JOIN persons p ON p.id = n.person_id
+          WHERE n.event_id IN (SELECT value FROM json_each(?)) AND p.is_former = 0`,
+      )
+      .bind(list(ids)),
+    db
+      .prepare(
+        `SELECT h.id, h.event_id, h.person_id, h.team_id, t.name AS team_name, h.status
+           FROM help_requests h JOIN teams t ON t.id = h.team_id
+          WHERE h.event_id IN (SELECT value FROM json_each(?))`,
+      )
+      .bind(list(ids)),
+    db.prepare("SELECT event_id, person_id FROM unexcused_absences WHERE event_id IN (SELECT value FROM json_each(?))").bind(list(ids)),
+  ]);
+  const unexcused = new Set((unexcusedRows!.results as { event_id: number; person_id: number }[]).map((u) => `${u.event_id}:${u.person_id}`));
+
+  const teams = new Map<number, TeamInfo>();
+  const eventTeams = new Map<number, number[]>();
+  for (const r of teamRows!.results as (TeamInfo & { event_id: number })[]) {
+    teams.set(r.id, r);
+    push(eventTeams, r.event_id, r.id);
+  }
+  const teamIds = [...teams.keys()];
+
+  const [members, allPlayers, standing] = await db.batch([
+    db
+      .prepare(
+        `SELECT tm.team_id, tm.person_id, tm.role, tm.helper_trainings, p.first_name, p.last_name, p.is_active
+           FROM team_memberships tm JOIN persons p ON p.id = tm.person_id
+          WHERE tm.team_id IN (SELECT value FROM json_each(?)) AND tm.role IN ('player', 'helper') AND p.is_former = 0
+          ORDER BY p.first_name, p.last_name, p.id`,
+      )
+      .bind(list(teamIds)),
+    db
+      .prepare(
+        `SELECT tm.team_id, tm.person_id, tm.role, tm.helper_trainings, p.first_name, p.last_name, p.is_active
+           FROM team_memberships tm JOIN persons p ON p.id = tm.person_id
+          WHERE ? = 1 AND tm.role = 'player' AND p.is_former = 0
+          ORDER BY p.first_name, p.last_name, p.id`,
+      )
+      .bind(hasClubWide ? 1 : 0),
+    db
+      .prepare(
+        `SELECT person_id, rule_id, valid_from, valid_to FROM standing_absences
+          WHERE rule_id IN (SELECT value FROM json_each(?))`,
+      )
+      .bind(list(ruleIds)),
+  ]);
+
+  const memberRows = members!.results as MemberRow[];
+  const allPlayerRows = allPlayers!.results as MemberRow[];
+  const responsesByEvent = new Map<number, Map<number, ResponseRow>>();
+  for (const r of responses!.results as ResponseRow[]) {
+    if (!responsesByEvent.has(r.event_id)) responsesByEvent.set(r.event_id, new Map());
+    responsesByEvent.get(r.event_id)!.set(r.person_id, r);
+  }
+  const nominationsByEvent = new Map<number, Map<number, NominationRow>>();
+  for (const n of nominations!.results as NominationRow[]) {
+    if (!nominationsByEvent.has(n.event_id)) nominationsByEvent.set(n.event_id, new Map());
+    nominationsByEvent.get(n.event_id)!.set(n.person_id, n);
+  }
+  const helpByEvent = new Map<number, HelpRow[]>();
+  for (const h of helps!.results as HelpRow[]) push(helpByEvent, h.event_id, h);
+  const standingByRule = new Map<number, StandingRow[]>();
+  for (const s of standing!.results as StandingRow[]) push(standingByRule, s.rule_id, s);
+
+  const participants = new Map<number, Participant[]>();
+  const membersByEvent = new Map<number, Map<number, MemberRow>>();
+  const personIds = new Set<number>();
+
+  for (const e of events) {
+    const evTeams = eventTeams.get(e.id) ?? [];
+    const evMembers = new Map<number, MemberRow>();
+    const memberTeams = new Map<number, number[]>();
+    const source = e.club_wide === 1 ? allPlayerRows : memberRows.filter((m) => evTeams.includes(m.team_id));
+    const teamName = (id: number) => teams.get(id)?.name ?? "";
+    for (const m of source) {
+      if (m.role === "helper" && !(e.kind === "game" || (e.kind === "training" && m.helper_trainings === 1))) continue;
+      memberTeams.set(m.person_id, [...new Set([...(memberTeams.get(m.person_id) ?? []), m.team_id])]);
+      const existing = evMembers.get(m.person_id);
+      // Spieler vor Aushilfe; bei zwei Mannschaften fest nach Name (wC1 vor wC2)
+      if (
+        !existing ||
+        (existing.role === "helper" && m.role === "player") ||
+        (existing.role === m.role && teamName(m.team_id).localeCompare(teamName(existing.team_id)) < 0)
+      ) {
+        evMembers.set(m.person_id, m);
+      }
+    }
+    membersByEvent.set(e.id, evMembers);
+
+    const resp = responsesByEvent.get(e.id) ?? new Map<number, ResponseRow>();
+    const standingRows = e.kind === "training" && e.rule_id != null ? (standingByRule.get(e.rule_id) ?? []) : [];
+    const list: Participant[] = [];
+
+    const add = (personId: number, first: string, last: string | null, isActive: number, teamId: number, isHelper: boolean) => {
+      const response = resp.get(personId) ?? null;
+      const hasStanding = standingRows.some((s) => s.person_id === personId && standingApplies(s, e));
+      let status: ParticipationStatus;
+      if (isActive !== 1) status = "inactive";
+      else if (response) status = response.status;
+      else if (hasStanding) status = "standing";
+      // Spielerinnen und Spieler gelten als zugesagt, bis sie absagen. Aushilfen sagen selbst zu.
+      else status = isHelper ? "open" : "yes";
+      personIds.add(personId);
+      list.push({
+        person: { id: personId, firstName: first, lastName: last },
+        teamId,
+        teamIds: [teamId, ...(memberTeams.get(personId) ?? []).filter((t) => t !== teamId).sort((a, b) => teamName(a).localeCompare(teamName(b)))],
+        isHelper,
+        isActive: isActive === 1,
+        status,
+        response,
+        hasStandingAbsence: hasStanding,
+      });
+    };
+
+    if (e.kind === "game") {
+      for (const n of nominationsByEvent.get(e.id)?.values() ?? []) {
+        const m = evMembers.get(n.person_id);
+        add(n.person_id, n.first_name, n.last_name, n.is_active, m?.team_id ?? evTeams[0] ?? 0, n.is_helper === 1 || m?.role === "helper");
+      }
+    } else {
+      for (const m of evMembers.values()) {
+        add(m.person_id, m.first_name, m.last_name, m.is_active, m.team_id, m.role === "helper");
+      }
+    }
+    participants.set(e.id, list);
+  }
+
+  // Wer ist Elternteil von wem? Für "abgesagt von Elternteil".
+  const guardianRows = personIds.size
+    ? await all<{ guardian_id: number; child_id: number }>(
+        db,
+        "SELECT guardian_id, child_id FROM guardianships WHERE child_id IN (SELECT value FROM json_each(?))",
+        list([...personIds]),
+      )
+    : [];
+
+  return {
+    teams,
+    eventTeams,
+    participants,
+    members: membersByEvent,
+    nominations: nominationsByEvent,
+    helpRequests: helpByEvent,
+    guardianOf: new Set(guardianRows.map((g) => `${g.guardian_id}:${g.child_id}`)),
+    unexcused,
+  };
+}
+
+/** Tabelle bei handball4all für die Mannschaft mit hinterlegtem Spielplan. */
+function gameLiveUrl(e: EventRow, teams: TeamInfo[]): string | null {
+  if (!e.h4a_game_id) return null;
+  const t = teams.find((x) => x.h4a_org_id && x.h4a_league_id && x.h4a_team_id);
+  return t ? h4aFetchUrl(t.h4a_org_id!, t.h4a_league_id!, t.h4a_team_id!) : null;
+}
+
+/**
+ * Dauer der Karte „Läuft gerade“, danach gibt es den Spielbericht: Aktive und A-Jugend 2 Stunden,
+ * B- bis D-Jugend 1,5 Stunden, E-Jugend 75 Minuten, jüngere 1 Stunde. Bei mehreren Mannschaften gilt die längste.
+ */
+export function gameLiveMinutes(ageClassCodes: string[]): number {
+  const minutes = (code: string) => {
+    const youth = code.length === 2 ? code[1]! : code === "Minis" || code === "Bambini" ? "F" : null;
+    if (youth === null || youth === "A") return 120;
+    if ("BCD".includes(youth)) return 90;
+    return youth === "E" ? 75 : 60;
+  };
+  return ageClassCodes.length ? Math.max(...ageClassCodes.map(minutes)) : 120;
+}
+
+function gameTableUrl(teams: TeamInfo[]): string | null {
+  const t = teams.find((x) => x.h4a_org_id && x.h4a_league_id);
+  return t ? h4aTableUrl(t.h4a_org_id!, t.h4a_league_id!, t.h4a_team_id) : null;
+}
+
+export function eventTeams(e: EventRow, ctx: EventContext): TeamInfo[] {
+  return (ctx.eventTeams.get(e.id) ?? []).map((id) => ctx.teams.get(id)!).filter(Boolean);
+}
+
+export function eventTitle(e: EventRow, teams: TeamRef[]): string {
+  if (e.kind === "game") {
+    const own = `${ownClubAbbr()} ${teams[0]?.name ?? ""}`.trim();
+    const host = matchdayHost({ home: e.home_team ?? "", guest: e.guest_team ?? "" });
+    if (host != null) return e.is_home === 1 ? `Heimspieltag ${own}` : `Spieltag bei ${host}`;
+    if (e.is_home === 1) return `${own} – ${e.guest_team ?? "Gegner"}`;
+    if (e.is_home === 0) return `${e.home_team ?? "Gegner"} – ${own}`;
+    return e.title ?? `${e.home_team ?? "?"} – ${e.guest_team ?? "?"}`;
+  }
+  if (e.kind === "training") return e.title ?? "Training";
+  return e.title ?? "Termin";
+}
+
+function respondedBy(ctx: EventContext, personId: number, response: ResponseRow | null): RespondedBy | null {
+  if (!response) return null;
+  if (response.by_person == null) return "other";
+  if (response.by_person === personId) return "self";
+  if (ctx.guardianOf.has(`${response.by_person}:${personId}`)) return "guardian";
+  return "other";
+}
+
+export function countsOf(list: Participant[]): EventCounts {
+  const c: EventCounts = { yes: 0, no: 0, open: 0, standing: 0, inactive: 0 };
+  for (const p of list) c[p.status]++;
+  return c;
+}
+
+export function isPast(e: EventRow, now: number): boolean {
+  return localToInstant(e.starts_at) <= now;
+}
+
+function myParticipations(e: EventRow, ctx: EventContext, actor: Actor, now: number): MyParticipation[] {
+  const out: MyParticipation[] = [];
+  const parts = ctx.participants.get(e.id) ?? [];
+  const members = ctx.members.get(e.id) ?? new Map();
+  const helps = ctx.helpRequests.get(e.id) ?? [];
+  const past = isPast(e, now);
+  const cancelled = e.cancelled_at != null;
+  const teamIds = ctx.eventTeams.get(e.id) ?? [];
+
+  for (const pid of scopePersonIds(actor)) {
+    // Kinder nur dort, wo die Eltern zuständig sind
+    if (pid !== actor.personId && !parentsInCharge(actor, pid, teamIds)) continue;
+    const part = parts.find((p) => p.person.id === pid);
+    const member = members.get(pid);
+    const help = helps.find((h) => h.person_id === pid && h.status !== "withdrawn") ?? null;
+    if (!part && !member && !help) continue;
+
+    const person: PersonRef =
+      part?.person ??
+      (member
+        ? { id: pid, firstName: member.first_name, lastName: member.last_name }
+        : pid === actor.personId
+          ? { id: pid, firstName: actor.firstName, lastName: actor.lastName }
+          : (actor.children.find((c) => c.id === pid) ?? { id: pid, firstName: "", lastName: null }));
+
+    let blockedReason: string | null = null;
+    if (cancelled) blockedReason = "Der Termin wurde abgesagt.";
+    else if (past) blockedReason = "Der Termin hat schon begonnen.";
+    else if (!part) blockedReason = e.kind === "game" ? "Nicht für dieses Spiel nominiert." : null;
+    else if (!part.isActive) blockedReason = "Derzeit inaktiv gemeldet. Bitte sprich mit deinem Trainer.";
+
+    const canAcceptBase = !blockedReason && !!part;
+    const canAccept = canAcceptBase && mayActFor(actor, pid, "may_accept", teamIds);
+    const canDecline = canAcceptBase && mayActFor(actor, pid, "may_decline", teamIds);
+    if (canAcceptBase && pid === actor.personId && (!canAccept || !canDecline) && !blockedReason) {
+      if (!canAccept && !canDecline) blockedReason = PARENTS_HANDLE_IT;
+    }
+
+    const response = part?.response ?? null;
+    out.push({
+      person,
+      participant: !!part,
+      nominated: e.kind === "game" ? !!part : false,
+      isHelper: part?.isHelper ?? member?.role === "helper",
+      status: part?.status ?? null,
+      reason: response?.reason ?? null,
+      isLate: response?.is_late === 1,
+      respondedAt: response?.responded_at ?? null,
+      respondedBy: respondedBy(ctx, pid, response),
+      respondedByName: response?.by_first ?? null,
+      unexcused: ctx.unexcused.has(`${e.id}:${pid}`),
+      canAccept,
+      canDecline,
+      blockedReason,
+      helpRequest: help
+        ? {
+            id: help.id,
+            status: help.status,
+            teamName: help.team_name,
+            canAnswer: help.status === "open" && !past && !cancelled && mayActFor(actor, pid, "may_answer_help", teamIds),
+          }
+        : null,
+    });
+  }
+  return out;
+}
+
+export function toSummary(e: EventRow, ctx: EventContext, actor: Actor, now: number): EventSummary {
+  const teams = eventTeams(e, ctx);
+  const teamRefs = teams.map((t) => ({ id: t.id, name: t.name }));
+  const parts = ctx.participants.get(e.id) ?? [];
+  const hours = deadlineHours(e, teams);
+  const showCounts = e.kind !== "game" || e.squad_published_at != null;
+  const canManage = e.club_wide === 1 ? actor.isAdmin : isCoachOfAny(actor, teams.map((t) => t.id));
+  return {
+    id: e.id,
+    kind: e.kind,
+    title: eventTitle(e, teamRefs),
+    startsAt: e.starts_at,
+    endsAt: e.ends_at,
+    location:
+      e.location_id != null && e.loc_name
+        ? { id: e.location_id, name: e.loc_name, address: e.loc_address, mapUrl: e.loc_map_url, kind: e.loc_kind ?? "custom" }
+        : null,
+    teams: teamRefs,
+    clubWide: e.club_wide === 1,
+    cancelled: e.cancelled_at
+      ? {
+          at: e.cancelled_at,
+          byName: e.cancelled_by_first ? e.cancelled_by_first : null,
+          reason: e.cancel_reason,
+        }
+      : null,
+    notes: e.notes,
+    deadline: toLocal(localToInstant(e.starts_at) - hours * 3_600_000),
+    deadlineHours: hours,
+    isPast: isPast(e, now),
+    counts: showCounts ? countsOf(parts) : null,
+    mine: myParticipations(e, ctx, actor, now),
+    canManage,
+    unexcusedCount: canManage ? parts.filter((p) => ctx.unexcused.has(`${e.id}:${p.person.id}`)).length : 0,
+    game:
+      e.kind === "game"
+        ? {
+            homeTeam: e.home_team,
+            guestTeam: e.guest_team,
+            isHome: e.is_home == null ? null : e.is_home === 1,
+            homeGoals: e.home_goals,
+            guestGoals: e.guest_goals,
+            gameNo: e.h4a_game_no,
+            meetingPoint: e.meeting_point,
+            meetingTime: e.meeting_time,
+            coachNotes: e.coach_notes,
+            squadPublished: e.squad_published_at != null,
+            nominatedCount: parts.length,
+            tableUrl: gameTableUrl(teams),
+            h4aGameId: e.h4a_game_id,
+            liveUrl: gameLiveUrl(e, teams),
+            liveMinutes: gameLiveMinutes(teams.map((t) => t.age_class_code)),
+          }
+        : null,
+    isDetached: e.is_detached === 1,
+    ruleId: e.rule_id,
+    myDuties: [],
+    organizing: false,
+    carpoolCount: null,
+    helpersNeeded: 0,
+  };
+}
+
+export function toDetail(e: EventRow, ctx: EventContext, actor: Actor, now: number): EventDetail {
+  const summary = toSummary(e, ctx, actor, now);
+  const parts = ctx.participants.get(e.id) ?? [];
+  const participants: ParticipantDetail[] | null = summary.canManage
+    ? parts.map((p) => ({
+        person: p.person,
+        teamId: p.teamId,
+        teamIds: p.teamIds,
+        isHelper: p.isHelper,
+        status: p.status,
+        reason: p.response?.reason ?? null,
+        isLate: p.response?.is_late === 1,
+        respondedAt: p.response?.responded_at ?? null,
+        respondedBy: respondedBy(ctx, p.person.id, p.response),
+        respondedByName: p.response?.by_first ?? null,
+        hasStandingAbsence: p.hasStandingAbsence,
+        unexcused: ctx.unexcused.has(`${e.id}:${p.person.id}`),
+      }))
+    : null;
+  // Mannschaften mit „Rückmeldungen für alle sichtbar“: Spieler und eingebundene Eltern sehen,
+  // wer zu- oder abgesagt hat (ohne Gründe). Nicht bei Spielen, nicht bei Vereinsterminen.
+  const teams = eventTeams(e, ctx);
+  const showRoster =
+    !summary.canManage &&
+    e.kind !== "game" &&
+    e.club_wide !== 1 &&
+    teams.length > 0 &&
+    teams.every((t) => t.show_responses === 1) &&
+    summary.mine.some((m) => m.participant);
+  const roster: RosterEntry[] | null = showRoster
+    ? parts
+        .map((p) => ({
+          personId: p.person.id,
+          name: p.person.lastName ? `${p.person.firstName} ${p.person.lastName.charAt(0)}.` : p.person.firstName,
+          status: p.status,
+        }))
+        .sort((a, b) => a.name.localeCompare(b.name, "de"))
+    : null;
+  return { ...summary, participants, roster, dutyManage: false, organizers: null, carpool: null };
+}
+
+/** SQL: Die Person (Ausdruck) nimmt am Termin e teil, ist nominiert, angefragt oder pfeift dort als KiHaSL/JuHaSL. */
+function relatesSql(person: string): string {
+  return `(
+    EXISTS (
+      SELECT 1 FROM event_teams et JOIN team_memberships tm ON tm.team_id = et.team_id
+       WHERE et.event_id = e.id AND tm.person_id = ${person}
+         AND (tm.role IN ('player', 'coach')
+              OR (tm.role = 'helper' AND (e.kind = 'game' OR (e.kind = 'training' AND tm.helper_trainings = 1))))
+    )
+    OR EXISTS (SELECT 1 FROM nominations n WHERE n.event_id = e.id AND n.person_id = ${person})
+    OR EXISTS (SELECT 1 FROM help_requests h WHERE h.event_id = e.id AND h.status IN ('open', 'accepted') AND h.person_id = ${person})
+    OR EXISTS (SELECT 1 FROM duties dd JOIN duty_types ddt ON ddt.id = dd.duty_type_id AND ddt.who_referees = 1 WHERE dd.event_id = e.id AND dd.person_id = ${person})
+  )`;
+}
+
+/**
+ * SQL-Bedingung: Termin ist sichtbar. ?1 enthält die eigene Person, ?2 die
+ * Kinder. Termine der Kinder sehen Eltern nur, wenn sie dort zuständig sind.
+ * Ersteller und Organisatoren eines Sondertermins sehen ihn immer (ohne Teilnehmerliste).
+ */
+export const VISIBLE_SQL = `(
+  e.club_wide = 1
+  OR EXISTS (SELECT 1 FROM json_each(?1) own_p WHERE ${relatesSql("own_p.value")})
+  OR EXISTS (SELECT 1 FROM json_each(?1) org_p WHERE e.created_by = org_p.value
+               OR EXISTS (SELECT 1 FROM event_organizers eo WHERE eo.event_id = e.id AND eo.person_id = org_p.value))
+  OR EXISTS (SELECT 1 FROM json_each(?2) kid_p WHERE ${relatesSql("kid_p.value")}
+               AND ${parentsInChargeSql("kid_p.value", "SELECT team_id FROM event_teams WHERE event_id = e.id")})
+)`;
+
+const PEOPLE = "SELECT value FROM json_each(?1) UNION ALL SELECT value FROM json_each(?2)";
+
+/**
+ * Vorauswahl für VISIBLE_SQL: alle Termine, die sichtbar sein könnten (eine Obermenge).
+ * Sie nimmt dieselben Personen wie VISIBLE_SQL (?1 man selbst, ?2 die Kinder) und jede Rolle,
+ * damit kein sichtbarer Termin fehlt. Entscheiden tut weiter VISIBLE_SQL; die Vorauswahl
+ * erspart nur, jeden Termin im Zeitraum einzeln zu prüfen (siehe docs/entscheidungen.md).
+ * In zwei Gruppen, weil D1 höchstens fünf Teile pro UNION erlaubt. Ergebnis: CTE `ids`.
+ */
+export const CANDIDATES_CTE = `
+  by_person(id) AS (
+    SELECT et.event_id FROM team_memberships tm JOIN event_teams et ON et.team_id = tm.team_id
+     WHERE tm.person_id IN (${PEOPLE})
+    UNION SELECT event_id FROM nominations WHERE person_id IN (${PEOPLE})
+    UNION SELECT event_id FROM help_requests WHERE person_id IN (${PEOPLE})
+    UNION SELECT event_id FROM duties WHERE person_id IN (${PEOPLE})
+  ),
+  by_role(id) AS (
+    SELECT event_id FROM event_organizers WHERE person_id IN (SELECT value FROM json_each(?1))
+    UNION SELECT id FROM events WHERE created_by IN (SELECT value FROM json_each(?1))
+    UNION SELECT id FROM events WHERE club_wide = 1 AND starts_at >= ?3 AND starts_at < ?4
+  ),
+  ids(id) AS MATERIALIZED (SELECT id FROM by_person UNION SELECT id FROM by_role)`;
+
+export function visibilityParams(actor: Actor): [string, string] {
+  return [list([actor.personId]), list(actor.children.map((c) => c.id))];
+}
+
+export async function listVisibleEvents(
+  db: D1Database,
+  actor: Actor,
+  opts: { from: string; to: string; teamId?: number; kind?: string },
+): Promise<EventRow[]> {
+  const params: (string | number)[] = [...visibilityParams(actor), opts.from, opts.to];
+  let candidates = CANDIDATES_CTE;
+  if (opts.teamId != null) {
+    params.push(opts.teamId);
+    candidates = `ids(id) AS MATERIALIZED (SELECT event_id FROM event_teams WHERE team_id = ?${params.length})`;
+  }
+  let kindFilter = "";
+  if (opts.kind) {
+    params.push(opts.kind);
+    kindFilter = ` AND e.kind = ?${params.length}`;
+  }
+  // Admins sehen bei gesetztem Mannschaftsfilter alle Termine dieser Mannschaft.
+  const visibility = actor.isAdmin && opts.teamId != null ? "1 = 1" : VISIBLE_SQL;
+  // MATERIALIZED und CROSS JOIN: SQLite beginnt bei der Vorauswahl, statt alle Termine im Zeitraum zu prüfen
+  return all<EventRow>(
+    db,
+    `WITH ${candidates}
+     SELECT ${EVENT_COLUMNS}
+       FROM ids CROSS JOIN events e ON e.id = ids.id${EVENT_JOINS}
+      WHERE e.starts_at >= ?3 AND e.starts_at < ?4 AND ${visibility}${kindFilter}
+      ORDER BY e.starts_at, e.id`,
+    ...params,
+  );
+}
+
+export interface EventCursor {
+  startsAt: string;
+  id: number;
+}
+
+/**
+ * Der nächste Abschnitt sichtbarer Termine für das seitenweise Laden: Die Vorauswahl wird erst
+ * nach Datum sortiert und begrenzt, dann geprüft. So fällt die Prüfung nur für `size` Termine an,
+ * nicht für die ganze Saison. `last` ist der letzte geprüfte Termin (auch wenn er nicht sichtbar
+ * war), `done`: Danach kommt nichts mehr.
+ */
+export async function visibleEventBatch(
+  db: D1Database,
+  actor: Actor,
+  opts: { from: string; to: string; size: number; desc?: boolean; after?: EventCursor | null },
+): Promise<{ rows: EventRow[]; last: EventCursor | null; done: boolean }> {
+  const params: (string | number)[] = [...visibilityParams(actor), opts.from, opts.to];
+  let cursor = "";
+  if (opts.after) {
+    params.push(opts.after.startsAt, opts.after.id);
+    cursor = ` AND (e.starts_at, e.id) ${opts.desc ? "<" : ">"} (?${params.length - 1}, ?${params.length})`;
+  }
+  params.push(opts.size);
+  const dir = opts.desc ? " DESC" : "";
+  const rows = await all<EventRow & { visible: number }>(
+    db,
+    `WITH ${CANDIDATES_CTE},
+       batch(id) AS MATERIALIZED (
+         SELECT e.id FROM ids CROSS JOIN events e ON e.id = ids.id
+          WHERE e.starts_at >= ?3 AND e.starts_at < ?4${cursor}
+          ORDER BY e.starts_at${dir}, e.id${dir} LIMIT ?${params.length})
+     SELECT ${EVENT_COLUMNS}, ${VISIBLE_SQL} AS visible
+       FROM batch CROSS JOIN events e ON e.id = batch.id${EVENT_JOINS}
+      ORDER BY e.starts_at${dir}, e.id${dir}`,
+    ...params,
+  );
+  const last = rows.at(-1);
+  return {
+    rows: rows.filter((r) => r.visible === 1).map(({ visible: _, ...r }) => r as EventRow),
+    last: last ? { startsAt: last.starts_at, id: last.id } : (opts.after ?? null),
+    done: rows.length < opts.size,
+  };
+}
+
+/** Kontexte mehrerer Abschnitte zusammenführen (Schlüssel sind Termin- bzw. Mannschafts-IDs). */
+export function mergeContexts(a: EventContext, b: EventContext): EventContext {
+  return {
+    teams: new Map([...a.teams, ...b.teams]),
+    eventTeams: new Map([...a.eventTeams, ...b.eventTeams]),
+    participants: new Map([...a.participants, ...b.participants]),
+    members: new Map([...a.members, ...b.members]),
+    nominations: new Map([...a.nominations, ...b.nominations]),
+    helpRequests: new Map([...a.helpRequests, ...b.helpRequests]),
+    guardianOf: new Set([...a.guardianOf, ...b.guardianOf]),
+    unexcused: new Set([...a.unexcused, ...b.unexcused]),
+  };
+}
+
+export async function loadVisibleEvent(db: D1Database, actor: Actor, eventId: number): Promise<EventRow | null> {
+  const rows = await all<EventRow>(
+    db,
+    `${EVENT_SELECT} WHERE e.id = ?3 AND (?4 = 1 OR ${VISIBLE_SQL}
+        OR EXISTS (SELECT 1 FROM event_teams ct JOIN team_memberships cm ON cm.team_id = ct.team_id
+                    WHERE ct.event_id = e.id AND cm.person_id = ?5 AND cm.role = 'coach'))`,
+    ...visibilityParams(actor),
+    eventId,
+    actor.isAdmin ? 1 : 0,
+    actor.personId,
+  );
+  return rows[0] ?? null;
+}
+
+export async function loadEvent(db: D1Database, eventId: number): Promise<EventRow | null> {
+  const rows = await all<EventRow>(db, `${EVENT_SELECT} WHERE e.id = ?`, eventId);
+  return rows[0] ?? null;
+}

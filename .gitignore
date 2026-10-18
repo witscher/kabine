@@ -1,0 +1,11 @@
+node_modules/
+dist/
+dist-e2e/
+.wrangler/
+.dev.vars
+.dev.vars.*
+!.dev.vars.example
+.secrets*.json
+test-results/
+playwright-report/
+*.tsbuildinfo
