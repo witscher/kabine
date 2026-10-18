@@ -38,6 +38,7 @@ export async function saveClub(db: D1Database, patch: Partial<ClubSettings>): Pr
   ownAbbr = clubAbbr(next);
   ownShortName = next.shortName;
   ownModules = next.modules;
+  ownSport = next.sport;
   return next;
 }
 
@@ -67,6 +68,7 @@ export async function rememberOrigin(db: D1Database, origin: string): Promise<vo
 let ownAbbr = clubAbbr(DEFAULT_CLUB);
 let ownShortName = DEFAULT_CLUB.shortName;
 let ownModules: ClubModules = DEFAULT_MODULES;
+let ownSport: string = DEFAULT_CLUB.sport;
 
 /** Is a module of this club on? (set with the club context of the request or cron run) */
 export function isModuleOn(id: ModuleId): boolean {
@@ -75,6 +77,11 @@ export function isModuleOn(id: ModuleId): boolean {
 
 export function ownClubAbbr(): string {
   return ownAbbr;
+}
+
+/** Sport of this club (set with the club context of the request or cron run). */
+export function ownClubSport(): string {
+  return ownSport;
 }
 
 export function ownClubShortName(): string {
@@ -86,6 +93,7 @@ export async function enterClubContext(db: D1Database): Promise<ClubSettings> {
   ownAbbr = clubAbbr(club);
   ownShortName = club.shortName;
   ownModules = club.modules;
+  ownSport = club.sport;
   setClubDefaultLocale(club.defaultLocale);
   setTimeZone(club.timeZone);
   return club;

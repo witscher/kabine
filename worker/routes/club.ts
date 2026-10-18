@@ -8,6 +8,7 @@ import { LOCALES } from "../../shared/i18n";
 import { type AppEnv, requireActor } from "../app";
 import { requireAdmin } from "../auth/actor";
 import { loadClub, saveClub } from "../domain/club";
+import { markModulesSeen } from "../domain/news";
 import { holidaySource } from "../domain/holidays";
 import { currentLocale } from "../i18n";
 import { badRequest, forbidden, parse, readJson } from "../lib/http";
@@ -53,6 +54,8 @@ clubRoutes.put("/admin/club", async (c) => {
   const modules: ClubModules = { ...current.modules };
   for (const [k, v] of Object.entries(changed ?? {})) if (typeof v === "boolean") modules[k as ModuleId] = v;
   const { ownerPersonId: _, ...club } = await saveClub(c.env.DB, { ...rest, modules });
+  // Whoever saves the module switches has seen the new ones
+  if (changed) await markModulesSeen(c.env.DB, actor.accountId);
   return c.json(club);
 });
 

@@ -56,7 +56,9 @@ CREATE TABLE accounts (
 , email TEXT, email_verified_at TEXT, coach_mode INTEGER NOT NULL DEFAULT 0 CHECK (coach_mode IN (0, 1)), last_seen_on TEXT,
   locale TEXT,                                  -- chosen language ('en', 'de'), NULL: club default
   phone TEXT,                                   -- only with the SMS module and only if the person enters it
-  phone_verified_at TEXT);
+  phone_verified_at TEXT,
+  changelog_seen TEXT,                          -- admins: last Kabine version whose release notes they saw
+  modules_seen TEXT);                           -- admins: JSON list of module ids they were told about
 CREATE TABLE passkeys (
   id           TEXT PRIMARY KEY,                -- Credential-ID (base64url)
   account_id   INTEGER NOT NULL REFERENCES accounts (id) ON DELETE CASCADE,

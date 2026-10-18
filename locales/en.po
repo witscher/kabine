@@ -332,6 +332,10 @@ msgstr "Create new link"
 msgid "This assignment does not exist."
 msgstr "This assignment does not exist."
 
+#: src/news.tsx
+msgid "Mark as read"
+msgstr "Mark as read"
+
 #: src/howto.tsx
 msgid "Hide news"
 msgstr "Hide news"
@@ -2467,6 +2471,10 @@ msgstr "We send a code to the e-mail address you gave for your access."
 msgid "The squad has not been published yet."
 msgstr "The squad has not been published yet."
 
+#: src/news.tsx
+msgid "New in Kabine"
+msgstr "New in Kabine"
+
 #: src/pages/help.tsx
 msgid "Attach screenshot or image (optional)"
 msgstr "Attach screenshot or image (optional)"
@@ -2983,6 +2991,10 @@ msgstr "Game moved ({teamName})"
 #: src/pages/profile.tsx
 msgid "No parents are involved in the teams of {firstName}. {firstName} accepts and declines on their own and is alone in the chat. So there are no permissions or notifications for {firstName}."
 msgstr "No parents are involved in the teams of {firstName}. {firstName} accepts and declines on their own and is alone in the chat. So there are no permissions or notifications for {firstName}."
+
+#: src/pages/admin.tsx
+msgid "(new)"
+msgstr "(new)"
 
 #: modules/duties/app/admin.tsx
 msgid "Whoever signs up can add something, e.g. which cake."
@@ -5505,6 +5517,10 @@ msgstr "Without a connection to the association: paste a table (for example from
 msgid "Are you coming?"
 msgstr "Are you coming?"
 
+#: src/news.tsx
+msgid "Switch on under Administration → Club"
+msgstr "Switch on under Administration → Club"
+
 #: modules/carpools/app/card.tsx
 #: src/respond.tsx
 msgid "You"
@@ -5529,6 +5545,10 @@ msgstr "Team chats in which you are not a coach or parent"
 #: src/pages/mail-settings.tsx
 msgid "Cloudflare"
 msgstr "Cloudflare"
+
+#: src/news.tsx
+msgid "Kabine updated to {version}"
+msgstr "Kabine updated to {version}"
 
 #: worker/routes/mail.ts
 msgid "Please enter the SMTP server."
@@ -7353,6 +7373,10 @@ msgstr "You are setting up a parent access for the {teamName}."
 msgid "There is already an access for this person. Contact your coach."
 msgstr "There is already an access for this person. Contact your coach."
 
+#: src/news.tsx
+msgid "New module you can switch on:"
+msgstr "New module you can switch on:"
+
 #: worker/routes/join.ts
 msgid "The setup link has already been used."
 msgstr "The setup link has already been used."
@@ -8566,6 +8590,10 @@ msgstr "Your personal access to the {club} app"
 msgid "Can the second parent take part too?"
 msgstr "Can the second parent take part too?"
 
+#: shared/changelog.ts
+msgid "First release of Kabine."
+msgstr "First release of Kabine."
+
 #: src/pages/team.tsx
 msgid "No one in the squad yet"
 msgstr "No one in the squad yet"
@@ -8768,6 +8796,11 @@ msgstr "Me"
 #: modules/carpools/app/card.tsx
 msgid "Who is driving?"
 msgstr "Who is driving?"
+
+#: src/pages/club-settings.tsx
+msgctxt "module"
+msgid "New"
+msgstr "New"
 
 #: src/pages/admin.tsx
 msgid "Without parents"
@@ -9912,6 +9945,7 @@ msgstr "This person no longer exists."
 msgid "You are in the chat as a parent of {parentOf}. If you leave, you will no longer get messages or chat notifications. You can rejoin at any time."
 msgstr "You are in the chat as a parent of {parentOf}. If you leave, you will no longer get messages or chat notifications. You can rejoin at any time."
 
+#: src/news.tsx
 #: src/pages/club-settings.tsx
 msgid "Beta"
 msgstr "Beta"
@@ -10307,6 +10341,10 @@ msgstr "Syncing …"
 msgid "At the season change the members of a group are kept."
 msgstr "At the season change the members of a group are kept."
 
+#: src/news.tsx
+msgid "What is new"
+msgstr "What is new"
+
 #: src/pages/join.tsx
 msgid "Set up your passkey now. The setup link only works a single time."
 msgstr "Set up your passkey now. The setup link only works a single time."
@@ -10524,6 +10562,10 @@ msgstr "Only possible when nobody is assigned any more."
 #: modules/carpools/worker/domain.ts
 msgid "{rest, plural, one {{listAll} and # other person} other {{listAll} and # others}}"
 msgstr "{rest, plural, one {{listAll} and # other person} other {{listAll} and # others}}"
+
+#: src/news.tsx
+msgid "New modules you can switch on:"
+msgstr "New modules you can switch on:"
 
 #: src/pages/chat.tsx
 msgid "Sad"

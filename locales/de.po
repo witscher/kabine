@@ -340,6 +340,11 @@ msgstr "Neuen Link erzeugen"
 msgid "This assignment does not exist."
 msgstr "Diese Zuordnung gibt es nicht."
 
+# ai
+#: src/news.tsx
+msgid "Mark as read"
+msgstr "Als gelesen markieren"
+
 #: src/howto.tsx
 msgid "Hide news"
 msgstr "Neuigkeit ausblenden"
@@ -2528,6 +2533,11 @@ msgstr "Wir schicken dir einen Code an die E-Mail-Adresse, die du bei deinem Zug
 msgid "The squad has not been published yet."
 msgstr "Der Kader ist noch nicht veröffentlicht."
 
+# ai
+#: src/news.tsx
+msgid "New in Kabine"
+msgstr "Neu in Kabine"
+
 #: src/pages/help.tsx
 msgid "Attach screenshot or image (optional)"
 msgstr "Screenshot oder Bild anhängen (optional)"
@@ -3056,6 +3066,11 @@ msgstr "Spiel verlegt ({teamName})"
 #: src/pages/profile.tsx
 msgid "No parents are involved in the teams of {firstName}. {firstName} accepts and declines on their own and is alone in the chat. So there are no permissions or notifications for {firstName}."
 msgstr "In den Mannschaften von {firstName} sind keine Eltern eingebunden. {firstName} sagt selbst zu und ab und ist allein im Chat. Freigaben und Benachrichtigungen für {firstName} gibt es deshalb nicht."
+
+# ai
+#: src/pages/admin.tsx
+msgid "(new)"
+msgstr "(neu)"
 
 #: modules/duties/app/admin.tsx
 msgid "Whoever signs up can add something, e.g. which cake."
@@ -5643,6 +5658,11 @@ msgstr "Ohne Anbindung an den Verband: Füge eine Tabelle ein (zum Beispiel aus 
 msgid "Are you coming?"
 msgstr "Bist du dabei?"
 
+# ai
+#: src/news.tsx
+msgid "Switch on under Administration → Club"
+msgstr "Einschalten unter Verwaltung → Verein"
+
 #: modules/carpools/app/card.tsx
 #: src/respond.tsx
 msgid "You"
@@ -5668,6 +5688,11 @@ msgstr "Mannschaftschats, in denen du nicht Trainer oder Elternteil bist"
 #: src/pages/mail-settings.tsx
 msgid "Cloudflare"
 msgstr "Cloudflare"
+
+# ai
+#: src/news.tsx
+msgid "Kabine updated to {version}"
+msgstr "Kabine auf {version} aktualisiert"
 
 # ai
 #: worker/routes/mail.ts
@@ -7541,6 +7566,11 @@ msgstr "Du richtest einen Elternzugang für die {teamName} ein."
 msgid "There is already an access for this person. Contact your coach."
 msgstr "Für diese Person gibt es schon einen Zugang. Wende dich an deinen Trainer."
 
+# ai
+#: src/news.tsx
+msgid "New module you can switch on:"
+msgstr "Neues Modul, das du einschalten kannst:"
+
 #: worker/routes/join.ts
 msgid "The setup link has already been used."
 msgstr "Der Einrichtungslink wurde bereits verwendet."
@@ -8775,6 +8805,11 @@ msgstr "Dein persönlicher Zugang zur App {club}"
 msgid "Can the second parent take part too?"
 msgstr "Kann auch das zweite Elternteil mitmachen?"
 
+# ai
+#: shared/changelog.ts
+msgid "First release of Kabine."
+msgstr "Erste Version von Kabine."
+
 #: src/pages/team.tsx
 msgid "No one in the squad yet"
 msgstr "Noch niemand im Kader"
@@ -8982,6 +9017,12 @@ msgstr "Ich"
 #: modules/carpools/app/card.tsx
 msgid "Who is driving?"
 msgstr "Wer fährt?"
+
+# ai
+#: src/pages/club-settings.tsx
+msgctxt "module"
+msgid "New"
+msgstr "Neu"
 
 #: src/pages/admin.tsx
 msgid "Without parents"
@@ -10152,6 +10193,7 @@ msgid "You are in the chat as a parent of {parentOf}. If you leave, you will no 
 msgstr "Du bist als Elternteil von {parentOf} im Chat. Wenn du dich abmeldest, bekommst du keine Nachrichten und keine Chat-Benachrichtigungen mehr. Anmelden kannst du dich jederzeit wieder."
 
 # ai
+#: src/news.tsx
 #: src/pages/club-settings.tsx
 msgid "Beta"
 msgstr "Beta"
@@ -10558,6 +10600,11 @@ msgstr "Wird abgeglichen …"
 msgid "At the season change the members of a group are kept."
 msgstr "Beim Saisonwechsel bleiben die Mitglieder einer Gruppe erhalten."
 
+# ai
+#: src/news.tsx
+msgid "What is new"
+msgstr "Neuigkeiten"
+
 #: src/pages/join.tsx
 msgid "Set up your passkey now. The setup link only works a single time."
 msgstr "Richte jetzt deinen Passkey ein. Der Einrichtungslink funktioniert nur ein einziges Mal."
@@ -10780,6 +10827,11 @@ msgstr "Nur möglich, wenn niemand mehr zugeordnet ist."
 #: modules/carpools/worker/domain.ts
 msgid "{rest, plural, one {{listAll} and # other person} other {{listAll} and # others}}"
 msgstr "{rest, plural, one {{listAll} und # weitere Person} other {{listAll} und # weitere}}"
+
+# ai
+#: src/news.tsx
+msgid "New modules you can switch on:"
+msgstr "Neue Module, die du einschalten kannst:"
 
 #: src/pages/chat.tsx
 msgid "Sad"

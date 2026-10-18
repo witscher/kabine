@@ -10,6 +10,7 @@ import { LOCALE_NAMES, LOCALES, type Locale } from "../../shared/i18n";
 import { useQuery } from "../store";
 import { api, errorMessage } from "../api";
 import { ClubMark, loadClub, setClub, useClub } from "../club";
+import { useSession } from "../session";
 import { Button, Field, Notice, SwitchRow, TextField, toast, TopBar, useDocumentTitle } from "../ui";
 import { AdminOnly } from "./admin";
 
@@ -21,6 +22,7 @@ const ALL_PARTS: ClubFormPart[] = ["name", "look", "region", "modules", "privacy
 /** The whole club profile, or some parts of it (steps of the setup wizard). Saving sends all fields. */
 export function ClubProfileForm({ onSaved, submitLabel, parts = ALL_PARTS }: { onSaved?: () => void; submitLabel?: string; parts?: ClubFormPart[] }) {
   const club = useClub();
+  const { refresh: refreshSession } = useSession();
   const show = (p: ClubFormPart) => parts.includes(p);
   const [name, setName] = useState(club.name);
   const [shortName, setShortName] = useState(club.shortName);
@@ -58,6 +60,8 @@ export function ClubProfileForm({ onSaved, submitLabel, parts = ALL_PARTS }: { o
         modules,
       });
       setClub(saved);
+      // Saving the switches marks new modules as seen (dot and "New" badge)
+      void refreshSession();
       toast(t`Saved`);
       onSaved?.();
     } catch (err) {
@@ -271,6 +275,8 @@ export function RegionSection(props: {
  */
 export function ModulesSection({ modules, onChange }: { modules: ClubModules; onChange: (m: ClubModules) => void }) {
   const { sport } = useClub();
+  // Modules the admin has not been told about yet (src/news.tsx) get a "New" badge
+  const fresh = new Set(useSession().me?.news?.newModules.map((m) => m.id) ?? []);
   const offered = MODULES.filter((m) => !("sports" in m) || (m.sports as readonly string[]).includes(sport) || modules[m.id]);
   return (
     <section class="card card-pad stack-sm" aria-label={t`Modules`}>
@@ -280,13 +286,11 @@ export function ModulesSection({ modules, onChange }: { modules: ClubModules; on
       {offered.map((m) => (
         <SwitchRow
           label={
-            (m as ModuleManifest).status === "beta" ? (
-              <>
-                {m.label()} <span class="pill pill-muted">{t`Beta`}</span>
-              </>
-            ) : (
-              m.label()
-            )
+            <>
+              {m.label()}
+              {fresh.has(m.id) ? <span class="pill pill-yes">{t({ message: "New", context: "module" })}</span> : null}
+              {(m as ModuleManifest).status === "beta" ? <span class="pill pill-muted">{t`Beta`}</span> : null}
+            </>
           }
           sub={m.description()}
           checked={modules[m.id]}

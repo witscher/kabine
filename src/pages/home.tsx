@@ -10,6 +10,7 @@ import { FirstStepsCard, InstallBanner, MotdBanner, PushSetupBanner } from "../h
 import { Ball, Icon } from "../icons";
 import { DeclineSheet, deadlineText, HelpRequestCard, PersonResponseRow, ResponseButtons } from "../respond";
 import { useActiveModules } from "../modules";
+import { NewsCard } from "../news";
 import { useMe } from "../session";
 import { useOffline } from "../offline";
 import { useQuery } from "../store";
@@ -527,6 +528,7 @@ export function HomePage() {
       </header>
 
       <div class="content">
+        <NewsCard />
         {!noTeam ? <MotdBanner /> : null}
         <Segmented<When>
           label={t`Period`}

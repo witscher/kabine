@@ -69,7 +69,15 @@ function TabBar() {
     const tab = m.tab?.(me);
     if (tab) tabs.push(tab);
   }
-  if (me.isAdmin) tabs.push({ href: "/verwaltung", label: t({ message: "Admin", context: "navigation" }), icon: "settings", match: (p) => p.startsWith("/verwaltung") || p.startsWith("/team") });
+  if (me.isAdmin)
+    tabs.push({
+      href: "/verwaltung",
+      label: t({ message: "Admin", context: "navigation" }),
+      icon: "settings",
+      match: (p) => p.startsWith("/verwaltung") || p.startsWith("/team"),
+      // Release notes or modules the admin has not seen yet (src/news.tsx)
+      dot: !!me.news,
+    });
   else if (me.manageableTeams.length) tabs.push({ href: "/team", label: t`Team`, icon: "users", match: (p) => p.startsWith("/team") });
   // Players and parents need no administration: help and feedback go there
   else tabs.push({ href: "/hilfe", label: t`Help`, icon: "info", match: (p) => p.startsWith("/hilfe") });

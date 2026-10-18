@@ -2638,6 +2638,29 @@ button.announcement-head {
   color: var(--black);
 }
 
+/* What is new for admins (src/news.tsx) */
+.news-items {
+  margin: 0;
+  padding-left: 20px;
+  display: grid;
+  gap: 4px;
+}
+
+.news-items .pill,
+.switch-row .pill {
+  margin-left: 6px;
+}
+
+/* Dot on a list entry with news (Administration → Club) */
+.list-row .dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--yellow);
+  box-shadow: 0 0 0 2px var(--black);
+  flex: none;
+}
+
 .motd p {
   margin: 0;
 }

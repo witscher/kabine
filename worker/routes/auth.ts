@@ -1,5 +1,7 @@
 import { t } from "@lingui/core/macro";
+import { ownClubSport } from "../domain/club";
 import { helperTeams, refereeRoles } from "../domain/duties";
+import { adminNews, markNewsSeen } from "../domain/news";
 import type { AuthenticationResponseJSON, RegistrationResponseJSON } from "@simplewebauthn/server";
 import { Hono } from "hono";
 import { z } from "zod";
@@ -63,6 +65,8 @@ export async function buildMe(env: Env, actor: Actor): Promise<Me> {
         : null,
     // Language chosen on the account (null: app or club default)
     locale: isLocale(actor.locale) ? actor.locale : null,
+    // Release notes and new modules, for admins in their own view only
+    news: actor.isAdmin && !actor.viewAs ? await adminNews(env.DB, actor.accountId, ownClubSport()) : null,
   };
 }
 
@@ -122,6 +126,14 @@ const clientErrorSchema = z.object({
 authRoutes.post("/client-errors", async (c) => {
   const input = parse(clientErrorSchema, await readJson(c.req.raw));
   console.warn("Passkey error in the browser", { ...input, ua: (c.req.header("user-agent") ?? "").slice(0, 200) });
+  return c.json({ ok: true });
+});
+
+/** The admin has read the release notes and learned about the new modules. */
+authRoutes.post("/me/news-seen", async (c) => {
+  const actor = requireActor(c);
+  if (!actor.isAdmin || actor.viewAs) throw forbidden();
+  await markNewsSeen(c.env.DB, actor.accountId);
   return c.json({ ok: true });
 });
 

@@ -77,6 +77,18 @@ export interface Me {
   adminSwitch: { coachMode: boolean } | null;
   /** Language chosen on the account; null: the app's language or the club default. */
   locale: import("./i18n").Locale | null;
+  /** Admins only: release notes and modules they have not seen yet (src/news.tsx); null when there is nothing new. */
+  news: AdminNews | null;
+}
+
+/** What is new for an admin since they last marked it as read (worker/domain/news.ts). */
+export interface AdminNews {
+  /** Installed version of Kabine. */
+  version: string;
+  /** Release notes of the versions since then, newest first. */
+  entries: { version: string; date: string; items: string[] }[];
+  /** Modules the admin was not told about yet (offered for the club's sport, beta ones included). */
+  newModules: { id: string; label: string; description: string; beta: boolean }[];
 }
 
 export type SessionResponse = { authenticated: false } | { authenticated: true; me: Me };

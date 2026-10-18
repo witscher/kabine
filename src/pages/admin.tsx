@@ -47,7 +47,7 @@ export function AdminPage() {
   const own = (teamsQuery.data?.teams ?? []).filter((x) => coaching.has(x.id));
   const teamCount = teams.data?.teams.length ?? 0;
   const firstName = me.person.firstName;
-  const items: { href: string; icon: IconName; title: string; sub: string; download?: boolean }[] = [
+  const items: { href: string; icon: IconName; title: string; sub: string; download?: boolean; dot?: boolean }[] = [
     {
       href: "/verwaltung/mannschaften",
       icon: "users",
@@ -72,7 +72,7 @@ export function AdminPage() {
     { href: "/chat?alle", icon: "chat", title: t`All chats`, sub: t`Team chats in which you are not a coach or parent` },
     { href: "/verwaltung/sondertermine", icon: "calendar", title: t`Special events and games`, sub: t`Upcoming events of other teams, create a special event` },
     { href: "/verwaltung/einrichtung", icon: "check", title: t`Setup wizard`, sub: t`Go through the setup step by step again` },
-    { href: "/verwaltung/verein", icon: "settings", title: t`Club`, sub: t`Name, colours, logo, region, modules` },
+    { href: "/verwaltung/verein", icon: "settings", title: t`Club`, sub: t`Name, colours, logo, region, modules`, dot: !!me?.news?.newModules.length },
     { href: "/verwaltung/mail", icon: "mail", title: t`E-mail`, sub: t`How the app sends e-mails` },
     { href: "/verwaltung/saisonwechsel", icon: "refresh", title: t`Season change`, sub: t`Once a year, with preview` },
     { href: "/api/admin/export", icon: "download", title: t`Export`, sub: t`All data as a JSON file, for backup`, download: true },
@@ -148,6 +148,14 @@ export function AdminPage() {
                       <span class="title">{i.title}</span>
                       <span class="sub">{i.sub}</span>
                     </span>
+                    {i.dot ? (
+                      <>
+                        <span class="dot" aria-hidden="true" />
+                        <span class="sr-only">
+                          <Trans>(new)</Trans>
+                        </span>
+                      </>
+                    ) : null}
                     <Icon name="chevron" size={18} />
                   </a>
                 )}
