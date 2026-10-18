@@ -138,7 +138,7 @@ Names in the chat are "Kim M.", with "Coach", "Staff", "Stand-in" or "Parent of 
 
 ## Season and defaults
 
-Age groups come from the sport profile (`shared/sports.ts`) with ages relative to the start year of the season. They have no gender; a team has an age group, a gender (female, male, mixed) and a level. The playing time and whether home games need a youth referee are properties of the age group. Admins can change the age groups of a season.
+Age groups come from the sport profile (`sports/<id>.ts`) with ages relative to the start year of the season. They have no gender; a team has an age group, a gender (female, male, mixed) and a level. The playing time and whether home games need a youth referee are properties of the age group. Admins can change the age groups of a season.
 
 Defaults: decline deadline 6 hours, squad at most 20 (see Automatic squad), muting in the chat until lifted. Everything can be changed per team or in the app.
 

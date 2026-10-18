@@ -10,7 +10,7 @@ Contributions with the help of a coding agent are welcome. A person sends the pu
 | --- | --- | --- |
 | A function clubs can switch on (polls, documents, statistics, …) | a module: `modules/<name>/` | [docs/modules.md](docs/modules.md) |
 | Game schedules from another association system (handball360, nuLiga, SAMS, basketball-bund, …) | a fixture connector module | [docs/connectors.md](docs/connectors.md) |
-| Another sport (age classes, playing times, typical helper duties) | `shared/sports.ts` | [docs/modules.md](docs/modules.md#other-extension-points) |
+| Another sport (age classes, playing times, typical helper duties) | a file in `sports/` | [docs/sports.md](docs/sports.md) |
 | Another SMS provider | `modules/sms/worker/provider.ts` | `modules/sms/README.md` |
 | A language or a better translation | `locales/` | [docs/translation.md](docs/translation.md) |
 | A fix or improvement of the core | `worker/`, `src/`, `shared/` | this file, `docs/design.md` |
@@ -20,6 +20,7 @@ Start a module or connector with the generator; it creates the folder, registers
 ```sh
 npm run new -- module polls --label "Polls" --label-de "Umfragen"
 npm run new -- connector nuliga --vendor "nuLiga" --domain nuliga.example --sport handball
+npm run new -- sport basketball --name "Basketball" --name-de "Basketball"
 npm run i18n && npm run check
 ```
 

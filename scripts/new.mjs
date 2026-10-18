@@ -1,6 +1,7 @@
-// Creates a new module or fixture connector from templates/ and registers it.
+// Creates a new module, fixture connector or sport from templates/ and registers it.
 //   npm run new -- module <name> --label "Polls" [--label-de "Umfragen"]
 //   npm run new -- connector <name> --vendor "nuLiga" --domain nuliga.example [--sport handball]
+//   npm run new -- sport <id> --name "Basketball" [--name-de "Basketball"]
 // <name> is the folder (kebab-case, e.g. "match-reports"); the module id is its camelCase form.
 // Afterwards: npm run i18n && npm run check, then fill in README.md and the TODOs. Guide: docs/modules.md.
 import { cpSync, existsSync, readdirSync, readFileSync, renameSync, statSync, writeFileSync } from "node:fs";
@@ -17,8 +18,29 @@ const fail = (msg) => {
   process.exit(1);
 };
 
-if (!["module", "connector"].includes(kind) || !folder) {
-  fail('Usage: npm run new -- module <name> --label "Name" [--label-de "Name"]\n       npm run new -- connector <name> --vendor "Vendor" --domain example.org [--sport handball]');
+if (!["module", "connector", "sport"].includes(kind) || !folder) {
+  fail(
+    'Usage: npm run new -- module <name> --label "Name" [--label-de "Name"]\n       npm run new -- connector <name> --vendor "Vendor" --domain example.org [--sport handball]\n       npm run new -- sport <id> --name "Name" [--name-de "Name"]',
+  );
+}
+
+// A sport is one file in sports/ plus a line in sports/index.ts
+if (kind === "sport") {
+  if (!/^[a-z][a-z0-9]*$/.test(folder)) fail(`"${folder}": use lowercase letters and digits, e.g. basketball`);
+  const file = join("sports", `${folder}.ts`);
+  if (existsSync(file)) fail(`${file} exists already.`);
+  const name = required("name", '"Name"');
+  const values = { __ID__: folder, __NAME__: name, __NAME_DE__: opt("name-de", name) };
+  for (const [k, v] of Object.entries(values)) if (/[`"\\$]/.test(v)) fail(`${k}: no quotes, backslashes or $ please.`);
+  const template = readFileSync(join("templates", "sport", "sport.ts"), "utf8");
+  writeFileSync(file, Object.entries(values).reduce((acc, [k, v]) => acc.replaceAll(k, v), template));
+  const list = readFileSync("sports/index.ts", "utf8");
+  const withImport = list.replace(/(import [^\n]+ from "\.\/[^"]+";\n)(?![\s\S]*import [^\n]+ from "\.\/[^"]+";)/, `$1import ${folder} from "./${folder}";\n`);
+  const withEntry = withImport.replace("  // new sports: above this line", `  ${folder},\n  // new sports: above this line`);
+  if (withEntry === list) fail("Could not update sports/index.ts.");
+  writeFileSync("sports/index.ts", withEntry);
+  console.log(`Created ${file} (sport "${folder}"). Fill in the TODOs, then npm run check (test/sports-contract.test.ts).`);
+  process.exit(0);
 }
 if (!/^[a-z][a-z0-9]*(-[a-z0-9]+)*$/.test(folder)) fail(`"${folder}": use kebab-case, e.g. match-reports`);
 const id = folder.replace(/-([a-z0-9])/g, (_, c) => c.toUpperCase());

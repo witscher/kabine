@@ -85,7 +85,7 @@ modules/carpools/
 
 ## Other extension points
 
-- **Sport:** see `shared/sports.ts` (age classes, playing times, duty types and templates).
+- **Sport:** one file in `sports/`, see [sports.md](sports.md).
 - **SMS provider:** `modules/sms/worker/provider.ts`, see `modules/sms/README.md`.
 - **Fixture connector** for another league system (handball360, nuLiga, SAMS, …): a module of kind `fixtures`, see [connectors.md](connectors.md). Only through permitted access (official API, public export or the association's permission).
 - **Language:** see [translation.md](translation.md).

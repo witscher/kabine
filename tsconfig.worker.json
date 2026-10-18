@@ -6,5 +6,5 @@
     "lib": ["ES2023"],
     "types": ["./worker/worker-configuration.d.ts", "@cloudflare/vitest-pool-workers/types"]
   },
-  "include": ["worker", "shared", "test", "modules/index.ts", "modules/*/module.ts", "modules/*/types.ts", "modules/*/worker", "modules/*/test"]
+  "include": ["worker", "shared", "sports", "test", "modules/index.ts", "modules/*/module.ts", "modules/*/types.ts", "modules/*/worker", "modules/*/test"]
 }

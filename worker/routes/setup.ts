@@ -4,7 +4,7 @@
 import { t } from "@lingui/core/macro";
 import { Hono } from "hono";
 import { z } from "zod";
-import { seasonAround, SPORTS, type SportId } from "../../shared/sports";
+import { seasonAround, SPORT_IDS, SPORTS, type SportId } from "../../shared/sports";
 import { type AppEnv, requireActor } from "../app";
 import { requireAdmin } from "../auth/actor";
 import { loadClub, saveClub } from "../domain/club";
@@ -38,7 +38,7 @@ setupRoutes.get("/admin/setup", async (c) => {
 });
 
 const sportSchema = z.object({
-  sport: z.enum(["handball", "football", "other"]),
+  sport: z.enum(SPORT_IDS),
   /** First day of the current season; default from the sport profile */
   season: z
     .object({ name: z.string().trim().min(1).max(20), startsOn: z.string().regex(/^\d{4}-\d{2}-\d{2}$/), endsOn: z.string().regex(/^\d{4}-\d{2}-\d{2}$/) })

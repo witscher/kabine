@@ -3,6 +3,7 @@ import { t } from "@lingui/core/macro";
 import { Hono } from "hono";
 import { z } from "zod";
 import { type ClubModules, isHexColor, isTimeZone, type ModuleId } from "../../shared/club";
+import { SPORT_IDS } from "../../shared/sports";
 import { MODULES } from "../../shared/modules";
 import { LOCALES } from "../../shared/i18n";
 import { type AppEnv, requireActor } from "../app";
@@ -36,7 +37,7 @@ const clubSchema = z.object({
   contact: z.string().trim().max(200).nullable().optional(),
   sourceUrl: z.string().trim().url().max(300).nullable().optional(),
   defaultLocale: z.enum(LOCALES).optional(),
-  sport: z.enum(["handball", "football", "other"]).optional(),
+  sport: z.enum(SPORT_IDS).optional(),
   country: z.string().regex(/^[A-Z]{2}$/).optional(),
   subdivision: z.string().regex(/^[A-Z]{2}-[A-Z0-9]{1,4}$/).nullable().optional(),
   timeZone: z.string().max(64).refine(isTimeZone, { error: () => t`Unknown time zone.` }).optional(),

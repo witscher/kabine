@@ -50,4 +50,4 @@ The core stores games with `events.external_ref = "<module id>:<game id>"` and h
 1. Ask the association or check the documentation for a permitted access; note it for the README.
 2. Copy the structure above (or use the generator, see `AGENTS.md`), `status: "beta"`, `defaultOn: false`.
 3. Write `parseLink`, `request`, `parse`, record samples, run `npm run check`.
-4. If the sport has no profile yet, add one (`shared/sports.ts`, docs/sports.md) and list the connector in its `connectors`.
+4. If the sport has no profile yet, add one first (`npm run new -- sport <id>`, see [sports.md](sports.md)); the connector names its sports in its manifest (`sports`).
