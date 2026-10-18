@@ -170,7 +170,15 @@ Gebaut mit Cloudflare Workers, D1, Durable Objects und Queues, Hono, Preact und 
 
 ## Mitmachen
 
-Beiträge als Pull Request sind willkommen: Übersetzungen, Sportarten, Anbindungen an Spielplan-Systeme, SMS-Anbieter und eigene Module. Wo was liegt und wie man ein Modul hinzufügt: [docs/modules.md](docs/modules.md) (Englisch), Regeln und Ablauf: [CONTRIBUTING.md](CONTRIBUTING.md).
+Kabine ist für Beiträge mit Coding-Agent gebaut: Wer eine Idee hat, kann mit Claude Code, Codex, Cursor oder einem anderen Agenten ein Modul, eine Spielplan-Anbindung (handball360, nuLiga, SAMS, …) oder eine Sportart beisteuern. Jeder Beitrag ist ein eigener Ordner oder eine Datei, ein Generator legt das Gerüst an, und Vertragstests zeigen sofort, was fehlt:
+
+```sh
+npm run new -- module polls --label "Polls" --label-de "Umfragen"
+npm run new -- connector nuliga --vendor "nuLiga" --domain nuliga.example --sport handball
+npm run new -- sport basketball --name "Basketball"
+```
+
+Der Einstieg für Menschen und Agenten ist [AGENTS.md](AGENTS.md) (Englisch). Den Pull Request schickt ein Mensch, der ihn lokal ausprobiert hat und für Rückfragen da ist. Ideen und Wünsche gehören in die [Issues](https://github.com/witscher/kabine/issues/new/choose), Sicherheitsprobleme nach [SECURITY.md](SECURITY.md).
 
 ## Lizenz
 

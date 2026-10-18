@@ -170,7 +170,15 @@ Built with Cloudflare Workers, D1, Durable Objects and Queues, Hono, Preact and 
 
 ## Contributing
 
-Pull requests are welcome: translations, sports, connectors to fixture systems, SMS providers and new modules. Where things live and how to add a module: [docs/modules.md](docs/modules.md); rules and process: [CONTRIBUTING.md](CONTRIBUTING.md).
+Kabine is built for contributions made with a coding agent: if you have an idea, you can add a module, a fixture connector (handball360, nuLiga, SAMS, …) or a sport with Claude Code, Codex, Cursor or another agent. Every contribution is a folder or a file of its own, a generator creates the skeleton, and contract tests show at once what is missing:
+
+```sh
+npm run new -- module polls --label "Polls" --label-de "Umfragen"
+npm run new -- connector nuliga --vendor "nuLiga" --domain nuliga.example --sport handball
+npm run new -- sport basketball --name "Basketball"
+```
+
+The entry point for people and agents is [AGENTS.md](AGENTS.md). A person sends the pull request, has tried it locally and answers questions. Ideas and requests go into the [issues](https://github.com/witscher/kabine/issues/new/choose), security problems to [SECURITY.md](SECURITY.md).
 
 ## Licence
 
