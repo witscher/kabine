@@ -11,6 +11,18 @@ const catalogs: Record<Locale, () => Promise<{ messages: Record<string, unknown>
   de: () => import("../locales/de.po"),
 };
 
+/** A link with ?lang=de or ?lang=en (the demo links on the website) sets the language on this device. */
+function fromLink(): Locale | null {
+  try {
+    const v = new URLSearchParams(location.search).get("lang");
+    if (!isLocale(v)) return null;
+    localStorage.setItem(STORAGE_KEY, v);
+    return v;
+  } catch {
+    return null;
+  }
+}
+
 function stored(): Locale | null {
   try {
     const v = localStorage.getItem(STORAGE_KEY);
@@ -25,7 +37,7 @@ function stored(): Locale | null {
  * else the club default (cached club profile).
  */
 export function initialLocale(clubDefault: Locale | null): Locale {
-  return stored() ?? matchLocale(typeof navigator === "undefined" ? [] : navigator.languages) ?? clubDefault ?? "en";
+  return fromLink() ?? stored() ?? matchLocale(typeof navigator === "undefined" ? [] : navigator.languages) ?? clubDefault ?? "en";
 }
 
 export async function activateLocale(locale: Locale): Promise<void> {

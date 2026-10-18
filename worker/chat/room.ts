@@ -226,6 +226,15 @@ export class ChatRoom extends DurableObject<Env> {
         const id = await this.addMessage("announcement", personId, text, body.notify === true ? [ALL] : []);
         return Response.json({ ok: true, id });
       }
+      case "/post": {
+        // A message of a person, only used to fill the public demo (worker/demo/reset.ts)
+        const personId = Number(body.personId);
+        const text = typeof body.text === "string" ? body.text.trim().slice(0, MAX_LENGTH) : "";
+        if (!personId || !text) return Response.json({ ok: false }, { status: 400 });
+        this.sql.exec("INSERT OR IGNORE INTO authors (person_id, name, label) VALUES (?, ?, NULL)", personId, String(body.name ?? ""));
+        const id = await this.addMessage("user", personId, text);
+        return Response.json({ ok: true, id });
+      }
       case "/forget": {
         // Person was deleted: messages stay anonymous, reactions disappear
         const ids = Array.isArray(body.personIds) ? body.personIds.filter((x): x is number => typeof x === "number") : [];

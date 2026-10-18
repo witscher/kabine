@@ -18,6 +18,8 @@ It asks for one secret, `ADMIN_BOOTSTRAP_TOKEN`. Choose a password of at least 1
 
 In the Worker's settings under *Build*, check that the deploy command is `npm run deploy`. It applies the database migrations before uploading the new version. With a plain `npx wrangler deploy` the database stays on the old schema.
 
+**Data in Europe:** the button does not let you choose where the database is stored. If your privacy policy promises the EU, create the database by hand first (`npx wrangler d1 create kabine --jurisdiction eu`, see "Installing by hand") and use that database for the Worker. The team chat already lives in the EU jurisdiction.
+
 ## 2. Add your domain
 
 In the Cloudflare dashboard open *Workers & Pages → kabine → Settings → Domains & Routes* and add a custom domain, for example `app.your-club.org`. Cloudflare creates the DNS record and the certificate.
@@ -68,7 +70,7 @@ Without the button, with Node.js 22 or newer and a Cloudflare API token:
 ```sh
 git clone https://github.com/witscher/kabine && cd kabine
 npm ci
-npx wrangler d1 create kabine          # put the database_id into wrangler.jsonc
+npx wrangler d1 create kabine --jurisdiction eu   # keeps the data in the EU; put the database_id into wrangler.jsonc
 npx wrangler kv namespace create KV    # put the id into wrangler.jsonc
 npx wrangler queues create kabine-push
 npx wrangler secret put ADMIN_BOOTSTRAP_TOKEN

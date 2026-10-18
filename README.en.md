@@ -46,12 +46,15 @@ Kabine is deliberately not a platform and not in the app stores.
 
 Most users are children and teenagers. Of players and parents Kabine stores only first name, last name and the players' year of birth. No address, no date of birth, no phone number unless someone enters one for text messages.
 
+- E-mail address and phone number are **entirely optional** and only used for signing in. Other users, coaches included, never see them. Admins see only other admins' e-mail addresses (required for admins) and, in the full data export, the e-mail addresses of the accounts; phone numbers never.
 - Reasons for declining are visible only to coaches and admins and are deleted 60 days after the event.
 - Parents of minors decide what their child may do in the app (accept, decline, read and write in the chat) and approve profile pictures before others see them.
 - Other parents and players see names shortened ("Kim M.") in helper duties and carpools.
 - Team chats always include the coaches, who can mute members and remove messages. There are no private messages.
 - No tracking, no advertising, no third-party scripts or fonts. The app loads nothing from other servers.
 - Leaving the club removes access at once and all data at the next season change at the latest. Chats, events and responses are deleted every season.
+
+**Cloudflare and where the data lives:** The app runs on Cloudflare's infrastructure (a processor; the club signs Cloudflare's data processing agreement in its own account). The D1 database should be **created explicitly in Europe** (`wrangler d1 create kabine --jurisdiction eu`); the team chat already lives in the EU jurisdiction. The app's code runs at Cloudflare locations near the users, while data is stored in the EU. The "Deploy to Cloudflare" dialog does not guarantee this: if you need it, create the database by hand first ([docs/install.md](docs/install.md)).
 
 The full list of stored data, who sees it and when it is deleted, plus a template for the club's privacy policy: [docs/privacy.md](docs/privacy.md).
 

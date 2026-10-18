@@ -6,6 +6,8 @@ interface AppSecrets {
   VAPID_PRIVATE_KEY?: string;
   /** Recipient of "Help and feedback" (worker/routes/feedback.ts). Not in the repository. */
   FEEDBACK_TO?: string;
+  /** Only in the demo environment: allows POST /api/demo/reset (worker/demo/routes.ts). */
+  DEMO_RESET_TOKEN?: string;
 }
 
 interface Env extends AppSecrets {}

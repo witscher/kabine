@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kabine – die freie Mannschafts-App für Vereine</title>
+<meta name="description" content="Kabine ist eine freie Web-App für Amateursportvereine: Training und Spiele mit Zu- und Absagen, Kader, Mannschaftschat, Helferdienste und Fahrgemeinschaften. Jeder Verein betreibt seine eigene Installation. Jetzt als Spieler, Elternteil, Trainer oder Admin ausprobieren.">
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<link rel="alternate" hreflang="de" href="https://kabine.dev/">
+<link rel="alternate" hreflang="en" href="https://kabine.dev/en/">
+<link rel="alternate" hreflang="x-default" href="https://kabine.dev/">
+<link rel="stylesheet" href="/style.css">
+<script src="/lang.js" defer></script>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="/"><img src="/icon.svg" alt="" width="30" height="30">Kabine</a>
+    <nav aria-label="Hauptmenü">
+      <a href="#funktionen">Funktionen</a>
+      <a class="keep" href="#demo">Demo</a>
+      <a href="#bilder">Bilder</a>
+      <a href="#datenschutz">Datenschutz</a>
+      <a href="#installation">Installation</a>
+      <a class="lang" href="/en/" hreflang="en" data-lang="en">EN</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+<div class="hero">
+  <div class="wrap">
+    <div>
+      <p class="eyebrow">Frei · Open Source · für jeden Verein</p>
+      <h1>Mannschaftsorganisation <mark>einfach</mark>. Kostenlos und ohne Werbung – für immer.</h1>
+      <p class="lead">Training und Spiele mit Zu- und Absagen, Kader, Mannschaftschat, Helferdienste und Fahrgemeinschaften. Für Spieler, Eltern und Trainer, auf dem Handy installierbar, ohne App Store.</p>
+      <div class="cta">
+        <a class="btn primary" href="#demo">Demo ausprobieren</a>
+        <a class="btn ghost" href="https://github.com/witscher/kabine">Quellcode auf GitHub</a>
+      </div>
+      <ul class="facts">
+        <li>Eine Installation pro Verein</li>
+        <li>Daten im eigenen Cloudflare-Konto</li>
+        <li>Deutsch und Englisch</li>
+        <li>AGPL-3.0</li>
+      </ul>
+    </div>
+    <div class="hero-shots" aria-hidden="true">
+      <img src="/shots/de/01-events.png" alt="" width="390" height="844">
+      <img src="/shots/de/03-coach-responses.png" alt="" width="390" height="844">
+    </div>
+  </div>
+</div>
+
+<section id="funktionen">
+  <div class="wrap">
+    <p class="kicker">Funktionen</p>
+    <h2>Alles, was eine Mannschaft Woche für Woche braucht.</h2>
+    <p class="sub">Entstanden in einem Handballverein, in dem mehrere hundert Spieler, Eltern und Trainer die App jeden Tag nutzen. Kabine ist dieselbe App für jeden Verein und jede Sportart.</p>
+    <div class="grid g4">
+      <div class="card">
+        <h3>Spieler</h3>
+        <p>Sehen Trainings, Spiele und Sondertermine, sagen mit einem Tipp zu oder ab und werden benachrichtigt, wenn sich etwas ändert. Trainings gelten als zugesagt, bis jemand absagt: niemand muss jede Woche antworten.</p>
+      </div>
+      <div class="card">
+        <h3>Eltern</h3>
+        <p>Sagen für ihre Kinder zu und ab, lesen im Mannschaftschat mit, übernehmen Helferdienste und bieten Plätze für Auswärtsspiele an. Sie entscheiden, was ihr Kind in der App darf.</p>
+      </div>
+      <div class="card">
+        <h3>Trainer</h3>
+        <p>Legen die Trainingszeiten einmal pro Saison fest. Die App erzeugt die Trainings und lässt Ferien und Feiertage aus. Kader nominieren, absagen, verschieben, per Link einladen, sehen, wer noch nicht erreichbar ist.</p>
+      </div>
+      <div class="card">
+        <h3>Admins</h3>
+        <p>Richten den Verein mit einem Assistenten ein: Sprache, Region, Sportart, Mannschaften, Module, E-Mail. Verwalten Personen und machen einmal im Jahr den Saisonwechsel.</p>
+      </div>
+    </div>
+    <div class="grid g3">
+      <div class="card"><h3>Helferdienste</h3><p>Kuchen, Kasse, Schiedsrichter: Dienste für Heimspiele mit Vorlagen und Live-Plan, Eltern tragen sich selbst ein.</p></div>
+      <div class="card"><h3>Fahrgemeinschaften</h3><p>Eltern bieten Plätze an, Spieler buchen. Die Gruppe bekommt rechtzeitig vor dem Spiel den Treffpunkt.</p></div>
+      <div class="card"><h3>Module für den Verein</h3><p>Spielpläne aus handball4all, Spiele aus Tabellen, Kinder- und Jugendschiedsrichter, Anmeldecodes per SMS. Alles zuschaltbar.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="demo" class="demo">
+  <div class="wrap">
+    <p class="kicker">Live-Demo</p>
+    <h2>Probier es aus, in jeder Rolle.</h2>
+    <p class="sub">Die Demo zeigt den erfundenen Verein „SV Musterstadt“ mit Handball-Mannschaften, Terminen, Spielen, Chat, Helferdiensten und einer Fahrgemeinschaft. Ein Tipp auf einen Knopf, und du bist drin: ohne Registrierung, ohne Passkey.</p>
+    <div class="grid g4">
+      <div class="card">
+        <span class="who">Spielerin</span>
+        <h3>Lea Beispiel</h3>
+        <p>wD-Jugend. Nächstes Training zu- oder absagen, einen Platz im Auto zum Auswärtsspiel buchen, im Chat schreiben.</p>
+        <a class="btn primary" href="https://handball.kabine.dev/api/demo/login/player?lang=de">Als Spielerin öffnen</a>
+      </div>
+      <div class="card">
+        <span class="who">Elternteil</span>
+        <h3>Petra Muster</h3>
+        <p>Mutter von Mia. Für Mia zusagen, einen Kuchen für das Heimspiel übernehmen, Plätze im Auto anbieten.</p>
+        <a class="btn primary" href="https://handball.kabine.dev/api/demo/login/parent?lang=de">Als Elternteil öffnen</a>
+      </div>
+      <div class="card">
+        <span class="who">Trainerin</span>
+        <h3>Clara Coach</h3>
+        <p>Trainerin der wD und der Damen 1. Rückmeldungen mit Gründen sehen, Kader nominieren, Spiele anlegen.</p>
+        <a class="btn primary" href="https://handball.kabine.dev/api/demo/login/coach?lang=de">Als Trainerin öffnen</a>
+      </div>
+      <div class="card">
+        <span class="who">Admin</span>
+        <h3>Alex Admin</h3>
+        <p>Verwaltung des Vereins: Mannschaften, Personen, Module, Einrichtungsassistent, Saisonwechsel.</p>
+        <a class="btn primary" href="https://handball.kabine.dev/api/demo/login/admin?lang=de">Als Admin öffnen</a>
+      </div>
+    </div>
+    <p class="note">Alle Besucher teilen sich dieselben vier Zugänge, alle Namen und Daten sind erfunden. Jede Nacht um 3:00 Uhr wird die Demo komplett zurückgesetzt. Bitte trage keine echten Daten ein. Am besten auf dem Handy öffnen, genau dafür ist die App gemacht. Dieselben Links gibt es <a href="/en/#demo">auf Englisch</a>.</p>
+  </div>
+</section>
+
+<section id="bilder">
+  <div class="wrap">
+    <p class="kicker">Bilder</p>
+    <h2>So sieht Kabine aus.</h2>
+    <p class="sub">Aufnahmen der Demo, in der Reihenfolge, in der eine Woche im Verein abläuft.</p>
+    <div class="gallery">
+      <figure class="shot"><img loading="lazy" src="/shots/de/01-events.png" width="390" height="844" alt="Nächste Termine einer Spielerin mit dem nächsten Training und ihrer Zusage"><figcaption>Nächste Termine</figcaption></figure>
+      <figure class="shot"><img loading="lazy" src="/shots/de/02-respond-for-child.png" width="390" height="844" alt="Eine Mutter sagt für ihre Tochter zum Training zu"><figcaption>Eltern sagen für ihr Kind zu</figcaption></figure>
+      <figure class="shot"><img loading="lazy" src="/shots/de/03-coach-responses.png" width="390" height="844" alt="Die Trainerin sieht, wer zu- und wer abgesagt hat, mit Gründen"><figcaption>Rückmeldungen für Trainer</figcaption></figure>
+      <figure class="shot"><img loading="lazy" src="/shots/de/04-squad.png" width="390" height="844" alt="Kader für ein Spiel nominieren"><figcaption>Kader nominieren</figcaption></figure>
+      <figure class="shot"><img loading="lazy" src="/shots/de/05-chat.png" width="390" height="844" alt="Mannschaftschat mit Trainerin, Mutter und Spielerin"><figcaption>Mannschaftschat</figcaption></figure>
+      <figure class="shot"><img loading="lazy" src="/shots/de/06-carpool.png" width="390" height="844" alt="Fahrgemeinschaft zu einem Auswärtsspiel"><figcaption>Fahrgemeinschaft</figcaption></figure>
+      <figure class="shot"><img loading="lazy" src="/shots/de/07-helper-duties.png" width="390" height="844" alt="Helferdienste für ein Heimspiel"><figcaption>Helferdienste</figcaption></figure>
+      <figure class="shot"><img loading="lazy" src="/shots/de/08-team.png" width="390" height="844" alt="Mannschaftsseite mit Kader und Trainern"><figcaption>Mannschaft</figcaption></figure>
+      <figure class="shot"><img loading="lazy" src="/shots/de/09-administration.png" width="390" height="844" alt="Verwaltung des Vereins"><figcaption>Verwaltung</figcaption></figure>
+      <figure class="shot"><img loading="lazy" src="/shots/de/10-setup-wizard.png" width="390" height="844" alt="Einrichtungsassistent für neue Vereine"><figcaption>Einrichtungsassistent</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<section id="datenschutz" class="alt">
+  <div class="wrap two">
+    <div>
+      <p class="kicker">Datenschutz und Jugendschutz</p>
+      <h2>Die meisten Nutzer sind Kinder.</h2>
+      <p class="sub">Von Spielern und Eltern speichert Kabine nur Vorname, Nachname und bei Spielern den Jahrgang. Keine Adresse, kein Geburtsdatum, keine Telefonnummer, außer jemand trägt selbst eine für SMS ein.</p>
+      <ul class="ticks">
+        <li><b>E-Mail und Telefonnummer sind rein optional</b> und nur für die Anmeldung da. Andere Nutzer, auch Trainer, sehen sie nie. Admins sehen nur die E-Mail anderer Admins und im Datenexport die E-Mail-Adressen der Konten, Telefonnummern nie.</li>
+        <li><b>Absagegründe</b> sehen nur Trainer und Admins und werden 60 Tage nach dem Termin gelöscht.</li>
+        <li><b>Eltern entscheiden</b>, was ihr Kind in der App darf, und geben Profilbilder frei.</li>
+        <li><b>Namen abgekürzt</b> bei Helferdiensten und Fahrgemeinschaften („Kim M.“).</li>
+        <li><b>Trainer sind in jedem Chat dabei.</b> Private Nachrichten gibt es nicht.</li>
+        <li><b>Kein Tracking, keine Werbung,</b> keine fremden Skripte oder Schriften.</li>
+        <li><b>Cloudflare als Auftragsverarbeiter</b> im eigenen Konto des Vereins. Die Datenbank sollte ausdrücklich in Europa angelegt werden (<code>--jurisdiction eu</code>), der Chat liegt bereits in der EU.</li>
+      </ul>
+    </div>
+    <div>
+      <p class="kicker">Bewusst eine interne App</p>
+      <h2>Ein Verein, eine Installation.</h2>
+      <ul class="ticks">
+        <li><b>Die Daten bleiben im Verein.</b> Jeder Verein betreibt seine Kopie im eigenen Cloudflare-Konto. Kein zentraler Server, und die Entwickler haben auf keine Vereinsdaten Zugriff.</li>
+        <li><b>Kein App Store.</b> Adresse öffnen, auf den Startbildschirm legen, fertig. Mit Benachrichtigungen, auch auf dem iPhone. Jedes Update erreicht alle sofort.</li>
+        <li><b>Nur mit Einladung.</b> Keine öffentliche Registrierung. Angemeldet wird mit Passkey (Face ID, Fingerabdruck, Displaysperre), keine Passwörter.</li>
+        <li><b>Schlank.</b> Mitgliedsbeiträge, Buchhaltung und die Vereinswebsite bleiben, wo sie sind.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section id="installation">
+  <div class="wrap two">
+    <div>
+      <p class="kicker">Installation</p>
+      <h2>In etwa 30 Minuten im eigenen Konto.</h2>
+      <p class="sub">Nötig sind ein Cloudflare-Konto (der kostenlose Tarif reicht für einen üblichen Verein), ein GitHub-Konto und am besten eine Domain des Vereins. Der Knopf legt die eigene Kopie und alle Ressourcen an, man wählt nur ein Passwort für den ersten Admin. Updates kommen als Pull Request in die eigene Kopie.</p>
+      <div class="cta">
+        <a class="btn primary on-light" href="https://deploy.workers.cloudflare.com/?url=https://github.com/witscher/kabine">Bei Cloudflare installieren</a>
+        <a class="btn ghost on-light" href="https://github.com/witscher/kabine/blob/main/docs/install.md">Anleitung (Englisch)</a>
+      </div>
+    </div>
+    <div>
+      <p class="kicker">Freie Software</p>
+      <h2>AGPL-3.0, für alle Vereine.</h2>
+      <p class="sub">Kabine darf genutzt, verändert und weitergegeben werden. Wer eine veränderte Fassung für andere betreibt, muss ihnen den Quellcode anbieten. Übersetzungen, Sportarten und Anbindungen an Spielplan-Systeme sind willkommen.</p>
+      <div class="cta">
+        <a class="btn ghost on-light" href="https://github.com/witscher/kabine">github.com/witscher/kabine</a>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>Kabine · freie Software unter AGPL-3.0</span>
+    <a href="/impressum/">Impressum und Datenschutz</a>
+    <a href="https://github.com/witscher/kabine">GitHub</a>
+    <a class="push" href="/en/" hreflang="en" data-lang="en">English</a>
+  </div>
+</footer>
+</body>
+</html>

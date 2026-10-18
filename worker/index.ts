@@ -1,5 +1,7 @@
 import { createBaseApp } from "./app";
 import { handleScheduled } from "./cron";
+import { demoGuard, demoRoutes } from "./demo/routes";
+import { demoLocalHour, resetDemo } from "./demo/reset";
 import type { PushJob } from "./domain/notify";
 import { maintenanceState } from "./lib/maintenance";
 import { handleQueue } from "./queue";
@@ -35,7 +37,9 @@ export { DutyHub } from "./duties/hub";
 export const app = createBaseApp();
 // env: "staging" makes the app show a banner (see src/env-banner.tsx)
 app.get("/api/health", async (c) => c.json({ ok: true, env: c.env.APP_ENV || "production", maintenance: !!(await maintenanceState(c.env.KV)) }));
+app.use("/api/*", demoGuard);
 for (const routes of [
+  demoRoutes((request, env, ctx) => app.fetch(request, env, ctx)),
   clubRoutes,
   authRoutes,
   emailRoutes,
@@ -65,8 +69,16 @@ for (const routes of [
   app.route("/api", routes);
 }
 
+/** The public demo (APP_ENV "demo") starts over at 3:00 local time, before the usual hourly run. */
+async function runScheduled(env: Env, ctx: ExecutionContext, scheduledTime: number): Promise<void> {
+  if (env.APP_ENV === "demo" && demoLocalHour(scheduledTime) === 3) {
+    await resetDemo(env, (request) => Promise.resolve(app.fetch(request, env, ctx)), scheduledTime);
+  }
+  await handleScheduled(env, scheduledTime);
+}
+
 export default {
   fetch: app.fetch,
-  scheduled: (controller, env, ctx) => ctx.waitUntil(handleScheduled(env, controller.scheduledTime)),
+  scheduled: (controller, env, ctx) => ctx.waitUntil(runScheduled(env, ctx, controller.scheduledTime)),
   queue: (batch, env) => handleQueue(batch, env),
 } satisfies ExportedHandler<Env, PushJob>;

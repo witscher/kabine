@@ -2,6 +2,12 @@
 
 Decisions not covered by `docs/plan.md`, with reasons. Newest first.
 
+## Public demo and project website (October 2026)
+
+`handball.kabine.dev` is the environment `demo` of `wrangler.jsonc` (Worker `kabine-demo`, own D1, KV, queue, Durable Objects; `APP_ENV=demo`). Visitors sign in by link per role (`/api/demo/login/<player|parent|coach|admin>?lang=de|en`), without passkeys. Four shared accounts, so everything that could lock others out or leave the demo (passkeys, e-mail, SMS, owner handover, invitations, feedback) is blocked (`worker/demo/routes.ts`). At 3:00 Berlin time the cron wipes database, KV and chats and fills them again from `seed/demo.sql` plus scenes made through the app's own API (`worker/demo/reset.ts`), so games and responses are always dated relative to today and the season moves on by itself. The cron runs hourly and checks the Berlin hour, which covers summer and winter time. Secret `DEMO_RESET_TOKEN` allows a manual reset (`npm run demo:reset`). The demo is deployed from `main` by `.github/workflows/deploy-demo.yml` (needs the repository secrets `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, `DEMO_RESET_TOKEN`), so it always runs the latest version.
+
+`kabine.dev` is a static Worker (`site/`, built by `npm run site:build`, German at `/`, English at `/en/`) with the demo screenshots and links. The publisher's details for the legal notice come from `site/legal.json`, which stays out of the repository.
+
 ## Optional joint training (October 2026)
 
 Some coaches let their team join another team's training by choice. In a joint training time ("together with") each team is mandatory or optional; a coach can change it for a single training, and that choice stays when the plan is generated again (`event_teams.optional_manual`). At least one team always trains as usual.

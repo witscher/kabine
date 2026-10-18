@@ -6776,6 +6776,11 @@ msgstr "Welche Dienste gibt es bei unseren Spielen, und wie bekommt ein Sonderte
 msgid "Before your own team in game titles, e.g. “SVM wD – HSG Gegner”. Empty: initials of the short name."
 msgstr "Vor der eigenen Mannschaft in Spieltiteln, z. B. „SVM wD – HSG Gegner“. Leer: Anfangsbuchstaben des Kurznamens."
 
+# ai
+#: worker/demo/routes.ts
+msgid "This is not available in the demo."
+msgstr "Das ist in der Demo nicht verfügbar."
+
 #: src/pages/club-settings.tsx
 msgid "Colours and logo"
 msgstr "Farben und Logo"
@@ -8155,6 +8160,9 @@ msgid "Important: everyone uses the link only once, for themselves. Please selec
 msgstr "Wichtig: Jede und jeder nutzt den Link nur einmal, für sich selbst. Bitte nur den eigenen Namen auswählen."
 
 #: worker/app.ts
+#: worker/demo/routes.ts
+#: worker/demo/routes.ts
+#: worker/demo/routes.ts
 msgid "Unknown endpoint."
 msgstr "Unbekannter Endpunkt."
 
@@ -9570,6 +9578,11 @@ msgstr "Abgeglichen {when}"
 msgid "If you use the app from the home screen, it is best to enter the code there directly."
 msgstr "Nutzt du die App vom Home-Bildschirm, gib den Code am besten direkt dort ein."
 
+# ai
+#: src/env-banner.tsx
+msgid "Demo · invented club, data is reset every night at 3:00"
+msgstr "Demo · erfundener Verein, die Daten werden jede Nacht um 3:00 Uhr zurückgesetzt"
+
 #: src/pages/duty-admin.tsx
 msgid "Who helps: {who}"
 msgstr "Wer hilft: {who}"
@@ -10690,3 +10703,4 @@ msgstr "Chat schreiben"
 #: worker/routes/events.ts
 msgid "In one time block the end is before the start."
 msgstr "Bei einem Zeitblock liegt das Ende vor dem Beginn."
+

@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kabine – the free team app for sports clubs</title>
+<meta name="description" content="Kabine is a free web app for amateur sports clubs: trainings and games with yes/no responses, squads, team chat, helper duties and carpools. Each club runs its own installation. Try it now as a player, parent, coach or admin.">
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<link rel="alternate" hreflang="de" href="https://kabine.dev/">
+<link rel="alternate" hreflang="en" href="https://kabine.dev/en/">
+<link rel="alternate" hreflang="x-default" href="https://kabine.dev/">
+<link rel="stylesheet" href="/style.css">
+<script src="/lang.js" defer></script>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="/en/"><img src="/icon.svg" alt="" width="30" height="30">Kabine</a>
+    <nav aria-label="Main menu">
+      <a href="#features">Features</a>
+      <a class="keep" href="#demo">Demo</a>
+      <a href="#screens">Screenshots</a>
+      <a href="#privacy">Privacy</a>
+      <a href="#install">Install</a>
+      <a class="lang" href="/" hreflang="de" data-lang="de">DE</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+<div class="hero">
+  <div class="wrap">
+    <div>
+      <p class="eyebrow">Free · open source · for any club</p>
+      <h1>Team organisation <mark>made simple</mark>. Free and ad-free – forever.</h1>
+      <p class="lead">Trainings and games with yes/no responses, squads, team chat, helper duties and carpools. For players, parents and coaches, installable on the phone, no app store.</p>
+      <div class="cta">
+        <a class="btn primary" href="#demo">Try the demo</a>
+        <a class="btn ghost" href="https://github.com/witscher/kabine">Source on GitHub</a>
+      </div>
+      <ul class="facts">
+        <li>One installation per club</li>
+        <li>Data in your own Cloudflare account</li>
+        <li>English and German</li>
+        <li>AGPL-3.0</li>
+      </ul>
+    </div>
+    <div class="hero-shots" aria-hidden="true">
+      <img src="/shots/en/01-events.png" alt="" width="390" height="844">
+      <img src="/shots/en/03-coach-responses.png" alt="" width="390" height="844">
+    </div>
+  </div>
+</div>
+
+<section id="features">
+  <div class="wrap">
+    <p class="kicker">Features</p>
+    <h2>Everything a team needs, week after week.</h2>
+    <p class="sub">Started in a handball club where several hundred players, parents and coaches use it every day. Kabine is the same app for any club and any sport.</p>
+    <div class="grid g4">
+      <div class="card">
+        <h3>Players</h3>
+        <p>See trainings, games and special events, say yes or no with one tap, and get notified when something changes. Trainings count as accepted until someone declines: nobody has to answer every week.</p>
+      </div>
+      <div class="card">
+        <h3>Parents</h3>
+        <p>Respond for their children, follow the team chat, take helper duties and offer seats for away games. They decide what their child may do in the app.</p>
+      </div>
+      <div class="card">
+        <h3>Coaches</h3>
+        <p>Set the training times once a season. The app creates the trainings and skips holidays. Nominate squads, cancel, move, invite by link, see who cannot be reached yet.</p>
+      </div>
+      <div class="card">
+        <h3>Admins</h3>
+        <p>Set up the club with a wizard: language, region, sport, teams, modules, e-mail. Manage people and do the season change once a year.</p>
+      </div>
+    </div>
+    <div class="grid g3">
+      <div class="card"><h3>Helper duties</h3><p>Cake, cash desk, referees: duties for home games with templates and a live plan; parents sign up themselves.</p></div>
+      <div class="card"><h3>Carpools</h3><p>Parents offer seats, players book one. The group gets the meeting point in time before the game.</p></div>
+      <div class="card"><h3>Modules for the club</h3><p>Fixtures from handball4all, games from spreadsheets, youth referees, sign-in codes by SMS. All switchable.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="demo" class="demo">
+  <div class="wrap">
+    <p class="kicker">Live demo</p>
+    <h2>Try it in every role.</h2>
+    <p class="sub">The demo shows an invented club, “SV Musterstadt”, with handball teams, events, games, chat, helper duties and a carpool. One tap and you are in: no registration, no passkey. The club is German, so names of halls, teams and age groups stay German while the app speaks English.</p>
+    <div class="grid g4">
+      <div class="card">
+        <span class="who">Player</span>
+        <h3>Lea Beispiel</h3>
+        <p>wD youth. Accept or decline the next training, book a seat for the away game, write in the chat.</p>
+        <a class="btn primary" href="https://handball.kabine.dev/api/demo/login/player?lang=en">Open as player</a>
+      </div>
+      <div class="card">
+        <span class="who">Parent</span>
+        <h3>Petra Muster</h3>
+        <p>Mia’s mother. Respond for Mia, take a cake for the home game, offer seats in the car.</p>
+        <a class="btn primary" href="https://handball.kabine.dev/api/demo/login/parent?lang=en">Open as parent</a>
+      </div>
+      <div class="card">
+        <span class="who">Coach</span>
+        <h3>Clara Coach</h3>
+        <p>Coach of the wD and Damen 1. See responses with reasons, nominate squads, create games.</p>
+        <a class="btn primary" href="https://handball.kabine.dev/api/demo/login/coach?lang=en">Open as coach</a>
+      </div>
+      <div class="card">
+        <span class="who">Admin</span>
+        <h3>Alex Admin</h3>
+        <p>Run the club: teams, people, modules, setup wizard, season change.</p>
+        <a class="btn primary" href="https://handball.kabine.dev/api/demo/login/admin?lang=en">Open as admin</a>
+      </div>
+    </div>
+    <p class="note">All visitors share the same four accounts, and all names and data are invented. Every night at 3:00 am (Berlin time) the demo is reset completely. Please do not enter real data. Best opened on a phone, which is what the app is made for. The same links <a href="/#demo">in German</a>.</p>
+  </div>
+</section>
+
+<section id="screens">
+  <div class="wrap">
+    <p class="kicker">Screenshots</p>
+    <h2>What Kabine looks like.</h2>
+    <p class="sub">Pictures of the demo, in the order a week in the club goes by.</p>
+    <div class="gallery">
+      <figure class="shot"><img loading="lazy" src="/shots/en/01-events.png" width="390" height="844" alt="Upcoming events of a player with the next training and her response"><figcaption>Upcoming events</figcaption></figure>
+      <figure class="shot"><img loading="lazy" src="/shots/en/02-respond-for-child.png" width="390" height="844" alt="A mother accepts the training for her daughter"><figcaption>Parents respond for their child</figcaption></figure>
+      <figure class="shot"><img loading="lazy" src="/shots/en/03-coach-responses.png" width="390" height="844" alt="A coach sees who accepted and who declined, with reasons"><figcaption>Responses for coaches</figcaption></figure>
+      <figure class="shot"><img loading="lazy" src="/shots/en/04-squad.png" width="390" height="844" alt="Nominating the squad for a game"><figcaption>Nominate the squad</figcaption></figure>
+      <figure class="shot"><img loading="lazy" src="/shots/en/05-chat.png" width="390" height="844" alt="Team chat with coach, parent and player"><figcaption>Team chat</figcaption></figure>
+      <figure class="shot"><img loading="lazy" src="/shots/en/06-carpool.png" width="390" height="844" alt="Carpool to an away game"><figcaption>Carpool</figcaption></figure>
+      <figure class="shot"><img loading="lazy" src="/shots/en/07-helper-duties.png" width="390" height="844" alt="Helper duties for a home game"><figcaption>Helper duties</figcaption></figure>
+      <figure class="shot"><img loading="lazy" src="/shots/en/08-team.png" width="390" height="844" alt="Team page with squad and coaches"><figcaption>Team</figcaption></figure>
+      <figure class="shot"><img loading="lazy" src="/shots/en/09-administration.png" width="390" height="844" alt="Club administration"><figcaption>Administration</figcaption></figure>
+      <figure class="shot"><img loading="lazy" src="/shots/en/10-setup-wizard.png" width="390" height="844" alt="Setup wizard for new clubs"><figcaption>Setup wizard</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<section id="privacy" class="alt">
+  <div class="wrap two">
+    <div>
+      <p class="kicker">Privacy and youth protection</p>
+      <h2>Most users are children.</h2>
+      <p class="sub">Of players and parents Kabine stores only first name, last name and, for players, the birth year. No address, no date of birth, no phone number, unless someone enters one for SMS.</p>
+      <ul class="ticks">
+        <li><b>E-mail and phone number are entirely optional</b> and only for signing in. Other users, coaches included, never see them. Admins see only other admins' e-mail addresses and, in the data export, the accounts' e-mail addresses; phone numbers never.</li>
+        <li><b>Decline reasons</b> are visible to coaches and admins only and deleted 60 days after the event.</li>
+        <li><b>Parents decide</b> what their child may do in the app and approve profile pictures.</li>
+        <li><b>Abbreviated names</b> for helper duties and carpools (“Kim M.”).</li>
+        <li><b>Coaches are in every chat.</b> There are no private messages.</li>
+        <li><b>No tracking, no ads,</b> no third-party scripts or fonts.</li>
+        <li><b>Cloudflare as processor</b> in the club's own account. The database should be created explicitly in Europe (<code>--jurisdiction eu</code>); the chat already lives in the EU.</li>
+      </ul>
+    </div>
+    <div>
+      <p class="kicker">Deliberately an internal app</p>
+      <h2>One club, one installation.</h2>
+      <ul class="ticks">
+        <li><b>The data stays with the club.</b> Each club runs its copy in its own Cloudflare account. No central server, and the developers have no access to any club’s data.</li>
+        <li><b>No app store.</b> Open the address, add it to the home screen, done. With notifications, on the iPhone too. Every update reaches everyone at once.</li>
+        <li><b>Invitation only.</b> No public sign-up. People sign in with a passkey (Face ID, fingerprint, screen lock), no passwords.</li>
+        <li><b>Lean.</b> Membership fees, bookkeeping and the club website stay where they are.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section id="install">
+  <div class="wrap two">
+    <div>
+      <p class="kicker">Installation</p>
+      <h2>About 30 minutes, in your own account.</h2>
+      <p class="sub">You need a Cloudflare account (the free plan is enough for a typical club), a GitHub account and ideally a domain of the club. The button creates your own copy and all resources; you only choose a password for the first admin. Updates arrive as pull requests in your copy.</p>
+      <div class="cta">
+        <a class="btn primary on-light" href="https://deploy.workers.cloudflare.com/?url=https://github.com/witscher/kabine">Install on Cloudflare</a>
+        <a class="btn ghost on-light" href="https://github.com/witscher/kabine/blob/main/docs/install.md">Installation guide</a>
+      </div>
+    </div>
+    <div>
+      <p class="kicker">Free software</p>
+      <h2>AGPL-3.0, for every club.</h2>
+      <p class="sub">Kabine may be used, changed and shared. Anyone who runs a changed version for others must offer them the source code. Translations, sports and connectors to fixture systems are welcome.</p>
+      <div class="cta">
+        <a class="btn ghost on-light" href="https://github.com/witscher/kabine">github.com/witscher/kabine</a>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>Kabine · free software under AGPL-3.0</span>
+    <a href="/en/legal/">Legal notice and privacy</a>
+    <a href="https://github.com/witscher/kabine">GitHub</a>
+    <a class="push" href="/" hreflang="de" data-lang="de">Deutsch</a>
+  </div>
+</footer>
+</body>
+</html>

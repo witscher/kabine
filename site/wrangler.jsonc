@@ -1,0 +1,12 @@
+{
+  "$schema": "../node_modules/wrangler/config-schema.json",
+  // Project website on kabine.dev: static files only, built by `npm run site:build` into site/dist.
+  // Deploy: npm run site:deploy
+  "name": "kabine-site",
+  "compatibility_date": "2026-08-20",
+  "assets": { "directory": "./dist", "not_found_handling": "404-page" },
+  "workers_dev": false,
+  "preview_urls": false,
+  "routes": [{ "pattern": "kabine.dev", "custom_domain": true }],
+  "observability": { "enabled": true }
+}

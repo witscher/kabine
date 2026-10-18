@@ -6626,6 +6626,10 @@ msgstr "Which duties are there at our games, and how does a special event get he
 msgid "Before your own team in game titles, e.g. “SVM wD – HSG Gegner”. Empty: initials of the short name."
 msgstr "Before your own team in game titles, e.g. “SVM wD – HSG Gegner”. Empty: initials of the short name."
 
+#: worker/demo/routes.ts
+msgid "This is not available in the demo."
+msgstr "This is not available in the demo."
+
 #: src/pages/club-settings.tsx
 msgid "Colours and logo"
 msgstr "Colours and logo"
@@ -7981,6 +7985,9 @@ msgid "Important: everyone uses the link only once, for themselves. Please selec
 msgstr "Important: everyone uses the link only once, for themselves. Please select only your own name."
 
 #: worker/app.ts
+#: worker/demo/routes.ts
+#: worker/demo/routes.ts
+#: worker/demo/routes.ts
 msgid "Unknown endpoint."
 msgstr "Unknown endpoint."
 
@@ -9371,6 +9378,10 @@ msgstr "Synced {when}"
 #: worker/domain/email-login.ts
 msgid "If you use the app from the home screen, it is best to enter the code there directly."
 msgstr "If you use the app from the home screen, it is best to enter the code there directly."
+
+#: src/env-banner.tsx
+msgid "Demo · invented club, data is reset every night at 3:00"
+msgstr "Demo · invented club, data is reset every night at 3:00"
 
 #: src/pages/duty-admin.tsx
 msgid "Who helps: {who}"

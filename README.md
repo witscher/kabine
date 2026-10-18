@@ -46,12 +46,15 @@ Kabine ist bewusst keine Plattform und nicht in den App Stores.
 
 Die meisten Nutzer sind Kinder und Jugendliche. Von Spielern und Eltern speichert Kabine nur Vorname, Nachname und bei Spielern den Jahrgang. Keine Adresse, kein Geburtsdatum, keine Telefonnummer, außer jemand trägt selbst eine für SMS ein.
 
+- E-Mail-Adresse und Telefonnummer sind **rein optional** und nur für die Anmeldung gedacht. Andere Nutzer, auch Trainer, sehen sie nie. Admins sehen nur die E-Mail-Adresse anderer Admins (für Admins Pflicht) und im vollständigen Datenexport die E-Mail-Adressen der Konten, Telefonnummern nie.
 - Absagegründe sehen nur Trainer und Admins. Sie werden 60 Tage nach dem Termin gelöscht.
 - Eltern von Minderjährigen legen fest, was ihr Kind in der App darf (zusagen, absagen, im Chat lesen und schreiben), und geben Profilbilder frei, bevor andere sie sehen.
 - Andere Eltern und Spieler sehen Namen bei Helferdiensten und Fahrgemeinschaften nur abgekürzt („Kim M.“).
 - In jedem Mannschaftschat sind die Trainer dabei. Sie können Mitglieder stummschalten und Nachrichten entfernen. Private Nachrichten gibt es nicht.
 - Kein Tracking, keine Werbung, keine fremden Skripte oder Schriften. Die App lädt nichts von anderen Servern.
 - Wer den Verein verlässt, verliert den Zugang sofort; alle Daten sind spätestens zum nächsten Saisonwechsel gelöscht. Chats, Termine und Rückmeldungen werden jede Saison gelöscht.
+
+**Cloudflare und Standort der Daten:** Die App läuft auf der Infrastruktur von Cloudflare (Auftragsverarbeiter, der Verein schließt den Auftragsverarbeitungsvertrag im eigenen Konto ab). Die D1-Datenbank sollte **ausdrücklich in Europa angelegt** werden (`wrangler d1 create kabine --jurisdiction eu`), der Mannschaftschat liegt bereits in der EU-Jurisdiktion. Der Code der App läuft an Cloudflare-Standorten in der Nähe der Nutzer, gespeichert wird in der EU. Im „Deploy to Cloudflare“-Dialog gibt es keine Garantie dafür: Wer sie braucht, legt die Datenbank vorher von Hand an ([docs/install.md](docs/install.md)).
 
 Die vollständige Liste der gespeicherten Daten, wer sie sieht und wann sie gelöscht werden, dazu eine Vorlage für die Datenschutzerklärung des Vereins: [docs/privacy.de.md](docs/privacy.de.md).
 

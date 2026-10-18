@@ -39,5 +39,34 @@
     "consumers": [{ "queue": "kabine-push", "max_batch_size": 20, "max_batch_timeout": 5, "max_retries": 3 }]
   },
   // One run per hour; worker/cron.ts decides what is due.
-  "triggers": { "crons": ["17 * * * *"] }
+  "triggers": { "crons": ["17 * * * *"] },
+  // Public demo on handball.kabine.dev: own database, KV, queue and Durable Objects, so it never touches
+  // anything else. Starts over every night at 3:00 Berlin time (worker/demo/reset.ts).
+  // Build and deploy: npm run deploy:demo. Secret: DEMO_RESET_TOKEN (manual reset, see docs/operation.md).
+  "env": {
+    "demo": {
+      "name": "kabine-demo",
+      "vars": { "RP_ID": "handball.kabine.dev", "ORIGIN": "https://handball.kabine.dev", "APP_ENV": "demo", "MAIL_FROM": "" },
+      "workers_dev": false,
+      "send_email": [{ "name": "EMAIL" }],
+      "routes": [{ "pattern": "handball.kabine.dev", "custom_domain": true }],
+      "d1_databases": [
+        { "binding": "DB", "database_name": "kabine-demo", "database_id": "6b179e9d-95b7-4748-93ae-056c30d4940d", "migrations_dir": "migrations" }
+      ],
+      "kv_namespaces": [{ "binding": "KV", "id": "77deaed831fb4f2e8379a274cd3cce7b" }],
+      "durable_objects": {
+        "bindings": [
+          { "name": "CHAT", "class_name": "ChatRoom" },
+          { "name": "DUTY_HUB", "class_name": "DutyHub" }
+        ]
+      },
+      "migrations": [{ "tag": "v1", "new_sqlite_classes": ["ChatRoom", "DutyHub"] }],
+      "queues": {
+        "producers": [{ "binding": "PUSH_QUEUE", "queue": "kabine-demo-push" }],
+        "consumers": [{ "queue": "kabine-demo-push", "max_batch_size": 20, "max_batch_timeout": 5, "max_retries": 3 }]
+      },
+      // On the hour; worker/index.ts resets the demo when it is 3:00 in Berlin
+      "triggers": { "crons": ["0 * * * *"] }
+    }
+  }
 }

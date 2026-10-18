@@ -39,6 +39,11 @@ export async function postAnnouncement(env: Env, teamIds: number[], author: { pe
   await Promise.all(teamIds.map((teamId) => callRoom(env, teamId, "/announce", { ...author, text, notify })));
 }
 
+/** A message of a person in one chat; only the public demo fills its chats this way. */
+export async function postChatMessage(env: Env, teamId: number, author: { personId: number; name: string }, text: string): Promise<void> {
+  await callRoom(env, teamId, "/post", { ...author, text });
+}
+
 export async function markFormerInChats(env: Env, teamIds: number[], personId: number): Promise<void> {
   await Promise.all(teamIds.map((teamId) => callRoom(env, teamId, "/former", { personId })));
 }
