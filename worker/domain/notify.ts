@@ -1,5 +1,8 @@
 import type { NotificationTopic } from "../../shared/types";
 import { parentsInChargeSql } from "../auth/actor";
+import { isLocale } from "../../shared/i18n";
+import { shortDateIn } from "../../shared/dates";
+import { currentLocale, withLocale } from "../i18n";
 import { all, list } from "../lib/db";
 
 export interface PushPayload {
@@ -10,6 +13,13 @@ export interface PushPayload {
   /** Gleiche Tags ersetzen sich auf dem Gerät (z. B. ein Chatraum). */
   tag?: string;
 }
+
+/**
+ * Content of a push: a function that builds title and body. It runs once per language of the
+ * recipients (withLocale), so texts written with t`…` arrive in each person's language.
+ * A plain payload is sent as is (texts without words, e.g. a chat message).
+ */
+export type PushContent = PushPayload | (() => PushPayload);
 
 export interface PushJob {
   accountIds: number[];
@@ -83,24 +93,33 @@ export function pushConfigured(env: Env): boolean {
 export async function enqueuePush(
   env: Env,
   accountIds: number[],
-  payload: PushPayload,
+  content: PushContent,
   opts: { exclude?: number[] } = {},
 ): Promise<number> {
   if (!pushConfigured(env)) return 0;
   const exclude = new Set(opts.exclude ?? []);
   const unique = [...new Set(accountIds)].filter((id) => !exclude.has(id));
   if (!unique.length) return 0;
-  const withDevices = await all<{ account_id: number }>(
+  const withDevices = await all<{ account_id: number; locale: string | null }>(
     env.DB,
-    "SELECT DISTINCT account_id FROM push_subscriptions WHERE account_id IN (SELECT value FROM json_each(?))",
+    `SELECT a.id AS account_id, a.locale FROM accounts a
+      WHERE a.id IN (SELECT value FROM json_each(?)) AND EXISTS (SELECT 1 FROM push_subscriptions s WHERE s.account_id = a.id)`,
     list(unique),
   );
-  const targets = withDevices.map((r) => r.account_id);
-  if (!targets.length) return 0;
+  if (!withDevices.length) return 0;
+  // One payload per language of the recipients
+  const byLocale = new Map<string, number[]>();
+  for (const r of withDevices) {
+    const key = isLocale(r.locale) ? r.locale : "";
+    byLocale.set(key, [...(byLocale.get(key) ?? []), r.account_id]);
+  }
   const jobs: { body: PushJob }[] = [];
-  for (let i = 0; i < targets.length; i += 50) jobs.push({ body: { accountIds: targets.slice(i, i + 50), payload } });
-  await env.PUSH_QUEUE.sendBatch(jobs);
-  return targets.length;
+  for (const [locale, targets] of byLocale) {
+    const payload = typeof content === "function" ? withLocale(locale || null, content) : content;
+    for (let i = 0; i < targets.length; i += 50) jobs.push({ body: { accountIds: targets.slice(i, i + 50), payload } });
+  }
+  for (let i = 0; i < jobs.length; i += 100) await env.PUSH_QUEUE.sendBatch(jobs.slice(i, i + 100));
+  return withDevices.length;
 }
 
 /** Push an Personen und ihre Eltern. teamIds: die betroffenen Mannschaften (für die Zuständigkeit der Eltern). */
@@ -108,7 +127,7 @@ export async function notifyPersons(
   env: Env,
   personIds: number[],
   topic: NotificationTopic,
-  payload: PushPayload,
+  payload: PushContent,
   opts: { teamIds: readonly number[]; exclude?: number[] },
 ): Promise<number> {
   if (!pushConfigured(env)) return 0;
@@ -118,20 +137,16 @@ export async function notifyPersons(
 export async function notifyCoaches(
   env: Env,
   teamIds: number[],
-  payload: PushPayload,
+  payload: PushContent,
   opts: { exclude?: number[] } = {},
 ): Promise<number> {
   if (!pushConfigured(env)) return 0;
   return enqueuePush(env, await recipientsForCoaches(env.DB, teamIds), payload, opts);
 }
 
-const WEEKDAYS = ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"];
-
-/** "Fr 02.10." für eine lokale Zeit 'YYYY-MM-DDTHH:MM'. */
+/** de "Fr 02.10.", en "Fri 2 Oct" for a local time 'YYYY-MM-DDTHH:MM', in the current language. */
 export function shortDate(local: string): string {
-  const [y, m, d] = local.slice(0, 10).split("-").map(Number) as [number, number, number];
-  const wd = new Date(Date.UTC(y, m - 1, d)).getUTCDay();
-  return `${WEEKDAYS[wd]} ${String(d).padStart(2, "0")}.${String(m).padStart(2, "0")}.`;
+  return shortDateIn(currentLocale(), local);
 }
 
 export function shortTime(local: string): string {

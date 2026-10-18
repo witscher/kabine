@@ -2,7 +2,7 @@ import { useLocation } from "preact-iso";
 import { useEffect, useState } from "preact/hooks";
 import type { TeamRef } from "../../shared/types";
 import { api } from "../api";
-import { fullDate, todayLocal, WEEKDAY_SHORT_ISO } from "../format";
+import { fullDate, todayLocal, weekdayShortIso } from "../format";
 import { Icon } from "../icons";
 import { invalidate, useQuery } from "../store";
 import { Button, confirmDialog, ErrorBox, Field, Notice, Segmented, Sheet, Spinner, TextField, toast, TopBar, useDocumentTitle } from "../ui";
@@ -47,8 +47,8 @@ interface PlansResponse {
 function RuleCard({ rule, ownTeamId, onEdit, onDelete }: { rule: RuleView; ownTeamId: number; onEdit?: () => void; onDelete?: () => void }) {
   return (
     <div class="rule-card">
-      <div class="rule-day" aria-label={WEEKDAY_SHORT_ISO[rule.weekday]}>
-        {WEEKDAY_SHORT_ISO[rule.weekday]!.toUpperCase()}
+      <div class="rule-day" aria-label={weekdayShortIso(rule.weekday)}>
+        {weekdayShortIso(rule.weekday).toUpperCase()}
       </div>
       <div class="rule-main">
         <div class="rule-time">
@@ -218,7 +218,7 @@ function RuleEditor(props: { initial: DraftRule | null; ownTeamId: number; allTe
       <div class="weekdays" role="group" aria-label="Wochentag">
         {[1, 2, 3, 4, 5, 6, 7].map((d) => (
           <button type="button" aria-pressed={weekday === d ? "true" : "false"} onClick={() => setWeekday(d)}>
-            {WEEKDAY_SHORT_ISO[d]}
+            {weekdayShortIso(d)}
           </button>
         ))}
       </div>

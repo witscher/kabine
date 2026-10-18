@@ -1,0 +1,14 @@
+{
+  "today": "heute",
+  "tomorrow": "morgen",
+  "yesterday": "gestern",
+  "in {diff} days": "in {diff} Tagen",
+  "in {weeks} weeks": "in {weeks} Wochen",
+  "{days} days ago": "vor {days} Tagen",
+  "Today": "Heute",
+  "Yesterday": "Gestern",
+  "never": "noch nie",
+  "just now": "gerade eben",
+  "{mins} min. ago": "vor {mins} Min.",
+  "{hours} hrs ago": "vor {hours} Std."
+}

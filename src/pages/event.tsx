@@ -4,7 +4,7 @@ import { api, errorMessage } from "../api";
 import { CarpoolCard } from "../carpool";
 import { dutyLines, neededText } from "../duties";
 import { BlockSheet } from "../duty-blocks";
-import { longDate, personName, shortName, stamp, time, timeRange, WEEKDAY_ADVERB } from "../format";
+import { longDate, personName, shortName, stamp, time, timeRange, weekdayPlural } from "../format";
 import { Icon } from "../icons";
 import { GameReportLink, isLiveWindow, isReportWindow, LiveTickerLink } from "../live";
 import { DeclineSheet, deadlineText, PersonResponseRow, QUICK_REASONS, ResponseButtons, respondedByText, sendResponse } from "../respond";
@@ -398,7 +398,7 @@ function CoachView({ event, onChanged }: { event: EventDetail; onChanged: () => 
             <div class="row-gap" style={{ justifyContent: "space-between" }}>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <strong style={{ color: p.status === "inactive" ? "var(--text-3)" : undefined }}>{nameFor(p)}</strong>
-                <div class="small muted">{p.status === "inactive" ? "Inaktiv" : `Dauerhaft abwesend: ${WEEKDAY_ADVERB[weekdayOf(event.startsAt)]}`}</div>
+                <div class="small muted">{p.status === "inactive" ? "Inaktiv" : `Dauerhaft abwesend: ${weekdayPlural(weekdayOf(event.startsAt))}`}</div>
               </div>
               {p.status === "inactive" ? (
                 <Button
@@ -779,7 +779,7 @@ function ParticipantSheet({ event, p, onClose, onDone }: { event: EventDetail; p
       {event.kind === "training" && event.ruleId != null ? (
         <div class="list">
           <SwitchRow
-            label={`Dauerhaft abwesend (${WEEKDAY_ADVERB[wd]})`}
+            label={`Dauerhaft abwesend (${weekdayPlural(wd)})`}
             sub="Gilt für alle Trainings dieser Trainingszeit. Einzelne Zusagen bleiben möglich."
             checked={p.hasStandingAbsence}
             onChange={async (active) => {
