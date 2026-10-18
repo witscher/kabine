@@ -24,7 +24,9 @@
     "deploy": "npm run build && wrangler d1 migrations apply DB --remote && wrangler deploy",
     "maintenance:on": "node scripts/maintenance.mjs on",
     "maintenance:off": "node scripts/maintenance.mjs off",
-    "maintenance:status": "node scripts/maintenance.mjs status"
+    "maintenance:status": "node scripts/maintenance.mjs status",
+    "i18n": "lingui extract --clean && node tools/i18n-fill.mjs",
+    "i18n:check": "lingui extract --clean && node tools/i18n-fill.mjs --check"
   },
   "dependencies": {
     "@fontsource/barlow": "^5.3.0",

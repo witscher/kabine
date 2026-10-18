@@ -25,9 +25,17 @@ msgstr "Nicht gefunden."
 msgid "<0>Tip:</0> In the browser menu, choose <1>Add to Home screen</1> or <2>Install app</2>. Then {club} starts like an app."
 msgstr "<0>Tipp:</0> Über das Browsermenü <1>Zum Startbildschirm hinzufügen</1> bzw. <2>App installieren</2> wählen. Dann startet {club} wie eine App."
 
+#: src/format.ts
+msgid "in {weeks} weeks"
+msgstr "in {weeks} Wochen"
+
 #: src/pages/login.tsx
 msgid "Welcome"
 msgstr "Willkommen"
+
+#: src/format.ts
+msgid "in {diff} days"
+msgstr "in {diff} Tagen"
 
 #: worker/lib/http.ts
 msgid "Invalid JSON."
@@ -45,6 +53,10 @@ msgstr "{club} ist eine interne Vereins-App. Kommt kein Code, ist diese Adresse 
 msgid "This browser does not support passkeys. Please use a current smartphone with Safari or Chrome."
 msgstr "Dieser Browser unterstützt keine Passkeys. Bitte nutze ein aktuelles Smartphone mit Safari oder Chrome."
 
+#: src/format.ts
+msgid "Today"
+msgstr "Heute"
+
 #: src/pages/login.tsx
 msgid "The passkey is the <0>safest way to sign in</0>: Face ID, fingerprint or your screen lock, without a password."
 msgstr "Der Passkey ist die <0>sicherste Anmeldung</0>: Face ID, Fingerabdruck oder deine Gerätesperre, ohne Passwort."
@@ -53,6 +65,11 @@ msgstr "Der Passkey ist die <0>sicherste Anmeldung</0>: Face ID, Fingerabdruck o
 msgid "Code by e-mail"
 msgstr "Code per E-Mail"
 
+#: src/format.ts
+#: src/format.ts
+msgid "{days} days ago"
+msgstr "vor {days} Tagen"
+
 #: worker/lib/http.ts
 msgid "Invalid input."
 msgstr "Ungültige Eingabe."
@@ -60,6 +77,10 @@ msgstr "Ungültige Eingabe."
 #: src/pages/login.tsx
 msgid "Sign in with passkey"
 msgstr "Mit Passkey anmelden"
+
+#: src/format.ts
+msgid "{hours} hrs ago"
+msgstr "vor {hours} Std."
 
 #: src/pages/login.tsx
 msgid "<0>Install as an app:</0> In Safari, tap <1>Share</1> at the bottom, then <2>Add to Home Screen</2>. Only then do notifications work on the iPhone."
@@ -73,9 +94,21 @@ msgstr "Code senden"
 msgid "You do not have permission to do this."
 msgstr "Dafür fehlt dir die Berechtigung."
 
+#: src/format.ts
+msgid "yesterday"
+msgstr "gestern"
+
 #: src/pages/login.tsx
 msgid "If you have no access yet or have changed your device, your coach will give you a new invitation link."
 msgstr "Falls du noch keinen Zugang hast oder dein Gerät gewechselt hast, bekommst du von deinem Trainer einen neuen Einladungslink."
+
+#: src/format.ts
+msgid "{mins} min. ago"
+msgstr "vor {mins} Min."
+
+#: src/format.ts
+msgid "tomorrow"
+msgstr "morgen"
 
 #: src/pages/login.tsx
 msgid "Events, responses and the team chat in one place."
@@ -101,11 +134,27 @@ msgstr "Bitte melde dich an."
 msgid "<0>No access yet?</0> Your coach sends you an invitation link, for example in the team's WhatsApp group."
 msgstr "<0>Noch kein Zugang?</0> Deine Trainerin oder dein Trainer schickt dir einen Einladungslink, zum Beispiel in der WhatsApp-Gruppe der Mannschaft."
 
+#: src/format.ts
+msgid "today"
+msgstr "heute"
+
 #: src/pages/login.tsx
 msgid "E-mail address"
 msgstr "E-Mail-Adresse"
 
+#: src/format.ts
+msgid "just now"
+msgstr "gerade eben"
+
+#: src/format.ts
+msgid "Yesterday"
+msgstr "Gestern"
+
 #: src/pages/login.tsx
 msgid "Sign in by e-mail"
 msgstr "Anmeldung per E-Mail"
+
+#: src/format.ts
+msgid "never"
+msgstr "noch nie"
 
