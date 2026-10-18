@@ -2,7 +2,7 @@
 
 Free team app for sports clubs (PWA): events, attendance, squads, team chat, push, helper duties, carpools, passkey login. One installation per club on Cloudflare. Licence AGPL-3.0.
 
-Read `docs/plan.md` before every task: decisions, milestones, open points. Decisions not covered there go into `docs/decisions.md` with a reason.
+Read `docs/plan.md` before every task: decisions, milestones, open points. Changes from the original club app that still need porting are listed in `docs/upstream-tasks.md`. Decisions not covered there go into `docs/decisions.md` with a reason.
 
 ## Platform
 
