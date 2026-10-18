@@ -1,3 +1,5 @@
+import { plural, t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 import { useLocation } from "preact-iso";
 import { useState } from "preact/hooks";
 import type { EventDetail } from "../../shared/types";
@@ -22,11 +24,11 @@ import { useLocations } from "./event";
 type NewKind = "game" | "special";
 
 /**
- * Termin anlegen. Aus einer Mannschaft heraus: Spiel ohne handball4all (Freundschaftsspiel,
- * Turnier) oder Sondertermin. Unter Verwaltung nur Sondertermine (auch für mehrere Mannschaften).
+ * Create an event. From within a team: a game without handball4all (friendly,
+ * tournament) or a special event. Under Administration only special events (also for several teams).
  */
 export function SpecialEventPage({ id }: { id?: string }) {
-  useDocumentTitle("Termin anlegen");
+  useDocumentTitle(t`Create event`);
   const [kind, setKind] = useState<NewKind>("special");
   const me = useMe();
   const { route } = useLocation();
@@ -38,39 +40,43 @@ export function SpecialEventPage({ id }: { id?: string }) {
   const [locationId, setLocationId] = useState<number | null>(null);
   const [notes, setNotes] = useState("");
   const teams = me.manageableTeams;
-  // Aus einer Mannschaft heraus ist sie vorausgewählt, ebenso wenn es nur eine gibt
+  // From within a team it is preselected, likewise if there is only one
   const [teamIds, setTeamIds] = useState<number[]>(
     id ? [Number(id)] : teams.length === 1 ? [teams[0]!.id] : [],
   );
   const [clubWide, setClubWide] = useState(false);
   const [blocks, setBlocks] = useState<NewBlock[]>([]);
-  // Gruppen haben nur Sondertermine
+  // Groups only have special events
   const isGroup = !!id && me.groupIds.includes(Number(id));
 
   return (
     <main class="page">
       <TopBar
-        title={kind === "game" ? "Spiel anlegen" : "Sondertermin"}
-        kicker={clubWide ? "Ganzer Verein" : "Termin anlegen"}
+        title={kind === "game" ? t`Create game` : t`Special event`}
+        kicker={clubWide ? t`Whole club` : t`Create event`}
         back={id ? `/team/${id}` : "/verwaltung/sondertermine"}
       />
       <div class="content">
-        {isGroup ? <p class="small muted">Z. B. Treffen oder Fortbildung. Alle Mitglieder der Gruppe sind eingeladen und sagen zu oder ab.</p> : null}
+        {isGroup ? (
+          <p class="small muted">
+            <Trans>E.g. a meeting or a training course. All members of the group are invited and accept or decline.</Trans>
+          </p>
+        ) : null}
         {id && !isGroup ? (
           <>
             <Segmented<NewKind>
-              label="Art des Termins"
+              label={t`Kind of event`}
               value={kind}
               onChange={setKind}
               options={[
-                { value: "game", label: "Spiel" },
-                { value: "special", label: "Sondertermin" },
+                { value: "game", label: t`Game` },
+                { value: "special", label: t`Special event` },
               ]}
             />
             <p class="small muted">
               {kind === "game"
-                ? "Ein Spiel, das nicht bei handball4all steht, z. B. Freundschaftsspiel oder Turnier. Mit Kader, Treffpunkt und Helferdiensten wie bei jedem Spiel."
-                : "Z. B. Fotoshooting, Feier oder Elternabend. Alle der Mannschaft sind eingeladen und sagen zu oder ab."}
+                ? t`A game that is not on handball4all, e.g. a friendly or a tournament. With squad, meeting point and helper duties like every game.`
+                : t`E.g. a photo shoot, a party or a parents' evening. Everyone in the team is invited and accepts or declines.`}
             </p>
           </>
         ) : null}
@@ -80,13 +86,13 @@ export function SpecialEventPage({ id }: { id?: string }) {
         {kind === "special" ? (
           <>
             <TextField
-              label="Titel"
+              label={t`Title`}
               value={title}
               onInput={setTitle}
               maxLength={80}
-              placeholder="z. B. Saisonabschluss, Turnier, Fotoshooting"
+              placeholder={t`e.g. end of season, tournament, photo shoot`}
             />
-            <Field label="Datum">
+            <Field label={t`Date`}>
               {(fid) => (
                 <input
                   id={fid}
@@ -98,7 +104,7 @@ export function SpecialEventPage({ id }: { id?: string }) {
               )}
             </Field>
             <div class="grid-2">
-              <Field label="Beginn">
+              <Field label={t`Start`}>
                 {(fid) => (
                   <input
                     id={fid}
@@ -111,7 +117,7 @@ export function SpecialEventPage({ id }: { id?: string }) {
                   />
                 )}
               </Field>
-              <Field label="Ende (optional)">
+              <Field label={t`End (optional)`}>
                 {(fid) => (
                   <input
                     id={fid}
@@ -125,7 +131,7 @@ export function SpecialEventPage({ id }: { id?: string }) {
                 )}
               </Field>
             </div>
-            <Field label="Ort (optional)">
+            <Field label={t`Location (optional)`}>
               {(fid) => (
                 <select
                   id={fid}
@@ -137,14 +143,14 @@ export function SpecialEventPage({ id }: { id?: string }) {
                     )
                   }
                 >
-                  <option value="">Kein Ort</option>
+                  <option value="">{t`No location`}</option>
                   {(locs?.locations ?? []).map((l) => (
                     <option value={l.id}>{l.name}</option>
                   ))}
                 </select>
               )}
             </Field>
-            <Field label="Infos (optional)">
+            <Field label={t`Info (optional)`}>
               {(fid) => (
                 <textarea
                   id={fid}
@@ -161,8 +167,8 @@ export function SpecialEventPage({ id }: { id?: string }) {
               <ul class="list">
                 <li>
                   <SwitchRow
-                    label="Für den ganzen Verein"
-                    sub="Alle Spielerinnen und Spieler aller Mannschaften"
+                    label={t`For the whole club`}
+                    sub={t`All players of all teams`}
                     checked={clubWide}
                     onChange={setClubWide}
                   />
@@ -170,10 +176,14 @@ export function SpecialEventPage({ id }: { id?: string }) {
               </ul>
             ) : null}
             {!clubWide && teams.length ? (
-              <div class="field" role="group" aria-label="Mannschaften">
-                <span class="field-label">Mannschaften</span>
+              <div class="field" role="group" aria-label={t`Teams`}>
+                <span class="field-label">
+                  <Trans>Teams</Trans>
+                </span>
                 {teams.length > 1 ? (
-                  <span class="field-hint">Mehrere möglich</span>
+                  <span class="field-hint">
+                    <Trans>Several possible</Trans>
+                  </span>
                 ) : null}
                 <div class="chips">
                   {teams.map((t) => (
@@ -204,7 +214,7 @@ export function SpecialEventPage({ id }: { id?: string }) {
               disabled={!title.trim() || (!clubWide && !teamIds.length)}
               onClick={async () => {
                 if (end && end <= start) {
-                  toast("Das Ende muss nach dem Beginn liegen.", "error");
+                  toast(t`The end must be after the start.`, "error");
                   return;
                 }
                 const event = await api.post<EventDetail>("/events", {
@@ -215,7 +225,7 @@ export function SpecialEventPage({ id }: { id?: string }) {
                   notes: notes.trim() || null,
                   teamIds: clubWide ? [] : teamIds,
                   clubWide,
-                  // Zeitblöcke hängen am Datum des Termins (Datum kann nach dem Anlegen der Blöcke geändert worden sein)
+                  // Time slots follow the date of the event (the date may have been changed after the slots were created)
                   duties: clubWide
                     ? []
                     : blocks.map((b) => ({
@@ -227,13 +237,11 @@ export function SpecialEventPage({ id }: { id?: string }) {
                 });
                 if (blocks.length) invalidate("/duties");
                 invalidate("/events");
-                toast(
-                  "Termin angelegt. Alle Beteiligten wurden benachrichtigt.",
-                );
+                toast(t`Event created. Everyone involved has been notified.`);
                 route(`/termine/${event.id}`, true);
               }}
             >
-              Termin anlegen
+              <Trans>Create event</Trans>
             </Button>
           </>
         ) : null}
@@ -258,23 +266,23 @@ function NewGameForm({
   return (
     <>
       <TextField
-        label="Gegner oder Turnier"
+        label={t`Opponent or tournament`}
         value={opponent}
         onInput={setOpponent}
         maxLength={80}
-        placeholder="z. B. HSG Musterstadt"
+        placeholder={t`e.g. HSG Musterstadt`}
       />
       <Segmented<"home" | "away">
-        label="Heim oder auswärts"
+        label={t`Home or away`}
         value={where}
         onChange={setWhere}
         options={[
-          { value: "home", label: "Heimspiel" },
-          { value: "away", label: "Auswärts" },
+          { value: "home", label: t`Home game` },
+          { value: "away", label: t`Away` },
         ]}
       />
       <div class="grid-2">
-        <Field label="Datum">
+        <Field label={t`Date`}>
           {(fid) => (
             <input
               id={fid}
@@ -285,7 +293,7 @@ function NewGameForm({
             />
           )}
         </Field>
-        <Field label="Anwurf">
+        <Field label={t`Throw-off`}>
           {(fid) => (
             <input
               id={fid}
@@ -297,7 +305,7 @@ function NewGameForm({
           )}
         </Field>
       </div>
-      <Field label="Halle (optional)">
+      <Field label={t`Hall (optional)`}>
         {(fid) => (
           <select
             id={fid}
@@ -309,7 +317,7 @@ function NewGameForm({
               )
             }
           >
-            <option value="">Keine Angabe</option>
+            <option value="">{t`No hall given`}</option>
             {locations.map((l) => (
               <option value={l.id}>{l.name}</option>
             ))}
@@ -333,19 +341,19 @@ function NewGameForm({
           );
           invalidate("/events");
           invalidate("/duties");
-          toast("Spiel angelegt. Die Mannschaft wurde benachrichtigt.");
+          toast(t`Game created. The team has been notified.`);
           route(`/termine/${res.id}`, true);
         }}
       >
-        Spiel anlegen
+        <Trans>Create game</Trans>
       </Button>
     </>
   );
 }
 
 /**
- * „Helfer benötigt“ beim Anlegen eines Sondertermins: Zeitblöcke von Hand, „+ Anschluss“
- * (gleicher Dienst, gleiche Dauer, direkt danach) und „Aus Vorlage übernehmen“.
+ * "Helpers needed" when creating a special event: time slots by hand, "+ Follow-on"
+ * (same duty, same duration, directly after) and "Apply from template".
  */
 function HelperBlocks({ date, start, end, blocks, onChange }: { date: string; start: string; end: string; blocks: NewBlock[]; onChange: (b: NewBlock[]) => void }) {
   const [on, setOn] = useState(blocks.length > 0);
@@ -375,16 +383,17 @@ function HelperBlocks({ date, start, end, blocks, onChange }: { date: string; st
     }
     onChange([...blocks, ...added]);
     setTemplateId("");
-    toast(added.length === 1 ? "1 Zeitblock übernommen." : `${added.length} Zeitblöcke übernommen.`);
+    const count = added.length;
+    toast(plural(count, { one: "# time slot applied.", other: "# time slots applied." }));
   };
 
   return (
-    <section class="stack-sm" aria-label="Helfer benötigt">
+    <section class="stack-sm" aria-label={t`Helpers needed`}>
       <ul class="list">
         <li>
           <SwitchRow
-            label="Helfer benötigt"
-            sub="Zeitblöcke erscheinen im Reiter Helfer, dort tragen sich Eltern bzw. Spieler ein."
+            label={t`Helpers needed`}
+            sub={t`Time slots appear in the Helpers tab, where parents or players sign up.`}
             checked={on}
             onChange={(v) => {
               setOn(v);
@@ -396,22 +405,25 @@ function HelperBlocks({ date, start, end, blocks, onChange }: { date: string; st
       {on ? (
         <>
           {sorted.length ? (
-            <ul class="list" aria-label="Zeitblöcke">
+            <ul class="list" aria-label={t`Time slots`}>
               {sorted.map((b) => {
                 const task = b.startsAt === b.endsAt;
+                const slots = b.slots;
+                const label = b.label;
+                const at = timeOf(b.startsAt);
                 return (
                   <li class="list-row">
                     <span class="main">
                       <span class="title">
-                        {task ? "Aufgabe" : `${timeOf(b.startsAt)}–${timeOf(b.endsAt)}`} · {b.label}
+                        {task ? t`Task` : `${timeOf(b.startsAt)}–${timeOf(b.endsAt)}`} · {b.label}
                       </span>
                       <span class="sub">
                         {task ? "" : `${durationLabel(minutesBetween(b.startsAt, b.endsAt))} · `}
-                        {b.slots === 1 ? "1 Platz" : `${b.slots} Plätze`}
-                        {b.newTypeName ? " · Sonderdienst" : ""}
+                        {plural(slots, { one: "# slot", other: "# slots" })}
+                        {b.newTypeName ? ` · ${t`Special duty`}` : ""}
                       </span>
                     </span>
-                    <button type="button" class="icon-btn icon-btn-sm" aria-label={`${b.label} ${timeOf(b.startsAt)} entfernen`} onClick={() => onChange(blocks.filter((x) => x !== b))}>
+                    <button type="button" class="icon-btn icon-btn-sm" aria-label={t`Remove ${label} ${at}`} onClick={() => onChange(blocks.filter((x) => x !== b))}>
                       <Icon name="trash" size={16} />
                     </button>
                   </li>
@@ -419,11 +431,13 @@ function HelperBlocks({ date, start, end, blocks, onChange }: { date: string; st
               })}
             </ul>
           ) : (
-            <p class="small muted">Noch keine Zeitblöcke.</p>
+            <p class="small muted">
+              <Trans>No time slots yet.</Trans>
+            </p>
           )}
           <div class="btn-row">
             <Button size="sm" variant="dashed" icon="plus" onClick={() => setAdding(true)}>
-              Zeitblock
+              <Trans>Time slot</Trans>
             </Button>
             {last && last.startsAt !== last.endsAt ? (
               <Button
@@ -435,16 +449,16 @@ function HelperBlocks({ date, start, end, blocks, onChange }: { date: string; st
                   onChange([...blocks, { ...last, startsAt: last.endsAt, endsAt: addMinutes(last.endsAt, minutes) }]);
                 }}
               >
-                Anschluss
+                <Trans>Follow-on</Trans>
               </Button>
             ) : null}
           </div>
           {templates.data?.templates.length ? (
             <div class="duty-template-apply">
-              <Field label="Aus Vorlage übernehmen">
+              <Field label={t`Apply from template`}>
                 {(fid) => (
                   <select id={fid} class="select" value={templateId} onChange={(e) => setTemplateId((e.target as HTMLSelectElement).value)}>
-                    <option value="">– Vorlage wählen –</option>
+                    <option value="">{t`– Choose template –`}</option>
                     {templates.data!.templates.map((t) => (
                       <option value={String(t.id)}>{t.name}</option>
                     ))}
@@ -452,7 +466,7 @@ function HelperBlocks({ date, start, end, blocks, onChange }: { date: string; st
                 )}
               </Field>
               <Button size="sm" disabled={!templateId || !types.data} onClick={applyTemplate}>
-                Übernehmen
+                <Trans>Apply</Trans>
               </Button>
             </div>
           ) : null}

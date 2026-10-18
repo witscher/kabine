@@ -5,9 +5,9 @@ import { loadVapid, type PushSubscriptionRow, sendWebPush } from "./lib/webpush"
 import { utcIso } from "./lib/time";
 
 /**
- * Absender-Kontakt für die Push-Dienste (VAPID "sub"): die Adresse der App,
- * keine persönliche E-Mail. Ohne ORIGIN die Adresse, unter der sich zuletzt
- * ein Gerät für Push angemeldet hat. Ohne Anmeldung gibt es nichts zu senden.
+ * Sender contact for the push services (VAPID "sub"): the app's address, not a
+ * personal e-mail. Without ORIGIN, the address under which a device last
+ * registered for push. Without a registration there is nothing to send.
  */
 export async function vapidSubject(env: Env): Promise<string | null> {
   if (env.ORIGIN) return env.ORIGIN;
@@ -30,7 +30,7 @@ export async function handleQueue(batch: MessageBatch<PushJob>, env: Env): Promi
         "SELECT id, account_id, endpoint, p256dh, auth FROM push_subscriptions WHERE account_id IN (SELECT value FROM json_each(?))",
         list(job.accountIds),
       );
-      // Jede Push bringt die aktuelle Zahl für das App-Icon mit (pro Account verschieden)
+      // Every push carries the current count for the app icon (different per account)
       const payloads = new Map<number, string>();
       for (const accountId of new Set(subs.map((s) => s.account_id))) {
         const badge = await badgeCount(env.DB, accountId).catch(() => null);
@@ -41,7 +41,7 @@ export async function handleQueue(batch: MessageBatch<PushJob>, env: Env): Promi
           try {
             return { id: s.id, outcome: await sendWebPush(s, payloads.get(s.account_id)!, vapid, { urgency: job.payload.tag?.startsWith("chat") ? "normal" : "high" }) };
           } catch (err) {
-            console.warn("Push fehlgeschlagen", err);
+            console.warn("Push failed", err);
             return { id: s.id, outcome: "failed" as const };
           }
         }),
@@ -53,7 +53,7 @@ export async function handleQueue(batch: MessageBatch<PushJob>, env: Env): Promi
       if (outcomes.some((o) => o.outcome === "retry") && message.attempts < 3) message.retry({ delaySeconds: 30 * message.attempts });
       else message.ack();
     } catch (err) {
-      console.error("Push-Job fehlgeschlagen", err);
+      console.error("Push job failed", err);
       message.retry({ delaySeconds: 60 });
     }
   }

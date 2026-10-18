@@ -1,11 +1,11 @@
-// Nur für Admins, in der App nirgends verlinkt: die App aus einer anderen Sicht ansehen
-// (Cookie kabine_view, gesetzt über ?playerview=1, ?parentview=1, ?trainerview=1; siehe docs/entscheidungen.md).
-// - player: erstes eigenes Kind
-// - parent: man selbst, ohne Admin- und Trainerrechte
-// - referee: man selbst als KiHaSL/JuHaSL, ohne Admin- und Trainerrechte
-// - trainer: erster Trainer der ersten eigenen Mannschaft (Trainer, sonst die des ersten Kindes)
-// Fremde Sichten (player, trainer) sind schreibgeschützt; das Konto bleibt das eigene,
-// damit Lesestände, Push und Einstellungen der anderen Person unberührt bleiben.
+// Admins only, not linked anywhere in the app: view the app from another perspective
+// (cookie kabine_view, set via ?playerview=1, ?parentview=1, ?trainerview=1; see docs/entscheidungen.md).
+// - player: first own child
+// - parent: oneself, without admin and coach rights
+// - referee: oneself as KiHaSL/JuHaSL, without admin and coach rights
+// - trainer: first coach of the first own team (coaching, else the first child's)
+// Views of other persons (player, trainer) are read-only; the account stays one's own,
+// so the other person's read markers, push and settings stay untouched.
 import { first } from "../lib/db";
 import { type Actor, type ActorRow, buildActor, type ViewMode } from "./actor";
 
@@ -31,14 +31,14 @@ async function personRow(db: D1Database, accountId: number, personId: number): P
   return p ? { account_id: accountId, person_id: p.id, first_name: p.first_name, last_name: p.last_name, is_admin: 0 } : null;
 }
 
-/** Sicht für einen Admin; null, wenn es die Sicht nicht gibt (z. B. kein Kind). */
+/** View for an admin; null if the view does not exist (e.g. no child). */
 export async function viewAsActor(db: D1Database, admin: Actor, mode: ViewMode): Promise<Actor | null> {
   if (!admin.isAdmin) return null;
   if (mode === "parent" || mode === "referee") {
     const self = await buildActor(db, admin.session, { account_id: admin.accountId, person_id: admin.personId, first_name: admin.firstName, last_name: admin.lastName, is_admin: 0 });
     const memberships = self.memberships.filter((m) => m.role !== "coach");
-    // referee: man selbst als KiHaSL/JuHaSL, ohne Admin- und Trainerrechte
-    return { ...self, memberships, coachTeamIds: [], viewAs: mode, refereeOverride: mode === "referee" };
+    // referee: oneself as KiHaSL/JuHaSL, without admin and coach rights
+    return { ...self, memberships, coachTeamIds: [], viewAs: mode, refereeOverride: mode === "referee", locale: admin.locale };
   }
   let personId: number | null = null;
   if (mode === "player") {
@@ -59,5 +59,5 @@ export async function viewAsActor(db: D1Database, admin: Actor, mode: ViewMode):
   if (personId == null) return null;
   const row = await personRow(db, admin.accountId, personId);
   if (!row) return null;
-  return { ...(await buildActor(db, admin.session, row)), viewAs: mode, readOnly: personId !== admin.personId };
+  return { ...(await buildActor(db, admin.session, row)), viewAs: mode, readOnly: personId !== admin.personId, locale: admin.locale };
 }

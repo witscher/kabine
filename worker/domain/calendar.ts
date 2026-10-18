@@ -1,10 +1,11 @@
-// Persönlicher Kalender (iCalendar, RFC 5545): Training, Spiele und Helferdienste je nach
-// Häkchen. Zeiten sind lokale Zeit Europe/Berlin und werden mit TZID ausgegeben.
+// Personal calendar (iCalendar, RFC 5545): training, games and helper duties depending on
+// the checkboxes. Times are local Europe/Berlin time and are written with TZID.
+import { t } from "@lingui/core/macro";
 import type { EventSummary, MyParticipation } from "../../shared/types";
 
 export interface CalendarItem {
   uid: string;
-  start: string; // lokale Zeit 'YYYY-MM-DDTHH:MM'
+  start: string; // local time 'YYYY-MM-DDTHH:MM'
   durationMinutes: number;
   summary: string;
   location: string | null;
@@ -36,7 +37,7 @@ function escapeText(s: string): string {
   return s.replace(/\\/g, "\\\\").replace(/\n/g, "\\n").replace(/,/g, "\\,").replace(/;/g, "\\;");
 }
 
-/** Zeilen über 75 Oktette umbrechen (Folding). */
+/** Wraps lines longer than 75 octets (folding). */
 function fold(line: string): string {
   const bytes = new TextEncoder().encode(line);
   if (bytes.length <= 75) return line;
@@ -101,7 +102,7 @@ export interface CalendarPrefs {
 export interface CalendarDuty {
   id: number;
   label: string;
-  /** Aufgabe (wird drumherum erledigt): kurzer Eintrag zum Zeitpunkt */
+  /** Task (done around the event): short entry at that time */
   task: boolean;
   childName: string | null;
   note: string | null;
@@ -125,49 +126,52 @@ function teamLabel(e: EventSummary): string {
   return e.teams.map((t) => t.name).join(" + ");
 }
 
-/** „gegen Gegner“ bzw. „bei Gegner“, ohne Heim/Auswärts-Angabe der Titel des Termins. */
+/** "vs opponent" or "at opponent"; without home/away information the title of the event. */
 function opponentText(isHome: boolean | null, homeTeam: string | null, guestTeam: string | null, title: string | null): string {
-  if (isHome === true && guestTeam) return `gegen ${guestTeam}`;
-  if (isHome === false && homeTeam) return `bei ${homeTeam}`;
-  return title ?? "Spiel";
+  if (isHome === true && guestTeam) return t`vs ${guestTeam}`;
+  if (isHome === false && homeTeam) return t`at ${homeTeam}`;
+  return title ?? t`Game`;
 }
 
-/** Zustand einer Person im Titel: bei Spielen „nominiert“, sonst nur Abweichungen. */
+/** State of a person in the title: "nominated" for games, otherwise only deviations. */
 function annotation(e: EventSummary, m: MyParticipation): string {
-  if (m.status === "no") return "abgesagt";
-  if (m.status === "standing") return "abwesend";
-  if (m.status === "inactive") return "inaktiv";
-  if (e.kind === "game" && m.nominated) return "nominiert";
+  if (m.status === "no") return t({ message: "declined", context: "calendar" });
+  if (m.status === "standing") return t({ message: "absent", context: "calendar" });
+  if (m.status === "inactive") return t({ message: "inactive", context: "calendar" });
+  if (e.kind === "game" && m.nominated) return t({ message: "nominated", context: "calendar" });
   return "";
 }
 
 /**
- * Wer betroffen ist, nach Zustand gruppiert: „Ella und Mia nominiert“, „Ella dabei, Mia abgesagt“.
- * Die eigene Person ohne Namen (bzw. „du“, wenn auch Kinder genannt werden), Kinder mit Vornamen.
+ * Who is concerned, grouped by state: "Ella and Mia nominated", "Ella attending, Mia declined".
+ * The own person without a name (or "you" if children are named too), children by first name.
  */
 function personsSuffix(e: EventSummary, selfId: number): string {
   const concerned = e.mine.filter((m) => m.participant || e.kind === "game");
   const alone = concerned.length === 1;
   const groups = new Map<string, string[]>();
   for (const m of concerned) {
-    const name = m.person.id === selfId ? (alone ? "" : "du") : m.person.firstName;
+    const name = m.person.id === selfId ? (alone ? "" : t({ message: "you", context: "calendar" })) : m.person.firstName;
     const state = annotation(e, m);
     groups.set(state, [...(groups.get(state) ?? []), name]);
   }
   const mixed = groups.size > 1;
   return [...groups]
     .map(([state, names]) => {
-      // Ohne Abweichung nur dann ein Wort, wenn es mehrere Gruppen gibt
-      const word = state || (mixed ? (e.kind === "game" ? "nicht nominiert" : "dabei") : "");
+      // Without a deviation only a word if there are several groups
+      const word =
+        state || (mixed ? (e.kind === "game" ? t({ message: "not nominated", context: "calendar" }) : t({ message: "attending", context: "calendar" })) : "");
       const who = names.filter(Boolean);
-      const list = who.length > 1 ? `${who.slice(0, -1).join(", ")} und ${who[who.length - 1]}` : (who[0] ?? "");
+      const rest = who.slice(0, -1).join(", ");
+      const last = who[who.length - 1] ?? "";
+      const list = who.length > 1 ? t`${rest} and ${last}` : (who[0] ?? "");
       return [list, word].filter(Boolean).join(" ");
     })
     .filter(Boolean)
     .join(", ");
 }
 
-/** Gegner eines Spiels: „gegen X“, „bei X“ oder „· Turnier Y“ (ohne Heim/Auswärts). */
+/** Opponent of a game: "vs X", "at X" or "· Tournament Y" (without home/away). */
 function gameVs(e: EventSummary): string {
   const g = e.game;
   if (!g || g.isHome == null) return `· ${e.title}`;
@@ -176,9 +180,26 @@ function gameVs(e: EventSummary): string {
 
 function eventTitle(e: EventSummary): string {
   const teams = teamLabel(e);
-  if (e.kind === "training") return teams ? `Training ${teams}` : "Training";
-  if (e.kind === "game") return teams ? `Spiel ${teams} ${gameVs(e)}` : `Spiel ${gameVs(e)}`;
+  if (e.kind === "training") return teams ? t`Training ${teams}` : t`Training`;
+  const vs = gameVs(e);
+  if (e.kind === "game") return teams ? t`Game ${teams} ${vs}` : t`Game ${vs}`;
   return teams ? `${e.title} · ${teams}` : e.title;
+}
+
+function cancelledEntry(entry: string): string {
+  return t`Cancelled: ${entry}`;
+}
+
+function noteText(note: string | null): string | null {
+  return note ? t`Note: ${note}` : null;
+}
+
+/** Summary of the meeting point entry: "Meeting point wD · Game vs X" (without home/away the title). */
+function meetingSummary(e: EventSummary): string {
+  const teams = teamLabel(e);
+  const vs = gameVs(e);
+  const what = e.game?.isHome == null ? e.title : t`Game ${vs}`;
+  return t`Meeting point ${teams} · ${what}`;
 }
 
 function locationText(e: EventSummary): string | null {
@@ -186,8 +207,8 @@ function locationText(e: EventSummary): string | null {
 }
 
 /**
- * Kalendereinträge aus den Terminen (wie in der Terminübersicht) und den eigenen Diensten.
- * coachTeamIds: Trainer bekommen den Treffpunkt auch ohne Nominierung.
+ * Calendar entries from the events (as in the event overview) and the own duties.
+ * coachTeamIds: coaches get the meeting point even without a nomination.
  */
 export function calendarItems(
   events: EventSummary[],
@@ -204,9 +225,12 @@ export function calendarItems(
     const suffix = personsSuffix(e, opts.selfId);
     const title = suffix ? `${base} · ${suffix}` : base;
     const g = e.game;
-    const meeting = g?.meetingTime ? `Treffen ${g.meetingTime} Uhr${g.meetingPoint ? ` · ${g.meetingPoint}` : ""}` : g?.meetingPoint ? `Treffpunkt: ${g.meetingPoint}` : null;
+    const meetAt = g?.meetingTime ?? null;
+    const point = g?.meetingPoint ?? null;
+    const meeting = meetAt ? (point ? t`Meet at ${meetAt} · ${point}` : t`Meet at ${meetAt}`) : point ? t`Meeting point: ${point}` : null;
+    const throwOff = e.startsAt.slice(11, 16);
     const description = [
-      e.kind === "game" ? `Anpfiff ${e.startsAt.slice(11, 16)} Uhr` : null,
+      e.kind === "game" ? t`Throw-off ${throwOff}` : null,
       meeting,
       `${opts.origin}/termine/${e.id}`,
     ]
@@ -218,13 +242,13 @@ export function calendarItems(
       uid: `event-${e.id}@${uidHost}`,
       start: e.startsAt,
       durationMinutes: duration,
-      summary: e.cancelled ? `Abgesagt: ${base}` : title,
+      summary: e.cancelled ? cancelledEntry(base) : title,
       location: locationText(e),
       description,
       cancelled: !!e.cancelled,
     });
 
-    // Treffpunkt: eigener Termin für Nominierte (bzw. deren Eltern) und Trainer
+    // Meeting point: separate entry for nominees (or their parents) and coaches
     if (e.kind !== "game" || !g?.meetingTime || e.cancelled) continue;
     const meetStart = `${e.startsAt.slice(0, 10)}T${g.meetingTime}`;
     if (meetStart >= e.startsAt) continue;
@@ -235,24 +259,32 @@ export function calendarItems(
       uid: `meet-${e.id}@${uidHost}`,
       start: meetStart,
       durationMinutes: Math.max(15, minutesBetween(meetStart, e.startsAt)),
-      summary: `Treffpunkt ${teamLabel(e)} · ${g.isHome == null ? e.title : `Spiel ${gameVs(e)}`}`,
+      summary: meetingSummary(e),
       location: g.meetingPoint ?? locationText(e),
-      description: [`Anpfiff ${e.startsAt.slice(11, 16)} Uhr`, `${opts.origin}/termine/${e.id}`].join("\n"),
+      description: [t`Throw-off ${throwOff}`, `${opts.origin}/termine/${e.id}`].join("\n"),
       cancelled: false,
     });
   }
   if (prefs.duties) {
     for (const d of duties) {
       const game = `${d.teamName ? `${d.teamName} ` : ""}${opponentText(d.isHome, d.homeTeam, d.guestTeam, d.title)}`;
-      const summary = `${d.task ? "Aufgabe" : "Helferdienst"} ${d.label} · ${game}${d.childName ? ` · für ${d.childName}` : ""}`;
+      const label = d.label;
+      const child = d.childName;
+      const summary = d.task
+        ? child
+          ? t`Task ${label} · ${game} · for ${child}`
+          : t`Task ${label} · ${game}`
+        : child
+          ? t`Helper duty ${label} · ${game} · for ${child}`
+          : t`Helper duty ${label} · ${game}`;
       items.push({
         uid: `duty-${d.id}@${uidHost}`,
         start: d.startsAt,
-        // Zeitblock des Dienstes; Aufgaben als kurzer Eintrag zum Beginn bzw. Ende des Termins
+        // Time block of the duty; tasks as a short entry at the start or end of the event
         durationMinutes: d.task ? 15 : d.endsAt && d.endsAt > d.startsAt ? minutesBetween(d.startsAt, d.endsAt) : 120,
-        summary: d.cancelled ? `Abgesagt: ${summary}` : summary,
+        summary: d.cancelled ? cancelledEntry(summary) : summary,
         location: d.location,
-        description: d.note ? `Notiz: ${d.note}` : null,
+        description: noteText(d.note),
         cancelled: d.cancelled,
       });
     }

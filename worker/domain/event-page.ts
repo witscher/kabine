@@ -1,7 +1,7 @@
-// Terminübersicht seitenweise („Mehr Termine“). Der Server filtert, was früher der Browser
-// gefiltert hat (Relevanz, Mannschaft), und liefert nur die nächsten `limit` Termine. Geprüft
-// und mit Details geladen werden dabei nur diese, nicht alle Termine der Saison.
-// Siehe docs/entscheidungen.md, Datenbank-Leselast.
+// Event overview page by page ("More events"). The server filters what the browser used to
+// filter (relevance, team) and returns only the next `limit` events. Only these are checked
+// and loaded with details, not all events of the season.
+// See docs/entscheidungen.md, Datenbank-Leselast.
 import { isRelevantEvent } from "../../shared/relevance";
 import type { EventPage, EventSummary } from "../../shared/types";
 import type { Actor } from "../auth/actor";
@@ -21,9 +21,9 @@ import {
 } from "./events";
 import { HORIZON_DAYS } from "./generate";
 
-/** So weit sucht der Server nach dem nächsten eigenen Termin für die große Karte (wie früher die 70 Tage). */
+/** How far the server looks for the next own event for the large card (like the former 70 days). */
 const NEXT_CARD_DAYS = 70;
-/** Etwas mehr Termine prüfen als nötig, falls einzelne nicht relevant sind. */
+/** Check a few more events than needed, in case some are not relevant. */
 const MARGIN = 10;
 
 interface Item {
@@ -31,7 +31,7 @@ interface Item {
   summary: EventSummary;
 }
 
-/** Zusammenfassung mit eigenen Diensten und Organisatoren, ohne Helferbedarf und Fahrgemeinschaften. */
+/** Summary with own duties and organisers, without helpers needed and carpools. */
 async function summarize(db: D1Database, actor: Actor, rows: EventRow[], now: number): Promise<{ ctx: EventContext; items: Item[] }> {
   const [ctx, duties, managers] = await Promise.all([
     loadEventContext(db, rows),
@@ -52,7 +52,7 @@ async function summarize(db: D1Database, actor: Actor, rows: EventRow[], now: nu
   return { ctx, items };
 }
 
-/** Termin für die große Karte („Dein nächster Termin“), wie in der Terminübersicht. */
+/** Event for the large card ("Your next event"), as in the event overview. */
 function nextCardCandidate(s: EventSummary): boolean {
   return !s.cancelled && s.mine.some((m) => m.participant || m.helpRequest?.status === "open");
 }
@@ -60,9 +60,9 @@ function nextCardCandidate(s: EventSummary): boolean {
 const day = (s: EventSummary) => s.startsAt.slice(0, 10);
 
 /**
- * Termine ab `from` (bis `to`), an denen man selbst oder ein Kind als Spieler, Aushilfe,
- * Nominierte oder Angefragte beteiligt ist: Anwärter für die große Karte. Nur IDs; ob die Eltern
- * zuständig sind und ob es wirklich ein eigener Termin ist, entscheidet danach die Zusammenfassung.
+ * Events from `from` (until `to`) in which oneself or a child takes part as player, helper,
+ * nominee or requested helper: candidates for the large card. IDs only; whether the parents are
+ * in charge and whether it really is an own event is decided afterwards by the summary.
  */
 export async function ownCandidates(db: D1Database, actor: Actor, from: string, to: string): Promise<number[]> {
   const people = list([actor.personId, ...actor.children.map((c) => c.id)]);
@@ -89,7 +89,7 @@ export async function loadEventPage(db: D1Database, actor: Actor, opts: { limit:
   const nowL = nowLocal();
   const today = todayLocal();
   const fits = (s: EventSummary) => isRelevantEvent(s) && (opts.teamId == null || s.teams.some((t) => t.id === opts.teamId));
-  // Ohne oberes Datum: Termine gibt es nur aus der laufenden Saison, der Saisonwechsel löscht die alten
+  // No upper date: events only exist for the current season, the season change deletes the old ones
   const range = opts.past
     ? { from: "0000-01-01T00:00", to: nowL, desc: true }
     : { from: `${today}T00:00`, to: "9999-12-31T00:00", desc: false };
@@ -115,7 +115,7 @@ export async function loadEventPage(db: D1Database, actor: Actor, opts: { limit:
         if (page.length < opts.limit) page.push(item);
         else hasMore = true;
       } else if (s.isPast) {
-        // Heute schon angepfiffen: für die Live-Karte, ob das Fenster noch läuft, prüft die App
+        // Already started today: for the live card; the app checks whether the window is still open
         if (s.kind === "game" && !s.cancelled) live.push(item);
         continue;
       } else {
@@ -127,7 +127,7 @@ export async function loadEventPage(db: D1Database, actor: Actor, opts: { limit:
     }
   }
 
-  // Große Karte: Liegt der nächste eigene Termin hinter der Seite, kommt er gezielt dazu (höchstens 70 Tage)
+  // Large card: if the next own event lies beyond the page, it is added specifically (at most 70 days)
   let next: Item[] = [];
   if (!opts.past && !page.some((i) => nextCardCandidate(i.summary))) {
     const known = new Set([...page, ...live].map((i) => i.row.id));
@@ -139,12 +139,12 @@ export async function loadEventPage(db: D1Database, actor: Actor, opts: { limit:
       const hits = part.items.filter((x) => fits(x.summary) && nextCardCandidate(x.summary));
       if (!hits.length) continue;
       ctx = ctx ? mergeContexts(ctx, part.ctx) : part.ctx;
-      // Weitere eigene Termine am selben Tag (zwei Spiele an einem Sonntag)
+      // Further own events on the same day (two games on a Sunday)
       next = hits.filter((x) => day(x.summary) === day(hits[0]!.summary));
     }
   }
 
-  // Offene Aushilfe-Anfragen an einen selbst oder die Kinder, auch jenseits der Seite (Karten oben)
+  // Open help requests to oneself or the children, also beyond the page (cards at the top)
   let openHelp: Item[] = [];
   if (!opts.past) {
     const ids = await all<{ event_id: number }>(
@@ -164,7 +164,7 @@ export async function loadEventPage(db: D1Database, actor: Actor, opts: { limit:
       .sort((a, b) => a.summary.startsAt.localeCompare(b.summary.startsAt) || a.row.id - b.row.id);
   }
 
-  // Helferbedarf und Fahrgemeinschaften nur für das, was die App zeigt
+  // Helpers needed and carpools only for what the app shows
   const shown = [...new Map([...page, ...live, ...next, ...openHelp].map((i) => [i.row.id, i.row])).values()];
   const [needed, carpool] =
     opts.past || !ctx
@@ -180,7 +180,7 @@ export async function loadEventPage(db: D1Database, actor: Actor, opts: { limit:
         ]);
   const finish = ({ row, summary }: Item): EventSummary => ({
     ...summary,
-    // Wer (oder wessen Familie) schon einen Dienst hat, bekommt keinen Aufruf
+    // Whoever (or whose family) already has a duty gets no call
     helpersNeeded: summary.myDuties.length ? 0 : (needed.get(row.id) ?? 0),
     carpoolCount: carpool.get(row.id) ?? null,
   });

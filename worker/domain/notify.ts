@@ -1,3 +1,4 @@
+import { t } from "@lingui/core/macro";
 import type { NotificationTopic } from "../../shared/types";
 import { parentsInChargeSql } from "../auth/actor";
 import { isLocale } from "../../shared/i18n";
@@ -8,9 +9,9 @@ import { all, list } from "../lib/db";
 export interface PushPayload {
   title: string;
   body: string;
-  /** Pfad innerhalb der App, der beim Antippen geöffnet wird. */
+  /** Path within the app that opens when tapped. */
   url: string;
-  /** Gleiche Tags ersetzen sich auf dem Gerät (z. B. ein Chatraum). */
+  /** Equal tags replace each other on the device (e.g. a chat room). */
   tag?: string;
 }
 
@@ -27,10 +28,10 @@ export interface PushJob {
 }
 
 /**
- * Accounts, die eine Push zu diesen Personen bekommen: der eigene Account der
- * Person und die Accounts ihrer Eltern, sofern die Eltern in den betroffenen
- * Mannschaften (teamIds) eingebunden sind. Gefiltert nach den
- * Benachrichtigungseinstellungen pro Account und Person.
+ * Accounts that get a push about these persons: the person's own account and
+ * the accounts of their parents, if parents are involved in the affected
+ * teams (teamIds). Filtered by the notification settings per account and
+ * person.
  */
 export async function recipientsForPersons(
   db: D1Database,
@@ -65,7 +66,7 @@ export async function recipientsForPersons(
   return rows.map((r) => r.account_id);
 }
 
-/** Accounts der Trainer dieser Mannschaften (Thema "coach" der eigenen Person). */
+/** Accounts of the coaches of these teams (topic "coach" of the own person). */
 export async function recipientsForCoaches(db: D1Database, teamIds: number[]): Promise<number[]> {
   if (!teamIds.length) return [];
   const rows = await all<{ account_id: number }>(
@@ -87,8 +88,8 @@ export function pushConfigured(env: Env): boolean {
 }
 
 /**
- * Reiht Pushes in die Queue ein. Accounts ohne registriertes Gerät werden
- * vorher aussortiert, damit keine Queue-Operationen verschwendet werden.
+ * Enqueues pushes. Accounts without a registered device are filtered out
+ * first, so no queue operations are wasted.
  */
 export async function enqueuePush(
   env: Env,
@@ -122,7 +123,7 @@ export async function enqueuePush(
   return withDevices.length;
 }
 
-/** Push an Personen und ihre Eltern. teamIds: die betroffenen Mannschaften (für die Zuständigkeit der Eltern). */
+/** Push to persons and their parents. teamIds: the affected teams (for whether parents are in charge). */
 export async function notifyPersons(
   env: Env,
   personIds: number[],
@@ -154,7 +155,7 @@ export function shortTime(local: string): string {
 }
 
 export function eventLabel(kind: string, title: string): string {
-  if (kind === "training") return "Training";
-  if (kind === "game") return `Spiel ${title}`;
+  if (kind === "training") return t`Training`;
+  if (kind === "game") return t`Game ${title}`;
   return title;
 }

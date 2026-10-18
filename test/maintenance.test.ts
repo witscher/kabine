@@ -57,7 +57,7 @@ describe("Wartungsmodus", () => {
   it("der Cron-Lauf wird ausgelassen, nach dem Ausschalten ist alles wieder offen", async () => {
     const log = vi.spyOn(console, "log");
     await handleScheduled(env, Date.now());
-    expect(log).toHaveBeenCalledWith("Wartungsmodus aktiv, Cron-Lauf ausgelassen");
+    expect(log).toHaveBeenCalledWith("Maintenance mode active, cron run skipped");
     log.mockRestore();
     await env.KV.delete(MAINTENANCE_KEY);
     expect((await api("/events", { cookie: playerCookie })).status).toBe(200);

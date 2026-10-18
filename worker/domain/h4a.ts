@@ -1,13 +1,15 @@
-// Spielplan aus handball4all.
+// Game schedule from handball4all.
 //
-// Die Schnittstelle ist gegen maschinelle Zugriffe geschützt. Abgefragt wird
-// deshalb ausschließlich vom Gerät eines Trainers oder Admins aus (CORS ist
-// freigegeben), sparsam und gedrosselt. Der Server prüft das Antwortformat und
-// gleicht die Spiele ab, er ruft handball4all selbst nie auf.
+// The interface is protected against automated access. It is therefore queried
+// only from the device of a coach or admin (CORS is allowed), sparingly and
+// throttled. The server checks the response format and syncs the games; it never
+// calls handball4all itself.
+
+import { t } from "@lingui/core/macro";
 
 export const H4A_ENDPOINT = "https://spo.handball4all.de/service/if_g_json.php";
 
-/** Liga mit Tabelle im handball4all-Portal (ogId steht im Link, das Portal des BWHV zeigt jeden Verband). */
+/** League with table in the handball4all portal (ogId is in the link, the BWHV portal shows every association). */
 export function h4aTableUrl(orgId: number, leagueId: number, teamId: number | null): string {
   const team = teamId ? `&tId=${teamId}` : "";
   return `https://www.handball4all.de/home/portal/baden-wuerttembergischer-hv#/league?ogId=${orgId}&lId=${leagueId}${team}`;
@@ -24,8 +26,8 @@ export interface H4aIds {
 }
 
 /**
- * Liest Verband, Liga und Team aus einem Portal-Link
- * (…/portal/…#/league?ogId=216&lId=164621&tId=1489086) oder einem API-Link.
+ * Reads association, league and team from a portal link
+ * (…/portal/…#/league?ogId=216&lId=164621&tId=1489086) or an API link.
  */
 export function parsePortalUrl(input: string): H4aIds | null {
   let url: URL;
@@ -103,11 +105,11 @@ function groups(v: unknown): Record<string, unknown>[] {
 
 export function parseSchedule(data: unknown): H4aSchedule {
   const root = Array.isArray(data) ? data[0] : data;
-  if (typeof root !== "object" || root === null) throw new H4aFormatError("Antwort ist kein Objekt");
+  if (typeof root !== "object" || root === null) throw new H4aFormatError(t`Response is not an object`);
   const content = (root as Record<string, unknown>).content;
-  if (typeof content !== "object" || content === null) throw new H4aFormatError("Feld content fehlt");
+  if (typeof content !== "object" || content === null) throw new H4aFormatError(t`Field content is missing`);
   const c = content as Record<string, unknown>;
-  if (!("actualGames" in c) && !("futureGames" in c)) throw new H4aFormatError("Keine Spiellisten gefunden");
+  if (!("actualGames" in c) && !("futureGames" in c)) throw new H4aFormatError(t`No game lists found`);
 
   const head = (root as Record<string, unknown>).head as Record<string, unknown> | undefined;
   const allGroups = [...groups(c.actualGames), ...groups(c.futureGames)];
@@ -124,14 +126,14 @@ export function parseSchedule(data: unknown): H4aSchedule {
       const r = raw as Record<string, unknown>;
       const gameId = str(r.gID);
       const d = date(r.gDate);
-      const t = time(r.gTime);
+      const clock = time(r.gTime);
       const home = str(r.gHomeTeam);
       const guest = str(r.gGuestTeam);
       if (!gameId || !/^\d{1,12}$/.test(gameId) || !d || !home || !guest) {
         skipped++;
         continue;
       }
-      if (!t) {
+      if (!clock) {
         skipped++;
         continue;
       }
@@ -145,7 +147,7 @@ export function parseSchedule(data: unknown): H4aSchedule {
         gameId,
         gameNo: str(r.gNo),
         date: d,
-        time: t,
+        time: clock,
         home: home.slice(0, 80),
         guest: guest.slice(0, 80),
         gymId: gymIdRaw && /^\d{1,10}$/.test(gymIdRaw) ? Number(gymIdRaw) : null,
@@ -158,8 +160,8 @@ export function parseSchedule(data: unknown): H4aSchedule {
   }
 
   const teams = Array.isArray(c.teamsList)
-    ? (c.teamsList as unknown[]).flatMap((t) => {
-        const o = t as Record<string, unknown>;
+    ? (c.teamsList as unknown[]).flatMap((entry) => {
+        const o = entry as Record<string, unknown>;
         const id = str(o?.teamID);
         const name = str(o?.teamName);
         return id && name ? [{ teamId: id, teamName: name }] : [];
@@ -170,22 +172,22 @@ export function parseSchedule(data: unknown): H4aSchedule {
 }
 
 /**
- * Spieltag statt Einzelspiel (F-Jugend und jünger): handball4all führt ihn als
- * Spiel des Ausrichters gegen den Platzhalter „Spieltag gF“, alle Teams der
- * Staffel spielen mit.
+ * Matchday instead of a single game (F youth and younger): handball4all lists it as
+ * a game of the host against the placeholder "Spieltag gF"; all teams of the
+ * division take part.
  */
 export function isMatchdayName(name: string | null | undefined): boolean {
   return /^Spieltag\b/i.test(name?.trim() ?? "");
 }
 
-/** Bei Spieltagen: Ausrichter (die andere Seite des Platzhalters), sonst null. */
+/** For matchdays: the host (the other side of the placeholder), else null. */
 export function matchdayHost(g: Pick<H4aGame, "home" | "guest">): string | null {
   if (isMatchdayName(g.guest)) return g.home;
   if (isMatchdayName(g.home)) return g.guest;
   return null;
 }
 
-/** Spieltag: Heimspieltag, wenn der eigene Verein ausrichtet oder in einer eigenen Halle gespielt wird. */
+/** Matchday: home matchday if the own club hosts or it is played in an own hall. */
 export function matchdayIsHome(g: H4aGame, hint: string | null, homeGymIds: Set<number>): boolean {
   const host = matchdayHost(g)?.toLowerCase() ?? "";
   const own = hint?.toLowerCase() ?? "";
@@ -194,8 +196,8 @@ export function matchdayIsHome(g: H4aGame, hint: string | null, homeGymIds: Set<
 }
 
 /**
- * Welcher Name in den Spielen ist die eigene Mannschaft? Bei der Abfrage mit
- * Team-Filter kommt sie in jedem Spiel vor.
+ * Which name in the games is the own team? When queried with the team filter
+ * it appears in every game.
  */
 export function ownTeamName(games: H4aGame[], hint: string | null, homeGymIds: Set<number>): string | null {
   if (!games.length) return null;

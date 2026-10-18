@@ -1,21 +1,33 @@
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 import { clubName } from "../club";
 import { MyCalendar } from "../calendar";
 import { useEffect, useState } from "preact/hooks";
 import { useLocation } from "preact-iso";
 import type { ChildPermission, ChildPermissions, NotificationTopic, PersonRef } from "../../shared/types";
-import { CHILD_PERMISSION_LABELS, NOTIFICATION_TOPIC_LABELS } from "../../shared/types";
+import { childPermissionLabels, notificationTopicLabels } from "../../shared/types";
 import { api, ApiError, errorMessage } from "../api";
 import { personName, stamp } from "../format";
 import { AvatarEditor, PersonAvatar } from "../avatar";
 import { EmailCodeForm, isEmail } from "../email";
 import { Icon } from "../icons";
+import { LanguageSwitch } from "../language-switch";
 import { isIos, isStandalone, registerPasskey, useMe, useSession } from "../session";
 import { invalidate, useQuery } from "../store";
 import { Button, confirmDialog, copyText, ErrorBox, Notice, shareLink, Sheet, Spinner, SwitchRow, TextField, toast, TopBar, useDocumentTitle } from "../ui";
 import { renderSVG } from "uqr";
 import { InstallHint } from "./login";
 
-const ROLE_LABEL: Record<string, string> = { player: "Spieler/in", coach: "Trainer/in", helper: "Aushilfe" };
+const roleLabels = (): Record<string, string> => ({
+  player: t({ message: "Player", context: "role" }),
+  coach: t({ message: "Coach", context: "role" }),
+  helper: t({ message: "Stand-in", context: "role" }),
+});
+
+/** "A and B and C" */
+function joinAnd(names: string[]): string {
+  return names.length ? names.reduce((first, next) => t`${first} and ${next}`) : "";
+}
 
 function urlBase64ToUint8Array(base64: string): Uint8Array<ArrayBuffer> {
   const padding = "=".repeat((4 - (base64.length % 4)) % 4);
@@ -50,7 +62,7 @@ function PushCard() {
   }, []);
 
   const enable = async () => {
-    if (!me.vapidPublicKey) throw new Error("Push ist auf dem Server noch nicht eingerichtet.");
+    if (!me.vapidPublicKey) throw new Error(t`Push is not set up on the server yet.`);
     const permission = await Notification.requestPermission();
     if (permission !== "granted") {
       setState(permission === "denied" ? "denied" : "off");
@@ -69,7 +81,7 @@ function PushCard() {
       await api.post("/push/subscriptions", sub.toJSON());
     }
     setState("on");
-    toast("Benachrichtigungen sind aktiv.");
+    toast(t`Notifications are on.`);
   };
 
   const disable = async () => {
@@ -80,34 +92,48 @@ function PushCard() {
       await sub.unsubscribe();
     }
     setState("off");
-    toast("Benachrichtigungen auf diesem Gerät ausgeschaltet.");
+    toast(t`Notifications turned off on this device.`);
   };
 
   return (
-    <section class="card card-body" aria-label="Push-Benachrichtigungen">
+    <section class="card card-body" aria-label={t`Push notifications`}>
       <div class="row-gap">
         <Icon name="bell" size={22} />
         <h2 class="section-title" style={{ margin: 0, flex: 1 }}>
-          Benachrichtigungen
+          <Trans>Notifications</Trans>
         </h2>
-        {state === "on" ? <span class="pill pill-yes">Aktiv</span> : null}
+        {state === "on" ? (
+          <span class="pill pill-yes">
+            <Trans>Active</Trans>
+          </span>
+        ) : null}
       </div>
       {state === "loading" ? <Spinner /> : null}
       {state === "needs-install" ? (
         <>
-          <p>Auf dem iPhone funktionieren Benachrichtigungen nur, wenn die App auf dem Home-Bildschirm installiert ist.</p>
+          <p>
+            <Trans>On the iPhone, notifications only work if the app is installed on the Home Screen.</Trans>
+          </p>
           <InstallHint />
         </>
       ) : null}
-      {state === "unsupported" ? <p class="muted">Dieser Browser unterstützt keine Push-Benachrichtigungen.</p> : null}
+      {state === "unsupported" ? (
+        <p class="muted">
+          <Trans>This browser does not support push notifications.</Trans>
+        </p>
+      ) : null}
       {state === "denied" ? (
-        <p class="muted">Benachrichtigungen sind für diese App in den Einstellungen deines Geräts blockiert. Erlaube sie dort, dann kannst du sie hier aktivieren.</p>
+        <p class="muted">
+          <Trans>Notifications for this app are blocked in your device settings. Allow them there, then you can turn them on here.</Trans>
+        </p>
       ) : null}
       {state === "off" ? (
         <>
-          <p class="muted">Erfahre sofort von neuen Terminen, Absagen, Nominierungen und Chatnachrichten.</p>
+          <p class="muted">
+            <Trans>Hear straight away about new events, cancellations, nominations and chat messages.</Trans>
+          </p>
           <Button variant="primary" icon="bell" onClick={enable}>
-            Auf diesem Gerät aktivieren
+            <Trans>Turn on for this device</Trans>
           </Button>
         </>
       ) : null}
@@ -117,20 +143,24 @@ function PushCard() {
             size="sm"
             onClick={async () => {
               await api.post("/push/test");
-              toast("Test-Benachrichtigung ist unterwegs.");
+              toast(t`Test notification is on its way.`);
             }}
           >
-            Testen
+            <Trans>Test</Trans>
           </Button>
           <Button size="sm" variant="ghost" onClick={disable}>
-            Ausschalten
+            <Trans>Turn off</Trans>
           </Button>
         </div>
       ) : null}
       <a class="list-row" href="/profil/benachrichtigungen" style={{ padding: "8px 0", minHeight: "44px" }}>
         <span class="main">
-          <span style={{ fontWeight: 600 }}>Was soll ich bekommen?</span>
-          <span class="sub">Themen pro Person einstellen</span>
+          <span style={{ fontWeight: 600 }}>
+            <Trans>What should I receive?</Trans>
+          </span>
+          <span class="sub">
+            <Trans>Choose topics per person</Trans>
+          </span>
         </span>
         <Icon name="chevron" size={18} />
       </a>
@@ -144,9 +174,9 @@ function NameSheet({ onClose }: { onClose: () => void }) {
   const [first, setFirst] = useState(me.person.firstName);
   const [last, setLast] = useState(me.person.lastName ?? "");
   return (
-    <Sheet open onClose={onClose} title="Name ändern">
-      <TextField label="Vorname" value={first} onInput={setFirst} maxLength={50} autoComplete="given-name" />
-      <TextField label="Nachname" value={last} onInput={setLast} maxLength={50} autoComplete="family-name" />
+    <Sheet open onClose={onClose} title={t`Change name`}>
+      <TextField label={t`First name`} value={first} onInput={setFirst} maxLength={50} autoComplete="given-name" />
+      <TextField label={t`Last name`} value={last} onInput={setLast} maxLength={50} autoComplete="family-name" />
       <Button
         variant="primary"
         size="lg"
@@ -155,32 +185,36 @@ function NameSheet({ onClose }: { onClose: () => void }) {
         onClick={async () => {
           await api.patch(`/persons/${me.person.id}`, { firstName: first.trim(), lastName: last.trim() || null });
           await refresh();
-          toast("Gespeichert.");
+          toast(t`Saved.`);
           onClose();
         }}
       >
-        Speichern
+        <Trans>Save</Trans>
       </Button>
     </Sheet>
   );
 }
 
-/** Admin, der auch Trainer ist: Admin-Rechte ruhen lassen und als Trainer arbeiten (gilt für alle Geräte). */
+/** Admin who is also a coach: suspend admin rights and work as a coach (applies to all devices). */
 function AdminModeSwitch({ coachMode }: { coachMode: boolean }) {
   const { refresh } = useSession();
   const { route } = useLocation();
   return (
-    <ul class="list" aria-label="Ansicht">
+    <ul class="list" aria-label={t`View`}>
       <li>
         <SwitchRow
-          label="Als Admin arbeiten"
-          sub={coachMode ? "Aus: Du siehst die App wie ein Trainer, ohne Verwaltung und ohne Admin-Rechte." : "An: Verwaltung und alle Mannschaften. Aus: nur deine Mannschaften, wie ein Trainer."}
+          label={t`Work as admin`}
+          sub={
+            coachMode
+              ? t`Off: you see the app like a coach, without administration and without admin rights.`
+              : t`On: administration and all teams. Off: only your teams, like a coach.`
+          }
           checked={!coachMode}
           onChange={async (admin) => {
             await api.put("/profile/admin-mode", { coachMode: !admin });
             invalidate("/");
             await refresh();
-            toast(admin ? "Admin-Ansicht an." : "Du arbeitest jetzt als Trainer.");
+            toast(admin ? t`Admin view on.` : t`You are now working as a coach.`);
             route("/profil", true);
           }}
         />
@@ -190,28 +224,38 @@ function AdminModeSwitch({ coachMode }: { coachMode: boolean }) {
 }
 
 export function ProfilePage() {
-  useDocumentTitle("Profil");
+  useDocumentTitle(t`Profile`);
   const me = useMe();
   const { logout } = useSession();
   const { route } = useLocation();
   const [nameOpen, setNameOpen] = useState(false);
+  const roles = roleLabels();
+  const children = joinAnd(me.children.map((c) => c.firstName));
   return (
     <main class="page">
       <header class="hero hero-avatar">
         <PersonAvatar personId={me.person.id} name={me.person.firstName} size={56} />
-        <div class="kicker">Profil</div>
+        <div class="kicker">
+          <Trans>Profile</Trans>
+        </div>
         <h1>{personName(me.person)}</h1>
         <div class="hero-sub">
           {[
-            ...me.memberships.map((m) => (me.groupIds.includes(m.id) ? `${m.role === "coach" ? "Verantwortlich" : "Mitglied"} ${m.name}` : `${ROLE_LABEL[m.role]} ${m.name}`)),
-            ...(me.children.length ? [`Elternteil von ${me.children.map((c) => c.firstName).join(" und ")}`] : []),
-            ...(me.isAdmin ? ["Admin"] : []),
-          ].join(" · ") || "Mitglied"}
+            ...me.memberships.map((m) => {
+              const name = m.name;
+              if (!me.groupIds.includes(m.id)) return `${roles[m.role]} ${name}`;
+              return m.role === "coach" ? t`In charge of ${name}` : t`Member of ${name}`;
+            }),
+            ...(me.children.length ? [t`Parent of ${children}`] : []),
+            ...(me.isAdmin ? [t`Admin`] : []),
+          ].join(" · ") || t`Member`}
         </div>
       </header>
       <div class="content">
         {me.parentsInCharge ? (
-          <Notice>Deine Eltern sind mit deinem Zugang verknüpft. Sie legen fest, was du selbst in der App machen kannst.</Notice>
+          <Notice>
+            <Trans>Your parents are linked to your access. They decide what you can do yourself in the app.</Trans>
+          </Notice>
         ) : null}
 
         <AvatarEditor personId={me.person.id} name={personName(me.person)} view="self" />
@@ -219,8 +263,10 @@ export function ProfilePage() {
         {me.adminSwitch ? <AdminModeSwitch coachMode={me.adminSwitch.coachMode} /> : null}
 
         {me.children.length ? (
-          <section class="stack-sm" aria-label="Meine Kinder">
-            <h2 class="section-title">Meine Kinder</h2>
+          <section class="stack-sm" aria-label={t`My children`}>
+            <h2 class="section-title">
+              <Trans>My children</Trans>
+            </h2>
             <ul class="list">
               {me.children.map((c) => (
                 <li>
@@ -229,8 +275,14 @@ export function ProfilePage() {
                     <span class="main">
                       <span class="title">{personName(c)}</span>
                       <span class="sub">
-                        {c.teams.map((t) => (t.parentsEnabled ? t.name : `${t.name} (ohne Eltern)`)).join(", ") || "keine Mannschaft"}
-                        {c.parentsInCharge ? " · Profilbild, Freigaben und Benachrichtigungen" : " · Profilbild"}
+                        {c.teams
+                          .map((team) => {
+                            const teamName = team.name;
+                            return team.parentsEnabled ? teamName : t`${teamName} (without parents)`;
+                          })
+                          .join(", ") || t`not in a team`}
+                        {" · "}
+                        {c.parentsInCharge ? t`Profile picture, permissions and notifications` : t`Profile picture`}
                       </span>
                     </span>
                     <Icon name="chevron" size={18} />
@@ -252,8 +304,12 @@ export function ProfilePage() {
             <a class="list-row" href="/profil/geraete">
               <Icon name="key" size={22} />
               <span class="main">
-                <span class="title">Passkeys und Geräte</span>
-                <span class="sub">Anmeldung per Passkey oder E-Mail, Geräte</span>
+                <span class="title">
+                  <Trans>Passkeys and devices</Trans>
+                </span>
+                <span class="sub">
+                  <Trans>Sign-in by passkey or e-mail, devices</Trans>
+                </span>
               </span>
               <Icon name="chevron" size={18} />
             </a>
@@ -262,7 +318,9 @@ export function ProfilePage() {
             <button type="button" class="list-row" onClick={() => setNameOpen(true)}>
               <Icon name="edit" size={22} />
               <span class="main">
-                <span class="title">Name ändern</span>
+                <span class="title">
+                  <Trans>Change name</Trans>
+                </span>
               </span>
             </button>
           </li>
@@ -271,7 +329,9 @@ export function ProfilePage() {
               <a class="list-row" href="/hilfe">
                 <Icon name="info" size={22} />
                 <span class="main">
-                  <span class="title">Hilfe und Feedback</span>
+                  <span class="title">
+                    <Trans>Help and feedback</Trans>
+                  </span>
                 </span>
                 <Icon name="chevron" size={18} />
               </a>
@@ -281,24 +341,29 @@ export function ProfilePage() {
             <a class="list-row" href="/datenschutz">
               <Icon name="shield" size={22} />
               <span class="main">
-                <span class="title">Datenschutz und Quellen</span>
+                <span class="title">
+                  <Trans>Privacy and sources</Trans>
+                </span>
               </span>
               <Icon name="chevron" size={18} />
             </a>
           </li>
         </ul>
+        <section class="card card-pad" aria-label={t`Language`}>
+          <LanguageSwitch />
+        </section>
         <InstallHint />
         <Button
           variant="ghost"
           icon="logout"
           onClick={async () => {
-            if (!(await confirmDialog({ title: "Abmelden?", message: "Du kannst dich jederzeit wieder mit deinem Passkey anmelden.", confirmLabel: "Abmelden" }))) return;
+            if (!(await confirmDialog({ title: t`Sign out?`, message: t`You can sign in again with your passkey at any time.`, confirmLabel: t`Sign out` }))) return;
             await logout();
-            // Nach der nächsten Anmeldung geht es mit den Terminen los
+            // After the next sign-in, things start with the events
             route("/", true);
           }}
         >
-          Abmelden
+          <Trans>Sign out</Trans>
         </Button>
       </div>
       {nameOpen ? <NameSheet onClose={() => setNameOpen(false)} /> : null}
@@ -315,33 +380,42 @@ interface PermissionsResponse {
   log: { permission: ChildPermission; value: boolean; at: string; byName: string }[];
 }
 
-/** Eltern richten den Zugang ihres Kindes ein bzw. erzeugen nach Handywechsel einen Link für einen neuen Passkey. */
+/** Parents set up their child's access, or create a link for a new passkey after a phone change. */
 function ChildAccessCard({ child, hasAccount }: { child: PersonRef; hasAccount: boolean }) {
   const [link, setLink] = useState<{ url: string; expiresAt: string } | null>(null);
-  const label = hasAccount ? "Link für neuen Passkey" : `Zugang für ${child.firstName} einrichten`;
+  const firstName = child.firstName;
+  const label = hasAccount ? t`Link for a new passkey` : t`Set up access for ${firstName}`;
   return (
-    <section class="card card-body stack-sm" aria-label="Zugang des Kindes">
+    <section class="card card-body stack-sm" aria-label={t`Child's access`}>
       <h2 class="section-title" style={{ margin: 0 }}>
-        Zugang für {child.firstName}
+        <Trans>Access for {firstName}</Trans>
       </h2>
       <p class="small muted">
         {hasAccount
-          ? `Neues Handy? Mit diesem Link richtet ${child.firstName} einen neuen Passkey ein. Der bisherige bleibt gültig.`
-          : `${child.firstName} bekommt einen eigenen Zugang mit Passkey. Den Link nur ${child.firstName} geben oder direkt auf dem Handy öffnen.`}
+          ? t`New phone? With this link ${firstName} sets up a new passkey. The previous one stays valid.`
+          : t`${firstName} gets their own access with a passkey. Only give the link to ${firstName} or open it directly on their phone.`}
       </p>
       {link ? (
         <>
           <div class="url-box">{link.url}</div>
           <div class="btn-row">
-            <Button icon="copy" onClick={() => copyText(link.url, "Link kopiert.")}>
-              Kopieren
+            <Button icon="copy" onClick={() => copyText(link.url, t`Link copied.`)}>
+              <Trans>Copy</Trans>
             </Button>
-            <Button icon="share" onClick={() => shareLink(`Zugang für ${child.firstName}`, `Dein Zugang zur App ${clubName()}`, link.url)}>
-              Teilen
+            <Button
+              icon="share"
+              onClick={() => {
+                const club = clubName();
+                void shareLink(t`Access for ${firstName}`, t`Your access to the ${club} app`, link.url);
+              }}
+            >
+              <Trans>Share</Trans>
             </Button>
           </div>
-          <div class="qr" role="img" aria-label="QR-Code des Links" dangerouslySetInnerHTML={{ __html: renderSVG(link.url, { border: 1 }) }} />
-          <p class="small muted">7 Tage gültig, nur einmal nutzbar.</p>
+          <div class="qr" role="img" aria-label={t`QR code of the link`} dangerouslySetInnerHTML={{ __html: renderSVG(link.url, { border: 1 }) }} />
+          <p class="small muted">
+            <Trans>Valid for 7 days, can be used once.</Trans>
+          </p>
         </>
       ) : (
         <Button
@@ -361,49 +435,61 @@ function ChildAccessCard({ child, hasAccount }: { child: PersonRef; hasAccount: 
 export function ChildPage({ id }: { id: string }) {
   const me = useMe();
   const child = me.children.find((c) => String(c.id) === id);
-  useDocumentTitle(child ? child.firstName : "Kind");
+  useDocumentTitle(child ? child.firstName : t`Child`);
   const { data, error, reload, mutate } = useQuery<PermissionsResponse>(child ? `/children/${id}/permissions` : null);
   if (!child) {
     return (
       <main class="page">
-        <TopBar title="Kind" back="/profil" />
+        <TopBar title={t`Child`} back="/profil" />
         <div class="content">
-          <Notice kind="warn">Dieses Kind ist nicht mit deinem Zugang verknüpft.</Notice>
+          <Notice kind="warn">
+            <Trans>This child is not linked to your access.</Trans>
+          </Notice>
         </div>
       </main>
     );
   }
+  const firstName = child.firstName;
+  const permissionLabels = childPermissionLabels();
+  const guardians = (data?.guardians ?? [])
+    .map((g) => {
+      const name = personName(g);
+      return g.hasAccount ? name : t`${name} (no access)`;
+    })
+    .join(", ");
   return (
     <main class="page">
-      <TopBar title={personName(child)} kicker="Profilbild und Freigaben" back="/profil" />
+      <TopBar title={personName(child)} kicker={t`Profile picture and permissions`} back="/profil" />
       <div class="content">
         {error ? <ErrorBox error={error} onRetry={reload} /> : null}
         <AvatarEditor personId={child.id} name={personName(child)} view="guardian" />
         {!data ? <Spinner /> : null}
         {data && !data.parentsInCharge ? (
           <Notice>
-            In den Mannschaften von {child.firstName} sind keine Eltern eingebunden. {child.firstName} sagt selbst zu und ab und ist allein im Chat. Freigaben und
-            Benachrichtigungen für {child.firstName} gibt es deshalb nicht.
+            <Trans>
+              No parents are involved in the teams of {firstName}. {firstName} accepts and declines on their own and is alone in the chat. So there are no
+              permissions or notifications for {firstName}.
+            </Trans>
           </Notice>
         ) : null}
         {data?.parentsInCharge ? (
           <>
             <Notice>
               {data.childHasAccount
-                ? `${child.firstName} hat einen eigenen Zugang. Hier legst du fest, was ${child.firstName} selbst darf. Du kannst immer für ${child.firstName} zu- und absagen.`
-                : `${child.firstName} hat noch keinen eigenen Zugang. Die Freigaben gelten, sobald ${child.firstName} einen bekommt.`}
+                ? t`${firstName} has their own access. Here you decide what ${firstName} may do on their own. You can always accept and decline for ${firstName}.`
+                : t`${firstName} has no access of their own yet. The permissions apply as soon as ${firstName} gets one.`}
             </Notice>
             <ChildAccessCard child={child} hasAccount={data.childHasAccount} />
-            <ul class="list" aria-label="Freigaben">
-              {(Object.keys(CHILD_PERMISSION_LABELS) as ChildPermission[]).map((perm) => (
+            <ul class="list" aria-label={t`Permissions`}>
+              {(Object.keys(permissionLabels) as ChildPermission[]).map((perm) => (
                 <li>
                   <SwitchRow
-                    label={CHILD_PERMISSION_LABELS[perm]}
+                    label={permissionLabels[perm]}
                     checked={data.permissions[perm]}
                     onChange={async (value) => {
                       const res = await api.put<{ permissions: ChildPermissions }>(`/children/${id}/permissions`, { permission: perm, value });
                       mutate({ ...data, permissions: res.permissions });
-                      toast("Gespeichert. Das andere Elternteil wird informiert.");
+                      toast(t`Saved. The other parent will be notified.`);
                       void reload();
                     }}
                   />
@@ -411,18 +497,19 @@ export function ChildPage({ id }: { id: string }) {
               ))}
             </ul>
             <p class="small muted">
-              Verknüpfte Eltern: {data.guardians.map((g) => `${personName(g)}${g.hasAccount ? "" : " (ohne Zugang)"}`).join(", ")}. Jedes Elternteil kann die Freigaben
-              ändern.
+              <Trans>Linked parents: {guardians}. Each parent can change the permissions.</Trans>
             </p>
             {data.log.length ? (
-              <section class="stack-sm" aria-label="Änderungen">
-                <h2 class="section-title">Letzte Änderungen</h2>
+              <section class="stack-sm" aria-label={t`Changes`}>
+                <h2 class="section-title">
+                  <Trans>Recent changes</Trans>
+                </h2>
                 <ul class="list">
                   {data.log.map((l) => (
                     <li class="list-row">
                       <span class="main">
                         <span>
-                          {CHILD_PERMISSION_LABELS[l.permission]}: <strong>{l.value ? "erlaubt" : "aus"}</strong>
+                          {permissionLabels[l.permission]}: <strong>{l.value ? t`allowed` : t`off`}</strong>
                         </span>
                         <span class="sub">
                           {l.byName}, {stamp(l.at)}
@@ -434,7 +521,7 @@ export function ChildPage({ id }: { id: string }) {
               </section>
             ) : null}
             <a class="btn" href="/profil/benachrichtigungen">
-              Benachrichtigungen für {child.firstName}
+              <Trans>Notifications for {firstName}</Trans>
             </a>
           </>
         ) : null}
@@ -448,23 +535,27 @@ interface NotificationSettings {
 }
 
 export function NotificationsPage() {
-  useDocumentTitle("Benachrichtigungen");
+  useDocumentTitle(t`Notifications`);
   const me = useMe();
   const { data, error, reload, mutate } = useQuery<NotificationSettings>("/me/notifications");
+  const topicLabels = notificationTopicLabels();
   return (
     <main class="page">
-      <TopBar title="Benachrichtigungen" kicker="Einstellungen" back="/profil" />
+      <TopBar title={t`Notifications`} kicker={t`Settings`} back="/profil" />
       <div class="content">
         {error ? <ErrorBox error={error} onRetry={reload} /> : null}
         {!data ? <Spinner /> : null}
-        {data?.persons.map((p) => (
-          <section class="stack-sm" aria-label={p.self ? "Für mich" : `Für ${p.person.firstName}`}>
-            <h2 class="section-title">{p.self ? "Für mich" : `Für ${p.person.firstName}`}</h2>
+        {data?.persons.map((p) => {
+          const firstName = p.person.firstName;
+          const heading = p.self ? t`For me` : t`For ${firstName}`;
+          return (
+          <section class="stack-sm" aria-label={heading}>
+            <h2 class="section-title">{heading}</h2>
             <ul class="list">
               {(Object.keys(p.topics) as NotificationTopic[]).map((topic) => (
                 <li>
                   <SwitchRow
-                    label={NOTIFICATION_TOPIC_LABELS[topic]}
+                    label={topicLabels[topic]}
                     checked={p.topics[topic] ?? true}
                     onChange={async (enabled) => {
                       await api.put("/me/notifications", { personId: p.person.id, topic, enabled });
@@ -475,22 +566,25 @@ export function NotificationsPage() {
               ))}
             </ul>
           </section>
-        ))}
+          );
+        })}
         {me.helperTeams.length || me.referee ? <HelperPrefs /> : null}
-        <p class="small muted">Die Einstellungen gelten für alle deine Geräte. Ob ein Gerät überhaupt Benachrichtigungen bekommt, legst du im Profil fest.</p>
+        <p class="small muted">
+          <Trans>The settings apply to all your devices. Whether a device gets notifications at all is set in your profile.</Trans>
+        </p>
       </div>
     </main>
   );
 }
 
 type DutyTopic = "duty_remind_3d" | "duty_remind_1d" | "duty_open" | "duty_coach_open" | "duty_referee_open";
-const DUTY_TOPIC_LABELS: Record<DutyTopic, string> = {
-  duty_remind_3d: "Erinnerung 3 Tage vor meinem Dienst",
-  duty_remind_1d: "Erinnerung 1 Tag vorher",
-  duty_open: "Helfer gesucht bei meinen Mannschaften",
-  duty_coach_open: "Offene Plätze (Trainer und Admins)",
-  duty_referee_open: "KiHaSL/JuHaSL gesucht",
-};
+const dutyTopicLabels = (): Record<DutyTopic, string> => ({
+  duty_remind_3d: t`Reminder 3 days before my duty`,
+  duty_remind_1d: t`Reminder 1 day before`,
+  duty_open: t`Helpers needed in my teams`,
+  duty_coach_open: t`Open slots (coaches and admins)`,
+  duty_referee_open: t`KiHaSL/JuHaSL needed`,
+});
 
 interface DutyPrefs {
   skills: { dutyTypeId: number; code: string | null; name: string; on: boolean }[];
@@ -498,19 +592,21 @@ interface DutyPrefs {
   mailAddressVerified: boolean;
 }
 
-/** Helferplan „Das kann ich“: Dienste mit Vorkenntnissen bietet der Helferplan nur nach Zustimmung an. */
+/** Helper plan "What I can do": the helper plan only offers duties that need prior knowledge after consent. */
 function SkillSwitches() {
   const { data, mutate } = useQuery<DutyPrefs>("/profile/duty-prefs");
   if (!data?.skills.length) return null;
-  // Zeitnehmer und Sekretär sind dieselbe Qualifikation: ein Schalter, intern zwei Zustimmungen
+  // Timekeeper and scorer are the same qualification: one switch, internally two consents
   const table = data.skills.filter((sk) => sk.code === "zeitnehmer" || sk.code === "sekretaer");
   const rows = [
-    ...(table.length ? [{ label: table.map((sk) => sk.name).join(" und "), items: table }] : []),
+    ...(table.length ? [{ label: joinAnd(table.map((sk) => sk.name)), items: table }] : []),
     ...data.skills.filter((sk) => !table.includes(sk)).map((sk) => ({ label: sk.name, items: [sk] })),
   ];
   return (
-    <section class="stack-sm" aria-label="Das kann ich">
-      <h2 class="section-title">Das kann ich</h2>
+    <section class="stack-sm" aria-label={t`What I can do`}>
+      <h2 class="section-title">
+        <Trans>What I can do</Trans>
+      </h2>
       <ul class="list">
         {rows.map((row) => (
           <li>
@@ -527,54 +623,79 @@ function SkillSwitches() {
           </li>
         ))}
       </ul>
-      <p class="small muted">Diese Dienste brauchen Vorkenntnisse. Der Helferplan bietet sie dir nur an, wenn du sie hier einschaltest.</p>
+      <p class="small muted">
+        <Trans>These duties need prior knowledge. The helper plan only offers them to you if you turn them on here.</Trans>
+      </p>
     </section>
   );
 }
 
-/** Helferplan: je Benachrichtigung Push und/oder Mail. */
+/** Helper plan: push and/or mail per notification. */
 function HelperPrefs() {
   const me = useMe();
   const { data, mutate } = useQuery<DutyPrefs>("/profile/duty-prefs");
   if (!data) return <Spinner />;
   const showCoach = me.isAdmin || me.manageableTeams.length > 0;
-  const topics = (Object.keys(DUTY_TOPIC_LABELS) as DutyTopic[]).filter(
-    (t) => (t !== "duty_coach_open" || showCoach) && (t !== "duty_referee_open" || me.referee) && (t !== "duty_open" || me.helperTeams.length > 0),
+  const labels = dutyTopicLabels();
+  const topics = (Object.keys(labels) as DutyTopic[]).filter(
+    (topic) => (topic !== "duty_coach_open" || showCoach) && (topic !== "duty_referee_open" || me.referee) && (topic !== "duty_open" || me.helperTeams.length > 0),
   );
   const setChannel = async (topic: DutyTopic, ch: { push: boolean; mail: boolean }) => {
     await api.put("/profile/duty-prefs", { channels: { [topic]: ch } });
     mutate({ ...data, channels: { ...data.channels, [topic]: ch } });
   };
   return (
-    <section class="stack-sm" aria-label="Helferplan">
-      <h2 class="section-title">Helferplan</h2>
-      <div class="duty-channels" role="table" aria-label="Benachrichtigungen im Helferplan">
+    <section class="stack-sm" aria-label={t`Helper plan`}>
+      <h2 class="section-title">
+        <Trans>Helper plan</Trans>
+      </h2>
+      <div class="duty-channels" role="table" aria-label={t`Notifications in the helper plan`}>
         <div role="row" class="head">
-          <span role="columnheader">Benachrichtigung</span>
-          <span role="columnheader">Push</span>
-          <span role="columnheader">Mail</span>
+          <span role="columnheader">
+            <Trans>Notification</Trans>
+          </span>
+          <span role="columnheader">
+            <Trans>Push</Trans>
+          </span>
+          <span role="columnheader">
+            <Trans>Mail</Trans>
+          </span>
         </div>
-        {topics.map((t) => (
-          <div role="row">
-            <span role="cell">{DUTY_TOPIC_LABELS[t]}</span>
-            <span role="cell">
-              <input type="checkbox" aria-label={`${DUTY_TOPIC_LABELS[t]} per Push`} checked={data.channels[t].push} onChange={(e) => setChannel(t, { ...data.channels[t], push: (e.target as HTMLInputElement).checked })} />
-            </span>
-            <span role="cell">
-              <input
-                type="checkbox"
-                aria-label={`${DUTY_TOPIC_LABELS[t]} per Mail`}
-                checked={data.channels[t].mail}
-                onChange={(e) => setChannel(t, { ...data.channels[t], mail: (e.target as HTMLInputElement).checked })}
-              />
-            </span>
-          </div>
-        ))}
+        {topics.map((topic) => {
+          const label = labels[topic];
+          return (
+            <div role="row">
+              <span role="cell">{label}</span>
+              <span role="cell">
+                <input
+                  type="checkbox"
+                  aria-label={t`${label} by push`}
+                  checked={data.channels[topic].push}
+                  onChange={(e) => setChannel(topic, { ...data.channels[topic], push: (e.target as HTMLInputElement).checked })}
+                />
+              </span>
+              <span role="cell">
+                <input
+                  type="checkbox"
+                  aria-label={t`${label} by mail`}
+                  checked={data.channels[topic].mail}
+                  onChange={(e) => setChannel(topic, { ...data.channels[topic], mail: (e.target as HTMLInputElement).checked })}
+                />
+              </span>
+            </div>
+          );
+        })}
       </div>
       {!data.mailAddressVerified ? (
-        <p class="small muted">Mails gehen an die bestätigte Adresse deiner Anmeldung. Du hast noch keine, trage sie unter <a href="/profil/geraete">Profil → Anmeldung</a> ein.</p>
+        <p class="small muted">
+          <Trans>
+            Mails go to the confirmed address you sign in with. You don't have one yet, add it under <a href="/profil/geraete">Profile → Sign-in</a>.
+          </Trans>
+        </p>
       ) : (
-        <p class="small muted">Mails gehen an die Adresse, mit der du dich anmeldest.</p>
+        <p class="small muted">
+          <Trans>Mails go to the address you sign in with.</Trans>
+        </p>
       )}
     </section>
   );
@@ -587,7 +708,7 @@ interface Security {
   sessions: { id: string; deviceLabel: string; createdAt: string; expiresAt: string; current: boolean }[];
 }
 
-/** Adresse für die Anmeldung per E-Mail-Code. Sieht niemand außer dir. */
+/** Address for signing in by e-mail code. Nobody but you sees it. */
 function EmailSection(props: { data: Security; reload: () => Promise<unknown> }) {
   const { data } = props;
   const [editing, setEditing] = useState(false);
@@ -602,8 +723,10 @@ function EmailSection(props: { data: Security; reload: () => Promise<unknown> })
   };
 
   return (
-    <section class="stack-sm" aria-label="E-Mail für die Anmeldung">
-      <h2 class="section-title">E-Mail für die Anmeldung</h2>
+    <section class="stack-sm" aria-label={t`E-mail for signing in`}>
+      <h2 class="section-title">
+        <Trans>E-mail for signing in</Trans>
+      </h2>
       <div class="card card-pad stack-sm">
         {pending ? (
           <EmailCodeForm
@@ -611,20 +734,20 @@ function EmailSection(props: { data: Security; reload: () => Promise<unknown> })
             email={pending.email}
             onDone={async () => {
               setPending(null);
-              toast("E-Mail-Adresse bestätigt.");
+              toast(t`E-mail address confirmed.`);
               await props.reload();
             }}
             onResend={() => save(pending.email)}
           />
         ) : editing ? (
           <>
-            <TextField label="E-Mail-Adresse" type="email" value={value} onInput={setValue} autoComplete="email" inputMode="email" maxLength={254} />
+            <TextField label={t`E-mail address`} type="email" value={value} onInput={setValue} autoComplete="email" inputMode="email" maxLength={254} />
             <div class="btn-row">
               <Button variant="primary" disabled={!isEmail(value)} onClick={() => save(value.trim().toLowerCase())}>
-                Code senden
+                <Trans>Send code</Trans>
               </Button>
               <Button variant="ghost" onClick={() => setEditing(false)}>
-                Abbrechen
+                <Trans>Cancel</Trans>
               </Button>
             </div>
           </>
@@ -634,10 +757,12 @@ function EmailSection(props: { data: Security; reload: () => Promise<unknown> })
               <p>
                 <strong>{data.email}</strong>
                 <br />
-                <span class="small muted">{data.emailVerified ? "Bestätigt. Du kannst dich damit per Code anmelden." : "Noch nicht bestätigt."}</span>
+                <span class="small muted">{data.emailVerified ? t`Confirmed. You can use it to sign in with a code.` : t`Not confirmed yet.`}</span>
               </p>
             ) : (
-              <p class="muted">Noch keine Adresse hinterlegt. Mit einer bestätigten Adresse kommst du per Code wieder in die App, falls dein Passkey fehlt.</p>
+              <p class="muted">
+                <Trans>No address on file yet. With a confirmed address you can get back into the app with a code if your passkey is missing.</Trans>
+              </p>
             )}
             <div class="btn-row">
               <Button
@@ -646,36 +771,42 @@ function EmailSection(props: { data: Security; reload: () => Promise<unknown> })
                   setEditing(true);
                 }}
               >
-                {data.email ? "Ändern" : "Adresse hinzufügen"}
+                {data.email ? t`Change` : t`Add address`}
               </Button>
-              {data.email && !data.emailVerified ? <Button onClick={() => save(data.email!)}>Code senden</Button> : null}
+              {data.email && !data.emailVerified ? (
+                <Button onClick={() => save(data.email!)}>
+                  <Trans>Send code</Trans>
+                </Button>
+              ) : null}
               {data.email && data.passkeys.length ? (
                 <Button
                   variant="ghost"
                   onClick={async () => {
-                    if (!(await confirmDialog({ title: "Adresse entfernen?", message: "Danach kannst du dich nur noch mit deinem Passkey anmelden.", confirmLabel: "Entfernen" }))) return;
+                    if (!(await confirmDialog({ title: t`Remove address?`, message: t`After that you can only sign in with your passkey.`, confirmLabel: t`Remove` }))) return;
                     await api.del("/me/email");
                     await props.reload();
                   }}
                 >
-                  Entfernen
+                  <Trans>Remove</Trans>
                 </Button>
               ) : null}
             </div>
           </>
         )}
-        <p class="small muted">Nur für die Anmeldung. Weder Trainer noch Admins sehen die Adresse.</p>
+        <p class="small muted">
+          <Trans>Only for signing in. Neither coaches nor admins see the address.</Trans>
+        </p>
       </div>
     </section>
   );
 }
 
 export function DevicesPage() {
-  useDocumentTitle("Passkeys und Geräte");
+  useDocumentTitle(t`Passkeys and devices`);
   const { data, error, reload } = useQuery<Security>("/me/security");
   return (
     <main class="page">
-      <TopBar title="Passkeys und Geräte" kicker="Sicherheit" back="/profil" />
+      <TopBar title={t`Passkeys and devices`} kicker={t`Security`} back="/profil" />
       <div class="content">
         {error ? <ErrorBox error={error} onRetry={reload} /> : null}
         {!data ? <Spinner /> : null}
@@ -683,32 +814,39 @@ export function DevicesPage() {
           <>
             {!data.passkeys.length ? (
               <Notice icon="key">
-                <strong>Richte einen Passkey ein.</strong> Er ist die sicherste Anmeldung: Face ID, Fingerabdruck oder Gerätesperre, ohne Passwort und ohne Code
-                per E-Mail.
+                <Trans>
+                  <strong>Set up a passkey.</strong> It is the safest way to sign in: Face ID, fingerprint or screen lock, without a password and without a code
+                  by e-mail.
+                </Trans>
               </Notice>
             ) : null}
             <EmailSection data={data} reload={reload} />
-            <section class="stack-sm" aria-label="Passkeys">
-              <h2 class="section-title">Passkeys</h2>
+            <section class="stack-sm" aria-label={t`Passkeys`}>
+              <h2 class="section-title">
+                <Trans>Passkeys</Trans>
+              </h2>
               <ul class="list">
-                {data.passkeys.map((p) => (
+                {data.passkeys.map((p) => {
+                  const created = stamp(p.createdAt);
+                  const lastUsed = p.lastUsedAt ? stamp(p.lastUsedAt) : null;
+                  return (
                   <li class="list-row">
                     <Icon name="key" size={22} />
                     <span class="main">
-                      <span class="title">{p.label ?? "Passkey"}</span>
+                      <span class="title">{p.label ?? t`Passkey`}</span>
                       <span class="sub">
-                        Seit {stamp(p.createdAt)}
-                        {p.lastUsedAt ? ` · zuletzt ${stamp(p.lastUsedAt)}` : ""}
-                        {p.synced ? " · synchronisiert" : ""}
+                        <Trans>Since {created}</Trans>
+                        {lastUsed ? ` · ${t`last used ${lastUsed}`}` : ""}
+                        {p.synced ? ` · ${t`synced`}` : ""}
                       </span>
                     </span>
                     {data.passkeys.length > 1 || data.emailVerified ? (
                       <Button
                         size="sm"
                         variant="ghost"
-                        aria-label="Passkey entfernen"
+                        aria-label={t`Remove passkey`}
                         onClick={async () => {
-                          if (!(await confirmDialog({ title: "Passkey entfernen?", message: "Mit diesem Passkey kannst du dich danach nicht mehr anmelden.", confirmLabel: "Entfernen", danger: true }))) return;
+                          if (!(await confirmDialog({ title: t`Remove passkey?`, message: t`You will no longer be able to sign in with this passkey.`, confirmLabel: t`Remove`, danger: true }))) return;
                           await api.del(`/me/passkeys/${encodeURIComponent(p.id)}`);
                           await reload();
                         }}
@@ -717,51 +855,66 @@ export function DevicesPage() {
                       </Button>
                     ) : null}
                   </li>
-                ))}
+                  );
+                })}
               </ul>
               <Button
                 icon="plus"
                 onClick={async () => {
                   try {
                     await registerPasskey("/me/passkeys", {});
-                    toast("Weiterer Passkey eingerichtet.");
+                    toast(t`Additional passkey set up.`);
                     await reload();
                   } catch (err) {
                     toast(errorMessage(err), "error");
                   }
                 }}
               >
-                {data.passkeys.length ? "Weiteren Passkey hinzufügen" : "Passkey einrichten"}
+                {data.passkeys.length ? t`Add another passkey` : t`Set up passkey`}
               </Button>
-              <p class="small muted">Tipp: Ein zweiter Passkey, z. B. auf einem Tablet, hilft, wenn das Handy verloren geht.</p>
+              <p class="small muted">
+                <Trans>Tip: a second passkey, e.g. on a tablet, helps if you lose your phone.</Trans>
+              </p>
             </section>
-            <section class="stack-sm" aria-label="Angemeldete Geräte">
-              <h2 class="section-title">Angemeldet auf</h2>
+            <section class="stack-sm" aria-label={t`Signed-in devices`}>
+              <h2 class="section-title">
+                <Trans>Signed in on</Trans>
+              </h2>
               <ul class="list">
-                {data.sessions.map((s) => (
+                {data.sessions.map((s) => {
+                  const since = stamp(s.createdAt);
+                  return (
                   <li class="list-row">
                     <Icon name="phone" size={22} />
                     <span class="main">
                       <span class="title">
-                        {s.deviceLabel} {s.current ? <span class="badge">Dieses Gerät</span> : null}
+                        {s.deviceLabel}{" "}
+                        {s.current ? (
+                          <span class="badge">
+                            <Trans>This device</Trans>
+                          </span>
+                        ) : null}
                       </span>
-                      <span class="sub">Angemeldet seit {stamp(s.createdAt)}</span>
+                      <span class="sub">
+                        <Trans>Signed in since {since}</Trans>
+                      </span>
                     </span>
                     {!s.current ? (
                       <Button
                         size="sm"
                         onClick={async () => {
                           await api.del(`/me/sessions/${s.id}`);
-                          toast("Gerät abgemeldet.");
+                          toast(t`Device signed out.`);
                           await reload();
                           invalidate("/me/security");
                         }}
                       >
-                        Abmelden
+                        <Trans>Sign out</Trans>
                       </Button>
                     ) : null}
                   </li>
-                ))}
+                  );
+                })}
               </ul>
             </section>
           </>

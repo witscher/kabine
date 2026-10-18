@@ -1,3 +1,4 @@
+import { t } from "@lingui/core/macro";
 import { Hono } from "hono";
 import { z } from "zod";
 import type { PersonRef } from "../../shared/types";
@@ -9,7 +10,9 @@ import { type EventRow, eventTeams, eventTitle, loadEvent, loadEventContext, toS
 import { notifyCoaches, notifyPersons, shortDate, shortTime } from "../domain/notify";
 import { all, first, list, run, stmt } from "../lib/db";
 import { badRequest, conflict, forbidden, notFound, parse, readJson } from "../lib/http";
-import { addMinutesLocal, localToInstant, utcIso } from "../lib/time";
+import { addMinutesLocal, isoWeekday, localToInstant, utcIso } from "../lib/time";
+import { isoWeekdayShort } from "../../shared/dates";
+import { currentLocale } from "../i18n";
 
 export const squadRoutes = new Hono<AppEnv>();
 
@@ -24,16 +27,16 @@ interface CandidateRow {
 
 async function gameForCoach(db: D1Database, actor: Actor, eventId: number) {
   const event = await loadEvent(db, eventId);
-  if (!event || event.kind !== "game") throw notFound("Dieses Spiel gibt es nicht.");
+  if (!event || event.kind !== "game") throw notFound(t`This game does not exist.`);
   const ctx = await loadEventContext(db, [event]);
   const teams = eventTeams(event, ctx);
   const team = teams[0];
-  if (!team) throw notFound("Dem Spiel ist keine Mannschaft zugeordnet.");
-  if (!isCoachOf(actor, team.id)) throw forbidden("Den Kader nominieren nur Trainer dieser Mannschaft.");
+  if (!team) throw notFound(t`No team is assigned to this game.`);
+  if (!isCoachOf(actor, team.id)) throw forbidden(t`Only coaches of this team nominate the squad.`);
   return { event, ctx, team };
 }
 
-/** Andere Spiele, die sich zeitlich überschneiden (±3 Stunden um den Anwurf). */
+/** Other games that overlap in time (±3 hours around the throw-off). */
 async function overlappingNominations(db: D1Database, event: EventRow, personIds: number[]) {
   if (!personIds.length) return new Map<number, string>();
   const rows = await all<{ person_id: number; event_id: number; starts_at: string; home_team: string | null; guest_team: string | null; team_name: string | null }>(
@@ -48,12 +51,19 @@ async function overlappingNominations(db: D1Database, event: EventRow, personIds
     addMinutesLocal(event.starts_at, -180),
     addMinutesLocal(event.starts_at, 180),
   );
-  // Alle überschneidenden Spiele je Person, z. B. bei Spielern in wC1 und wC2
+  // All overlapping games per person, e.g. for players in wC1 and wC2
   const parts = new Map<number, string[]>();
   for (const r of rows.sort((a, b) => a.starts_at.localeCompare(b.starts_at))) {
-    parts.set(r.person_id, [...(parts.get(r.person_id) ?? []), `${r.team_name ?? "ein anderes Spiel"} (${r.starts_at.slice(11, 16)} Uhr)`]);
+    const game = r.team_name ?? t`another game`;
+    const time = r.starts_at.slice(11, 16);
+    parts.set(r.person_id, [...(parts.get(r.person_id) ?? []), t`${game} (${time})`]);
   }
-  return new Map([...parts].map(([id, list]) => [id, `Zur selben Zeit für ${list.join(", ")} nominiert`]));
+  return new Map(
+    [...parts].map(([id, list]) => {
+      const games = list.join(", ");
+      return [id, t`Nominated for ${games} at the same time`];
+    }),
+  );
 }
 
 async function ageClassFor(db: D1Database, code: string) {
@@ -70,8 +80,9 @@ export function ageWarning(
   ac: { name: string; birth_year_min: number | null; birth_year_max: number | null } | null,
 ): string | null {
   if (!ac || birthYear == null) return null;
-  if (ac.birth_year_min != null && birthYear < ac.birth_year_min) return `Jahrgang ${birthYear} ist zu alt für die ${ac.name}`;
-  if (ac.birth_year_max != null && birthYear > ac.birth_year_max) return `Jahrgang ${birthYear} passt nicht zur ${ac.name}`;
+  const ageClass = ac.name;
+  if (ac.birth_year_min != null && birthYear < ac.birth_year_min) return t`Born ${birthYear}: too old for ${ageClass}`;
+  if (ac.birth_year_max != null && birthYear > ac.birth_year_max) return t`Born ${birthYear}: does not fit ${ageClass}`;
   return null;
 }
 
@@ -130,24 +141,27 @@ squadRoutes.get("/events/:id/squad", async (c) => {
   const candidates = [...members];
   for (const a of accepted) if (!candidates.some((m) => m.person_id === a.person_id)) candidates.push(a);
 
-  // Hinweise aus dem letzten Training vor dem Spiel
+  // Hints from the last training before the game
   const trainingHints = new Map<number, string>();
   if (lastTraining) {
     const training = (await loadEvent(db, lastTraining.id))!;
     const tctx = await loadEventContext(db, [training]);
-    const day = shortDate(training.starts_at).slice(0, 2);
+    const weekday = isoWeekday(training.starts_at.slice(0, 10));
+    const day = isoWeekdayShort(currentLocale(), weekday);
     for (const p of tctx.participants.get(training.id) ?? []) {
       const text =
         p.status === "yes"
-          ? `Training ${day} zugesagt`
+          ? t`Accepted training ${day}`
           : p.status === "no"
             ? p.response?.is_late
-              ? `Training ${day} kurzfristig abgesagt`
-              : `Training ${day} abgesagt`
+              ? t`Declined training ${day} at short notice`
+              : t`Declined training ${day}`
             : p.status === "standing"
-              ? `${day === "Fr" ? "Freitags" : `Training ${day}`} dauerhaft abwesend`
+              ? weekday === 5
+                ? t`Permanently absent on Fridays`
+                : t`Permanently absent from training ${day}`
               : p.status === "open"
-                ? "Keine Rückmeldung zum Training"
+                ? t`No response for the training`
                 : "";
       if (text) trainingHints.set(p.person.id, text);
     }
@@ -166,7 +180,7 @@ squadRoutes.get("/events/:id/squad", async (c) => {
     event: toSummary(event, ctx, actor, Date.now()),
     team: { id: team.id, name: team.name, maxSquad: team.max_squad, autoSquad: team.auto_squad === 1 },
     published: event.squad_published_at != null,
-    // Automatisch aus dem Stammkader, solange der Trainer diesen Kader nicht selbst bearbeitet
+    // Automatic from the core squad as long as the coach does not edit this squad
     automatic: team.auto_squad === 1 && event.squad_manual === 0,
     candidates: candidates.map((m) => {
       const isHelper = m.role === "helper";
@@ -179,7 +193,7 @@ squadRoutes.get("/events/:id/squad", async (c) => {
         nominated: nominated.has(m.person_id),
         status: part?.status ?? null,
         reason: part?.response?.reason ?? null,
-        hint: m.is_active !== 1 ? "Inaktiv, nicht nominierbar" : (trainingHints.get(m.person_id) ?? (isHelper ? "Aushilfe" : "")),
+        hint: m.is_active !== 1 ? t`Inactive, cannot be nominated` : (trainingHints.get(m.person_id) ?? (isHelper ? t({ message: "Helper", context: "squad" }) : "")),
         conflict: conflicts.get(m.person_id) ?? null,
         ageWarning: isHelper ? null : ageWarning(m.birth_year, ac),
       };
@@ -203,9 +217,10 @@ squadRoutes.put("/events/:id/squad", async (c) => {
   const personIds = [...new Set(raw)];
   const { event, ctx, team } = await gameForCoach(c.env.DB, actor, intParam(c, "id"));
   const db = c.env.DB;
-  if (event.cancelled_at) throw conflict("Das Spiel wurde abgesagt.");
-  if (localToInstant(event.starts_at) <= Date.now()) throw conflict("Das Spiel hat schon begonnen.");
-  if (personIds.length > team.max_squad) throw badRequest(`Höchstens ${team.max_squad} Spieler können nominiert werden.`);
+  if (event.cancelled_at) throw conflict(t`The game has been cancelled.`);
+  if (localToInstant(event.starts_at) <= Date.now()) throw conflict(t`The game has already started.`);
+  const max = team.max_squad;
+  if (personIds.length > max) throw badRequest(t`At most ${max} players can be nominated.`);
 
   const allowed = await all<{ person_id: number; is_active: number; via_help: number }>(
     db,
@@ -220,8 +235,8 @@ squadRoutes.put("/events/:id/squad", async (c) => {
   const allowedMap = new Map(allowed.map((a) => [a.person_id, a]));
   for (const id of personIds) {
     const a = allowedMap.get(id);
-    if (!a) throw badRequest("Mindestens eine Person gehört nicht zum Kader dieser Mannschaft.");
-    if (a.is_active !== 1) throw badRequest("Inaktive Spieler können nicht nominiert werden.");
+    if (!a) throw badRequest(t`At least one person does not belong to the squad of this team.`);
+    if (a.is_active !== 1) throw badRequest(t`Inactive players cannot be nominated.`);
   }
 
   const current = ctx.nominations.get(event.id) ?? new Map();
@@ -248,53 +263,59 @@ squadRoutes.put("/events/:id/squad", async (c) => {
   await db.batch(statements);
   await releaseRequests(c.env, { event, ctx, teamIds: ctx.eventTeams.get(event.id) ?? [] }, removed, [actor.accountId]);
 
-  const title = eventTitle(event, [{ id: team.id, name: team.name }]);
-  const when = `${shortDate(event.starts_at)}, ${shortTime(event.starts_at)}`;
+  const teamRefs = [{ id: team.id, name: team.name }];
+  const texts = () => ({ title: eventTitle(event, teamRefs), when: `${shortDate(event.starts_at)}, ${shortTime(event.starts_at)}` });
   await notifyPersons(
     c.env,
     added,
     "squad",
-    { title: "Du bist nominiert", body: `${title} am ${when}. Falls du nicht kannst, sag bitte ab.`, url: `/termine/${event.id}` },
+    () => {
+      const { title, when } = texts();
+      return { title: t`You have been nominated`, body: t`${title} on ${when}. If you can't make it, please decline.`, url: `/termine/${event.id}` };
+    },
     { teamIds: [team.id], exclude: [actor.accountId] },
   );
   await notifyPersons(
     c.env,
     removed,
     "squad",
-    { title: "Kader geändert", body: `Für ${title} am ${when} bist du nicht mehr im Kader.`, url: `/termine/${event.id}` },
+    () => {
+      const { title, when } = texts();
+      return { title: t`Squad changed`, body: t`You are no longer in the squad for ${title} on ${when}.`, url: `/termine/${event.id}` };
+    },
     { teamIds: [team.id], exclude: [actor.accountId] },
   );
   return c.json({ ok: true, added: added.length, removed: removed.length });
 });
 
-/** Einen von Hand bearbeiteten Kader wieder automatisch aus dem Stammkader führen. */
+/** Puts a squad edited by hand back on automatic from the core squad. */
 squadRoutes.post("/events/:id/squad/auto", async (c) => {
   const actor = requireActor(c);
   const { event, team } = await gameForCoach(c.env.DB, actor, intParam(c, "id"));
-  if (team.auto_squad !== 1) throw conflict("Für diese Mannschaft ist der automatische Kader ausgeschaltet.");
-  if (localToInstant(event.starts_at) <= Date.now()) throw conflict("Das Spiel hat schon begonnen.");
+  if (team.auto_squad !== 1) throw conflict(t`The automatic squad is switched off for this team.`);
+  if (localToInstant(event.starts_at) <= Date.now()) throw conflict(t`The game has already started.`);
   await run(c.env.DB, "UPDATE events SET squad_manual = 0 WHERE id = ?", event.id);
   await syncAutoSquads(c.env.DB, [team.id]);
   return c.json({ ok: true });
 });
 
-// Ad-hoc-Aushilfe ---------------------------------------------------------------
+// Ad-hoc helpers -----------------------------------------------------------------
 
 export interface TeamCandidate {
   person_id: number;
   first_name: string;
   last_name: string | null;
   is_active: number;
-  /** Alle passenden Mannschaften der Person (z. B. wC1 und wC2) */
+  /** All matching teams of the person (e.g. wC1 and wC2) */
   team_ids: number[];
   team_name: string;
 }
 
 /**
- * Kandidaten aus anderen Mannschaften, eine Zeile je Person.
- * - help: 2. Mannschaft derselben Altersklasse oder nächstniedrigere Altersklasse, ohne alle, die schon in der Mannschaft sind.
- * - player: jede andere Mannschaft derselben Altersklasse oder die nächstniedrigere, ohne die, die hier schon spielen
- *   (eine Aushilfe kann so zur Spielerin werden).
+ * Candidates from other teams, one row per person.
+ * - help: 2nd team of the same age class or the next lower age class, without everyone already in the team.
+ * - player: any other team of the same age class or the next lower one, without those who already play here
+ *   (so a helper can become a player).
  */
 export async function teamCandidates(db: D1Database, teamId: number, mode: "help" | "player"): Promise<TeamCandidate[]> {
   const team = await first<{ id: number; age_class_code: string; level: number }>(db, "SELECT id, age_class_code, level FROM teams WHERE id = ?", teamId);
@@ -333,7 +354,7 @@ export async function teamCandidates(db: D1Database, teamId: number, mode: "help
   return [...byPerson.values()];
 }
 
-/** Spieler aus der 2. Mannschaft derselben Altersklasse oder der nächstniedrigeren Altersklasse. */
+/** Players from the 2nd team of the same age class or the next lower age class. */
 export function helpCandidates(db: D1Database, teamId: number) {
   return teamCandidates(db, teamId, "help");
 }
@@ -366,12 +387,12 @@ squadRoutes.post("/events/:id/help-requests", async (c) => {
   const actor = requireActor(c);
   const { personId } = parse(helpSchema, await readJson(c.req.raw));
   const { event, team } = await gameForCoach(c.env.DB, actor, intParam(c, "id"));
-  if (event.cancelled_at || localToInstant(event.starts_at) <= Date.now()) throw conflict("Für dieses Spiel sind keine Anfragen mehr möglich.");
+  if (event.cancelled_at || localToInstant(event.starts_at) <= Date.now()) throw conflict(t`Requests are no longer possible for this game.`);
   const candidate = (await helpCandidates(c.env.DB, team.id)).find((r) => r.person_id === personId);
-  if (!candidate) throw badRequest("Diese Person kann für diese Mannschaft nicht angefragt werden.");
-  if (candidate.is_active !== 1) throw badRequest("Inaktive Spieler können nicht angefragt werden.");
+  if (!candidate) throw badRequest(t`This person cannot be requested for this team.`);
+  if (candidate.is_active !== 1) throw badRequest(t`Inactive players cannot be requested.`);
   const existing = await first<{ id: number; status: string }>(c.env.DB, "SELECT id, status FROM help_requests WHERE event_id = ? AND person_id = ?", event.id, personId);
-  if (existing && existing.status !== "withdrawn") throw conflict("Diese Person wurde bereits angefragt.");
+  if (existing && existing.status !== "withdrawn") throw conflict(t`This person has already been requested.`);
   if (existing) {
     await run(
       c.env.DB,
@@ -391,25 +412,34 @@ squadRoutes.post("/events/:id/help-requests", async (c) => {
       actor.personId,
     );
   }
-  const when = `${shortDate(event.starts_at)}, ${shortTime(event.starts_at)}`;
+  const whenText = () => `${shortDate(event.starts_at)}, ${shortTime(event.starts_at)}`;
+  const actorName = actor.firstName;
+  const playerName = candidate.first_name;
+  const teamName = team.name;
   await notifyPersons(
     c.env,
     [personId],
     "squad",
-    {
-      title: `Aushilfe bei der ${team.name}?`,
-      body: `${actor.firstName} fragt, ob ${candidate.first_name} am ${when} bei der ${team.name} aushelfen kann.`,
-      url: `/termine/${event.id}`,
+    () => {
+      const when = whenText();
+      return {
+        title: t`Help out ${teamName}?`,
+        body: t`${actorName} asks whether ${playerName} can help out ${teamName} on ${when}.`,
+        url: `/termine/${event.id}`,
+      };
     },
     { teamIds: [team.id] },
   );
   await notifyCoaches(
     c.env,
     candidate.team_ids,
-    {
-      title: "Aushilfe-Anfrage",
-      body: `${actor.firstName} (${team.name}) fragt ${candidate.first_name} für das Spiel am ${when} als Aushilfe an.`,
-      url: `/termine/${event.id}`,
+    () => {
+      const when = whenText();
+      return {
+        title: t`Help request`,
+        body: t`${actorName} (${teamName}) asks ${playerName} to help out in the game on ${when}.`,
+        url: `/termine/${event.id}`,
+      };
     },
     { exclude: [actor.accountId] },
   );
@@ -427,11 +457,11 @@ squadRoutes.post("/help-requests/:id/answer", async (c) => {
        FROM help_requests h JOIN teams t ON t.id = h.team_id JOIN persons p ON p.id = h.person_id WHERE h.id = ?`,
     intParam(c, "id"),
   );
-  if (!help) throw notFound("Diese Anfrage gibt es nicht.");
+  if (!help) throw notFound(t`This request does not exist.`);
   requireActFor(actor, help.person_id, "may_answer_help", [help.team_id]);
-  if (help.status !== "open") throw conflict("Diese Anfrage ist bereits beantwortet.");
+  if (help.status !== "open") throw conflict(t`This request has already been answered.`);
   const event = (await loadEvent(c.env.DB, help.event_id))!;
-  if (event.cancelled_at || localToInstant(event.starts_at) <= Date.now()) throw conflict("Das Spiel ist vorbei oder abgesagt.");
+  if (event.cancelled_at || localToInstant(event.starts_at) <= Date.now()) throw conflict(t`The game is over or cancelled.`);
 
   const now = utcIso();
   const statements = [
@@ -461,13 +491,18 @@ squadRoutes.post("/help-requests/:id/answer", async (c) => {
     );
   }
   await c.env.DB.batch(statements);
+  const playerName = help.first_name;
+  const teamName = help.team_name;
   await notifyCoaches(
     c.env,
     [help.team_id],
-    {
-      title: accept ? "Aushilfe zugesagt" : "Aushilfe abgelehnt",
-      body: `${help.first_name} hilft am ${shortDate(event.starts_at)} ${accept ? "" : "nicht "}bei der ${help.team_name} aus.`,
-      url: `/termine/${event.id}`,
+    () => {
+      const date = shortDate(event.starts_at);
+      return {
+        title: accept ? t`Help accepted` : t`Help declined`,
+        body: accept ? t`${playerName} will help out ${teamName} on ${date}.` : t`${playerName} will not help out ${teamName} on ${date}.`,
+        url: `/termine/${event.id}`,
+      };
     },
     { exclude: [actor.accountId] },
   );
@@ -481,7 +516,7 @@ squadRoutes.delete("/help-requests/:id", async (c) => {
     "SELECT h.id, h.event_id, h.person_id, h.team_id, h.status, t.name AS team_name FROM help_requests h JOIN teams t ON t.id = h.team_id WHERE h.id = ?",
     intParam(c, "id"),
   );
-  if (!help) throw notFound("Diese Anfrage gibt es nicht.");
+  if (!help) throw notFound(t`This request does not exist.`);
   if (!isCoachOfAny(actor, [help.team_id])) throw forbidden();
   const event = (await loadEvent(c.env.DB, help.event_id))!;
   await c.env.DB.batch([
@@ -491,14 +526,18 @@ squadRoutes.delete("/help-requests/:id", async (c) => {
     stmt(c.env.DB, "DELETE FROM carpool_requests WHERE event_id = ? AND player_id = ?", help.event_id, help.person_id),
   ]);
   if (localToInstant(event.starts_at) > Date.now()) {
+    const teamName = help.team_name;
     await notifyPersons(
       c.env,
       [help.person_id],
       "squad",
-      {
-        title: "Anfrage zurückgezogen",
-        body: `Die Aushilfe-Anfrage der ${help.team_name} für ${shortDate(event.starts_at)} wurde zurückgezogen.`,
-        url: `/termine`,
+      () => {
+        const date = shortDate(event.starts_at);
+        return {
+          title: t`Request withdrawn`,
+          body: t`The help request from ${teamName} for ${date} has been withdrawn.`,
+          url: `/termine`,
+        };
       },
       { teamIds: [help.team_id] },
     );

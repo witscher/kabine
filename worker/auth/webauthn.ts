@@ -1,3 +1,4 @@
+import { t } from "@lingui/core/macro";
 import {
   generateAuthenticationOptions,
   generateRegistrationOptions,
@@ -15,7 +16,7 @@ import { b64url, fromB64url, randomToken } from "../lib/crypto";
 import { loadClub } from "../domain/club";
 import { badRequest, gone } from "../lib/http";
 
-/** Challenges leben kurz in KV und sind nur einmal verwendbar. */
+/** Challenges live briefly in KV and can be used only once. */
 const CHALLENGE_TTL_SECONDS = 300;
 
 export interface RelyingParty {
@@ -24,9 +25,9 @@ export interface RelyingParty {
 }
 
 /**
- * RP-ID und Origin. Ohne Konfiguration werden sie aus der Anfrage abgeleitet
- * (workers.dev). Bei eigener Domain fest in wrangler.jsonc eintragen, denn ein
- * Wechsel macht alle Passkeys unbrauchbar.
+ * RP ID and origin. Without configuration they are derived from the request
+ * (workers.dev). With an own domain, set them in wrangler.jsonc, because a
+ * change makes all passkeys unusable.
  */
 export function relyingParty(env: Env, request: Request): RelyingParty {
   const url = new URL(request.url);
@@ -49,11 +50,11 @@ async function storeChallenge<C>(kv: KVNamespace, value: StoredChallenge<C>): Pr
 }
 
 async function takeChallenge<C>(kv: KVNamespace, id: string, purpose: StoredChallenge<C>["purpose"]): Promise<StoredChallenge<C>> {
-  if (!/^[\w-]{10,64}$/.test(id)) throw badRequest("Ungültige Anfrage.");
+  if (!/^[\w-]{10,64}$/.test(id)) throw badRequest(t`Invalid request.`);
   const key = `webauthn:${id}`;
   const value = await kv.get<StoredChallenge<C>>(key, "json");
   if (!value || value.purpose !== purpose) {
-    throw gone("Die Anmeldung hat zu lange gedauert. Bitte versuche es noch einmal.", "challenge_expired");
+    throw gone(t`Signing in took too long. Please try again.`, "challenge_expired");
   }
   await kv.delete(key);
   return value;
@@ -117,10 +118,10 @@ export async function finishRegistration<C>(
       requireUserVerification: false,
     });
   } catch (err) {
-    console.warn("Passkey-Registrierung abgelehnt", err instanceof Error ? err.message : err);
-    throw badRequest("Der Passkey konnte nicht bestätigt werden. Bitte versuche es erneut.", "webauthn_failed");
+    console.warn("Passkey registration rejected", err instanceof Error ? err.message : err);
+    throw badRequest(t`The passkey could not be verified. Please try again.`, "webauthn_failed");
   }
-  if (!verification.verified) throw badRequest("Der Passkey konnte nicht bestätigt werden.", "webauthn_failed");
+  if (!verification.verified) throw badRequest(t`The passkey could not be verified.`, "webauthn_failed");
   const info = verification.registrationInfo;
   return {
     context: stored.context,
@@ -178,10 +179,10 @@ export async function finishLogin(
       },
     });
   } catch (err) {
-    console.warn("Passkey-Login abgelehnt", err instanceof Error ? err.message : err);
-    throw badRequest("Die Anmeldung konnte nicht bestätigt werden.", "webauthn_failed");
+    console.warn("Passkey login rejected", err instanceof Error ? err.message : err);
+    throw badRequest(t`The sign-in could not be verified.`, "webauthn_failed");
   }
-  if (!verification.verified) throw badRequest("Die Anmeldung konnte nicht bestätigt werden.", "webauthn_failed");
+  if (!verification.verified) throw badRequest(t`The sign-in could not be verified.`, "webauthn_failed");
   return { newCounter: verification.authenticationInfo.newCounter };
 }
 

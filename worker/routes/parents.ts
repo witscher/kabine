@@ -1,7 +1,8 @@
+import { t } from "@lingui/core/macro";
 import { Hono } from "hono";
 import { z } from "zod";
 import type { ChildPermission, ChildPermissions, NotificationTopic } from "../../shared/types";
-import { CHILD_PERMISSION_LABELS } from "../../shared/types";
+import { childPermissionLabels } from "../../shared/types";
 import { type AppEnv, intParam, requireActor } from "../app";
 import { ALL_PERMISSIONS, type Actor, parentsInCharge } from "../auth/actor";
 import { enqueuePush } from "../domain/notify";
@@ -14,13 +15,13 @@ export const parentRoutes = new Hono<AppEnv>();
 const PERMISSIONS = Object.keys(ALL_PERMISSIONS) as ChildPermission[];
 
 function requireGuardian(actor: Actor, childId: number) {
-  if (!actor.children.some((c) => c.id === childId)) throw forbidden("Nur verknüpfte Eltern können das einstellen.");
+  if (!actor.children.some((c) => c.id === childId)) throw forbidden(t`Only linked parents can set this.`);
 }
 
-/** Freigaben und Benachrichtigungen für ein Kind gibt es nur, wenn Eltern in einer seiner Mannschaften eingebunden sind. */
+/** Permissions and notifications for a child exist only if parents are involved in one of the child's teams. */
 function requireInCharge(actor: Actor, childId: number) {
   requireGuardian(actor, childId);
-  if (!parentsInCharge(actor, childId)) throw forbidden("In den Mannschaften deines Kindes sind keine Eltern eingebunden.");
+  if (!parentsInCharge(actor, childId)) throw forbidden(t`Parents are not involved in your child's teams.`);
 }
 
 async function permissionsOf(db: D1Database, childId: number): Promise<ChildPermissions> {
@@ -54,10 +55,10 @@ parentRoutes.get("/children/:id/permissions", async (c) => {
   return c.json({
     permissions,
     parentsInCharge: parentsInCharge(actor, childId),
-    labels: CHILD_PERMISSION_LABELS,
+    labels: childPermissionLabels(),
     childHasAccount: info?.has_account === 1,
     guardians: guardians.map((g) => ({ firstName: g.first_name, lastName: g.last_name, hasAccount: g.has_account === 1 })),
-    log: log.map((l) => ({ permission: l.permission, value: l.value === 1, at: l.changed_at, byName: l.first_name ?? "Ehemaliges Elternteil" })),
+    log: log.map((l) => ({ permission: l.permission, value: l.value === 1, at: l.changed_at, byName: l.first_name ?? t`Former parent` })),
   });
 });
 
@@ -79,7 +80,7 @@ parentRoutes.put("/children/:id/permissions", async (c) => {
     stmt(c.env.DB, `UPDATE child_permissions SET ${permission} = ?, updated_at = ? WHERE child_id = ?`, value ? 1 : 0, now, childId),
     stmt(c.env.DB, "INSERT INTO child_permission_log (child_id, account_id, permission, value, changed_at) VALUES (?, ?, ?, ?, ?)", childId, actor.accountId, permission, value ? 1 : 0, now),
   ]);
-  // Das andere Elternteil informieren
+  // Inform the other parent
   const others = await all<{ id: number }>(
     c.env.DB,
     `SELECT a.id FROM guardianships g JOIN accounts a ON a.person_id = g.guardian_id
@@ -88,15 +89,20 @@ parentRoutes.put("/children/:id/permissions", async (c) => {
     actor.accountId,
   );
   const child = actor.children.find((ch) => ch.id === childId)!;
-  await enqueuePush(c.env, others.map((o) => o.id), {
-    title: "Freigabe geändert",
-    body: `${actor.firstName} hat für ${child.firstName} „${CHILD_PERMISSION_LABELS[permission]}“ ${value ? "erlaubt" : "ausgeschaltet"}.`,
-    url: `/profil/kind/${childId}`,
+  const name = actor.firstName;
+  const childName = child.firstName;
+  await enqueuePush(c.env, others.map((o) => o.id), () => {
+    const label = childPermissionLabels()[permission];
+    return {
+      title: t`Permission changed`,
+      body: value ? t`${name} has allowed “${label}” for ${childName}.` : t`${name} has turned off “${label}” for ${childName}.`,
+      url: `/profil/kind/${childId}`,
+    };
   });
   return c.json({ ok: true, permissions: await permissionsOf(c.env.DB, childId) });
 });
 
-// Benachrichtigungseinstellungen ---------------------------------------------------
+// Notification settings -----------------------------------------------------------
 
 const TOPICS: NotificationTopic[] = ["events", "reminders", "squad", "responses", "chat", "mentions", "coach", "carpool"];
 
@@ -112,7 +118,7 @@ parentRoutes.get("/me/notifications", async (c) => {
     ...actor.children.filter((ch) => parentsInCharge(actor, ch.id)).map((ch) => ({ ...ch, self: false })),
   ];
   const isCoach = actor.coachTeamIds.length > 0 || actor.isAdmin;
-  // "Rückmeldungen durch andere" braucht nur, wer Eltern hat, die für ihn handeln
+  // "Responses by others" is only needed by someone whose parents act for them
   const selfInCharge = actor.hasGuardians && parentsInCharge(actor, actor.personId);
   return c.json({
     persons: persons.map((p) => {

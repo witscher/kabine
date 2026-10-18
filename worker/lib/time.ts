@@ -1,8 +1,8 @@
-// Zeitrechnung in Europe/Berlin.
+// Time calculations in Europe/Berlin.
 //
-// Termine werden als lokale Wanduhrzeit gespeichert ('YYYY-MM-DDTHH:MM').
-// Für Fristen und Vergleiche mit "jetzt" werden sie hier in Instants (ms seit
-// Epoche) umgerechnet. Sommer- und Winterzeit übernimmt Intl.
+// Events are stored as local wall-clock time ('YYYY-MM-DDTHH:MM').
+// For deadlines and comparisons with "now" they are converted here to instants (ms since
+// epoch). Intl takes care of daylight saving time.
 
 export const TZ = "Europe/Berlin";
 
@@ -27,7 +27,7 @@ function partsAt(ms: number): Parts {
   return out as Parts;
 }
 
-/** Abstand von Berliner Wanduhrzeit zu UTC in ms zum Zeitpunkt `ms`. */
+/** Offset of Berlin wall-clock time from UTC in ms at instant `ms`. */
 function offsetAt(ms: number): number {
   const whole = ms - (((ms % 1000) + 1000) % 1000);
   const p = partsAt(whole);
@@ -36,13 +36,13 @@ function offsetAt(ms: number): number {
 
 const pad = (n: number, len = 2) => String(n).padStart(len, "0");
 
-/** Lokale Zeit 'YYYY-MM-DDTHH:MM' für einen Instant. */
+/** Local time 'YYYY-MM-DDTHH:MM' for an instant. */
 export function toLocal(ms: number): string {
   const p = partsAt(ms);
   return `${p.year}-${pad(p.month)}-${pad(p.day)}T${pad(p.hour)}:${pad(p.minute)}`;
 }
 
-/** Lokales Datum 'YYYY-MM-DD' für einen Instant. */
+/** Local date 'YYYY-MM-DD' for an instant. */
 export function toLocalDate(ms: number): string {
   return toLocal(ms).slice(0, 10);
 }
@@ -73,7 +73,7 @@ export function isTime(s: string): boolean {
   return /^([01]\d|2[0-3]):[0-5]\d$/.test(s);
 }
 
-/** Instant (ms) für eine lokale Berliner Zeit 'YYYY-MM-DDTHH:MM'. */
+/** Instant (ms) for a local Berlin time 'YYYY-MM-DDTHH:MM'. */
 export function localToInstant(local: string): number {
   const m = LOCAL_RE.exec(local);
   if (!m) return Number.NaN;
@@ -84,23 +84,23 @@ export function localToInstant(local: string): number {
   return t;
 }
 
-/** Datumsarithmetik auf 'YYYY-MM-DD' (zeitzonenunabhängig). */
+/** Date arithmetic on 'YYYY-MM-DD' (independent of time zone). */
 export function addDays(date: string, days: number): string {
   const m = DATE_RE.exec(date);
-  if (!m) throw new Error(`Ungültiges Datum: ${date}`);
+  if (!m) throw new Error(`Invalid date: ${date}`);
   const d = new Date(Date.UTC(+m[1]!, +m[2]! - 1, +m[3]! + days));
   return `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())}`;
 }
 
-/** ISO-Wochentag (1 = Montag … 7 = Sonntag) für 'YYYY-MM-DD'. */
+/** ISO weekday (1 = Monday … 7 = Sunday) for 'YYYY-MM-DD'. */
 export function isoWeekday(date: string): number {
   const m = DATE_RE.exec(date);
-  if (!m) throw new Error(`Ungültiges Datum: ${date}`);
+  if (!m) throw new Error(`Invalid date: ${date}`);
   const wd = new Date(Date.UTC(+m[1]!, +m[2]! - 1, +m[3]!)).getUTCDay();
   return wd === 0 ? 7 : wd;
 }
 
-/** Lokale Zeit plus Minuten, über Instants gerechnet. */
+/** Local time plus minutes, calculated via instants. */
 export function addMinutesLocal(local: string, minutes: number): string {
   return toLocal(localToInstant(local) + minutes * 60_000);
 }
@@ -108,7 +108,7 @@ export function addMinutesLocal(local: string, minutes: number): string {
 export function daysBetween(from: string, to: string): number {
   const a = DATE_RE.exec(from);
   const b = DATE_RE.exec(to);
-  if (!a || !b) throw new Error("Ungültiges Datum");
+  if (!a || !b) throw new Error("Invalid date");
   return Math.round(
     (Date.UTC(+b[1]!, +b[2]! - 1, +b[3]!) - Date.UTC(+a[1]!, +a[2]! - 1, +a[3]!)) / 86_400_000,
   );

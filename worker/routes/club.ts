@@ -1,3 +1,4 @@
+import { t } from "@lingui/core/macro";
 // Club profile: public read (login page, splash, manifest) and admin edit.
 import { Hono } from "hono";
 import { z } from "zod";
@@ -20,7 +21,7 @@ clubRoutes.get("/club", async (c) => {
   return c.json(club);
 });
 
-const color = z.string().refine(isHexColor, "Invalid colour.");
+const color = z.string().refine(isHexColor, { error: () => t`Invalid colour.` });
 const clubSchema = z.object({
   name: z.string().trim().min(1).max(80).optional(),
   shortName: z.string().trim().min(1).max(24).optional(),
@@ -37,7 +38,7 @@ clubRoutes.put("/admin/club", async (c) => {
   const actor = requireActor(c);
   requireAdmin(actor);
   const input = parse(clubSchema, await readJson(c.req.raw));
-  if (input.privacyUrl && !/^https:\/\//.test(input.privacyUrl)) throw badRequest("The link must start with https://.");
+  if (input.privacyUrl && !/^https:\/\//.test(input.privacyUrl)) throw badRequest(t`The link must start with https://.`);
   const { ownerPersonId: _, ...club } = await saveClub(c.env.DB, input);
   return c.json(club);
 });
@@ -48,9 +49,9 @@ clubRoutes.put("/admin/club/owner", async (c) => {
   requireAdmin(actor);
   const { personId } = parse(z.object({ personId: z.number().int().positive() }), await readJson(c.req.raw));
   const club = await loadClub(c.env.DB);
-  if (club.ownerPersonId !== null && club.ownerPersonId !== actor.personId) throw forbidden("Only the owner can hand over this role.", "owner_only");
+  if (club.ownerPersonId !== null && club.ownerPersonId !== actor.personId) throw forbidden(t`Only the owner can hand over this role.`, "owner_only");
   const target = await c.env.DB.prepare("SELECT 1 FROM persons WHERE id = ? AND is_admin = 1 AND is_former = 0").bind(personId).first();
-  if (!target) throw badRequest("The new owner must be an admin.");
+  if (!target) throw badRequest(t`The new owner must be an admin.`);
   await saveClub(c.env.DB, { ownerPersonId: personId });
   return c.json({ ok: true });
 });
@@ -70,9 +71,9 @@ clubRoutes.put("/admin/club/logo", async (c) => {
   const actor = requireActor(c);
   requireAdmin(actor);
   const type = (c.req.header("content-type") ?? "").split(";")[0]!.trim();
-  if (!LOGO_TYPES.includes(type)) throw badRequest("Please upload a PNG, JPEG, WebP or SVG file.");
+  if (!LOGO_TYPES.includes(type)) throw badRequest(t`Please upload a PNG, JPEG, WebP or SVG file.`);
   const body = await c.req.arrayBuffer();
-  if (!body.byteLength || body.byteLength > LOGO_MAX_BYTES) throw badRequest("The logo may be at most 256 KB.");
+  if (!body.byteLength || body.byteLength > LOGO_MAX_BYTES) throw badRequest(t`The logo may be at most 256 KB.`);
   await c.env.KV.put(LOGO_KEY, body, { metadata: { type } });
   const club = await loadClub(c.env.DB);
   await saveClub(c.env.DB, { logoVersion: (club.logoVersion ?? 0) + 1 });

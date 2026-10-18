@@ -1,5 +1,7 @@
-// Profil → Meine Termine: persönlicher Kalender als Abo-Link mit Häkchen für Training,
-// Spiele und Helferdienste (Server: worker/routes/calendar.ts).
+// Profile → My events: personal calendar as a subscription link with checkboxes for training,
+// games and helper duties (server: worker/routes/calendar.ts).
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 import { useState } from "preact/hooks";
 import { api } from "./api";
 import { useMe } from "./session";
@@ -24,29 +26,33 @@ export function MyCalendar() {
   const showDuties = me.helperTeams.length > 0 || me.referee;
   const set = async (key: keyof CalendarPrefs, value: boolean) => {
     const next = { ...data, [key]: value };
-    // Mit Link sofort speichern, ohne Link beim Erzeugen mitschicken
+    // With a link save immediately, without one send it along when creating the link
     if (data.hasCalendar) await api.put("/profile/calendar", { training: next.training, games: next.games, duties: next.duties });
     mutate(next);
   };
   return (
-    <section class="stack-sm" aria-label="Meine Termine">
-      <h2 class="section-title">Meine Termine</h2>
-      <p class="small muted">Deine Termine als Kalender auf dem Handy, immer aktuell. Wähle, was drinstehen soll.</p>
+    <section class="stack-sm" aria-label={t`My events`}>
+      <h2 class="section-title">
+        <Trans>My events</Trans>
+      </h2>
+      <p class="small muted">
+        <Trans>Your events as a calendar on your phone, always up to date. Choose what it should contain.</Trans>
+      </p>
       <ul class="list">
         <li>
-          <SwitchRow label="Training und weitere Termine" checked={data.training} onChange={(v) => set("training", v)} />
+          <SwitchRow label={t`Training and other events`} checked={data.training} onChange={(v) => set("training", v)} />
         </li>
         <li>
-          <SwitchRow label="Spiele" sub="Alle Spiele deiner Mannschaften, mit Treffpunkt, wenn du nominiert bist" checked={data.games} onChange={(v) => set("games", v)} />
+          <SwitchRow label={t`Games`} sub={t`All games of your teams, with meeting point if you are nominated`} checked={data.games} onChange={(v) => set("games", v)} />
         </li>
         {showDuties ? (
           <li>
-            <SwitchRow label="Helferdienste" checked={data.duties} onChange={(v) => set("duties", v)} />
+            <SwitchRow label={t`Helper duties`} checked={data.duties} onChange={(v) => set("duties", v)} />
           </li>
         ) : null}
       </ul>
       <Button icon="calendar" onClick={() => setOpen(true)}>
-        {data.hasCalendar ? "Kalender-Link" : "Im Kalender abonnieren"}
+        {data.hasCalendar ? t`Calendar link` : t`Subscribe in calendar`}
       </Button>
       {open ? (
         <CalendarSheet
@@ -69,57 +75,72 @@ function CalendarSheet(props: { state: CalendarState; onClose: () => void; onCha
     props.onChange(true);
   };
   return (
-    <Sheet open onClose={props.onClose} title="Meine Termine im Kalender">
+    <Sheet open onClose={props.onClose} title={t`My events in the calendar`}>
       <p class="muted">
-        Mit einem persönlichen Link erscheinen deine Termine in der Kalender-App deines Handys und bleiben aktuell. Den Link nicht weitergeben: Wer ihn hat, sieht deine
-        Termine.
+        <Trans>
+          With a personal link your events appear in the calendar app on your phone and stay up to date. Do not share the link: anyone who has it can see your
+          events.
+        </Trans>
       </p>
       {url ? (
         <div class="stack-sm">
           <a class="btn btn-primary" href={webcal}>
-            Im Kalender abonnieren
+            <Trans>Subscribe in calendar</Trans>
           </a>
           <div class="url-box">{url}</div>
           <div class="btn-row">
-            <Button icon="copy" onClick={() => copyText(url, "Link kopiert.")}>
-              Link kopieren
+            <Button icon="copy" onClick={() => copyText(url, t`Link copied.`)}>
+              <Trans>Copy link</Trans>
             </Button>
             <a class="btn" href={url} download="kabine.ics">
-              Als Datei laden
+              <Trans>Download as file</Trans>
             </a>
           </div>
-          <p class="small muted">Klappt das Abonnieren nicht, den Link kopieren und in der Kalender-App unter „Kalender abonnieren“ bzw. „Per URL hinzufügen“ einfügen.</p>
           <p class="small muted">
-            Google Kalender: am Computer unter calendar.google.com → Weitere Kalender → Per URL den Link einfügen. Danach erscheint er auch in der App. Google
-            aktualisiert nur alle paar Stunden.
+            <Trans>If subscribing does not work, copy the link and paste it in the calendar app under “Add subscribed calendar” or “Add by URL”.</Trans>
+          </p>
+          <p class="small muted">
+            <Trans>
+              Google Calendar: on a computer, go to calendar.google.com → Other calendars → From URL and paste the link. It then also appears in the app. Google
+              only updates every few hours.
+            </Trans>
           </p>
         </div>
       ) : state.hasCalendar ? (
         <div class="stack-sm">
           <Notice>
-            Du hast schon einen Kalender-Link. Aus Sicherheitsgründen zeigt die App ihn nicht noch einmal. Ein neuer Link macht den alten ungültig, dann musst du neu
-            abonnieren.
+            <Trans>
+              You already have a calendar link. For security reasons the app does not show it again. A new link makes the old one invalid, then you have to
+              subscribe again.
+            </Trans>
           </Notice>
           <Button variant="primary" icon="calendar" onClick={create}>
-            Neuen Link erzeugen
+            <Trans>Create new link</Trans>
           </Button>
           <Button
             variant="danger"
             onClick={async () => {
-              if (!(await confirmDialog({ title: "Kalender-Link entfernen?", message: "Der Kalender auf deinen Geräten wird danach nicht mehr aktualisiert.", confirmLabel: "Entfernen", danger: true })))
+              if (
+                !(await confirmDialog({
+                  title: t`Remove calendar link?`,
+                  message: t`The calendar on your devices will no longer be updated afterwards.`,
+                  confirmLabel: t`Remove`,
+                  danger: true,
+                }))
+              )
                 return;
               await api.del("/profile/calendar-token");
               props.onChange(false);
-              toast("Kalender-Link entfernt.");
+              toast(t`Calendar link removed.`);
               props.onClose();
             }}
           >
-            Link entfernen
+            <Trans>Remove link</Trans>
           </Button>
         </div>
       ) : (
         <Button variant="primary" icon="calendar" onClick={create}>
-          Link erzeugen
+          <Trans>Create link</Trans>
         </Button>
       )}
     </Sheet>

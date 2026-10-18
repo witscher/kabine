@@ -1,12 +1,14 @@
-// Profilbilder: Anzeige, Aufnahme mit der Kamera oder Auswahl, Zuschneiden, Freigabe.
+// Profile pictures: display, taking with the camera or choosing, cropping, approval.
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 import { useEffect, useRef, useState } from "preact/hooks";
 import { api } from "./api";
 import { invalidate, useQuery } from "./store";
 import { Avatar, Button, confirmDialog, Notice, Sheet, Spinner, toast } from "./ui";
 
-/** Kantenlänge des gespeicherten Bildes in Pixeln. */
+/** Edge length of the stored picture in pixels. */
 const OUTPUT = 256;
-/** Größe des Zuschneide-Feldes auf dem Bildschirm. */
+/** Size of the crop area on screen. */
 const VIEW = 280;
 const MAX_ZOOM = 4;
 
@@ -14,12 +16,12 @@ export function avatarUrl(personId: number, version: number, pending = false): s
   return `/api/persons/${personId}/avatar?${pending ? "pending=1&" : ""}v=${version}`;
 }
 
-/** Alle freigegebenen Bilder (personId → Version), einmal geladen und geteilt. */
+/** All approved pictures (personId → version), loaded once and shared. */
 export function useAvatars(): Record<string, number> {
   return useQuery<{ avatars: Record<string, number> }>("/avatars").data?.avatars ?? {};
 }
 
-/** Avatar einer Person: Bild, falls freigegeben, sonst der Anfangsbuchstabe. */
+/** A person's avatar: picture if approved, otherwise the initial. */
 export function PersonAvatar(props: { personId: number | null; name: string; coach?: boolean; size?: number }) {
   const avatars = useAvatars();
   const version = props.personId ? avatars[props.personId] : undefined;
@@ -30,7 +32,7 @@ function refreshAvatars(personId: number) {
   invalidate("/avatars", `/persons/${personId}/avatar`);
 }
 
-// Zuschneiden ---------------------------------------------------------------------
+// Cropping -------------------------------------------------------------------------
 
 interface Crop {
   zoom: number;
@@ -45,18 +47,18 @@ function loadImage(file: File): Promise<HTMLImageElement> {
     img.onload = () => resolve(img);
     img.onerror = () => {
       URL.revokeObjectURL(url);
-      reject(new Error("Das Bild konnte nicht geöffnet werden. Bitte ein Foto im Format JPEG, PNG, WebP oder HEIC wählen."));
+      reject(new Error(t`The picture could not be opened. Please choose a photo in JPEG, PNG, WebP or HEIC format.`));
     };
     img.src = url;
   });
 }
 
-/** Maßstab, bei dem das Bild das quadratische Feld gerade ausfüllt. */
+/** Scale at which the picture just fills the square area. */
 function coverScale(img: HTMLImageElement): number {
   return VIEW / Math.min(img.naturalWidth, img.naturalHeight);
 }
 
-/** Verschiebung so begrenzen, dass immer das ganze Feld bedeckt ist. */
+/** Limit the offset so that the whole area is always covered. */
 function clamp(img: HTMLImageElement, crop: Crop): Crop {
   const scale = coverScale(img) * crop.zoom;
   const maxX = Math.max(0, (img.naturalWidth * scale - VIEW) / 2);
@@ -79,7 +81,7 @@ function toBlob(canvas: HTMLCanvasElement, type: string, quality: number): Promi
   return new Promise((resolve) => canvas.toBlob(resolve, type, quality));
 }
 
-/** Als WebP speichern, wo der Browser das kann (Safari kann es nicht), sonst als JPEG. */
+/** Save as WebP where the browser can (Safari can't), otherwise as JPEG. */
 async function exportImage(img: HTMLImageElement, crop: Crop): Promise<Blob> {
   const canvas = document.createElement("canvas");
   canvas.width = OUTPUT;
@@ -88,7 +90,7 @@ async function exportImage(img: HTMLImageElement, crop: Crop): Promise<Blob> {
   const webp = await toBlob(canvas, "image/webp", 0.85);
   if (webp?.type === "image/webp") return webp;
   const jpeg = await toBlob(canvas, "image/jpeg", 0.85);
-  if (!jpeg) throw new Error("Das Bild konnte nicht umgewandelt werden.");
+  if (!jpeg) throw new Error(t`The picture could not be converted.`);
   return jpeg;
 }
 
@@ -142,7 +144,7 @@ function CropSheet(props: { file: File; onClose: () => void; onSave: (blob: Blob
       update({ ...crop, zoom: (pinch.current.zoom * Math.hypot(a.x - b.x, a.y - b.y)) / pinch.current.distance });
       return;
     }
-    // Das Feld wird per CSS eventuell kleiner dargestellt als VIEW
+    // CSS may display the area smaller than VIEW
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
     const k = VIEW / rect.width;
     update({ ...crop, x: crop.x + (e.clientX - last.x) * k, y: crop.y + (e.clientY - last.y) * k });
@@ -153,9 +155,9 @@ function CropSheet(props: { file: File; onClose: () => void; onSave: (blob: Blob
   };
 
   return (
-    <Sheet open onClose={props.onClose} title="Bild zuschneiden">
+    <Sheet open onClose={props.onClose} title={t`Crop picture`}>
       {error ? <Notice kind="warn">{error}</Notice> : null}
-      {!img && !error ? <Spinner label="Bild wird geladen" /> : null}
+      {!img && !error ? <Spinner label={t`Loading picture`} /> : null}
       {img ? (
         <>
           <div
@@ -169,11 +171,13 @@ function CropSheet(props: { file: File; onClose: () => void; onSave: (blob: Blob
               update({ ...crop, zoom: crop.zoom * (e.deltaY < 0 ? 1.08 : 1 / 1.08) });
             }}
           >
-            <canvas ref={canvasRef} aria-label="Vorschau des Profilbilds" />
+            <canvas ref={canvasRef} aria-label={t`Profile picture preview`} />
             <div class="crop-mask" aria-hidden="true" />
           </div>
           <label class="crop-zoom">
-            <span class="small muted">Zoom</span>
+            <span class="small muted">
+              <Trans>Zoom</Trans>
+            </span>
             <input
               type="range"
               min={1}
@@ -183,9 +187,11 @@ function CropSheet(props: { file: File; onClose: () => void; onSave: (blob: Blob
               onInput={(e) => update({ ...crop, zoom: Number((e.target as HTMLInputElement).value) })}
             />
           </label>
-          <p class="small muted">Verschieben mit dem Finger, vergrößern mit zwei Fingern oder dem Regler.</p>
+          <p class="small muted">
+            <Trans>Move with your finger, zoom with two fingers or the slider.</Trans>
+          </p>
           <Button variant="primary" size="lg" block icon="check" onClick={async () => props.onSave(await exportImage(img, crop))}>
-            Übernehmen
+            <Trans>Apply</Trans>
           </Button>
         </>
       ) : null}
@@ -193,7 +199,7 @@ function CropSheet(props: { file: File; onClose: () => void; onSave: (blob: Blob
   );
 }
 
-// Bearbeiten ----------------------------------------------------------------------
+// Editing --------------------------------------------------------------------------
 
 interface AvatarInfo {
   approved: number | null;
@@ -205,8 +211,8 @@ interface AvatarInfo {
 }
 
 /**
- * Profilbild der eigenen Person oder eines Kindes. "self" ist die Sicht der
- * Person, "guardian" die eines Elternteils.
+ * Profile picture of the own person or a child. "self" is the person's view, "guardian" that of
+ * a parent.
  */
 export function AvatarEditor(props: { personId: number; name: string; view: "self" | "guardian" }) {
   const { data: info, reload } = useQuery<AvatarInfo>(`/persons/${props.personId}/avatar/info`);
@@ -230,7 +236,7 @@ export function AvatarEditor(props: { personId: number; name: string; view: "sel
   const save = async (blob: Blob) => {
     const res = await api.upload<{ status: "approved" | "pending" }>(`/persons/${props.personId}/avatar`, blob);
     setFile(null);
-    toast(res.status === "pending" ? "Gespeichert. Deine Eltern müssen das Bild noch freigeben." : "Profilbild gespeichert.");
+    toast(res.status === "pending" ? t`Saved. Your parents still need to approve the picture.` : t`Profile picture saved.`);
     await changed();
   };
 
@@ -240,15 +246,15 @@ export function AvatarEditor(props: { personId: number; name: string; view: "sel
   const pendingSrc = info.pending != null ? avatarUrl(props.personId, info.pending, true) : null;
 
   return (
-    <section class="card card-body stack-sm" aria-label="Profilbild">
+    <section class="card card-body stack-sm" aria-label={t`Profile picture`}>
       <div class="row-gap">
         <Avatar name={props.name} src={current} size={72} />
         <div style={{ flex: 1 }}>
           <h2 class="section-title" style={{ margin: 0 }}>
-            Profilbild
+            <Trans>Profile picture</Trans>
           </h2>
           <p class="small muted" style={{ margin: 0 }}>
-            {current ? "Sichtbar für alle, die in der App angemeldet sind." : "Noch kein Bild. Bis dahin steht hier der Anfangsbuchstabe."}
+            {current ? t`Visible to everyone signed in to the app.` : t`No picture yet. Until then, the initial is shown here.`}
           </p>
         </div>
       </div>
@@ -258,7 +264,7 @@ export function AvatarEditor(props: { personId: number; name: string; view: "sel
           <Avatar name={props.name} src={pendingSrc} size={56} />
           <div class="stack-sm" style={{ flex: 1 }}>
             <span>
-              {firstName} möchte dieses Bild verwenden. Erst nach deiner Freigabe sehen es andere.
+              <Trans>{firstName} would like to use this picture. Others only see it after you approve it.</Trans>
             </span>
             <div class="btn-row">
               <Button
@@ -267,22 +273,22 @@ export function AvatarEditor(props: { personId: number; name: string; view: "sel
                 icon="check"
                 onClick={async () => {
                   await api.post(`/persons/${props.personId}/avatar/approve`);
-                  toast("Freigegeben.");
+                  toast(t`Approved.`);
                   await changed();
                 }}
               >
-                Freigeben
+                <Trans>Approve</Trans>
               </Button>
               <Button
                 size="sm"
                 icon="x"
                 onClick={async () => {
                   await api.del(`/persons/${props.personId}/avatar?pending=1`);
-                  toast("Abgelehnt.");
+                  toast(t`Rejected.`);
                   await changed();
                 }}
               >
-                Ablehnen
+                <Trans>Reject</Trans>
               </Button>
             </div>
           </div>
@@ -291,22 +297,30 @@ export function AvatarEditor(props: { personId: number; name: string; view: "sel
       {pendingSrc && props.view === "self" ? (
         <div class="notice">
           <Avatar name={props.name} src={pendingSrc} size={56} />
-          <div>Dein neues Bild wartet auf die Freigabe durch deine Eltern.</div>
+          <div>
+            <Trans>Your new picture is waiting for your parents' approval.</Trans>
+          </div>
         </div>
       ) : null}
 
       {info.canUpload ? (
         <>
           {props.view === "self" && info.needsConsent ? (
-            <p class="small muted">Weil du noch nicht volljährig bist, geben deine Eltern dein Bild frei, bevor andere es sehen.</p>
+            <p class="small muted">
+              <Trans>Because you are not of age yet, your parents approve your picture before others see it.</Trans>
+            </p>
           ) : null}
-          {props.view === "guardian" ? <p class="small muted">Ein Bild, das du hochlädst, gilt sofort. Sprich es vorher mit {firstName} ab.</p> : null}
+          {props.view === "guardian" ? (
+            <p class="small muted">
+              <Trans>A picture you upload applies immediately. Talk it over with {firstName} first.</Trans>
+            </p>
+          ) : null}
           <div class="btn-row">
             <Button icon="camera" onClick={() => cameraRef.current?.click()}>
-              Foto machen
+              <Trans>Take photo</Trans>
             </Button>
             <Button icon="image" onClick={() => pickRef.current?.click()}>
-              Bild wählen
+              <Trans>Choose picture</Trans>
             </Button>
           </div>
           <input ref={cameraRef} type="file" accept="image/*" capture="user" hidden onChange={onFile} />
@@ -315,8 +329,8 @@ export function AvatarEditor(props: { personId: number; name: string; view: "sel
       ) : (
         <Notice>
           {props.view === "self"
-            ? "Für ein Profilbild brauchst du die Zustimmung deiner Eltern. Mit deinem Zugang ist aber noch kein Elternteil verknüpft. Frag deinen Trainer, ob deine Eltern eingebunden werden können."
-            : "Ein Profilbild kann hier gerade nicht geändert werden."}
+            ? t`For a profile picture you need your parents' consent. But no parent is linked to your access yet. Ask your coach whether your parents can be added.`
+            : t`The profile picture cannot be changed here right now.`}
         </Notice>
       )}
 
@@ -325,13 +339,13 @@ export function AvatarEditor(props: { personId: number; name: string; view: "sel
           variant="ghost"
           icon="trash"
           onClick={async () => {
-            if (!(await confirmDialog({ title: "Profilbild entfernen?", message: "Danach steht wieder der Anfangsbuchstabe da.", confirmLabel: "Entfernen", danger: true }))) return;
+            if (!(await confirmDialog({ title: t`Remove profile picture?`, message: t`After that the initial is shown again.`, confirmLabel: t`Remove`, danger: true }))) return;
             await api.del(`/persons/${props.personId}/avatar`);
-            toast("Profilbild entfernt.");
+            toast(t`Profile picture removed.`);
             await changed();
           }}
         >
-          Bild entfernen
+          <Trans>Remove picture</Trans>
         </Button>
       ) : null}
 
@@ -340,27 +354,30 @@ export function AvatarEditor(props: { personId: number; name: string; view: "sel
   );
 }
 
-/** Für Admins: vorhandenes Bild einer Person ansehen und entfernen. */
+/** For admins: view and remove a person's existing picture. */
 export function AdminAvatar(props: { personId: number; name: string }) {
   const avatars = useAvatars();
   const version = avatars[props.personId];
   if (!version) return null;
   return (
     <section class="stack-sm">
-      <strong>Profilbild</strong>
+      <strong>
+        <Trans>Profile picture</Trans>
+      </strong>
       <div class="row-gap">
         <Avatar name={props.name} src={avatarUrl(props.personId, version)} size={56} />
         <Button
           variant="danger"
           icon="trash"
           onClick={async () => {
-            if (!(await confirmDialog({ title: "Profilbild entfernen?", message: `Das Bild von ${props.name} wird gelöscht.`, confirmLabel: "Entfernen", danger: true }))) return;
+            const name = props.name;
+            if (!(await confirmDialog({ title: t`Remove profile picture?`, message: t`The picture of ${name} will be deleted.`, confirmLabel: t`Remove`, danger: true }))) return;
             await api.del(`/persons/${props.personId}/avatar`);
             refreshAvatars(props.personId);
-            toast("Profilbild entfernt.");
+            toast(t`Profile picture removed.`);
           }}
         >
-          Entfernen
+          <Trans>Remove</Trans>
         </Button>
       </div>
     </section>

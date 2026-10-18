@@ -1,5 +1,7 @@
-// Gruppen: nur Chat und Sondertermine (z. B. Trainerteam, KiHaSL/JuHaSL). Intern eine Mannschaft mit
-// kind = 'group', siehe docs/entscheidungen.md, Abschnitt Gruppen.
+// Groups: only chat and special events (e.g. coaching team, KiHaSL/JuHaSL). Internally a team with
+// kind = 'group', see docs/entscheidungen.md, section Gruppen.
+import { plural, t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 import { useState } from "preact/hooks";
 import type { PersonRef } from "../../shared/types";
 import { api } from "../api";
@@ -11,19 +13,21 @@ import { invalidate, useQuery } from "../store";
 import { Button, confirmDialog, Empty, ErrorBox, Notice, Segmented, Sheet, Spinner, SwitchRow, TextField, toast, TopBar, useDocumentTitle } from "../ui";
 import type { TeamDetail } from "./team";
 
-/** Rollenbezeichnung: in Gruppen „Mitglied“ und „Verantwortlich“ statt Spieler und Trainer. */
+/** Role label: in groups "Member" and "Lead" instead of player and coach. */
 export function roleLabel(role: string, isGroup: boolean): string {
-  if (isGroup) return role === "coach" ? "Verantwortlich" : "Mitglied";
-  return role === "coach" ? "Trainer" : role === "helper" ? "Aushilfe" : "Spieler";
+  if (isGroup) return role === "coach" ? t`Lead` : t`Member`;
+  return role === "coach" ? t`Coach` : role === "helper" ? t`Stand-in` : t`Player`;
 }
 
-/** Erklärt den Unterschied zwischen Gruppe und Mannschaft. */
+/** Explains the difference between a group and a team. */
 export function GroupExplainer({ compact = false }: { compact?: boolean }) {
   return (
     <Notice>
-      <strong>Gruppe oder Mannschaft?</strong> Eine Gruppe hat nur einen Chat und Sondertermine mit Zu- und Absage, etwa für das Trainerteam oder die
-      KiHaSL/JuHaSL. Training, Spiele, Kader, Helferplan, Eltern und Altersklasse gibt es nur bei Mannschaften.
-      {compact ? null : " Beim Saisonwechsel bleiben die Mitglieder einer Gruppe erhalten."}
+      <Trans>
+        <strong>Group or team?</strong> A group only has a chat and special events with responses, for example for the coaching team or the KiHaSL/JuHaSL. Training, games, squad,
+        helper plan, parents and age group only exist for teams.
+      </Trans>
+      {compact ? null : ` ${t`At the season change the members of a group are kept.`}`}
     </Notice>
   );
 }
@@ -37,81 +41,122 @@ interface GroupListItem {
   coaches: number;
 }
 
-/** Verwaltung → Gruppen. */
+/** Admin → Groups. */
 export function AdminGroupsPage() {
-  useDocumentTitle("Gruppen");
+  useDocumentTitle(t`Groups`);
   const me = useMe();
   const { refresh } = useSession();
   const { data, error, reload } = useQuery<{ teams: GroupListItem[] }>("/teams");
-  const [create, setCreate] = useState<{ name: string; auto: "manual" | "referees" } | null>(null);
-  const groups = (data?.teams ?? []).filter((t) => t.kind === "group");
+  const [create, setCreate] = useState<{
+    name: string;
+    auto: "manual" | "referees";
+  } | null>(null);
+  const groups = (data?.teams ?? []).filter((tm) => tm.kind === "group");
   const hasRefereeGroup = groups.some((g) => g.autoMembers === "referees");
-  if (!me.isAdmin) return <Empty title="Nur für Admins">Gruppen legen Admins an.</Empty>;
+  if (!me.isAdmin)
+    return (
+      <Empty title={t`Admins only`}>
+        <Trans>Admins create groups.</Trans>
+      </Empty>
+    );
   return (
     <main class="page">
-      <TopBar title="Gruppen" kicker="Verwaltung" back="/verwaltung" />
+      <TopBar title={t`Groups`} kicker={t`Administration`} back="/verwaltung" />
       <div class="content">
         <GroupExplainer />
         <Button variant="primary" icon="plus" onClick={() => setCreate({ name: "", auto: "manual" })}>
-          Gruppe anlegen
+          <Trans>Create group</Trans>
         </Button>
         {error ? <ErrorBox error={error} onRetry={reload} /> : null}
         {!data ? <Spinner /> : null}
-        {data && !groups.length ? <Empty title="Noch keine Gruppe">Lege eine Gruppe an, etwa für das Trainerteam.</Empty> : null}
+        {data && !groups.length ? (
+          <Empty title={t`No group yet`}>
+            <Trans>Create a group, for example for the coaching team.</Trans>
+          </Empty>
+        ) : null}
         <ul class="list">
-          {groups.map((g) => (
-            <li>
-              <a class="list-row" href={`/team/${g.id}`}>
-                <span class="team-badge outline" style={{ minWidth: "48px", textAlign: "center" }}>
-                  {g.name}
-                </span>
-                <span class="main">
-                  <span class="title">{g.name}</span>
-                  <span class="sub">
-                    Gruppe · {g.players} {g.players === 1 ? "Mitglied" : "Mitglieder"} · {g.coaches} Verantwortliche
-                    {g.autoMembers === "referees" ? " · automatisch alle KiHaSL/JuHaSL" : ""}
+          {groups.map((g) => {
+            const players = g.players;
+            const coaches = g.coaches;
+            const members = plural(players, {
+              one: "# member",
+              other: "# members",
+            });
+            const leads = plural(coaches, {
+              one: "# lead",
+              other: "# leads",
+            });
+            return (
+              <li>
+                <a class="list-row" href={`/team/${g.id}`}>
+                  <span class="team-badge outline" style={{ minWidth: "48px", textAlign: "center" }}>
+                    {g.name}
                   </span>
-                </span>
-                <Icon name="chevron" size={18} />
-              </a>
-            </li>
-          ))}
+                  <span class="main">
+                    <span class="title">{g.name}</span>
+                    <span class="sub">
+                      <Trans>
+                        Group · {members} · {leads}
+                      </Trans>
+                      {g.autoMembers === "referees" ? ` · ${t`automatically all KiHaSL/JuHaSL`}` : ""}
+                    </span>
+                  </span>
+                  <Icon name="chevron" size={18} />
+                </a>
+              </li>
+            );
+          })}
         </ul>
       </div>
       {create ? (
-        <Sheet open onClose={() => setCreate(null)} title="Neue Gruppe">
-          <p class="muted">Nur Chat und Sondertermine. Kein Training, keine Spiele, kein Kader, keine Eltern.</p>
-          <TextField label="Name" value={create.name} onInput={(v) => setCreate({ ...create, name: v })} maxLength={30} hint="Kurz, erscheint wie ein Mannschaftsname, z. B. JT" />
+        <Sheet open onClose={() => setCreate(null)} title={t`New group`}>
+          <p class="muted">
+            <Trans>Only chat and special events. No training, no games, no squad, no parents.</Trans>
+          </p>
+          <TextField label={t`Name`} value={create.name} onInput={(v) => setCreate({ ...create, name: v })} maxLength={30} hint={t`Short, shown like a team name, e.g. JT`} />
           <Segmented<"manual" | "referees">
-            label="Mitglieder"
+            label={t`Members`}
             value={create.auto}
-            onChange={(v) => setCreate({ ...create, auto: v, name: v === "referees" && !create.name ? "KiHaSL/JuHaSL" : create.name })}
+            onChange={(v) =>
+              setCreate({
+                ...create,
+                auto: v,
+                name: v === "referees" && !create.name ? "KiHaSL/JuHaSL" : create.name,
+              })
+            }
             options={[
-              { value: "manual", label: "Von Hand" },
-              { value: "referees", label: "Alle KiHaSL/JuHaSL" },
+              { value: "manual", label: t`Manually` },
+              { value: "referees", label: t`All KiHaSL/JuHaSL` },
             ]}
           />
           <p class="small muted">
             {create.auto === "referees"
-              ? "Mitglieder sind automatisch alle Personen mit der Rolle KiHaSL/JuHaSL, Verantwortliche alle Admins. Kommt jemand dazu oder verliert die Rolle, passt sich die Gruppe an."
-              : "Mitglieder und Verantwortliche ordnest du danach in der Gruppe zu."}
+              ? t`Members are automatically all people with the KiHaSL/JuHaSL role, leads all admins. If someone joins or loses the role, the group adjusts.`
+              : t`You assign members and leads in the group afterwards.`}
           </p>
-          {create.auto === "referees" && hasRefereeGroup ? <Notice kind="warn">Es gibt schon eine Gruppe für alle KiHaSL/JuHaSL.</Notice> : null}
+          {create.auto === "referees" && hasRefereeGroup ? (
+            <Notice kind="warn">
+              <Trans>There is already a group for all KiHaSL/JuHaSL.</Trans>
+            </Notice>
+          ) : null}
           <Button
             variant="primary"
             size="lg"
             block
             disabled={!create.name.trim()}
             onClick={async () => {
-              const { id } = await api.post<{ id: number }>("/groups", { name: create.name.trim(), autoMembers: create.auto === "referees" ? "referees" : null });
-              toast("Gruppe angelegt.");
+              const { id } = await api.post<{ id: number }>("/groups", {
+                name: create.name.trim(),
+                autoMembers: create.auto === "referees" ? "referees" : null,
+              });
+              toast(t`Group created.`);
               setCreate(null);
               invalidate("/teams", "/chat");
               await refresh();
               location.assign(`/team/${id}`);
             }}
           >
-            Anlegen
+            <Trans>Create</Trans>
           </Button>
         </Sheet>
       ) : null}
@@ -126,7 +171,7 @@ interface AdminPersonLite {
   children: string | null;
 }
 
-/** Seite einer Gruppe: Mitglieder, Verantwortliche, Sondertermine, Einstellungen. */
+/** Page of a group: members, leads, special events, settings. */
 export function GroupPage({ team, onChanged }: { team: TeamDetail; onChanged: () => void }) {
   const me = useMe();
   const { refresh } = useSession();
@@ -134,12 +179,19 @@ export function GroupPage({ team, onChanged }: { team: TeamDetail; onChanged: ()
   const [renameOpen, setRenameOpen] = useState(false);
   const auto = team.autoMembers === "referees";
   const manage = me.isAdmin && !auto;
+  const teamName = team.name;
+  const players = team.players.length;
+  const coaches = team.coaches.length;
 
   const remove = async (p: PersonRef, role: "player" | "coach") => {
+    const name = personName(p);
     const ok = await confirmDialog({
-      title: `Aus ${team.name} entfernen?`,
-      message: `${personName(p)} ist danach nicht mehr ${roleLabel(role, true)} in der Gruppe ${team.name}. Die Person bleibt erhalten.`,
-      confirmLabel: "Entfernen",
+      title: t`Remove from group ${teamName}?`,
+      message:
+        role === "coach"
+          ? t`${name} will then no longer be a lead in the group ${teamName}. The person is kept.`
+          : t`${name} will then no longer be a member in the group ${teamName}. The person is kept.`,
+      confirmLabel: t`Remove`,
       danger: true,
     });
     if (!ok) return;
@@ -152,79 +204,109 @@ export function GroupPage({ team, onChanged }: { team: TeamDetail; onChanged: ()
     <main class="page">
       <header class="hero">
         <div class="hero-top">
-          <div class="kicker">Gruppe · nur Chat und Sondertermine</div>
+          <div class="kicker">
+            <Trans>Group · chat and special events only</Trans>
+          </div>
           {me.isAdmin || me.manageableTeams.length > 1 ? (
             <a class="team-badge outline" href={me.isAdmin ? "/verwaltung/gruppen" : "/team"} style={{ textDecoration: "none" }}>
-              Wechseln
+              <Trans>Switch</Trans>
             </a>
           ) : null}
         </div>
         <h1>{team.name}</h1>
         <div class="hero-sub">
-          {team.players.length} {team.players.length === 1 ? "Mitglied" : "Mitglieder"} · {team.coaches.length} Verantwortliche
+          {plural(players, { one: "# member", other: "# members" })} · {plural(coaches, { one: "# lead", other: "# leads" })}
         </div>
       </header>
       <div class="content">
         <div class="grid-2">
           <a class="btn btn-primary" href={`/team/${team.id}/termin-neu`}>
             <Icon name="plus" size={18} />
-            Sondertermin anlegen
+            <Trans>Create special event</Trans>
           </a>
           <a class="btn" href={`/chat/${team.id}`}>
             <Icon name="chat" size={18} />
-            Chat öffnen
+            <Trans>Open chat</Trans>
           </a>
         </div>
         <GroupExplainer compact />
         <details class="card howto-fold faq">
           <summary>
-            <span>Kommende Sondertermine</span>
+            <span>
+              <Trans>Upcoming special events</Trans>
+            </span>
             <Icon name="chevron" size={18} />
           </summary>
           <div class="card-body stack-sm">
-            <p class="small muted">Antippen öffnet den Termin zum Bearbeiten, Absagen oder Löschen.</p>
-            <ExtraEventList path={`/teams/${team.id}/extra-events`} empty="Noch keine kommenden Sondertermine." showTeams={false} />
+            <p class="small muted">
+              <Trans>Tap an event to edit, cancel or delete it.</Trans>
+            </p>
+            <ExtraEventList path={`/teams/${team.id}/extra-events`} empty={t`No upcoming special events yet.`} showTeams={false} />
           </div>
         </details>
 
         {auto ? (
-          <Notice>Mitglieder sind automatisch alle Personen mit der Rolle KiHaSL/JuHaSL, Verantwortliche alle Admins. Die Rolle vergibst du unter Verwaltung → KiHaSL/JuHaSL.</Notice>
+          <Notice>
+            <Trans>Members are automatically all people with the KiHaSL/JuHaSL role, leads all admins. You give the role under Admin → KiHaSL/JuHaSL.</Trans>
+          </Notice>
         ) : null}
 
-        <section class="stack-sm" aria-label="Verantwortliche">
-          <h2 class="section-title">Verantwortliche</h2>
-          <p class="small muted">Legen Sondertermine an, erinnern und moderieren den Chat (auch @alle).</p>
-          <MemberList members={team.coaches.map((c) => ({ person: c.person, hasAccount: c.hasAccount }))} onRemove={manage ? (p) => remove(p, "coach") : undefined} />
+        <section class="stack-sm" aria-label={t`Leads`}>
+          <h2 class="section-title">
+            <Trans>Leads</Trans>
+          </h2>
+          <p class="small muted">
+            <Trans>Create special events, send reminders and moderate the chat (including @alle).</Trans>
+          </p>
+          <MemberList
+            members={team.coaches.map((c) => ({
+              person: c.person,
+              hasAccount: c.hasAccount,
+            }))}
+            onRemove={manage ? (p) => remove(p, "coach") : undefined}
+          />
           {manage ? (
             <Button icon="plus" onClick={() => setAddRole("coach")}>
-              Verantwortliche hinzufügen
+              <Trans>Add leads</Trans>
             </Button>
           ) : null}
         </section>
 
-        <section class="stack-sm" aria-label="Mitglieder">
-          <h2 class="section-title">Mitglieder</h2>
-          <MemberList members={team.players.map((p) => ({ person: p.person, hasAccount: p.hasAccount }))} onRemove={manage ? (p) => remove(p, "player") : undefined} />
+        <section class="stack-sm" aria-label={t`Members`}>
+          <h2 class="section-title">
+            <Trans>Members</Trans>
+          </h2>
+          <MemberList
+            members={team.players.map((p) => ({
+              person: p.person,
+              hasAccount: p.hasAccount,
+            }))}
+            onRemove={manage ? (p) => remove(p, "player") : undefined}
+          />
           {manage ? (
             <Button icon="plus" onClick={() => setAddRole("player")}>
-              Mitglieder hinzufügen
+              <Trans>Add members</Trans>
             </Button>
           ) : null}
-          {!me.isAdmin && !auto ? <p class="small muted">Mitglieder ordnet ein Admin zu.</p> : null}
+          {!me.isAdmin && !auto ? (
+            <p class="small muted">
+              <Trans>An admin assigns members.</Trans>
+            </p>
+          ) : null}
         </section>
 
-        <section class="card card-body" aria-label="Einstellungen">
+        <section class="card card-body" aria-label={t`Settings`}>
           <h2 class="section-title" style={{ marginTop: 0 }}>
-            Rückmeldungen
+            <Trans>Responses</Trans>
           </h2>
           <SwitchRow
-            label="Zu- und Absagen für alle sichtbar"
-            sub="Bei Sonderterminen sehen alle Mitglieder, wer zu- oder abgesagt hat. Gründe sehen nur die Verantwortlichen."
+            label={t`Responses visible to everyone`}
+            sub={t`For special events, all members see who accepted or declined. Only the leads see the reasons.`}
             checked={team.showResponses}
             onChange={async (value) => {
               await api.patch(`/teams/${team.id}`, { showResponses: value });
               invalidate("/events");
-              toast(value ? "Zu- und Absagen sind jetzt für alle sichtbar." : "Zu- und Absagen sehen jetzt nur die Verantwortlichen.");
+              toast(value ? t`Responses are now visible to everyone.` : t`Only the leads now see the responses.`);
               onChanged();
             }}
           />
@@ -233,16 +315,16 @@ export function GroupPage({ team, onChanged }: { team: TeamDetail; onChanged: ()
         {me.isAdmin ? (
           <div class="btn-row">
             <Button variant="ghost" icon="edit" onClick={() => setRenameOpen(true)}>
-              Umbenennen
+              <Trans>Rename</Trans>
             </Button>
             <Button
               variant="ghost"
               icon="trash"
               onClick={async () => {
                 const ok = await confirmDialog({
-                  title: `Gruppe ${team.name} löschen?`,
-                  message: "Chat und Sondertermine der Gruppe werden gelöscht. Die Personen bleiben erhalten.",
-                  confirmLabel: "Löschen",
+                  title: t`Delete group ${teamName}?`,
+                  message: t`The group's chat and special events are deleted. The people are kept.`,
+                  confirmLabel: t`Delete`,
                   danger: true,
                 });
                 if (!ok) return;
@@ -252,7 +334,7 @@ export function GroupPage({ team, onChanged }: { team: TeamDetail; onChanged: ()
                 location.assign("/verwaltung/gruppen");
               }}
             >
-              Gruppe löschen
+              <Trans>Delete group</Trans>
             </Button>
           </div>
         ) : null}
@@ -263,8 +345,12 @@ export function GroupPage({ team, onChanged }: { team: TeamDetail; onChanged: ()
               <a class="list-row" href="/hilfe">
                 <Icon name="info" size={22} />
                 <span class="main">
-                  <span class="title">Hilfe und Feedback</span>
-                  <span class="sub">Häufige Fragen, Anleitungen, Rückmeldung zur App</span>
+                  <span class="title">
+                    <Trans>Help and feedback</Trans>
+                  </span>
+                  <span class="sub">
+                    <Trans>Frequent questions, guides, feedback on the app</Trans>
+                  </span>
                 </span>
                 <Icon name="chevron" size={18} />
               </a>
@@ -279,18 +365,23 @@ export function GroupPage({ team, onChanged }: { team: TeamDetail; onChanged: ()
 }
 
 function MemberList({ members, onRemove }: { members: { person: PersonRef; hasAccount: boolean }[]; onRemove?: (p: PersonRef) => void }) {
-  if (!members.length) return <p class="small muted">Noch niemand.</p>;
+  if (!members.length)
+    return (
+      <p class="small muted">
+        <Trans>No one yet.</Trans>
+      </p>
+    );
   return (
     <ul class="list">
       {members.map((m) => (
         <li class="list-row">
           <span class="main">
             <span class="title">{personName(m.person)}</span>
-            <span class="sub">{m.hasAccount ? "nutzt die App" : "noch kein Zugang"}</span>
+            <span class="sub">{m.hasAccount ? t`uses the app` : t`no access yet`}</span>
           </span>
           {onRemove ? (
             <Button size="sm" variant="ghost" onClick={() => onRemove(m.person)}>
-              Entfernen
+              <Trans>Remove</Trans>
             </Button>
           ) : null}
         </li>
@@ -304,39 +395,45 @@ function AddMembersSheet({ team, role, onClose, onChanged }: { team: TeamDetail;
   const persons = useQuery<{ persons: AdminPersonLite[] }>("/admin/persons");
   const [filter, setFilter] = useState("");
   const inGroup = new Set((role === "coach" ? team.coaches : team.players).map((m) => m.person.id));
-  const candidates = (persons.data?.persons ?? []).filter(
-    (p) => !inGroup.has(p.person.id) && (!filter || personName(p.person).toLowerCase().includes(filter.toLowerCase())),
-  );
+  const candidates = (persons.data?.persons ?? []).filter((p) => !inGroup.has(p.person.id) && (!filter || personName(p.person).toLowerCase().includes(filter.toLowerCase())));
+  const teamName = team.name;
   return (
-    <Sheet open onClose={onClose} title={role === "coach" ? `Verantwortliche ${team.name}` : `Mitglieder ${team.name}`}>
-      <TextField label="Person suchen" value={filter} onInput={setFilter} placeholder="Name" />
+    <Sheet open onClose={onClose} title={role === "coach" ? t`Leads of ${teamName}` : t`Members of ${teamName}`}>
+      <TextField label={t`Search person`} value={filter} onInput={setFilter} placeholder={t`Name`} />
       {!persons.data ? <Spinner /> : null}
       <ul class="list" style={{ maxHeight: "50vh", overflowY: "auto" }}>
-        {candidates.slice(0, 40).map((p) => (
-          <li class="list-row">
-            <span class="main">
-              <span class="title">{personName(p.person)}</span>
-              <span class="sub">
-                {p.teams.map((t) => `${t.name} (${roleLabel(t.role, t.isGroup)})`).join(", ") || (p.children ? `Elternteil von ${p.children}` : "ohne Mannschaft")}
+        {candidates.slice(0, 40).map((p) => {
+          const children = p.children;
+          return (
+            <li class="list-row">
+              <span class="main">
+                <span class="title">{personName(p.person)}</span>
+                <span class="sub">{p.teams.map((tm) => `${tm.name} (${roleLabel(tm.role, tm.isGroup)})`).join(", ") || (children ? t`Parent of ${children}` : t`no team`)}</span>
               </span>
-            </span>
-            <Button
-              size="sm"
-              onClick={async () => {
-                await api.post(`/teams/${team.id}/members`, { personId: p.person.id, role });
-                toast(`${p.person.firstName} ist jetzt ${roleLabel(role, true)} in ${team.name}.`);
-                invalidate("/admin/persons", "/teams");
-                await persons.reload();
-                await refresh();
-                onChanged();
-              }}
-            >
-              Hinzufügen
-            </Button>
-          </li>
-        ))}
+              <Button
+                size="sm"
+                onClick={async () => {
+                  await api.post(`/teams/${team.id}/members`, {
+                    personId: p.person.id,
+                    role,
+                  });
+                  const name = p.person.firstName;
+                  toast(role === "coach" ? t`${name} is now a lead in ${teamName}.` : t`${name} is now a member in ${teamName}.`);
+                  invalidate("/admin/persons", "/teams");
+                  await persons.reload();
+                  await refresh();
+                  onChanged();
+                }}
+              >
+                <Trans>Add</Trans>
+              </Button>
+            </li>
+          );
+        })}
       </ul>
-      <p class="small muted">Neue Personen zuerst unter Verwaltung → Personen anlegen.</p>
+      <p class="small muted">
+        <Trans>Create new people first under Admin → People.</Trans>
+      </p>
     </Sheet>
   );
 }
@@ -345,8 +442,8 @@ function RenameSheet({ team, onClose, onChanged }: { team: TeamDetail; onClose: 
   const { refresh } = useSession();
   const [name, setName] = useState(team.name);
   return (
-    <Sheet open onClose={onClose} title="Gruppe umbenennen">
-      <TextField label="Name" value={name} onInput={setName} maxLength={30} />
+    <Sheet open onClose={onClose} title={t`Rename group`}>
+      <TextField label={t`Name`} value={name} onInput={setName} maxLength={30} />
       <Button
         variant="primary"
         size="lg"
@@ -354,14 +451,14 @@ function RenameSheet({ team, onClose, onChanged }: { team: TeamDetail; onClose: 
         disabled={!name.trim() || name.trim() === team.name}
         onClick={async () => {
           await api.patch(`/teams/${team.id}`, { name: name.trim() });
-          toast("Gespeichert.");
+          toast(t`Saved.`);
           invalidate("/teams", "/chat", "/events");
           await refresh();
           onClose();
           onChanged();
         }}
       >
-        Speichern
+        <Trans>Save</Trans>
       </Button>
     </Sheet>
   );

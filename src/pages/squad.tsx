@@ -1,3 +1,5 @@
+import { plural, t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 import { useEffect, useMemo, useState } from "preact/hooks";
 import type { EventSummary, ParticipationStatus, PersonRef } from "../../shared/types";
 import { api } from "../api";
@@ -31,7 +33,7 @@ interface SquadData {
 }
 
 export function SquadPage({ id }: { id: string }) {
-  useDocumentTitle("Kader nominieren");
+  useDocumentTitle(t`Nominate squad`);
   const { data, error, loading, reload } = useQuery<SquadData>(`/events/${id}/squad`);
   const [picked, setPicked] = useState<number[] | null>(null);
   const [helpOpen, setHelpOpen] = useState(false);
@@ -57,7 +59,7 @@ export function SquadPage({ id }: { id: string }) {
   const toggle = (c: Candidate) => {
     if (!c.isActive) return;
     if (selected.includes(c.person.id)) setPicked(selected.filter((x) => x !== c.person.id));
-    else if (selected.length >= max) toast(`Höchstens ${max} Spieler im Kader.`, "error");
+    else if (selected.length >= max) toast(t`At most ${max} players in the squad.`, "error");
     else setPicked([...selected, c.person.id]);
   };
   const activeIds = new Set(data.candidates.filter((c) => c.isActive).map((c) => c.person.id));
@@ -65,15 +67,26 @@ export function SquadPage({ id }: { id: string }) {
     ? JSON.stringify([...selected].sort()) !== JSON.stringify(data.candidates.filter((c) => c.nominated).map((c) => c.person.id).sort())
     : true;
   const ev = data.event;
+  const declinedNames = declined
+    .map((d) => {
+      const name = shortName(d.person);
+      const reason = d.reason;
+      return reason ? t`${name} ("${reason}")` : name;
+    })
+    .join(", ");
+  const replacementNames = replacements.map((r) => shortName(r.person)).join(", ");
+  const count = selected.length;
 
   return (
     <main class="page">
       <header class="topbar" style={{ flexDirection: "column", alignItems: "stretch", gap: "14px", paddingLeft: "16px", paddingRight: "16px" }}>
         <div class="row-gap">
-          <button type="button" class="icon-btn" aria-label="Zurück" onClick={() => history.back()} style={{ marginLeft: "-8px" }}>
+          <button type="button" class="icon-btn" aria-label={t`Back`} onClick={() => history.back()} style={{ marginLeft: "-8px" }}>
             <Icon name="back" size={24} stroke={2.2} />
           </button>
-          <h1 style={{ fontSize: "28px" }}>Kader nominieren</h1>
+          <h1 style={{ fontSize: "28px" }}>
+            <Trans>Nominate squad</Trans>
+          </h1>
         </div>
         <div class="squad-head">
           <div>
@@ -81,27 +94,33 @@ export function SquadPage({ id }: { id: string }) {
               {shortDate(ev.startsAt).toUpperCase()} · {time(ev.startsAt)}
             </div>
             <div style={{ fontFamily: "var(--font-cond)", fontWeight: 700, fontSize: "24px", lineHeight: 1.1 }}>{ev.title}</div>
-            <div style={{ fontSize: "14px" }}>{ev.location?.name ?? "Halle folgt"}</div>
+            <div style={{ fontSize: "14px" }}>{ev.location?.name ?? t`Venue to follow`}</div>
           </div>
           <div>
             <div class="squad-count" aria-live="polite">
               {selected.length}
               <small>/{max}</small>
             </div>
-            <div style={{ fontSize: "12px", fontWeight: 700, textAlign: "right" }}>nominiert</div>
+            <div style={{ fontSize: "12px", fontWeight: 700, textAlign: "right" }}>
+              <Trans>nominated</Trans>
+            </div>
           </div>
         </div>
       </header>
 
       <div class="content">
         {data.automatic ? (
-          <Notice>Automatisch: Für dieses Spiel ist der Stammkader nominiert. Änderst du hier etwas, gilt deine Auswahl nur für dieses Spiel.</Notice>
+          <Notice>
+            <Trans>Automatic: the core squad is nominated for this game. If you change anything here, your selection only applies to this game.</Trans>
+          </Notice>
         ) : null}
         {data.team.autoSquad && !data.automatic && data.published && !ev.isPast ? (
           <div class="notice">
             <Icon name="info" size={18} />
             <div class="stack-sm" style={{ flex: 1 }}>
-              <span>Diesen Kader hast du von Hand angepasst. Änderungen am Stammkader wirken hier nicht.</span>
+              <span>
+                <Trans>You adjusted this squad by hand. Changes to the core squad do not apply here.</Trans>
+              </span>
               <Button
                 size="sm"
                 onClick={async () => {
@@ -109,25 +128,27 @@ export function SquadPage({ id }: { id: string }) {
                   invalidate("/events");
                   setPicked(null);
                   await reload();
-                  toast("Der Kader folgt wieder dem Stammkader.");
+                  toast(t`The squad follows the core squad again.`);
                 }}
               >
-                Wieder automatisch
+                <Trans>Automatic again</Trans>
               </Button>
             </div>
           </div>
         ) : null}
         {selected.length > max ? (
           <Notice kind="warn">
-            Mehr als {max} im Kader. Bitte abwählen oder die Kadergröße unter Team → Einstellungen erhöhen.
+            <Trans>More than {max} in the squad. Please deselect players or increase the squad size under Team → Settings.</Trans>
           </Notice>
         ) : null}
         {declined.length ? (
           <div class="notice warn">
             <Icon name="alert" size={18} />
             <div>
-              <strong>Absage:</strong> {declined.map((d) => `${shortName(d.person)}${d.reason ? ` („${d.reason}“)` : ""}`).join(", ")}.
-              {replacements.length ? ` Ersatzvorschlag: ${replacements.map((r) => shortName(r.person)).join(", ")}.` : ""}
+              <Trans>
+                <strong>Declined:</strong> {declinedNames}.
+              </Trans>
+              {replacements.length ? " " + t`Suggested replacement: ${replacementNames}.` : ""}
             </div>
           </div>
         ) : null}
@@ -137,22 +158,25 @@ export function SquadPage({ id }: { id: string }) {
             disabled={!data.coreIds.length}
             onClick={() => setPicked(data.coreIds.filter((pid) => activeIds.has(pid)).slice(0, max))}
           >
-            Stammkader übernehmen
+            <Trans>Use core squad</Trans>
           </Button>
           <Button disabled={!data.lastGameIds.length} onClick={() => setPicked(data.lastGameIds.filter((pid) => activeIds.has(pid)).slice(0, max))}>
-            Wie letztes Spiel
+            <Trans>Same as last game</Trans>
           </Button>
         </div>
         {!data.coreIds.length ? (
           <p class="small muted">
-            Noch kein Stammkader festgelegt. Das geht unter <a href={`/team/${data.team.id}`}>Team → Kader</a>.
+            <Trans>
+              No core squad set yet. You can do that under <a href={`/team/${data.team.id}`}>Team → Squad</a>.
+            </Trans>
           </p>
         ) : null}
 
-        <ul class="list" aria-label="Spielerinnen und Spieler">
+        <ul class="list" aria-label={t({ message: "Players", context: "list" })}>
           {data.candidates.map((c) => {
             const on = selected.includes(c.person.id);
             const warning = c.conflict ?? c.ageWarning;
+            const reason = c.reason;
             if (!c.isActive) {
               return (
                 <li>
@@ -160,7 +184,9 @@ export function SquadPage({ id }: { id: string }) {
                     <span class="check disabled" />
                     <span style={{ flex: 1 }}>
                       <span style={{ display: "block", fontWeight: 700 }}>{shortName(c.person)}</span>
-                      <span class="small">Inaktiv, nicht nominierbar</span>
+                      <span class="small">
+                        <Trans>Inactive, cannot be nominated</Trans>
+                      </span>
                     </span>
                   </div>
                 </li>
@@ -174,9 +200,11 @@ export function SquadPage({ id }: { id: string }) {
                     <span style={{ display: "block", fontWeight: 700, fontSize: "16px" }}>{shortName(c.person)}</span>
                     <span class="small muted" style={{ display: "block" }}>
                       {c.nominated && c.status === "yes"
-                        ? "Zugesagt"
+                        ? t`Accepted`
                         : c.nominated && c.status === "no"
-                          ? `Abgesagt${c.reason ? `: ${c.reason}` : ""}`
+                          ? reason
+                            ? t`Declined: ${reason}`
+                            : t`Declined`
                           : c.hint || " "}
                     </span>
                     {warning ? (
@@ -185,8 +213,12 @@ export function SquadPage({ id }: { id: string }) {
                       </span>
                     ) : null}
                   </span>
-                  {c.isHelper ? <span class="badge muted">Aushilfe</span> : null}
-                  {c.isCore ? <span class="badge outline">Stamm</span> : null}
+                  {c.isHelper ? <span class="badge muted">
+                      <Trans>Stand-in</Trans>
+                    </span> : null}
+                  {c.isCore ? <span class="badge outline">
+                      <Trans>Core</Trans>
+                    </span> : null}
                 </button>
               </li>
             );
@@ -195,14 +227,16 @@ export function SquadPage({ id }: { id: string }) {
 
         {data.helpRequests.length ? (
           <div class="card card-pad stack-sm">
-            <strong>Aushilfe-Anfragen</strong>
+            <strong>
+              <Trans>Stand-in requests</Trans>
+            </strong>
             {data.helpRequests.map((h) => (
               <div class="row-gap" style={{ justifyContent: "space-between" }}>
                 <span>
                   {personName(h.person)} {h.homeTeam ? <span class="muted">({h.homeTeam})</span> : null}
                 </span>
                 <span class={`pill ${h.status === "accepted" ? "pill-yes" : h.status === "declined" ? "pill-no" : "pill-open"}`}>
-                  {h.status === "accepted" ? "Zugesagt" : h.status === "declined" ? "Abgelehnt" : "Angefragt"}
+                  {h.status === "accepted" ? t`Accepted` : h.status === "declined" ? t`Turned down` : t`Requested`}
                 </span>
               </div>
             ))}
@@ -210,7 +244,7 @@ export function SquadPage({ id }: { id: string }) {
         ) : null}
 
         <Button variant="dashed" icon="plus" onClick={() => setHelpOpen(true)}>
-          Aushilfe anfragen
+          <Trans>Request a stand-in</Trans>
         </Button>
 
         <Button
@@ -218,20 +252,26 @@ export function SquadPage({ id }: { id: string }) {
           size="lg"
           disabled={!changed && data.published}
           onClick={async () => {
-            if (!selected.length && !(await confirmDialog({ title: "Leeren Kader veröffentlichen?", message: "Niemand ist nominiert.", confirmLabel: "Trotzdem" }))) return;
+            if (!selected.length && !(await confirmDialog({ title: t`Publish an empty squad?`, message: t`Nobody is nominated.`, confirmLabel: t`Anyway` }))) return;
             const res = await api.put<{ added: number; removed: number }>(`/events/${id}/squad`, { personIds: selected });
             invalidate(`/events`);
             setPicked(null);
-            toast(data.published ? `Kader aktualisiert (${res.added} neu, ${res.removed} entfernt).` : "Kader veröffentlicht. Die Nominierten wurden benachrichtigt.");
+            const added = res.added;
+            const removed = res.removed;
+            toast(data.published ? t`Squad updated (${added} new, ${removed} removed).` : t`Squad published. The nominated players have been notified.`);
             await reload();
           }}
         >
-          {data.published ? `Änderungen speichern · ${selected.length}` : `Kader veröffentlichen · ${selected.length} ${selected.length === 1 ? "Person" : "Personen"}`}
+          {data.published ? t`Save changes · ${count}` : plural(count, { one: "Publish squad · # person", other: "Publish squad · # people" })}
         </Button>
         <p class="small muted" style={{ textAlign: "center" }}>
-          Nominierte erhalten eine Benachrichtigung und gelten als zugesagt, bis sie absagen.
+          <Trans>Nominated players receive a notification and count as accepted until they decline.</Trans>
         </p>
-        {!data.published ? <Notice>Vorausgewählt ist der Stammkader. Spieler und Eltern sehen die Nominierung erst nach dem Veröffentlichen.</Notice> : null}
+        {!data.published ? (
+          <Notice>
+            <Trans>The core squad is preselected. Players and parents only see the nomination after publishing.</Trans>
+          </Notice>
+        ) : null}
       </div>
       {helpOpen ? <HelpSheet eventId={id} teamName={data.team.name} onClose={() => setHelpOpen(false)} onDone={reload} /> : null}
     </main>
@@ -243,14 +283,20 @@ function HelpSheet({ eventId, teamName, onClose, onDone }: { eventId: string; te
     `/events/${eventId}/help-candidates`,
   );
   return (
-    <Sheet open onClose={onClose} title="Aushilfe anfragen">
+    <Sheet open onClose={onClose} title={t`Request a stand-in`}>
       <p class="muted">
-        Vorschläge aus der 2. Mannschaft derselben Altersklasse und der nächstjüngeren Jugend. Die Anfrage geht an die Person bzw. ihre Eltern, die Trainer der
-        Stammmannschaft werden informiert.
+        <Trans>
+          Suggestions from the second team of the same age class and the next younger youth team. The request goes to the person or their parents, and the
+          coaches of their home team are informed.
+        </Trans>
       </p>
       {error ? <ErrorBox error={error} /> : null}
       {!data ? <Spinner /> : null}
-      {data && !data.candidates.length ? <Notice>Für die {teamName} gibt es keine passenden Aushilfen.</Notice> : null}
+      {data && !data.candidates.length ? (
+        <Notice>
+          <Trans>There are no suitable stand-ins for {teamName}.</Trans>
+        </Notice>
+      ) : null}
       <ul class="list">
         {(data?.candidates ?? []).map((c) => (
           <li class="list-row">
@@ -260,19 +306,22 @@ function HelpSheet({ eventId, teamName, onClose, onDone }: { eventId: string; te
               {c.conflict ? <span class="small warn-text">{c.conflict}</span> : null}
             </span>
             {c.requested ? (
-              <span class="pill pill-muted">Angefragt</span>
+              <span class="pill pill-muted">
+                <Trans>Requested</Trans>
+              </span>
             ) : (
               <Button
                 size="sm"
                 variant="primary"
                 onClick={async () => {
                   await api.post(`/events/${eventId}/help-requests`, { personId: c.person.id });
-                  toast(`${c.person.firstName} wurde angefragt.`);
+                  const name = c.person.firstName;
+                  toast(t`${name} has been asked.`);
                   await reload();
                   onDone();
                 }}
               >
-                Anfragen
+                <Trans>Send request</Trans>
               </Button>
             )}
           </li>

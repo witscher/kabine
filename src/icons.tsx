@@ -1,4 +1,4 @@
-// Linien-Icons im Stil der Mockups. Immer aria-hidden, Bedeutung trägt der Text.
+// Line icons in the style of the mockups. Always aria-hidden, the text carries the meaning.
 import type { JSX } from "preact";
 
 const paths = {
@@ -39,7 +39,7 @@ const paths = {
   download: <><path d="M12 3v12M7 10l5 5 5-5" /><path d="M5 19h14" /></>,
   camera: <><path d="M4 8h3l2-3h6l2 3h3v12H4z" /><circle cx="12" cy="13.5" r="3.5" /></>,
   image: <><rect x="3" y="4" width="18" height="16" rx="2" /><circle cx="9" cy="9.5" r="1.8" /><path d="M3 17l5-5 4 4 3-3 6 6" /></>,
-  // Herz mit Handschlag für den Helferplan, aus Lucide „heart-handshake“ (ISC-Lizenz)
+  // Heart with handshake for the helper plan, from Lucide "heart-handshake" (ISC licence)
   helping: <><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" /><path d="M12 5 9.04 7.96a2.17 2.17 0 0 0 0 3.08c.82.82 2.13.85 3 .07l2.07-1.9a2.82 2.82 0 0 1 3.79 0l2.96 2.66" /><path d="m18 15-2-2M15 18l-2-2" /></>,
   whistle: <><circle cx="8" cy="14" r="5" /><path d="M12 11l8-4v4l-6 3" /></>,
   car: <><path d="M3 16v-4l2.2-5h13.6l2.2 5v4H3z" /><path d="M3 12h18" /><circle cx="7.5" cy="16.5" r="1.8" /><circle cx="16.5" cy="16.5" r="1.8" /></>,

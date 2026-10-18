@@ -5,6 +5,7 @@ import { useEffect, useState } from "preact/hooks";
 import { errorMessage } from "../api";
 import { EmailCodeForm, isEmail, startEmailLogin } from "../email";
 import { Icon } from "../icons";
+import { LanguageSwitch } from "../language-switch";
 import { isIos, isStandalone, loginWithPasskey, passkeyErrorDetail, passkeyErrorMessage, passkeysSupported, prepareLogin, useSession } from "../session";
 import { Button, Notice, TextField, useDocumentTitle } from "../ui";
 
@@ -161,6 +162,7 @@ export function LoginPage() {
           </Trans>
         </p>
         <InstallHint />
+        <LanguageSwitch />
         <div class="spacer" />
         <p class="footer-links">
           <a href="/datenschutz">

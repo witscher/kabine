@@ -1,22 +1,24 @@
+import { plural, t } from "@lingui/core/macro";
 import type { EventSummary, MyDuty } from "../shared/types";
 import { Icon } from "./icons";
 
-/** "Dein Dienst: Kuchen & Theke" bzw. "Dienst für Lina: Trikots waschen", je Person eine Zeile. */
+/** "Your duty: Cake & bar" or "Duty for Lina: wash shirts", one line per person. */
 export function dutyLines(duties: MyDuty[]): string[] {
   const groups = new Map<string, string[]>();
   for (const d of duties) {
-    const key = d.mine ? "Dein Dienst" : d.child ? `Dienst für ${d.child}` : "Dienst";
+    const child = d.child;
+    const key = d.mine ? t`Your duty` : child ? t`Duty for ${child}` : t`Duty`;
     groups.set(key, [...(groups.get(key) ?? []), d.label]);
   }
   return [...groups].map(([who, labels]) => `${who}: ${labels.join(", ")}`);
 }
 
-/** "Helfer benötigt · 2 Plätze frei" */
+/** "Helpers needed · 2 spots free" */
 export function neededText(n: number): string {
-  return `Helfer benötigt · ${n === 1 ? "1 Platz" : `${n} Plätze`} frei`;
+  return plural(n, { one: "Helpers needed · # spot free", other: "Helpers needed · # spots free" });
 }
 
-/** Marken am Spiel in der Terminübersicht: gelb für eigene Dienste, rot, wenn Helfer fehlen. */
+/** Chips on the game in the event overview: yellow for your own duties, red when helpers are missing. */
 export function DutyChips({ event }: { event: Pick<EventSummary, "myDuties" | "helpersNeeded"> }) {
   if (!event.myDuties.length && !event.helpersNeeded) return null;
   return (

@@ -1,5 +1,6 @@
-// Auf Staging immer sichtbar: Hier liegen Kopien echter Daten, damit niemand
-// das Testsystem mit der richtigen App verwechselt.
+// Always visible on staging: copies of real data live here, so nobody
+// confuses the test system with the real app.
+import { Trans } from "@lingui/react/macro";
 import { useEffect, useState } from "preact/hooks";
 
 export function EnvBanner() {
@@ -13,7 +14,7 @@ export function EnvBanner() {
   if (env !== "staging") return null;
   return (
     <div class="env-banner" role="note">
-      Staging · Testsystem mit kopierten Daten
+      <Trans>Staging · test system with copied data</Trans>
     </div>
   );
 }

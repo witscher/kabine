@@ -1,5 +1,5 @@
-// Von Hand angelegte Termine: Sondertermine und Spiele ohne handball4all. Für die Liste unter
-// Verwaltung (alle Mannschaften) und unter Team → Termine (eine Mannschaft).
+// Events created by hand: special events and games without handball4all. For the list under
+// Administration (all teams) and under Team → Events (one team).
 import type { Actor } from "../auth/actor";
 import { all } from "../lib/db";
 import { nowLocal } from "../lib/time";

@@ -1,4 +1,5 @@
-// Profilbilder: hochladen, freigeben, ausliefern, entfernen.
+import { t } from "@lingui/core/macro";
+// Profile pictures: upload, approve, serve, remove.
 import { Hono } from "hono";
 import { type AppEnv, intParam, requireActor } from "../app";
 import type { Actor } from "../auth/actor";
@@ -9,7 +10,7 @@ import { nowLocal } from "../lib/time";
 
 export const avatarRoutes = new Hono<AppEnv>();
 
-/** Obergrenze für ein Bild. Der Browser schneidet auf 256 x 256 Pixel zu, das sind meist 10 bis 30 KB. */
+/** Upper limit for a picture. The browser crops to 256 x 256 pixels, which is usually 10 to 30 KB. */
 export const MAX_AVATAR_BYTES = 150_000;
 export const ADULT_AGE = 18;
 
@@ -48,9 +49,9 @@ async function loadSubject(db: D1Database, personId: number): Promise<Subject> {
 }
 
 /**
- * Braucht ein Bild dieser Person die Zustimmung der Eltern? Maßgeblich ist das
- * Geburtsjahr: wer in diesem Jahr 18 wird oder älter ist, entscheidet selbst.
- * Ohne Geburtsjahr gilt die Person als volljährig (Entscheidung des Vereins, 11.10.2026).
+ * Does a picture of this person need the parents' consent? The birth year
+ * decides: whoever turns 18 this year or is older decides themselves.
+ * Without a birth year the person counts as an adult (club decision, 11.10.2026).
  */
 export function needsConsent(s: Subject, year = Number(nowLocal().slice(0, 4))): boolean {
   return s.birthYear != null && year - s.birthYear < ADULT_AGE;
@@ -60,7 +61,7 @@ function isGuardian(actor: Actor, s: Subject): boolean {
   return s.guardianIds.includes(actor.personId);
 }
 
-/** Bildformat an den ersten Bytes erkennen, nicht am mitgeschickten Typ. */
+/** Detect the image format from the first bytes, not from the declared type. */
 export function detectMime(bytes: Uint8Array): "image/webp" | "image/jpeg" | null {
   if (bytes.length > 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) return "image/jpeg";
   const ascii = (from: number, to: number) => String.fromCharCode(...bytes.subarray(from, to));
@@ -76,7 +77,7 @@ async function versions(db: D1Database, personId: number): Promise<Record<Status
   };
 }
 
-/** Alle freigegebenen Bilder als personId → Version. Sichtbar für alle Angemeldeten. */
+/** All approved pictures as personId → version. Visible to everyone signed in. */
 avatarRoutes.get("/avatars", async (c) => {
   requireActor(c);
   const rows = await all<{ person_id: number; version: number }>(
@@ -86,7 +87,7 @@ avatarRoutes.get("/avatars", async (c) => {
   return c.json({ avatars: Object.fromEntries(rows.map((r) => [r.person_id, r.version])) });
 });
 
-/** Stand für die Profilseite der Person selbst oder eines Elternteils. */
+/** State for the profile page of the person themselves or of a parent. */
 avatarRoutes.get("/persons/:id/avatar/info", async (c) => {
   const actor = requireActor(c);
   const s = await loadSubject(c.env.DB, intParam(c, "id"));
@@ -99,7 +100,7 @@ avatarRoutes.get("/persons/:id/avatar/info", async (c) => {
     ...v,
     needsConsent: consent,
     hasGuardians: s.guardianIds.length > 0,
-    // Minderjährige ohne verknüpfte Eltern können kein Bild hochladen
+    // Minors without linked parents cannot upload a picture
     canUpload: guardian || (self && (!consent || s.guardianIds.length > 0)),
     canApprove: guardian,
   });
@@ -121,7 +122,7 @@ avatarRoutes.get("/persons/:id/avatar", async (c) => {
   );
   if (!row) throw notFound();
   const bytes = row.image instanceof ArrayBuffer ? new Uint8Array(row.image) : Uint8Array.from(row.image);
-  // Mit passender Version in der Adresse ändert sich das Bild nie, ein neues Bild bekommt eine neue Version
+  // With a matching version in the URL the picture never changes; a new picture gets a new version
   const cacheable = status === "approved" && c.req.query("v") === String(row.version);
   return new Response(bytes, {
     headers: {
@@ -137,20 +138,20 @@ avatarRoutes.put("/persons/:id/avatar", async (c) => {
   const s = await loadSubject(c.env.DB, intParam(c, "id"));
   const self = s.id === actor.personId;
   const guardian = isGuardian(actor, s);
-  if (!self && !guardian) throw forbidden("Ein Profilbild laden nur die Person selbst oder ihre Eltern hoch.");
+  if (!self && !guardian) throw forbidden(t`Only the person themselves or their parents can upload a profile picture.`);
 
   const declared = Number(c.req.header("content-length") ?? 0);
-  if (declared > MAX_AVATAR_BYTES) throw new ApiError(413, "too_large", "Das Bild ist zu groß.");
+  if (declared > MAX_AVATAR_BYTES) throw new ApiError(413, "too_large", t`The picture is too large.`);
   const bytes = new Uint8Array(await c.req.arrayBuffer());
-  if (bytes.length > MAX_AVATAR_BYTES) throw new ApiError(413, "too_large", "Das Bild ist zu groß.");
+  if (bytes.length > MAX_AVATAR_BYTES) throw new ApiError(413, "too_large", t`The picture is too large.`);
   const mime = detectMime(bytes);
-  if (!mime) throw badRequest("Bitte ein Bild im Format JPEG oder WebP hochladen.");
+  if (!mime) throw badRequest(t`Please upload a picture in JPEG or WebP format.`);
 
   let status: Status = "approved";
   if (!guardian && needsConsent(s)) {
     if (!s.guardianIds.length) {
       throw conflict(
-        "Für ein Profilbild brauchst du die Zustimmung deiner Eltern, und mit deinem Zugang ist noch kein Elternteil verknüpft. Frag deinen Trainer, ob Eltern eingebunden werden können.",
+        t`For a profile picture you need your parents' consent, and no parent is linked to your access yet. Ask your coach whether parents can be involved.`,
         "consent_required",
       );
     }
@@ -177,18 +178,19 @@ avatarRoutes.put("/persons/:id/avatar", async (c) => {
   ]);
 
   if (status === "pending") {
-    // Freigabe ist Sache der Eltern, unabhängig davon, ob sie in der Mannschaft eingebunden sind
+    // Approval is up to the parents, regardless of whether they are involved in the team
     const accounts = await all<{ id: number }>(
       db,
       `SELECT a.id FROM accounts a WHERE a.disabled_at IS NULL AND a.person_id IN (SELECT value FROM json_each(?))`,
       JSON.stringify(s.guardianIds),
     );
-    await enqueuePush(c.env, accounts.map((a) => a.id), {
-      title: "Profilbild freigeben",
-      body: `${s.firstName} möchte ein neues Profilbild verwenden. Schau es dir an und gib es frei.`,
+    const name = s.firstName;
+    await enqueuePush(c.env, accounts.map((a) => a.id), () => ({
+      title: t`Approve profile picture`,
+      body: t`${name} would like to use a new profile picture. Take a look and approve it.`,
       url: `/profil/kind/${s.id}`,
       tag: `avatar-${s.id}`,
-    });
+    }));
   }
   return c.json({ ok: true, status, ...(await versions(db, s.id)) }, 201);
 });
@@ -196,25 +198,26 @@ avatarRoutes.put("/persons/:id/avatar", async (c) => {
 avatarRoutes.post("/persons/:id/avatar/approve", async (c) => {
   const actor = requireActor(c);
   const s = await loadSubject(c.env.DB, intParam(c, "id"));
-  if (!isGuardian(actor, s)) throw forbidden("Nur verknüpfte Eltern können ein Profilbild freigeben.");
+  if (!isGuardian(actor, s)) throw forbidden(t`Only linked parents can approve a profile picture.`);
   const db = c.env.DB;
   const pending = await first<{ version: number }>(db, "SELECT version FROM avatars WHERE person_id = ? AND status = 'pending'", s.id);
-  if (!pending) throw conflict("Es wartet kein Bild auf Freigabe.");
+  if (!pending) throw conflict(t`No picture is waiting for approval.`);
   await db.batch([
     stmt(db, "DELETE FROM avatars WHERE person_id = ? AND status = 'approved'", s.id),
     stmt(db, "UPDATE avatars SET status = 'approved', approved_by = ? WHERE person_id = ? AND status = 'pending'", actor.personId, s.id),
   ]);
   const accounts = await all<{ id: number }>(db, "SELECT id FROM accounts WHERE person_id = ? AND disabled_at IS NULL", s.id);
-  await enqueuePush(c.env, accounts.map((a) => a.id), {
-    title: "Profilbild freigegeben",
-    body: `${actor.firstName} hat dein neues Profilbild freigegeben.`,
+  const name = actor.firstName;
+  await enqueuePush(c.env, accounts.map((a) => a.id), () => ({
+    title: t`Profile picture approved`,
+    body: t`${name} has approved your new profile picture.`,
     url: "/profil",
     tag: `avatar-${s.id}`,
-  });
+  }));
   return c.json({ ok: true, ...(await versions(db, s.id)) });
 });
 
-/** Entfernen dürfen die Person selbst, ihre Eltern und Admins. ?pending=1 lehnt ein wartendes Bild ab. */
+/** The person themselves, their parents and admins may remove it. ?pending=1 rejects a waiting picture. */
 avatarRoutes.delete("/persons/:id/avatar", async (c) => {
   const actor = requireActor(c);
   const s = await loadSubject(c.env.DB, intParam(c, "id"));

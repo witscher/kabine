@@ -1,3 +1,4 @@
+import { t } from "@lingui/core/macro";
 import { Hono } from "hono";
 import { z } from "zod";
 import { type AppEnv, intParam, requireActor } from "../app";
@@ -18,7 +19,7 @@ import { relyingParty } from "../auth/webauthn";
 
 export const teamRoutes = new Hono<AppEnv>();
 
-const nameField = z.string().trim().min(1, "Bitte gib einen Namen ein.").max(50, "Der Name ist zu lang.");
+const nameField = z.string().trim().min(1, { error: () => t`Please enter a name.` }).max(50, { error: () => t`The name is too long.` });
 const birthYearField = z.number().int().min(1930).max(2100).nullable();
 
 teamRoutes.get("/teams", async (c) => {
@@ -64,7 +65,7 @@ const createTeamSchema = z.object({
   name: z.string().trim().min(1).max(30),
   ageClassCode: z.string().trim().min(1).max(10),
   level: z.number().int().min(1).max(9).default(1),
-  /** Ohne Angabe: Jugend mit Eltern, Aktive ohne. */
+  /** If not given: youth with parents, adults without. */
   parentsEnabled: z.boolean().optional(),
 });
 
@@ -89,18 +90,18 @@ teamRoutes.post("/teams", async (c) => {
     );
     return c.json({ id: row!.id }, 201);
   } catch (err) {
-    if (err instanceof Error && /UNIQUE/.test(err.message)) throw conflict("Eine Mannschaft mit diesem Namen gibt es schon.");
+    if (err instanceof Error && /UNIQUE/.test(err.message)) throw conflict(t`A team with this name already exists.`);
     throw err;
   }
 });
 
 const createGroupSchema = z.object({
   name: z.string().trim().min(1).max(30),
-  /** referees: Mitglieder folgen der KiHaSL/JuHaSL-Rolle, Admins sind Verantwortliche. */
+  /** referees: members follow the KiHaSL/JuHaSL role, admins are in charge. */
   autoMembers: z.enum(["referees"]).nullable().default(null),
 });
 
-/** Gruppe anlegen: nur Chat und Sondertermine (Admins). */
+/** Creates a group: only chat and special events (admins). */
 teamRoutes.post("/groups", async (c) => {
   const actor = requireActor(c);
   requireAdmin(actor);
@@ -116,7 +117,7 @@ teamRoutes.post("/groups", async (c) => {
     if (input.autoMembers) await syncAutoGroups(c.env.DB);
     return c.json({ id: row!.id }, 201);
   } catch (err) {
-    if (err instanceof Error && /UNIQUE/.test(err.message)) throw conflict("Eine Mannschaft oder Gruppe mit diesem Namen gibt es schon.");
+    if (err instanceof Error && /UNIQUE/.test(err.message)) throw conflict(t`A team or group with this name already exists.`);
     throw err;
   }
 });
@@ -150,7 +151,7 @@ teamRoutes.get("/teams/:id", async (c) => {
   requireCoach(actor, teamId);
   const db = c.env.DB;
   const team = await first<TeamRow>(db, "SELECT * FROM teams WHERE id = ?", teamId);
-  if (!team) throw notFound("Diese Mannschaft gibt es nicht.");
+  if (!team) throw notFound(t`This team does not exist.`);
 
   const [members, guardians, core, invites, ac, unexcusedRows] = await Promise.all([
     all<{
@@ -199,7 +200,7 @@ teamRoutes.get("/teams/:id", async (c) => {
          JOIN seasons s ON s.id = ac.season_id AND s.is_current = 1 WHERE ac.code = ?`,
       team.age_class_code,
     ),
-    // Unentschuldigtes Fehlen bei Terminen dieser Mannschaft; Termine gibt es nur aus der laufenden Saison
+    // Unexcused absences at this team's events; events exist only from the current season
     all<{ person_id: number; n: number }>(
       db,
       `SELECT ua.person_id, count(*) AS n FROM unexcused_absences ua
@@ -293,11 +294,11 @@ const updateTeamSchema = z.object({
   maxSquad: z.number().int().min(1).max(40).optional(),
   autoSquad: z.boolean().optional(),
   parentsEnabled: z.boolean().optional(),
-  /** Helferplan für diese Mannschaft (Trainer und Admins). */
+  /** Helper plan for this team (coaches and admins). */
   helperPlan: z.boolean().optional(),
-  /** Rückmeldungen (ohne Gründe) für Spieler und Eltern sichtbar (Trainer und Admins). */
+  /** Responses (without reasons) visible to players and parents (coaches and admins). */
   showResponses: z.boolean().optional(),
-  /** Vorlage der Helferdienste für Heim- bzw. Auswärtsspiele, null = Standard (Trainer und Admins). */
+  /** Helper duty template for home or away games, null = default (coaches and admins). */
   homeTemplateId: z.number().int().positive().nullable().optional(),
   awayTemplateId: z.number().int().positive().nullable().optional(),
 });
@@ -311,10 +312,10 @@ teamRoutes.patch("/teams/:id", async (c) => {
   const team = await first<TeamRow>(c.env.DB, "SELECT * FROM teams WHERE id = ?", teamId);
   if (!team) throw notFound();
   if (team.kind === "group" && (input.ageClassCode || input.level || input.parentsEnabled || input.helperPlan || input.autoSquad || input.homeTemplateId || input.awayTemplateId)) {
-    throw badRequest("Gruppen haben nur Chat und Sondertermine.", "group_not_supported");
+    throw badRequest(t`Groups only have chat and special events.`, "group_not_supported");
   }
   for (const tid of [input.homeTemplateId, input.awayTemplateId]) {
-    if (tid != null && !(await first(c.env.DB, "SELECT 1 AS ok FROM duty_templates WHERE id = ?", tid))) throw badRequest("Diese Vorlage gibt es nicht.");
+    if (tid != null && !(await first(c.env.DB, "SELECT 1 AS ok FROM duty_templates WHERE id = ?", tid))) throw badRequest(t`This template does not exist.`);
   }
   try {
     await run(
@@ -336,16 +337,16 @@ teamRoutes.patch("/teams/:id", async (c) => {
       teamId,
     );
   } catch (err) {
-    if (err instanceof Error && /UNIQUE/.test(err.message)) throw conflict("Eine Mannschaft mit diesem Namen gibt es schon.");
+    if (err instanceof Error && /UNIQUE/.test(err.message)) throw conflict(t`A team with this name already exists.`);
     throw err;
   }
   if (input.parentsEnabled === false && team.parents_enabled === 1) {
-    // Ab jetzt ohne Eltern: Elternlinks ungültig, offene Elternverbindungen im Chat trennen
+    // From now on without parents: parent links invalid, disconnect open parent connections in the chat
     await run(c.env.DB, "UPDATE invites SET revoked_at = ? WHERE kind = 'parent' AND team_id = ? AND revoked_at IS NULL", utcIso(), teamId);
     c.executionCtx.waitUntil(closeParentConnections(c.env, teamId));
   }
   if (input.autoSquad) await syncAutoSquads(c.env.DB, [teamId]);
-  // Neue Vorlage: kommende Spiele ohne Einträge bekommen ihre Dienste neu
+  // New template: upcoming games without entries get their duties anew
   if (
     (input.homeTemplateId !== undefined && input.homeTemplateId !== team.home_template_id) ||
     (input.awayTemplateId !== undefined && input.awayTemplateId !== team.away_template_id)
@@ -359,10 +360,10 @@ teamRoutes.delete("/teams/:id", async (c) => {
   const actor = requireActor(c);
   requireAdmin(actor);
   const teamId = intParam(c, "id");
-  // Gruppen lassen sich samt Zuordnungen löschen, die Personen bleiben
+  // Groups can be deleted with their assignments; the persons remain
   const { kind } = await teamKind(c.env.DB, teamId);
   const members = await first<{ n: number }>(c.env.DB, "SELECT count(*) AS n FROM team_memberships WHERE team_id = ?", teamId);
-  if (kind === "team" && (members?.n ?? 0) > 0) throw conflict("Die Mannschaft hat noch Mitglieder. Bitte zuerst alle entfernen.");
+  if (kind === "team" && (members?.n ?? 0) > 0) throw conflict(t`The team still has members. Please remove all of them first.`);
   await c.env.DB.batch([
     stmt(
       c.env.DB,
@@ -376,7 +377,7 @@ teamRoutes.delete("/teams/:id", async (c) => {
   return c.json({ ok: true });
 });
 
-// Kader -----------------------------------------------------------------------
+// Squad -----------------------------------------------------------------------
 
 const newPlayerSchema = z.object({
   firstName: nameField,
@@ -404,15 +405,15 @@ teamRoutes.post("/teams/:id/players", async (c) => {
 
 const memberSchema = z.object({ personId: z.number().int().positive(), role: z.enum(["player", "coach"]) });
 
-/** Admins ordnen bestehende Personen als Spieler oder Trainer zu. */
+/** Admins assign existing persons as players or coaches. */
 teamRoutes.post("/teams/:id/members", async (c) => {
   const actor = requireActor(c);
   requireAdmin(actor);
   const teamId = intParam(c, "id");
   const input = parse(memberSchema, await readJson(c.req.raw));
-  if ((await teamKind(c.env.DB, teamId)).autoMembers) throw badRequest("Die Mitglieder dieser Gruppe ergeben sich automatisch.", "auto_members");
+  if ((await teamKind(c.env.DB, teamId)).autoMembers) throw badRequest(t`The members of this group are determined automatically.`, "auto_members");
   const person = await first(c.env.DB, "SELECT 1 AS ok FROM persons WHERE id = ? AND is_former = 0", input.personId);
-  if (!person) throw notFound("Diese Person gibt es nicht.");
+  if (!person) throw notFound(t`This person does not exist.`);
   await run(
     c.env.DB,
     "INSERT OR IGNORE INTO team_memberships (person_id, team_id, role) VALUES (?, ?, ?)",
@@ -431,7 +432,7 @@ teamRoutes.delete("/teams/:id/members/:personId", async (c) => {
   const { role } = parse(z.object({ role: z.enum(["player", "coach", "helper"]).default("player") }), { role: c.req.query("role") });
   if (role === "coach") requireAdmin(actor);
   else requireCoach(actor, teamId);
-  if ((await teamKind(c.env.DB, teamId)).autoMembers) throw badRequest("Die Mitglieder dieser Gruppe ergeben sich automatisch.", "auto_members");
+  if ((await teamKind(c.env.DB, teamId)).autoMembers) throw badRequest(t`The members of this group are determined automatically.`, "auto_members");
   const res = await c.env.DB.batch([
     stmt(c.env.DB, "DELETE FROM team_memberships WHERE team_id = ? AND person_id = ? AND role = ?", teamId, personId, role),
     stmt(
@@ -444,7 +445,7 @@ teamRoutes.delete("/teams/:id/members/:personId", async (c) => {
       personId,
     ),
   ]);
-  if (!res[0]!.meta.changes) throw notFound("Diese Zuordnung gibt es nicht.");
+  if (!res[0]!.meta.changes) throw notFound(t`This assignment does not exist.`);
   await syncAutoSquads(c.env.DB, [teamId]);
   return c.json({ ok: true });
 });
@@ -464,7 +465,7 @@ teamRoutes.put("/teams/:id/core-squad", async (c) => {
     teamId,
     list(personIds),
   );
-  if (valid.length !== new Set(personIds).size) throw badRequest("Der Stammkader darf nur Spieler dieser Mannschaft enthalten.");
+  if (valid.length !== new Set(personIds).size) throw badRequest(t`The core squad may only contain players of this team.`);
   await c.env.DB.batch([
     stmt(c.env.DB, "DELETE FROM core_squad WHERE team_id = ?", teamId),
     ...[...new Set(personIds)].map((id) => stmt(c.env.DB, "INSERT INTO core_squad (team_id, person_id) VALUES (?, ?)", teamId, id)),
@@ -473,7 +474,7 @@ teamRoutes.put("/teams/:id/core-squad", async (c) => {
   return c.json({ ok: true });
 });
 
-// Dauerhafte Aushilfen ------------------------------------------------------------
+// Permanent stand-ins -------------------------------------------------------------
 
 teamRoutes.get("/teams/:id/helper-candidates", async (c) => {
   const actor = requireActor(c);
@@ -489,7 +490,7 @@ teamRoutes.get("/teams/:id/helper-candidates", async (c) => {
   });
 });
 
-// Spieler aus einer anderen Mannschaft zusätzlich aufnehmen (z. B. wC2 → auch wC1) ---------
+// Additionally take in players from another team (e.g. wC2 → also wC1) ---------------
 
 teamRoutes.get("/teams/:id/player-candidates", async (c) => {
   const actor = requireActor(c);
@@ -512,20 +513,29 @@ teamRoutes.post("/teams/:id/players/existing", async (c) => {
   await requireTeam(c.env.DB, teamId);
   const { personId } = parse(z.object({ personId: z.number().int().positive() }), await readJson(c.req.raw));
   const candidate = (await teamCandidates(c.env.DB, teamId, "player")).find((r) => r.person_id === personId);
-  if (!candidate) throw badRequest("Aufnehmen lassen sich Spieler anderer Mannschaften derselben oder der nächstjüngeren Altersklasse.");
+  if (!candidate) throw badRequest(t`Players of other teams of the same or the next younger age class can be taken in.`);
   const team = await first<{ name: string }>(c.env.DB, "SELECT name FROM teams WHERE id = ?", teamId);
   await c.env.DB.batch([
-    // Eine dauerhafte Aushilfe dieser Mannschaft wird zur Spielerin
+    // A permanent stand-in of this team becomes a player
     stmt(c.env.DB, "DELETE FROM team_memberships WHERE team_id = ? AND person_id = ? AND role = 'helper'", teamId, personId),
     stmt(c.env.DB, "INSERT OR IGNORE INTO team_memberships (person_id, team_id, role) VALUES (?, ?, 'player')", personId, teamId),
     clubMemberStmt(c.env.DB, [personId], teamId),
   ]);
   await syncAutoSquads(c.env.DB, [teamId]);
+  const playerName = candidate.first_name;
+  const teamName = team?.name;
+  const by = actor.firstName;
   c.executionCtx.waitUntil(
     notifyCoaches(
       c.env,
       candidate.team_ids,
-      { title: "Kader", body: `${candidate.first_name} spielt jetzt auch in der ${team?.name ?? "anderen Mannschaft"} (aufgenommen von ${actor.firstName}).`, url: `/team/${teamId}` },
+      () => ({
+        title: t`Squad`,
+        body: teamName
+          ? t`${playerName} now also plays in the ${teamName} (added by ${by}).`
+          : t`${playerName} now also plays in the other team (added by ${by}).`,
+        url: `/team/${teamId}`,
+      }),
       { exclude: [actor.accountId] },
     ),
   );
@@ -541,7 +551,7 @@ teamRoutes.post("/teams/:id/helpers", async (c) => {
   await requireTeam(c.env.DB, teamId);
   const input = parse(helperSchema, await readJson(c.req.raw));
   const ok = (await helpCandidates(c.env.DB, teamId)).some((r) => r.person_id === input.personId);
-  if (!ok) throw badRequest("Aushilfen kommen aus der 2. Mannschaft derselben Altersklasse oder der nächstjüngeren Jugend.");
+  if (!ok) throw badRequest(t`Stand-ins come from the 2nd team of the same age class or the next younger youth.`);
   await run(
     c.env.DB,
     `INSERT INTO team_memberships (person_id, team_id, role, helper_trainings) VALUES (?, ?, 'helper', ?)
@@ -569,7 +579,7 @@ teamRoutes.patch("/teams/:id/helpers/:personId", async (c) => {
   return c.json({ ok: true });
 });
 
-// Einladungslinks -----------------------------------------------------------------
+// Invitation links ----------------------------------------------------------------
 
 teamRoutes.post("/teams/:id/invites", async (c) => {
   const actor = requireActor(c);
@@ -579,7 +589,7 @@ teamRoutes.post("/teams/:id/invites", async (c) => {
   const { kind } = parse(z.object({ kind: z.enum(["player", "parent"]) }), await readJson(c.req.raw));
   if (kind === "parent") {
     const team = await first<{ parents_enabled: number }>(c.env.DB, "SELECT parents_enabled FROM teams WHERE id = ?", teamId);
-    if (team?.parents_enabled !== 1) throw conflict("In dieser Mannschaft sind keine Eltern eingebunden. Das kann ein Admin ändern.");
+    if (team?.parents_enabled !== 1) throw conflict(t`Parents are not involved in this team. An admin can change that.`);
   }
   const invite = await createInvite(c.env, { kind, teamId, createdBy: actor.personId });
   return c.json(
@@ -604,7 +614,7 @@ teamRoutes.delete("/invites/:id", async (c) => {
 
 export { nameField, birthYearField };
 
-/** Team → Termine: kommende Sondertermine und Spiele ohne handball4all dieser Mannschaft. */
+/** Team → events: this team's upcoming special events and games without handball4all. */
 teamRoutes.get("/teams/:id/extra-events", async (c) => {
   const actor = requireActor(c);
   const teamId = intParam(c, "id");

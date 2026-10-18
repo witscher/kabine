@@ -1,5 +1,6 @@
-// Persönlicher Kalender (Profil → Meine Termine): geheimer Abo-Link je Konto mit Häkchen
-// für Training, Spiele und Helferdienste. Der Link zeigt dieselben Termine wie die App.
+// Personal calendar (Profile → My events): secret subscription link per account with checkboxes
+// for training, games and helper duties. The link shows the same events as the app.
+import { t } from "@lingui/core/macro";
 import { Hono } from "hono";
 import { z } from "zod";
 import { isRelevantEvent } from "../../shared/relevance";
@@ -12,10 +13,11 @@ import { b64url, randomBytes, sha256Hex } from "../lib/crypto";
 import { all, first, run } from "../lib/db";
 import { notFound, parse, readJson } from "../lib/http";
 import { addDays, todayLocal } from "../lib/time";
+import { currentLocale, withLocale } from "../i18n";
 
 export const calendarRoutes = new Hono<AppEnv>();
 
-/** Zeitraum des Kalenders: einen Monat zurück, ein halbes Jahr voraus. */
+/** Range of the calendar: one month back, half a year ahead. */
 const PAST_DAYS = 30;
 const FUTURE_DAYS = 180;
 
@@ -48,11 +50,11 @@ calendarRoutes.put("/profile/calendar", async (c) => {
     p.duties ? 1 : 0,
     actor.accountId,
   );
-  if (!res.meta.changes) throw notFound("Du hast noch keinen Kalender-Link.");
+  if (!res.meta.changes) throw notFound(t`You do not have a calendar link yet.`);
   return c.json({ ok: true });
 });
 
-/** Neuer Kalender-Link (der alte wird ungültig). Den Token gibt es nur in dieser Antwort. */
+/** New calendar link (the old one becomes invalid). The token is only in this response. */
 calendarRoutes.post("/profile/calendar-token", async (c) => {
   const actor = requireActor(c);
   const p = parse(prefsSchema.partial(), await readJson(c.req.raw).catch(() => ({})));
@@ -79,33 +81,38 @@ calendarRoutes.delete("/profile/calendar-token", async (c) => {
   return c.json({ ok: true });
 });
 
-/** Kalender-Abo ohne Anmeldung, nur mit geheimem Link. */
+/** Calendar subscription without sign-in, only with the secret link. */
 calendarRoutes.get("/calendar/:file", async (c) => {
   const file = c.req.param("file");
   const token = file.endsWith(".ics") ? file.slice(0, -4) : file;
   if (!/^[A-Za-z0-9_-]{20,64}$/.test(token)) throw notFound();
   const db = c.env.DB;
-  const row = await first<ActorRow & PrefsRow>(
+  const row = await first<ActorRow & PrefsRow & { locale: string | null }>(
     db,
-    `SELECT a.id AS account_id, p.id AS person_id, p.first_name, p.last_name, p.is_admin, ct.training, ct.games, ct.duties
+    `SELECT a.id AS account_id, p.id AS person_id, p.first_name, p.last_name, p.is_admin, ct.training, ct.games, ct.duties, a.locale
        FROM calendar_tokens ct JOIN accounts a ON a.id = ct.account_id AND a.disabled_at IS NULL
        JOIN persons p ON p.id = a.person_id AND p.is_former = 0
       WHERE ct.token_hash = ?`,
     await sha256Hex(token),
   );
   if (!row) throw notFound();
+  // Fetched without a session: texts in the language of the calendar owner's account
+  return withLocale(row.locale ?? currentLocale(), () => calendarFeed(c.env, db, row, new URL(c.req.url).origin));
+});
+
+async function calendarFeed(env: Env, db: D1Database, row: ActorRow & PrefsRow, requestOrigin: string): Promise<Response> {
   const prefs = toPrefs(row);
   const from = `${addDays(todayLocal(), -PAST_DAYS)}T00:00`;
   const to = `${addDays(todayLocal(), FUTURE_DAYS)}T00:00`;
 
-  // Sichtbarkeit und Elternregeln genau wie in der App: Actor des Kontos
+  // Visibility and parent rules exactly as in the app: actor of the account
   const now = Date.now();
   const actor = await buildActor(db, { id: "calendar", account_id: row.account_id, created_at: "", expires_at: "", extended_at: "" }, row);
   let events: ReturnType<typeof toSummary>[] = [];
   if (prefs.training || prefs.games) {
     const rows = await listVisibleEvents(db, actor, { from, to });
     const ctx = await loadEventContext(db, rows);
-    // myDuties bleibt leer: Dienste kommen als eigene Einträge, ein Spiel nur mit Dienst gehört nicht zu „Spiele“
+    // myDuties stays empty: duties come as separate entries, a game with only a duty does not belong to "games"
     events = rows.map((e) => toSummary(e, ctx, actor, now)).filter(isRelevantEvent);
   }
 
@@ -161,7 +168,7 @@ calendarRoutes.get("/calendar/:file", async (c) => {
     }));
   }
 
-  const origin = c.env.ORIGIN || new URL(c.req.url).origin;
+  const origin = env.ORIGIN || requestOrigin;
   const [club, install] = await Promise.all([loadClub(db), installId(db)]);
   const items = calendarItems(events, duties, prefs, { selfId: row.person_id, coachTeamIds: actor.coachTeamIds, origin, uidHost: `${install}.kabine` });
   return new Response(buildCalendar(club.shortName, items, new Date().toISOString()), {
@@ -171,4 +178,4 @@ calendarRoutes.get("/calendar/:file", async (c) => {
       "cache-control": "private, max-age=300",
     },
   });
-});
+}

@@ -32,7 +32,7 @@ startOfflineWatch();
 if ("serviceWorker" in navigator && import.meta.env.PROD) {
   const register = () => {
     navigator.serviceWorker.register("/sw.js").catch((err) => console.warn("Service Worker", err));
-    // Alle Seiten der App für offline vorab speichern
+    // Pre-cache all pages of the app for offline use
     void navigator.serviceWorker.ready.then((reg) => reg.active?.postMessage({ type: "precache", version: __APP_VERSION__ }));
   };
   // The language catalog is loaded first (await above), so the page may already be loaded

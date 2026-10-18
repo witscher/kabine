@@ -1,3 +1,5 @@
+import { plural, t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 import { useLocation } from "preact-iso";
 import { useEffect, useMemo, useState } from "preact/hooks";
 import type { LocationRef, PersonRef } from "../../shared/types";
@@ -19,9 +21,11 @@ export function AdminOnly({ children }: { children: preact.ComponentChildren }) 
   if (!me.isAdmin) {
     return (
       <main class="page">
-        <TopBar title="Verwaltung" back="/" />
+        <TopBar title={t`Administration`} back="/" />
         <div class="content">
-          <Notice kind="warn">Dieser Bereich ist nur für Admins.</Notice>
+          <Notice kind="warn">
+            <Trans>This area is for admins only.</Trans>
+          </Notice>
         </div>
       </main>
     );
@@ -30,67 +34,73 @@ export function AdminOnly({ children }: { children: preact.ComponentChildren }) 
 }
 
 export function AdminPage() {
-  useDocumentTitle("Verwaltung");
+  useDocumentTitle(t`Administration`);
   const me = useMe();
   const club = useClub();
   const teamsQuery = useQuery<{ teams: { id: number; name: string; kind: "team" | "group"; players: number; coaches: number }[] }>("/teams");
-  const teams = { ...teamsQuery, data: teamsQuery.data && { teams: teamsQuery.data.teams.filter((t) => t.kind === "team") } };
-  const groupCount = (teamsQuery.data?.teams ?? []).filter((t) => t.kind === "group").length;
+  const teams = { ...teamsQuery, data: teamsQuery.data && { teams: teamsQuery.data.teams.filter((x) => x.kind === "team") } };
+  const groupCount = (teamsQuery.data?.teams ?? []).filter((x) => x.kind === "group").length;
   const coaching = new Set(me.memberships.filter((m) => m.role === "coach").map((m) => m.id));
-  const own = (teamsQuery.data?.teams ?? []).filter((t) => coaching.has(t.id));
+  const own = (teamsQuery.data?.teams ?? []).filter((x) => coaching.has(x.id));
+  const teamCount = teams.data?.teams.length ?? 0;
+  const firstName = me.person.firstName;
   const items: { href: string; icon: IconName; title: string; sub: string; download?: boolean }[] = [
     {
       href: "/verwaltung/mannschaften",
       icon: "users",
-      title: "Mannschaften",
+      title: t`Teams`,
       sub: teams.data
-        ? `${teams.data.teams.length === 1 ? "1 Mannschaft" : `${teams.data.teams.length} Mannschaften`} · Kader öffnen, anlegen, Trainer zuordnen`
-        : "Kader öffnen, anlegen, Trainer zuordnen",
+        ? `${plural(teamCount, { one: "# team", other: "# teams" })} · ${t`Open squads, create, assign coaches`}`
+        : t`Open squads, create, assign coaches`,
     },
     {
       href: "/verwaltung/gruppen",
       icon: "chat",
-      title: "Gruppen",
-      sub: `${groupCount ? `${groupCount === 1 ? "1 Gruppe" : `${groupCount} Gruppen`} · ` : ""}Nur Chat und Sondertermine, z. B. Trainerteam`,
+      title: t`Groups`,
+      sub: `${groupCount ? `${plural(groupCount, { one: "# group", other: "# groups" })} · ` : ""}${t`Only chat and special events, e.g. coaching team`}`,
     },
-    { href: "/verwaltung/personen", icon: "user", title: "Personen", sub: "Alle Mitglieder, Admins, Zugangslinks" },
-    { href: "/verwaltung/altersklassen", icon: "calendar", title: "Altersklassen", sub: "Jahrgänge der laufenden Saison" },
-    { href: "/verwaltung/ferien", icon: "sun", title: "Ferien", sub: "Zeiträume bearbeiten (z. B. Fastnacht)" },
-    { href: "/verwaltung/orte", icon: "pin", title: "Trainingsorte", sub: "Vereinshallen und weitere Orte" },
-    { href: "/verwaltung/rundnachricht", icon: "bell", title: "Rundnachricht", sub: "Ankündigung in alle oder ausgewählte Mannschaftschats" },
-    { href: "/verwaltung/helferdienste", icon: "helping", title: "Helferdienste", sub: "Dienstarten und Vorlagen für Spiele und Sondertermine" },
-    { href: "/verwaltung/kihasl", icon: "whistle", title: "KiHaSL/JuHaSL", sub: "Schiedsrichter-Rolle per Link vergeben, Liste" },
-    { href: "/chat?alle", icon: "chat", title: "Alle Chats", sub: "Mannschaftschats, in denen du nicht Trainer oder Elternteil bist" },
-    { href: "/verwaltung/sondertermine", icon: "calendar", title: "Sondertermine und Spiele", sub: "Kommende Termine anderer Mannschaften, Sondertermin anlegen" },
-    { href: "/verwaltung/verein", icon: "settings", title: "Verein", sub: "Name, Farben, Logo, Datenschutz" },
-    { href: "/verwaltung/saisonwechsel", icon: "refresh", title: "Saisonwechsel", sub: "Einmal im Jahr, mit Vorschau" },
-    { href: "/api/admin/export", icon: "download", title: "Export", sub: "Alle Daten als JSON-Datei, zur Datensicherung", download: true },
-    { href: "/hilfe", icon: "info", title: "Hilfe und Feedback", sub: "Rückmeldung zur App schicken" },
+    { href: "/verwaltung/personen", icon: "user", title: t`People`, sub: t`All members, admins, access links` },
+    { href: "/verwaltung/altersklassen", icon: "calendar", title: t`Age groups`, sub: t`Birth years of the current season` },
+    { href: "/verwaltung/ferien", icon: "sun", title: t`Holidays`, sub: t`Edit periods (e.g. carnival)` },
+    { href: "/verwaltung/orte", icon: "pin", title: t`Training venues`, sub: t`Club halls and other venues` },
+    { href: "/verwaltung/rundnachricht", icon: "bell", title: t`Broadcast`, sub: t`Announcement in all or selected team chats` },
+    { href: "/verwaltung/helferdienste", icon: "helping", title: t`Helper duties`, sub: t`Duty types and templates for games and special events` },
+    { href: "/verwaltung/kihasl", icon: "whistle", title: "KiHaSL/JuHaSL", sub: t`Grant the referee role by link, list` },
+    { href: "/chat?alle", icon: "chat", title: t`All chats`, sub: t`Team chats in which you are not a coach or parent` },
+    { href: "/verwaltung/sondertermine", icon: "calendar", title: t`Special events and games`, sub: t`Upcoming events of other teams, create a special event` },
+    { href: "/verwaltung/verein", icon: "settings", title: t`Club`, sub: t`Name, colours, logo, privacy` },
+    { href: "/verwaltung/saisonwechsel", icon: "refresh", title: t`Season change`, sub: t`Once a year, with preview` },
+    { href: "/api/admin/export", icon: "download", title: t`Export`, sub: t`All data as a JSON file, for backup`, download: true },
+    { href: "/hilfe", icon: "info", title: t`Help and feedback`, sub: t`Send feedback about the app` },
   ];
   return (
     <AdminOnly>
       <main class="page">
         <header class="hero">
-          <div class="kicker">Verwaltung</div>
+          <div class="kicker">
+            <Trans>Administration</Trans>
+          </div>
           <h1>{club.name}</h1>
-          <div class="hero-sub">Angemeldet als Admin {me.person.firstName}</div>
+          <div class="hero-sub">
+            <Trans>Signed in as admin {firstName}</Trans>
+          </div>
         </header>
         <div class="content">
-          {/* Nur eigene Mannschaften als Abkürzung, alle übrigen unter Verwaltung → Mannschaften */}
+          {/* Only own teams as a shortcut, all others under Administration → Teams */}
           {own.length ? (
-            <section class="stack-sm" aria-label="Meine Mannschaften">
-              <h2 class="section-title">Meine Mannschaften</h2>
+            <section class="stack-sm" aria-label={t`My teams`}>
+              <h2 class="section-title">
+                <Trans>My teams</Trans>
+              </h2>
               <ul class="list">
-                {own.map((t) => (
+                {own.map((team) => (
                   <li>
-                    <a class="list-row" href={`/team/${t.id}`}>
+                    <a class="list-row" href={`/team/${team.id}`}>
                       <span class="team-badge" style={{ minWidth: "48px", textAlign: "center" }}>
-                        {t.name}
+                        {team.name}
                       </span>
                       <span class="main">
-                        <span class="sub">
-                          {t.players} Spieler · {t.coaches} Trainer
-                        </span>
+                        <span class="sub">{memberCounts(team.players, team.coaches)}</span>
                       </span>
                       <Icon name="chevron" size={18} />
                     </a>
@@ -100,11 +110,11 @@ export function AdminPage() {
             </section>
           ) : null}
           {teams.error ? <ErrorBox error={teams.error} /> : null}
-          <ul class="list" aria-label="Verwaltung">
+          <ul class="list" aria-label={t`Administration`}>
             {items.map((i) => (
               <li>
                 {i.download ? (
-                  // Knopf statt Link: der Router würde den Link abfangen, erst kommt der Datenschutzhinweis
+                  // Button instead of link: the router would intercept the link, the privacy notice comes first
                   <button type="button" class="list-row" onClick={() => void downloadExport()}>
                     <Icon name={i.icon} size={22} />
                     <span class="main">
@@ -132,10 +142,15 @@ export function AdminPage() {
   );
 }
 
-// Rundnachricht -----------------------------------------------------------------------
+/** "12 players · 2 coaches" */
+function memberCounts(players: number, coaches: number): string {
+  return `${plural(players, { one: "# player", other: "# players" })} · ${plural(coaches, { one: "# coach", other: "# coaches" })}`;
+}
+
+// Broadcast ---------------------------------------------------------------------------
 
 export function AdminBroadcastPage() {
-  useDocumentTitle("Rundnachricht");
+  useDocumentTitle(t`Broadcast`);
   const teams = useQuery<{ teams: { id: number; name: string; players: number }[] }>("/teams");
   const [text, setText] = useState("");
   const [all, setAll] = useState(true);
@@ -144,33 +159,55 @@ export function AdminBroadcastPage() {
   const [busy, setBusy] = useState(false);
   const list = teams.data?.teams ?? [];
   const count = all ? list.length : teamIds.length;
+  const chatCount = list.length;
   return (
     <AdminOnly>
       <main class="page">
-        <TopBar title="Rundnachricht" kicker="Verwaltung" back="/verwaltung" />
+        <TopBar title={t`Broadcast`} kicker={t`Administration`} back="/verwaltung" />
         <div class="content">
-          <p class="muted">Erscheint als hervorgehobene Ankündigung im Chat jeder gewählten Mannschaft, mit deinem Namen.</p>
-          <Field label="Nachricht">
-            {(fid) => <textarea id={fid} class="textarea" rows={5} value={text} maxLength={2000} onInput={(e) => setText((e.target as HTMLTextAreaElement).value)} placeholder="z. B. Einladung zum Saisonabschluss am …" />}
+          <p class="muted">
+            <Trans>Appears as a highlighted announcement in the chat of every selected team, with your name.</Trans>
+          </p>
+          <Field label={t`Message`}>
+            {(fid) => (
+              <textarea
+                id={fid}
+                class="textarea"
+                rows={5}
+                value={text}
+                maxLength={2000}
+                onInput={(e) => setText((e.target as HTMLTextAreaElement).value)}
+                placeholder={t`e.g. invitation to the end-of-season party on …`}
+              />
+            )}
           </Field>
           <ul class="list">
             <li>
-              <SwitchRow label="An alle Mannschaften" sub={`${list.length} Mannschaftschats`} checked={all} onChange={setAll} />
+              <SwitchRow
+                label={t`To all teams`}
+                sub={plural(chatCount, { one: "# team chat", other: "# team chats" })}
+                checked={all}
+                onChange={setAll}
+              />
             </li>
           </ul>
           {!all ? (
-            <div class="field" role="group" aria-label="Mannschaften">
-              <span class="field-label">Mannschaften</span>
-              <span class="field-hint">Mehrere möglich</span>
+            <div class="field" role="group" aria-label={t`Teams`}>
+              <span class="field-label">
+                <Trans>Teams</Trans>
+              </span>
+              <span class="field-hint">
+                <Trans>Several possible</Trans>
+              </span>
               <div class="chips">
-                {list.map((t) => (
+                {list.map((team) => (
                   <button
                     type="button"
-                    class={`chip ${teamIds.includes(t.id) ? "selected" : ""}`}
-                    aria-pressed={teamIds.includes(t.id) ? "true" : "false"}
-                    onClick={() => setTeamIds(teamIds.includes(t.id) ? teamIds.filter((x) => x !== t.id) : [...teamIds, t.id])}
+                    class={`chip ${teamIds.includes(team.id) ? "selected" : ""}`}
+                    aria-pressed={teamIds.includes(team.id) ? "true" : "false"}
+                    onClick={() => setTeamIds(teamIds.includes(team.id) ? teamIds.filter((x) => x !== team.id) : [...teamIds, team.id])}
                   >
-                    {t.name}
+                    {team.name}
                   </button>
                 ))}
               </div>
@@ -179,11 +216,11 @@ export function AdminBroadcastPage() {
           <ul class="list">
             <li>
               <SwitchRow
-                label="Alle sofort benachrichtigen"
+                label={t`Notify everyone immediately`}
                 sub={
                   notify
-                    ? "Jede Person im Chat, auch Eltern, bekommt sofort eine Benachrichtigung und die Zahl am App-Icon zählt hoch (wie bei @alle)."
-                    : "Wie eine normale Chatnachricht: gebündelte Chat-Benachrichtigung für alle, die sie eingeschaltet haben."
+                    ? t`Everyone in the chat, including parents, gets a notification immediately and the number on the app icon goes up (as with @alle).`
+                    : t`Like a normal chat message: a bundled chat notification for everyone who has turned it on.`
                 }
                 checked={notify}
                 onChange={setNotify}
@@ -197,15 +234,21 @@ export function AdminBroadcastPage() {
             disabled={busy || !text.trim() || !count}
             onClick={async () => {
               const ok = await confirmDialog({
-                title: "Rundnachricht senden?",
-                message: `Die Ankündigung erscheint in ${count === 1 ? "einem Mannschaftschat" : `${count} Mannschaftschats`}${notify ? " und alle werden sofort benachrichtigt" : ""}.`,
-                confirmLabel: "Senden",
+                title: t`Send broadcast?`,
+                message: notify
+                  ? plural(count, {
+                      one: "The announcement appears in one team chat and everyone is notified immediately.",
+                      other: "The announcement appears in # team chats and everyone is notified immediately.",
+                    })
+                  : plural(count, { one: "The announcement appears in one team chat.", other: "The announcement appears in # team chats." }),
+                confirmLabel: t`Send`,
               });
               if (!ok) return;
               setBusy(true);
               try {
                 const res = await api.post<{ sent: number }>("/admin/broadcast", { teamIds: all ? [] : teamIds, text: text.trim(), notify });
-                toast(`Gesendet an ${res.sent === 1 ? "einen Chat" : `${res.sent} Chats`}.`);
+                const sent = res.sent;
+                toast(plural(sent, { one: "Sent to one chat.", other: "Sent to # chats." }));
                 setText("");
                 invalidate("/chat/rooms");
               } finally {
@@ -213,7 +256,7 @@ export function AdminBroadcastPage() {
               }
             }}
           >
-            {count ? `An ${count === 1 ? "einen Chat" : `${count} Chats`} senden` : "Mannschaften wählen"}
+            {count ? plural(count, { one: "Send to one chat", other: "Send to # chats" }) : t`Choose teams`}
           </Button>
         </div>
       </main>
@@ -221,7 +264,7 @@ export function AdminBroadcastPage() {
   );
 }
 
-// Mannschaften ------------------------------------------------------------------------
+// Teams -------------------------------------------------------------------------------
 
 interface AgeClass {
   code: string;
@@ -242,11 +285,11 @@ interface AdminPerson {
   hasAccount: boolean;
   isReferee: boolean;
   isClubMember: boolean;
-  /** Letzte Aktivität des Zugangs (lokales Datum), null = nie benutzt oder kein Zugang. */
+  /** Last activity of the account (local date), null = never used or no account. */
   lastSeenOn: string | null;
   teams: { name: string; role: string; isGroup: boolean }[];
   children: string | null;
-  /** Mannschaften der Kinder (Eltern). */
+  /** Teams of the children (parents). */
   childTeams: string[];
   childIds: number[];
   parentIds: number[];
@@ -256,40 +299,52 @@ type RoleFilter = "all" | "player" | "coach" | "parent" | "none";
 type ActivityFilter = "" | "stale" | "never" | "noaccount";
 type SortOrder = "name" | "activity";
 
-/** Ab so vielen Tagen ohne Aktivität gilt ein Zugang im Filter als verwaist. */
+/** After this many days without activity an account counts as abandoned in the filter. */
 const STALE_DAYS = 60;
 
 function daysSinceSeen(p: AdminPerson): number | null {
   return p.lastSeenOn ? daysBetween(p.lastSeenOn, todayLocal()) : null;
 }
 
-/** „heute aktiv“, „vor 12 Tagen aktiv“, „Zugang nie benutzt“, „kein Zugang“ */
+/** "active today", "active 12 days ago", "access never used", "no access" */
 export function activityLabel(p: Pick<AdminPerson, "hasAccount" | "lastSeenOn">): string {
-  if (!p.hasAccount) return "kein Zugang";
-  if (!p.lastSeenOn) return "Zugang nie benutzt";
+  if (!p.hasAccount) return t`no access`;
+  if (!p.lastSeenOn) return t`Access never used`;
   const days = daysBetween(p.lastSeenOn, todayLocal());
-  if (days <= 0) return "heute aktiv";
-  if (days === 1) return "gestern aktiv";
-  if (days < 45) return `vor ${days} Tagen aktiv`;
-  if (days < 365) return `vor ${Math.round(days / 30)} Monaten aktiv`;
-  return "vor über einem Jahr aktiv";
+  if (days <= 0) return t`active today`;
+  if (days === 1) return t`active yesterday`;
+  if (days < 45) return t`active ${days} days ago`;
+  const months = Math.round(days / 30);
+  if (days < 365) return t`active ${months} months ago`;
+  return t`active over a year ago`;
 }
 
-/** Sortierung „Zuletzt aktiv“: nie benutzte Zugänge, dann am längsten inaktiv, Personen ohne Zugang am Ende. */
+/** Like activityLabel without "active", for "Last active: <date> (<ago>)". */
+function lastSeenAgo(lastSeenOn: string): string {
+  const days = daysBetween(lastSeenOn, todayLocal());
+  if (days <= 0) return t`today`;
+  if (days === 1) return t`yesterday`;
+  if (days < 45) return t`${days} days ago`;
+  const months = Math.round(days / 30);
+  if (days < 365) return t`${months} months ago`;
+  return t`over a year ago`;
+}
+
+/** Sort order "Last active": never-used accounts, then longest inactive, people without an account at the end. */
 function activityRank(p: AdminPerson): number {
   if (!p.hasAccount) return -1;
   const days = daysSinceSeen(p);
   return days == null ? Number.MAX_SAFE_INTEGER : days;
 }
 
-/** Weder Mannschaft noch Kind noch Admin- oder KiHaSL-Rolle: Kandidaten zum Aufräumen. */
+/** Neither team nor child nor admin or KiHaSL role: candidates for cleaning up. */
 function withoutRole(p: AdminPerson): boolean {
   return !p.teams.length && !p.childIds.length && !p.isAdmin && !p.isReferee;
 }
 const NONE = "__none__";
 
 export function AdminTeamsPage() {
-  useDocumentTitle("Mannschaften");
+  useDocumentTitle(t`Teams`);
   const { refresh } = useSession();
   const teams = useQuery<{
     teams: { id: number; name: string; kind: "team" | "group"; ageClassCode: string; level: number; parentsEnabled: boolean; players: number; coaches: number }[];
@@ -304,7 +359,7 @@ export function AdminTeamsPage() {
   return (
     <AdminOnly>
       <main class="page">
-        <TopBar title="Mannschaften" kicker="Verwaltung" back="/verwaltung" />
+        <TopBar title={t`Teams`} kicker={t`Administration`} back="/verwaltung" />
         <div class="content">
           <Button
             variant="primary"
@@ -314,51 +369,64 @@ export function AdminTeamsPage() {
               setEdit({ name: "", ageClassCode: code, level: 1, parentsEnabled: isYouth(code) });
             }}
           >
-            Mannschaft anlegen
+            <Trans>Create team</Trans>
           </Button>
           {teams.error ? <ErrorBox error={teams.error} /> : null}
           <p class="small muted">
-            Für Kreise ohne Training und Spiele, etwa das Trainerteam, gibt es <a href="/verwaltung/gruppen">Gruppen</a>.
+            <Trans>
+              For circles without training and games, such as the coaching team, there are <a href="/verwaltung/gruppen">groups</a>.
+            </Trans>
           </p>
           <ul class="list">
-            {(teams.data?.teams ?? []).filter((t) => t.kind === "team").map((t) => (
-              <li>
-                <div class="list-row">
-                  <span class="team-badge" style={{ minWidth: "48px", textAlign: "center" }}>
-                    {t.name}
-                  </span>
-                  <span class="main">
-                    <span class="title">{ages.data?.ageClasses.find((a) => a.code === t.ageClassCode)?.name ?? t.ageClassCode}</span>
-                    <span class="sub">
-                      {t.level}. Mannschaft · {t.players} Spieler · {t.coaches} Trainer{t.parentsEnabled ? "" : " · ohne Eltern"}
+            {(teams.data?.teams ?? []).filter((x) => x.kind === "team").map((team) => {
+              const level = team.level;
+              return (
+                <li>
+                  <div class="list-row">
+                    <span class="team-badge" style={{ minWidth: "48px", textAlign: "center" }}>
+                      {team.name}
                     </span>
-                  </span>
-                </div>
-                <div class="btn-row" style={{ padding: "0 14px 12px" }}>
-                  <a class="btn btn-sm" href={`/team/${t.id}`}>
-                    Öffnen
-                  </a>
-                  <Button size="sm" onClick={() => setCoachesFor({ id: t.id, name: t.name })}>
-                    Trainer
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() =>
-                      setEdit({ id: t.id, name: t.name, ageClassCode: t.ageClassCode, level: t.level, parentsEnabled: t.parentsEnabled, wasEnabled: t.parentsEnabled })
-                    }
-                  >
-                    Bearbeiten
-                  </Button>
-                </div>
-              </li>
-            ))}
+                    <span class="main">
+                      <span class="title">{ages.data?.ageClasses.find((a) => a.code === team.ageClassCode)?.name ?? team.ageClassCode}</span>
+                      <span class="sub">
+                        {t`Team ${level}`} · {memberCounts(team.players, team.coaches)}
+                        {team.parentsEnabled ? "" : ` · ${t`without parents`}`}
+                      </span>
+                    </span>
+                  </div>
+                  <div class="btn-row" style={{ padding: "0 14px 12px" }}>
+                    <a class="btn btn-sm" href={`/team/${team.id}`}>
+                      <Trans>Open</Trans>
+                    </a>
+                    <Button size="sm" onClick={() => setCoachesFor({ id: team.id, name: team.name })}>
+                      <Trans context="short">Coaches</Trans>
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() =>
+                        setEdit({
+                          id: team.id,
+                          name: team.name,
+                          ageClassCode: team.ageClassCode,
+                          level: team.level,
+                          parentsEnabled: team.parentsEnabled,
+                          wasEnabled: team.parentsEnabled,
+                        })
+                      }
+                    >
+                      <Trans>Edit</Trans>
+                    </Button>
+                  </div>
+                </li>
+              );
+            })}
           </ul>
         </div>
         {edit ? (
-          <Sheet open onClose={() => setEdit(null)} title={edit.id ? "Mannschaft bearbeiten" : "Neue Mannschaft"}>
-            <TextField label="Name" value={edit.name} onInput={(v) => setEdit({ ...edit, name: v })} maxLength={30} hint="z. B. wC1, wC2, Damen 2" />
-            <Field label="Altersklasse">
+          <Sheet open onClose={() => setEdit(null)} title={edit.id ? t`Edit team` : t`New team`}>
+            <TextField label={t`Name`} value={edit.name} onInput={(v) => setEdit({ ...edit, name: v })} maxLength={30} hint={t`e.g. wC1, wC2, Damen 2`} />
+            <Field label={t`Age group`}>
               {(id) => (
                 <select
                   id={id}
@@ -366,7 +434,7 @@ export function AdminTeamsPage() {
                   value={edit.ageClassCode}
                   onChange={(e) => {
                     const code = (e.target as HTMLSelectElement).value;
-                    // Neue Mannschaften: Jugend mit Eltern, Aktive ohne
+                    // New teams: youth with parents, adults without
                     setEdit({ ...edit, ageClassCode: code, parentsEnabled: edit.id ? edit.parentsEnabled : isYouth(code) });
                   }}
                 >
@@ -378,18 +446,18 @@ export function AdminTeamsPage() {
                 </select>
               )}
             </Field>
-            <Field label="Mannschaft">
+            <Field label={t`Team number`}>
               {(id) => (
                 <select id={id} class="select" value={edit.level} onChange={(e) => setEdit({ ...edit, level: Number((e.target as HTMLSelectElement).value) })}>
-                  {[1, 2, 3, 4].map((l) => (
-                    <option value={l}>{l}. Mannschaft</option>
+                  {[1, 2, 3, 4].map((level) => (
+                    <option value={level}>{t`Team ${level}`}</option>
                   ))}
                 </select>
               )}
             </Field>
             <SwitchRow
-              label="Eltern einbinden"
-              sub="Eltern sagen für ihr Kind zu und ab, sind im Chat dabei und bekommen Benachrichtigungen. Ausschalten, wenn die Spieler selbst Verantwortung übernehmen, etwa in älteren Jugendmannschaften und bei den Aktiven."
+              label={t`Include parents`}
+              sub={t`Parents respond for their child, are in the chat and get notifications. Turn off when the players take responsibility themselves, for example in older youth teams and for adults.`}
               checked={edit.parentsEnabled}
               onChange={(v) => setEdit({ ...edit, parentsEnabled: v })}
             />
@@ -402,36 +470,36 @@ export function AdminTeamsPage() {
                 const body = { name: edit.name.trim(), ageClassCode: edit.ageClassCode, level: edit.level, parentsEnabled: edit.parentsEnabled };
                 if (edit.id && edit.wasEnabled && !edit.parentsEnabled) {
                   const ok = await confirmDialog({
-                    title: "Ohne Eltern weiterführen?",
-                    message:
-                      "Eltern sehen die Termine und den Chat dieser Mannschaft dann nicht mehr und können nicht mehr für ihr Kind antworten. Offene Elternlinks werden ungültig. Die Verknüpfungen bleiben erhalten und gelten wieder, wenn du Eltern später einschaltest.",
-                    confirmLabel: "Ohne Eltern",
+                    title: t`Continue without parents?`,
+                    message: t`Parents will then no longer see this team's events and chat and can no longer respond for their child. Open parent links become invalid. The links between parents and children are kept and apply again if you turn parents on later.`,
+                    confirmLabel: t`Without parents`,
                   });
                   if (!ok) return;
                 }
                 if (edit.id) await api.patch(`/teams/${edit.id}`, body);
                 else await api.post("/teams", body);
-                toast("Gespeichert.");
+                toast(t`Saved.`);
                 setEdit(null);
                 invalidate("/teams");
                 await refresh();
               }}
             >
-              Speichern
+              <Trans>Save</Trans>
             </Button>
             {edit.id ? (
               <Button
                 variant="ghost"
                 icon="trash"
                 onClick={async () => {
-                  if (!(await confirmDialog({ title: "Mannschaft löschen?", message: "Nur möglich, wenn niemand mehr zugeordnet ist.", confirmLabel: "Löschen", danger: true }))) return;
+                  if (!(await confirmDialog({ title: t`Delete team?`, message: t`Only possible when nobody is assigned any more.`, confirmLabel: t`Delete`, danger: true })))
+                    return;
                   await api.del(`/teams/${edit.id}`);
                   setEdit(null);
                   invalidate("/teams");
                   await refresh();
                 }}
               >
-                Mannschaft löschen
+                <Trans>Delete team</Trans>
               </Button>
             ) : null}
           </Sheet>
@@ -446,7 +514,7 @@ function CoachesSheet({ team, onClose }: { team: { id: number; name: string }; o
   const { refresh } = useSession();
   const persons = useQuery<{ persons: AdminPerson[] }>("/admin/persons");
   const [filter, setFilter] = useState("");
-  const coaches = (persons.data?.persons ?? []).filter((p) => p.teams.some((t) => t.name === team.name && t.role === "coach"));
+  const coaches = (persons.data?.persons ?? []).filter((p) => p.teams.some((m) => m.name === team.name && m.role === "coach"));
   const candidates = (persons.data?.persons ?? []).filter(
     (p) => !coaches.includes(p) && (!filter || personName(p.person).toLowerCase().includes(filter.toLowerCase())),
   );
@@ -455,15 +523,16 @@ function CoachesSheet({ team, onClose }: { team: { id: number; name: string }; o
     await persons.reload();
     await refresh();
   };
+  const teamName = team.name;
   return (
-    <Sheet open onClose={onClose} title={`Trainer ${team.name}`}>
+    <Sheet open onClose={onClose} title={t`Coaches of ${teamName}`}>
       {!persons.data ? <Spinner /> : null}
       <ul class="list">
         {coaches.map((c) => (
           <li class="list-row">
             <span class="main">
               <span class="title">{personName(c.person)}</span>
-              <span class="sub">{c.hasAccount ? "hat Zugang" : "noch kein Zugang – Link unter Personen erzeugen"}</span>
+              <span class="sub">{c.hasAccount ? t`has access` : t`no access yet – create a link under People`}</span>
             </span>
             <Button
               size="sm"
@@ -473,42 +542,54 @@ function CoachesSheet({ team, onClose }: { team: { id: number; name: string }; o
                 await update();
               }}
             >
-              Entfernen
+              <Trans>Remove</Trans>
             </Button>
           </li>
         ))}
       </ul>
-      {!coaches.length && persons.data ? <p class="muted">Noch kein Trainer zugeordnet.</p> : null}
-      <TextField label="Person suchen" value={filter} onInput={setFilter} placeholder="Name" />
+      {!coaches.length && persons.data ? (
+        <p class="muted">
+          <Trans>No coach assigned yet.</Trans>
+        </p>
+      ) : null}
+      <TextField label={t`Search person`} value={filter} onInput={setFilter} placeholder={t`Name`} />
       <ul class="list" style={{ maxHeight: "40vh", overflowY: "auto" }}>
-        {candidates.slice(0, 30).map((p) => (
-          <li class="list-row">
-            <span class="main">
-              <span class="title">{personName(p.person)}</span>
-              <span class="sub">{p.teams.map((t) => `${t.name} (${roleLabel(t.role, t.isGroup)})`).join(", ") || (p.children ? `Elternteil von ${p.children}` : "ohne Mannschaft")}</span>
-            </span>
-            <Button
-              size="sm"
-              onClick={async () => {
-                await api.post(`/teams/${team.id}/members`, { personId: p.person.id, role: "coach" });
-                toast(`${p.person.firstName} ist Trainer der ${team.name}.`);
-                await update();
-              }}
-            >
-              Als Trainer
-            </Button>
-          </li>
-        ))}
+        {candidates.slice(0, 30).map((p) => {
+          const children = p.children;
+          return (
+            <li class="list-row">
+              <span class="main">
+                <span class="title">{personName(p.person)}</span>
+                <span class="sub">
+                  {p.teams.map((m) => `${m.name} (${roleLabel(m.role, m.isGroup)})`).join(", ") || (children ? t`Parent of ${children}` : t`no team`)}
+                </span>
+              </span>
+              <Button
+                size="sm"
+                onClick={async () => {
+                  await api.post(`/teams/${team.id}/members`, { personId: p.person.id, role: "coach" });
+                  const firstName = p.person.firstName;
+                  toast(t`${firstName} is now a coach of ${teamName}.`);
+                  await update();
+                }}
+              >
+                <Trans>Make coach</Trans>
+              </Button>
+            </li>
+          );
+        })}
       </ul>
-      <p class="small muted">Neue Trainer zuerst unter Personen anlegen.</p>
+      <p class="small muted">
+        <Trans>Create new coaches under People first.</Trans>
+      </p>
     </Sheet>
   );
 }
 
-// Personen ------------------------------------------------------------------------
+// People ------------------------------------------------------------------------------
 
 export function AdminPersonsPage() {
-  useDocumentTitle("Personen");
+  useDocumentTitle(t`People`);
   const me = useMe();
   const { data, error, reload } = useQuery<{ persons: AdminPerson[] }>("/admin/persons");
   const [filter, setFilter] = useState("");
@@ -521,20 +602,20 @@ export function AdminPersonsPage() {
   const [createOpen, setCreateOpen] = useState(false);
   const persons = data?.persons ?? [];
   const selected = persons.find((p) => p.person.id === selectedId) ?? null;
-  const teamNames = useMemo(() => [...new Set(persons.flatMap((p) => p.teams.map((t) => t.name)))].sort((a, b) => a.localeCompare(b, "de")), [data]);
+  const teamNames = useMemo(() => [...new Set(persons.flatMap((p) => p.teams.map((m) => m.name)))].sort((a, b) => a.localeCompare(b, "de")), [data]);
   const years = useMemo(() => [...new Set(persons.map((p) => p.birthYear).filter((y): y is number => y != null))].sort((a, b) => b - a), [data]);
   const list = useMemo(
     () =>
       persons.filter((p) => {
         if (filter && !personName(p.person).toLowerCase().includes(filter.toLowerCase())) return false;
         if (year && (year === NONE ? p.birthYear != null : String(p.birthYear) !== year)) return false;
-        // Mit Mannschaft: Mitglieder und Eltern von Mitgliedern
-        const inTeam = (t: { name: string; role: string }) => !team || t.name === team;
+        // With team: members and parents of members
+        const inTeam = (m: { name: string; role: string }) => !team || m.name === team;
         if (team === NONE) {
           if (p.teams.length || p.childTeams.length) return false;
         } else if (team && !p.teams.some(inTeam) && !p.childTeams.includes(team)) return false;
-        if (role === "player" && !p.teams.some((t) => inTeam(t) && (t.role === "player" || t.role === "helper"))) return false;
-        if (role === "coach" && !p.teams.some((t) => inTeam(t) && t.role === "coach")) return false;
+        if (role === "player" && !p.teams.some((m) => inTeam(m) && (m.role === "player" || m.role === "helper"))) return false;
+        if (role === "coach" && !p.teams.some((m) => inTeam(m) && m.role === "coach")) return false;
         if (role === "parent" && !(team ? p.childTeams.includes(team) : p.childTeams.length || p.children)) return false;
         if (role === "none" && !withoutRole(p)) return false;
         if (activity === "stale" && !(p.hasAccount && (daysSinceSeen(p) ?? Infinity) > STALE_DAYS)) return false;
@@ -544,87 +625,91 @@ export function AdminPersonsPage() {
       }).sort((a, b) => (sort === "activity" ? activityRank(b) - activityRank(a) : 0)),
     [data, filter, team, year, role, activity, sort],
   );
+  const noRoleCount = persons.filter(withoutRole).length;
+  const staleDays = STALE_DAYS;
+  const shown = list.length;
+  const total = persons.length;
   return (
     <AdminOnly>
       <main class="page">
-        <TopBar title="Personen" kicker="Verwaltung" back="/verwaltung" />
+        <TopBar title={t`People`} kicker={t`Administration`} back="/verwaltung" />
         <div class="content">
           <div class="row-gap">
             <div style={{ flex: 1 }}>
-              <TextField label="Suchen" value={filter} onInput={setFilter} placeholder="Name" />
+              <TextField label={t`Search`} value={filter} onInput={setFilter} placeholder={t`Name`} />
             </div>
           </div>
           <div class="row-gap" style={{ alignItems: "flex-end" }}>
             <div style={{ flex: 1 }}>
-              <Field label="Mannschaft">
+              <Field label={t({ message: "Team", context: "filter" })}>
                 {(id) => (
                   <select id={id} class="select" value={team} onChange={(e) => setTeam((e.target as HTMLSelectElement).value)}>
-                    <option value="">Alle</option>
-                    {teamNames.map((t) => (
-                      <option value={t}>{t}</option>
+                    <option value="">{t`All`}</option>
+                    {teamNames.map((n) => (
+                      <option value={n}>{n}</option>
                     ))}
-                    <option value={NONE}>Ohne Mannschaft</option>
+                    <option value={NONE}>{t`Without team`}</option>
                   </select>
                 )}
               </Field>
             </div>
             <div style={{ flex: 1 }}>
-              <Field label="Jahrgang">
+              <Field label={t`Year of birth`}>
                 {(id) => (
                   <select id={id} class="select" value={year} onChange={(e) => setYear((e.target as HTMLSelectElement).value)}>
-                    <option value="">Alle</option>
+                    <option value="">{t`All`}</option>
                     {years.map((y) => (
                       <option value={String(y)}>{y}</option>
                     ))}
-                    <option value={NONE}>Ohne Angabe</option>
+                    <option value={NONE}>{t`Not specified`}</option>
                   </select>
                 )}
               </Field>
             </div>
           </div>
           <Segmented
-            label="Rolle"
+            label={t`Role`}
             value={role}
             onChange={setRole}
             options={[
-              { value: "all", label: "Alle" },
-              { value: "player", label: "Spieler" },
-              { value: "coach", label: "Trainer" },
-              { value: "parent", label: "Eltern" },
-              { value: "none", label: `Ohne Rolle${data ? ` (${persons.filter(withoutRole).length})` : ""}` },
+              { value: "all", label: t`All` },
+              { value: "player", label: t({ message: "Players", context: "short" }) },
+              { value: "coach", label: t({ message: "Coaches", context: "short" }) },
+              { value: "parent", label: t`Parents` },
+              { value: "none", label: data ? t`No role (${noRoleCount})` : t`No role` },
             ]}
           />
           <div class="row-gap" style={{ alignItems: "flex-end" }}>
             <div style={{ flex: 1 }}>
-              <Field label="Aktivität">
+              <Field label={t`Activity`}>
                 {(id) => (
                   <select id={id} class="select" value={activity} onChange={(e) => setActivity((e.target as HTMLSelectElement).value as ActivityFilter)}>
-                    <option value="">Alle</option>
-                    <option value="stale">Über {STALE_DAYS} Tage nicht aktiv</option>
-                    <option value="never">Zugang nie benutzt</option>
-                    <option value="noaccount">Kein Zugang</option>
+                    <option value="">{t`All`}</option>
+                    <option value="stale">{t`Not active for over ${staleDays} days`}</option>
+                    <option value="never">{t`Access never used`}</option>
+                    <option value="noaccount">{t`No access`}</option>
                   </select>
                 )}
               </Field>
             </div>
             <div style={{ flex: 1 }}>
-              <Field label="Sortierung">
+              <Field label={t`Sort by`}>
                 {(id) => (
                   <select id={id} class="select" value={sort} onChange={(e) => setSort((e.target as HTMLSelectElement).value as SortOrder)}>
-                    <option value="name">Name</option>
-                    <option value="activity">Zuletzt aktiv</option>
+                    <option value="name">{t`Name`}</option>
+                    <option value="activity">{t`Last active`}</option>
                   </select>
                 )}
               </Field>
             </div>
           </div>
           <Button icon="plus" onClick={() => setCreateOpen(true)}>
-            Person anlegen
+            <Trans>Add person</Trans>
           </Button>
           {error ? <ErrorBox error={error} onRetry={reload} /> : null}
           {!data ? <Spinner /> : null}
           <p class="small muted">
-            {list.length === persons.length ? `${list.length} Personen` : `${list.length} von ${persons.length} Personen`}
+            {shown === total ? plural(total, { one: "# person", other: "# people" }) : t`${shown} of ${total} people`}
             {team || year || role !== "all" || filter || activity ? (
               <>
                 {" · "}
@@ -639,36 +724,50 @@ export function AdminPersonsPage() {
                     setActivity("");
                   }}
                 >
-                  Filter zurücksetzen
+                  <Trans>Reset filters</Trans>
                 </button>
               </>
             ) : null}
           </p>
           <ul class="list">
-            {list.map((p) => (
-              <li>
-                <button type="button" class="list-row" onClick={() => setSelectedId(p.person.id)}>
-                  <PersonAvatar personId={p.person.id} name={p.person.firstName} />
-                  <span class="main">
-                    <span class="title">
-                      {personName(p.person)} {p.isAdmin ? <span class="badge">Admin</span> : null} {!p.isActive ? <span class="badge muted">Inaktiv</span> : null}
+            {list.map((p) => {
+              const birthYear = p.birthYear;
+              const children = p.children;
+              return (
+                <li>
+                  <button type="button" class="list-row" onClick={() => setSelectedId(p.person.id)}>
+                    <PersonAvatar personId={p.person.id} name={p.person.firstName} />
+                    <span class="main">
+                      <span class="title">
+                        {personName(p.person)}{" "}
+                        {p.isAdmin ? (
+                          <span class="badge">
+                            <Trans>Admin</Trans>
+                          </span>
+                        ) : null}{" "}
+                        {!p.isActive ? (
+                          <span class="badge muted">
+                            <Trans>Inactive</Trans>
+                          </span>
+                        ) : null}
+                      </span>
+                      <span class="sub">
+                        {[
+                          // Without a team the year of birth helps to place the person
+                          !p.teams.length && birthYear ? t`b. ${birthYear}` : "",
+                          ...p.teams.map((m) => `${m.name} ${m.role === "coach" ? t`(coach)` : m.role === "helper" ? t`(stand-in)` : ""}`.trim()),
+                          children ? t`Parent of ${children}` : "",
+                          activityLabel(p),
+                        ]
+                          .filter(Boolean)
+                          .join(" · ")}
+                      </span>
                     </span>
-                    <span class="sub">
-                      {[
-                        // Ohne Mannschaft hilft der Jahrgang beim Einordnen
-                        !p.teams.length && p.birthYear ? `Jg. ${p.birthYear}` : "",
-                        ...p.teams.map((t) => `${t.name} ${t.role === "coach" ? "(Trainer)" : t.role === "helper" ? "(Aushilfe)" : ""}`.trim()),
-                        p.children ? `Elternteil von ${p.children}` : "",
-                        activityLabel(p),
-                      ]
-                        .filter(Boolean)
-                        .join(" · ")}
-                    </span>
-                  </span>
-                  <Icon name="chevron" size={18} />
-                </button>
-              </li>
-            ))}
+                    <Icon name="chevron" size={18} />
+                  </button>
+                </li>
+              );
+            })}
           </ul>
         </div>
         {selected ? (
@@ -684,10 +783,12 @@ function CreatePersonSheet({ onClose, onDone }: { onClose: () => void; onDone: (
   const [first, setFirst] = useState("");
   const [last, setLast] = useState("");
   return (
-    <Sheet open onClose={onClose} title="Person anlegen">
-      <p class="muted">Zum Beispiel neue Trainerinnen und Trainer. Spieler legt der Trainer im Kader an.</p>
-      <TextField label="Vorname" value={first} onInput={setFirst} maxLength={50} />
-      <TextField label="Nachname" value={last} onInput={setLast} maxLength={50} />
+    <Sheet open onClose={onClose} title={t`Add person`}>
+      <p class="muted">
+        <Trans>For example new coaches. Coaches add players in the squad.</Trans>
+      </p>
+      <TextField label={t`First name`} value={first} onInput={setFirst} maxLength={50} />
+      <TextField label={t`Last name`} value={last} onInput={setLast} maxLength={50} />
       <Button
         variant="primary"
         size="lg"
@@ -695,38 +796,43 @@ function CreatePersonSheet({ onClose, onDone }: { onClose: () => void; onDone: (
         disabled={!first.trim()}
         onClick={async () => {
           await api.post("/admin/persons", { firstName: first.trim(), lastName: last.trim() || null });
-          toast("Angelegt. Ordne die Person unter Mannschaften als Trainer zu.");
+          toast(t`Created. Assign the person as a coach under Teams.`);
           onClose();
           onDone();
         }}
       >
-        Anlegen
+        <Trans>Create</Trans>
       </Button>
     </Sheet>
   );
 }
 
-/** Eltern und Kinder einer Person zuordnen oder lösen (Korrekturen durch Admins). */
+/** Assign or remove parents and children of a person (corrections by admins). */
 function FamilySection({ p, all, onChanged }: { p: AdminPerson; all: AdminPerson[]; onChanged: () => void }) {
   const [picking, setPicking] = useState<"child" | "parent" | null>(null);
   const [search, setSearch] = useState("");
   const byId = new Map(all.map((x) => [x.person.id, x]));
-  const describe = (x: AdminPerson) => [x.teams.map((t) => t.name).join(", "), x.birthYear ? `Jg. ${x.birthYear}` : ""].filter(Boolean).join(" · ");
+  const describe = (x: AdminPerson) => {
+    const birthYear = x.birthYear;
+    return [x.teams.map((m) => m.name).join(", "), birthYear ? t`b. ${birthYear}` : ""].filter(Boolean).join(" · ");
+  };
 
   const link = async (guardianId: number, childId: number) => {
     await api.post("/admin/guardianships", { guardianId, childId });
     setPicking(null);
     setSearch("");
-    toast("Zugeordnet.");
+    toast(t`Assigned.`);
     onChanged();
   };
   const unlink = async (guardianId: number, childId: number) => {
     const g = byId.get(guardianId);
     const c = byId.get(childId);
+    const parent = g ? personName(g.person) : t`The parent`;
+    const child = c ? c.person.firstName : t`the child`;
     const ok = await confirmDialog({
-      title: "Verknüpfung lösen?",
-      message: `${g ? personName(g.person) : "Das Elternteil"} kann danach nicht mehr für ${c ? c.person.firstName : "das Kind"} handeln. Beide Personen bleiben erhalten.`,
-      confirmLabel: "Lösen",
+      title: t`Remove link?`,
+      message: t`${parent} can then no longer act for ${child}. Both people are kept.`,
+      confirmLabel: t`Unlink`,
       danger: true,
     });
     if (!ok) return;
@@ -737,8 +843,8 @@ function FamilySection({ p, all, onChanged }: { p: AdminPerson; all: AdminPerson
   const candidates = all
     .filter((x) => x.person.id !== p.person.id && !p.childIds.includes(x.person.id) && !p.parentIds.includes(x.person.id))
     .filter((x) => !search || personName(x.person).toLowerCase().includes(search.toLowerCase()))
-    // Für Kinder zuerst Spielerinnen und Spieler zeigen
-    .sort((a, b) => (picking === "child" ? Number(b.teams.some((t) => t.role === "player")) - Number(a.teams.some((t) => t.role === "player")) : 0))
+    // For children show players first
+    .sort((a, b) => (picking === "child" ? Number(b.teams.some((m) => m.role === "player")) - Number(a.teams.some((m) => m.role === "player")) : 0))
     .slice(0, 30);
 
   const row = (x: AdminPerson | undefined, onRemove: () => void) =>
@@ -746,32 +852,38 @@ function FamilySection({ p, all, onChanged }: { p: AdminPerson; all: AdminPerson
       <li class="list-row">
         <span class="main">
           <span class="title">{personName(x.person)}</span>
-          <span class="sub">{describe(x) || "ohne Mannschaft"}</span>
+          <span class="sub">{describe(x) || t`no team`}</span>
         </span>
         <Button size="sm" variant="ghost" onClick={onRemove}>
-          Lösen
+          <Trans>Unlink</Trans>
         </Button>
       </li>
     ) : null;
 
   return (
     <section class="stack-sm">
-      <strong>Familie</strong>
+      <strong>
+        <Trans>Family</Trans>
+      </strong>
       {p.childIds.length ? (
         <>
-          <span class="small muted">Kinder</span>
+          <span class="small muted">
+            <Trans>Children</Trans>
+          </span>
           <ul class="list">{p.childIds.map((id) => row(byId.get(id), () => unlink(p.person.id, id)))}</ul>
         </>
       ) : null}
       {p.parentIds.length ? (
         <>
-          <span class="small muted">Eltern</span>
+          <span class="small muted">
+            <Trans>Parents</Trans>
+          </span>
           <ul class="list">{p.parentIds.map((id) => row(byId.get(id), () => unlink(id, p.person.id)))}</ul>
         </>
       ) : null}
       {picking ? (
         <div class="stack-sm">
-          <TextField label={picking === "child" ? "Kind suchen" : "Elternteil suchen"} value={search} onInput={setSearch} placeholder="Name" />
+          <TextField label={picking === "child" ? t`Search child` : t`Search parent`} value={search} onInput={setSearch} placeholder={t`Name`} />
           <ul class="list">
             {candidates.map((x) => (
               <li>
@@ -782,7 +894,7 @@ function FamilySection({ p, all, onChanged }: { p: AdminPerson; all: AdminPerson
                 >
                   <span class="main">
                     <span class="title">{personName(x.person)}</span>
-                    <span class="sub">{describe(x) || "ohne Mannschaft"}</span>
+                    <span class="sub">{describe(x) || t`no team`}</span>
                   </span>
                   <Icon name="plus" size={18} />
                 </button>
@@ -790,36 +902,40 @@ function FamilySection({ p, all, onChanged }: { p: AdminPerson; all: AdminPerson
             ))}
           </ul>
           <Button variant="ghost" onClick={() => setPicking(null)}>
-            Abbrechen
+            <Trans>Cancel</Trans>
           </Button>
         </div>
       ) : (
         <div class="btn-row">
           <Button size="sm" icon="plus" onClick={() => setPicking("child")}>
-            Kind zuordnen
+            <Trans>Assign child</Trans>
           </Button>
           <Button size="sm" icon="plus" onClick={() => setPicking("parent")}>
-            Elternteil zuordnen
+            <Trans>Assign parent</Trans>
           </Button>
         </div>
       )}
-      <p class="small muted">Eltern sehen die Termine ihrer Kinder, sagen für sie zu und ab und sind im Mannschaftschat, sofern die Mannschaft Eltern einbindet.</p>
+      <p class="small muted">
+        <Trans>Parents see their children's events, respond for them and are in the team chat, provided the team includes parents.</Trans>
+      </p>
     </section>
   );
 }
 
-/** Mannschaften einer Person zuordnen oder entfernen (Admins). */
+/** Assign a person to teams or remove them (admins). */
 function TeamsSection({ p, onChanged }: { p: AdminPerson; onChanged: () => void }) {
   const teams = useQuery<{ teams: { id: number; name: string; kind: "team" | "group"; autoMembers: string | null }[] }>("/teams");
   const [teamId, setTeamId] = useState("");
   const [role, setRole] = useState<"player" | "coach">("player");
   const [busy, setBusy] = useState(false);
   const all = teams.data?.teams ?? [];
-  const idOf = new Map(all.map((t) => [t.name, t.id]));
-  // Gruppen mit automatischen Mitgliedern (KiHaSL/JuHaSL) lassen sich nicht von Hand zuordnen
-  const free = all.filter((t) => !t.autoMembers && !p.teams.some((m) => m.name === t.name && m.role === role));
-  const selected = all.find((t) => t.id === Number(teamId || free[0]?.id));
+  const idOf = new Map(all.map((x) => [x.name, x.id]));
+  // Groups with automatic members (KiHaSL/JuHaSL) cannot be assigned by hand
+  const free = all.filter((x) => !x.autoMembers && !p.teams.some((m) => m.name === x.name && m.role === role));
+  const selected = all.find((x) => x.id === Number(teamId || free[0]?.id));
   const selectedIsGroup = selected?.kind === "group";
+  const roleName = roleLabel(role, selectedIsGroup);
+  const teamRole = roleLabel(role, false);
 
   const done = () => {
     invalidate("/teams");
@@ -831,7 +947,9 @@ function TeamsSection({ p, onChanged }: { p: AdminPerson; onChanged: () => void 
     setBusy(true);
     try {
       await api.post(`/teams/${id}/members`, { personId: p.person.id, role });
-      toast(`${p.person.firstName} ist jetzt ${roleLabel(role, selectedIsGroup)} in ${all.find((t) => t.id === id)?.name ?? "der Mannschaft"}.`);
+      const firstName = p.person.firstName;
+      const teamName = all.find((x) => x.id === id)?.name ?? t`the team`;
+      toast(t`${firstName} is now ${roleName} in ${teamName}.`);
       setTeamId("");
       done();
     } finally {
@@ -841,10 +959,12 @@ function TeamsSection({ p, onChanged }: { p: AdminPerson; onChanged: () => void 
   const remove = async (name: string, r: string, isGroup: boolean) => {
     const id = idOf.get(name);
     if (!id) return;
+    const fullName = personName(p.person);
+    const memberRole = roleLabel(r, isGroup);
     const ok = await confirmDialog({
-      title: `Aus ${name} entfernen?`,
-      message: `${personName(p.person)} ist danach nicht mehr ${roleLabel(r, isGroup)} in ${name}. Die Person bleibt erhalten.`,
-      confirmLabel: "Entfernen",
+      title: t`Remove from ${name}?`,
+      message: t`${fullName} will then no longer be ${memberRole} in ${name}. The person is kept.`,
+      confirmLabel: t`Remove`,
       danger: true,
     });
     if (!ok) return;
@@ -854,62 +974,71 @@ function TeamsSection({ p, onChanged }: { p: AdminPerson; onChanged: () => void 
 
   return (
     <section class="stack-sm">
-      <strong>Mannschaften und Gruppen</strong>
+      <strong>
+        <Trans>Teams and groups</Trans>
+      </strong>
       {p.teams.length ? (
         <ul class="list">
           {p.teams.map((m) => (
             <li class="list-row">
               <span class="main">
                 <span class="title">{m.name}</span>
-                <span class="sub">{m.isGroup ? `Gruppe · ${roleLabel(m.role, true)}` : roleLabel(m.role, false)}</span>
+                <span class="sub">{m.isGroup ? `${t`Group`} · ${roleLabel(m.role, true)}` : roleLabel(m.role, false)}</span>
               </span>
               <Button size="sm" variant="ghost" onClick={() => remove(m.name, m.role, m.isGroup)}>
-                Entfernen
+                <Trans>Remove</Trans>
               </Button>
             </li>
           ))}
         </ul>
       ) : (
-        <p class="small muted">Noch keiner Mannschaft zugeordnet.</p>
+        <p class="small muted">
+          <Trans>Not assigned to any team yet.</Trans>
+        </p>
       )}
       {teams.error ? <ErrorBox error={teams.error} /> : null}
       {all.length ? (
         <>
           <Segmented
-            label="Rolle"
+            label={t`Role`}
             value={role}
             onChange={setRole}
             options={[
-              { value: "player", label: "Spieler / Mitglied" },
-              { value: "coach", label: "Trainer / Verantw." },
+              { value: "player", label: t`Player / member` },
+              { value: "coach", label: t`Coach / in charge` },
             ]}
           />
           {free.length ? (
             <>
-              <Field label="Mannschaft oder Gruppe">
+              <Field label={t`Team or group`}>
                 {(id) => (
                   <select id={id} class="select" value={teamId || String(free[0]!.id)} onChange={(e) => setTeamId((e.target as HTMLSelectElement).value)}>
-                    {free.map((t) => (
-                      <option value={t.id}>{t.kind === "group" ? `${t.name} (Gruppe)` : t.name}</option>
-                    ))}
+                    {free.map((x) => {
+                      const name = x.name;
+                      return <option value={x.id}>{x.kind === "group" ? t`${name} (group)` : name}</option>;
+                    })}
                   </select>
                 )}
               </Field>
               <Button icon="plus" disabled={busy} onClick={add}>
-                Als {roleLabel(role, selectedIsGroup)} zuordnen
+                <Trans>Assign as {roleName}</Trans>
               </Button>
             </>
           ) : (
-            <p class="small muted">Überall schon {roleLabel(role, false)}.</p>
+            <p class="small muted">
+              <Trans>Already {teamRole} everywhere.</Trans>
+            </p>
           )}
         </>
       ) : null}
-      <p class="small muted">Aushilfen tragen die Trainer in ihrer Mannschaft ein.</p>
+      <p class="small muted">
+        <Trans>Coaches add stand-ins in their own team.</Trans>
+      </p>
     </section>
   );
 }
 
-/** Angaben einer Person korrigieren oder ergänzen (nur Vorname, Nachname, Jahrgang). */
+/** Correct or complete a person's details (only first name, last name, year of birth). */
 function PersonDataSection({ p, onChanged }: { p: AdminPerson; onChanged: () => void }) {
   const [firstName, setFirstName] = useState(p.person.firstName);
   const [lastName, setLastName] = useState(p.person.lastName ?? "");
@@ -920,19 +1049,21 @@ function PersonDataSection({ p, onChanged }: { p: AdminPerson; onChanged: () => 
   const changed = firstName.trim() !== p.person.firstName || (lastName.trim() || null) !== (p.person.lastName ?? null) || year !== p.birthYear;
   return (
     <section class="stack-sm">
-      <strong>Angaben</strong>
+      <strong>
+        <Trans context="person">Details</Trans>
+      </strong>
       <div class="grid-2">
-        <TextField label="Vorname" value={firstName} onInput={setFirstName} maxLength={50} />
-        <TextField label="Nachname" value={lastName} onInput={setLastName} maxLength={50} />
+        <TextField label={t`First name`} value={firstName} onInput={setFirstName} maxLength={50} />
+        <TextField label={t`Last name`} value={lastName} onInput={setLastName} maxLength={50} />
       </div>
       <TextField
-        label="Jahrgang"
+        label={t`Year of birth`}
         value={birthYear}
         onInput={setBirthYear}
         inputMode="numeric"
         maxLength={4}
-        placeholder="z. B. 2015"
-        error={yearInvalid ? "Bitte ein Jahr wie 2015 eingeben." : null}
+        placeholder={t`e.g. 2015`}
+        error={yearInvalid ? t`Please enter a year such as 2015.` : null}
       />
       <Button
         disabled={busy || !changed || !firstName.trim() || yearInvalid}
@@ -940,55 +1071,65 @@ function PersonDataSection({ p, onChanged }: { p: AdminPerson; onChanged: () => 
           setBusy(true);
           try {
             await api.patch(`/persons/${p.person.id}`, { firstName: firstName.trim(), lastName: lastName.trim() || null, birthYear: year });
-            toast("Angaben gespeichert.");
+            toast(t`Details saved.`);
             onChanged();
           } finally {
             setBusy(false);
           }
         }}
       >
-        Angaben speichern
+        <Trans>Save details</Trans>
       </Button>
     </section>
   );
 }
 
-/** Dauerhaft löschen, mit Übersicht der Folgen und Namensbestätigung. */
+/** Delete permanently, with an overview of the consequences and name confirmation. */
 function DeletePersonSection({ p, all, onDeleted }: { p: AdminPerson; all: AdminPerson[]; onDeleted: () => void }) {
   const [open, setOpen] = useState(false);
   const [typed, setTyped] = useState("");
   const [busy, setBusy] = useState(false);
   const name = personName(p.person);
-  // Eltern ohne weiteres Kind und ohne eigene Rolle verschwinden mit (wie auf dem Server)
+  // Parents without another child and without their own role are deleted too (as on the server)
   const orphanParents = p.parentIds
     .map((id) => all.find((x) => x.person.id === id))
     .filter((x): x is AdminPerson => !!x && !x.isAdmin && !x.teams.length && x.childIds.length === 1 && !x.parentIds.length);
+  const teamNames = p.teams.map((m) => m.name).join(", ");
+  const parentNames = orphanParents.map((x) => personName(x.person)).join(", ");
   const effects = [
-    p.hasAccount ? "der Zugang mit allen Geräten und Benachrichtigungen" : "",
-    p.teams.length ? `die Zuordnung zu ${p.teams.map((t) => t.name).join(", ")}` : "",
-    "alle Zusagen, Absagen und Nominierungen",
-    p.childIds.length ? "die Verknüpfung zu den Kindern" : "",
-    p.parentIds.length ? "die Verknüpfung zu den Eltern" : "",
-    orphanParents.length ? `${orphanParents.map((x) => personName(x.person)).join(", ")} (Elternteil ohne weiteres Kind)` : "",
-    "das Profilbild",
+    p.hasAccount ? t`the access with all devices and notifications` : "",
+    p.teams.length ? t`the assignment to ${teamNames}` : "",
+    t`all responses and nominations`,
+    p.childIds.length ? t`the link to the children` : "",
+    p.parentIds.length ? t`the link to the parents` : "",
+    orphanParents.length ? t`${parentNames} (parent without another child)` : "",
+    t`the profile picture`,
   ].filter(Boolean);
   return (
     <section class="stack-sm">
-      <strong>Löschen</strong>
+      <strong>
+        <Trans>Delete</Trans>
+      </strong>
       {!open ? (
         <Button variant="danger" icon="trash" onClick={() => setOpen(true)}>
-          Person dauerhaft löschen
+          <Trans>Delete person permanently</Trans>
         </Button>
       ) : (
         <div class="stack-sm">
-          <p class="small">Das lässt sich nicht rückgängig machen. Gelöscht werden {name} und:</p>
+          <p class="small">
+            <Trans>This cannot be undone. This deletes {name} and:</Trans>
+          </p>
           <ul class="small" style={{ margin: 0, paddingLeft: "20px" }}>
             {effects.map((e) => (
               <li>{e}</li>
             ))}
           </ul>
-          <p class="small muted">Chatnachrichten bleiben stehen und erscheinen als „Gelöschte Person“. Wer den Verein nur verlässt, besser über den Austritt in der Mannschaft austragen.</p>
-          <TextField label={`Zur Bestätigung „${name}“ eintippen`} value={typed} onInput={setTyped} />
+          <p class="small muted">
+            <Trans>
+              Chat messages remain and appear as “Deleted person”. If someone is only leaving the club, it is better to remove them via leaving the club in the team.
+            </Trans>
+          </p>
+          <TextField label={t`Type “${name}” to confirm`} value={typed} onInput={setTyped} />
           <div class="btn-row">
             <Button
               variant="danger-solid"
@@ -998,17 +1139,17 @@ function DeletePersonSection({ p, all, onDeleted }: { p: AdminPerson; all: Admin
                 setBusy(true);
                 try {
                   await api.del(`/admin/persons/${p.person.id}`);
-                  toast(`${name} wurde gelöscht.`);
+                  toast(t`${name} has been deleted.`);
                   onDeleted();
                 } finally {
                   setBusy(false);
                 }
               }}
             >
-              Endgültig löschen
+              <Trans>Delete for good</Trans>
             </Button>
             <Button variant="ghost" onClick={() => { setOpen(false); setTyped(""); }}>
-              Abbrechen
+              <Trans>Cancel</Trans>
             </Button>
           </div>
         </div>
@@ -1020,99 +1161,140 @@ function DeletePersonSection({ p, all, onDeleted }: { p: AdminPerson; all: Admin
 function PersonAdminSheet({ p, all, selfId, onClose, onChanged }: { p: AdminPerson; all: AdminPerson[]; selfId: number; onClose: () => void; onChanged: () => void }) {
   const [email, setEmail] = useState(p.adminEmail ?? "");
   const [link, setLink] = useState<{ url: string; expiresAt: string } | null>(null);
+  const children = p.children;
+  const firstName = p.person.firstName;
+  const fullName = personName(p.person);
+  const validUntil = link ? fullDate(isoToLocalDate(link.expiresAt)) : "";
+  let lastSeen = activityLabel(p);
+  if (p.lastSeenOn && p.hasAccount) {
+    const date = fullDate(p.lastSeenOn);
+    const ago = lastSeenAgo(p.lastSeenOn);
+    lastSeen = t`Last active: ${date} (${ago})`;
+  }
   return (
     <Sheet open onClose={onClose} title={personName(p.person)}>
       <p class="muted">
-        {p.teams.map((t) => `${t.name} (${roleLabel(t.role, t.isGroup)})`).join(", ") || "Keine Mannschaft"}
-        {p.children ? ` · Elternteil von ${p.children}` : ""}
+        {p.teams.map((m) => `${m.name} (${roleLabel(m.role, m.isGroup)})`).join(", ") || t`No team`}
+        {children ? ` · ${t`Parent of ${children}`}` : ""}
       </p>
-      <p class="small muted">
-        {p.lastSeenOn && p.hasAccount ? `Zuletzt aktiv: ${fullDate(p.lastSeenOn)} (${activityLabel(p).replace(" aktiv", "")})` : activityLabel(p)}
-      </p>
+      <p class="small muted">{lastSeen}</p>
       <PersonDataSection key={p.person.id} p={p} onChanged={onChanged} />
       <TeamsSection p={p} onChanged={onChanged} />
       <section class="stack-sm">
-        <strong>Zugang</strong>
-        <p class="small muted">{p.hasAccount ? "Hat einen Zugang." : "Hat noch keinen Zugang."} Ein persönlicher Einmal-Link richtet einen neuen Passkey ein und meldet dabei die bisherigen Geräte ab.</p>
+        <strong>
+          <Trans>Access</Trans>
+        </strong>
+        <p class="small muted">
+          {p.hasAccount ? t`Has access.` : t`Has no access yet.`}{" "}
+          <Trans>A personal one-time link sets up a new passkey and signs out the previous devices.</Trans>
+        </p>
         <Button
           icon="link"
           onClick={async () => {
             setLink(await api.post<{ url: string; expiresAt: string }>(`/persons/${p.person.id}/personal-link`, {}));
           }}
         >
-          Persönlichen Link erzeugen
+          <Trans>Create personal link</Trans>
         </Button>
         {link ? (
           <div class="stack-sm">
             <QrLink url={link.url} />
             <div class="url-box">{link.url}</div>
             <div class="btn-row">
-              <Button variant="primary" icon="share" onClick={() => shareLink(clubName(), `Dein persönlicher Zugang zur App ${clubName()}`, link.url)}>
-                Teilen
+              <Button
+                variant="primary"
+                icon="share"
+                onClick={() => {
+                  const club = clubName();
+                  shareLink(club, t`Your personal access to the ${club} app`, link.url);
+                }}
+              >
+                <Trans>Share</Trans>
               </Button>
               <Button icon="copy" onClick={() => copyText(link.url)}>
-                Kopieren
+                <Trans>Copy</Trans>
               </Button>
             </div>
-            <p class="small muted">Gültig bis {fullDate(isoToLocalDate(link.expiresAt))}, nur einmal verwendbar.</p>
+            <p class="small muted">
+              <Trans>Valid until {validUntil}, can only be used once.</Trans>
+            </p>
           </div>
         ) : null}
       </section>
       <AdminAvatar personId={p.person.id} name={personName(p.person)} />
       <SwitchRow
         label="KiHaSL/JuHaSL"
-        sub="Darf bei allen Jugend-Heimspielen F bis C als Schiedsrichter eingeteilt werden."
+        sub={t`May be assigned as referee at all youth home games from F to C.`}
         checked={p.isReferee}
         onChange={async (on) => {
           if (on) await api.put(`/admin/referees/${p.person.id}`);
           else await api.del(`/admin/referees/${p.person.id}`);
-          toast(on ? `${p.person.firstName} ist als KiHaSL/JuHaSL freigeschaltet.` : `${p.person.firstName} ist kein KiHaSL/JuHaSL mehr.`);
+          toast(on ? t`${firstName} is now enabled as KiHaSL/JuHaSL.` : t`${firstName} is no longer KiHaSL/JuHaSL.`);
           onChanged();
         }}
       />
       <SwitchRow
-        label="Ordentliches Mitglied"
-        sub="Nur für Admins sichtbar. Ordentliche Mitglieder können Sondertermine mitorganisieren und Dienste mit „Wer hilft: Mitglieder“ übernehmen."
+        label={t`Full club member`}
+        sub={t`Only visible to admins. Full club members can help organise special events and take on duties with “Who helps: members”.`}
         checked={p.isClubMember}
         onChange={async (on) => {
           if (on) await api.put(`/admin/club-members/${p.person.id}`);
           else await api.del(`/admin/club-members/${p.person.id}`);
-          toast(on ? `${p.person.firstName} ist ordentliches Mitglied.` : `${p.person.firstName} ist kein ordentliches Mitglied mehr.`);
+          toast(on ? t`${firstName} is a full club member.` : t`${firstName} is no longer a full club member.`);
           onChanged();
         }}
       />
       <FamilySection p={p} all={all} onChanged={onChanged} />
       <section class="stack-sm">
-        <strong>Admin</strong>
+        <strong>
+          <Trans>Admin</Trans>
+        </strong>
         {p.isAdmin ? (
           <>
-            <p class="small muted">Admin{p.adminEmail ? ` · ${p.adminEmail}` : ""}</p>
+            <p class="small muted">
+              {t`Admin`}
+              {p.adminEmail ? ` · ${p.adminEmail}` : ""}
+            </p>
             {p.person.id !== selfId ? (
               <Button
                 variant="danger"
                 onClick={async () => {
-                  if (!(await confirmDialog({ title: "Admin-Rechte entziehen?", message: `${personName(p.person)} ist danach kein Admin mehr.`, confirmLabel: "Entziehen", danger: true }))) return;
+                  if (
+                    !(await confirmDialog({
+                      title: t`Revoke admin rights?`,
+                      message: t`${fullName} will then no longer be an admin.`,
+                      confirmLabel: t`Revoke`,
+                      danger: true,
+                    }))
+                  )
+                    return;
                   await api.patch(`/admin/persons/${p.person.id}`, { isAdmin: false });
                   onClose();
                   onChanged();
                 }}
               >
-                Admin-Rechte entziehen
+                <Trans>Revoke admin rights</Trans>
               </Button>
             ) : null}
           </>
         ) : (
           <>
-            <TextField label="E-Mail (nur für Admins)" type="email" value={email} onInput={setEmail} hint="Dient nur als Kennung des Admins. Die Adresse für die Anmeldung legt jede Person selbst im Profil fest." />
+            <TextField
+              label={t`E-mail (admins only)`}
+              type="email"
+              value={email}
+              onInput={setEmail}
+              hint={t`Only serves to identify the admin. Everyone sets the address for signing in themselves in their profile.`}
+            />
             <Button
               onClick={async () => {
                 await api.patch(`/admin/persons/${p.person.id}`, { isAdmin: true, adminEmail: email.trim() || null });
-                toast(`${p.person.firstName} ist jetzt Admin.`);
+                toast(t`${firstName} is now an admin.`);
                 onClose();
                 onChanged();
               }}
             >
-              Zum Admin machen
+              <Trans>Make admin</Trans>
             </Button>
           </>
         )}
@@ -1122,12 +1304,12 @@ function PersonAdminSheet({ p, all, selfId, onClose, onChanged }: { p: AdminPers
   );
 }
 
-// Altersklassen --------------------------------------------------------------------
+// Age groups ---------------------------------------------------------------------------
 
 export function AdminAgeClassesPage() {
   const { query } = useLocation();
   const seasonId = query.season;
-  useDocumentTitle("Altersklassen");
+  useDocumentTitle(t`Age groups`);
   const path = seasonId ? `/seasons/${seasonId}/age-classes` : "/age-classes";
   const { data, error, reload } = useQuery<{ season?: { name: string } | null; ageClasses: AgeClass[] }>(path);
   const [rows, setRows] = useState<AgeClass[] | null>(null);
@@ -1141,11 +1323,17 @@ export function AdminAgeClassesPage() {
   return (
     <AdminOnly>
       <main class="page">
-        <TopBar title="Altersklassen" kicker={seasonId ? "Kommende Saison" : (data?.season?.name ?? "Laufende Saison")} back={seasonId ? "/verwaltung/saisonwechsel" : "/verwaltung"} />
+        <TopBar
+          title={t`Age groups`}
+          kicker={seasonId ? t`Next season` : (data?.season?.name ?? t`Current season`)}
+          back={seasonId ? "/verwaltung/saisonwechsel" : "/verwaltung"}
+        />
         <div class="content">
           <Notice>
-            Die Jahrgänge legt der Verband pro Saison fest. Bitte mit den Durchführungsbestimmungen abgleichen. „Rang“ ordnet die Klassen von jung nach alt und bestimmt,
-            welches die nächsthöhere Jugend ist.
+            <Trans>
+              The association sets the birth years per season. Please check them against the competition rules. “Rank” orders the classes from young to old and
+              determines which is the next higher youth class.
+            </Trans>
           </Notice>
           {error ? <ErrorBox error={error} onRetry={reload} /> : null}
           {!rows ? <Spinner /> : null}
@@ -1154,53 +1342,70 @@ export function AdminAgeClassesPage() {
               <table class="table">
                 <thead>
                   <tr>
-                    <th>Kürzel</th>
-                    <th>Name</th>
-                    <th>Geschl.</th>
-                    <th>Rang</th>
-                    <th>Jugend</th>
-                    <th>Jg. von</th>
-                    <th>Jg. bis</th>
                     <th>
-                      <span class="sr-only">Entfernen</span>
+                      <Trans context="age group">Code</Trans>
+                    </th>
+                    <th>
+                      <Trans>Name</Trans>
+                    </th>
+                    <th>{t({ message: "Gender", context: "column header" })}</th>
+                    <th>
+                      <Trans>Rank</Trans>
+                    </th>
+                    <th>
+                      <Trans>Youth</Trans>
+                    </th>
+                    <th>
+                      <Trans>Born from</Trans>
+                    </th>
+                    <th>
+                      <Trans>Born to</Trans>
+                    </th>
+                    <th>
+                      <span class="sr-only">
+                        <Trans>Remove</Trans>
+                      </span>
                     </th>
                   </tr>
                 </thead>
                 <tbody>
-                  {rows.map((r, i) => (
-                    <tr>
-                      <td>
-                        <input class="input" style={{ width: "64px" }} value={r.code} aria-label="Kürzel" onInput={(e) => update(i, { code: (e.target as HTMLInputElement).value })} />
-                      </td>
-                      <td>
-                        <input class="input" style={{ minWidth: "160px" }} value={r.name} aria-label="Name" onInput={(e) => update(i, { name: (e.target as HTMLInputElement).value })} />
-                      </td>
-                      <td>
-                        <select class="select" style={{ minHeight: "40px", width: "64px" }} value={r.gender} aria-label="Geschlecht" onChange={(e) => update(i, { gender: (e.target as HTMLSelectElement).value as AgeClass["gender"] })}>
-                          <option value="w">w</option>
-                          <option value="m">m</option>
-                          <option value="x">gem.</option>
-                        </select>
-                      </td>
-                      <td>
-                        <input class="input" style={{ width: "52px" }} inputMode="numeric" value={r.rank} aria-label="Rang" onInput={(e) => update(i, { rank: Number((e.target as HTMLInputElement).value) || 0 })} />
-                      </td>
-                      <td>
-                        <input type="checkbox" checked={r.isYouth} aria-label="Jugend" onChange={(e) => update(i, { isYouth: (e.target as HTMLInputElement).checked })} style={{ width: "22px", height: "22px" }} />
-                      </td>
-                      <td>
-                        <input class="input" style={{ width: "72px" }} inputMode="numeric" value={r.birthYearMin ?? ""} aria-label="Ältester Jahrgang" onInput={(e) => update(i, { birthYearMin: num((e.target as HTMLInputElement).value) })} />
-                      </td>
-                      <td>
-                        <input class="input" style={{ width: "72px" }} inputMode="numeric" value={r.birthYearMax ?? ""} aria-label="Jüngster Jahrgang" onInput={(e) => update(i, { birthYearMax: num((e.target as HTMLInputElement).value) })} />
-                      </td>
-                      <td>
-                        <button type="button" class="icon-btn" aria-label={`${r.name} entfernen`} onClick={() => setRows(rows.filter((_, j) => j !== i))}>
-                          <Icon name="trash" size={18} />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
+                  {rows.map((r, i) => {
+                    const name = r.name;
+                    return (
+                      <tr>
+                        <td>
+                          <input class="input" style={{ width: "64px" }} value={r.code} aria-label={t({ message: "Code", context: "age group" })} onInput={(e) => update(i, { code: (e.target as HTMLInputElement).value })} />
+                        </td>
+                        <td>
+                          <input class="input" style={{ minWidth: "160px" }} value={r.name} aria-label={t`Name`} onInput={(e) => update(i, { name: (e.target as HTMLInputElement).value })} />
+                        </td>
+                        <td>
+                          <select class="select" style={{ minHeight: "40px", width: "64px" }} value={r.gender} aria-label={t`Gender`} onChange={(e) => update(i, { gender: (e.target as HTMLSelectElement).value as AgeClass["gender"] })}>
+                            <option value="w">{t({ message: "f", context: "gender" })}</option>
+                            <option value="m">{t({ message: "m", context: "gender" })}</option>
+                            <option value="x">{t({ message: "mixed", context: "gender" })}</option>
+                          </select>
+                        </td>
+                        <td>
+                          <input class="input" style={{ width: "52px" }} inputMode="numeric" value={r.rank} aria-label={t`Rank`} onInput={(e) => update(i, { rank: Number((e.target as HTMLInputElement).value) || 0 })} />
+                        </td>
+                        <td>
+                          <input type="checkbox" checked={r.isYouth} aria-label={t`Youth`} onChange={(e) => update(i, { isYouth: (e.target as HTMLInputElement).checked })} style={{ width: "22px", height: "22px" }} />
+                        </td>
+                        <td>
+                          <input class="input" style={{ width: "72px" }} inputMode="numeric" value={r.birthYearMin ?? ""} aria-label={t`Oldest year of birth`} onInput={(e) => update(i, { birthYearMin: num((e.target as HTMLInputElement).value) })} />
+                        </td>
+                        <td>
+                          <input class="input" style={{ width: "72px" }} inputMode="numeric" value={r.birthYearMax ?? ""} aria-label={t`Youngest year of birth`} onInput={(e) => update(i, { birthYearMax: num((e.target as HTMLInputElement).value) })} />
+                        </td>
+                        <td>
+                          <button type="button" class="icon-btn" aria-label={t`Remove ${name}`} onClick={() => setRows(rows.filter((_, j) => j !== i))}>
+                            <Icon name="trash" size={18} />
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -1208,18 +1413,18 @@ export function AdminAgeClassesPage() {
           {rows ? (
             <>
               <Button icon="plus" onClick={() => setRows([...rows, { code: "", name: "", gender: "w", rank: 1, isYouth: true, birthYearMin: null, birthYearMax: null }])}>
-                Zeile hinzufügen
+                <Trans>Add row</Trans>
               </Button>
               <Button
                 variant="primary"
                 size="lg"
                 onClick={async () => {
                   await api.put(path, { ageClasses: rows.map((r) => ({ ...r, code: r.code.trim(), name: r.name.trim() })) });
-                  toast("Altersklassen gespeichert.");
+                  toast(t`Age groups saved.`);
                   invalidate(path, "/teams");
                 }}
               >
-                Speichern
+                <Trans>Save</Trans>
               </Button>
             </>
           ) : null}
@@ -1229,7 +1434,7 @@ export function AdminAgeClassesPage() {
   );
 }
 
-// Ferien --------------------------------------------------------------------------
+// Holidays ------------------------------------------------------------------------------
 
 interface HolidayPeriod {
   id: number;
@@ -1237,49 +1442,60 @@ interface HolidayPeriod {
   startsOn: string;
   endsOn: string;
   imported: boolean;
-  /** Verknüpfte Ferienpläne, die bei Änderungen mitziehen */
+  /** Linked holiday plans that follow changes */
   plans: number;
 }
 
 const dayCount = (from: string, to: string) => Math.round((Date.parse(`${to}T00:00:00Z`) - Date.parse(`${from}T00:00:00Z`)) / 86_400_000) + 1;
 
 export function AdminHolidaysPage() {
-  useDocumentTitle("Ferien");
+  useDocumentTitle(t`Holidays`);
   const { data, error, reload } = useQuery<{ periods: HolidayPeriod[]; source: string }>("/holidays");
   const [editing, setEditing] = useState<HolidayPeriod | "new" | null>(null);
   const today = todayLocal();
+  const source = data?.source ?? "OpenHolidays API";
   return (
     <AdminOnly>
       <main class="page">
-        <TopBar title="Ferien" kicker="Verwaltung" back="/verwaltung" />
+        <TopBar title={t`Holidays`} kicker={t`Administration`} back="/verwaltung" />
         <div class="content">
           {error ? <ErrorBox error={error} onRetry={reload} /> : null}
           <p class="muted">
-            Ferienzeiträume mit Namen. Jeder lässt sich ändern oder löschen. Ferienpläne der Mannschaften, die mit einem Zeitraum verknüpft sind, ziehen bei Änderungen
-            mit. Die Schulferien Baden-Württemberg werden beim Saisonwechsel übernommen (Quelle: {data?.source ?? "OpenHolidays API"}).
+            <Trans>
+              Named holiday periods. Each one can be changed or deleted. Team holiday plans linked to a period follow its changes. The school holidays of
+              Baden-Württemberg are imported at the season change (source: {source}).
+            </Trans>
           </p>
           <Button icon="plus" onClick={() => setEditing("new")}>
-            Zeitraum hinzufügen
+            <Trans>Add period</Trans>
           </Button>
-          <section class="stack-sm" aria-label="Ferienzeiträume">
+          <section class="stack-sm" aria-label={t`Holiday periods`}>
             {!data && !error ? <Spinner /> : null}
-            {data && !data.periods.length ? <Empty title="Keine Ferien">Lege Zeiträume an oder übernimm sie beim nächsten Saisonwechsel.</Empty> : null}
+            {data && !data.periods.length ? (
+              <Empty title={t`No holidays`}>
+                <Trans>Add periods or import them at the next season change.</Trans>
+              </Empty>
+            ) : null}
             <ul class="list">
-              {(data?.periods ?? []).map((p) => (
-                <li>
-                  <button type="button" class="list-row" style={{ opacity: p.endsOn < today ? 0.6 : 1 }} onClick={() => setEditing(p)}>
-                    <Icon name="sun" size={20} />
-                    <span class="main">
-                      <span class="title">{p.name}</span>
-                      <span class="sub">
-                        {fullDate(p.startsOn)} – {fullDate(p.endsOn)} · {dayCount(p.startsOn, p.endsOn)} {dayCount(p.startsOn, p.endsOn) === 1 ? "Tag" : "Tage"}
-                        {p.plans ? ` · ${p.plans} ${p.plans === 1 ? "Ferienplan" : "Ferienpläne"}` : ""}
+              {(data?.periods ?? []).map((p) => {
+                const days = dayCount(p.startsOn, p.endsOn);
+                const plans = p.plans;
+                return (
+                  <li>
+                    <button type="button" class="list-row" style={{ opacity: p.endsOn < today ? 0.6 : 1 }} onClick={() => setEditing(p)}>
+                      <Icon name="sun" size={20} />
+                      <span class="main">
+                        <span class="title">{p.name}</span>
+                        <span class="sub">
+                          {fullDate(p.startsOn)} – {fullDate(p.endsOn)} · {plural(days, { one: "# day", other: "# days" })}
+                          {plans ? ` · ${plural(plans, { one: "# holiday plan", other: "# holiday plans" })}` : ""}
+                        </span>
                       </span>
-                    </span>
-                    <Icon name="chevron" size={18} />
-                  </button>
-                </li>
-              ))}
+                      <Icon name="chevron" size={18} />
+                    </button>
+                  </li>
+                );
+              })}
             </ul>
           </section>
         </div>
@@ -1304,17 +1520,25 @@ function HolidaySheet({ period, onClose, onDone }: { period: HolidayPeriod | nul
   const [from, setFrom] = useState(period?.startsOn ?? "");
   const [to, setTo] = useState(period?.endsOn ?? "");
   const valid = name.trim() && from && to && from <= to;
+  const plans = period?.plans ?? 0;
   return (
-    <Sheet open onClose={onClose} title={period ? period.name : "Neuer Ferienzeitraum"}>
-      <TextField label="Name" value={name} onInput={setName} maxLength={60} placeholder="z. B. Fastnachtsferien" />
+    <Sheet open onClose={onClose} title={period ? period.name : t`New holiday period`}>
+      <TextField label={t`Name`} value={name} onInput={setName} maxLength={60} placeholder={t`e.g. carnival holidays`} />
       <div class="grid-2">
-        <Field label="Von">{(id) => <input id={id} class="input" type="date" value={from} onInput={(e) => setFrom((e.target as HTMLInputElement).value)} />}</Field>
-        <Field label="Bis">{(id) => <input id={id} class="input" type="date" value={to} onInput={(e) => setTo((e.target as HTMLInputElement).value)} />}</Field>
+        <Field label={t`From`}>{(id) => <input id={id} class="input" type="date" value={from} onInput={(e) => setFrom((e.target as HTMLInputElement).value)} />}</Field>
+        <Field label={t`To`}>{(id) => <input id={id} class="input" type="date" value={to} onInput={(e) => setTo((e.target as HTMLInputElement).value)} />}</Field>
       </div>
-      {from && to && from > to ? <p class="small warn-text">Das Ende muss nach dem Beginn liegen.</p> : null}
-      {period?.plans ? (
+      {from && to && from > to ? (
+        <p class="small warn-text">
+          <Trans>The end must be after the start.</Trans>
+        </p>
+      ) : null}
+      {plans ? (
         <p class="small muted">
-          {period.plans === 1 ? "Ein Ferienplan ist" : `${period.plans} Ferienpläne sind`} mit diesem Zeitraum verknüpft und übernehmen neue Daten automatisch.
+          {plural(plans, {
+            one: "One holiday plan is linked to this period and takes over new dates automatically.",
+            other: "# holiday plans are linked to this period and take over new dates automatically.",
+          })}
         </p>
       ) : null}
       <Button
@@ -1326,53 +1550,52 @@ function HolidaySheet({ period, onClose, onDone }: { period: HolidayPeriod | nul
           const body = { name: name.trim(), startsOn: from, endsOn: to };
           if (period) await api.patch(`/holidays/${period.id}`, body);
           else await api.post("/holidays", body);
-          toast(period ? "Gespeichert. Trainings sind angepasst." : "Ferienzeitraum angelegt.");
+          toast(period ? t`Saved. Trainings have been adjusted.` : t`Holiday period created.`);
           onDone();
         }}
       >
-        Speichern
+        <Trans>Save</Trans>
       </Button>
       {period ? (
         <Button
           variant="danger"
           block
           onClick={async () => {
+            const periodName = period.name;
             const ok = await confirmDialog({
-              title: `${period.name} löschen?`,
-              message: period.plans
-                ? `Verknüpfte Ferienpläne bleiben mit ihren Daten bestehen, ziehen aber nicht mehr mit.`
-                : "Der Zeitraum wird aus der Liste entfernt.",
-              confirmLabel: "Löschen",
+              title: t`Delete ${periodName}?`,
+              message: period.plans ? t`Linked holiday plans keep their dates but no longer follow changes.` : t`The period is removed from the list.`,
+              confirmLabel: t`Delete`,
               danger: true,
             });
             if (!ok) return;
             await api.del(`/holidays/${period.id}`);
-            toast("Ferienzeitraum gelöscht.");
+            toast(t`Holiday period deleted.`);
             onDone();
           }}
         >
-          Löschen
+          <Trans>Delete</Trans>
         </Button>
       ) : null}
     </Sheet>
   );
 }
 
-// Orte --------------------------------------------------------------------------
+// Venues ------------------------------------------------------------------------------
 
 export function AdminLocationsPage() {
-  useDocumentTitle("Trainingsorte");
+  useDocumentTitle(t`Training venues`);
   const { data, error, reload } = useQuery<{ locations: (LocationRef & { inUse: boolean })[] }>("/locations?all=1");
   const [edit, setEdit] = useState<(LocationRef & { inUse: boolean }) | null>(null);
   const groups: { kind: LocationRef["kind"]; title: string }[] = [
-    { kind: "hall", title: "Vereinshallen" },
-    { kind: "custom", title: "Weitere Trainingsorte" },
-    { kind: "external", title: "Gegnerische Hallen (aus dem Spielplan)" },
+    { kind: "hall", title: t`Club halls` },
+    { kind: "custom", title: t`Other training venues` },
+    { kind: "external", title: t`Opponents' halls (from the fixture list)` },
   ];
   return (
     <AdminOnly>
       <main class="page">
-        <TopBar title="Trainingsorte" kicker="Verwaltung" back="/verwaltung" />
+        <TopBar title={t`Training venues`} kicker={t`Administration`} back="/verwaltung" />
         <div class="content">
           {error ? <ErrorBox error={error} onRetry={reload} /> : null}
           {!data ? <Spinner /> : null}
@@ -1389,7 +1612,7 @@ export function AdminLocationsPage() {
                         <Icon name="pin" size={20} />
                         <span class="main">
                           <span class="title">{l.name}</span>
-                          <span class="sub">{l.address ?? "Adresse fehlt"}</span>
+                          <span class="sub">{l.address ?? t`Address missing`}</span>
                         </span>
                         <Icon name="edit" size={18} />
                       </button>
@@ -1411,10 +1634,10 @@ function LocationSheet({ loc, onClose, onDone }: { loc: LocationRef & { inUse: b
   const [address, setAddress] = useState(loc.address ?? "");
   const [mapUrl, setMapUrl] = useState(loc.mapUrl ?? "");
   return (
-    <Sheet open onClose={onClose} title="Ort bearbeiten">
-      <TextField label="Name" value={name} onInput={setName} maxLength={80} />
-      <TextField label="Adresse" value={address} onInput={setAddress} maxLength={200} />
-      <TextField label="Kartenlink (optional)" value={mapUrl} onInput={setMapUrl} type="url" hint="https-Link, z. B. zu OpenStreetMap" />
+    <Sheet open onClose={onClose} title={t`Edit venue`}>
+      <TextField label={t`Name`} value={name} onInput={setName} maxLength={80} />
+      <TextField label={t`Address`} value={address} onInput={setAddress} maxLength={200} />
+      <TextField label={t`Map link (optional)`} value={mapUrl} onInput={setMapUrl} type="url" hint={t`https link, e.g. to OpenStreetMap`} />
       <Button
         variant="primary"
         size="lg"
@@ -1422,12 +1645,12 @@ function LocationSheet({ loc, onClose, onDone }: { loc: LocationRef & { inUse: b
         onClick={async () => {
           await api.patch(`/locations/${loc.id}`, { name: name.trim(), address: address.trim() || null, mapUrl: mapUrl.trim() || null });
           invalidate("/locations", "/events");
-          toast("Gespeichert.");
+          toast(t`Saved.`);
           onClose();
           onDone();
         }}
       >
-        Speichern
+        <Trans>Save</Trans>
       </Button>
       {loc.kind !== "hall" ? (
         <Button
@@ -1441,31 +1664,35 @@ function LocationSheet({ loc, onClose, onDone }: { loc: LocationRef & { inUse: b
             onDone();
           }}
         >
-          {loc.inUse ? "Wird in einem Plan verwendet" : "Ort löschen"}
+          {loc.inUse ? t`Used in a plan` : t`Delete venue`}
         </Button>
       ) : null}
     </Sheet>
   );
 }
 
-/** Kommende, von Hand angelegte Termine anderer Mannschaften (eigene stehen unter Termine). */
+/** Upcoming, manually created events of other teams (own ones are under Events). */
 export function AdminExtraEventsPage() {
-  useDocumentTitle("Sondertermine und Spiele");
+  useDocumentTitle(t`Special events and games`);
   return (
     <AdminOnly>
       <main class="page">
-        <TopBar title="Sondertermine und Spiele" kicker="Verwaltung" back="/verwaltung" />
+        <TopBar title={t`Special events and games`} kicker={t`Administration`} back="/verwaltung" />
         <div class="content">
           <p class="small muted">
-            Kommende Sondertermine und Spiele ohne handball4all aller Mannschaften. Termine, die du ohnehin unter Termine siehst, stehen nicht hier. Antippen öffnet den
-            Termin, dort kannst du ihn bearbeiten, absagen oder löschen.
+            <Trans>
+              Upcoming special events and games without handball4all of all teams. Events you already see under Events are not listed here. Tap to open the event,
+              where you can edit, cancel or delete it.
+            </Trans>
           </p>
           <a class="btn btn-primary" href="/verwaltung/termin-neu">
             <Icon name="plus" size={18} />
-            Sondertermin anlegen
+            <Trans>Create special event</Trans>
           </a>
-          <p class="small muted">Spiele ohne handball4all legst du in der Mannschaft an (Team → Termin anlegen).</p>
-          <ExtraEventList path="/admin/extra-events" empty="Alle kommenden Sondertermine und Spiele stehen in deiner Terminübersicht." />
+          <p class="small muted">
+            <Trans>You create games without handball4all in the team (Team → Create event).</Trans>
+          </p>
+          <ExtraEventList path="/admin/extra-events" empty={t`All upcoming special events and games are in your event overview.`} />
         </div>
       </main>
     </AdminOnly>

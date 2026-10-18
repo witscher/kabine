@@ -1,15 +1,15 @@
-// Erzeugt Einzeltermine aus Trainingsplänen, rollierend für die nächsten
-// zehn Wochen. Idempotent: kann jederzeit erneut laufen.
+// Generates single events from training plans, rolling for the next
+// ten weeks. Idempotent: can run again at any time.
 //
-// Regeln:
-//   * Pro Regel und Datum genau ein Termin, auch bei gemeinsamen Trainings.
-//   * Ein Ferienplan einer Mannschaft hat in seinem Zeitraum Vorrang vor ihrem
-//     regulären Plan. Ein Ferienplan ohne Regeln bedeutet Trainingspause.
-//   * Manuell geänderte Termine (is_detached) werden nicht angefasst.
-//   * Nur zukünftige Termine werden geändert oder gelöscht.
-//   * Gleiches Datum, andere Uhrzeit oder Halle: Termin wird angepasst,
-//     Rückmeldungen bleiben erhalten. Entfällt ein Datum, wird der Termin samt
-//     Rückmeldungen gelöscht.
+// Rules:
+//   * Exactly one event per rule and date, also for joint trainings.
+//   * A team's holiday plan takes precedence over its regular plan within its
+//     period. A holiday plan without rules means a training break.
+//   * Manually changed events (is_detached) are left alone.
+//   * Only future events are changed or deleted.
+//   * Same date, different time or hall: the event is adjusted, responses
+//     are kept. If a date is dropped, the event is deleted together with its
+//     responses.
 
 import { all, batch, first, list, run, stmt } from "../lib/db";
 import { addDays, eachDay, isoWeekday, nowLocal, todayLocal } from "../lib/time";
@@ -58,11 +58,11 @@ export interface GenerationResult {
   created: number;
   updated: number;
   deleted: number;
-  /** Geänderte Termine (Uhrzeit/Ort) für Benachrichtigungen. */
+  /** Changed events (time/location) for notifications. */
   changedEventIds: number[];
 }
 
-/** Gewünschte Termine aus Plänen und Regeln (rein, ohne Datenbank). */
+/** Desired events from plans and rules (pure, without database). */
 export function plannedOccurrences(
   plans: PlanRow[],
   rules: RuleRow[],
@@ -172,7 +172,7 @@ export async function generateTrainings(db: D1Database, now = Date.now()): Promi
         for (const t of want.teamIds) statements.push(stmt(db, "INSERT INTO event_teams (event_id, team_id) VALUES (?, ?)", ex.id, t));
       }
     } else {
-      // Manuell verschobene Termine bleiben; abgesagte und reguläre entfallen.
+      // Manually moved events stay; cancelled and regular ones are dropped.
       if (ex.is_detached === 1 && !ex.cancelled_at) continue;
       statements.push(stmt(db, "DELETE FROM events WHERE id = ?", ex.id));
       result.deleted++;
@@ -217,14 +217,14 @@ export async function generateTrainings(db: D1Database, now = Date.now()): Promi
   return result;
 }
 
-/** Erzeugt Termine, falls das heute noch nicht passiert ist. */
+/** Generates events if that has not happened yet today. */
 export async function ensureGenerated(db: D1Database, now = Date.now()): Promise<void> {
   const row = await first<{ value: string }>(db, "SELECT value FROM app_meta WHERE key = 'generated_on'");
   if (row?.value === todayLocal(now)) return;
   await generateTrainings(db, now);
 }
 
-/** Löscht zukünftige Termine einer Regel (vor dem Löschen der Regel). */
+/** Deletes future events of a rule (before the rule is deleted). */
 export async function deleteFutureEventsOfRules(db: D1Database, ruleIds: number[], now = Date.now()): Promise<void> {
   if (!ruleIds.length) return;
   await run(

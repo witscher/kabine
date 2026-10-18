@@ -1,14 +1,18 @@
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 import { useState } from "preact/hooks";
+import { clockTimeIn } from "../shared/dates";
 import type { EventSummary, MyParticipation } from "../shared/types";
 import { api } from "./api";
 import { longDate, nowLocal, personName, stamp, time } from "./format";
 import { Icon } from "./icons";
 import { useSession } from "./session";
 import { refreshBadge } from "./badge";
+import { currentLocale } from "./i18n";
 import { invalidate } from "./store";
 import { Button, Sheet, StatusPill, toast } from "./ui";
 
-export const QUICK_REASONS = ["Schule", "Krank", "Familie", "Urlaub", "Andere Sportart", "Verletzt"];
+export const quickReasons = () => [t`School`, t`Ill`, t`Family`, t`Holiday`, t`Other sport`, t`Injured`];
 
 function deadlinePassed(event: EventSummary): boolean {
   if (!event.deadline) return false;
@@ -17,15 +21,25 @@ function deadlinePassed(event: EventSummary): boolean {
 
 export function deadlineText(event: EventSummary): string {
   if (!event.deadline) return "";
-  return `${longDate(event.deadline)}, ${time(event.deadline)} Uhr`;
+  return `${longDate(event.deadline)}, ${clockTimeIn(currentLocale(), time(event.deadline))}`;
 }
 
 export function respondedByText(p: MyParticipation, selfId: number): string | null {
   if (!p.respondedBy || !p.respondedAt) return null;
-  if (p.respondedBy === "guardian") return `von ${p.respondedByName ?? "Elternteil"} (Elternteil)`;
-  if (p.respondedBy === "self" && p.person.id !== selfId) return `von ${p.person.firstName} selbst`;
-  if (p.respondedBy === "other") return p.respondedByName ? `von ${p.respondedByName}` : null;
+  const name = p.respondedByName;
+  if (p.respondedBy === "guardian") return byGuardianText(name);
+  if (p.respondedBy === "self" && p.person.id !== selfId) {
+    const firstName = p.person.firstName;
+    return t`by ${firstName} themselves`;
+  }
+  if (p.respondedBy === "other") return name ? t`by ${name}` : null;
   return null;
+}
+
+/** "by Anna (parent)", without a name "by parent (parent)" as before. */
+export function byGuardianText(respondedByName: string | null | undefined): string {
+  const name = respondedByName ?? t`Parent`;
+  return t`by ${name} (parent)`;
 }
 
 export async function sendResponse(event: EventSummary, personId: number, status: "yes" | "no", reason?: string) {
@@ -33,27 +47,30 @@ export async function sendResponse(event: EventSummary, personId: number, status
   invalidate("/events", "/session");
 }
 
-/** Absagen mit Begründung (Pflicht) als Bottom Sheet. */
+/** Declining with a reason (required) as a bottom sheet. */
 export function DeclineSheet(props: { event: EventSummary; person: MyParticipation | null; onClose: () => void }) {
   const [reason, setReason] = useState(props.person?.reason ?? "");
   const [error, setError] = useState<string | null>(null);
   const late = deadlinePassed(props.event);
   const { me } = useSession();
   const forOther = props.person && me && props.person.person.id !== me.person.id;
+  const firstName = props.person?.person.firstName ?? "";
   return (
-    <Sheet open={!!props.person} onClose={props.onClose} title={forOther ? `Absage für ${props.person!.person.firstName}` : "Absagen"}>
+    <Sheet open={!!props.person} onClose={props.onClose} title={forOther ? t`Decline for ${firstName}` : t`Decline`}>
       {late ? (
         <div class="notice warn">
           <Icon name="alert" size={18} />
-          <div>Die Absagefrist ist abgelaufen. Du kannst trotzdem absagen, der Trainer wird dann sofort informiert.</div>
+          <div>
+            <Trans>The deadline for declining has passed. You can still decline, the coach will then be informed immediately.</Trans>
+          </div>
         </div>
       ) : null}
       <div class="field">
         <label class="field-label" for="decline-reason">
-          Grund (Pflicht)
+          <Trans>Reason (required)</Trans>
         </label>
-        <div class="chips" role="group" aria-label="Schnellauswahl">
-          {QUICK_REASONS.map((r) => (
+        <div class="chips" role="group" aria-label={t`Quick selection`}>
+          {quickReasons().map((r) => (
             <button type="button" class={`chip ${reason === r ? "selected" : ""}`} aria-pressed={reason === r ? "true" : "false"} onClick={() => setReason(r)}>
               {r}
             </button>
@@ -64,7 +81,7 @@ export function DeclineSheet(props: { event: EventSummary; person: MyParticipati
           class="input"
           value={reason}
           maxLength={200}
-          placeholder="z. B. Schulveranstaltung"
+          placeholder={t`e.g. school event`}
           aria-invalid={error ? "true" : undefined}
           onInput={(e) => {
             setReason((e.target as HTMLInputElement).value);
@@ -72,7 +89,9 @@ export function DeclineSheet(props: { event: EventSummary; person: MyParticipati
           }}
         />
         {error ? <div class="field-error">{error}</div> : null}
-        <div class="field-hint">Bitte keine Details zu Erkrankungen angeben, „krank“ genügt. Den Grund sehen nur die Trainer.</div>
+        <div class="field-hint">
+          <Trans>Please do not give details about illnesses, “ill” is enough. Only the coaches see the reason.</Trans>
+        </div>
       </div>
       <Button
         variant="primary"
@@ -80,24 +99,24 @@ export function DeclineSheet(props: { event: EventSummary; person: MyParticipati
         block
         onClick={async () => {
           if (!reason.trim()) {
-            setError("Bitte gib kurz einen Grund an.");
+            setError(t`Please give a short reason.`);
             return;
           }
           await sendResponse(props.event, props.person!.person.id, "no", reason.trim());
-          toast(late ? "Abgesagt. Der Trainer wurde informiert." : "Abgesagt.");
+          toast(late ? t`Declined. The coach has been informed.` : t`Declined.`);
           props.onClose();
         }}
       >
-        {late ? "Kurzfristig absagen" : "Absage senden"}
+        {late ? t`Decline at short notice` : t`Send decline`}
       </Button>
     </Sheet>
   );
 }
 
 /**
- * Rückmeldung für eine Person, groß (Karte) oder kompakt (Zeile). Wer nicht
- * absagt, gilt als zugesagt. Zusagen gibt es deshalb nur, um eine Absage
- * zurückzunehmen, und für Aushilfen und Dauerabwesende.
+ * Response for one person, large (card) or compact (row). Anyone who does not
+ * decline counts as accepted. Accepting therefore only exists to withdraw a
+ * decline, and for stand-ins and the permanently absent.
  */
 export function ResponseButtons(props: { event: EventSummary; p: MyParticipation; onDecline: (p: MyParticipation) => void; compact?: boolean }) {
   const { event, p } = props;
@@ -109,7 +128,8 @@ export function ResponseButtons(props: { event: EventSummary; p: MyParticipation
   if (hint) return <p class="small muted">{hint}</p>;
   const size = props.compact ? "sm" : "md";
   const showAccept = status !== "yes";
-  const acceptLabel = status === "no" ? (isSelf ? "Bin doch dabei" : "Wieder zusagen") : status === "standing" ? "Diesmal dabei" : isSelf ? "Bin dabei" : "Zusagen";
+  const acceptLabel =
+    status === "no" ? (isSelf ? t`I'm in after all` : t`Accept again`) : status === "standing" ? t`In this time` : isSelf ? t`I'm in` : t`Accept`;
   const restricted = isSelf && me?.hasGuardians && !p.blockedReason && ((showAccept && !p.canAccept) || !p.canDecline);
   return (
     <div class="stack-sm">
@@ -122,17 +142,19 @@ export function ResponseButtons(props: { event: EventSummary; p: MyParticipation
             disabled={!p.canAccept}
             onClick={async () => {
               await sendResponse(event, p.person.id, "yes");
-              toast("Zugesagt.");
+              toast(t`Accepted.`);
             }}
           >
             {acceptLabel}
           </Button>
         ) : null}
         <Button variant={status === "no" ? "secondary" : "danger"} size={size} disabled={!p.canDecline} onClick={() => props.onDecline(p)}>
-          {status === "no" ? "Grund ändern" : "Absagen"}
+          {status === "no" ? t`Change reason` : t`Decline`}
         </Button>
       </div>
-      {restricted ? <p class="small muted">Deine Eltern kümmern sich um {!p.canDecline ? "Absagen" : "das Zurücknehmen von Absagen"}.</p> : null}
+      {restricted ? (
+        <p class="small muted">{!p.canDecline ? <Trans>Your parents take care of declining.</Trans> : <Trans>Your parents take care of withdrawing declines.</Trans>}</p>
+      ) : null}
     </div>
   );
 }
@@ -141,18 +163,33 @@ export function HelpRequestCard(props: { event: EventSummary; p: MyParticipation
   const help = props.p.helpRequest!;
   const { me } = useSession();
   const forOther = me && props.p.person.id !== me.person.id;
+  const team = help.teamName;
+  const name = props.p.person.firstName;
   if (help.status !== "open") {
     return (
       <p class="small muted">
-        Aushilfe-Anfrage der {help.teamName}: {help.status === "accepted" ? "angenommen" : help.status === "declined" ? "abgelehnt" : "zurückgezogen"}
+        {help.status === "accepted" ? (
+          <Trans>Help request from {team}: accepted</Trans>
+        ) : help.status === "declined" ? (
+          <Trans>Help request from {team}: turned down</Trans>
+        ) : (
+          <Trans>Help request from {team}: withdrawn</Trans>
+        )}
       </p>
     );
   }
   return (
     <div class="notice yellow" style={{ flexDirection: "column", gap: "10px" }}>
       <div>
-        <strong>Aushilfe-Anfrage:</strong> Die {help.teamName} fragt, ob {forOther ? props.p.person.firstName : "du"} bei diesem Spiel aushelfen{" "}
-        {forOther ? "kann" : "kannst"}.
+        {forOther ? (
+          <Trans>
+            <strong>Help request:</strong> {team} asks whether {name} can help out at this game.
+          </Trans>
+        ) : (
+          <Trans>
+            <strong>Help request:</strong> {team} asks whether you can help out at this game.
+          </Trans>
+        )}
       </div>
       {help.canAnswer ? (
         <div class="btn-row" style={{ width: "100%" }}>
@@ -163,10 +200,10 @@ export function HelpRequestCard(props: { event: EventSummary; p: MyParticipation
               await api.post(`/help-requests/${help.id}/answer`, { accept: true });
               refreshBadge();
               invalidate("/events");
-              toast("Zugesagt. Danke fürs Aushelfen!");
+              toast(t`Accepted. Thanks for helping out!`);
             }}
           >
-            Ich helfe aus
+            <Trans>I'll help out</Trans>
           </Button>
           <Button
             size="sm"
@@ -174,38 +211,53 @@ export function HelpRequestCard(props: { event: EventSummary; p: MyParticipation
               await api.post(`/help-requests/${help.id}/answer`, { accept: false });
               refreshBadge();
               invalidate("/events");
-              toast("Abgelehnt.");
+              toast(t`Turned down.`);
             }}
           >
-            Diesmal nicht
+            <Trans>Not this time</Trans>
           </Button>
         </div>
       ) : (
-        <p class="small">Deine Eltern kümmern sich darum.</p>
+        <p class="small">
+          <Trans>Your parents take care of this.</Trans>
+        </p>
       )}
     </div>
   );
 }
 
-/** Eine Zeile pro Person (Eltern mit mehreren Kindern). */
+/** One row per person (parents with several children). */
 export function PersonResponseRow(props: { event: EventSummary; p: MyParticipation; onDecline: (p: MyParticipation) => void }) {
   const { me } = useSession();
   const { p, event } = props;
   const by = respondedByText(p, me?.person.id ?? 0);
+  const reason = p.reason;
   return (
     <div class="stack-sm" style={{ paddingTop: "4px" }}>
       <div class="row-gap" style={{ justifyContent: "space-between" }}>
-        <strong>{me?.person.id === p.person.id ? "Du" : personName(p.person)}</strong>
+        <strong>{me?.person.id === p.person.id ? t`You` : personName(p.person)}</strong>
         <StatusPill status={p.status} late={p.isLate} nominated={p.nominated} game={event.kind === "game"} />
       </div>
-      {p.unexcused ? <span class="badge warn" style={{ alignSelf: "flex-start" }}>Unentschuldigt gefehlt</span> : null}
+      {p.unexcused ? (
+        <span class="badge warn" style={{ alignSelf: "flex-start" }}>
+          <Trans>Missed without excuse</Trans>
+        </span>
+      ) : null}
       {p.helpRequest ? <HelpRequestCard event={event} p={p} /> : null}
-      {event.kind === "game" && !p.participant && !p.helpRequest ? <p class="small muted">Nicht für dieses Spiel nominiert.</p> : null}
+      {event.kind === "game" && !p.participant && !p.helpRequest ? (
+        <p class="small muted">
+          <Trans>Not nominated for this game.</Trans>
+        </p>
+      ) : null}
       <ResponseButtons event={event} p={p} onDecline={props.onDecline} compact />
-      {p.status === "no" && p.reason ? <p class="small muted">Grund: „{p.reason}“</p> : null}
+      {p.status === "no" && reason ? (
+        <p class="small muted">
+          <Trans>Reason: “{reason}”</Trans>
+        </p>
+      ) : null}
       {by ? (
         <p class="small muted">
-          {p.status === "yes" ? "Zugesagt" : "Abgesagt"} {by}
+          {p.status === "yes" ? t`Accepted ${by}` : t`Declined ${by}`}
           {p.respondedAt ? `, ${stamp(p.respondedAt)}` : ""}
         </p>
       ) : null}

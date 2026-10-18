@@ -1,3 +1,4 @@
+import { t } from "@lingui/core/macro";
 import type { RegistrationResponseJSON } from "@simplewebauthn/server";
 import { Hono } from "hono";
 import { z } from "zod";
@@ -15,8 +16,9 @@ import { ApiError, badRequest, conflict, forbidden, gone, parse, readJson } from
 import { utcIso } from "../lib/time";
 import { distinctShortNames } from "../../shared/names";
 import { insertPasskey } from "./auth";
+import { withLocale } from "../i18n";
 
-/** email: Adresse für die Anmeldung. Pflicht, sobald ein neuer Zugang entsteht. */
+/** email: address for sign-in. Required as soon as a new access is created. */
 export type JoinContext =
   | { kind: "player"; inviteId: number; personId: number; userId: string; email: string | null }
   | { kind: "parent"; inviteId: number; firstName: string; lastName: string; childIds: number[]; userId: string; email: string | null }
@@ -50,7 +52,7 @@ async function teamPlayers(db: D1Database, teamId: number) {
   );
 }
 
-const nameSchema = z.string().trim().min(1, "Bitte gib einen Namen ein.").max(50, "Der Name ist zu lang.");
+const nameSchema = z.string().trim().min(1, { error: () => t`Please enter a name.` }).max(50, { error: () => t`The name is too long.` });
 const tokenSchema = z.object({ token: z.string().min(1) });
 const verifySchema = z.object({ challengeId: z.string().min(1), response: z.record(z.string(), z.unknown()) });
 
@@ -111,34 +113,34 @@ const optionsSchema = z.object({
 });
 
 type JoinInput = z.infer<typeof optionsSchema>;
-/** Pflicht nur für den Zugang per E-Mail-Code und für Admins; sonst reicht der Passkey (Ersatz über den persönlichen Link des Trainers). */
-const EMAIL_REQUIRED = "Bitte gib deine E-Mail-Adresse an. Dorthin schicken wir den Code.";
-const ADMIN_EMAIL_REQUIRED = "Bitte gib deine E-Mail-Adresse an. Für Admins ist sie Pflicht.";
+/** Required only for access by e-mail code and for admins; otherwise the passkey is enough (replacement via the coach's personal link). */
+const emailRequired = () => t`Please enter your e-mail address. We will send the code there.`;
+const adminEmailRequired = () => t`Please enter your e-mail address. It is required for admins.`;
 
 /**
- * Prüft einen Einladungslink samt Auswahl und beschreibt den Zugang, der
- * entstehen soll. Gemeinsam für Passkey und E-Mail-Code.
+ * Checks an invitation link including the selection and describes the access
+ * to be created. Shared by passkey and e-mail code.
  */
 async function buildJoinContext(env: Env, input: JoinInput): Promise<{ context: JoinContext; name: string; exclude: { id: string }[] }> {
   const invite = await findValidInvite(env, input.token);
   const email = input.email || null;
 
   if (invite.kind === "player") {
-    if (!input.personId) throw badRequest("Bitte wähle aus, wer du bist.");
+    if (!input.personId) throw badRequest(t`Please select who you are.`);
     const players = await teamPlayers(env.DB, invite.team_id!);
     const person = players.find((p) => p.id === input.personId);
-    if (!person) throw badRequest("Diese Person gehört nicht zu dieser Mannschaft.");
-    if (person.has_account) throw conflict("Für diese Person gibt es schon einen Zugang. Wende dich an deinen Trainer.", "person_taken");
+    if (!person) throw badRequest(t`This person does not belong to this team.`);
+    if (person.has_account) throw conflict(t`There is already an access for this person. Contact your coach.`, "person_taken");
     const context: JoinContext = { kind: "player", inviteId: invite.id, personId: person.id, userId: newWebauthnUserId(), email };
     return { context, name: fullName(person.first_name, person.last_name), exclude: [] };
   }
 
   if (invite.kind === "parent") {
-    if (!input.firstName || !input.lastName) throw badRequest("Bitte gib deinen Vor- und Nachnamen ein.");
+    if (!input.firstName || !input.lastName) throw badRequest(t`Please enter your first and last name.`);
     const childIds = [...new Set(input.childIds ?? [])];
-    if (!childIds.length) throw badRequest("Bitte wähle mindestens ein Kind aus.");
+    if (!childIds.length) throw badRequest(t`Please select at least one child.`);
     const players = await teamPlayers(env.DB, invite.team_id!);
-    if (!childIds.every((id) => players.some((p) => p.id === id))) throw badRequest("Ungültige Auswahl.");
+    if (!childIds.every((id) => players.some((p) => p.id === id))) throw badRequest(t`Invalid selection.`);
     await assertGuardianCapacity(env.DB, childIds, null);
     const context: JoinContext = {
       kind: "parent",
@@ -152,24 +154,24 @@ async function buildJoinContext(env: Env, input: JoinInput): Promise<{ context: 
     return { context, name: `${input.firstName} ${input.lastName}`, exclude: [] };
   }
 
-  // Persönlicher Link: neuer Passkey (oder E-Mail) für eine bestehende Person.
+  // Personal link: new passkey (or e-mail) for an existing person.
   const person = await first<{ id: number; first_name: string; last_name: string | null; is_admin: number }>(
     env.DB,
     "SELECT id, first_name, last_name, is_admin FROM persons WHERE id = ? AND is_former = 0",
     invite.person_id,
   );
-  if (!person) throw gone("Diese Person gibt es nicht mehr.");
-  // Den Zugang des Eigentümers stellt nur ein Link wieder her, den er selbst erzeugt hat
+  if (!person) throw gone(t`This person no longer exists.`);
+  // Only a link created by the owner restores the owner's access
   await assertInviteAllowed(env.DB, invite.id, person.id);
   const account = await first<{ id: number; webauthn_user_id: string; email: string | null; email_verified_at: string | null }>(
     env.DB,
     "SELECT id, webauthn_user_id, email, email_verified_at FROM accounts WHERE person_id = ?",
     person.id,
   );
-  if (!account && !email && person.is_admin) throw badRequest(ADMIN_EMAIL_REQUIRED, "email_required");
+  if (!account && !email && person.is_admin) throw badRequest(adminEmailRequired(), "email_required");
   // A link never replaces a confirmed address: whoever holds it could otherwise take over the e-mail login
   if (account?.email_verified_at && email && email !== account.email) {
-    throw badRequest("Für diesen Zugang ist schon eine bestätigte E-Mail-Adresse hinterlegt. Nimm diese Adresse oder richte einen Passkey ein.", "email_locked");
+    throw badRequest(t`A confirmed e-mail address is already stored for this access. Use this address or set up a passkey.`, "email_locked");
   }
   // Taking over an existing account always signs out its previous devices, so the owner notices
   const context: JoinContext = {
@@ -198,10 +200,10 @@ joinRoutes.post("/join/options", async (c) => {
   );
 });
 
-/** Zugang ohne Passkey: Code an die angegebene Adresse, eingelöst über /auth/email/verify. */
+/** Access without passkey: code to the given address, redeemed via /auth/email/verify. */
 joinRoutes.post("/join/email", async (c) => {
   const input = parse(optionsSchema, await readJson(c.req.raw));
-  if (!input.email) throw badRequest(EMAIL_REQUIRED, "email_required");
+  if (!input.email) throw badRequest(emailRequired(), "email_required");
   const { context } = await buildJoinContext(c.env, input);
   const requestId = await issueEmailCode(c.env, {
     purpose: "join",
@@ -216,7 +218,7 @@ joinRoutes.post("/join/email", async (c) => {
 async function stillValid(env: Env, inviteId: number): Promise<InviteRow> {
   const invite = await first<InviteRow>(env.DB, "SELECT * FROM invites WHERE id = ?", inviteId);
   if (!invite || invite.revoked_at || invite.used_at || Date.parse(invite.expires_at) <= Date.now()) {
-    throw gone("Dieser Einladungslink gilt nicht mehr. Bitte frag nach einem neuen Link.", "invite_expired");
+    throw gone(t`This invitation link is no longer valid. Please ask for a new link.`, "invite_expired");
   }
   return invite;
 }
@@ -228,8 +230,8 @@ function isUniqueViolation(err: unknown): boolean {
 type Credential = Parameters<typeof insertPasskey>[2];
 
 /**
- * Legt den Zugang an bzw. ergänzt ihn: mit Passkey (credential) oder ohne,
- * wenn die Anmeldung über einen E-Mail-Code bestätigt wurde (emailVerified).
+ * Creates or completes the access: with a passkey (credential) or without,
+ * if the sign-in was confirmed with an e-mail code (emailVerified).
  */
 export async function finishJoin(
   env: Env,
@@ -253,7 +255,7 @@ export async function finishJoin(
   return accountId;
 }
 
-/** Nach einem Passkey-Zugang die angegebene Adresse bestätigen lassen (Fehler beim Versand blockieren nichts). */
+/** After a passkey access, have the given address confirmed (sending errors block nothing). */
 export async function requestEmailConfirmation(env: Env, request: Request, accountId: number): Promise<void> {
   const account = await first<{ email: string | null; email_verified_at: string | null }>(
     env.DB,
@@ -270,25 +272,29 @@ export async function requestEmailConfirmation(env: Env, request: Request, accou
       ip: request.headers.get("cf-connecting-ip"),
     });
   } catch (err) {
-    console.warn("Bestätigungs-E-Mail nicht verschickt", err);
+    console.warn("Confirmation e-mail not sent", err);
   }
 }
 
 /** Tells the owner of an account by e-mail that a personal link signed in a new device and signed out the old ones. */
 async function notifyNewDevice(env: Env, accountId: number): Promise<void> {
-  const account = await first<{ email: string | null; email_verified_at: string | null }>(env.DB, "SELECT email, email_verified_at FROM accounts WHERE id = ?", accountId);
+  const account = await first<{ email: string | null; email_verified_at: string | null; locale: string | null }>(
+    env.DB,
+    "SELECT email, email_verified_at, locale FROM accounts WHERE id = ?",
+    accountId,
+  );
   if (!account?.email || !account.email_verified_at) return;
   const club = await loadClub(env.DB);
+  const app = club.shortName;
+  // In the language of the account's owner
+  const { subject, text } = withLocale(account.locale, () => ({
+    subject: t`New device for your access to ${app}`,
+    text: `${t`Hello,`}\n\n${t`a new device has just been set up for your access via a personal link. Your previous devices have been signed out.`}\n\n${t`If this was not you, please contact your coach or an admin immediately.`}\n`,
+  }));
   try {
-    await mailer.send(env, {
-      to: account.email,
-      subject: `Neues Gerät für deinen Zugang zu ${club.shortName}`,
-      text:
-        `Hallo,\n\nüber einen persönlichen Link wurde gerade ein neues Gerät für deinen Zugang eingerichtet. ` +
-        `Deine bisherigen Geräte sind dabei abgemeldet worden.\n\nWarst du das nicht, melde dich bitte sofort bei deinem Trainer oder einem Admin.\n`,
-    });
+    await mailer.send(env, { to: account.email, subject, text });
   } catch (err) {
-    console.warn("Hinweis auf neues Gerät nicht verschickt", err instanceof Error ? err.message : err);
+    console.warn("New device notice not sent", err instanceof Error ? err.message : err);
   }
 }
 
@@ -307,7 +313,7 @@ async function createJoinAccount(env: Env, request: Request, context: JoinContex
       context.personId,
       invite.team_id,
     );
-    if (!isPlayer) throw badRequest("Diese Person gehört nicht (mehr) zu dieser Mannschaft.");
+    if (!isPlayer) throw badRequest(t`This person does not (or no longer) belong to this team.`);
     let accountId: number;
     try {
       accountId = (await first<{ id: number }>(
@@ -317,7 +323,7 @@ async function createJoinAccount(env: Env, request: Request, context: JoinContex
         context.userId,
       ))!.id;
     } catch (err) {
-      if (isUniqueViolation(err)) throw conflict("Für diese Person wurde gerade schon ein Zugang angelegt.", "person_taken");
+      if (isUniqueViolation(err)) throw conflict(t`An access has just been created for this person.`, "person_taken");
       throw err;
     }
     await addPasskey(accountId);
@@ -333,7 +339,7 @@ async function createJoinAccount(env: Env, request: Request, context: JoinContex
       invite.team_id,
       list(context.childIds),
     );
-    if (valid.length !== context.childIds.length) throw badRequest("Die Auswahl der Kinder ist nicht mehr gültig.");
+    if (valid.length !== context.childIds.length) throw badRequest(t`The selection of children is no longer valid.`);
     await assertGuardianCapacity(db, context.childIds, null);
     const person = await first<{ id: number }>(
       db,
@@ -373,7 +379,7 @@ async function createJoinAccount(env: Env, request: Request, context: JoinContex
           context.userId,
         ))!.id;
       } catch (err) {
-        if (isUniqueViolation(err)) throw conflict("Für diese Person gibt es inzwischen einen Zugang. Bitte frag nach einem neuen Link.");
+        if (isUniqueViolation(err)) throw conflict(t`There is now an access for this person. Please ask for a new link.`);
         throw err;
       }
     } else {
@@ -389,9 +395,9 @@ async function createJoinAccount(env: Env, request: Request, context: JoinContex
     return accountId;
   }
 
-  // Admin-Bootstrap
+  // Admin bootstrap
   const used = await first(db, "SELECT 1 AS used FROM app_meta WHERE key = 'bootstrap_used_at'");
-  if (used) throw gone("Der Einrichtungslink wurde bereits verwendet.");
+  if (used) throw gone(t`The setup link has already been used.`);
   let accountId: number;
   try {
     accountId = (await first<{ id: number }>(
@@ -401,7 +407,7 @@ async function createJoinAccount(env: Env, request: Request, context: JoinContex
       context.userId,
     ))!.id;
   } catch (err) {
-    if (isUniqueViolation(err)) throw gone("Der Admin-Zugang ist bereits eingerichtet.");
+    if (isUniqueViolation(err)) throw gone(t`The admin access is already set up.`);
     throw err;
   }
   await addPasskey(accountId);
@@ -417,7 +423,7 @@ joinRoutes.post("/join/verify", async (c) => {
     challengeId,
     response as unknown as RegistrationResponseJSON,
   );
-  if (context.kind === "bootstrap") throw badRequest("Ungültige Anfrage.");
+  if (context.kind === "bootstrap") throw badRequest(t`Invalid request.`);
   const accountId = await finishJoin(c.env, c.req.raw, context, credential);
   c.executionCtx.waitUntil(requestEmailConfirmation(c.env, c.req.raw, accountId));
   const session = await createSession(c.env.DB, accountId, c.req.header("user-agent") ?? null);
@@ -425,7 +431,7 @@ joinRoutes.post("/join/verify", async (c) => {
   return c.json({ ok: true, kind: context.kind });
 });
 
-/** Höchstens zwei Elternteile pro Kind über Elternlinks (Admins können mehr verknüpfen). */
+/** At most two parents per child via parent links (admins can link more). */
 export const MAX_GUARDIANS = 2;
 
 async function assertGuardianCapacity(db: D1Database, childIds: number[], guardianId: number | null): Promise<void> {
@@ -440,24 +446,23 @@ async function assertGuardianCapacity(db: D1Database, childIds: number[], guardi
     MAX_GUARDIANS,
   );
   if (full.length) {
-    throw conflict(
-      `Für ${full.map((f) => f.first_name).join(" und ")} sind schon zwei Elternteile eingetragen. Wende dich bitte an die Trainer.`,
-      "child_full",
-    );
+    const and = t`and`;
+    const names = full.map((f) => f.first_name).join(` ${and} `);
+    throw conflict(t`Two parents are already registered for ${names}. Please contact the coaches.`, "child_full");
   }
 }
 
 const linkSchema = z.object({ token: z.string().min(1), childIds: z.array(z.number().int().positive()).min(1).max(10) });
 
-/** Eingeloggte Eltern verknüpfen über einen Elternlink ein weiteres Kind. */
+/** Signed-in parents link another child via a parent link. */
 joinRoutes.post("/join/link-children", async (c) => {
   const actor = requireActor(c);
   const { token, childIds } = parse(linkSchema, await readJson(c.req.raw));
   const invite = await findValidInvite(c.env, token);
-  if (invite.kind !== "parent") throw badRequest("Das ist kein Elternlink.");
-  if (childIds.includes(actor.personId)) throw badRequest("Du kannst dich nicht selbst als Kind verknüpfen.");
+  if (invite.kind !== "parent") throw badRequest(t`This is not a parent link.`);
+  if (childIds.includes(actor.personId)) throw badRequest(t`You cannot link yourself as a child.`);
   const players = await teamPlayers(c.env.DB, invite.team_id!);
-  if (!childIds.every((id) => players.some((p) => p.id === id))) throw badRequest("Ungültige Auswahl.");
+  if (!childIds.every((id) => players.some((p) => p.id === id))) throw badRequest(t`Invalid selection.`);
   await assertGuardianCapacity(c.env.DB, childIds, actor.personId);
   await c.env.DB.batch(
     childIds.map((childId) =>
@@ -467,15 +472,15 @@ joinRoutes.post("/join/link-children", async (c) => {
   return c.json({ ok: true });
 });
 
-// Admin-Bootstrap -----------------------------------------------------------
+// Admin bootstrap -----------------------------------------------------------
 
 /** First admin of the installation; null on a fresh installation (the setup creates it). */
 async function bootstrapPerson(env: Env, token: string) {
   const expected = env.ADMIN_BOOTSTRAP_TOKEN;
-  if (!expected || expected.length < 16) throw new ApiError(404, "bootstrap_disabled", "Die Einrichtung ist nicht aktiviert.");
-  if (!safeEqual(token, expected)) throw forbidden("Dieser Einrichtungslink ist ungültig.");
+  if (!expected || expected.length < 16) throw new ApiError(404, "bootstrap_disabled", t`Setup is not enabled.`);
+  if (!safeEqual(token, expected)) throw forbidden(t`This setup link is invalid.`);
   const used = await first(env.DB, "SELECT 1 AS used FROM app_meta WHERE key = 'bootstrap_used_at'");
-  if (used) throw gone("Der Einrichtungslink wurde bereits verwendet. Melde dich mit deinem Passkey an.", "bootstrap_used");
+  if (used) throw gone(t`The setup link has already been used. Sign in with your passkey.`, "bootstrap_used");
   return first<{ id: number; first_name: string; last_name: string | null; admin_email: string | null }>(
     env.DB,
     "SELECT id, first_name, last_name, admin_email FROM persons WHERE is_admin = 1 AND is_former = 0 ORDER BY id LIMIT 1",
@@ -499,7 +504,7 @@ joinRoutes.post("/bootstrap/options", async (c) => {
   const input = parse(bootstrapOptionsSchema, await readJson(c.req.raw));
   let person = await bootstrapPerson(c.env, input.token);
   if (!person) {
-    if (!input.firstName || !input.lastName || !input.email) throw badRequest("Bitte gib Vorname, Nachname und E-Mail-Adresse an.");
+    if (!input.firstName || !input.lastName || !input.email) throw badRequest(t`Please enter first name, last name and e-mail address.`);
     person = await first<{ id: number; first_name: string; last_name: string | null; admin_email: string | null }>(
       c.env.DB,
       "INSERT INTO persons (first_name, last_name, is_admin, admin_email) VALUES (?, ?, 1, ?) RETURNING id, first_name, last_name, admin_email",
@@ -528,7 +533,7 @@ joinRoutes.post("/bootstrap/verify", async (c) => {
     challengeId,
     response as unknown as RegistrationResponseJSON,
   );
-  if (context.kind !== "bootstrap") throw badRequest("Ungültige Anfrage.");
+  if (context.kind !== "bootstrap") throw badRequest(t`Invalid request.`);
   const accountId = await finishJoin(c.env, c.req.raw, context, credential);
   // The person who sets up the installation is its protected owner
   if ((await loadClub(c.env.DB)).ownerPersonId === null) await saveClub(c.env.DB, { ownerPersonId: context.personId });

@@ -1,0 +1,76 @@
+# Keeps a club's copy of Kabine up to date. The "Deploy to Cloudflare" button creates a copy of the
+# repository (not a fork) in the club's GitHub account. Once a week this workflow looks for a new
+# Kabine release and opens a pull request with it. Merging the pull request deploys the new version
+# (Workers Builds), including database migrations.
+#
+# The club's own settings in wrangler.jsonc (resource IDs, domain) are kept.
+name: Kabine updates
+
+on:
+  schedule:
+    - cron: "23 5 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+env:
+  UPSTREAM: https://github.com/witscher/kabine.git
+
+jobs:
+  update:
+    # Only in copies, not in the Kabine repository itself
+    if: github.repository != 'witscher/kabine'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Find the latest release
+        id: release
+        run: |
+          git remote add upstream "$UPSTREAM"
+          git fetch --quiet upstream 'refs/tags/v*:refs/tags/upstream/v*' --no-tags
+          latest=$(git tag --list 'upstream/v*' --sort=-v:refname | head -n1)
+          if [ -z "$latest" ]; then echo "No release yet"; exit 0; fi
+          version=${latest#upstream/}
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          if git ls-remote --exit-code --heads origin "kabine-update-$version" >/dev/null; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          elif [ -f .kabine-version ] && [ "$(cat .kabine-version)" = "$version" ]; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Prepare the update
+        if: steps.release.outputs.version && !steps.release.outputs.exists
+        env:
+          VERSION: ${{ steps.release.outputs.version }}
+        run: |
+          git config user.name "kabine-update"
+          git config user.email "kabine-update@users.noreply.github.com"
+          git checkout -b "kabine-update-$VERSION"
+          cp wrangler.jsonc /tmp/wrangler.club.jsonc
+          # The copy has its own history: take the release's files, keep the club's wrangler settings
+          git merge --allow-unrelated-histories --no-edit -X theirs "upstream/$VERSION" || true
+          git checkout "upstream/$VERSION" -- . ':!wrangler.jsonc' ':!.kabine-version'
+          cp /tmp/wrangler.club.jsonc wrangler.jsonc
+          git show "upstream/$VERSION:wrangler.jsonc" > /tmp/wrangler.release.jsonc
+          echo "$VERSION" > .kabine-version
+          git add -A
+          git commit --quiet -m "Kabine $VERSION" || true
+          git push --quiet origin "kabine-update-$VERSION"
+      - name: Open the pull request
+        if: steps.release.outputs.version && !steps.release.outputs.exists
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.release.outputs.version }}
+        run: |
+          notes=$(git show "upstream/$VERSION:CHANGELOG.md" 2>/dev/null | awk "/^## $VERSION/{f=1;next}/^## /{f=0}f" | head -n 80)
+          if ! diff -q <(sed 's/"database_id": *"[^"]*"//;s/"id": *"[^"]*"//' /tmp/wrangler.release.jsonc) <(sed 's/"database_id": *"[^"]*"//;s/"id": *"[^"]*"//' wrangler.jsonc) >/dev/null; then
+            wrangler_note=$'\n\n**Check wrangler.jsonc:** the release changes the Cloudflare configuration (for example a new binding). Compare your wrangler.jsonc with the one of the release and add new entries before merging.'
+          fi
+          gh pr create --base "${{ github.event.repository.default_branch }}" --head "kabine-update-$VERSION" \
+            --title "Update Kabine to $VERSION" \
+            --body "Kabine $VERSION is available. Merging this pull request deploys it, database migrations included.${wrangler_note:-}
+
+$notes"

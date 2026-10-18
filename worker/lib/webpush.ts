@@ -1,6 +1,6 @@
-// Web Push ohne Node-Abhängigkeiten, nur mit der Web Crypto API.
-//   * VAPID-Authentifizierung nach RFC 8292 (ES256-JWT)
-//   * Payload-Verschlüsselung "aes128gcm" nach RFC 8291 / RFC 8188
+// Web Push without Node dependencies, only with the Web Crypto API.
+//   * VAPID authentication per RFC 8292 (ES256 JWT)
+//   * Payload encryption "aes128gcm" per RFC 8291 / RFC 8188
 
 import { b64url, fromB64url } from "./crypto";
 
@@ -22,9 +22,9 @@ async function hkdf(salt: Uint8Array, ikm: Uint8Array, info: Uint8Array, length:
   return new Uint8Array(bits);
 }
 
-/** Privater P-256-Schlüssel aus dem Skalar d und dem unkomprimierten öffentlichen Punkt. */
+/** Private P-256 key from the scalar d and the uncompressed public point. */
 export async function importP256Private(d: string, publicKey: Uint8Array, usage: "ECDSA" | "ECDH"): Promise<CryptoKey> {
-  if (publicKey.length !== 65 || publicKey[0] !== 4) throw new Error("Öffentlicher Schlüssel muss unkomprimiert (65 Byte) sein");
+  if (publicKey.length !== 65 || publicKey[0] !== 4) throw new Error("Public key must be uncompressed (65 bytes)");
   const jwk: JsonWebKey = {
     kty: "EC",
     crv: "P-256",
@@ -39,12 +39,12 @@ export async function importP256Private(d: string, publicKey: Uint8Array, usage:
 }
 
 export interface EncryptOptions {
-  /** Nur für Tests: feste Werte statt Zufall. */
+  /** Tests only: fixed values instead of randomness. */
   salt?: Uint8Array;
   serverKeys?: { publicKey: Uint8Array; privateKey: CryptoKey };
 }
 
-/** Verschlüsselt eine Nachricht für ein Push-Abo (ein einzelner Record, rs = 4096). */
+/** Encrypts a message for a push subscription (a single record, rs = 4096). */
 export async function encryptPayload(
   plaintext: Uint8Array,
   uaPublicB64: string,
@@ -53,7 +53,7 @@ export async function encryptPayload(
 ): Promise<Uint8Array<ArrayBuffer>> {
   const uaPublic = fromB64url(uaPublicB64);
   const authSecret = fromB64url(authSecretB64);
-  if (plaintext.length > 3993) throw new Error("Push-Nachricht ist zu groß");
+  if (plaintext.length > 3993) throw new Error("Push message is too large");
 
   let asPublic: Uint8Array;
   let asPrivate: CryptoKey;
@@ -89,7 +89,7 @@ export async function encryptPayload(
 }
 
 export interface Vapid {
-  publicKey: string; // base64url, unkomprimierter Punkt
+  publicKey: string; // base64url, uncompressed point
   privateKey: CryptoKey;
   subject: string;
 }
@@ -102,7 +102,7 @@ export async function loadVapid(publicKeyB64: string, privateKeyD: string, subje
   };
 }
 
-/** Authorization-Header nach RFC 8292. */
+/** Authorization header per RFC 8292. */
 export async function vapidAuthorization(endpoint: string, vapid: Vapid, now = Date.now()): Promise<string> {
   const header = b64url(encoder.encode(JSON.stringify({ typ: "JWT", alg: "ES256" })));
   const claims = b64url(
@@ -142,7 +142,7 @@ export async function sendWebPush(
   if (res.status === 404 || res.status === 410) return "gone";
   if (res.status === 429 || res.status >= 500) return "retry";
   if (!res.ok) {
-    console.warn(`Push an ${new URL(sub.endpoint).host} abgelehnt: ${res.status}`);
+    console.warn(`Push to ${new URL(sub.endpoint).host} rejected: ${res.status}`);
     return "failed";
   }
   return "sent";

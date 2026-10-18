@@ -1,5 +1,7 @@
-// Fahrgemeinschaften bei Auswärtsspielen: Karte in der Termin-Detailansicht.
-// Regeln im Worker (worker/domain/carpool.ts), Festlegungen in docs/entscheidungen.md.
+// Carpools for away games: card in the event detail view.
+// Rules in the worker (worker/domain/carpool.ts), decisions in docs/entscheidungen.md.
+import { plural, t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 import { useState } from "preact/hooks";
 import type { CarpoolInfo, CarpoolOffer, CarpoolPersonRef, CarpoolRequest, EventDetail } from "../shared/types";
 import { api } from "./api";
@@ -10,7 +12,7 @@ import { Button, confirmDialog, Sheet, toast } from "./ui";
 
 const MAX_SEATS = 8;
 
-const seatsText = (n: number) => (n === 1 ? "1 Platz" : `${n} Plätze`);
+const seatsText = (n: number) => plural(n, { one: "# seat", other: "# seats" });
 const riderText = (r: { name: string; companions: number }) => (r.companions ? `${r.name} + ${r.companions}` : r.name);
 
 type OfferTarget = { personId: number | null; offer: CarpoolOffer | null };
@@ -32,42 +34,53 @@ export function CarpoolCard({ event, carpool, onChanged }: { event: EventDetail;
   const driverName = (offerId: number | null) => carpool.offers.find((o) => o.id === offerId)?.name ?? "";
 
   const cancelBooking = async (r: CarpoolRequest) => {
-    if (!(await confirmDialog({ title: "Doch nicht mitfahren?", message: `${r.name} fährt nicht mehr bei ${driverName(r.offerId)} mit. Der Fahrer wird benachrichtigt.`, confirmLabel: "Absagen" }))) return;
+    const name = r.name;
+    const driver = driverName(r.offerId);
+    if (!(await confirmDialog({ title: t`Not riding after all?`, message: t`${name} is no longer riding with ${driver}. The driver will be notified.`, confirmLabel: t`Cancel ride` }))) return;
     await api.del(`${base}/requests/${r.playerId}/booking`);
-    toast("Mitfahrt abgesagt.");
+    toast(t`Ride cancelled.`);
     refresh();
   };
   const deleteRequest = async (r: CarpoolRequest) => {
     await api.del(`${base}/requests/${r.playerId}`);
-    toast("Suche gelöscht.");
+    toast(t`Ride request deleted.`);
     refresh();
   };
 
+  const drivers = carpool.offers.length;
+  const freeSeats = seatsText(free);
+  const waiting = carpool.waiting.length;
+  const seatsNeeded = seatsText(waitingSeats);
+  const ownTaken = own ? own.seats - own.free : 0;
+  const ownSeats = own ? seatsText(own.seats) : "";
+
   return (
-    <section class="card card-body" aria-label="Fahrgemeinschaften">
+    <section class="card card-body" aria-label={t`Carpools`}>
       <div class="row-gap" style={{ justifyContent: "space-between" }}>
         <h2 class="section-title" style={{ margin: 0 }}>
-          Fahrgemeinschaften
+          <Trans>Carpools</Trans>
         </h2>
         <Icon name="car" size={22} />
       </div>
       <p class="small muted">
-        {carpool.offers.length ? `${carpool.offers.length} Fahrer · ${seatsText(free)} frei` : "Noch niemand bietet Plätze an"}
-        {carpool.waiting.length ? ` · ${carpool.waiting.length} ${carpool.waiting.length === 1 ? "sucht" : "suchen"} (${seatsText(waitingSeats)})` : ""}
+        {drivers ? plural(drivers, { one: `# driver · ${freeSeats} free`, other: `# drivers · ${freeSeats} free` }) : t`Nobody is offering seats yet`}
+        {waiting ? ` · ${plural(waiting, { one: `# is looking (${seatsNeeded})`, other: `# are looking (${seatsNeeded})` })}` : ""}
       </p>
 
       {own ? (
         <div class="row-gap" style={{ justifyContent: "space-between" }}>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <strong>Du fährst</strong>
+            <strong>
+              <Trans>You are driving</Trans>
+            </strong>
             <div class="small muted">
-              {own.seats - own.free} von {seatsText(own.seats)} belegt
+              {t`${ownTaken} of ${ownSeats} taken`}
               {own.riders.length ? `: ${own.riders.map(riderText).join(", ")}` : ""}
             </div>
           </div>
           {own.canEdit ? (
             <Button size="sm" onClick={() => setOfferFor({ personId: own.personId, offer: own })}>
-              Ändern
+              <Trans>Change</Trans>
             </Button>
           ) : null}
         </div>
@@ -75,40 +88,49 @@ export function CarpoolCard({ event, carpool, onChanged }: { event: EventDetail;
 
       {carpool.mine
         .filter((m) => m.request)
-        .map(({ player, request: r }) => (
+        .map(({ player, request: r }) => {
+          const driver = driverName(r!.offerId);
+          const seats = seatsText(r!.seats);
+          const name = player.name;
+          return (
           <div class="row-gap" style={{ justifyContent: "space-between" }} key={player.id}>
             <div style={{ flex: 1, minWidth: 0 }}>
-              <strong>{player.self ? "Du" : player.name}</strong>
+              <strong>{player.self ? t`You` : player.name}</strong>
               <div class="small muted">
                 {r!.offerId != null
-                  ? `${player.self ? "fährst" : "fährt"} bei ${driverName(r!.offerId)} mit (${seatsText(r!.seats)})`
-                  : `${player.self ? "suchst" : "sucht"} eine Mitfahrgelegenheit (${seatsText(r!.seats)})`}
+                  ? player.self
+                    ? t`are riding with ${driver} (${seats})`
+                    : t`is riding with ${driver} (${seats})`
+                  : player.self
+                    ? t`are looking for a ride (${seats})`
+                    : t`is looking for a ride (${seats})`}
               </div>
             </div>
             {r!.canEdit ? (
               r!.offerId != null ? (
                 <Button size="sm" onClick={() => cancelBooking(r!)}>
-                  Doch nicht
+                  <Trans>Not after all</Trans>
                 </Button>
               ) : (
                 <div class="row-gap" style={{ gap: "6px" }}>
                   <Button size="sm" variant="primary" onClick={() => setRideFor({ player, self: player.self, request: r, asCoach: false })}>
-                    Mitfahren
+                    <Trans>Ride along</Trans>
                   </Button>
-                  <button type="button" class="icon-btn icon-btn-sm" aria-label={`Suche für ${player.name} löschen`} onClick={() => deleteRequest(r!)}>
+                  <button type="button" class="icon-btn icon-btn-sm" aria-label={t`Delete ride request for ${name}`} onClick={() => deleteRequest(r!)}>
                     <Icon name="trash" size={16} />
                   </button>
                 </div>
               )
             ) : null}
           </div>
-        ))}
+          );
+        })}
 
       {carpool.open && (carpool.canOffer || searchable.length) ? (
         <div class={carpool.canOffer && searchable.length ? "grid-2" : "stack-sm"}>
           {carpool.canOffer ? (
             <Button variant="primary" onClick={() => setOfferFor({ personId: me.person.id, offer: null })}>
-              Ich fahre
+              <Trans>I'm driving</Trans>
             </Button>
           ) : null}
           {searchable.length ? (
@@ -118,7 +140,7 @@ export function CarpoolCard({ event, carpool, onChanged }: { event: EventDetail;
                 setRideFor({ player: only, self: only?.self ?? false, request: null, asCoach: false });
               }}
             >
-              Ich brauche eine Mitfahrgelegenheit
+              <Trans>I need a ride</Trans>
             </Button>
           ) : null}
         </div>
@@ -127,33 +149,36 @@ export function CarpoolCard({ event, carpool, onChanged }: { event: EventDetail;
       {carpool.offers.filter((o) => !o.mine).length ? (
         <div class="stack-sm">
           <div class="small muted" style={{ fontWeight: 700 }}>
-            FAHRER
+            <Trans>DRIVERS</Trans>
           </div>
           {carpool.offers
             .filter((o) => !o.mine)
-            .map((o) => (
+            .map((o) => {
+              const seats = seatsText(o.free);
+              return (
               <div class="row-gap" style={{ justifyContent: "space-between" }} key={o.id}>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <strong>{o.name}</strong>
                   <div class="small muted">
-                    {o.free ? `${seatsText(o.free)} frei` : "voll"}
+                    {o.free ? t`${seats} free` : t`full`}
                     {o.riders.length ? ` · ${o.riders.map(riderText).join(", ")}` : ""}
                   </div>
                 </div>
                 {o.canEdit ? (
                   <Button size="sm" onClick={() => setOfferFor({ personId: o.personId, offer: o })}>
-                    Ändern
+                    <Trans>Change</Trans>
                   </Button>
                 ) : null}
               </div>
-            ))}
+              );
+            })}
         </div>
       ) : null}
 
       {carpool.waiting.filter((r) => !r.mine).length ? (
         <div class="stack-sm">
           <div class="small muted" style={{ fontWeight: 700 }}>
-            SUCHEN NOCH
+            <Trans>STILL LOOKING</Trans>
           </div>
           {carpool.waiting
             .filter((r) => !r.mine)
@@ -164,7 +189,7 @@ export function CarpoolCard({ event, carpool, onChanged }: { event: EventDetail;
                 </span>
                 {r.canEdit ? (
                   <Button size="sm" onClick={() => setRideFor({ player: { id: r.playerId, name: r.name }, self: false, request: r, asCoach: true })}>
-                    Eintragen
+                    <Trans>Assign</Trans>
                   </Button>
                 ) : null}
               </div>
@@ -175,20 +200,24 @@ export function CarpoolCard({ event, carpool, onChanged }: { event: EventDetail;
       {carpool.coach ? (
         <div class="stack-sm">
           <div class="small muted" style={{ fontWeight: 700 }}>
-            FÜR TRAINER
+            <Trans>FOR COACHES</Trans>
           </div>
           <div class="grid-2">
             <Button size="sm" onClick={() => setOfferFor({ personId: null, offer: null })}>
-              Fahrer eintragen
+              <Trans>Add driver</Trans>
             </Button>
             <Button size="sm" onClick={() => setRideFor({ player: null, self: false, request: null, asCoach: true })}>
-              Mitfahrer eintragen
+              <Trans>Add passenger</Trans>
             </Button>
           </div>
         </div>
       ) : null}
 
-      {!carpool.open ? <p class="small muted">Das Spiel ist abgesagt oder hat schon begonnen.</p> : null}
+      {!carpool.open ? (
+        <p class="small muted">
+          <Trans>The game has been cancelled or has already started.</Trans>
+        </p>
+      ) : null}
 
       {offerFor ? <OfferSheet event={event} carpool={carpool} target={offerFor} onClose={() => setOfferFor(null)} onDone={refresh} /> : null}
       {rideFor ? <RideSheet event={event} carpool={carpool} target={rideFor} onClose={() => setRideFor(null)} onDone={refresh} /> : null}
@@ -200,11 +229,11 @@ function Stepper({ label, value, min, max, onChange }: { label: string; value: n
   return (
     <div class="duty-stepper">
       <span>{label}</span>
-      <button type="button" class="icon-btn icon-btn-sm" aria-label="Ein Platz weniger" disabled={value <= min} onClick={() => onChange(Math.max(min, value - 1))}>
+      <button type="button" class="icon-btn icon-btn-sm" aria-label={t`One seat fewer`} disabled={value <= min} onClick={() => onChange(Math.max(min, value - 1))}>
         −
       </button>
       <strong aria-live="polite">{value}</strong>
-      <button type="button" class="icon-btn icon-btn-sm" aria-label="Ein Platz mehr" disabled={value >= max} onClick={() => onChange(Math.min(max, value + 1))}>
+      <button type="button" class="icon-btn icon-btn-sm" aria-label={t`One seat more`} disabled={value >= max} onClick={() => onChange(Math.min(max, value + 1))}>
         +
       </button>
     </div>
@@ -220,7 +249,7 @@ function CheckRow({ label, checked, disabled, onToggle }: { label: string; check
   );
 }
 
-/** Angebot anlegen oder ändern; Trainer wählen den Fahrer aus. */
+/** Create or change an offer; coaches choose the driver. */
 function OfferSheet({ event, carpool, target, onClose, onDone }: { event: EventDetail; carpool: CarpoolInfo; target: OfferTarget; onClose: () => void; onDone: () => void }) {
   const [personId, setPersonId] = useState<number | null>(target.personId);
   const [seats, setSeats] = useState(target.offer?.seats ?? 1);
@@ -229,23 +258,26 @@ function OfferSheet({ event, carpool, target, onClose, onDone }: { event: EventD
   const base = `/events/${event.id}/carpool/offers`;
   const taken = offer ? offer.riders.filter((r) => !remove.includes(r.id)).reduce((n, r) => n + r.seats, 0) : 0;
   const tooFew = seats < taken;
-  // Trainer ohne Vorauswahl wählen den Fahrer; wer schon fährt, fehlt in der Auswahl
+  // Coaches without a preselection choose the driver; whoever is already driving is missing from the choice
   const candidates = carpool.coach?.drivers.filter((d) => !carpool.offers.some((o) => o.personId === d.id)) ?? [];
   const chosen = target.personId == null;
 
   const save = async () => {
     if (personId == null) return;
     await api.put(`${base}/${personId}`, { seats, removeRequestIds: remove.length ? remove : undefined });
-    toast(offer ? "Angebot geändert." : "Danke! Wer mitfahren möchte, kann jetzt buchen.");
+    toast(offer ? t`Offer changed.` : t`Thanks! Anyone who wants to ride along can now book.`);
     onClose();
     onDone();
   };
 
+  const driver = offer?.name ?? "";
   return (
-    <Sheet open onClose={onClose} title={offer ? (offer.mine ? "Dein Angebot" : `Angebot von ${offer.name}`) : "Ich fahre"}>
+    <Sheet open onClose={onClose} title={offer ? (offer.mine ? t`Your offer` : t`Offer from ${driver}`) : t`I'm driving`}>
       {chosen && !offer ? (
         <>
-          <p class="muted">Wer fährt?</p>
+          <p class="muted">
+            <Trans>Who is driving?</Trans>
+          </p>
           <div class="chips">
             {candidates.map((d) => (
               <button type="button" class={`chip ${personId === d.id ? "selected" : ""}`} onClick={() => setPersonId(d.id)} key={d.id}>
@@ -255,11 +287,15 @@ function OfferSheet({ event, carpool, target, onClose, onDone }: { event: EventD
           </div>
         </>
       ) : null}
-      <p class="muted">Wie viele Plätze sind frei? Ohne dich und deine eigenen Mitfahrer gezählt.</p>
-      <Stepper label="Freie Plätze" value={seats} min={1} max={MAX_SEATS} onChange={setSeats} />
+      <p class="muted">
+        <Trans>How many seats are free? Not counting you and your own passengers.</Trans>
+      </p>
+      <Stepper label={t`Free seats`} value={seats} min={1} max={MAX_SEATS} onChange={setSeats} />
       {offer?.riders.length ? (
         <>
-          <p class="small muted">Es fahren mit. Wen du nicht mehr mitnehmen kannst, hier abwählen; die Familie wird benachrichtigt und sucht wieder.</p>
+          <p class="small muted">
+            <Trans>Riding along. Deselect anyone you can no longer take; the family will be notified and will look again.</Trans>
+          </p>
           <ul class="list">
             {offer.riders.map((r) => (
               <li key={r.id}>
@@ -271,33 +307,37 @@ function OfferSheet({ event, carpool, target, onClose, onDone }: { event: EventD
               </li>
             ))}
           </ul>
-          {tooFew ? <p class="small" style={{ color: "var(--red)" }}>Es fahren {taken} Personen mit. Bitte mehr Plätze angeben oder Mitfahrer abwählen.</p> : null}
+          {tooFew ? (
+            <p class="small" style={{ color: "var(--red)" }}>
+              <Trans>{taken} people are riding along. Please enter more seats or deselect passengers.</Trans>
+            </p>
+          ) : null}
         </>
       ) : null}
       <Button variant="primary" size="lg" block disabled={tooFew || personId == null} onClick={save}>
-        {offer ? "Speichern" : "Plätze anbieten"}
+        {offer ? t`Save` : t`Offer seats`}
       </Button>
       {offer ? (
         <Button
           variant="ghost"
           icon="trash"
           onClick={async () => {
-            const msg = offer.riders.length ? "Alle Mitfahrer werden benachrichtigt und suchen wieder." : "Das Angebot wird gelöscht.";
-            if (!(await confirmDialog({ title: "Angebot zurückziehen?", message: msg, confirmLabel: "Zurückziehen", danger: true }))) return;
+            const msg = offer.riders.length ? t`All passengers will be notified and will look again.` : t`The offer will be deleted.`;
+            if (!(await confirmDialog({ title: t`Withdraw offer?`, message: msg, confirmLabel: t`Withdraw`, danger: true }))) return;
             await api.del(`${base}/${offer.personId}`);
-            toast("Angebot zurückgezogen.");
+            toast(t`Offer withdrawn.`);
             onClose();
             onDone();
           }}
         >
-          Angebot zurückziehen
+          <Trans>Withdraw offer</Trans>
         </Button>
       ) : null}
     </Sheet>
   );
 }
 
-/** Mitfahrgelegenheit suchen und buchen; Trainer wählen den Spieler aus. */
+/** Look for and book a ride; coaches choose the player. */
 function RideSheet({ event, carpool, target, onClose, onDone }: { event: EventDetail; carpool: CarpoolInfo; target: RideTarget; onClose: () => void; onDone: () => void }) {
   const me = useMe();
   const options = target.asCoach
@@ -310,15 +350,17 @@ function RideSheet({ event, carpool, target, onClose, onDone }: { event: EventDe
   const need = 1 + companions;
   const base = `/events/${event.id}/carpool/requests`;
   const offers = carpool.offers.filter((o) => o.free >= need);
-  // Begleitung: die Eltern des Mitfahrers mit Namen (man selbst zuerst, mit „du“); Trainer fahren mit Begleitpersonen
+  // Companions: the passenger's parents by name (yourself first, with "you"); coaches travel with companions
   const rider = [...carpool.mine.map((m) => m.player), ...(carpool.coach?.riders ?? [])].find((r) => r.id === player?.id);
   const isCoach = !!rider?.coach;
   const guardians = [...(rider?.guardians ?? [])].sort((a, b) => Number(b.id === me.person.id) - Number(a.id === me.person.id));
-  const fallback = isCoach ? ["Eine Begleitperson", "Zweite Begleitperson"] : guardians.length ? ["Weitere Begleitperson", "Weitere Begleitperson"] : ["Ein Elternteil", "Zweites Elternteil"];
+  const fallback = isCoach ? [t`One companion`, t`Second companion`] : guardians.length ? [t`Another companion`, t`Another companion`] : [t`One parent`, t`Second parent`];
   const labels = [0, 1].map((i) => {
     const g = guardians[i];
-    return g ? (g.id === me.person.id ? `${g.name} (du)` : g.name) : fallback[i]!;
+    const name = g?.name ?? "";
+    return g ? (g.id === me.person.id ? t`${name} (you)` : g.name) : fallback[i]!;
   });
+  const needed = seatsText(need);
 
   const ensureRequest = async () => {
     if (!player) return false;
@@ -327,10 +369,10 @@ function RideSheet({ event, carpool, target, onClose, onDone }: { event: EventDe
   };
 
   return (
-    <Sheet open onClose={onClose} title={target.asCoach ? "Mitfahrer eintragen" : "Mitfahrgelegenheit"}>
+    <Sheet open onClose={onClose} title={target.asCoach ? t`Add passenger` : t`Getting a ride`}>
       {!target.player ? (
         <>
-          <p class="muted">{target.asCoach ? "Wer braucht eine Mitfahrgelegenheit?" : "Für wen?"}</p>
+          <p class="muted">{target.asCoach ? t`Who needs a ride?` : t`For whom?`}</p>
           <div class="chips">
             {options.map((o) => (
               <button type="button" class={`chip ${player?.id === o.id ? "selected" : ""}`} onClick={() => setPlayer(o)} key={o.id}>
@@ -342,10 +384,12 @@ function RideSheet({ event, carpool, target, onClose, onDone }: { event: EventDe
       ) : null}
       {player ? (
         <>
-          <p class="muted">Wer fährt mit?</p>
+          <p class="muted">
+            <Trans>Who is riding along?</Trans>
+          </p>
           <ul class="list">
             <li>
-              <CheckRow label={self ? "Ich" : player.name} checked disabled />
+              <CheckRow label={self ? t`Me` : player.name} checked disabled />
             </li>
             {labels.map((label, i) => (
               <li key={i}>
@@ -353,13 +397,20 @@ function RideSheet({ event, carpool, target, onClose, onDone }: { event: EventDe
               </li>
             ))}
           </ul>
-          <p class="small muted">Gesucht: {seatsText(need)}</p>
+          <p class="small muted">
+            <Trans>Needed: {needed}</Trans>
+          </p>
           {offers.length ? (
             <div class="stack-sm">
-              {offers.map((o) => (
+              {offers.map((o) => {
+                const seats = seatsText(o.free);
+                const driver = o.name;
+                const driverFirstName = o.name.split(" ")[0] ?? "";
+                const name = player.name;
+                return (
                 <div class="row-gap" style={{ justifyContent: "space-between" }} key={o.id}>
                   <span>
-                    <strong>{o.name}</strong> <span class="small muted">{seatsText(o.free)} frei</span>
+                    <strong>{o.name}</strong> <span class="small muted">{t`${seats} free`}</span>
                   </span>
                   <Button
                     size="sm"
@@ -367,30 +418,37 @@ function RideSheet({ event, carpool, target, onClose, onDone }: { event: EventDe
                     onClick={async () => {
                       if (!(await ensureRequest())) return;
                       await api.put(`${base}/${player.id}/booking`, { offerId: o.id });
-                      toast(`${self ? "Du fährst" : `${player.name} fährt`} bei ${o.name} mit. ${o.name.split(" ")[0]} wird benachrichtigt.`);
+                      toast(
+                        self
+                          ? t`You are riding with ${driver}. ${driverFirstName} will be notified.`
+                          : t`${name} is riding with ${driver}. ${driverFirstName} will be notified.`,
+                      );
                       onClose();
                       onDone();
                     }}
                   >
-                    Mitfahren
+                    <Trans>Ride along</Trans>
                   </Button>
                 </div>
-              ))}
+                );
+              })}
             </div>
           ) : (
-            <p class="small muted">Gerade hat niemand genug Plätze frei.</p>
+            <p class="small muted">
+              <Trans>Nobody has enough free seats right now.</Trans>
+            </p>
           )}
           {!target.request || target.request.companions !== companions ? (
             <Button
               block
               onClick={async () => {
                 if (!(await ensureRequest())) return;
-                toast("Gespeichert. Sobald jemand Plätze anbietet, gibt es eine Benachrichtigung.");
+                toast(t`Saved. As soon as someone offers seats, you will get a notification.`);
                 onClose();
                 onDone();
               }}
             >
-              {target.request ? "Änderung speichern" : "Warten, bis jemand Plätze anbietet"}
+              {target.request ? t`Save change` : t`Wait until someone offers seats`}
             </Button>
           ) : null}
           {target.asCoach && target.request ? (
@@ -399,12 +457,12 @@ function RideSheet({ event, carpool, target, onClose, onDone }: { event: EventDe
               icon="trash"
               onClick={async () => {
                 await api.del(`${base}/${player.id}`);
-                toast("Suche gelöscht.");
+                toast(t`Ride request deleted.`);
                 onClose();
                 onDone();
               }}
             >
-              Suche löschen
+              <Trans>Delete ride request</Trans>
             </Button>
           ) : null}
         </>

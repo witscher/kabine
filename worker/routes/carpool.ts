@@ -1,4 +1,5 @@
-// Fahrgemeinschaften-API. Regeln in worker/domain/carpool.ts.
+// Carpool API. Rules in worker/domain/carpool.ts.
+import { plural, t } from "@lingui/core/macro";
 import { type Context, Hono } from "hono";
 import { z } from "zod";
 import { type AppEnv, intParam, requireActor } from "../app";
@@ -40,36 +41,44 @@ interface Scope extends CarpoolEvent {
   requests: RequestRow[];
 }
 
-/** Spiel laden und prüfen: sichtbar, Auswärtsspiel, beteiligt, noch offen. */
+/** Load and check the game: visible, away game, involved, still open. */
 async function scope(c: Context<AppEnv>): Promise<Scope> {
   const actor = requireActor(c);
   const db = c.env.DB;
   const event = await loadVisibleEvent(db, actor, intParam(c, "id"));
-  if (!event) throw notFound("Diesen Termin gibt es nicht oder du kannst ihn nicht sehen.");
-  if (!carpoolGame(event)) throw notFound("Fahrgemeinschaften gibt es nur bei Auswärtsspielen.");
+  if (!event) throw notFound(t`This event does not exist or you cannot see it.`);
+  if (!carpoolGame(event)) throw notFound(t`Carpools only exist for away games.`);
   const ctx = await loadEventContext(db, [event]);
   const { offers, requests } = await loadCarpoolRows(db, event.id);
-  if (!mayViewCarpool(actor, event, ctx, offers)) throw forbidden("Fahrgemeinschaften sehen nur Nominierte, ihre Eltern und die Trainer.");
-  if (!carpoolOpen(event, Date.now())) throw conflict("Das Spiel ist abgesagt oder hat schon begonnen.");
+  if (!mayViewCarpool(actor, event, ctx, offers)) throw forbidden(t`Only nominated players, their parents and the coaches see carpools.`);
+  if (!carpoolOpen(event, Date.now())) throw conflict(t`The game has been cancelled or has already started.`);
   const teamIds = ctx.eventTeams.get(event.id) ?? [];
   return { actor, db, event, ctx, teamIds, manage: isCoachOfAny(actor, teamIds), offers, requests };
 }
 
-/** Zusatz in Pushes, wenn ein Trainer für andere eingetragen hat. */
-const byline = (s: Scope, own: boolean) => (own ? "" : ` (eingetragen von ${s.actor.firstName})`);
+// Pushes name the coach when a coach made the entry for someone else ("(entered by …)").
 
-// Angebote -------------------------------------------------------------------------
+// Offers ---------------------------------------------------------------------------
 
-/** Eigenes Angebot, oder Trainer für andere. */
+/** Own offer, or a coach for others. */
 function offerAccess(s: Scope, personId: number): { own: boolean } {
   const own = personId === s.actor.personId;
-  if (!own && !s.manage) throw forbidden("Angebote für andere tragen nur Trainer ein.");
+  if (!own && !s.manage) throw forbidden(t`Only coaches enter offers for others.`);
   return { own };
 }
 
 const offerSchema = z.object({
-  seats: z.number().int().min(1, "Mindestens ein freier Platz.").max(MAX_SEATS, `Höchstens ${MAX_SEATS} freie Plätze.`),
-  /** Beim Senken unter die Belegung: diese Mitfahrer nicht mehr mitnehmen. */
+  seats: z
+    .number()
+    .int()
+    .min(1, { error: () => t`At least one free seat.` })
+    .max(MAX_SEATS, {
+      error: () => {
+        const max = MAX_SEATS;
+        return t`At most ${max} free seats.`;
+      },
+    }),
+  /** When lowering below the seats taken: no longer take these passengers. */
   removeRequestIds: z.array(z.number().int().positive()).max(MAX_SEATS).optional(),
 });
 
@@ -82,17 +91,27 @@ carpoolRoutes.put("/events/:id/carpool/offers/:personId", async (c) => {
 
   if (!existing) {
     if (!own && !(await driverCandidates(s.db, s.event, s.ctx)).some((p) => p.id === personId)) {
-      throw badRequest("Fahrer können Nominierte, ihre Eltern und die Trainer sein.");
+      throw badRequest(t`Drivers can be nominated players, their parents and the coaches.`);
     }
     assertNoConflict(await familyConflict(s.db, s.event.id, { driverId: personId }), "driver");
     await run(s.db, "INSERT INTO carpool_offers (event_id, person_id, seats, created_by) VALUES (?, ?, ?, ?)", s.event.id, personId, input.seats, s.actor.personId);
     if (!own) {
+      const coach = s.actor.firstName;
+      const seats = input.seats;
       await notifyCarpool(
         c.env,
         s,
         [personId],
-        "Als Fahrer eingetragen",
-        `${s.actor.firstName} hat dich mit ${input.seats === 1 ? "einem freien Platz" : `${input.seats} freien Plätzen`} als Fahrer eingetragen: ${gameWhat(s)}.`,
+        () => {
+          const game = gameWhat(s);
+          return {
+            title: t`Entered as driver`,
+            body: plural(seats, {
+              one: `${coach} entered you as a driver with one free seat: ${game}.`,
+              other: `${coach} entered you as a driver with # free seats: ${game}.`,
+            }),
+          };
+        },
         [s.actor.accountId],
       );
     }
@@ -103,10 +122,10 @@ carpoolRoutes.put("/events/:id/carpool/offers/:personId", async (c) => {
   const riders = s.requests.filter((r) => r.offer_id === existing.id);
   const removeIds = [...new Set(input.removeRequestIds ?? [])];
   const removed = riders.filter((r) => removeIds.includes(r.id));
-  if (removed.length !== removeIds.length) throw badRequest("Mindestens ein Mitfahrer fährt nicht bei diesem Fahrer mit.");
+  if (removed.length !== removeIds.length) throw badRequest(t`At least one passenger is not riding with this driver.`);
   const takenAfter = takenSeats(existing.id, s.requests) - removed.reduce((n, r) => n + seatsOf(r), 0);
   if (input.seats < takenAfter) {
-    throw conflict(`Es fahren schon ${takenAfter} Personen mit. Bitte wähle aus, wen du nicht mehr mitnehmen kannst.`, "carpool_overbooked");
+    throw conflict(t`${takenAfter} people are already riding along. Please choose whom you can no longer take.`, "carpool_overbooked");
   }
   const [, updated] = await s.db.batch([
     stmt(
@@ -115,7 +134,7 @@ carpoolRoutes.put("/events/:id/carpool/offers/:personId", async (c) => {
       existing.id,
       list(removed.map((r) => r.id)),
     ),
-    // Gegen gleichzeitige Buchungen: nur, wenn die Plätze noch reichen
+    // Against simultaneous bookings: only if the seats are still enough
     stmt(
       s.db,
       "UPDATE carpool_offers SET seats = ?1 WHERE id = ?2 AND ?1 >= (SELECT coalesce(sum(1 + companions), 0) FROM carpool_requests WHERE offer_id = ?2)",
@@ -124,21 +143,31 @@ carpoolRoutes.put("/events/:id/carpool/offers/:personId", async (c) => {
     ),
   ]);
   await afterRemoval(c.env, s, existing, removed, own);
-  if (!updated!.meta.changes) throw conflict("Inzwischen hat jemand gebucht. Bitte noch einmal versuchen.", "carpool_overbooked");
+  if (!updated!.meta.changes) throw conflict(t`Someone has booked in the meantime. Please try again.`, "carpool_overbooked");
   if (input.seats > existing.seats || removed.length) await notifyMatches(c.env, s, [s.actor.accountId]);
   return c.json({ ok: true });
 });
 
-/** Herausgenommene Mitfahrer suchen wieder und erfahren es; dasselbe Angebot schlägt ihnen die App nicht erneut vor. */
+/** Removed passengers search again and are told; the app does not suggest the same offer to them again. */
 async function afterRemoval(env: Env, s: Scope, offer: OfferRow, removed: RequestRow[], own: boolean) {
   await suppressMatches(s.db, removed.map((r) => [offer.id, r.id]));
+  const driver = offer.name;
+  const coach = s.actor.firstName;
   for (const r of removed) {
+    const rider = r.name;
     await notifyCarpool(
       env,
       s,
       [r.player_id],
-      "Mitfahrt entfällt",
-      `${offer.name} kann ${r.name} nicht mehr mitnehmen: ${gameWhat(s)}. Die Suche läuft weiter${byline(s, own)}.`,
+      () => {
+        const game = gameWhat(s);
+        return {
+          title: t`Lift is off`,
+          body: own
+            ? t`${driver} can no longer take ${rider}: ${game}. The search continues.`
+            : t`${driver} can no longer take ${rider}: ${game}. The search continues (entered by ${coach}).`,
+        };
+      },
       [s.actor.accountId],
     );
   }
@@ -149,23 +178,44 @@ carpoolRoutes.delete("/events/:id/carpool/offers/:personId", async (c) => {
   const personId = intParam(c, "personId");
   const { own } = offerAccess(s, personId);
   const offer = s.offers.find((o) => o.person_id === personId);
-  if (!offer) throw notFound("Dieses Angebot gibt es nicht.");
+  if (!offer) throw notFound(t`This offer does not exist.`);
   const riders = s.requests.filter((r) => r.offer_id === offer.id);
   await s.db.batch([
     stmt(s.db, "UPDATE carpool_requests SET offer_id = NULL, booked_at = NULL WHERE offer_id = ?", offer.id),
     stmt(s.db, "DELETE FROM carpool_offers WHERE id = ?", offer.id),
   ]);
+  const driver = offer.name;
+  const coach = s.actor.firstName;
   for (const r of riders) {
+    const rider = r.name;
     await notifyCarpool(
       c.env,
       s,
       [r.player_id],
-      "Mitfahrt entfällt",
-      `${offer.name} fährt nicht: ${gameWhat(s)}. Die Suche nach einer Mitfahrgelegenheit für ${r.name} läuft weiter${byline(s, own)}.`,
+      () => {
+        const game = gameWhat(s);
+        return {
+          title: t`Lift is off`,
+          body: own
+            ? t`${driver} is not driving: ${game}. The search for a lift for ${rider} continues.`
+            : t`${driver} is not driving: ${game}. The search for a lift for ${rider} continues (entered by ${coach}).`,
+        };
+      },
       [s.actor.accountId],
     );
   }
-  if (!own) await notifyCarpool(c.env, s, [personId], "Angebot zurückgezogen", `${s.actor.firstName} hat dein Angebot als Fahrer zurückgezogen: ${gameWhat(s)}.`, [s.actor.accountId]);
+  if (!own) {
+    await notifyCarpool(
+      c.env,
+      s,
+      [personId],
+      () => {
+        const game = gameWhat(s);
+        return { title: t`Offer withdrawn`, body: t`${coach} withdrew your offer as a driver: ${game}.` };
+      },
+      [s.actor.accountId],
+    );
+  }
   if (riders.length) await notifyMatches(c.env, s, [s.actor.accountId]);
   return c.json({ ok: true });
 });
@@ -176,30 +226,39 @@ carpoolRoutes.delete("/events/:id/carpool/offers/:personId/riders/:requestId", a
   const { own } = offerAccess(s, personId);
   const offer = s.offers.find((o) => o.person_id === personId);
   const rider = s.requests.find((r) => r.id === intParam(c, "requestId"));
-  if (!offer || !rider || rider.offer_id !== offer.id) throw notFound("Diese Person fährt hier nicht mit.");
+  if (!offer || !rider || rider.offer_id !== offer.id) throw notFound(t`This person is not riding here.`);
   await run(s.db, "UPDATE carpool_requests SET offer_id = NULL, booked_at = NULL WHERE id = ? AND offer_id = ?", rider.id, offer.id);
   await afterRemoval(c.env, s, offer, [rider], own);
   await notifyMatches(c.env, s, [s.actor.accountId]);
   return c.json({ ok: true });
 });
 
-// Suchen und Buchungen -------------------------------------------------------------
+// Searches and bookings ------------------------------------------------------------
 
-/** Für sich, ein Kind (zuständige Eltern) oder als Trainer für Nominierte. */
+/** For oneself, a child (parents in charge) or as a coach for nominated players. */
 function requestAccess(s: Scope, playerId: number): { own: boolean } {
   const own = actsFor(s.actor, playerId, s.teamIds);
-  if (!own && !s.manage) throw forbidden("Du kannst nur für dich oder deine Kinder eine Mitfahrgelegenheit suchen.");
+  if (!own && !s.manage) throw forbidden(t`You can only look for a lift for yourself or your children.`);
   return { own };
 }
 
 function existingRequest(s: Scope, playerId: number): RequestRow {
   const r = s.requests.find((x) => x.player_id === playerId);
-  if (!r) throw notFound("Für diese Person gibt es keine Suche.");
+  if (!r) throw notFound(t`There is no search for this person.`);
   return r;
 }
 
 const requestSchema = z.object({
-  companions: z.number().int().min(0).max(MAX_COMPANIONS, `Höchstens ${MAX_COMPANIONS} Begleitpersonen.`),
+  companions: z
+    .number()
+    .int()
+    .min(0)
+    .max(MAX_COMPANIONS, {
+      error: () => {
+        const max = MAX_COMPANIONS;
+        return t`At most ${max} companions.`;
+      },
+    }),
 });
 
 carpoolRoutes.put("/events/:id/carpool/requests/:playerId", async (c) => {
@@ -208,7 +267,7 @@ carpoolRoutes.put("/events/:id/carpool/requests/:playerId", async (c) => {
   const { own } = requestAccess(s, playerId);
   const { companions } = parse(requestSchema, await readJson(c.req.raw));
   const rider = (await eligibleRiders(s.db, s.event, s.ctx)).find((p) => p.person.id === playerId);
-  if (!rider) throw badRequest("Mitfahren können nominierte Spieler, die nicht abgesagt haben, und die Trainer.", "not_eligible");
+  if (!rider) throw badRequest(t`Passengers can be nominated players who have not declined, and the coaches.`, "not_eligible");
   const existing = s.requests.find((r) => r.player_id === playerId);
 
   if (!existing) {
@@ -221,7 +280,7 @@ carpoolRoutes.put("/events/:id/carpool/requests/:playerId", async (c) => {
       companions,
       s.actor.personId,
     ))[0]!;
-    // Freie Plätze stehen gleich zur Auswahl, dafür kein Push
+    // Free seats are offered right away, so no push for them
     const need = 1 + companions;
     await suppressMatches(
       s.db,
@@ -229,13 +288,23 @@ carpoolRoutes.put("/events/:id/carpool/requests/:playerId", async (c) => {
     );
     if (!own) {
       const name = riderLabel({ name: rider.person.firstName, companions });
-      await notifyCarpool(c.env, s, [playerId], "Mitfahrgelegenheit gesucht", `Für ${name} wird eine Mitfahrgelegenheit gesucht: ${gameWhat(s)}${byline(s, own)}.`, [s.actor.accountId]);
+      const coach = s.actor.firstName;
+      await notifyCarpool(
+        c.env,
+        s,
+        [playerId],
+        () => {
+          const game = gameWhat(s);
+          return { title: t`Looking for a lift`, body: t`Looking for a lift for ${name}: ${game} (entered by ${coach}).` };
+        },
+        [s.actor.accountId],
+      );
     }
     return c.json({ ok: true, id: row.id }, 201);
   }
 
   if (companions === existing.companions) return c.json({ ok: true, id: existing.id });
-  // Gebucht: mehr Plätze nur, wenn der Fahrer sie hat
+  // Booked: more seats only if the driver has them
   const res = await run(
     s.db,
     `UPDATE carpool_requests SET companions = ?1
@@ -245,15 +314,19 @@ carpoolRoutes.put("/events/:id/carpool/requests/:playerId", async (c) => {
     companions,
     existing.id,
   );
-  if (!res.meta.changes) throw conflict("Beim Fahrer ist nicht genug Platz frei. Bitte die Mitfahrt absagen und neu buchen.", "carpool_full");
+  if (!res.meta.changes) throw conflict(t`The driver does not have enough free seats. Please cancel the lift and book again.`, "carpool_full");
   const offer = s.offers.find((o) => o.id === existing.offer_id);
   if (offer) {
+    const rider = riderLabel({ name: existing.name, companions });
+    const coach = s.actor.firstName;
     await notifyCarpool(
       c.env,
       s,
       [offer.person_id],
-      "Mitfahrt geändert",
-      `${riderLabel({ name: existing.name, companions })} fährt mit dir mit: ${gameWhat(s)}${byline(s, own)}.`,
+      () => {
+        const game = gameWhat(s);
+        return { title: t`Lift changed`, body: ridingWithYou(own, rider, game, coach) };
+      },
       [s.actor.accountId],
     );
     if (companions < existing.companions) await notifyMatches(c.env, s, [s.actor.accountId]);
@@ -269,7 +342,7 @@ carpoolRoutes.delete("/events/:id/carpool/requests/:playerId", async (c) => {
   await run(s.db, "DELETE FROM carpool_requests WHERE id = ?", existing.id);
   const offer = s.offers.find((o) => o.id === existing.offer_id);
   if (offer) {
-    await notifyCarpool(c.env, s, [offer.person_id], "Mitfahrt abgesagt", `${riderLabel(existing)} fährt doch nicht mit dir mit: ${gameWhat(s)}${byline(s, own)}.`, [s.actor.accountId]);
+    await notifyNotRiding(c.env, s, offer, riderLabel(existing), own);
     await notifyMatches(c.env, s, [s.actor.accountId]);
   }
   return c.json({ ok: true });
@@ -282,11 +355,11 @@ carpoolRoutes.put("/events/:id/carpool/requests/:playerId/booking", async (c) =>
   const { offerId } = parse(z.object({ offerId: z.number().int().positive() }), await readJson(c.req.raw));
   const request = existingRequest(s, playerId);
   if (request.offer_id === offerId) return c.json({ ok: true });
-  if (request.offer_id != null) throw conflict("Bitte die bisherige Mitfahrt zuerst absagen.", "carpool_booked");
+  if (request.offer_id != null) throw conflict(t`Please cancel the current lift first.`, "carpool_booked");
   const offer = s.offers.find((o) => o.id === offerId);
-  if (!offer) throw notFound("Dieses Angebot gibt es nicht mehr.");
-  if (offer.person_id === playerId) throw conflict("Mit sich selbst kann man nicht mitfahren.", "carpool_family");
-  // Platz atomar belegen: Wer zuerst bucht, bekommt ihn
+  if (!offer) throw notFound(t`This offer no longer exists.`);
+  if (offer.person_id === playerId) throw conflict(t`You cannot ride with yourself.`, "carpool_family");
+  // Take the seat atomically: whoever books first gets it
   const res = await run(
     s.db,
     `UPDATE carpool_requests SET offer_id = ?1, booked_at = ?3
@@ -297,10 +370,32 @@ carpoolRoutes.put("/events/:id/carpool/requests/:playerId/booking", async (c) =>
     request.id,
     utcIso(),
   );
-  if (!res.meta.changes) throw conflict(`Bei ${offer.name} ist nicht mehr genug Platz frei.`, "carpool_full");
-  await notifyCarpool(c.env, s, [offer.person_id], "Neuer Mitfahrer", `${riderLabel(request)} fährt mit dir mit: ${gameWhat(s)}${byline(s, own)}.`, [s.actor.accountId]);
+  const driver = offer.name;
+  if (!res.meta.changes) throw conflict(t`${driver} no longer has enough free seats.`, "carpool_full");
+  const rider = riderLabel(request);
+  const name = request.name;
+  const coach = s.actor.firstName;
+  await notifyCarpool(
+    c.env,
+    s,
+    [offer.person_id],
+    () => {
+      const game = gameWhat(s);
+      return { title: t`New passenger`, body: ridingWithYou(own, rider, game, coach) };
+    },
+    [s.actor.accountId],
+  );
   if (!own) {
-    await notifyCarpool(c.env, s, [playerId], "Mitfahrt eingetragen", `${request.name} fährt bei ${offer.name} mit: ${gameWhat(s)}${byline(s, own)}.`, [s.actor.accountId]);
+    await notifyCarpool(
+      c.env,
+      s,
+      [playerId],
+      () => {
+        const game = gameWhat(s);
+        return { title: t`Lift booked`, body: t`${name} is riding with ${driver}: ${game} (entered by ${coach}).` };
+      },
+      [s.actor.accountId],
+    );
   }
   return c.json({ ok: true });
 });
@@ -314,10 +409,47 @@ carpoolRoutes.delete("/events/:id/carpool/requests/:playerId/booking", async (c)
   if (!offer) return c.json({ ok: true });
   await run(s.db, "UPDATE carpool_requests SET offer_id = NULL, booked_at = NULL WHERE id = ? AND offer_id = ?", request.id, offer.id);
   await suppressMatches(s.db, [[offer.id, request.id]]);
-  await notifyCarpool(c.env, s, [offer.person_id], "Mitfahrt abgesagt", `${riderLabel(request)} fährt doch nicht mit dir mit: ${gameWhat(s)}${byline(s, own)}.`, [s.actor.accountId]);
+  await notifyNotRiding(c.env, s, offer, riderLabel(request), own);
   if (!own) {
-    await notifyCarpool(c.env, s, [playerId], "Mitfahrt abgesagt", `${request.name} fährt nicht mehr bei ${offer.name} mit: ${gameWhat(s)}. Die Suche läuft weiter${byline(s, own)}.`, [s.actor.accountId]);
+    const name = request.name;
+    const driver = offer.name;
+    const coach = s.actor.firstName;
+    await notifyCarpool(
+      c.env,
+      s,
+      [playerId],
+      () => {
+        const game = gameWhat(s);
+        return { title: t`Lift cancelled`, body: t`${name} is no longer riding with ${driver}: ${game}. The search continues (entered by ${coach}).` };
+      },
+      [s.actor.accountId],
+    );
   }
   await notifyMatches(c.env, s, [s.actor.accountId]);
   return c.json({ ok: true });
 });
+
+/** Push text to the driver: "Lena M. + 1 is riding with you: …", naming the coach who made the entry. */
+function ridingWithYou(own: boolean, rider: string, game: string, coach: string): string {
+  return own ? t`${rider} is riding with you: ${game}.` : t`${rider} is riding with you: ${game} (entered by ${coach}).`;
+}
+
+/** Tells the driver that a passenger is not riding with them after all. */
+async function notifyNotRiding(env: Env, s: Scope, offer: OfferRow, rider: string, own: boolean) {
+  const coach = s.actor.firstName;
+  await notifyCarpool(
+    env,
+    s,
+    [offer.person_id],
+    () => {
+      const game = gameWhat(s);
+      return {
+        title: t`Lift cancelled`,
+        body: own
+          ? t`${rider} is not riding with you after all: ${game}.`
+          : t`${rider} is not riding with you after all: ${game} (entered by ${coach}).`,
+      };
+    },
+    [s.actor.accountId],
+  );
+}

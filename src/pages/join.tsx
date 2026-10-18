@@ -1,3 +1,5 @@
+import { plural, t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 import { clubName } from "../club";
 import { useLocation } from "preact-iso";
 import { useEffect, useState } from "preact/hooks";
@@ -26,6 +28,11 @@ type JoinInfo =
       revokeExisting: boolean;
     };
 
+/** "A and B and C": names as one list, in the app's language. */
+function joinAnd(names: string[]): string {
+  return names.reduce((list, name) => (list ? t`${list} and ${name}` : name), "");
+}
+
 function tokenFromHash(): string {
   return decodeURIComponent(location.hash.replace(/^#/, "")).trim();
 }
@@ -41,13 +48,15 @@ function Done(props: { title: string; text: string }) {
             <span class="logo-mark" style={{ width: "44px", height: "44px", fontSize: "18px" }} aria-hidden="true">
               <Icon name="check" size={26} stroke={3} />
             </span>
-            <h2 style={{ fontSize: "26px" }}>Geschafft!</h2>
+            <h2 style={{ fontSize: "26px" }}>
+              <Trans>All done!</Trans>
+            </h2>
           </div>
           <p>{props.text}</p>
         </div>
         <InstallHint />
         <Button variant="primary" size="lg" block onClick={() => route("/", true)}>
-          Zur App
+          <Trans>Go to the app</Trans>
         </Button>
       </div>
     </main>
@@ -81,7 +90,7 @@ function PersonChoice(props: { name: string; selected: boolean; disabled?: boole
 }
 
 export function JoinPage() {
-  useDocumentTitle("Einladung");
+  useDocumentTitle(t`Invitation`);
   const { refresh, me } = useSession();
   const [token] = useState(tokenFromHash);
   const [info, setInfo] = useState<JoinInfo | null>(null);
@@ -103,15 +112,15 @@ export function JoinPage() {
   };
 
   useEffect(() => {
-    if (!token) setError(new Error("Der Link ist unvollständig. Bitte öffne den Einladungslink noch einmal vollständig."));
+    if (!token) setError(new Error(t`The link is incomplete. Please open the complete invitation link again.`));
     else void load();
   }, [token]);
 
-  /** Neuer Zugang? Dann gibt es das Feld für die E-Mail-Adresse, Pflicht ist sie nur für Admins. */
+  /** New access? Then there is the e-mail address field; it is only mandatory for admins. */
   const needsEmail = !!info && (info.kind === "player" || (info.kind === "parent" && !me) || (info.kind === "personal" && !info.person.hasAccount));
   const emailRequired = !!info && info.kind === "personal" && !info.person.hasAccount && info.person.isAdmin;
 
-  /** Anfrage für Passkey und E-Mail-Code, oder null, solange etwas fehlt. */
+  /** Request for passkey and e-mail code, or null as long as something is missing. */
   const joinBody = (): Record<string, unknown> | null => {
     if (!info) return null;
     const trimmed = email.trim();
@@ -127,7 +136,7 @@ export function JoinPage() {
     return { token, personId: selected[0], ...mail };
   };
 
-  // Passkey-Optionen bereitlegen, sobald feststeht, wofür (iOS, siehe session.tsx)
+  // Prepare passkey options as soon as it is clear what for (iOS, see session.tsx)
   useEffect(() => {
     if (info?.kind === "parent" && me) return;
     if (info?.kind === "parent") void prepareLogin();
@@ -137,22 +146,22 @@ export function JoinPage() {
     return () => window.clearTimeout(timer);
   }, [info, me, selected, email, firstName, lastName]);
 
-  if (done) return <Done title="Willkommen" text={done} />;
+  if (done) return <Done title={t`Welcome`} text={done} />;
 
   if (error) {
     return (
       <main class="page no-tabs">
-        <TopBar title="Einladung" kicker={clubName()} />
+        <TopBar title={t`Invitation`} kicker={clubName()} />
         <div class="content">
           <ErrorBox error={error} />
           <a class="btn" href="/">
-            Zur Anmeldung
+            <Trans>Go to sign-in</Trans>
           </a>
         </div>
       </main>
     );
   }
-  if (!info) return <Spinner label="Einladung wird geprüft" />;
+  if (!info) return <Spinner label={t`Checking invitation`} />;
 
   const finish = async (text: string) => {
     clearCache();
@@ -163,31 +172,38 @@ export function JoinPage() {
   if (!passkeysSupported()) {
     return (
       <main class="page no-tabs">
-        <TopBar title="Einladung" kicker={clubName()} />
+        <TopBar title={t`Invitation`} kicker={clubName()} />
         <div class="content">
-          <Notice kind="warn">Dieser Browser unterstützt keine Passkeys. Bitte öffne den Link in Safari (iPhone) oder Chrome (Android).</Notice>
+          <Notice kind="warn">
+            <Trans>This browser does not support passkeys. Please open the link in Safari (iPhone) or Chrome (Android).</Trans>
+          </Notice>
         </div>
       </main>
     );
   }
 
   if (info.kind === "personal") {
+    const until = fullDate(isoToLocalDate(info.expiresAt));
     return (
       <main class="page no-tabs">
-        <TopBar title="Persönlicher Zugang" kicker="Einladung" />
+        <TopBar title={t`Personal access`} kicker={t`Invitation`} />
         <div class="content">
           <SafariHint />
           <div class="card card-pad stack">
             <p class="kicker" style={{ color: "var(--text-2)" }}>
-              Zugang für
+              <Trans>Access for</Trans>
             </p>
             <h2 style={{ fontSize: "30px" }}>{info.person.name}</h2>
             <p class="muted">
               {info.person.hasAccount
-                ? "Mit diesem Link richtest du auf diesem Gerät einen neuen Passkey für deinen bestehenden Zugang ein."
-                : "Mit diesem Link richtest du deinen Zugang ein. Dein Login ist ein Passkey: Face ID, Fingerabdruck oder die Gerätesperre."}
+                ? t`With this link you set up a new passkey on this device for your existing access.`
+                : t`With this link you set up your access. Your login is a passkey: Face ID, fingerprint or the screen lock.`}
             </p>
-            {info.revokeExisting ? <Notice kind="yellow">Deine bisherigen Passkeys und Anmeldungen werden dabei abgemeldet.</Notice> : null}
+            {info.revokeExisting ? (
+              <Notice kind="yellow">
+                <Trans>Your previous passkeys and sessions will be signed out.</Trans>
+              </Notice>
+            ) : null}
           </div>
           {needsEmail ? <EmailField value={email} onInput={setEmail} required={emailRequired} /> : null}
           <Button
@@ -205,14 +221,18 @@ export function JoinPage() {
                 toast(passkeyErrorMessage(err, "register"), "error");
                 return;
               }
-              await finish("Dein Passkey ist eingerichtet. Ab jetzt meldest du dich damit an.");
+              await finish(t`Your passkey is set up. From now on you sign in with it.`);
             }}
           >
-            Passkey einrichten (empfohlen)
+            <Trans>Set up passkey (recommended)</Trans>
           </Button>
-          <p class="small muted">Der Passkey ist die sicherste Anmeldung: Face ID, Fingerabdruck oder Gerätesperre, ohne Passwort.</p>
-          {needsEmail ? <JoinByEmail body={joinBody} email={email.trim()} onDone={() => finish("Dein Zugang ist eingerichtet. Du meldest dich per E-Mail-Code an.")} /> : null}
-          <p class="small muted">Gültig bis {fullDate(isoToLocalDate(info.expiresAt))}. Der Link funktioniert nur einmal.</p>
+          <p class="small muted">
+            <Trans>The passkey is the safest way to sign in: Face ID, fingerprint or screen lock, without a password.</Trans>
+          </p>
+          {needsEmail ? <JoinByEmail body={joinBody} email={email.trim()} onDone={() => finish(t`Your access is set up. You sign in with an e-mail code.`)} /> : null}
+          <p class="small muted">
+            <Trans>Valid until {until}. The link only works once.</Trans>
+          </p>
         </div>
       </main>
     );
@@ -228,25 +248,30 @@ export function JoinPage() {
   const nameCounts = new Map<string, number>();
   for (const p of info.persons) nameCounts.set(p.name.toLowerCase(), (nameCounts.get(p.name.toLowerCase()) ?? 0) + 1);
   const ambiguous = (name: string) => (nameCounts.get(name.toLowerCase()) ?? 0) > 1;
+  const playerName = chosen[0]?.name.split(" ")[0] ?? "";
+  const teamName = info.team.name;
+  const loggedInAs = info.loggedInAs;
 
   const submit = async () => {
     setFormError(null);
     if (isParent && me) {
       await api.post("/join/link-children", { token, childIds: selected });
-      await finish(`${chosen.map((c) => c.name).join(" und ")} ${chosen.length > 1 ? "sind" : "ist"} jetzt mit deinem Zugang verknüpft.`);
+      const names = joinAnd(chosen.map((c) => c.name));
+      const count = chosen.length;
+      await finish(plural(count, { one: `${names} is now linked to your access.`, other: `${names} are now linked to your access.` }));
       return;
     }
     if (isParent && (!firstName.trim() || !lastName.trim())) {
-      setFormError("Bitte gib deinen Vor- und Nachnamen ein.");
+      setFormError(t`Please enter your first and last name.`);
       return;
     }
     if (!selected.length) {
-      setFormError(isParent ? "Bitte wähle mindestens ein Kind aus." : "Bitte wähle deinen Namen aus.");
+      setFormError(isParent ? t`Please select at least one child.` : t`Please select your name.`);
       return;
     }
     const body = joinBody();
     if (!body) {
-      setFormError("Bitte gib eine gültige E-Mail-Adresse an.");
+      setFormError(t`Please provide a valid e-mail address.`);
       return;
     }
     try {
@@ -259,35 +284,43 @@ export function JoinPage() {
     await finishTeamJoin();
   };
 
-  const finishTeamJoin = () =>
-    finish(
+  const finishTeamJoin = () => {
+    const names = joinAnd(chosen.map((c) => c.name.split(" ")[0]!));
+    return finish(
       isParent
-        ? `Du bist jetzt mit ${chosen.map((c) => c.name.split(" ")[0]).join(" und ")} verknüpft und siehst alle Termine der ${info.team.name}.`
-        : `Hallo ${chosen[0]?.name.split(" ")[0]}! Du siehst jetzt deine Termine und kannst zu- und absagen.`,
+        ? t`You are now linked to ${names} and see all events of the ${teamName}.`
+        : t`Hello ${playerName}! You now see your events and can accept or decline.`,
     );
+  };
 
   return (
     <main class="page no-tabs">
       <header class="hero">
         <div class="hero-top">
-          <div class="kicker">Einladung</div>
+          <div class="kicker">
+            <Trans>Invitation</Trans>
+          </div>
           <div class="team-badge">{info.team.name}</div>
         </div>
-        <h1>{isParent ? "Für Eltern" : "Für Spielerinnen und Spieler"}</h1>
+        <h1>{isParent ? t`For parents` : t`For players`}</h1>
         <div class="hero-sub">
           {isParent
-            ? `Du richtest einen Elternzugang für die ${info.team.name} ein.`
-            : `Du richtest deinen eigenen Zugang für die ${info.team.name} ein.`}
+            ? t`You are setting up a parent access for the ${teamName}.`
+            : t`You are setting up your own access for the ${teamName}.`}
         </div>
       </header>
       <div class="content">
         <SafariHint />
         {isParent && me ? (
-          <Notice kind="yellow">Du bist als {info.loggedInAs} angemeldet. Wähle das Kind aus, das du zusätzlich verknüpfen möchtest.</Notice>
+          <Notice kind="yellow">
+            <Trans>You are signed in as {loggedInAs}. Select the child you want to link in addition.</Trans>
+          </Notice>
         ) : null}
         {!isParent && me ? (
           <Notice kind="yellow">
-            Auf diesem Gerät ist gerade {info.loggedInAs} angemeldet. Wenn du fortfährst, wird ein Zugang für die ausgewählte Person angelegt und diese angemeldet.
+            <Trans>
+              {loggedInAs} is currently signed in on this device. If you continue, an access will be created for the selected person and they will be signed in.
+            </Trans>
           </Notice>
         ) : null}
         {isParent && !me ? (
@@ -298,16 +331,18 @@ export function JoinPage() {
             }}
           />
         ) : null}
-        {isParent && !me ? <h2 class="section-title">Noch kein Zugang? Dann hier neu einrichten</h2> : null}
+        {isParent && !me ? <h2 class="section-title">
+            <Trans>No access yet? Then set one up here</Trans>
+          </h2> : null}
         {isParent && !me ? (
           <div class="stack">
-            <TextField label="Dein Vorname" value={firstName} onInput={setFirstName} autoComplete="given-name" maxLength={50} />
-            <TextField label="Dein Nachname" value={lastName} onInput={setLastName} autoComplete="family-name" maxLength={50} />
+            <TextField label={t`Your first name`} value={firstName} onInput={setFirstName} autoComplete="given-name" maxLength={50} />
+            <TextField label={t`Your last name`} value={lastName} onInput={setLastName} autoComplete="family-name" maxLength={50} />
           </div>
         ) : null}
         <div class="stack-sm">
-          <h2 class="section-title">{isParent ? "Dein Kind (eins oder mehrere)" : "Wer bist du?"}</h2>
-          <ul class="list" role={isParent ? "group" : "radiogroup"} aria-label={isParent ? "Kinder" : "Spielerinnen und Spieler"}>
+          <h2 class="section-title">{isParent ? t`Your child (one or more)` : t`Who are you?`}</h2>
+          <ul class="list" role={isParent ? "group" : "radiogroup"} aria-label={isParent ? t`Children` : t({ message: "Players", context: "player list" })}>
             {info.persons.map((p) => (
               <PersonChoice
                 key={p.id}
@@ -317,18 +352,22 @@ export function JoinPage() {
                 disabled={p.taken || p.linkedToMe || ambiguous(p.name)}
                 note={
                   p.taken
-                    ? "hat schon einen Zugang"
+                    ? t`has access already`
                     : p.linkedToMe
-                      ? "bereits mit dir verknüpft"
+                      ? t`already linked to you`
                       : ambiguous(p.name)
-                        ? "Name doppelt, der Trainer ergänzt noch den Nachnamen"
+                        ? t`Duplicate name, the coach will add the last name`
                         : undefined
                 }
                 onSelect={() => toggle(p.id)}
               />
             ))}
           </ul>
-          {!isParent ? <p class="small muted">Dein Name fehlt oder ist schon vergeben? Sag deinem Trainer Bescheid.</p> : null}
+          {!isParent ? (
+            <p class="small muted">
+              <Trans>Your name is missing or already taken? Let your coach know.</Trans>
+            </p>
+          ) : null}
         </div>
         {needsEmail ? <EmailField value={email} onInput={setEmail} /> : null}
         {formError ? (
@@ -339,15 +378,16 @@ export function JoinPage() {
         ) : null}
         <Button variant="primary" size="lg" block icon={isParent && me ? "link" : "key"} onClick={submit}>
           {isParent && me
-            ? "Kind verknüpfen"
+            ? t`Link child`
             : !isParent && chosen[0]
-              ? `Ich bin ${chosen[0].name.split(" ")[0]} – Passkey einrichten`
-              : "Passkey einrichten (empfohlen)"}
+              ? t`I am ${playerName} – set up passkey`
+              : t`Set up passkey (recommended)`}
         </Button>
         {!(isParent && me) ? (
           <p class="small muted">
-            Der Passkey ist die sicherste Anmeldung: Face ID, Fingerabdruck oder Gerätesperre, ohne Passwort. Die App bekommt dabei nie biometrische Daten zu
-            sehen.
+            <Trans>
+              The passkey is the safest way to sign in: Face ID, fingerprint or screen lock, without a password. The app never gets to see any biometric data.
+            </Trans>
           </p>
         ) : null}
         {needsEmail ? <JoinByEmail body={joinBody} email={email.trim()} onDone={finishTeamJoin} /> : null}
@@ -357,8 +397,8 @@ export function JoinPage() {
 }
 
 /**
- * Elternlink ohne Anmeldung: Wer schon einen Elternzugang hat (z. B. für ein Geschwisterkind),
- * meldet sich zuerst an und verknüpft dann das Kind. Sonst entsteht ein zweiter Zugang.
+ * Parent link without being signed in: whoever already has a parent access (e.g. for a sibling)
+ * signs in first and then links the child. Otherwise a second access is created.
  */
 function ExistingParentLogin({ onLoggedIn }: { onLoggedIn: () => Promise<void> }) {
   const [emailMode, setEmailMode] = useState(false);
@@ -366,10 +406,12 @@ function ExistingParentLogin({ onLoggedIn }: { onLoggedIn: () => Promise<void> }
   const [requestId, setRequestId] = useState<string | null>(null);
   const send = async () => setRequestId(await startEmailLogin(email));
   return (
-    <section class="notice yellow" style={{ flexDirection: "column", alignItems: "stretch", gap: "10px" }} aria-label="Schon einen Elternzugang?">
+    <section class="notice yellow" style={{ flexDirection: "column", alignItems: "stretch", gap: "10px" }} aria-label={t`Already have a parent access?`}>
       <div>
-        <strong>Bist du schon in der App registriert? Dann öffne diesen Link auf dem Gerät, auf dem die App installiert ist!</strong> Oder melde dich hier an
-        und verknüpfe danach dieses Kind mit deinem Zugang. Sonst entsteht ein zweiter Zugang für dich.
+        <Trans>
+          <strong>Already registered in the app? Then open this link on the device where the app is installed!</strong> Or sign in here and then link this
+          child to your access. Otherwise a second access will be created for you.
+        </Trans>
       </div>
       {!emailMode ? (
         <div class="btn-row">
@@ -386,19 +428,19 @@ function ExistingParentLogin({ onLoggedIn }: { onLoggedIn: () => Promise<void> }
               await onLoggedIn();
             }}
           >
-            Mit Passkey anmelden
+            <Trans>Sign in with passkey</Trans>
           </Button>
           <Button icon="mail" onClick={() => setEmailMode(true)}>
-            Code per E-Mail
+            <Trans>Code by e-mail</Trans>
           </Button>
         </div>
       ) : requestId ? (
         <EmailCodeForm requestId={requestId} email={email.trim()} onDone={onLoggedIn} onResend={send} />
       ) : (
         <div class="stack-sm">
-          <TextField label="E-Mail-Adresse deines Zugangs" value={email} onInput={setEmail} type="email" autoComplete="email" />
+          <TextField label={t`E-mail address of your access`} value={email} onInput={setEmail} type="email" autoComplete="email" />
           <Button variant="primary" icon="mail" disabled={!isEmail(email)} onClick={send}>
-            Code senden
+            <Trans>Send code</Trans>
           </Button>
         </div>
       )}
@@ -406,11 +448,11 @@ function ExistingParentLogin({ onLoggedIn }: { onLoggedIn: () => Promise<void> }
   );
 }
 
-/** Optional, außer für Admins: Ohne Passkey ersetzt der Trainer den Zugang per persönlichem Link. */
+/** Optional, except for admins: without a passkey the coach replaces the access with a personal link. */
 function EmailField(props: { value: string; onInput: (v: string) => void; required?: boolean }) {
   return (
     <TextField
-      label={props.required ? "Deine E-Mail-Adresse" : "Deine E-Mail-Adresse (optional)"}
+      label={props.required ? t`Your e-mail address` : t`Your e-mail address (optional)`}
       type="email"
       value={props.value}
       onInput={props.onInput}
@@ -419,19 +461,19 @@ function EmailField(props: { value: string; onInput: (v: string) => void; requir
       maxLength={254}
       hint={
         props.required
-          ? "Für Admins Pflicht. Damit kommst du auch ohne Passkey per Code in die App."
-          : "Nur nötig, wenn du dich ohne Passkey per Code anmelden möchtest. In der App sieht sie niemand sonst."
+          ? t`Mandatory for admins. With it you can also get into the app by code without a passkey.`
+          : t`Only needed if you want to sign in by code without a passkey. Nobody else in the app sees it.`
       }
     />
   );
 }
 
-/** Zugang ohne Passkey: Code an die angegebene Adresse schicken und eingeben lassen. */
+/** Access without a passkey: send a code to the given address and let it be entered. */
 function JoinByEmail(props: { body: () => Record<string, unknown> | null; email: string; onDone: () => Promise<void> }) {
   const [requestId, setRequestId] = useState<string | null>(null);
   const send = async () => {
     if (!isEmail(props.email)) {
-      toast("Für den Code per E-Mail brauchen wir deine E-Mail-Adresse.", "error");
+      toast(t`For the code by e-mail we need your e-mail address.`, "error");
       return;
     }
     const body = props.body();
@@ -445,24 +487,26 @@ function JoinByEmail(props: { body: () => Record<string, unknown> | null; email:
   if (requestId) return <EmailCodeForm requestId={requestId} email={props.email} onDone={props.onDone} onResend={send} />;
   return (
     <Button variant="ghost" icon="mail" onClick={send}>
-      Ohne Passkey: Code per E-Mail
+      <Trans>Without passkey: code by e-mail</Trans>
     </Button>
   );
 }
 
-/** Auf dem iPhone nur in Safari einrichten, sonst findet die App vom Home-Bildschirm den Passkey nicht. */
+/** On the iPhone set up only in Safari, otherwise the app on the home screen does not find the passkey. */
 function SafariHint() {
   if (!isIosOtherBrowser()) return null;
   return (
     <Notice kind="warn">
-      Bitte öffne diesen Link in <strong>Safari</strong>. Passkeys, die in einem anderen Browser angelegt werden, kann die App auf dem Home-Bildschirm oft nicht
-      nutzen. Link kopieren, Safari öffnen und in die Adresszeile einfügen.
+      <Trans>
+        Please open this link in <strong>Safari</strong>. Passkeys created in another browser often cannot be used by the app on the home screen. Copy the
+        link, open Safari and paste it into the address bar.
+      </Trans>
     </Notice>
   );
 }
 
 export function BootstrapPage() {
-  useDocumentTitle("Einrichtung");
+  useDocumentTitle(t`Setup`);
   const { refresh } = useSession();
   const [token] = useState(tokenFromHash);
   const [info, setInfo] = useState<{ name: string; email: string | null } | null>(null);
@@ -479,11 +523,11 @@ export function BootstrapPage() {
       .catch(setError);
   }, [token]);
 
-  if (done) return <Done title="Admin-Zugang" text="Dein Admin-Zugang ist eingerichtet. Der Einrichtungslink ist jetzt ungültig." />;
+  if (done) return <Done title={t`Admin access`} text={t`Your admin access is set up. The setup link is now invalid.`} />;
 
   return (
     <main class="page no-tabs">
-      <TopBar title="Einrichtung" kicker={clubName()} />
+      <TopBar title={t`Setup`} kicker={clubName()} />
       <div class="content">
         <SafariHint />
         {error ? <ErrorBox error={error} /> : null}
@@ -492,11 +536,13 @@ export function BootstrapPage() {
           <>
             <div class="card card-pad stack">
               <p class="kicker" style={{ color: "var(--text-2)" }}>
-                Admin-Zugang für
+                <Trans>Admin access for</Trans>
               </p>
               <h2 style={{ fontSize: "30px" }}>{info.name}</h2>
               {info.email ? <p class="muted">{info.email}</p> : null}
-              <p class="muted">Richte jetzt deinen Passkey ein. Der Einrichtungslink funktioniert nur ein einziges Mal.</p>
+              <p class="muted">
+                <Trans>Set up your passkey now. The setup link only works a single time.</Trans>
+              </p>
             </div>
             <Button
               variant="primary"
@@ -515,7 +561,7 @@ export function BootstrapPage() {
                 setDone(true);
               }}
             >
-              Passkey einrichten
+              <Trans>Set up passkey</Trans>
             </Button>
           </>
         ) : null}

@@ -1,3 +1,4 @@
+import { t } from "@lingui/core/macro";
 import { helperTeams, refereeRoles } from "../domain/duties";
 import type { AuthenticationResponseJSON, RegistrationResponseJSON } from "@simplewebauthn/server";
 import { Hono } from "hono";
@@ -10,6 +11,7 @@ import { finishLogin, finishRegistration, startLogin, startRegistration, type St
 import { all, first, run } from "../lib/db";
 import { badRequest, conflict, forbidden, notFound, parse, readJson } from "../lib/http";
 import { utcIso } from "../lib/time";
+import { isLocale, LOCALES } from "../../shared/i18n";
 
 export async function buildMe(env: Env, actor: Actor): Promise<Me> {
   const childIds = actor.children.map((c) => c.id);
@@ -41,7 +43,7 @@ export async function buildMe(env: Env, actor: Actor): Promise<Me> {
       teams: childTeams.filter((t) => t.person_id === c.id).map((t) => ({ id: t.id, name: t.name, parentsEnabled: t.parents_enabled === 1 })),
       parentsInCharge: parentsInCharge(actor, c.id),
     })),
-    // Wie im Actor (die Elternsicht für Admins lässt Trainerrollen weg)
+    // As in the actor (the parent view for admins leaves out coach roles)
     memberships: memberships
       .filter((m) => actor.memberships.some((a) => a.teamId === m.id && a.role === m.role))
       .map((m) => ({ id: m.id, name: m.name, role: m.role, parentsEnabled: m.parents_enabled === 1 })),
@@ -54,11 +56,13 @@ export async function buildMe(env: Env, actor: Actor): Promise<Me> {
     viewAs: actor.viewAs ? { mode: actor.viewAs, readOnly: !!actor.readOnly } : null,
     referee: (await refereeRoles(env.DB, actor)).length > 0,
     groupIds: groups.map((g) => g.id),
-    // Umschalter Admin/Trainer im Profil: nur Admins mit eigener Trainerrolle
+    // Admin/coach switch in the profile: only admins with an own coach role
     adminSwitch:
       (actor.isAdmin || actor.adminSuspended) && !actor.viewAs && actor.memberships.some((m) => m.role === "coach")
         ? { coachMode: !!actor.adminSuspended }
         : null,
+    // Language chosen on the account (null: app or club default)
+    locale: isLocale(actor.locale) ? actor.locale : null,
   };
 }
 
@@ -79,7 +83,7 @@ const verifySchema = z.object({ challengeId: z.string().min(1), response: z.reco
 authRoutes.post("/auth/login/verify", async (c) => {
   const { challengeId, response } = parse(verifySchema, await readJson(c.req.raw));
   const auth = response as unknown as AuthenticationResponseJSON;
-  if (typeof auth.id !== "string") throw badRequest("Ungültige Antwort.");
+  if (typeof auth.id !== "string") throw badRequest(t`Invalid response.`);
   const passkey = await first<StoredPasskey & { disabled_at: string | null; is_former: number }>(
     c.env.DB,
     `SELECT pk.id, pk.account_id, pk.public_key, pk.counter, pk.transports, a.disabled_at, p.is_former
@@ -89,7 +93,7 @@ authRoutes.post("/auth/login/verify", async (c) => {
   );
   if (!passkey || passkey.disabled_at || passkey.is_former) {
     throw badRequest(
-      "Dieser Passkey ist hier nicht (mehr) registriert. Bitte frag deinen Trainer nach einem neuen Einladungslink.",
+      t`This passkey is not (or no longer) registered here. Please ask your coach for a new invitation link.`,
       "unknown_passkey",
     );
   }
@@ -114,10 +118,10 @@ const clientErrorSchema = z.object({
   preparedAgeMs: z.number().int().min(0).max(3_600_000).nullable(),
 });
 
-/** Gescheiterte Passkey-Dialoge landen im Log (Fehlersuche, ohne Personendaten). */
+/** Failed passkey dialogs end up in the log (troubleshooting, without personal data). */
 authRoutes.post("/client-errors", async (c) => {
   const input = parse(clientErrorSchema, await readJson(c.req.raw));
-  console.warn("Passkey-Fehler im Browser", { ...input, ua: (c.req.header("user-agent") ?? "").slice(0, 200) });
+  console.warn("Passkey error in the browser", { ...input, ua: (c.req.header("user-agent") ?? "").slice(0, 200) });
   return c.json({ ok: true });
 });
 
@@ -128,7 +132,7 @@ authRoutes.post("/auth/logout", async (c) => {
   return c.json({ ok: true });
 });
 
-// Geräte und Passkeys des eigenen Accounts ------------------------------------
+// Devices and passkeys of the own account ------------------------------------
 
 authRoutes.get("/me/security", async (c) => {
   const actor = requireActor(c);
@@ -162,7 +166,7 @@ authRoutes.get("/me/security", async (c) => {
     })),
     sessions: sessions.map((s) => ({
       id: s.id,
-      deviceLabel: s.device_label ?? "Gerät",
+      deviceLabel: s.device_label ?? t`Device`,
       createdAt: s.created_at,
       expiresAt: s.expires_at,
       current: s.id === actor.session.id,
@@ -186,7 +190,7 @@ authRoutes.delete("/me/passkeys/:id", async (c) => {
     actor.accountId,
   );
   if ((count?.n ?? 0) <= 1 && !count?.verified) {
-    throw conflict("Das ist dein einziger Passkey. Ohne ihn und ohne bestätigte E-Mail-Adresse könntest du dich nicht mehr anmelden.");
+    throw conflict(t`This is your only passkey. Without it and without a confirmed e-mail address you could no longer sign in.`);
   }
   const res = await run(c.env.DB, "DELETE FROM passkeys WHERE id = ? AND account_id = ?", c.req.param("id"), actor.accountId);
   if (!res.meta.changes) throw notFound();
@@ -226,7 +230,7 @@ authRoutes.post("/me/passkeys/verify", async (c) => {
     challengeId,
     response as unknown as RegistrationResponseJSON,
   );
-  if (context.kind !== "add" || context.accountId !== actor.accountId) throw badRequest("Ungültige Anfrage.");
+  if (context.kind !== "add" || context.accountId !== actor.accountId) throw badRequest(t`Invalid request.`);
   await insertPasskey(c.env.DB, actor.accountId, credential, c.req.header("user-agent") ?? null);
   return c.json({ ok: true });
 });
@@ -254,7 +258,7 @@ export async function insertPasskey(
 
 const adminModeSchema = z.object({ coachMode: z.boolean() });
 
-/** Admin, der auch Trainer ist: als Trainer oder als Admin arbeiten. Prüft die Person, nicht den Actor (im Trainer-Modus ruhen die Admin-Rechte). */
+/** Admin who is also a coach: work as a coach or as an admin. Checks the person, not the actor (in coach mode the admin rights are suspended). */
 authRoutes.put("/profile/admin-mode", async (c) => {
   const actor = requireActor(c);
   const { coachMode } = parse(adminModeSchema, await readJson(c.req.raw));
@@ -264,7 +268,17 @@ authRoutes.put("/profile/admin-mode", async (c) => {
        AND EXISTS (SELECT 1 FROM team_memberships tm WHERE tm.person_id = p.id AND tm.role = 'coach')`,
     actor.personId,
   );
-  if (!ok || actor.viewAs) throw forbidden("Den Umschalter gibt es nur für Admins, die auch Trainer sind.");
+  if (!ok || actor.viewAs) throw forbidden(t`The switch is only available to admins who are also coaches.`);
   await run(c.env.DB, "UPDATE accounts SET coach_mode = ? WHERE id = ?", coachMode ? 1 : 0, actor.accountId);
   return c.json({ ok: true });
+});
+
+const localeSchema = z.object({ locale: z.enum(LOCALES).nullable() });
+
+/** Language of the own account; null goes back to the app's language or the club default. */
+authRoutes.put("/me/locale", async (c) => {
+  const actor = requireActor(c);
+  const { locale } = parse(localeSchema, await readJson(c.req.raw));
+  await run(c.env.DB, "UPDATE accounts SET locale = ? WHERE id = ?", locale, actor.accountId);
+  return c.json({ ok: true, locale });
 });

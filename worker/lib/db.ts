@@ -1,5 +1,5 @@
-// Dünne Hilfen um D1. Listen werden als JSON übergeben und mit json_each()
-// aufgelöst, damit es keine Grenze bei der Anzahl gebundener Parameter gibt.
+// Thin helpers around D1. Lists are passed as JSON and expanded with json_each(),
+// so there is no limit on the number of bound parameters.
 
 export type Param = string | number | null | boolean | ArrayBuffer | Uint8Array | undefined;
 
@@ -30,7 +30,7 @@ export async function run(db: D1Database, sql: string, ...params: Param[]): Prom
   return stmt(db, sql, ...params).run();
 }
 
-/** Führt Statements in Blöcken als Batch aus (jeder Block ist eine Transaktion). */
+/** Runs statements as batches in chunks (each chunk is a transaction). */
 export async function batch(db: D1Database, statements: D1PreparedStatement[], chunk = 80): Promise<D1Result[]> {
   const results: D1Result[] = [];
   for (let i = 0; i < statements.length; i += chunk) {
@@ -39,7 +39,7 @@ export async function batch(db: D1Database, statements: D1PreparedStatement[], c
   return results;
 }
 
-/** JSON-Liste für `IN (SELECT value FROM json_each(?))`. */
+/** JSON list for `IN (SELECT value FROM json_each(?))`. */
 export function list(values: readonly (number | string)[]): string {
   return JSON.stringify(values);
 }

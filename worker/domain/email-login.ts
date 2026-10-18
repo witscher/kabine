@@ -1,5 +1,6 @@
-// Anmeldung per E-Mail: Einmal-Code und Link. Der Passkey bleibt die sicherste
-// Variante, die E-Mail ist der Weg für Geräte ohne Passkey und zur Wiederherstellung.
+import { t } from "@lingui/core/macro";
+// Sign-in by e-mail: one-time code and link. The passkey remains the most secure
+// option; e-mail is the way for devices without a passkey and for recovery.
 import { loadClub } from "./club";
 import { z } from "zod";
 import { hmacB64url, randomToken, sha256Hex } from "../lib/crypto";
@@ -18,30 +19,30 @@ export const emailSchema = z
   .string()
   .trim()
   .toLowerCase()
-  .max(254, "Die E-Mail-Adresse ist zu lang.")
-  .email("Bitte gib eine gültige E-Mail-Adresse ein.");
+  .max(254, { error: () => t`The e-mail address is too long.` })
+  .email({ error: () => t`Please type in a valid e-mail address.` });
 
 export interface MailMessage {
   to: string;
   subject: string;
   text: string;
-  /** Abweichender Anzeigename, z. B. „SVM Helferplan“ (Adresse immer MAIL_FROM). */
+  /** Different display name, e.g. "SVM Helferplan" (address always MAIL_FROM). */
   from?: { email: string; name: string };
   replyTo?: string;
   attachments?: { content: ArrayBuffer | Uint8Array; filename: string; type: string }[];
 }
 
-/** Versand über Cloudflare Email Service. Als Objekt, damit Tests ihn ersetzen können. */
+/** Sending via Cloudflare Email Service. An object so tests can replace it. */
 export const mailer = {
   async send(env: Env, msg: MailMessage): Promise<void> {
     if (!env.EMAIL) {
       // Test installations may run without mail. Logs are kept, so they get neither the text (codes, feedback,
       // names) nor the address, only the subject and a short hash of the recipient.
       if (env.APP_ENV === "staging") {
-        console.log(`E-Mail nicht verschickt (kein Versand eingerichtet): ${msg.subject} an ${(await sha256Hex(msg.to)).slice(0, 12)}`);
+        console.log(`E-mail not sent (no sending set up): ${msg.subject} to ${(await sha256Hex(msg.to)).slice(0, 12)}`);
         return;
       }
-      throw new Error("E-Mail-Versand ist nicht eingerichtet (Binding EMAIL fehlt).");
+      throw new Error("E-mail sending is not set up (binding EMAIL missing).");
     }
     await env.EMAIL.send({
       from: msg.from ?? { email: env.MAIL_FROM, name: (await loadClub(env.DB)).shortName },
@@ -68,7 +69,7 @@ export interface EmailCodeRow {
 }
 
 function sixDigits(): string {
-  // Gleichverteilt: Werte oberhalb des letzten vollen Millionenblocks verwerfen
+  // Uniform: discard values above the last full block of a million
   const max = Math.floor(0x1_0000_0000 / 1_000_000) * 1_000_000;
   const buf = new Uint32Array(1);
   do crypto.getRandomValues(buf);
@@ -80,13 +81,13 @@ async function codeHash(env: Env, requestId: string, code: string): Promise<stri
   return hmacB64url(env.APP_SECRET, `email-code:${requestId}:${code}`);
 }
 
-/** Höchstens wenige E-Mails pro Adresse und Absender-IP und Stunde. */
+/** At most a few e-mails per address and sender IP per hour. */
 async function rateLimit(env: Env, email: string, ip: string | null): Promise<void> {
   const keys: [string, number][] = [[`mail:to:${await sha256Hex(email)}`, SENDS_PER_ADDRESS_PER_HOUR]];
   if (ip) keys.push([`mail:ip:${await sha256Hex(ip)}`, SENDS_PER_IP_PER_HOUR]);
   for (const [key, limit] of keys) {
     const count = Number((await env.KV.get(key)) ?? 0);
-    if (count >= limit) throw conflict("Es wurden gerade viele E-Mails verschickt. Bitte versuche es in einer Stunde noch einmal.", "rate_limited");
+    if (count >= limit) throw conflict(t`Many e-mails have just been sent. Please try again in an hour.`, "rate_limited");
   }
   for (const [key] of keys) {
     const count = Number((await env.KV.get(key)) ?? 0);
@@ -94,34 +95,35 @@ async function rateLimit(env: Env, email: string, ip: string | null): Promise<vo
   }
 }
 
-const TEXTS: Record<EmailPurpose, { subject: (code: string, app: string) => string; intro: (app: string) => string }> = {
-  login: { subject: (code, app) => `${code} ist dein Anmeldecode für ${app}`, intro: () => "hier ist dein Code zum Anmelden" },
-  verify: { subject: (code) => `${code}: Bitte bestätige deine E-Mail-Adresse`, intro: (app) => `bitte bestätige deine E-Mail-Adresse für ${app} mit diesem Code` },
-  join: { subject: (code, app) => `${code} ist dein Code für den Zugang zu ${app}`, intro: () => "hier ist dein Code, um deinen Zugang einzurichten" },
-};
+const texts = (): Record<EmailPurpose, { subject: (code: string, app: string) => string; intro: (app: string) => string }> => ({
+  login: { subject: (code, app) => t`${code} is your sign-in code for ${app}`, intro: () => t`here is your code to sign in:` },
+  verify: { subject: (code) => t`${code}: Please confirm your e-mail address`, intro: (app) => t`please confirm your e-mail address for ${app} with this code:` },
+  join: { subject: (code, app) => t`${code} is your code for access to ${app}`, intro: () => t`here is your code to set up your access:` },
+});
 
 function mailText(purpose: EmailPurpose, code: string, link: string, club: string): string {
+  const minutes = CODE_TTL_MS / 60_000;
   return [
-    "Hallo,",
+    t`Hello,`,
     "",
-    `${TEXTS[purpose].intro(club)}:`,
+    texts()[purpose].intro(club),
     "",
     `    ${code}`,
     "",
-    `Der Code gilt ${CODE_TTL_MS / 60_000} Minuten. Statt den Code einzugeben, kannst du auch diesen Link öffnen:`,
+    t`The code is valid for ${minutes} minutes. Instead of entering the code, you can also open this link:`,
     link,
     "",
-    "Nutzt du die App vom Home-Bildschirm, gib den Code am besten direkt dort ein.",
+    t`If you use the app from the home screen, it is best to enter the code there directly.`,
     "",
-    "Am sichersten meldest du dich mit einem Passkey an (Face ID, Fingerabdruck oder Gerätesperre). Einrichten kannst du ihn in der App unter Profil, Passkeys und Geräte.",
+    t`The most secure way to sign in is with a passkey (Face ID, fingerprint or device lock). You can set one up in the app under Profile, Passkeys and devices.`,
     "",
-    "Du hast das nicht angefordert? Dann ignoriere diese E-Mail einfach.",
+    t`You did not request this? Then simply ignore this e-mail.`,
     "",
     club,
   ].join("\n");
 }
 
-/** Legt einen Code an und verschickt ihn. Gibt die Anfrage-ID für die Code-Eingabe zurück. */
+/** Creates a code and sends it. Returns the request ID for entering the code. */
 export async function issueEmailCode(
   env: Env,
   input: { purpose: EmailPurpose; email: string; accountId?: number | null; context?: unknown; origin: string; ip: string | null },
@@ -147,30 +149,30 @@ export async function issueEmailCode(
   const club = await loadClub(env.DB);
   await mailer.send(env, {
     to: input.email,
-    subject: TEXTS[input.purpose].subject(code, club.shortName),
+    subject: texts()[input.purpose].subject(code, club.shortName),
     text: mailText(input.purpose, code, `${input.origin}/email#${token}`, club.name),
   });
   return requestId;
 }
 
-const INVALID = "Der Code stimmt nicht oder ist abgelaufen. Bitte fordere einen neuen an.";
+const invalid = () => t`The code is wrong or has expired. Please request a new one.`;
 
 /**
- * Prüft Code oder Link, ohne ihn zu verbrauchen (das macht markUsed nach
- * erfolgreicher Anmeldung). Falsche Codes zählen mit, nach fünf ist Schluss.
+ * Checks a code or link without using it up (markUsed does that after a
+ * successful sign-in). Wrong codes are counted; after five it is over.
  */
 export async function checkEmailCode(env: Env, by: { requestId: string; code: string } | { token: string }, now = Date.now()): Promise<EmailCodeRow> {
   const row =
     "token" in by
       ? await first<EmailCodeRow>(env.DB, "SELECT * FROM email_codes WHERE token_hash = ?", await sha256Hex(by.token))
       : await first<EmailCodeRow>(env.DB, "SELECT * FROM email_codes WHERE request_id = ?", by.requestId);
-  if (!row || row.used_at || Date.parse(row.expires_at) <= now) throw gone(INVALID, "code_invalid");
-  if (row.attempts >= MAX_ATTEMPTS) throw gone("Zu viele Fehlversuche. Bitte fordere einen neuen Code an.", "code_invalid");
+  if (!row || row.used_at || Date.parse(row.expires_at) <= now) throw gone(invalid(), "code_invalid");
+  if (row.attempts >= MAX_ATTEMPTS) throw gone(t`Too many failed attempts. Please request a new code.`, "code_invalid");
   if ("code" in by) {
     const expected = await codeHash(env, row.request_id, by.code.replace(/\s/g, ""));
     if (expected !== row.code_hash) {
       await run(env.DB, "UPDATE email_codes SET attempts = attempts + 1 WHERE id = ?", row.id);
-      throw badRequest("Der Code stimmt nicht.", "code_wrong");
+      throw badRequest(t`The code is wrong.`, "code_wrong");
     }
   }
   return row;
@@ -178,5 +180,5 @@ export async function checkEmailCode(env: Env, by: { requestId: string; code: st
 
 export async function markEmailCodeUsed(db: D1Database, id: number): Promise<void> {
   const res = await run(db, "UPDATE email_codes SET used_at = ? WHERE id = ? AND used_at IS NULL", utcIso(), id);
-  if (!res.meta.changes) throw gone(INVALID, "code_invalid");
+  if (!res.meta.changes) throw gone(invalid(), "code_invalid");
 }

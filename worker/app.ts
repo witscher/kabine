@@ -1,3 +1,4 @@
+import { t } from "@lingui/core/macro";
 import { type Context, Hono } from "hono";
 import { type Actor, loadActor } from "./auth/actor";
 import { readViewMode, viewAsActor } from "./auth/view-as";
@@ -23,7 +24,7 @@ export function requireActor(c: Ctx): Actor {
 export function intParam(c: Ctx, name: string): number {
   const raw = c.req.param(name);
   const n = Number(raw);
-  if (!Number.isInteger(n) || n <= 0) throw new ApiError(404, "not_found", "Nicht gefunden.");
+  if (!Number.isInteger(n) || n <= 0) throw new ApiError(404, "not_found", t`Not found.`);
   return n;
 }
 
@@ -36,29 +37,29 @@ export function createBaseApp(): Hono<AppEnv> {
     if (err instanceof ApiError) {
       return c.json({ error: { code: err.code, message: err.message } }, err.status);
     }
-    console.error("Unerwarteter Fehler", err);
-    return c.json({ error: { code: "internal", message: "Es ist ein Fehler aufgetreten. Bitte versuche es später erneut." } }, 500);
+    console.error("Unexpected error", err);
+    return c.json({ error: { code: "internal", message: t`Something went wrong. Please try again later.` } }, 500);
   });
 
-  app.notFound((c) => c.json({ error: { code: "not_found", message: "Unbekannter Endpunkt." } }, 404));
+  app.notFound((c) => c.json({ error: { code: "not_found", message: t`Unknown endpoint.` } }, 404));
 
   app.use("/api/*", async (c, next) => {
     const club = await enterClubContext(c.env.DB);
     // Language: the account's, else the app's (header), else the club's
     const asked = c.req.header("x-kabine-locale");
     return withLocale(isLocale(asked) ? asked : club.defaultLocale, async () => {
-      // Schutz gegen CSRF: Browser senden bei Schreibzugriffen immer Origin mit.
+      // CSRF protection: browsers always send Origin with write requests.
       const appOrigin = c.env.ORIGIN || new URL(c.req.url).origin;
       if (UNSAFE.has(c.req.method)) {
         const origin = c.req.header("origin");
         if (origin && origin !== appOrigin) {
-          throw forbidden("Ungültige Herkunft der Anfrage.");
+          throw forbidden(t`Invalid request origin.`);
         }
       }
       // WebSockets (chat, helper plan) carry the session cookie from any site of the same parent domain, and browsers
       // always send Origin with them: only the app itself may open one.
       if (c.req.header("upgrade")?.toLowerCase() === "websocket" && c.req.header("origin") !== appOrigin) {
-        throw forbidden("Ungültige Herkunft der Anfrage.");
+        throw forbidden(t`Invalid request origin.`);
       }
 
       const token = readSessionToken(c.req.raw);
@@ -75,25 +76,32 @@ export function createBaseApp(): Hono<AppEnv> {
       }
       const actorToken = actor ? token : null;
       const locale = isLocale(actor?.locale) ? actor.locale : currentLocale();
+      // Remember the app's language on the account the first time, so pushes, mails and the calendar feed
+      // (which arrive without the app) use it too. A choice in the profile overwrites it.
+      if (actor && !isLocale(actor.locale) && isLocale(asked)) {
+        c.executionCtx.waitUntil(
+          c.env.DB.prepare("UPDATE accounts SET locale = ? WHERE id = ? AND locale IS NULL").bind(asked, actor.accountId).run().catch(() => undefined),
+        );
+      }
       return withLocale(locale, async () => {
-        // Wartungsmodus: nur Admins (auch im Trainer-Modus oder in einer Ansicht)
+        // Maintenance mode: admins only (also in coach mode or in a view)
         if (!(actor?.isAdmin || actor?.adminSuspended) && !maintenanceAllowed(c.req.path, !!actor)) {
           if (await maintenanceState(c.env.KV)) {
-            return c.json({ error: { code: "maintenance", message: "Die App wird gerade gewartet und ist gleich wieder da." } }, 503);
+            return c.json({ error: { code: "maintenance", message: t`The app is under maintenance and will be back shortly.` } }, 503);
           }
         }
         const viewMode = actor?.isAdmin ? readViewMode(c.req.raw) : null;
         if (actor && viewMode) {
           actor = (await viewAsActor(c.env.DB, actor, viewMode)) ?? actor;
           if (actor.readOnly && UNSAFE.has(c.req.method) && !c.req.path.startsWith("/api/auth/logout")) {
-            throw forbidden("In dieser Ansicht kann nichts geändert werden.", "view_read_only");
+            throw forbidden(t`Nothing can be changed in this view.`, "view_read_only");
           }
         }
         c.set("actor", actor);
         c.set("sessionToken", actorToken);
 
         await next();
-        // Profilbilder setzen ihr eigenes Caching
+        // Profile pictures set their own caching
         if (!c.res.headers.has("Cache-Control")) c.header("Cache-Control", "no-store");
       });
     });

@@ -1,3 +1,5 @@
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 import { ErrorBoundary, LocationProvider, Route, Router, useLocation } from "preact-iso";
 import type { ComponentChildren } from "preact";
 import { useEffect } from "preact/hooks";
@@ -58,25 +60,27 @@ function TabBar() {
   if (!me) return null;
   const unread = rooms.data?.rooms.some((r) => r.unread) ?? false;
   const tabs: { href: string; label: string; icon: IconName; match: (p: string) => boolean; dot?: boolean }[] = [
-    { href: "/", label: "Termine", icon: "calendar", match: (p) => p === "/" || p.startsWith("/termine") },
-    { href: "/chat", label: "Chat", icon: "chat", match: (p) => p.startsWith("/chat"), dot: unread },
+    { href: "/", label: t`Events`, icon: "calendar", match: (p) => p === "/" || p.startsWith("/termine") },
+    { href: "/chat", label: t`Chat`, icon: "chat", match: (p) => p.startsWith("/chat"), dot: unread },
   ];
-  if (me.helperTeams.length || me.referee) tabs.push({ href: "/helfer", label: "Helfer", icon: "helping", match: (p) => p.startsWith("/helfer") });
-  if (me.isAdmin) tabs.push({ href: "/verwaltung", label: "Verwaltung", icon: "settings", match: (p) => p.startsWith("/verwaltung") || p.startsWith("/team") });
-  else if (me.manageableTeams.length) tabs.push({ href: "/team", label: "Team", icon: "users", match: (p) => p.startsWith("/team") });
-  // Spieler und Eltern brauchen keine Verwaltung: dort steht Hilfe und Feedback
-  else tabs.push({ href: "/hilfe", label: "Hilfe", icon: "info", match: (p) => p.startsWith("/hilfe") });
-  tabs.push({ href: "/profil", label: "Profil", icon: "user", match: (p) => p.startsWith("/profil") });
+  if (me.helperTeams.length || me.referee) tabs.push({ href: "/helfer", label: t`Helpers`, icon: "helping", match: (p) => p.startsWith("/helfer") });
+  if (me.isAdmin) tabs.push({ href: "/verwaltung", label: t({ message: "Admin", context: "navigation" }), icon: "settings", match: (p) => p.startsWith("/verwaltung") || p.startsWith("/team") });
+  else if (me.manageableTeams.length) tabs.push({ href: "/team", label: t`Team`, icon: "users", match: (p) => p.startsWith("/team") });
+  // Players and parents need no administration: help and feedback go there
+  else tabs.push({ href: "/hilfe", label: t`Help`, icon: "info", match: (p) => p.startsWith("/hilfe") });
+  tabs.push({ href: "/profil", label: t`Profile`, icon: "user", match: (p) => p.startsWith("/profil") });
   return (
-    <nav class="tabbar" aria-label="Hauptnavigation">
-      {tabs.map((t) => (
-        <a class="tab" href={t.href} aria-current={t.match(path) ? "page" : undefined}>
-          <Icon name={t.icon} size={22} />
-          {t.label}
-          {t.dot ? (
+    <nav class="tabbar" aria-label={t`Main navigation`}>
+      {tabs.map((tab) => (
+        <a class="tab" href={tab.href} aria-current={tab.match(path) ? "page" : undefined}>
+          <Icon name={tab.icon} size={22} />
+          {tab.label}
+          {tab.dot ? (
             <>
               <span class="dot" aria-hidden="true" />
-              <span class="sr-only">(ungelesen)</span>
+              <span class="sr-only">
+                <Trans>(unread)</Trans>
+              </span>
             </>
           ) : null}
         </a>
@@ -93,7 +97,7 @@ function ScrollTop() {
   return null;
 }
 
-/** Zurück online: alles Sichtbare neu laden und nach einer neuen Version sehen. */
+/** Back online: reload everything visible and look for a new version. */
 function OnlineRefresh() {
   useEffect(() => {
     const onOnline = () => {
@@ -107,9 +111,9 @@ function OnlineRefresh() {
 }
 
 /**
- * iOS, installierte App: Nach dem Schließen der Tastatur bleiben fest positionierte Elemente
- * (Navigationsleiste unten) manchmal um die Tastaturhöhe nach oben verschoben, bis neu gescrollt
- * wird. Wird der sichtbare Bereich wieder deutlich größer, einmal minimal scrollen und zurück.
+ * iOS, installed app: after the keyboard closes, fixed elements (bottom navigation bar)
+ * sometimes stay shifted up by the keyboard height until the next scroll. When the visible
+ * area grows clearly again, scroll minimally once and back.
  */
 function KeyboardViewportFix() {
   useEffect(() => {
@@ -154,7 +158,7 @@ function Shell({ children }: { children: ComponentChildren }) {
   if (loading && !isPublic) {
     return (
       <div class="app">
-        <Spinner label="App wird geladen" />
+        <Spinner label={t`Loading app`} />
       </div>
     );
   }
@@ -175,7 +179,7 @@ function Shell({ children }: { children: ComponentChildren }) {
   );
 }
 
-/** Alte Adresse /spiele: die Spiele stehen unter Termine, der Abgleich in der Mannschaft. */
+/** Old address /spiele: games are listed under events, the sync in the team. */
 function RedirectHome() {
   const { route } = useLocation();
   useEffect(() => route("/", true), []);
@@ -187,9 +191,11 @@ function NotFound() {
     <main class="page">
       <div class="content">
         <div class="empty">
-          <div class="title">Seite nicht gefunden</div>
+          <div class="title">
+            <Trans>Page not found</Trans>
+          </div>
           <a class="btn btn-primary" href="/">
-            Zu den Terminen
+            <Trans>Go to events</Trans>
           </a>
         </div>
       </div>

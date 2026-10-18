@@ -1,11 +1,15 @@
-// Ferienzeiträume: frei bearbeitbare Liste (Name, von, bis). Die Schulferien
-// Baden-Württemberg kommen einmal je Saison beim Saisonwechsel von OpenHolidays (ODbL).
+// Holiday periods: freely editable list (name, from, to). The school holidays of
+// Baden-Württemberg come from OpenHolidays (ODbL) once per season at the season change.
+import { t } from "@lingui/core/macro";
 import { all } from "../lib/db";
 
 export const OPENHOLIDAYS_URL = "https://openholidaysapi.org/SchoolHolidays";
 export const SUBDIVISION = "DE-BW";
-export const HOLIDAY_SOURCE = "OpenHolidays API (openholidaysapi.org), Lizenz ODbL";
-/** Längster erlaubter Zeitraum (Sommerferien plus Puffer). */
+/** Source note shown with imported holidays. */
+export function holidaySourceLabel(): string {
+  return t`OpenHolidays API (openholidaysapi.org), licence ODbL`;
+}
+/** Longest allowed period (summer holidays plus buffer). */
 export const MAX_HOLIDAY_DAYS = 120;
 
 export interface HolidayPeriodView {
@@ -32,7 +36,7 @@ interface PeriodRow {
 
 const view = (p: PeriodRow): HolidayPeriodView => ({ id: p.id, name: p.name, startsOn: p.starts_on, endsOn: p.ends_on, imported: p.imported === 1 });
 
-/** Ferienzeiträume, die den Bereich berühren (ohne Bereich: alle). */
+/** Holiday periods touching the range (without a range: all). */
 export async function holidayPeriods(db: D1Database, from?: string, to?: string): Promise<HolidayPeriodView[]> {
   const rows =
     from && to
@@ -61,24 +65,24 @@ function isEntry(x: unknown): x is OpenHolidaysEntry {
   );
 }
 
-/** Schulferien Baden-Württemberg im Bereich, nur gelesen und geprüft (für den Saisonwechsel). */
+/** School holidays of Baden-Württemberg in the range, only read and checked (for the season change). */
 export async function fetchBwHolidays(from: string, to: string, fetcher: typeof fetch = fetch): Promise<HolidayInput[]> {
   const url = `${OPENHOLIDAYS_URL}?countryIsoCode=DE&subdivisionCode=${SUBDIVISION}&languageIsoCode=DE&validFrom=${from}&validTo=${to}`;
   const res = await fetcher(url, { headers: { accept: "application/json" } });
-  if (!res.ok) throw new Error(`OpenHolidays antwortet mit ${res.status}`);
+  if (!res.ok) throw new Error(`OpenHolidays responded with ${res.status}`);
   const data: unknown = await res.json();
-  if (!Array.isArray(data) || !data.every(isEntry)) throw new Error("OpenHolidays: unerwartetes Antwortformat");
+  if (!Array.isArray(data) || !data.every(isEntry)) throw new Error("OpenHolidays: unexpected response format");
   return data
     .filter((e) => e.endDate >= from && e.startDate <= to)
     .map((e) => ({
-      name: (e.name.find((n) => n.language === "DE")?.text ?? e.name[0]?.text ?? "Ferien").slice(0, 60),
+      name: (e.name.find((n) => n.language === "DE")?.text ?? e.name[0]?.text ?? t`Holidays`).slice(0, 60),
       startsOn: e.startDate,
       endsOn: e.endDate,
     }))
     .sort((a, b) => a.startsOn.localeCompare(b.startsOn));
 }
 
-/** Austauschbar für Tests (wie `mailer` beim E-Mail-Versand). */
+/** Replaceable in tests (like `mailer` for sending e-mail). */
 export const holidaySource = {
   bw: (from: string, to: string): Promise<HolidayInput[]> => fetchBwHolidays(from, to),
 };

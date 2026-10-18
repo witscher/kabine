@@ -1,4 +1,6 @@
-// Anmeldung und Bestätigung per E-Mail-Code oder Link.
+// Sign-in and confirmation by e-mail code or link.
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 import { clubName } from "./club";
 import { useEffect, useState } from "preact/hooks";
 import { api, errorMessage } from "./api";
@@ -23,7 +25,7 @@ export function isEmail(value: string): boolean {
   return EMAIL_PATTERN.test(value.trim());
 }
 
-/** Anmelde-Code anfordern. Die Antwort sagt bewusst nicht, ob die Adresse bekannt ist. */
+/** Request a sign-in code. The response deliberately does not say whether the address is known. */
 export async function startEmailLogin(email: string): Promise<string> {
   return (await api.post<{ requestId: string }>("/auth/email/start", { email: email.trim() })).requestId;
 }
@@ -31,7 +33,9 @@ export async function startEmailLogin(email: string): Promise<string> {
 function ChooseAccount(props: { choices: Choice[]; onPick: (accountId: number) => Promise<void> }) {
   return (
     <div class="stack-sm">
-      <p>Zu dieser Adresse gehören mehrere Zugänge. Mit welchem möchtest du dich anmelden?</p>
+      <p>
+        <Trans>Several accesses belong to this address. Which one do you want to sign in with?</Trans>
+      </p>
       {props.choices.map((c) => (
         <Button block size="lg" onClick={() => props.onPick(c.accountId)}>
           {c.lastName ? `${c.firstName} ${c.lastName}` : c.firstName}
@@ -41,7 +45,7 @@ function ChooseAccount(props: { choices: Choice[]; onPick: (accountId: number) =
   );
 }
 
-/** Code-Eingabe nach dem Versand. onDone bekommt, was passiert ist. */
+/** Code entry after sending. onDone receives what happened. */
 export function EmailCodeForm(props: { requestId: string; email: string; onDone: (kind: EmailKind) => Promise<void> | void; onResend?: () => Promise<void> }) {
   const [code, setCode] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -63,13 +67,17 @@ export function EmailCodeForm(props: { requestId: string; email: string; onDone:
 
   if (choices) return <ChooseAccount choices={choices} onPick={(id) => submit(id)} />;
 
+  const email = props.email;
+
   return (
     <div class="stack-sm">
       <p>
-        Wir haben einen sechsstelligen Code an <strong>{props.email}</strong> geschickt, falls zu der Adresse ein Zugang gehört. Er gilt 15 Minuten. Schau
-        auch im Spam-Ordner nach.
+        <Trans>
+          We have sent a six-digit code to <strong>{email}</strong> if an access belongs to this address. It is valid for 15 minutes. Please also check your
+          spam folder.
+        </Trans>
       </p>
-      <TextField label="Code aus der E-Mail" value={code} onInput={(v) => setCode(v.replace(/[^\d ]/g, ""))} inputMode="numeric" autoComplete="one-time-code" maxLength={7} />
+      <TextField label={t`Code from the e-mail`} value={code} onInput={(v) => setCode(v.replace(/[^\d ]/g, ""))} inputMode="numeric" autoComplete="one-time-code" maxLength={7} />
       {error ? (
         <div class="notice warn" role="alert">
           <Icon name="alert" />
@@ -77,20 +85,20 @@ export function EmailCodeForm(props: { requestId: string; email: string; onDone:
         </div>
       ) : null}
       <Button variant="primary" size="lg" block disabled={code.replace(/\s/g, "").length !== 6} onClick={() => submit()}>
-        Bestätigen
+        <Trans>Confirm</Trans>
       </Button>
       {props.onResend ? (
         <Button variant="ghost" onClick={props.onResend}>
-          Neuen Code senden
+          <Trans>Send a new code</Trans>
         </Button>
       ) : null}
     </div>
   );
 }
 
-/** Ziel des Links aus der E-Mail (/email#token). */
+/** Target of the link in the e-mail (/email#token). */
 export function EmailLinkPage() {
-  useDocumentTitle("E-Mail");
+  useDocumentTitle(t`E-mail`);
   const { refresh } = useSession();
   const [token] = useState(() => window.location.hash.replace(/^#/, ""));
   const [state, setState] = useState<{ kind: EmailKind } | { choose: Choice[] } | { error: string } | null>(null);
@@ -113,36 +121,38 @@ export function EmailLinkPage() {
   };
 
   useEffect(() => {
-    // Den Link aus der Adresszeile entfernen, damit er nicht im Verlauf bleibt
+    // Remove the link from the address bar so it does not stay in the history
     history.replaceState(null, "", "/email");
     if (token) void verify();
-    else setState({ error: "Der Link ist unvollständig. Bitte öffne ihn noch einmal vollständig oder gib den Code ein." });
+    else setState({ error: t`The link is incomplete. Please open it again in full or enter the code.` });
   }, []);
 
   return (
     <main class="page no-tabs">
-      <TopBar title="E-Mail" kicker={clubName()} />
+      <TopBar title={t`E-mail`} kicker={clubName()} />
       <div class="content">
-        {!state ? <Spinner label="Link wird geprüft" /> : null}
+        {!state ? <Spinner label={t`Checking link`} /> : null}
         {state && "choose" in state ? <ChooseAccount choices={state.choose} onPick={(id) => verify(id)} /> : null}
         {state && "error" in state ? (
           <>
             <Notice kind="warn">{state.error}</Notice>
             <a class="btn" href="/">
-              Zur Anmeldung
+              <Trans>Go to sign-in</Trans>
             </a>
           </>
         ) : null}
         {state && "kind" in state ? (
           <>
             <Notice>
-              {state.kind === "verify" ? "Deine E-Mail-Adresse ist bestätigt. Du kannst dich jetzt auch per E-Mail-Code anmelden." : "Du bist angemeldet."}
+              {state.kind === "verify" ? t`Your e-mail address is confirmed. You can now also sign in with an e-mail code.` : t`You are signed in.`}
             </Notice>
             <Notice icon="phone">
-              Nutzt du die App vom Home-Bildschirm? Dann bist du dort nicht automatisch angemeldet. Fordere dort einen Code an und gib ihn direkt in der App ein.
+              <Trans>
+                Do you use the app from the Home Screen? Then you are not signed in there automatically. Request a code there and enter it directly in the app.
+              </Trans>
             </Notice>
             <a class="btn btn-primary" href="/">
-              {state.kind === "verify" ? "Zur App" : "Zu den Terminen"}
+              {state.kind === "verify" ? t`Go to the app` : t`Go to events`}
             </a>
           </>
         ) : null}

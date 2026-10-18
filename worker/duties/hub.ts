@@ -1,8 +1,8 @@
 import { DurableObject } from "cloudflare:workers";
 
-// Live-Aktualisierung des Helferplans: ein Objekt pro Mannschaft. Speichert
-// nichts, verteilt nur "es hat sich etwas geändert"; die Clients laden dann
-// über die normale API neu. Der Worker prüft die Berechtigung vor /connect.
+// Live updates of the helper plan: one object per team. Stores nothing, only
+// broadcasts "something changed"; the clients then reload through the normal
+// API. The worker checks permissions before /connect.
 
 export class DutyHub extends DurableObject<Env> {
   override async fetch(request: Request): Promise<Response> {
@@ -19,7 +19,7 @@ export class DutyHub extends DurableObject<Env> {
         try {
           ws.send(JSON.stringify({ type: "changed" }));
         } catch {
-          // Verbindung bereits geschlossen
+          // Connection already closed
         }
       }
       return Response.json({ ok: true });
@@ -35,12 +35,12 @@ export class DutyHub extends DurableObject<Env> {
     try {
       ws.close(code === 1005 ? 1000 : code, "bye");
     } catch {
-      // schon geschlossen
+      // already closed
     }
   }
 }
 
-/** Wie die Chaträume in der EU; lokal (workerd) ohne Jurisdiktion. */
+/** In the EU like the chat rooms; locally (workerd) without jurisdiction. */
 export function dutyHubStub(env: Env, teamId: number) {
   const name = `duties:${teamId}`;
   try {
@@ -52,11 +52,11 @@ export function dutyHubStub(env: Env, teamId: number) {
   }
 }
 
-/** Allen, die den Helferplan der Mannschaft offen haben, "neu laden" melden. */
+/** Tell everyone who has the team's helper plan open to reload. */
 export async function notifyDutyChange(env: Env, teamId: number): Promise<void> {
   try {
     await dutyHubStub(env, teamId).fetch("https://duties.internal/notify", { method: "POST" });
   } catch (err) {
-    console.warn("Helferplan live", err);
+    console.warn("Helper plan live", err);
   }
 }

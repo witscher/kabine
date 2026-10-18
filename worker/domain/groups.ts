@@ -1,19 +1,20 @@
-// Gruppen: Mannschaften mit kind = 'group'. Sie haben nur Chat und Sondertermine (kein Training,
-// keine Spiele, kein Kader, keine Eltern, keine Altersklasse) und bleiben beim Saisonwechsel bestehen.
-// Siehe docs/entscheidungen.md, Abschnitt Gruppen.
+import { t } from "@lingui/core/macro";
+// Groups: teams with kind = 'group'. They only have chat and special events (no training, no games,
+// no squad, no parents, no age class) and remain at the season change.
+// See docs/entscheidungen.md, section Gruppen.
 import { all, first, stmt } from "../lib/db";
 import { badRequest, notFound } from "../lib/http";
 
-/** SQL-Bedingung: t ist eine echte Mannschaft, keine Gruppe. */
+/** SQL condition: t is a real team, not a group. */
 export const IS_TEAM_SQL = (alias: string) => `${alias}.kind = 'team'`;
 
 export async function teamKind(db: D1Database, teamId: number): Promise<{ kind: "team" | "group"; autoMembers: "referees" | null }> {
   const row = await first<{ kind: "team" | "group"; auto_members: "referees" | null }>(db, "SELECT kind, auto_members FROM teams WHERE id = ?", teamId);
-  if (!row) throw notFound("Diese Mannschaft gibt es nicht.");
+  if (!row) throw notFound(t`This team does not exist.`);
   return { kind: row.kind, autoMembers: row.auto_members };
 }
 
-/** Training, Spiele, Kader, Einladungen usw. gibt es nur bei Mannschaften. */
+/** Training, games, squad, invitations etc. exist only for teams. */
 export async function requireTeam(db: D1Database, teamIds: number | number[]): Promise<void> {
   const ids = Array.isArray(teamIds) ? teamIds : [teamIds];
   if (!ids.length) return;
@@ -22,12 +23,15 @@ export async function requireTeam(db: D1Database, teamIds: number | number[]): P
     "SELECT name FROM teams WHERE kind = 'group' AND id IN (SELECT value FROM json_each(?))",
     JSON.stringify(ids),
   );
-  if (groups.length) throw badRequest(`${groups.map((g) => g.name).join(", ")} ist eine Gruppe. Gruppen haben nur Chat und Sondertermine.`, "group_not_supported");
+  if (groups.length) {
+    const names = groups.map((g) => g.name).join(", ");
+    throw badRequest(t`${names} is a group. Groups only have chat and special events.`, "group_not_supported");
+  }
 }
 
 /**
- * Gruppen mit automatischen Mitgliedern abgleichen. KiHaSL/JuHaSL: Mitglieder sind alle Personen mit
- * der Rolle, Verantwortliche alle Admins. Wiederholbar, ein zweiter Lauf ändert nichts.
+ * Synchronises groups with automatic members. KiHaSL/JuHaSL: members are all persons with the role,
+ * those in charge are all admins. Repeatable, a second run changes nothing.
  */
 export async function syncAutoGroups(db: D1Database): Promise<void> {
   const groups = await all<{ id: number }>(db, "SELECT id FROM teams WHERE kind = 'group' AND auto_members = 'referees'");

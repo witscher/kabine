@@ -1,7 +1,8 @@
-// Helferplan: Dienstarten, Vorlagen und Zeitblöcke je Termin. Eine Dienstart legt fest,
-// wer hilft (Eltern, Spieler, Trainer, KiHaSL/JuHaSL-Rolle) und ob es ein Dienst vor Ort
-// oder eine Aufgabe ist. Spiele bekommen ihre Blöcke aus der Vorlage der Mannschaft,
-// Sondertermine von Hand. Siehe docs/entscheidungen.md, Abschnitt Helferdienste.
+// Helper plan: duty types, templates and time blocks per event. A duty type defines
+// who helps (parents, players, coaches, KiHaSL/JuHaSL role) and whether it is an on-site
+// duty or a task. Games get their blocks from the team's template, special events by hand.
+// See docs/entscheidungen.md, section Helferdienste.
+import { t } from "@lingui/core/macro";
 import type { Actor } from "../auth/actor";
 import { isCoachOf, isCoachOfAny } from "../auth/actor";
 import type { MyDuty } from "../../shared/types";
@@ -9,7 +10,7 @@ import { all, first, stmt } from "../lib/db";
 import { addMinutesLocal, localToInstant } from "../lib/time";
 import { gameLiveMinutes } from "./events";
 
-/** Code der KiHaSL/JuHaSL-Dienstart (Startbestand der Migration 0018). */
+/** Code of the KiHaSL/JuHaSL duty type (initial data of migration 0018). */
 export const REFEREE_CODE = "referee";
 
 export interface DutyType {
@@ -20,12 +21,12 @@ export interface DutyType {
   whoParents: boolean;
   whoPlayers: boolean;
   whoCoaches: boolean;
-  /** Ordentliche Mitglieder (club_members), die zur Mannschaft gehören */
+  /** Full club members (club_members) who belong to the team */
   whoMembers: boolean;
   whoReferees: boolean;
   noteAllowed: boolean;
   needsSkill: boolean;
-  /** Sonderdienst nur für diesen Termin */
+  /** Special duty only for this event */
   eventId: number | null;
   archived: boolean;
 }
@@ -64,7 +65,7 @@ export function toDutyType(r: DutyTypeRow): DutyType {
   };
 }
 
-/** Vereinsweite Dienstarten (ohne Sonderdienste) und optional die Sonderdienste der genannten Termine. */
+/** Club-wide duty types (without special duties) and optionally the special duties of the given events. */
 export async function loadDutyTypes(db: D1Database, eventIds: number[] = []): Promise<Map<number, DutyType>> {
   const rows = await all<DutyTypeRow>(
     db,
@@ -74,27 +75,27 @@ export async function loadDutyTypes(db: D1Database, eventIds: number[] = []): Pr
   return new Map(rows.map((r) => [r.id, toDutyType(r)]));
 }
 
-/** Alle Dienstarten einschließlich aller Sonderdienste (für den Cron). */
+/** All duty types including all special duties (for the cron job). */
 export async function loadAllDutyTypes(db: D1Database): Promise<Map<number, DutyType>> {
   const rows = await all<DutyTypeRow>(db, "SELECT * FROM duty_types ORDER BY sort, id");
   return new Map(rows.map((r) => [r.id, toDutyType(r)]));
 }
 
 /**
- * KiHaSL/JuHaSL braucht es bei jedem Heimspiel der Jugenden F bis C, unabhängig
- * vom Helferplan der Mannschaft. Erkennung über den Code der Altersklasse (gE, wD, mC …).
+ * KiHaSL/JuHaSL is needed at every home game of the youth classes F to C, regardless
+ * of the team's helper plan. Recognised by the code of the age class (gE, wD, mC …).
  */
 export function isRefereeAgeClass(code: string | null | undefined): boolean {
   return !!code && /^[a-z][FEDC]$/.test(code);
 }
 
-/** SQL-Bedingung für dasselbe (Alias der Mannschaft). */
+/** SQL condition for the same (alias of the team). */
 export const REFEREE_TEAM_SQL = (t: string) => `(length(${t}.age_class_code) = 2 AND substr(${t}.age_class_code, 2, 1) IN ('F', 'E', 'D', 'C'))`;
 
-/** Zeitraum des KiHaSL/JuHaSL-Blocks: ab 15 Minuten vor Anpfiff bis Spielende. */
+/** Time span of the KiHaSL/JuHaSL block: from 15 minutes before throw-off until the end of the game. */
 const REFEREE_BEFORE_MIN = 15;
 
-/** Als wer kann man sich eintragen: selbst oder als Elternteil für ein Kind. */
+/** As whom one can sign up: oneself or as a parent for a child. */
 export interface HelperRole {
   childId: number | null;
   childName: string | null;
@@ -103,28 +104,28 @@ export interface HelperRole {
 export interface HelperTeam {
   teamId: number;
   teamName: string;
-  /** Trainer der Mannschaft oder Admin: verwalten, für andere eintragen. */
+  /** Coach of the team or admin: manage, sign up others. */
   canManage: boolean;
-  /** Alle Rollen, mit denen man sich bei irgendeinem Dienst eintragen kann. */
+  /** All roles one can sign up with for any duty. */
   roles: HelperRole[];
-  /** Eigene Mannschaft (Trainer, Spieler oder Elternteil), unabhängig von Admin-Rechten. */
+  /** Own team (coach, player or parent), regardless of admin rights. */
   own: boolean;
-  /** Intern: Grundlage für rolesFor */
+  /** Internal: basis for rolesFor */
   parentsEnabled: boolean;
   isPlayer: boolean;
   isCoach: boolean;
-  /** Ordentliches Mitglied (für „Wer hilft: Mitglieder“) */
+  /** Full club member (for “who helps: members”) */
   isMember: boolean;
   childRoles: HelperRole[];
 }
 
 /**
- * Mit welchen Rollen darf man sich bei einer Dienstart in dieser Mannschaft eintragen?
- * - Eltern: für ihr Kind, wenn die Mannschaft Eltern einbindet; sonst die Spieler selbst
- * - Spieler: selbst
- * - Trainer: selbst
- * Trainer und Admins der Mannschaft dürfen sich immer selbst eintragen (wie bisher).
- * KiHaSL/JuHaSL läuft über refereeRoles.
+ * With which roles may one sign up for a duty type in this team?
+ * - Parents: for their child if the team involves parents; otherwise the players themselves
+ * - Players: themselves
+ * - Coaches: themselves
+ * Coaches and admins of the team may always sign up themselves (as before).
+ * KiHaSL/JuHaSL goes through refereeRoles.
  */
 export function rolesFor(team: HelperTeam, type: DutyType): HelperRole[] {
   if (type.whoReferees) return [];
@@ -138,14 +139,14 @@ export function rolesFor(team: HelperTeam, type: DutyType): HelperRole[] {
 }
 
 /**
- * Mannschaften mit Helferplan (oder mit kommenden Sonderterminen mit Diensten), bei denen
- * die Person helfen oder die sie verwalten kann.
+ * Teams with a helper plan (or with upcoming special events with duties) where
+ * the person can help or which they can manage.
  */
 export async function helperTeams(db: D1Database, actor: Actor, types?: Map<number, DutyType>): Promise<HelperTeam[]> {
   const [teams, typeMap, member, organized] = await Promise.all([
     all<{ id: number; name: string; parents_enabled: number }>(
       db,
-      // Unterabfrage ohne Bezug auf t: einmal ausgewertet, über events (kind, starts_at)
+      // Subquery without reference to t: evaluated once, via events (kind, starts_at)
       `SELECT t.id, t.name, t.parents_enabled FROM teams t
         WHERE t.helper_plan = 1
            OR t.id IN (SELECT et.team_id FROM events e JOIN event_teams et ON et.event_id = e.id
@@ -155,7 +156,7 @@ export async function helperTeams(db: D1Database, actor: Actor, types?: Map<numb
     ),
     types ? Promise.resolve(types) : loadDutyTypes(db),
     isClubMember(db, actor.personId),
-    // Mannschaften kommender Sondertermine mit Zeitblöcken, die man erstellt hat oder mitorganisiert
+    // Teams of upcoming special events with time blocks that one created or co-organises
     all<{ team_id: number }>(
       db,
       `SELECT DISTINCT et.team_id FROM events e JOIN event_teams et ON et.event_id = e.id
@@ -197,13 +198,13 @@ export async function helperTeams(db: D1Database, actor: Actor, types?: Map<numb
       childRoles,
     });
   }
-  // Eigene Mannschaften zuerst (für Admins, die alle sehen)
+  // Own teams first (for admins, who see all)
   return [...out.filter((t) => t.own), ...out.filter((t) => !t.own)];
 }
 
 /**
- * Spieler und Trainer einer Mannschaft (nicht Gruppe) werden ordentliche Mitglieder. Admins können das Merkmal
- * danach wieder abschalten; eine neue Zuordnung setzt es erneut.
+ * Players and coaches of a team (not a group) become full club members. Admins can switch the flag
+ * off again afterwards; a new assignment sets it again.
  */
 export function clubMemberStmt(db: D1Database, personIds: number[], teamId: number | null): D1PreparedStatement {
   return stmt(
@@ -219,7 +220,7 @@ export async function isClubMember(db: D1Database, personId: number): Promise<bo
   return !!(await first(db, "SELECT 1 AS ok FROM club_members WHERE person_id = ?", personId));
 }
 
-/** Ersteller und Organisatoren je Sondertermin (verwalten die Helferdienste). */
+/** Creator and organisers per special event (they manage the helper duties). */
 export async function dutyManagers(db: D1Database, eventIds: number[]): Promise<Map<number, Set<number>>> {
   const out = new Map<number, Set<number>>();
   if (!eventIds.length) return out;
@@ -234,19 +235,19 @@ export async function dutyManagers(db: D1Database, eventIds: number[]): Promise<
   return out;
 }
 
-/** Helferdienste eines Termins verwalten: Trainer einer beteiligten Mannschaft, Admins, Ersteller, Organisatoren. */
+/** Managing an event's helper duties: coaches of a team involved, admins, creator, organisers. */
 export function mayManageDuties(actor: Actor, teamIds: number[], managers: Set<number> | undefined): boolean {
   return isCoachOfAny(actor, teamIds) || !!managers?.has(actor.personId);
 }
 
-/** Für die Antwort an den Client ohne interne Felder. */
+/** For the response to the client, without internal fields. */
 export function publicHelperTeam(t: HelperTeam) {
   return { teamId: t.teamId, teamName: t.teamName, canManage: t.canManage, roles: t.roles, own: t.own };
 }
 
 /**
- * Für wen kann der Actor KiHaSL/JuHaSL-Dienste übernehmen? Man selbst und/oder
- * Kinder mit der Rolle. In der Admin-Sicht „referee“ zählt man selbst immer.
+ * For whom can the actor take KiHaSL/JuHaSL duties? Oneself and/or
+ * children with the role. In the admin view “referee” oneself always counts.
  */
 export async function refereeRoles(db: D1Database, actor: Actor): Promise<HelperRole[]> {
   const ids = [actor.personId, ...actor.children.map((c) => c.id)];
@@ -259,17 +260,23 @@ export async function refereeRoles(db: D1Database, actor: Actor): Promise<Helper
   return roles;
 }
 
-/** Gegner aus Sicht des Vereins, für Texte. */
+/** Opponent from the club's point of view, for texts ("vs X", "at X"). */
 export function opponentOf(e: { is_home: number | null; home_team: string | null; guest_team: string | null; title: string | null }): string {
-  if (e.is_home === 1) return `gegen ${e.guest_team ?? "Gegner"}`;
-  if (e.is_home === 0) return `bei ${e.home_team ?? "Gegner"}`;
+  if (e.is_home === 1) {
+    const opponent = e.guest_team ?? t`opponent`;
+    return t`vs ${opponent}`;
+  }
+  if (e.is_home === 0) {
+    const opponent = e.home_team ?? t`opponent`;
+    return t`at ${opponent}`;
+  }
   return e.title ?? `${e.home_team ?? "?"} – ${e.guest_team ?? "?"}`;
 }
 
-/** "Vorname N." wie im Chat. */
+/** "First name L." as in the chat. */
 export const SHORT_NAME_SQL = (alias: string) => `${alias}.first_name || CASE WHEN ${alias}.last_name IS NOT NULL AND ${alias}.last_name <> '' THEN ' ' || substr(${alias}.last_name, 1, 1) || '.' ELSE '' END`;
 
-/** Dienstarten mit Vorkenntnissen, die das Konto im Profil freigegeben hat („Das kann ich“). */
+/** Duty types needing skills that the account has enabled in the profile (“I can do this”). */
 export async function skillConsents(db: D1Database, accountId: number): Promise<Set<number>> {
   const rows = await all<{ duty_type_id: number }>(db, "SELECT duty_type_id FROM skill_consents WHERE account_id = ?", accountId);
   return new Set(rows.map((r) => r.duty_type_id));
@@ -279,7 +286,7 @@ export function mayTake(type: DutyType, consents: Set<number>): boolean {
   return !type.needsSkill || consents.has(type.id);
 }
 
-// Zeitblöcke ---------------------------------------------------------------------
+// Time blocks --------------------------------------------------------------------
 
 export interface TemplateItem {
   dutyTypeId: number;
@@ -289,7 +296,7 @@ export interface TemplateItem {
   taskWhen: "before" | "after";
 }
 
-/** Block aus einer Vorlagenzeile für einen Termin von start bis end. */
+/** Block from a template line for an event from start to end. */
 export function blockFromItem(item: TemplateItem, mode: DutyType["mode"], start: string, end: string): { startsAt: string; endsAt: string } {
   if (mode === "task") {
     const at = item.taskWhen === "before" ? start : end;
@@ -307,7 +314,7 @@ export async function templateItems(db: D1Database, templateId: number): Promise
   return rows.map((r) => ({ dutyTypeId: r.duty_type_id, slots: r.slots, beforeMin: r.before_min, afterMin: r.after_min, taskWhen: r.task_when }));
 }
 
-/** Ende eines Spiels: Anpfiff plus Spieldauer der Altersklasse. */
+/** End of a game: throw-off plus the playing time of the age class. */
 export function gameEnd(startsAt: string, ageClassCode: string): string {
   return addMinutesLocal(startsAt, gameLiveMinutes([ageClassCode]));
 }
@@ -317,11 +324,11 @@ function minutesBetween(from: string, to: string): number {
 }
 
 /**
- * Zeitblöcke der Spiele aktuell halten (lazy, bei jedem Lesen):
- * - Spiele von Mannschaften mit Helferplan bekommen einmal die Blöcke ihrer Vorlage,
- * - Jugend-Heimspiele F–C einmal den KiHaSL/JuHaSL-Block,
- * - hat sich die Anpfiffzeit geändert, ziehen alle Blöcke um dieselbe Zeit mit.
- * Ohne eventIds: alle Spiele ab heute minus 90 Tage.
+ * Keep the time blocks of games up to date (lazily, on every read):
+ * - games of teams with a helper plan get the blocks of their template once,
+ * - youth home games F–C get the KiHaSL/JuHaSL block once,
+ * - if the throw-off time changed, all blocks move by the same amount.
+ * Without eventIds: all games from today minus 90 days.
  */
 export async function ensureEventDuties(db: D1Database, eventIds: number[] | null, from: string): Promise<void> {
   if (eventIds && !eventIds.length) return;
@@ -337,7 +344,7 @@ export async function ensureEventDuties(db: D1Database, eventIds: number[] | nul
     away_template_id: number | null;
   }>(
     db,
-    // Zwei Varianten statt „?2 IS NULL OR …“: Nur so sucht SQLite gezielt nach den IDs
+    // Two variants instead of “?2 IS NULL OR …”: only then does SQLite look up the IDs directly
     `SELECT e.id, e.starts_at, e.is_home, e.duties_anchor, e.duties_generated, t.helper_plan, t.age_class_code, t.home_template_id, t.away_template_id
        FROM events e
        JOIN teams t ON t.id = (SELECT et.team_id FROM event_teams et WHERE et.event_id = e.id ORDER BY et.team_id LIMIT 1)
@@ -364,7 +371,7 @@ export async function ensureEventDuties(db: D1Database, eventIds: number[] | nul
   };
   const statements: D1PreparedStatement[] = [];
   for (const g of games) {
-    // Verschobenes Spiel: Blöcke mitziehen
+    // Moved game: move the blocks along
     if (g.duties_anchor && g.duties_anchor !== g.starts_at) {
       const delta = minutesBetween(g.duties_anchor, g.starts_at);
       const blocks = await all<{ id: number; starts_at: string; ends_at: string }>(db, "SELECT id, starts_at, ends_at FROM event_duties WHERE event_id = ?", g.id);
@@ -402,13 +409,13 @@ export async function ensureEventDuties(db: D1Database, eventIds: number[] | nul
     }
     statements.push(stmt(db, "UPDATE events SET duties_anchor = starts_at, duties_generated = ? WHERE id = ?", generated, g.id));
   }
-  // In Portionen, D1 begrenzt die Größe eines Batches
+  // In chunks, D1 limits the size of a batch
   for (let i = 0; i < statements.length; i += 50) await db.batch(statements.slice(i, i + 50));
 }
 
 /**
- * Neue Vorlage einer Mannschaft: kommende Spiele ohne Einträge bekommen ihre Blöcke neu.
- * Blöcke mit Einträgen und der KiHaSL/JuHaSL-Block bleiben.
+ * New template of a team: upcoming games without entries get their blocks anew.
+ * Blocks with entries and the KiHaSL/JuHaSL block stay.
  */
 export async function resetTeamDuties(db: D1Database, teamId: number, now: string): Promise<void> {
   const games = await all<{ id: number }>(
@@ -426,11 +433,11 @@ export async function resetTeamDuties(db: D1Database, teamId: number, now: strin
   ]);
 }
 
-// Terminübersicht ----------------------------------------------------------------
+// Event overview -----------------------------------------------------------------
 
 /**
- * Eigene Dienste und die für die eigenen Kinder je Termin, für die Terminübersicht.
- * Nur Termine mit Helferplan (Spiele) bzw. Sondertermine, keine ausgeblendeten oder abgesagten.
+ * Own duties and those for one's children per event, for the event overview.
+ * Only events with a helper plan (games) or special events, none hidden or cancelled.
  */
 export async function loadMyDuties(db: D1Database, actor: Actor, eventIds: number[]): Promise<Map<number, MyDuty[]>> {
   const out = new Map<number, MyDuty[]>();
@@ -441,7 +448,7 @@ export async function loadMyDuties(db: D1Database, actor: Actor, eventIds: numbe
        FROM duties d JOIN events e ON e.id = d.event_id JOIN duty_types dt ON dt.id = d.duty_type_id
        LEFT JOIN persons ch ON ch.id = d.child_id
       WHERE (d.person_id = ? OR d.child_id IN (SELECT value FROM json_each(?)))
-        -- „+“: über die eigenen Dienste suchen, nicht über alle Dienste der gelisteten Termine
+        -- “+”: search via one's own duties, not via all duties of the listed events
         AND +d.event_id IN (SELECT value FROM json_each(?))
         AND e.cancelled_at IS NULL
         AND (dt.who_referees = 1 OR e.kind = 'special'
@@ -454,7 +461,7 @@ export async function loadMyDuties(db: D1Database, actor: Actor, eventIds: numbe
   for (const r of rows) {
     const mine = r.person_id === actor.personId;
     const list = out.get(r.event_id) ?? [];
-    // Derselbe Dienst nur einmal (z. B. eigener Eintrag und einer des anderen Elternteils)
+    // The same duty only once (e.g. own entry and one by the other parent)
     if (!list.some((x) => x.dutyTypeId === r.type_id && x.mine === mine)) {
       list.push({ dutyTypeId: r.type_id, referee: r.who_referees === 1, label: r.name, child: mine ? null : r.child_name, mine });
     }
@@ -464,10 +471,10 @@ export async function loadMyDuties(db: D1Database, actor: Actor, eventIds: numbe
 }
 
 /**
- * Freie Plätze je Termin, die der Actor als helfendes Elternteil (bzw. als Spieler)
- * übernehmen könnte. Gleiche Regeln wie „Helfer gesucht“ in worker/domain/duty-notify.ts:
- * Wer hilft je Dienstart, Vorkenntnisse nur mit Freigabe. Trainer und Admins zählen nur
- * über eigene Kinder oder als Spieler.
+ * Free places per event that the actor could take as a helping parent (or as a player).
+ * Same rules as “helpers wanted” in worker/domain/duty-notify.ts: who helps per duty type,
+ * skills only with consent. Coaches and admins only count through their own children
+ * or as players.
  */
 export async function loadHelpersNeeded(db: D1Database, actor: Actor, eventIds: number[], now: string): Promise<Map<number, number>> {
   const out = new Map<number, number>();
@@ -497,7 +504,7 @@ export async function loadHelpersNeeded(db: D1Database, actor: Actor, eventIds: 
     const type = types.get(b.duty_type_id);
     const team = teams.find((t) => t.teamId === b.team_id);
     if (!type || !team || !mayTake(type, consents)) continue;
-    // Trainer/Admin zählen nur mit eigenen Rollen (Kind, Spieler), nicht als Verwalter
+    // Coaches/admins only count with their own roles (child, player), not as managers
     const roles = rolesFor({ ...team, canManage: false }, type);
     if (!roles.length) continue;
     const free = Math.max(0, b.slots - b.taken);
@@ -506,7 +513,7 @@ export async function loadHelpersNeeded(db: D1Database, actor: Actor, eventIds: 
   return out;
 }
 
-/** Block mit Termin und Mannschaft, für Eintragen und Verwalten. */
+/** Block with event and team, for signing up and managing. */
 export interface BlockRow {
   id: number;
   event_id: number;

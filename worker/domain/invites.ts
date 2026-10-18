@@ -1,3 +1,4 @@
+import { t } from "@lingui/core/macro";
 import { hmacB64url, randomToken, sha256Hex } from "../lib/crypto";
 import { first, run } from "../lib/db";
 import { badRequest } from "../lib/http";
@@ -21,7 +22,7 @@ export interface InviteRow {
 
 function secret(env: Env): string {
   if (!env.APP_SECRET || env.APP_SECRET.length < 16) {
-    throw new Error("APP_SECRET fehlt oder ist zu kurz (wrangler secret put APP_SECRET).");
+    throw new Error("APP_SECRET is missing or too short (wrangler secret put APP_SECRET).");
   }
   return env.APP_SECRET;
 }
@@ -43,8 +44,8 @@ export async function createInvite(
   const token = await tokenForNonce(env, nonce);
   const days = input.kind === "personal" ? PERSONAL_INVITE_DAYS : TEAM_INVITE_DAYS;
   const expiresAt = utcIso(now + days * 86_400_000);
-  // Pro Mannschaft gibt es je Art nur einen gültigen Link, bei persönlichen
-  // Links einen pro Person.
+  // Per team there is only one valid link of each kind; for personal links,
+  // one per person.
   if (input.kind === "personal") {
     await run(
       env.DB,
@@ -78,19 +79,19 @@ export async function createInvite(
   return { id: row!.id, token, expiresAt };
 }
 
-/** Sucht eine gültige Einladung. Wirft mit verständlicher Meldung, wenn sie nicht (mehr) gilt. */
+/** Finds a valid invitation. Throws with an understandable message if it is not (or no longer) valid. */
 export async function findValidInvite(env: Env, token: string, now = Date.now()): Promise<InviteRow> {
-  if (!/^[\w-]{20,100}$/.test(token)) throw badRequest("Dieser Einladungslink ist ungültig.", "invite_invalid");
+  if (!/^[\w-]{20,100}$/.test(token)) throw badRequest(t`This invitation link is invalid.`, "invite_invalid");
   const row = await first<InviteRow>(env.DB, "SELECT * FROM invites WHERE token_hash = ?", await sha256Hex(token));
-  if (!row) throw badRequest("Dieser Einladungslink ist ungültig.", "invite_invalid");
+  if (!row) throw badRequest(t`This invitation link is invalid.`, "invite_invalid");
   if (row.kind === "parent") {
     const team = await first<{ parents_enabled: number }>(env.DB, "SELECT parents_enabled FROM teams WHERE id = ?", row.team_id);
     if (team?.parents_enabled !== 1) {
-      throw badRequest("In dieser Mannschaft sind keine Eltern eingebunden. Der Elternlink gilt deshalb nicht.", "parents_disabled");
+      throw badRequest(t`Parents are not involved in this team. The parent link is therefore not valid.`, "parents_disabled");
     }
   }
-  if (row.revoked_at) throw badRequest("Dieser Einladungslink wurde zurückgezogen. Bitte frag nach einem neuen Link.", "invite_revoked");
-  if (row.used_at) throw badRequest("Dieser Link wurde bereits verwendet. Bitte frag nach einem neuen Link.", "invite_used");
-  if (Date.parse(row.expires_at) <= now) throw badRequest("Dieser Einladungslink ist abgelaufen. Bitte frag nach einem neuen Link.", "invite_expired");
+  if (row.revoked_at) throw badRequest(t`This invitation link has been withdrawn. Please ask for a new link.`, "invite_revoked");
+  if (row.used_at) throw badRequest(t`This link has already been used. Please ask for a new link.`, "invite_used");
+  if (Date.parse(row.expires_at) <= now) throw badRequest(t`This invitation link has expired. Please ask for a new link.`, "invite_expired");
   return row;
 }

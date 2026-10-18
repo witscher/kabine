@@ -1,13 +1,13 @@
-// Anwesenheitsprotokoll: Jeder Termin wird nach Beginn einmal festgeschrieben, damit
-// Statistiken nicht vom heutigen Stand (Mannschaft, Aktiv, Dauerabwesenheiten) abhängen.
-// Beim Saisonwechsel wird das Protokoll zu season_stats verdichtet (siehe seasonStatsStatements).
+// Attendance record: every event is fixed once after it starts, so that statistics
+// do not depend on the current state (team, active, standing absences).
+// At the season change the record is condensed into season_stats (see seasonStatsStatements).
 import { all, stmt } from "../lib/db";
 import { nowLocal, utcIso } from "../lib/time";
 import { EVENT_SELECT, type EventRow, loadEventContext, type Participant } from "./events";
 
 export type AttendanceStatus = "present" | "open" | "declined" | "standing" | "inactive" | "unexcused";
 
-/** Status im Protokoll; „unentschuldigt“ geht allem vor. */
+/** Status in the record; "unexcused" takes precedence over everything. */
 export function attendanceStatus(status: Participant["status"], unexcused: boolean): AttendanceStatus {
   if (unexcused) return "unexcused";
   switch (status) {
@@ -20,10 +20,10 @@ export function attendanceStatus(status: Participant["status"], unexcused: boole
   }
 }
 
-/** Höchstens so viele Termine pro Lauf; der Rest folgt in der nächsten Stunde. */
+/** At most this many events per run; the rest follows in the next hour. */
 const BATCH_EVENTS = 150;
 
-/** Begonnene, nicht abgesagte Termine festschreiben, die noch kein Protokoll haben. Gibt die Zahl der Termine zurück. */
+/** Records started, not cancelled events that have no record yet. Returns the number of events. */
 export async function recordAttendance(db: D1Database, now = Date.now()): Promise<number> {
   const rows = await all<EventRow>(
     db,
@@ -48,7 +48,7 @@ export async function recordAttendance(db: D1Database, now = Date.now()): Promis
           e.kind,
           attendanceStatus(p.status, ctx.unexcused.has(`${e.id}:${p.person.id}`)),
           p.isHelper ? 1 : 0,
-          // Kurzfristige Absage: nach der Frist abgegeben
+          // Short-notice decline: given after the deadline
           p.status === "no" && p.response?.is_late === 1 ? 1 : 0,
           at,
         ),
@@ -60,15 +60,15 @@ export async function recordAttendance(db: D1Database, now = Date.now()): Promis
   return rows.length;
 }
 
-/** Nachträgliche Markierung „fehlt unentschuldigt“ ins Protokoll übernehmen, falls der Termin schon festgeschrieben ist. */
+/** Applies a later "unexcused absence" mark to the record if the event has already been recorded. */
 export function attendanceUpdate(db: D1Database, eventId: number, personId: number, status: AttendanceStatus): D1PreparedStatement {
   return stmt(db, "UPDATE attendance SET status = ?, recorded_at = ? WHERE event_id = ? AND person_id = ?", status, utcIso(), eventId, personId);
 }
 
 /**
- * Saisonwechsel: Protokoll und Helferdienste der laufenden Saison zu Kennzahlen je
- * Person und Mannschaft verdichten. Läuft vor dem Löschen der Termine.
- * *_total zählt nur Termine, bei denen die Person erwartet wurde (nicht inaktiv, nicht dauerhaft abwesend).
+ * Season change: condenses the record and helper duties of the current season into figures per
+ * person and team. Runs before the events are deleted.
+ * *_total only counts events where the person was expected (not inactive, not permanently absent).
  */
 export function seasonStatsStatements(db: D1Database, seasonId: number): D1PreparedStatement[] {
   const teamName = "COALESCE((SELECT t.name FROM teams t WHERE t.id = a.team_id), '–')";
@@ -83,7 +83,7 @@ export function seasonStatsStatements(db: D1Database, seasonId: number): D1Prepa
       metric,
       kind,
     );
-  // Mannschaft eines Spiels: bei mehreren die alphabetisch erste
+  // Team of a game: if several, the alphabetically first
   const gameTeam = "COALESCE((SELECT min(t.name) FROM event_teams et JOIN teams t ON t.id = et.team_id WHERE et.event_id = d.event_id), '–')";
   const fromDuties = (metric: string, where: string) =>
     stmt(

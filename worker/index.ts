@@ -29,7 +29,7 @@ export { ChatRoom } from "./chat/room";
 export { DutyHub } from "./duties/hub";
 
 export const app = createBaseApp();
-// env: "staging" lässt die App ein Banner zeigen (siehe src/env-banner.tsx)
+// env: "staging" makes the app show a banner (see src/env-banner.tsx)
 app.get("/api/health", async (c) => c.json({ ok: true, env: c.env.APP_ENV || "production", maintenance: !!(await maintenanceState(c.env.KV)) }));
 for (const routes of [
   clubRoutes,

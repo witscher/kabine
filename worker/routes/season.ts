@@ -1,3 +1,4 @@
+import { t } from "@lingui/core/macro";
 import { Hono } from "hono";
 import { z } from "zod";
 import type { PersonRef, TeamRef } from "../../shared/types";
@@ -6,7 +7,7 @@ import { requireAdmin } from "../auth/actor";
 import { assertNotProtected, assertNotStaffUnlessAdmin } from "../auth/owner";
 import { recordAttendance, seasonStatsStatements } from "../domain/attendance";
 import { chatStub, clearChats, markFormerInChats } from "../domain/chat";
-import { HOLIDAY_SOURCE, type HolidayInput, holidaySource } from "../domain/holidays";
+import { type HolidayInput, holidaySource, holidaySourceLabel } from "../domain/holidays";
 import { all, first, list, run, stmt } from "../lib/db";
 import { badRequest, conflict, forbidden, notFound, parse, readJson } from "../lib/http";
 import { isDate, nowLocal, utcIso } from "../lib/time";
@@ -43,40 +44,41 @@ seasonRoutes.get("/seasons", async (c) => {
 });
 
 const newSeasonSchema = z.object({
-  name: z.string().trim().regex(/^\d{4}\/\d{2}$/, "Format z. B. 2027/28"),
+  name: z.string().trim().regex(/^\d{4}\/\d{2}$/, { error: () => t`Format e.g. 2027/28` }),
   startsOn: z.string().refine(isDate),
   endsOn: z.string().refine(isDate),
 });
 
-/** Daten einer kommenden Saison prüfen: Ende nach Beginn, Beginn nach dem der laufenden Saison. */
+/** Checks the dates of an upcoming season: end after start, start after that of the current season. */
 function checkSeasonDates(input: { startsOn: string; endsOn: string }, current: SeasonRow | null) {
-  if (input.startsOn >= input.endsOn) throw badRequest("Das Ende muss nach dem Beginn liegen.");
+  if (input.startsOn >= input.endsOn) throw badRequest(t`The end must be after the start.`);
   if (current && input.startsOn <= current.starts_on) {
-    throw badRequest(`Die neue Saison muss nach dem Beginn der laufenden Saison ${current.name} anfangen.`);
+    const name = current.name;
+    throw badRequest(t`The new season must begin after the start of the current season ${name}.`);
   }
 }
 
-/** Die kommende Saison (noch nicht gestartet). Nur sie lässt sich ändern oder verwerfen. */
+/** The upcoming season (not started yet). Only it can be changed or discarded. */
 async function upcomingSeason(db: D1Database, id: number) {
   const [season, current] = await Promise.all([
     first<SeasonRow>(db, "SELECT * FROM seasons WHERE id = ?", id),
     first<SeasonRow>(db, "SELECT * FROM seasons WHERE is_current = 1"),
   ]);
-  if (!season) throw notFound("Diese Saison gibt es nicht.");
+  if (!season) throw notFound(t`This season does not exist.`);
   if (season.is_current === 1 || (current && season.starts_on <= current.starts_on)) {
-    throw conflict("Nur die kommende, noch nicht gestartete Saison lässt sich ändern oder verwerfen.");
+    throw conflict(t`Only the upcoming season that has not started yet can be changed or discarded.`);
   }
   return { season, current };
 }
 
-/** Legt die kommende Saison an und übernimmt die Altersklassen um ein Jahr verschoben. */
+/** Creates the upcoming season and takes over the age classes shifted by one year. */
 seasonRoutes.post("/seasons", async (c) => {
   requireAdmin(requireActor(c));
   const input = parse(newSeasonSchema, await readJson(c.req.raw));
   const current = await first<SeasonRow>(c.env.DB, "SELECT * FROM seasons WHERE is_current = 1");
   checkSeasonDates(input, current);
   const upcoming = await first(c.env.DB, "SELECT 1 AS ok FROM seasons WHERE is_current = 0 AND starts_on > ?", current?.starts_on ?? "");
-  if (upcoming) throw conflict("Es gibt bereits eine kommende Saison.");
+  if (upcoming) throw conflict(t`There is already an upcoming season.`);
   let season: { id: number } | null;
   try {
     season = await first<{ id: number }>(
@@ -87,7 +89,7 @@ seasonRoutes.post("/seasons", async (c) => {
       input.endsOn,
     );
   } catch (err) {
-    if (err instanceof Error && /UNIQUE/.test(err.message)) throw conflict("Diese Saison gibt es schon.");
+    if (err instanceof Error && /UNIQUE/.test(err.message)) throw conflict(t`This season already exists.`);
     throw err;
   }
   if (current) {
@@ -102,7 +104,7 @@ seasonRoutes.post("/seasons", async (c) => {
   return c.json({ id: season!.id }, 201);
 });
 
-/** Name oder Zeitraum der kommenden Saison korrigieren. Die Altersklassen bleiben. */
+/** Corrects the name or period of the upcoming season. The age classes remain. */
 seasonRoutes.patch("/seasons/:id", async (c) => {
   requireAdmin(requireActor(c));
   const { season, current } = await upcomingSeason(c.env.DB, intParam(c, "id"));
@@ -111,13 +113,13 @@ seasonRoutes.patch("/seasons/:id", async (c) => {
   try {
     await run(c.env.DB, "UPDATE seasons SET name = ?, starts_on = ?, ends_on = ? WHERE id = ?", input.name, input.startsOn, input.endsOn, season.id);
   } catch (err) {
-    if (err instanceof Error && /UNIQUE/.test(err.message)) throw conflict("Diese Saison gibt es schon.");
+    if (err instanceof Error && /UNIQUE/.test(err.message)) throw conflict(t`This season already exists.`);
     throw err;
   }
   return c.json({ ok: true });
 });
 
-/** Begonnenen Saisonwechsel verwerfen: kommende Saison samt ihren Altersklassen löschen. Sonst ändert sich nichts. */
+/** Discards a started season change: deletes the upcoming season with its age classes. Nothing else changes. */
 seasonRoutes.delete("/seasons/:id", async (c) => {
   requireAdmin(requireActor(c));
   const { season } = await upcomingSeason(c.env.DB, intParam(c, "id"));
@@ -148,7 +150,7 @@ seasonRoutes.put("/seasons/:id/age-classes", async (c) => {
   requireAdmin(requireActor(c));
   const seasonId = intParam(c, "id");
   const { ageClasses } = parse(z.object({ ageClasses: z.array(ageClassSchema).max(40) }), await readJson(c.req.raw));
-  if (new Set(ageClasses.map((a) => a.code)).size !== ageClasses.length) throw badRequest("Jedes Kürzel darf nur einmal vorkommen.");
+  if (new Set(ageClasses.map((a) => a.code)).size !== ageClasses.length) throw badRequest(t`Each code may appear only once.`);
   const season = await first(c.env.DB, "SELECT 1 AS ok FROM seasons WHERE id = ?", seasonId);
   if (!season) throw notFound();
   await c.env.DB.batch([
@@ -171,7 +173,7 @@ seasonRoutes.put("/seasons/:id/age-classes", async (c) => {
   return c.json({ ok: true });
 });
 
-// Vorschau des Saisonwechsels ---------------------------------------------------
+// Preview of the season change -------------------------------------------------
 
 type Category = "auto" | "choose" | "no_team" | "outgrown" | "missing_birth_year" | "adult" | "ambiguous";
 
@@ -182,7 +184,7 @@ interface PreviewPlayer {
   newAgeClass: { code: string; name: string } | null;
   category: Category;
   options: TeamRef[];
-  /** Vorschlag: Jugend nach Jahrgang in die 1. Mannschaft, Erwachsenen-Teams bleiben alle (z. B. Herren 1 und Herren 2). */
+  /** Suggestion: youth by birth year into the 1st team, adult teams all remain (e.g. Herren 1 and Herren 2). */
   suggestedTeamIds: number[];
 }
 
@@ -191,8 +193,8 @@ async function buildPreview(db: D1Database, seasonId: number) {
     first<SeasonRow>(db, "SELECT * FROM seasons WHERE is_current = 1"),
     first<SeasonRow>(db, "SELECT * FROM seasons WHERE id = ?", seasonId),
   ]);
-  if (!next) throw notFound("Diese Saison gibt es nicht.");
-  if (next.is_current === 1) throw conflict("Diese Saison läuft bereits.");
+  if (!next) throw notFound(t`This season does not exist.`);
+  if (next.is_current === 1) throw conflict(t`This season is already running.`);
   const [currentClasses, nextClasses, teams, players, formers, coaches] = await Promise.all([
     all<AgeClassRow>(db, "SELECT * FROM age_classes WHERE season_id = ?", current?.id ?? 0),
     all<AgeClassRow>(db, "SELECT * FROM age_classes WHERE season_id = ? ORDER BY rank", seasonId),
@@ -219,7 +221,7 @@ async function buildPreview(db: D1Database, seasonId: number) {
   const out: PreviewPlayer[] = players.map((p) => {
     const ids = p.team_ids.split(",").map(Number);
     const allCurrent = teams.filter((t) => ids.includes(t.id));
-    // Erwachsenen-Teams sind vom Saisonwechsel nicht betroffen und bleiben, auch neben einer Jugendmannschaft
+    // Adult teams are not affected by the season change and remain, also alongside a youth team
     const adultIds = allCurrent.filter((t) => classOf(t.age_class_code)?.is_youth === 0).map((t) => t.id);
     const withAdult = (suggested: number[]) => [...new Set([...suggested, ...adultIds])];
     const currentTeams = allCurrent.filter((t) => !adultIds.includes(t.id));
@@ -255,7 +257,7 @@ async function buildPreview(db: D1Database, seasonId: number) {
     }
     if (!candidateTeams.length) return { ...base, newAgeClass, category: "no_team" as const, options: allTeams, suggestedTeamIds: adultIds };
     if (candidateTeams.length === 1) return { ...base, newAgeClass, category: "auto" as const, options: candidateTeams.map(ref), suggestedTeamIds: withAdult([candidateTeams[0]!.id]) };
-    // Jugend wird nach Jahrgang neu gebildet: Vorschlag ist die 1. Mannschaft, eine 2. legt der Admin bei Bedarf an
+    // Youth is regrouped by birth year: the suggestion is the 1st team; the admin creates a 2nd if needed
     const first1 = candidateTeams.find((t) => t.level === 1) ?? candidateTeams[0]!;
     return { ...base, newAgeClass, category: "choose" as const, options: candidateTeams.map(ref), suggestedTeamIds: withAdult([first1.id]) };
   });
@@ -273,18 +275,18 @@ async function buildPreview(db: D1Database, seasonId: number) {
 seasonRoutes.get("/season-change/preview", async (c) => {
   requireAdmin(requireActor(c));
   const seasonId = Number(c.req.query("seasonId"));
-  if (!Number.isInteger(seasonId) || seasonId <= 0) throw badRequest("Bitte wähle die neue Saison.");
+  if (!Number.isInteger(seasonId) || seasonId <= 0) throw badRequest(t`Please select the new season.`);
   const preview = await buildPreview(c.env.DB, seasonId);
-  // Schulferien BW der neuen Saison: einmalig hier, danach frei bearbeitbar unter Verwaltung → Ferien
+  // School holidays BW of the new season: once here, afterwards freely editable under Administration → Holidays
   let holidays: HolidayInput[] = [];
   let holidaysError: string | null = null;
   try {
     holidays = await holidaySource.bw(preview.next.startsOn, preview.next.endsOn);
   } catch (err) {
-    console.error("Ferienimport fehlgeschlagen", err);
-    holidaysError = "Die Schulferien ließen sich gerade nicht laden. Du kannst sie nach dem Wechsel unter Verwaltung → Ferien eintragen oder es später erneut versuchen.";
+    console.error("Holiday import failed", err);
+    holidaysError = t`The school holidays could not be loaded just now. You can enter them after the change under Administration → Holidays or try again later.`;
   }
-  return c.json({ ...preview, holidays, holidaysError, holidaySource: HOLIDAY_SOURCE });
+  return c.json({ ...preview, holidays, holidaysError, holidaySource: holidaySourceLabel() });
 });
 
 const executeSchema = z.object({
@@ -293,7 +295,7 @@ const executeSchema = z.object({
   assignments: z
     .array(z.object({ personId: z.number().int().positive(), teamIds: z.array(z.number().int().positive()).max(3), former: z.boolean() }))
     .max(2000),
-  /** Ferien der neuen Saison aus der Vorschau; ersetzen alle bisherigen Zeiträume */
+  /** Holidays of the new season from the preview; they replace all previous periods */
   holidays: z
     .array(
       z
@@ -310,17 +312,20 @@ seasonRoutes.post("/season-change/execute", async (c) => {
   const input = parse(executeSchema, await readJson(c.req.raw));
   const db = c.env.DB;
   const next = await first<SeasonRow>(db, "SELECT * FROM seasons WHERE id = ?", input.seasonId);
-  if (!next || next.is_current === 1) throw badRequest("Ungültige Saison.");
-  if (input.confirmName.trim() !== next.name) throw badRequest(`Zur Bestätigung bitte genau „${next.name}“ eingeben.`);
+  if (!next || next.is_current === 1) throw badRequest(t`Invalid season.`);
+  if (input.confirmName.trim() !== next.name) {
+    const name = next.name;
+    throw badRequest(t`To confirm, please enter exactly “${name}”.`);
+  }
   const teamIds = new Set((await all<{ id: number }>(db, "SELECT id FROM teams WHERE kind = 'team'")).map((t) => t.id));
-  for (const a of input.assignments) if (a.teamIds.some((t) => !teamIds.has(t))) throw badRequest("Unbekannte Mannschaft in der Zuordnung.");
+  for (const a of input.assignments) if (a.teamIds.some((t) => !teamIds.has(t))) throw badRequest(t`Unknown team in the assignment.`);
 
   const formerIds = input.assignments.filter((a) => a.former).map((a) => a.personId);
-  if (formerIds.includes(actor.personId)) throw badRequest("Du kannst dich nicht selbst als ehemalig markieren.");
+  if (formerIds.includes(actor.personId)) throw badRequest(t`You cannot mark yourself as former.`);
   await assertNotProtected(db, actor, formerIds);
   const memberships = input.assignments.filter((a) => !a.former).flatMap((a) => [...new Set(a.teamIds)].map((t) => ({ p: a.personId, t })));
 
-  // Eltern, deren Kinder alle gehen und die selbst keine Rolle haben, werden gelöscht.
+  // Parents whose children all leave and who have no role themselves are deleted.
   const orphanParents = await all<{ id: number }>(
     db,
     `SELECT DISTINCT g.guardian_id AS id FROM guardianships g JOIN persons gp ON gp.id = g.guardian_id
@@ -332,20 +337,20 @@ seasonRoutes.post("/season-change/execute", async (c) => {
         )`,
     list(formerIds),
   );
-  // Auch die Chats der Gruppen werden geleert, ihre Mitglieder bleiben
+  // The groups' chats are emptied as well; their members remain
   const allTeamIds = (await all<{ id: number }>(db, "SELECT id FROM teams")).map((t) => t.id);
 
-  // Statistik der ablaufenden Saison: erst alle begonnenen Termine festschreiben, dann verdichten
+  // Statistics of the ending season: first record all started events, then condense
   const ending = await first<SeasonRow>(db, "SELECT * FROM seasons WHERE is_current = 1");
   while (await recordAttendance(db)) {
-    // in Portionen, bis alles festgeschrieben ist
+    // in portions until everything is recorded
   }
 
   await db.batch([
     ...(ending ? seasonStatsStatements(db, ending.id) : []),
     stmt(db, "DELETE FROM events"),
     stmt(db, "DELETE FROM training_plans"),
-    // Ohne geladene Ferien (Import fehlgeschlagen) bleiben die bisherigen Zeiträume stehen
+    // Without loaded holidays (import failed) the previous periods remain
     ...(input.holidays.length ? [stmt(db, "DELETE FROM holiday_periods")] : []),
     ...input.holidays.map((h) =>
       stmt(db, "INSERT INTO holiday_periods (name, starts_on, ends_on, imported) VALUES (?, ?, ?, 1)", h.name, h.startsOn, h.endsOn),
@@ -379,9 +384,9 @@ seasonRoutes.post("/season-change/execute", async (c) => {
   });
 });
 
-// Export: Datensicherung einmal pro Saison und vor dem Reset ----------------------
+// Export: backup once per season and before the reset ---------------------------
 
-/** Tabellen mit Vereinsdaten, vollständig exportiert. */
+/** Tables with club data, exported in full. */
 export const EXPORT_TABLES = [
   "app_meta",
   "seasons",
@@ -429,10 +434,10 @@ export const EXPORT_TABLES = [
 ];
 
 /**
- * Bewusst nicht oder nur teilweise im Export: Zugangsdaten, die nach einer
- * Wiederherstellung neu entstehen und in einer abgelegten Datei nur schaden.
- * accounts und avatars kommen gesondert (ohne Geheimnisse bzw. als Base64).
- * Ein Test prüft, dass jede Tabelle in einer der beiden Listen steht.
+ * Deliberately not or only partly in the export: access data that is created
+ * anew after a restore and would only do harm in a stored file.
+ * accounts and avatars come separately (without secrets or as Base64).
+ * A test checks that every table is in one of the two lists.
  */
 export const EXPORT_EXCLUDED = [
   "accounts",
@@ -457,12 +462,12 @@ function base64(bytes: ArrayBuffer | Uint8Array | number[]): string {
 seasonRoutes.get("/admin/export", async (c) => {
   const actor = requireActor(c);
   requireAdmin(actor);
-  // Protokoll für die Rechenschaft des Vereins: wer wann exportiert hat (nur IDs, in den Worker-Logs)
+  // Log for the club's accountability: who exported when (IDs only, in the worker logs)
   console.info(JSON.stringify({ event: "admin_export", personId: actor.personId, accountId: actor.accountId, viewAs: actor.viewAs ?? null, at: utcIso() }));
   const db = c.env.DB;
   const data: Record<string, unknown> = {};
   for (const table of EXPORT_TABLES) data[table] = await all(db, `SELECT * FROM ${table}`);
-  // Zugänge ohne Passkey-Handle; die E-Mail ist für Eltern mit E-Mail-Anmeldung der einzige Kontakt
+  // Accounts without passkey handle; the e-mail is the only contact for parents with e-mail sign-in
   data.accounts = await all(db, "SELECT id, person_id, email, email_verified_at, created_at, disabled_at FROM accounts");
   const avatars = await all<{ person_id: number; status: string; mime: string; image: ArrayBuffer; version: number; created_at: string }>(
     db,
@@ -490,7 +495,7 @@ seasonRoutes.get("/admin/export", async (c) => {
   });
 });
 
-// Vereinsaustritt -----------------------------------------------------------------
+// Leaving the club ---------------------------------------------------------------
 
 async function retirePerson(db: D1Database, personId: number, now: number): Promise<D1PreparedStatement[]> {
   const nowL = nowLocal(now);
@@ -515,16 +520,16 @@ async function retirePerson(db: D1Database, personId: number, now: number): Prom
 seasonRoutes.post("/persons/:id/leave", async (c) => {
   const actor = requireActor(c);
   const personId = intParam(c, "id");
-  if (personId === actor.personId) throw badRequest("Den eigenen Austritt trägt ein Admin ein.");
+  if (personId === actor.personId) throw badRequest(t`An admin records your own leaving.`);
   await assertNotProtected(c.env.DB, actor, personId);
-  if (!(await canManagePerson(c.env.DB, actor, personId))) throw forbidden("Diese Person verwaltest du nicht.");
+  if (!(await canManagePerson(c.env.DB, actor, personId))) throw forbidden(t`You do not manage this person.`);
   await assertNotStaffUnlessAdmin(c.env.DB, actor, personId);
   const person = await first<{ id: number; is_admin: number }>(c.env.DB, "SELECT id, is_admin FROM persons WHERE id = ? AND is_former = 0", personId);
-  if (!person) throw notFound("Diese Person gibt es nicht.");
+  if (!person) throw notFound(t`This person does not exist.`);
   if (person.is_admin && !actor.isAdmin) throw forbidden();
   const now = Date.now();
   const teams = (await all<{ team_id: number }>(c.env.DB, "SELECT DISTINCT team_id FROM team_memberships WHERE person_id = ?", personId)).map((t) => t.team_id);
-  // Eltern, deren letztes Kind austritt und die selbst keine Rolle haben
+  // Parents whose last child leaves and who have no role themselves
   const parents = await all<{ id: number }>(
     c.env.DB,
     `SELECT g.guardian_id AS id FROM guardianships g JOIN persons gp ON gp.id = g.guardian_id

@@ -1,7 +1,9 @@
-// Neue Versionen erkennen. Nach einem Deployment fehlen die nachgeladenen
-// Dateien der alten Version, eine offene App würde sonst beim nächsten
-// Seitenwechsel hängen bleiben. Die installierte App auf dem Home-Bildschirm
-// läuft oft tagelang, ohne neu geladen zu werden.
+// Detect new versions. After a deployment the lazily loaded files of the old
+// version are gone, an open app would otherwise hang on the next page change.
+// The installed app on the home screen often runs for days without being
+// reloaded.
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 import type { ComponentType } from "preact";
 import { useEffect, useState } from "preact/hooks";
 import { lazy } from "preact-iso";
@@ -9,7 +11,7 @@ import { Icon } from "./icons";
 
 const CURRENT = __APP_VERSION__;
 const CHECK_EVERY_MS = 10 * 60 * 1000;
-/** So lange im Hintergrund, dann lädt die App beim Zurückkehren ohne Nachfrage neu. */
+/** After this long in the background, the app reloads on return without asking. */
 const AUTO_RELOAD_AFTER_HIDDEN_MS = 30 * 1000;
 const RELOAD_GUARD = "kabine-reloaded-for";
 
@@ -40,14 +42,14 @@ export async function checkForUpdate(): Promise<boolean> {
   return available;
 }
 
-/** Neu laden, höchstens einmal pro neuer Version automatisch (gegen Schleifen). */
+/** Reload, automatically at most once per new version (against loops). */
 export function reloadApp(auto = false) {
   if (auto) {
     try {
       if (sessionStorage.getItem(RELOAD_GUARD) === CURRENT) return false;
       sessionStorage.setItem(RELOAD_GUARD, CURRENT);
     } catch {
-      // Ohne Speicher lieber nicht automatisch
+      // Without storage better not automatically
       return false;
     }
   }
@@ -67,7 +69,7 @@ export function startUpdateChecks() {
     }
     const wasAway = hiddenSince != null && Date.now() - hiddenSince >= AUTO_RELOAD_AFTER_HIDDEN_MS;
     hiddenSince = null;
-    // Wer die App aus dem Hintergrund holt, bekommt die neue Version ohne Rückfrage
+    // Whoever brings the app back from the background gets the new version without asking
     if ((await checkForUpdate()) && wasAway) reloadApp(true);
   });
   window.setInterval(() => {
@@ -80,10 +82,10 @@ function UpdateRequired() {
     <main class="page no-tabs">
       <div class="content">
         <div class="empty">
-          <div class="title">{available ? "Die App wurde aktualisiert" : "Seite konnte nicht geladen werden"}</div>
-          <p>{available ? "Bitte einmal neu laden, dann geht es weiter." : "Prüfe deine Internetverbindung und lade die App neu."}</p>
+          <div class="title">{available ? t`The app has been updated` : t`The page could not be loaded`}</div>
+          <p>{available ? t`Please reload once, then you can continue.` : t`Check your internet connection and reload the app.`}</p>
           <button type="button" class="btn btn-primary" onClick={() => reloadApp()}>
-            Neu laden
+            <Trans>Reload</Trans>
           </button>
         </div>
       </div>
@@ -92,13 +94,13 @@ function UpdateRequired() {
 }
 
 /**
- * Wie lazy() aus preact-iso, aber wenn die Datei der Seite nicht mehr
- * existiert (neue Version deployt), lädt die App neu oder bittet darum.
+ * Like lazy() from preact-iso, but when the page's file no longer exists
+ * (new version deployed), the app reloads or asks to.
  */
 export function lazyPage<P>(load: () => Promise<ComponentType<P>>) {
   return lazy(() =>
     load().catch(async (err: unknown) => {
-      console.warn("Seite konnte nicht geladen werden", err);
+      console.warn("Page could not be loaded", err);
       if ((await checkForUpdate()) && reloadApp(true)) return new Promise<never>(() => undefined);
       return UpdateRequired as unknown as ComponentType<P>;
     }),
@@ -115,9 +117,11 @@ export function UpdateBanner() {
   return (
     <div class="update-banner" role="status">
       <Icon name="refresh" size={18} />
-      <span>Es gibt eine neue Version der App.</span>
+      <span>
+        <Trans>There is a new version of the app.</Trans>
+      </span>
       <button type="button" class="btn btn-sm btn-accent" onClick={() => reloadApp()}>
-        Jetzt laden
+        <Trans>Load now</Trans>
       </button>
     </div>
   );

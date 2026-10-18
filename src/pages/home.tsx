@@ -1,3 +1,5 @@
+import { plural, t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 import { clubName } from "../club";
 import { useLocation } from "preact-iso";
 import { useRef, useState } from "preact/hooks";
@@ -14,9 +16,27 @@ import { Button, Empty, ErrorBox, Segmented, StatusPill, useDocumentTitle } from
 import { isLiveWindow, LiveCard } from "../live";
 import { isRelevantEvent } from "../../shared/relevance";
 
-const KIND_LABEL = { training: "Training", game: "Spiel", special: "Termin" } as const;
+const kindLabel = () => ({ training: t`Training`, game: t`Game`, special: t`Event` }) as const;
 
-/** Mannschaft(en) am Termin nennen, wenn man mit mehr als einer Mannschaft zu tun hat (eigene oder die der Kinder). */
+/** "A and B and C": names as one list, in the app's language. */
+function joinAnd(names: string[]): string {
+  return names.reduce((list, name) => (list ? t`${list} and ${name}` : name), "");
+}
+
+/** Card heading "Up next: game" or, for a further event on the same day, "Then: game". */
+function nextHeading(kind: EventSummary["kind"], later: boolean): string {
+  if (later) return kind === "game" ? t`Then: game` : kind === "training" ? t`Then: training` : t`Then: event`;
+  return kind === "game" ? t`Up next: game` : kind === "training" ? t`Up next: training` : t`Up next: event`;
+}
+
+/** Carpool summary on the card: "Carpools (2/5) · 1 is still looking". */
+function carpoolLine(c: { taken: number; seats: number; waiting: number }): string {
+  const { taken, seats, waiting } = c;
+  const head = t`Carpools (${taken}/${seats})`;
+  return waiting ? `${head} · ${plural(waiting, { one: "# is still looking", other: "# are still looking" })}` : head;
+}
+
+/** Name the team(s) of the event when you deal with more than one team (your own or your children's). */
 function useTeamLabel(): (e: EventSummary) => string {
   const me = useMe();
   const names = new Set([...me.memberships.map((m) => m.name), ...me.children.flatMap((c) => c.teams.map((t) => t.name))]);
@@ -24,18 +44,21 @@ function useTeamLabel(): (e: EventSummary) => string {
 }
 
 
-/** later: weiterer Termin am selben Tag wie der nächste, ebenfalls als große Karte („Danach: Spiel“). */
+/** later: a further event on the same day as the next one, also as a big card ("Then: game"). */
 function NextCard({ event, onDecline, later = false }: { event: EventSummary; onDecline: (p: MyParticipation) => void; later?: boolean }) {
   const me = useMe();
   const mine = event.mine.filter((m) => m.participant || m.helpRequest);
   const single = mine.length === 1 && mine[0]!.person.id === me.person.id && !mine[0]!.helpRequest;
   const counts = event.counts;
   const teamLabel = useTeamLabel();
+  const kind = kindLabel()[event.kind];
+  const reason = single && mine[0]!.status === "no" ? mine[0]!.reason : null;
+  const deadline = deadlineText(event);
   return (
-    <section class="card" aria-label={`Nächster Termin: ${KIND_LABEL[event.kind]}`}>
+    <section class="card" aria-label={t`Next event: ${kind}`}>
       <div class="card-head">
         <span class="label">
-          {later ? "Danach:" : "Nächstes"} {event.kind === "game" ? "Spiel" : event.kind === "training" ? "Training" : "Event"}
+          {nextHeading(event.kind, later)}
           {teamLabel(event) ? ` · ${teamLabel(event)}` : ""}
         </span>
         <span style={{ fontWeight: 600, fontSize: "14px" }}>{relativeDay(event.startsAt)}</span>
@@ -63,23 +86,28 @@ function NextCard({ event, onDecline, later = false }: { event: EventSummary; on
         {event.carpoolCount ? (
           <a class="carpool-line" href={`/termine/${event.id}`}>
             <Icon name="car" size={16} />
-            Fahrgemeinschaften ({event.carpoolCount.taken}/{event.carpoolCount.seats})
-            {event.carpoolCount.waiting ? ` · ${event.carpoolCount.waiting} ${event.carpoolCount.waiting === 1 ? "sucht" : "suchen"} noch` : ""}
+            {carpoolLine(event.carpoolCount)}
           </a>
         ) : null}
         {counts ? (
           <div class="stats">
             <div class="stat">
               <div class="n">{counts.yes}</div>
-              <div class="l">Nehmen teil</div>
+              <div class="l">
+                <Trans>Attending</Trans>
+              </div>
             </div>
             <div class="stat">
               <div class="n">{counts.no + counts.standing}</div>
-              <div class="l">Absagen</div>
+              <div class="l">
+                <Trans>Declines</Trans>
+              </div>
             </div>
             <div class="stat">
               <div class="n">{counts.inactive}</div>
-              <div class="l">Inaktiv</div>
+              <div class="l">
+                <Trans>Inactive</Trans>
+              </div>
             </div>
           </div>
         ) : null}
@@ -91,29 +119,36 @@ function NextCard({ event, onDecline, later = false }: { event: EventSummary; on
               </div>
             ) : null}
             <ResponseButtons event={event} p={mine[0]!} onDecline={onDecline} />
-            {mine[0]!.status === "no" && mine[0]!.reason ? <p class="small muted">Dein Grund: „{mine[0]!.reason}“</p> : null}
+            {reason ? (
+              <p class="small muted">
+                <Trans>Your reason: “{reason}”</Trans>
+              </p>
+            ) : null}
           </>
         ) : (
           mine.map((m) => <PersonResponseRow key={m.person.id} event={event} p={m} onDecline={onDecline} />)
         )}
         {event.deadline && mine.some((m) => m.participant) ? (
-          <p class="small muted">Bitte sage rechtzeitig bis {deadlineText(event)} ab, damit deine Trainer besser planen können.</p>
+          <p class="small muted">
+            <Trans>Please decline in good time by {deadline} so that your coaches can plan better.</Trans>
+          </p>
         ) : null}
       </div>
     </section>
   );
 }
 
-/** Spiele: Treffpunkt und Uhrzeit; Trainern ein Hinweis, solange beides fehlt. */
+/** Games: meeting point and time; a hint for coaches as long as both are missing. */
 function MeetingLine({ event }: { event: EventSummary }) {
   const g = event.game;
   if (event.kind !== "game" || !g || event.cancelled) return null;
   if (g.meetingTime || g.meetingPoint) {
+    const meetingTime = g.meetingTime;
     return (
       <div class="meeting-line">
         <Icon name="users" size={18} />
         <span>
-          Treffen{g.meetingTime ? ` ${g.meetingTime} Uhr` : ""}
+          {meetingTime ? t`Meet at ${meetingTime}` : t`Meet`}
           {g.meetingPoint ? ` · ${g.meetingPoint}` : ""}
         </span>
       </div>
@@ -122,19 +157,21 @@ function MeetingLine({ event }: { event: EventSummary }) {
   return event.canManage ? (
     <a class="meeting-line missing" href={`/termine/${event.id}`}>
       <Icon name="alert" size={18} />
-      <span>Treffpunkt und Uhrzeit noch nicht eingetragen</span>
+      <span>
+        <Trans>Meeting point and time not entered yet</Trans>
+      </span>
     </a>
   ) : null;
 }
 
-/** Für Trainer: nächster Termin ihrer Mannschaften mit Rückmeldestand. */
+/** For coaches: next event of their teams with the state of responses. */
 function CoachNextCard({ event, later = false }: { event: EventSummary; later?: boolean }) {
   const c = event.counts!;
   return (
-    <section class="card" aria-label="Nächster Termin deiner Mannschaft">
+    <section class="card" aria-label={t`Your team's next event`}>
       <div class="card-head">
         <span class="label">
-          {later ? "Danach:" : "Nächstes"} {event.kind === "game" ? "Spiel" : event.kind === "training" ? "Training" : "Event"} ·{" "}
+          {nextHeading(event.kind, later)} ·{" "}
           <span class="nocaps">{event.teams.map((t) => t.name).join(" + ")}</span>
         </span>
         <span style={{ fontWeight: 600, fontSize: "14px" }}>{relativeDay(event.startsAt)}</span>
@@ -158,23 +195,31 @@ function CoachNextCard({ event, later = false }: { event: EventSummary; later?: 
         <div class="stat-tiles">
           <div class="stat-tile yellow">
             <div class="n">{c.yes}</div>
-            <div class="l">nehmen teil</div>
+            <div class="l">
+              <Trans>attending</Trans>
+            </div>
           </div>
           <div class="stat-tile" style={{ background: "var(--bg)" }}>
             <div class="n">{c.no}</div>
-            <div class="l">abgesagt</div>
+            <div class="l">
+              <Trans>declined</Trans>
+            </div>
           </div>
           <div class="stat-tile" style={{ background: "var(--bg)" }}>
             <div class="n">{c.standing}</div>
-            <div class="l">abwesend</div>
+            <div class="l">
+              <Trans>absent</Trans>
+            </div>
           </div>
           <div class="stat-tile dark">
             <div class="n">{c.inactive}</div>
-            <div class="l">inaktiv</div>
+            <div class="l">
+              <Trans>inactive</Trans>
+            </div>
           </div>
         </div>
         <a class="btn btn-primary" href={`/termine/${event.id}`}>
-          Details und Erinnern
+          <Trans>Details and reminders</Trans>
         </a>
       </div>
     </section>
@@ -190,12 +235,21 @@ function EventRow({ event }: { event: EventSummary }) {
   const self = mine.find((m) => m.person.id === me.person.id);
   const single = mine.length === 1 ? mine[0]! : null;
   const team = useTeamLabel()(event);
+  const at = time(event.startsAt);
+  const title = event.title;
   const label =
     event.kind === "training"
-      ? `Training${team ? ` ${team}` : ""} · ${time(event.startsAt)}`
+      ? team
+        ? t`Training ${team} · ${at}`
+        : t`Training · ${at}`
       : event.kind === "game"
-        ? `Spiel · ${event.title}`
+        ? t`Game · ${title}`
         : `${event.title} · ${time(event.startsAt)}`;
+  const byName = event.cancelled?.byName;
+  const names = others.map((o) => o.person.firstName).join(", ");
+  const counts = event.counts;
+  const yes = counts?.yes ?? 0;
+  const total = counts ? counts.yes + counts.no + counts.open + counts.standing + counts.inactive : 0;
   return (
     <a href={`/termine/${event.id}`} class={`event-row ${dark && !cancelled ? "dark" : ""} ${cancelled ? "cancelled" : ""}`}>
       <div class="date-block">
@@ -207,14 +261,16 @@ function EventRow({ event }: { event: EventSummary }) {
         <div class="title">{label}</div>
         {cancelled ? (
           <div class="sub">
-            <span class="cancel-tag">Termin abgesagt</span>
-            {event.cancelled!.byName ? `von ${event.cancelled!.byName}` : ""}
+            <span class="cancel-tag">
+              <Trans>Event cancelled</Trans>
+            </span>
+            {byName ? t`by ${byName}` : ""}
             {event.cancelled!.reason ? `${event.cancelled!.byName ? ": " : ""}${event.cancelled!.reason}` : ""}
           </div>
         ) : (
           <div class="sub">
             {event.kind === "game" ? `${time(event.startsAt)} · ` : ""}
-            {event.location?.name ?? "Ort folgt"}
+            {event.location?.name ?? t`Location to follow`}
             {event.teams.length > 1 && !team ? ` · ${event.teams.map((t) => t.name).join(" + ")}` : ""}
           </div>
         )}
@@ -222,17 +278,20 @@ function EventRow({ event }: { event: EventSummary }) {
         {event.isPast && !cancelled ? <UnexcusedChips event={event} /> : null}
         {others.length ? (
           <div class="who">
-            {others.map((o) => o.person.firstName).join(", ")}
-            {self ? " und du" : ""}
+            {self ? t`${names} and you` : names}
           </div>
         ) : null}
       </div>
       {!cancelled && single ? (
         single.helpRequest?.status === "open" ? (
-          <span class="pill pill-nominated">Anfrage</span>
+          <span class="pill pill-nominated">
+            <Trans context="help request">Request</Trans>
+          </span>
         ) : event.kind === "game" && single.nominated && single.status === "yes" ? (
-          // In der Liste zählt bei Spielen, wer nominiert ist; Spiele ohne Nominierung stehen ohne Marke da
-          <span class="pill pill-nominated">Nominiert</span>
+          // For games the list counts who is nominated; games without a nomination have no mark
+          <span class="pill pill-nominated">
+            <Trans>Nominated</Trans>
+          </span>
         ) : (
           <StatusPill status={single.status} late={single.isLate} nominated={single.nominated} game={event.kind === "game"} />
         )
@@ -243,7 +302,7 @@ function EventRow({ event }: { event: EventSummary }) {
         </span>
       ) : null}
       {!cancelled && !mine.length && event.canManage && event.counts ? (
-        <span class="pill pill-muted" aria-label={`${event.counts.yes} von ${event.counts.yes + event.counts.no + event.counts.open + event.counts.standing + event.counts.inactive} zugesagt`}>
+        <span class="pill pill-muted" aria-label={t`${yes} of ${total} accepted`}>
           <Icon name="check" size={13} stroke={3} />
           {event.counts.yes}/{event.counts.yes + event.counts.no + event.counts.open + event.counts.standing + event.counts.inactive}
         </span>
@@ -253,17 +312,19 @@ function EventRow({ event }: { event: EventSummary }) {
   );
 }
 
-/** Vergangene Termine: eigene Markierung bzw. für Trainer die Zahl der Markierungen. */
+/** Past events: your own mark, or for coaches the number of marks. */
 function UnexcusedChips({ event }: { event: EventSummary }) {
   const me = useMe();
   const marked = event.mine.filter((m) => m.unexcused);
   if (!marked.length && !event.unexcusedCount) return null;
+  const count = event.unexcusedCount;
   return (
     <div class="row-gap" style={{ gap: "6px", marginTop: "4px" }}>
-      {marked.map((m) => (
-        <span class="badge warn">{m.person.id === me.person.id ? "Unentschuldigt gefehlt" : `${m.person.firstName}: unentschuldigt gefehlt`}</span>
-      ))}
-      {event.unexcusedCount && event.canManage ? <span class="badge warn">{event.unexcusedCount}× unentschuldigt</span> : null}
+      {marked.map((m) => {
+        const name = m.person.firstName;
+        return <span class="badge warn">{m.person.id === me.person.id ? t`Missed without excuse` : t`${name}: missed without excuse`}</span>;
+      })}
+      {count && event.canManage ? <span class="badge warn">{t`${count}× unexcused`}</span> : null}
     </div>
   );
 }
@@ -284,19 +345,19 @@ function saveTeamFilter(team: string | null) {
     if (team) sessionStorage.setItem(TEAM_FILTER, team);
     else sessionStorage.removeItem(TEAM_FILTER);
   } catch {
-    // Privater Modus: Filter gilt nur bis zum Neuladen
+    // Private mode: the filter only lasts until the page is reloaded
   }
 }
 
-/** Termine pro Abschnitt; „Mehr Termine“ lädt so viele weitere. */
+/** Events per section; "More events" loads that many more. */
 const PAGE = 20;
-/** Geladene Termine je Ansicht. Bleibt beim Wechsel in einen Termin und zurück erhalten. */
+/** Loaded events per view. Kept when opening an event and going back. */
 const loaded: Record<When, number> = { upcoming: PAGE, past: PAGE };
 
 const byStart = (list: EventSummary[]) => [...new Map(list.map((e) => [e.id, e])).values()].sort((a, b) => a.startsAt.localeCompare(b.startsAt) || a.id - b.id);
 
 export function HomePage() {
-  useDocumentTitle("Termine");
+  useDocumentTitle(t`Events`);
   const me = useMe();
   const offline = useOffline();
   const { query } = useLocation();
@@ -309,17 +370,17 @@ export function HomePage() {
   };
   const [declineFor, setDeclineFor] = useState<{ event: EventSummary; p: MyParticipation } | null>(null);
 
-  // Kinder nur, soweit die Eltern in ihren Mannschaften eingebunden sind
+  // Children only as far as parents are involved in their teams
   const children = me.children.filter((c) => c.parentsInCharge);
   const noTeam = !me.memberships.length && !children.length;
   const teamNames = [
     ...new Set([...me.memberships.map((m) => m.name), ...children.flatMap((c) => c.teams.filter((t) => t.parentsEnabled).map((t) => t.name))]),
   ];
-  // Ein gemerkter Filter auf eine Mannschaft, zu der man nicht mehr gehört, gilt nicht
+  // A remembered filter for a team you no longer belong to does not apply
   const team = teamFilter && teamNames.includes(teamFilter) ? teamFilter : null;
-  // Bei gesetztem Filter: welche Kinder spielen in dieser Mannschaft?
+  // With a filter set: which children play in this team?
   const teamKids = team ? children.filter((c) => c.teams.some((t) => t.parentsEnabled && t.name === team)).map((c) => c.firstName) : [];
-  const teamLabel = team ? `der ${team}${teamKids.length ? ` für ${teamKids.join(" und ")}` : ""}` : "";
+  const kids = joinAnd(teamKids);
   const pickTeam = (name: string) => {
     const next = team === name ? null : name;
     saveTeamFilter(next);
@@ -330,13 +391,13 @@ export function HomePage() {
     ? ([...me.memberships, ...children.flatMap((c) => c.teams.filter((t) => t.parentsEnabled))].find((t) => t.name === team)?.id ?? null)
     : null;
 
-  // Seitenweise vom Server, der auch nach Relevanz und Mannschaft filtert. Offline ohne Mannschaft:
-  // Dann kommt die zuletzt geladene Liste aus dem Speicher, gefiltert wird hier.
+  // Page by page from the server, which also filters by relevance and team. Offline without a team:
+  // then the last loaded list comes from storage and is filtered here.
   const limit = limits[when];
   const serverTeam = offline ? null : teamId;
   const path = `/events?limit=${limit}${serverTeam ? `&team=${serverTeam}` : ""}${when === "past" ? "&past=1" : ""}`;
   const { data, error, loading, reload } = useQuery<EventPage>(path, { refreshMs: 60_000 });
-  // Beim Nachladen bleibt die bisherige Liste stehen, statt kurz zu verschwinden
+  // While loading more, the previous list stays instead of briefly disappearing
   const kept = useRef<Partial<Record<When, EventPage>>>({});
   if (data) kept.current[when] = data;
   const shown = data ?? kept.current[when];
@@ -346,13 +407,13 @@ export function HomePage() {
   const events = (shown?.events ?? []).filter(isRelevantEvent).filter(teamOk);
   const past = when === "past" ? events.filter((e) => e.isPast) : [];
   const upcoming = when === "upcoming" ? events.filter((e) => !e.isPast) : [];
-  // Angepfiffene Spiele mit handball4all-Spielstand bleiben bis 3 Stunden nach Anpfiff oben
+  // Games that have started with a handball4all score stay at the top until 3 hours after throw-off
   const liveGames = when === "upcoming" ? (shown?.live ?? []).filter(teamOk).filter((e) => isLiveWindow(e)) : [];
-  // Termine mit offener Aushilfe-Anfrage und der nächste eigene Termin, auch wenn sie hinter der Seite liegen
+  // Events with an open stand-in request and your own next event, even if they lie beyond the page
   const helpRequests = when === "upcoming" ? (shown?.openHelp ?? []).filter(teamOk) : [];
   const pool = byStart([...upcoming, ...(when === "upcoming" ? (shown?.next ?? []).filter(teamOk) : []), ...helpRequests]);
-  // Große Karte für den nächsten Termin und weitere Spiele am selben Tag (z. B. zwei Spiele an einem Sonntag)
-  // Der nächste Termin immer, weitere am selben Tag nur, wenn es Spiele sind
+  // Big card for the next event and further games on the same day (e.g. two games on a Sunday)
+  // The next event always, further ones on the same day only if they are games
   const sameDayAs = (first: EventSummary | undefined, list: EventSummary[]) =>
     first ? list.filter((e) => e === first || (e.kind === "game" && e.startsAt.slice(0, 10) === first.startsAt.slice(0, 10))) : [];
   const isMine = (e: EventSummary) => !e.cancelled && e.mine.some((m) => m.participant || m.helpRequest?.status === "open");
@@ -367,22 +428,29 @@ export function HomePage() {
       )
     : [];
   const rest = upcoming.filter((e) => !mineIds.has(e.id) && !coachCards.includes(e));
-  // Hinweis, ab wann nur noch Spiele und Sondertermine folgen (Trainings werden 70 Tage im Voraus erzeugt)
+  // Note from when on only games and special events follow (trainings are generated 70 days ahead)
   const trainingsUntil = when === "upcoming" ? (shown?.trainingsUntil ?? null) : null;
   const horizonAt =
     trainingsUntil && upcoming.some((e) => e.kind === "training") ? rest.findIndex((e) => e.startsAt.slice(0, 10) > trainingsUntil) : -1;
+  const until = trainingsUntil ? longDate(`${trainingsUntil}T00:00`) : "";
   const moreButton = shown?.hasMore ? (
     <div class="stack-sm" style={{ alignItems: "center" }}>
-      {growing && error ? <p class="small muted">Weitere Termine ließen sich nicht laden.</p> : null}
+      {growing && error ? (
+        <p class="small muted">
+          <Trans>More events could not be loaded.</Trans>
+        </p>
+      ) : null}
       <Button
         disabled={growing && !error}
         onClick={() => (growing && error ? reload() : setLimit(when, limit + PAGE))}
       >
-        {growing ? (error ? "Erneut versuchen" : "Lädt …") : "Mehr Termine"}
+        {growing ? (error ? t`Try again` : t`Loading …`) : t`More events`}
       </Button>
     </div>
   ) : null;
 
+  const firstName = me.person.firstName;
+  const childNames = joinAnd(children.map((c) => c.firstName));
   let lastMonth = "";
   return (
     <main class="page">
@@ -390,7 +458,7 @@ export function HomePage() {
         <div class="hero-top">
           <div class="kicker">{clubName()}</div>
           {teamNames.length > 1 ? (
-            <div class="row-gap team-filter" role="group" aria-label="Nach Mannschaft filtern">
+            <div class="row-gap team-filter" role="group" aria-label={t`Filter by team`}>
               {teamNames.map((t) => (
                 <button
                   type="button"
@@ -406,27 +474,37 @@ export function HomePage() {
             teamNames.map((t) => <span class="team-badge">{t}</span>)
           )}
         </div>
-        <h1>Hallo {me.person.firstName}</h1>
+        <h1>
+          <Trans>Hello {firstName}</Trans>
+        </h1>
         <div class="hero-sub">
           {when === "past"
-            ? `Vergangene Termine${team ? ` ${teamLabel}` : ""} in dieser Saison`
+            ? team
+              ? kids
+                ? t`Past events of the ${team} for ${kids} this season`
+                : t`Past events of the ${team} this season`
+              : t`Past events this season`
             : team
-              ? `Termine ${teamLabel}`
+              ? kids
+                ? t`Events of the ${team} for ${kids}`
+                : t`Events of the ${team}`
               : children.length
-            ? `Termine von ${me.memberships.length ? "dir und " : ""}${children.map((c) => c.firstName).join(" und ")}`
-            : "Deine nächsten Termine"}
+                ? me.memberships.length
+                  ? t`Events for you and ${childNames}`
+                  : t`Events for ${childNames}`
+                : t`Your upcoming events`}
         </div>
       </header>
 
       <div class="content">
         {!noTeam ? <MotdBanner /> : null}
         <Segmented<When>
-          label="Zeitraum"
+          label={t`Period`}
           value={when}
           onChange={setWhen}
           options={[
-            { value: "upcoming", label: "Kommend" },
-            { value: "past", label: "Vergangen" },
+            { value: "upcoming", label: t`Upcoming` },
+            { value: "past", label: t`Past` },
           ]}
         />
         {error && !shown ? <ErrorBox error={error} onRetry={reload} /> : null}
@@ -441,11 +519,16 @@ export function HomePage() {
         <InstallBanner />
         <PushSetupBanner />
 
-        {openHelp.map((e) => (
-          <section class="card card-pad stack" aria-label="Aushilfe-Anfrage">
+        {openHelp.map((e) => {
+          const date = longDate(e.startsAt);
+          const at = time(e.startsAt);
+          return (
+          <section class="card card-pad stack" aria-label={t`Stand-in request`}>
             <a href={`/termine/${e.id}`} style={{ textDecoration: "none" }}>
               <div class="kicker" style={{ color: "var(--text-2)" }}>
-                Spiel · {longDate(e.startsAt)}, {time(e.startsAt)}
+                <Trans>
+                  Game · {date}, {at}
+                </Trans>
               </div>
               <strong>{e.title}</strong>
             </a>
@@ -455,7 +538,8 @@ export function HomePage() {
                 <HelpRequestCard event={e} p={m} />
               ))}
           </section>
-        ))}
+          );
+        })}
 
         {liveGames.map((e) => (
           <LiveCard key={e.id} event={e} />
@@ -468,13 +552,13 @@ export function HomePage() {
         ))}
 
         {shown && when === "past" && !past.length ? (
-          <Empty title="Keine vergangenen Termine" icon="calendar">
-            In dieser Saison gab es{team ? ` für die ${team}` : ""} noch keine Termine.
+          <Empty title={t`No past events`} icon="calendar">
+            {team ? t`There have been no events for the ${team} this season yet.` : t`There have been no events this season yet.`}
           </Empty>
         ) : null}
 
         {past.length ? (
-          <section class="stack" aria-label="Vergangene Termine">
+          <section class="stack" aria-label={t`Past events`}>
             {past.map((e) => {
               const month = monthLabel(e.startsAt);
               const showMonth = month !== lastMonth;
@@ -492,26 +576,30 @@ export function HomePage() {
 
         {shown && when === "upcoming" && !upcoming.length ? (
           noTeam && me.isAdmin ? (
-            <Empty title="Keine eigenen Termine" icon="calendar">
-              <p>Du bist keiner Mannschaft zugeordnet. Die Mannschaften und ihre Termine findest du in der Verwaltung.</p>
+            <Empty title={t`No events of your own`} icon="calendar">
+              <p>
+                <Trans>You are not assigned to any team. You can find the teams and their events in the administration.</Trans>
+              </p>
               <a class="btn btn-primary" href="/verwaltung" style={{ marginTop: "12px" }}>
-                Zur Verwaltung
+                <Trans>Go to administration</Trans>
               </a>
             </Empty>
           ) : (
-            <Empty title="Keine Termine" icon="calendar">
+            <Empty title={t`No events`} icon="calendar">
               {me.manageableTeams.length
-                ? "Lege im Bereich Team einen Trainingsplan an, dann erscheinen hier die Termine."
+                ? t`Create a training plan in the Team section, then the events will appear here.`
                 : me.children.length && !children.length
-                  ? "In den Mannschaften deiner Kinder sind keine Eltern eingebunden. Deine Kinder sagen dort selbst zu und ab."
-                  : "Sobald dein Trainer Termine anlegt, siehst du sie hier."}
+                  ? t`Parents are not involved in your children's teams. Your children respond there themselves.`
+                  : t`As soon as your coach creates events, you will see them here.`}
             </Empty>
           )
         ) : null}
 
         {rest.length ? (
-          <section class="stack" aria-label="Weitere Termine">
-            <h2 class="section-title">Demnächst</h2>
+          <section class="stack" aria-label={t`Other events`}>
+            <h2 class="section-title">
+              <Trans>Coming up</Trans>
+            </h2>
             {rest.map((e, i) => {
               const month = monthLabel(e.startsAt);
               const showMonth = month !== lastMonth && lastMonth !== "";
@@ -520,7 +608,7 @@ export function HomePage() {
                 <>
                   {i === horizonAt && trainingsUntil ? (
                     <p class="small muted horizon-note">
-                      Trainings sind bis {longDate(`${trainingsUntil}T00:00`)} eingetragen. Danach folgen nur Spiele und Sondertermine.
+                      <Trans>Trainings are scheduled until {until}. After that only games and special events follow.</Trans>
                     </p>
                   ) : null}
                   {showMonth ? <div class="month-label">{month}</div> : null}

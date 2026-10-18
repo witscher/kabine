@@ -1,26 +1,30 @@
-// Admin-Export mit Datenschutzhinweis vor dem Herunterladen (Verwaltung, Saisonwechsel).
+// Admin export with a privacy notice before downloading (administration, season change).
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 import { confirmDialog } from "./ui";
 
 export const EXPORT_URL = "/api/admin/export";
 
-/** Zeigt den Hinweis zum Umgang mit den Daten und lädt erst nach Bestätigung herunter. */
+/** Shows the notice on handling the data and downloads only after confirmation. */
 export async function downloadExport(): Promise<boolean> {
   const ok = await confirmDialog({
-    title: "Hinweis",
+    title: t`Notice`,
     message: (
-      // Text vom Verein (10.10.2026)
+      // Text from the club (10.10.2026)
       <p style={{ textAlign: "left" }}>
-        Die Datei enthält persönliche Daten von Personen, auch von Minderjährigen. Sie dient nur der Datensicherung des Vereins und darf nicht weitergegeben werden.
-        Lösche sie nach spätestens 30 Tagen von deinem Rechner. Die Sicherung des Vereins gehört verschlüsselt in den dafür vorgesehenen Speicher. Ist ein Speicherort,
-        zum Beispiel dein Rechner, durch einen Virus oder Ähnliches für Unbefugte zugänglich geworden, informiere unverzüglich die Vorstandschaft.
+        <Trans>
+          The file contains personal data of people, including minors. It is only for the club's data backup and must not be passed on. Delete it from your
+          computer after 30 days at the latest. The club's backup belongs encrypted in the storage intended for it. If a storage location, for example your
+          computer, has become accessible to unauthorised persons through a virus or similar, inform the board immediately.
+        </Trans>
       </p>
     ),
-    confirmLabel: "Verstanden, herunterladen",
+    confirmLabel: t`Understood, download`,
   });
   if (!ok) return false;
   const a = document.createElement("a");
   a.href = EXPORT_URL;
-  // Nicht leer: Der Router fängt Links ohne download-Wert ab. Den Dateinamen mit Datum setzt der Server.
+  // Not empty: the router intercepts links without a download value. The server sets the file name with the date.
   a.download = "kabine-export.json";
   document.body.appendChild(a);
   a.click();

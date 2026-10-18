@@ -1,3 +1,4 @@
+import { t } from "@lingui/core/macro";
 import { h4aFetchUrl, h4aTableUrl, matchdayHost } from "./h4a";
 import type {
   EventCounts,
@@ -132,7 +133,7 @@ interface StandingRow {
 export interface Participant {
   person: PersonRef;
   teamId: number;
-  /** Alle beteiligten Mannschaften der Person, z. B. wC1 und wC2 bei einem gemeinsamen Training */
+  /** All teams of the person involved, e.g. wC1 and wC2 at a joint training */
   teamIds: number[];
   isHelper: boolean;
   isActive: boolean;
@@ -145,12 +146,12 @@ export interface EventContext {
   teams: Map<number, TeamInfo>;
   eventTeams: Map<number, number[]>;
   participants: Map<number, Participant[]>;
-  /** Mannschaftsmitglieder je Termin (auch ohne Nominierung), für "nicht nominiert". */
+  /** Team members per event (also without nomination), for "not nominated". */
   members: Map<number, Map<number, MemberRow>>;
   nominations: Map<number, Map<number, NominationRow>>;
   helpRequests: Map<number, HelpRow[]>;
   guardianOf: Set<string>; // `${guardianId}:${childId}`
-  /** „Fehlt unentschuldigt“: `${eventId}:${personId}` */
+  /** "Unexcused absence": `${eventId}:${personId}` */
   unexcused: Set<string>;
 }
 
@@ -177,7 +178,7 @@ function standingApplies(s: StandingRow, e: EventRow): boolean {
   return (!s.valid_from || s.valid_from <= day) && (!s.valid_to || day <= s.valid_to);
 }
 
-/** Lädt alles, was für Status, Zahlen und Rechte einer Terminliste nötig ist. */
+/** Loads everything needed for status, counts and permissions of a list of events. */
 export async function loadEventContext(db: D1Database, events: EventRow[]): Promise<EventContext> {
   const ids = events.map((e) => e.id);
   const ruleIds = [...new Set(events.map((e) => e.rule_id).filter((r): r is number => r != null))];
@@ -281,7 +282,7 @@ export async function loadEventContext(db: D1Database, events: EventRow[]): Prom
       if (m.role === "helper" && !(e.kind === "game" || (e.kind === "training" && m.helper_trainings === 1))) continue;
       memberTeams.set(m.person_id, [...new Set([...(memberTeams.get(m.person_id) ?? []), m.team_id])]);
       const existing = evMembers.get(m.person_id);
-      // Spieler vor Aushilfe; bei zwei Mannschaften fest nach Name (wC1 vor wC2)
+      // Player before helper; with two teams fixed by name (wC1 before wC2)
       if (
         !existing ||
         (existing.role === "helper" && m.role === "player") ||
@@ -303,7 +304,7 @@ export async function loadEventContext(db: D1Database, events: EventRow[]): Prom
       if (isActive !== 1) status = "inactive";
       else if (response) status = response.status;
       else if (hasStanding) status = "standing";
-      // Spielerinnen und Spieler gelten als zugesagt, bis sie absagen. Aushilfen sagen selbst zu.
+      // Players count as accepted until they decline. Helpers accept themselves.
       else status = isHelper ? "open" : "yes";
       personIds.add(personId);
       list.push({
@@ -331,7 +332,7 @@ export async function loadEventContext(db: D1Database, events: EventRow[]): Prom
     participants.set(e.id, list);
   }
 
-  // Wer ist Elternteil von wem? Für "abgesagt von Elternteil".
+  // Who is a parent of whom? For "declined by parent".
   const guardianRows = personIds.size
     ? await all<{ guardian_id: number; child_id: number }>(
         db,
@@ -352,7 +353,7 @@ export async function loadEventContext(db: D1Database, events: EventRow[]): Prom
   };
 }
 
-/** Tabelle bei handball4all für die Mannschaft mit hinterlegtem Spielplan. */
+/** Table at handball4all for the team with a linked schedule. */
 function gameLiveUrl(e: EventRow, teams: TeamInfo[]): string | null {
   if (!e.h4a_game_id) return null;
   const t = teams.find((x) => x.h4a_org_id && x.h4a_league_id && x.h4a_team_id);
@@ -360,8 +361,8 @@ function gameLiveUrl(e: EventRow, teams: TeamInfo[]): string | null {
 }
 
 /**
- * Dauer der Karte „Läuft gerade“, danach gibt es den Spielbericht: Aktive und A-Jugend 2 Stunden,
- * B- bis D-Jugend 1,5 Stunden, E-Jugend 75 Minuten, jüngere 1 Stunde. Bei mehreren Mannschaften gilt die längste.
+ * Duration of the "In progress" card, after that there is the game report: adults and A youth 2 hours,
+ * B to D youth 1.5 hours, E youth 75 minutes, younger 1 hour. With several teams the longest applies.
  */
 export function gameLiveMinutes(ageClassCodes: string[]): number {
   const minutes = (code: string) => {
@@ -386,13 +387,13 @@ export function eventTitle(e: EventRow, teams: TeamRef[]): string {
   if (e.kind === "game") {
     const own = `${ownClubAbbr()} ${teams[0]?.name ?? ""}`.trim();
     const host = matchdayHost({ home: e.home_team ?? "", guest: e.guest_team ?? "" });
-    if (host != null) return e.is_home === 1 ? `Heimspieltag ${own}` : `Spieltag bei ${host}`;
-    if (e.is_home === 1) return `${own} – ${e.guest_team ?? "Gegner"}`;
-    if (e.is_home === 0) return `${e.home_team ?? "Gegner"} – ${own}`;
+    if (host != null) return e.is_home === 1 ? t`Home matchday ${own}` : t`Matchday at ${host}`;
+    if (e.is_home === 1) return `${own} – ${e.guest_team ?? t`Opponent`}`;
+    if (e.is_home === 0) return `${e.home_team ?? t`Opponent`} – ${own}`;
     return e.title ?? `${e.home_team ?? "?"} – ${e.guest_team ?? "?"}`;
   }
-  if (e.kind === "training") return e.title ?? "Training";
-  return e.title ?? "Termin";
+  if (e.kind === "training") return e.title ?? t`Training`;
+  return e.title ?? t`Event`;
 }
 
 function respondedBy(ctx: EventContext, personId: number, response: ResponseRow | null): RespondedBy | null {
@@ -423,7 +424,7 @@ function myParticipations(e: EventRow, ctx: EventContext, actor: Actor, now: num
   const teamIds = ctx.eventTeams.get(e.id) ?? [];
 
   for (const pid of scopePersonIds(actor)) {
-    // Kinder nur dort, wo die Eltern zuständig sind
+    // Children only where the parents are in charge
     if (pid !== actor.personId && !parentsInCharge(actor, pid, teamIds)) continue;
     const part = parts.find((p) => p.person.id === pid);
     const member = members.get(pid);
@@ -439,16 +440,16 @@ function myParticipations(e: EventRow, ctx: EventContext, actor: Actor, now: num
           : (actor.children.find((c) => c.id === pid) ?? { id: pid, firstName: "", lastName: null }));
 
     let blockedReason: string | null = null;
-    if (cancelled) blockedReason = "Der Termin wurde abgesagt.";
-    else if (past) blockedReason = "Der Termin hat schon begonnen.";
-    else if (!part) blockedReason = e.kind === "game" ? "Nicht für dieses Spiel nominiert." : null;
-    else if (!part.isActive) blockedReason = "Derzeit inaktiv gemeldet. Bitte sprich mit deinem Trainer.";
+    if (cancelled) blockedReason = t`The event has been cancelled.`;
+    else if (past) blockedReason = t`The event has already started.`;
+    else if (!part) blockedReason = e.kind === "game" ? t`Not nominated for this game.` : null;
+    else if (!part.isActive) blockedReason = t`Currently marked as inactive. Please talk to your coach.`;
 
     const canAcceptBase = !blockedReason && !!part;
     const canAccept = canAcceptBase && mayActFor(actor, pid, "may_accept", teamIds);
     const canDecline = canAcceptBase && mayActFor(actor, pid, "may_decline", teamIds);
     if (canAcceptBase && pid === actor.personId && (!canAccept || !canDecline) && !blockedReason) {
-      if (!canAccept && !canDecline) blockedReason = PARENTS_HANDLE_IT;
+      if (!canAccept && !canDecline) blockedReason = PARENTS_HANDLE_IT();
     }
 
     const response = part?.response ?? null;
@@ -562,8 +563,8 @@ export function toDetail(e: EventRow, ctx: EventContext, actor: Actor, now: numb
         unexcused: ctx.unexcused.has(`${e.id}:${p.person.id}`),
       }))
     : null;
-  // Mannschaften mit „Rückmeldungen für alle sichtbar“: Spieler und eingebundene Eltern sehen,
-  // wer zu- oder abgesagt hat (ohne Gründe). Nicht bei Spielen, nicht bei Vereinsterminen.
+  // Teams with "responses visible to everyone": players and involved parents see who
+  // accepted or declined (without reasons). Not for games, not for club events.
   const teams = eventTeams(e, ctx);
   const showRoster =
     !summary.canManage &&
@@ -584,7 +585,7 @@ export function toDetail(e: EventRow, ctx: EventContext, actor: Actor, now: numb
   return { ...summary, participants, roster, dutyManage: false, organizers: null, carpool: null };
 }
 
-/** SQL: Die Person (Ausdruck) nimmt am Termin e teil, ist nominiert, angefragt oder pfeift dort als KiHaSL/JuHaSL. */
+/** SQL: the person (expression) takes part in event e, is nominated, requested or referees there as KiHaSL/JuHaSL. */
 function relatesSql(person: string): string {
   return `(
     EXISTS (
@@ -600,9 +601,9 @@ function relatesSql(person: string): string {
 }
 
 /**
- * SQL-Bedingung: Termin ist sichtbar. ?1 enthält die eigene Person, ?2 die
- * Kinder. Termine der Kinder sehen Eltern nur, wenn sie dort zuständig sind.
- * Ersteller und Organisatoren eines Sondertermins sehen ihn immer (ohne Teilnehmerliste).
+ * SQL condition: the event is visible. ?1 holds the own person, ?2 the
+ * children. Parents only see their children's events where they are in charge.
+ * Creator and organisers of a special event always see it (without the participant list).
  */
 export const VISIBLE_SQL = `(
   e.club_wide = 1
@@ -616,11 +617,11 @@ export const VISIBLE_SQL = `(
 const PEOPLE = "SELECT value FROM json_each(?1) UNION ALL SELECT value FROM json_each(?2)";
 
 /**
- * Vorauswahl für VISIBLE_SQL: alle Termine, die sichtbar sein könnten (eine Obermenge).
- * Sie nimmt dieselben Personen wie VISIBLE_SQL (?1 man selbst, ?2 die Kinder) und jede Rolle,
- * damit kein sichtbarer Termin fehlt. Entscheiden tut weiter VISIBLE_SQL; die Vorauswahl
- * erspart nur, jeden Termin im Zeitraum einzeln zu prüfen (siehe docs/entscheidungen.md).
- * In zwei Gruppen, weil D1 höchstens fünf Teile pro UNION erlaubt. Ergebnis: CTE `ids`.
+ * Preselection for VISIBLE_SQL: all events that could be visible (a superset).
+ * It takes the same persons as VISIBLE_SQL (?1 oneself, ?2 the children) and every role,
+ * so that no visible event is missing. VISIBLE_SQL still decides; the preselection only
+ * saves checking every event in the range one by one (see docs/entscheidungen.md).
+ * In two groups because D1 allows at most five parts per UNION. Result: CTE `ids`.
  */
 export const CANDIDATES_CTE = `
   by_person(id) AS (
@@ -657,9 +658,9 @@ export async function listVisibleEvents(
     params.push(opts.kind);
     kindFilter = ` AND e.kind = ?${params.length}`;
   }
-  // Admins sehen bei gesetztem Mannschaftsfilter alle Termine dieser Mannschaft.
+  // With a team filter set, admins see all events of this team.
   const visibility = actor.isAdmin && opts.teamId != null ? "1 = 1" : VISIBLE_SQL;
-  // MATERIALIZED und CROSS JOIN: SQLite beginnt bei der Vorauswahl, statt alle Termine im Zeitraum zu prüfen
+  // MATERIALIZED and CROSS JOIN: SQLite starts at the preselection instead of checking all events in the range
   return all<EventRow>(
     db,
     `WITH ${candidates}
@@ -677,10 +678,10 @@ export interface EventCursor {
 }
 
 /**
- * Der nächste Abschnitt sichtbarer Termine für das seitenweise Laden: Die Vorauswahl wird erst
- * nach Datum sortiert und begrenzt, dann geprüft. So fällt die Prüfung nur für `size` Termine an,
- * nicht für die ganze Saison. `last` ist der letzte geprüfte Termin (auch wenn er nicht sichtbar
- * war), `done`: Danach kommt nichts mehr.
+ * The next section of visible events for loading page by page: the preselection is first
+ * sorted by date and limited, then checked. So the check only applies to `size` events,
+ * not to the whole season. `last` is the last checked event (even if it was not visible),
+ * `done`: nothing comes after it.
  */
 export async function visibleEventBatch(
   db: D1Database,
@@ -715,7 +716,7 @@ export async function visibleEventBatch(
   };
 }
 
-/** Kontexte mehrerer Abschnitte zusammenführen (Schlüssel sind Termin- bzw. Mannschafts-IDs). */
+/** Merges contexts of several sections (keys are event or team IDs). */
 export function mergeContexts(a: EventContext, b: EventContext): EventContext {
   return {
     teams: new Map([...a.teams, ...b.teams]),

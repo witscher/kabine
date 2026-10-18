@@ -1,3 +1,4 @@
+import { t } from "@lingui/core/macro";
 import { Hono } from "hono";
 import { z } from "zod";
 import { type AppEnv, intParam, requireActor } from "../app";
@@ -14,11 +15,11 @@ import { utcIso } from "../lib/time";
 
 export const personRoutes = new Hono<AppEnv>();
 
-const nameField = z.string().trim().min(1, "Bitte gib einen Namen ein.").max(50, "Der Name ist zu lang.");
+const nameField = z.string().trim().min(1, { error: () => t`Please enter a name.` }).max(50, { error: () => t`The name is too long.` });
 
 /**
- * Trainer verwalten Spieler und Aushilfen ihrer Mannschaften sowie deren
- * Eltern. Admins verwalten alle.
+ * Coaches manage players and stand-ins of their teams and their parents.
+ * Admins manage everyone.
  */
 export async function canManagePerson(db: D1Database, actor: Actor, personId: number): Promise<boolean> {
   if (actor.isAdmin) return true;
@@ -37,7 +38,7 @@ export async function canManagePerson(db: D1Database, actor: Actor, personId: nu
 }
 
 async function requireManagePerson(db: D1Database, actor: Actor, personId: number) {
-  if (!(await canManagePerson(db, actor, personId))) throw forbidden("Diese Person verwaltest du nicht.");
+  if (!(await canManagePerson(db, actor, personId))) throw forbidden(t`You do not manage this person.`);
 }
 
 const updatePersonSchema = z.object({
@@ -53,14 +54,14 @@ personRoutes.patch("/persons/:id", async (c) => {
   const self = personId === actor.personId;
   if (!self) await requireManagePerson(c.env.DB, actor, personId);
   if (self && input.birthYear !== undefined && !actor.isAdmin && !(await canManagePerson(c.env.DB, actor, personId))) {
-    throw forbidden("Das Geburtsjahr pflegt dein Trainer.");
+    throw forbidden(t`Your coach maintains the birth year.`);
   }
   const person = await first<{ first_name: string; last_name: string | null; birth_year: number | null }>(
     c.env.DB,
     "SELECT first_name, last_name, birth_year FROM persons WHERE id = ? AND is_former = 0",
     personId,
   );
-  if (!person) throw notFound("Diese Person gibt es nicht.");
+  if (!person) throw notFound(t`This person does not exist.`);
   await run(
     c.env.DB,
     "UPDATE persons SET first_name = ?, last_name = ?, birth_year = ? WHERE id = ?",
@@ -86,28 +87,28 @@ personRoutes.post("/persons/:id/active", async (c) => {
     personId,
   );
   if (!res.meta.changes) throw notFound();
-  // Inaktive fallen aus automatischen Kadern, Reaktivierte kommen zurück
+  // Inactive persons drop out of automatic squads, reactivated ones come back
   const teams = await all<{ team_id: number }>(c.env.DB, "SELECT team_id FROM core_squad WHERE person_id = ?", personId);
   if (teams.length) await syncAutoSquads(c.env.DB, teams.map((t) => t.team_id));
   return c.json({ ok: true });
 });
 
-/** Verknüpfung eines Accounts lösen, z. B. nach Fehlauswahl beim Spielerlink. */
+/** Unlinks an account, e.g. after a wrong choice on the player link. */
 personRoutes.delete("/persons/:id/account", async (c) => {
   const actor = requireActor(c);
   const personId = intParam(c, "id");
   await requireManagePerson(c.env.DB, actor, personId);
-  if (personId === actor.personId) throw badRequest("Den eigenen Zugang kannst du hier nicht lösen.");
+  if (personId === actor.personId) throw badRequest(t`You cannot unlink your own access here.`);
   await assertNotProtected(c.env.DB, actor, personId);
   await assertNotStaffUnlessAdmin(c.env.DB, actor, personId);
   const target = await first<{ is_admin: number }>(c.env.DB, "SELECT is_admin FROM persons WHERE id = ?", personId);
   if (target?.is_admin && !actor.isAdmin) throw forbidden();
   const res = await run(c.env.DB, "DELETE FROM accounts WHERE person_id = ?", personId);
-  if (!res.meta.changes) throw notFound("Diese Person hat keinen Zugang.");
+  if (!res.meta.changes) throw notFound(t`This person has no access.`);
   return c.json({ ok: true });
 });
 
-/** Elternverknüpfung lösen. Eltern ohne verbleibendes Kind werden gelöscht. */
+/** Removes a parent link. Parents without a remaining child are deleted. */
 personRoutes.delete("/guardianships/:guardianId/:childId", async (c) => {
   const actor = requireActor(c);
   const guardianId = intParam(c, "guardianId");
@@ -115,37 +116,37 @@ personRoutes.delete("/guardianships/:guardianId/:childId", async (c) => {
   const isSelf = guardianId === actor.personId;
   if (!isSelf) await requireManagePerson(c.env.DB, actor, childId);
   const res = await run(c.env.DB, "DELETE FROM guardianships WHERE guardian_id = ? AND child_id = ?", guardianId, childId);
-  if (!res.meta.changes) throw notFound("Diese Verknüpfung gibt es nicht.");
+  if (!res.meta.changes) throw notFound(t`This link does not exist.`);
   await deleteOrphanParent(c.env.DB, guardianId);
   return c.json({ ok: true });
 });
 
 const guardianshipSchema = z.object({ guardianId: z.number().int().positive(), childId: z.number().int().positive() });
 
-/** Admins ordnen Eltern und Kinder direkt zu, z. B. um falsche Verknüpfungen zu korrigieren. */
+/** Admins assign parents and children directly, e.g. to correct wrong links. */
 personRoutes.post("/admin/guardianships", async (c) => {
   const actor = requireActor(c);
   requireAdmin(actor);
   const { guardianId, childId } = parse(guardianshipSchema, await readJson(c.req.raw));
-  if (guardianId === childId) throw badRequest("Eine Person kann nicht ihr eigenes Elternteil sein.");
+  if (guardianId === childId) throw badRequest(t`A person cannot be their own parent.`);
   const found = await all<{ id: number }>(c.env.DB, "SELECT id FROM persons WHERE id IN (?, ?) AND is_former = 0", guardianId, childId);
-  if (found.length !== 2) throw notFound("Diese Person gibt es nicht.");
+  if (found.length !== 2) throw notFound(t`This person does not exist.`);
   const reverse = await first(c.env.DB, "SELECT 1 AS x FROM guardianships WHERE guardian_id = ? AND child_id = ?", childId, guardianId);
-  if (reverse) throw conflict("Umgekehrt besteht schon eine Verknüpfung: Das Kind ist als Elternteil dieser Person eingetragen.");
+  if (reverse) throw conflict(t`A link already exists the other way round: the child is registered as a parent of this person.`);
   await run(c.env.DB, "INSERT OR IGNORE INTO guardianships (guardian_id, child_id) VALUES (?, ?)", guardianId, childId);
   return c.json({ ok: true }, 201);
 });
 
-/** Verknüpfung durch einen Admin lösen. Die Personen bleiben in jedem Fall erhalten. */
+/** Link removed by an admin. The persons remain in any case. */
 personRoutes.delete("/admin/guardianships/:guardianId/:childId", async (c) => {
   const actor = requireActor(c);
   requireAdmin(actor);
   const res = await run(c.env.DB, "DELETE FROM guardianships WHERE guardian_id = ? AND child_id = ?", intParam(c, "guardianId"), intParam(c, "childId"));
-  if (!res.meta.changes) throw notFound("Diese Verknüpfung gibt es nicht.");
+  if (!res.meta.changes) throw notFound(t`This link does not exist.`);
   return c.json({ ok: true });
 });
 
-/** Löscht eine Elternperson, wenn sie kein Kind mehr hat und sonst keine Rolle im Verein. */
+/** Deletes a parent person if they have no child left and no other role in the club. */
 export async function deleteOrphanParent(db: D1Database, personId: number): Promise<boolean> {
   const res = await run(
     db,
@@ -158,7 +159,7 @@ export async function deleteOrphanParent(db: D1Database, personId: number): Prom
   return (res.meta.changes ?? 0) > 0;
 }
 
-/** Persönlicher Einmal-Link: Erstzugang (z. B. Trainer) oder neuer Passkey nach Geräteverlust. */
+/** Personal one-time link: first access (e.g. coach) or a new passkey after losing a device. */
 personRoutes.post("/persons/:id/personal-link", async (c) => {
   const actor = requireActor(c);
   const personId = intParam(c, "id");
@@ -168,11 +169,11 @@ personRoutes.post("/persons/:id/personal-link", async (c) => {
        FROM persons WHERE id = ? AND is_former = 0`,
     personId,
   );
-  if (!target) throw notFound("Diese Person gibt es nicht.");
+  if (!target) throw notFound(t`This person does not exist.`);
   await assertNotProtected(c.env.DB, actor, personId);
-  // Trainer- und Admin-Zugänge stellt nur ein Admin wieder her.
-  if ((target.is_admin || target.coach) && !actor.isAdmin) throw forbidden("Zugänge von Trainern und Admins verwaltet ein Admin.");
-  // Eltern richten den Zugang ihres Kindes selbst ein, wenn sie in seiner Mannschaft eingebunden sind
+  // Only an admin restores access of coaches and admins.
+  if ((target.is_admin || target.coach) && !actor.isAdmin) throw forbidden(t`Access of coaches and admins is managed by an admin.`);
+  // Parents set up their child's access themselves if they are involved in the child's team
   const asParent = !target.is_admin && !target.coach && actor.children.some((ch) => ch.id === personId) && parentsInCharge(actor, personId);
   if (!target.is_admin && !target.coach && !asParent) await requireManagePerson(c.env.DB, actor, personId);
   // On an existing account the link always replaces the previous passkeys and sessions (see routes/join.ts)
@@ -180,7 +181,7 @@ personRoutes.post("/persons/:id/personal-link", async (c) => {
   return c.json({ url: inviteUrl(relyingParty(c.env, c.req.raw).origin, invite.token), expiresAt: invite.expiresAt }, 201);
 });
 
-// Admin: alle Personen --------------------------------------------------------
+// Admin: all persons -----------------------------------------------------------
 
 personRoutes.get("/admin/persons", async (c) => {
   const actor = requireActor(c);
@@ -229,9 +230,9 @@ personRoutes.get("/admin/persons", async (c) => {
       adminEmail: r.admin_email,
       hasAccount: r.has_account === 1,
       isReferee: r.is_referee === 1,
-      /** Ordentliches Mitglied (verstecktes Merkmal, nur Admins sehen und ändern es) */
+      /** Full member (hidden attribute, only admins see and change it) */
       isClubMember: r.is_club_member === 1,
-      /** Letzte Aktivität des Zugangs (lokales Datum), null = Zugang nie benutzt oder kein Zugang. */
+      /** Last activity of the access (local date), null = access never used or no access. */
       lastSeenOn: r.last_seen_on,
       teams: (r.teams ?? "")
         .split(",")
@@ -270,7 +271,7 @@ personRoutes.post("/admin/persons", async (c) => {
 
 const adminFlagSchema = z.object({
   isAdmin: z.boolean(),
-  adminEmail: z.email("Bitte gib eine gültige E-Mail-Adresse an.").nullable().optional(),
+  adminEmail: z.email({ error: () => t`Please enter a valid e-mail address.` }).nullable().optional(),
 });
 
 personRoutes.patch("/admin/persons/:id", async (c) => {
@@ -278,7 +279,7 @@ personRoutes.patch("/admin/persons/:id", async (c) => {
   requireAdmin(actor);
   const personId = intParam(c, "id");
   const input = parse(adminFlagSchema, await readJson(c.req.raw));
-  if (personId === actor.personId && !input.isAdmin) throw conflict("Du kannst dir die Admin-Rechte nicht selbst entziehen.");
+  if (personId === actor.personId && !input.isAdmin) throw conflict(t`You cannot remove your own admin rights.`);
   await assertNotProtected(c.env.DB, actor, personId);
   if (!input.isAdmin) {
     await run(c.env.DB, "UPDATE persons SET is_admin = 0, admin_email = NULL WHERE id = ?", personId);
@@ -286,29 +287,29 @@ personRoutes.patch("/admin/persons/:id", async (c) => {
     try {
       await run(c.env.DB, "UPDATE persons SET is_admin = 1, admin_email = ? WHERE id = ?", input.adminEmail ?? null, personId);
     } catch (err) {
-      if (err instanceof Error && /UNIQUE/.test(err.message)) throw conflict("Diese E-Mail-Adresse ist schon vergeben.");
+      if (err instanceof Error && /UNIQUE/.test(err.message)) throw conflict(t`This e-mail address is already taken.`);
       throw err;
     }
   }
-  // Admins sind Verantwortliche der KiHaSL/JuHaSL-Gruppe
+  // Admins are in charge of the KiHaSL/JuHaSL group
   await syncAutoGroups(c.env.DB);
   return c.json({ ok: true });
 });
 
 /**
- * Person dauerhaft löschen (nur Admins). Zugang, Mitgliedschaften, Zusagen,
- * Elternverknüpfungen usw. gehen über ON DELETE CASCADE mit. Eltern, die
- * dadurch kein Kind und keine Rolle mehr haben, werden ebenfalls gelöscht.
- * In den Chats bleiben Nachrichten anonym stehen.
+ * Deletes a person permanently (admins only). Access, memberships, responses,
+ * parent links etc. go along via ON DELETE CASCADE. Parents who thereby have
+ * no child and no role left are deleted as well.
+ * Messages remain in the chats anonymously.
  */
 personRoutes.delete("/admin/persons/:id", async (c) => {
   const actor = requireActor(c);
   requireAdmin(actor);
   const personId = intParam(c, "id");
-  if (personId === actor.personId) throw badRequest("Dich selbst kannst du nicht löschen.");
+  if (personId === actor.personId) throw badRequest(t`You cannot delete yourself.`);
   await assertNotProtected(c.env.DB, actor, personId);
   const person = await first<{ id: number }>(c.env.DB, "SELECT id FROM persons WHERE id = ?", personId);
-  if (!person) throw notFound("Diese Person gibt es nicht.");
+  if (!person) throw notFound(t`This person does not exist.`);
   const parents = await all<{ id: number }>(
     c.env.DB,
     `SELECT g.guardian_id AS id FROM guardianships g JOIN persons gp ON gp.id = g.guardian_id

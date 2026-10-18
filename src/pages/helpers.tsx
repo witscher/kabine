@@ -1,4 +1,6 @@
-// Reiter "Helfer": Helferplan der Mannschaften (Dienste in Zeitblöcken bei Spielen und Sonderterminen).
+// "Helpers" tab: the teams' helper plan (duties in time slots at games and special events).
+import { plural, t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 import { useEffect, useRef, useState } from "preact/hooks";
 import { api, errorMessage } from "../api";
 import { dayOfMonth, monthShort, shortDate, time, todayLocal, weekdayShort } from "../format";
@@ -22,7 +24,7 @@ interface Role {
   childName: string | null;
 }
 
-/** Zeitblock eines Dienstes bei einem Termin */
+/** Time slot of a duty at an event */
 interface Block {
   id: number;
   dutyTypeId: number;
@@ -36,7 +38,7 @@ interface Block {
   noteAllowed: boolean;
   needsSkill: boolean;
   skillMissing: boolean;
-  /** Als wer man sich eintragen kann (leer: gar nicht) */
+  /** As whom one can sign up (empty: not at all) */
   roles: Role[];
   entries: Entry[];
 }
@@ -56,7 +58,7 @@ interface Game {
   hidden: boolean;
   manual: boolean;
   blocks: Block[];
-  /** Nur in der KiHaSL/JuHaSL-Ansicht (alle Mannschaften) */
+  /** Only in the KiHaSL/JuHaSL view (all teams) */
   teamName?: string;
   teamId?: number;
   canManage?: boolean;
@@ -75,9 +77,15 @@ interface DutyList {
 }
 
 function opponent(g: Game): string {
-  if (g.kind === "special") return g.title ?? "Termin";
-  if (g.isHome === true) return `gegen ${g.guestTeam ?? "Gegner"}`;
-  if (g.isHome === false) return `bei ${g.homeTeam ?? "Gegner"}`;
+  if (g.kind === "special") return g.title ?? t`Event`;
+  if (g.isHome === true) {
+    const guest = g.guestTeam ?? t`Opponent`;
+    return t`vs ${guest}`;
+  }
+  if (g.isHome === false) {
+    const home = g.homeTeam ?? t`Opponent`;
+    return t`at ${home}`;
+  }
   return g.title ?? `${g.homeTeam ?? "?"} – ${g.guestTeam ?? "?"}`;
 }
 
@@ -87,10 +95,20 @@ function eventTime(g: Game): string {
 
 const free = (b: Block) => Math.max(0, b.total - b.entries.length);
 
-/** Virtuelle „Mannschaft“ der KiHaSL/JuHaSL-Ansicht: alle Jugend-Heimspiele F–C */
+/** Note of an entry in quotation marks */
+function quoted(note: string): string {
+  return t`“${note}”`;
+}
+
+/** "for Anna": entry made for a child */
+function forChild(child: string): string {
+  return t`for ${child}`;
+}
+
+/** Virtual "team" of the KiHaSL/JuHaSL view: all youth home games F–C */
 const REFEREE = 0;
 
-/** Live: bei jeder Änderung neu laden (entprellt), Rückfall: alle 60 Sekunden. */
+/** Live: reload on every change (debounced), fallback: every 60 seconds. */
 function useLiveReload(teamId: number | null, reload: () => void) {
   const reloadRef = useRef(reload);
   reloadRef.current = reload;
@@ -123,7 +141,7 @@ function useLiveReload(teamId: number | null, reload: () => void) {
       };
     };
     connect();
-    // Nur als Rückfall, falls eine Live-Meldung verloren geht: Änderungen kommen über die Verbindung
+    // Only as a fallback in case a live message gets lost: changes come through the connection
     const poll = window.setInterval(() => document.visibilityState === "visible" && reloadRef.current(), 5 * 60_000);
     const onVisible = () => {
       if (document.visibilityState !== "visible") return;
@@ -147,20 +165,18 @@ function useLiveReload(teamId: number | null, reload: () => void) {
 }
 
 export function HelpersPage() {
-  useDocumentTitle("Helfer");
+  useDocumentTitle(t`Helpers`);
   const me = useMe();
-  // Admins sehen alle Mannschaften; der Filter zeigt zuerst nur die eigenen
-  const hasOwn = me.helperTeams.some((t) => t.own);
-  const hasOthers = me.helperTeams.some((t) => !t.own);
+  // Admins see all teams; the filter first shows only their own
+  const hasOwn = me.helperTeams.some((ht) => ht.own);
+  const hasOthers = me.helperTeams.some((ht) => !ht.own);
   const [scope, setScope] = useState<"own" | "all">("own");
-  const helperTeams = hasOwn && hasOthers && scope === "own" ? me.helperTeams.filter((t) => t.own) : me.helperTeams;
-  // KiHaSL/JuHaSL: für alle mit Rolle zuerst, für Trainer und Admins am Ende
+  const helperTeams = hasOwn && hasOthers && scope === "own" ? me.helperTeams.filter((ht) => ht.own) : me.helperTeams;
+  // KiHaSL/JuHaSL: first for everyone with the role, last for coaches and admins
   const refereeChip = { id: REFEREE, name: "KiHaSL/JuHaSL", own: true };
   const showReferee = me.referee || me.isAdmin || me.manageableTeams.length > 0;
   const teams = !showReferee ? helperTeams : me.referee ? [refereeChip, ...helperTeams] : [...helperTeams, refereeChip];
-  const [teamId, setTeamId] = useState<number | null>(() =>
-    showReferee && new URLSearchParams(location.search).has("kihasl") ? REFEREE : (teams[0]?.id ?? null),
-  );
+  const [teamId, setTeamId] = useState<number | null>(() => (showReferee && new URLSearchParams(location.search).has("kihasl") ? REFEREE : (teams[0]?.id ?? null)));
   const isReferee = teamId === REFEREE;
   const list = useQuery<DutyList>(teamId == null ? null : isReferee ? "/duties/referee" : `/duties?teamId=${teamId}`);
   useLiveReload(teamId, () => void list.reload());
@@ -172,10 +188,10 @@ export function HelpersPage() {
   if (!teams.length) {
     return (
       <main class="page">
-        <TopBar title="Helfer" kicker="Helferplan" />
+        <TopBar title={t`Helpers`} kicker={t`Helper plan`} />
         <div class="content">
-          <Empty title="Kein Helferplan" icon="helping">
-            Sobald eine Mannschaft deines Kindes oder deine Mannschaft den Helferplan nutzt, kannst du dich hier für Dienste bei Spielen und Terminen eintragen.
+          <Empty title={t`No helper plan`} icon="helping">
+            <Trans>As soon as a team of your child or your own team uses the helper plan, you can sign up here for duties at games and events.</Trans>
           </Empty>
         </div>
       </main>
@@ -184,7 +200,7 @@ export function HelpersPage() {
 
   const data = list.data;
   const team = data?.team;
-  // In der Mannschafts-Ansicht zählt der KiHaSL-Platz nicht mit (eigene Liste)
+  // In the team view the KiHaSL slot does not count (separate list)
   const openSlots = (g: Game) => g.blocks.reduce((n, b) => n + (b.referee && !isReferee ? 0 : free(b)), 0);
   const allUpcoming = (data?.games ?? []).filter((g) => !g.isPast);
   const upcoming = onlyOpen ? allUpcoming.filter((g) => !g.cancelled && openSlots(g) > 0) : allUpcoming;
@@ -194,27 +210,27 @@ export function HelpersPage() {
 
   return (
     <main class="page">
-      <TopBar title="Helfer" kicker="Helferplan" />
+      <TopBar title={t`Helpers`} kicker={t`Helper plan`} />
       <div class="content">
         {hasOwn && hasOthers ? (
           <Segmented
-            label="Mannschaften"
+            label={t`Teams`}
             value={scope}
             options={[
-              { value: "own", label: "Meine Teams" },
-              { value: "all", label: "Alle Mannschaften" },
+              { value: "own", label: t`Own teams` },
+              { value: "all", label: t`All teams` },
             ]}
             onChange={(v) => {
               setScope(v);
-              if (v === "own" && teamId !== REFEREE && !me.helperTeams.some((t) => t.own && t.id === teamId)) setTeamId(me.helperTeams.find((t) => t.own)?.id ?? null);
+              if (v === "own" && teamId !== REFEREE && !me.helperTeams.some((ht) => ht.own && ht.id === teamId)) setTeamId(me.helperTeams.find((ht) => ht.own)?.id ?? null);
             }}
           />
         ) : null}
         {teams.length > 1 || isReferee || (hasOwn && hasOthers) ? (
-          <div class="chips" role="group" aria-label="Mannschaft">
-            {teams.map((t) => (
-              <button type="button" class={`chip ${teamId === t.id ? "selected" : ""}`} aria-pressed={teamId === t.id ? "true" : "false"} onClick={() => setTeamId(t.id)}>
-                {t.name}
+          <div class="chips" role="group" aria-label={t`Team selection`}>
+            {teams.map((tm) => (
+              <button type="button" class={`chip ${teamId === tm.id ? "selected" : ""}`} aria-pressed={teamId === tm.id ? "true" : "false"} onClick={() => setTeamId(tm.id)}>
+                {tm.name}
               </button>
             ))}
           </div>
@@ -223,8 +239,10 @@ export function HelpersPage() {
         {!data && !list.error ? <Spinner /> : null}
 
         {data ? (
-          <section class="duty-mine" aria-label="Meine Dienste">
-            <strong>Meine Dienste</strong>
+          <section class="duty-mine" aria-label={t`My duties`}>
+            <strong>
+              <Trans>My duties</Trans>
+            </strong>
             {mine.length ? (
               <ul class="duty-mine-list">
                 {mine.map(({ g, b, e }) => (
@@ -232,42 +250,52 @@ export function HelpersPage() {
                     <span>
                       {shortDate(g.startsAt)} · {b.label} · {blockTime(b, g.startsAt)}
                     </span>
-                    <span class="muted">{e.child ? `für ${e.child}` : e.mine ? "ich" : e.name}</span>
+                    <span class="muted">{e.child ? forChild(e.child) : e.mine ? t`me` : e.name}</span>
                   </li>
                 ))}
               </ul>
             ) : (
-              <p class="small muted">Du bist für keinen kommenden Dienst eingetragen.</p>
+              <p class="small muted">
+                <Trans>You are not signed up for any upcoming duty.</Trans>
+              </p>
             )}
           </section>
         ) : null}
 
         {allUpcoming.length ? (
           <Segmented
-            label="Termine"
+            label={t`Events`}
             value={onlyOpen ? "open" : "all"}
             options={[
-              { value: "all", label: "Alle Termine" },
-              { value: "open", label: "Nur mit freien Plätzen" },
+              { value: "all", label: t`All events` },
+              { value: "open", label: t`Only with free slots` },
             ]}
             onChange={(v) => setOnlyOpen(v === "open")}
           />
         ) : null}
 
-        {data && allUpcoming.length && !upcoming.length ? <p class="muted">Alle Plätze sind vergeben.</p> : null}
+        {data && allUpcoming.length && !upcoming.length ? (
+          <p class="muted">
+            <Trans>All slots are taken.</Trans>
+          </p>
+        ) : null}
 
         {data && !allUpcoming.length ? (
-          <Empty title="Keine kommenden Termine" icon="ball">
+          <Empty title={t`No upcoming events`} icon="ball">
             {isReferee
-              ? "Sobald es Jugend-Heimspiele F bis C gibt, erscheinen sie hier."
-              : "Die Spiele kommen aus dem Spielplan der Mannschaft. Sondertermine erscheinen hier, sobald Helfer dafür gesucht werden."}
+              ? t`As soon as there are youth home games F to C, they appear here.`
+              : t`The games come from the team's fixture list. Special events appear here as soon as helpers are needed for them.`}
           </Empty>
         ) : null}
 
         {upcoming.map((g) => {
           const open = openSlots(g);
+          const title = opponent(g);
+          const weekday = weekdayShort(g.startsAt);
+          const day = dayOfMonth(g.startsAt);
+          const month = monthShort(g.startsAt);
           return (
-            <article class={`duty-game ${g.cancelled ? "cancelled" : ""}`} aria-label={`${opponent(g)}, ${weekdayShort(g.startsAt)} ${dayOfMonth(g.startsAt)}. ${monthShort(g.startsAt)}`}>
+            <article class={`duty-game ${g.cancelled ? "cancelled" : ""}`} aria-label={t`${title}, ${weekday} ${day} ${month}`}>
               <header class="duty-game-head">
                 <div class="date-block">
                   <div class="wd">{weekdayShort(g.startsAt)}</div>
@@ -282,22 +310,35 @@ export function HelpersPage() {
                   <div class="sub">
                     {eventTime(g)}
                     {g.location ? ` · ${g.location}` : ""}
-                    {g.kind === "special" ? " · Sondertermin" : g.isHome === true ? " · Heim" : g.isHome === false ? " · Auswärts" : ""}
+                    {g.kind === "special" ? ` · ${t`Special event`}` : g.isHome === true ? ` · ${t`Home`}` : g.isHome === false ? ` · ${t`Away`}` : ""}
                   </div>
                 </div>
                 {g.cancelled ? (
-                  <span class="badge badge-cancelled">Termin abgesagt</span>
+                  <span class="badge badge-cancelled">
+                    <Trans>Event cancelled</Trans>
+                  </span>
                 ) : g.hidden ? (
-                  <span class="badge">Ausgeblendet</span>
+                  <span class="badge">
+                    <Trans>Hidden</Trans>
+                  </span>
                 ) : open ? (
-                  <span class="badge badge-open">{open} frei</span>
+                  <span class="badge badge-open">
+                    <Trans>{open} free</Trans>
+                  </span>
                 ) : g.blocks.length ? (
-                  <span class="badge badge-full">voll</span>
+                  <span class="badge badge-full">
+                    <Trans>full</Trans>
+                  </span>
                 ) : null}
               </header>
-              {!g.blocks.length ? <p class="small muted duty-none">Für diesen Termin sind keine Dienste eingetragen.</p> : null}
+              {!g.blocks.length ? (
+                <p class="small muted duty-none">
+                  <Trans>No duties have been set up for this event.</Trans>
+                </p>
+              ) : null}
               {g.blocks.map((b) => {
                 const already = b.entries.some((e) => e.mine);
+                const label = b.label;
                 return (
                   <div class="duty-slot">
                     <span class="duty-name">
@@ -311,18 +352,18 @@ export function HelpersPage() {
                         <span class="duty-entry">
                           <span class={e.mine || e.forMyChild ? "me" : ""}>
                             {e.name}
-                            {e.child ? <span class="muted"> · für {e.child}</span> : null}
+                            {e.child ? <span class="muted"> · {forChild(e.child)}</span> : null}
                           </span>
-                          {e.note ? <span class="note">„{e.note}“</span> : null}
+                          {e.note ? <span class="note">{quoted(e.note)}</span> : null}
                           {e.mine || e.forMyChild ? (
                             <button
                               type="button"
                               class="icon-btn icon-btn-sm"
-                              aria-label={`${b.label} austragen`}
+                              aria-label={t`Withdraw from ${label}`}
                               onClick={async () => {
                                 try {
                                   await api.del(`/duties/${e.id}`);
-                                  toast("Ausgetragen.");
+                                  toast(t`Withdrawn.`);
                                   void list.reload();
                                 } catch (err) {
                                   toast(errorMessage(err), "error");
@@ -334,22 +375,26 @@ export function HelpersPage() {
                           ) : null}
                         </span>
                       ))}
-                      {!b.entries.length ? <span class="muted">frei</span> : null}
+                      {!b.entries.length ? (
+                        <span class="muted">
+                          <Trans>free</Trans>
+                        </span>
+                      ) : null}
                     </span>
                     {b.referee && !isReferee ? (
                       free(b) > 0 && me.referee ? (
                         <button type="button" class="take" onClick={() => setTeamId(REFEREE)}>
-                          KiHaSL-Liste
+                          <Trans>KiHaSL list</Trans>
                         </button>
                       ) : null
                     ) : free(b) > 0 && !g.cancelled && !already && b.roles.length ? (
                       b.skillMissing ? (
-                        <a class="small muted" href="/profil" title="Im Profil unter „Das kann ich“ einschalten">
-                          Profil
+                        <a class="small muted" href="/profil" title={t`Turn on in your profile under “I can do this”`}>
+                          <Trans>Profile</Trans>
                         </a>
                       ) : (
                         <button type="button" class="take" onClick={() => setSignup({ game: g, block: b })}>
-                          Eintragen
+                          <Trans>Sign up</Trans>
                         </button>
                       )
                     ) : null}
@@ -359,7 +404,7 @@ export function HelpersPage() {
               {g.canManage ? (
                 <div class="duty-manage">
                   <Button size="sm" variant="ghost" icon="settings" onClick={() => setManage(g.id)}>
-                    Verwalten
+                    <Trans>Manage</Trans>
                   </Button>
                 </div>
               ) : null}
@@ -369,7 +414,9 @@ export function HelpersPage() {
 
         {skillHint ? (
           <p class="small muted">
-            Dienste, die Vorkenntnisse brauchen (z. B. Zeitnehmer), kannst du übernehmen, wenn du sie in deinem <a href="/profil">Profil</a> unter „Das kann ich“ einschaltest.
+            <Trans>
+              You can take on duties that need prior knowledge (e.g. timekeeper) once you turn them on in your <a href="/profil">profile</a> under “I can do this”.
+            </Trans>
           </p>
         ) : null}
 
@@ -378,7 +425,7 @@ export function HelpersPage() {
             <TopHelpers teamId={teamId} />
           ) : (
             <Button variant="ghost" size="sm" icon="star" onClick={() => setShowTop(true)}>
-              Top-Helfer anzeigen
+              <Trans>Show top helpers</Trans>
             </Button>
           )
         ) : null}
@@ -393,30 +440,42 @@ export function HelpersPage() {
 }
 
 function eventLine(g: Game) {
-  return `${opponent(g)}, ${weekdayShort(g.startsAt)} ${dayOfMonth(g.startsAt)}. um ${time(g.startsAt)}`;
+  const title = opponent(g);
+  const weekday = weekdayShort(g.startsAt);
+  const day = dayOfMonth(g.startsAt);
+  const clock = time(g.startsAt);
+  return t`${title}, ${weekday} ${day} at ${clock}`;
 }
 
 function SignupSheet({ game, block, onClose, onDone }: { game: Game; block: Block; onClose: () => void; onDone: () => void }) {
   const roles = block.roles;
-  // KiHaSL/JuHaSL: Wer pfeift, ist die Person im Eintrag (man selbst oder das Kind). Sonst ist man immer selbst
-  // eingetragen; ein Kind der Mannschaft verknüpft der Server automatisch, damit das andere Elternteil es sieht.
+  // KiHaSL/JuHaSL: whoever referees is the person in the entry (oneself or the child). Otherwise one is always signed up
+  // oneself; the server links a child of the team automatically so the other parent sees it.
   const [role, setRole] = useState(String(roles.find((r) => r.childId != null)?.childId ?? roles[0]?.childId ?? "self"));
   const linkedChild = block.referee ? null : (roles.find((r) => r.childId != null)?.childName ?? null);
   const [note, setNote] = useState("");
+  const range = blockTime(block, game.startsAt);
   return (
     <Sheet open onClose={onClose} title={block.label}>
       <p class="muted">{eventLine(game)}</p>
-      <p class="duty-preview">{block.mode === "task" ? blockTime(block, game.startsAt) : `Dienst ${blockTime(block, game.startsAt)} Uhr`}</p>
+      <p class="duty-preview">{block.mode === "task" ? range : t`Duty ${range}`}</p>
       {block.referee && roles.length > 1 ? (
         <Segmented
-          label="Wer pfeift?"
+          label={t`Who referees?`}
           value={role}
           onChange={setRole}
-          options={roles.map((r) => ({ value: String(r.childId ?? "self"), label: r.childName ?? "Ich selbst" }))}
+          options={roles.map((r) => ({
+            value: String(r.childId ?? "self"),
+            label: r.childName ?? t`Myself`,
+          }))}
         />
       ) : null}
-      {linkedChild ? <p class="small muted">Der Dienst erscheint auch bei {linkedChild}s anderem Elternteil.</p> : null}
-      {block.noteAllowed ? <TextField label="Was bringst du mit? (optional)" value={note} onInput={setNote} maxLength={200} placeholder="z. B. Marmorkuchen" /> : null}
+      {linkedChild ? (
+        <p class="small muted">
+          <Trans>The duty also appears for {linkedChild}'s other parent.</Trans>
+        </p>
+      ) : null}
+      {block.noteAllowed ? <TextField label={t`What are you bringing? (optional)`} value={note} onInput={setNote} maxLength={200} placeholder={t`e.g. marble cake`} /> : null}
       <Button
         variant="primary"
         size="lg"
@@ -427,12 +486,13 @@ function SignupSheet({ game, block, onClose, onDone }: { game: Game; block: Bloc
             ...(block.referee ? { childId: role === "self" ? null : Number(role) } : {}),
             note: block.noteAllowed ? note.trim() || null : null,
           });
-          toast(`Eingetragen: ${block.label}.`);
+          const label = block.label;
+          toast(t`Signed up: ${label}.`);
           onClose();
           onDone();
         }}
       >
-        Eintragen
+        <Trans>Sign up</Trans>
       </Button>
     </Sheet>
   );
@@ -446,28 +506,27 @@ interface PersonOption {
   teams?: string | null;
 }
 
-/** Jemanden eintragen: ohne Suche die Personen der Mannschaft, ab 2 Zeichen der ganze Verein. Sonst Name ohne Zugang. */
+/** Sign someone up: without a search the team's people, from 2 characters the whole club. Otherwise a name without access. */
 function OnBehalfPicker({ game, blocks, onDone }: { game: Game; blocks: Block[]; onDone: () => void }) {
   const [blockId, setBlockId] = useState(String(blocks[0]?.id ?? ""));
   const selected = blocks.find((b) => String(b.id) === blockId) ?? blocks[0];
   const [search, setSearch] = useState("");
   const [q, setQ] = useState("");
   useEffect(() => {
-    const t = window.setTimeout(() => setQ(search.trim()), 250);
-    return () => window.clearTimeout(t);
+    const timer = window.setTimeout(() => setQ(search.trim()), 250);
+    return () => window.clearTimeout(timer);
   }, [search]);
   const referee = !!selected?.referee;
   const team = useQuery<{ people: PersonOption[] }>(referee ? "/duties/referee/people" : `/duties/events/${game.id}/people`);
   const club = useQuery<{ people: PersonOption[] }>(!referee && q.length >= 2 ? `/duties/events/${game.id}/people?q=${encodeURIComponent(q)}` : null);
   const needle = search.trim().toLowerCase();
+  const name = search.trim();
   const list: PersonOption[] =
-    !referee && q.length >= 2
-      ? (club.data?.people ?? [])
-      : (team.data?.people ?? []).filter((p) => !needle || `${p.name} ${p.childName ?? ""}`.toLowerCase().includes(needle));
+    !referee && q.length >= 2 ? (club.data?.people ?? []) : (team.data?.people ?? []).filter((p) => !needle || `${p.name} ${p.childName ?? ""}`.toLowerCase().includes(needle));
   const add = async (body: Record<string, unknown>) => {
     try {
       await api.post("/duties", { blockId: selected!.id, ...body });
-      toast("Eingetragen.");
+      toast(t`Signed up.`);
       setSearch("");
       onDone();
     } catch (err) {
@@ -475,9 +534,11 @@ function OnBehalfPicker({ game, blocks, onDone }: { game: Game; blocks: Block[];
     }
   };
   return (
-    <section class="stack-sm" aria-label="Jemanden eintragen">
-      <strong>Jemanden eintragen</strong>
-      <Field label="Dienst">
+    <section class="stack-sm" aria-label={t`Sign someone up`}>
+      <strong>
+        <Trans>Sign someone up</Trans>
+      </strong>
+      <Field label={t`Duty`}>
         {(id) => (
           <select id={id} class="select" value={String(selected?.id ?? "")} onChange={(e) => setBlockId((e.target as HTMLSelectElement).value)}>
             {blocks.map((b) => (
@@ -489,29 +550,33 @@ function OnBehalfPicker({ game, blocks, onDone }: { game: Game; blocks: Block[];
         )}
       </Field>
       <TextField
-        label={referee ? "KiHaSL/JuHaSL suchen" : "Name suchen"}
+        label={referee ? t`Search KiHaSL/JuHaSL` : t`Search name`}
         value={search}
         onInput={setSearch}
         maxLength={60}
-        hint={referee ? "Nur Personen mit KiHaSL/JuHaSL-Rolle." : "Ohne Eingabe: Personen der Mannschaft. Ab 2 Buchstaben: alle im Verein."}
+        hint={referee ? t`Only people with the KiHaSL/JuHaSL role.` : t`Without input: people of the team. From 2 letters: everyone in the club.`}
       />
-      <ul class="list" aria-label="Personen">
+      <ul class="list" aria-label={t`People`}>
         {list.slice(0, 30).map((p) => (
           <li>
             <button type="button" class="list-row" onClick={() => add({ onBehalfPersonId: p.personId, childId: p.childId })}>
               <span class="main">
                 <span class="title">{p.name}</span>
-                {p.childName || p.teams ? <span class="sub">{p.childName ? `für ${p.childName}` : p.teams}</span> : null}
+                {p.childName || p.teams ? <span class="sub">{p.childName ? forChild(p.childName) : p.teams}</span> : null}
               </span>
               <Icon name="plus" size={18} />
             </button>
           </li>
         ))}
       </ul>
-      {needle && !list.length && !(club.data == null && q.length >= 2) ? <p class="small muted">Niemand gefunden.</p> : null}
+      {needle && !list.length && !(club.data == null && q.length >= 2) ? (
+        <p class="small muted">
+          <Trans>No one found.</Trans>
+        </p>
+      ) : null}
       {!referee && search.trim() ? (
         <Button size="sm" variant="ghost" onClick={() => add({ manualName: search.trim() })}>
-          „{search.trim()}“ als Name ohne Zugang eintragen
+          <Trans>Add “{name}” as a name without access</Trans>
         </Button>
       ) : null}
     </section>
@@ -534,7 +599,7 @@ function ManageSheet({ teamId, game, refereeView, onClose, onDone }: { teamId: n
   };
 
   if (sub === "add") {
-    // Vorschlag: im Anschluss an den letzten Block vor Ort, sonst zum Beginn des Termins
+    // Suggestion: right after the last on-site block, otherwise at the start of the event
     const lastEnd = game.blocks.filter((b) => b.mode === "onsite" && !b.referee).reduce<string | null>((m, b) => (m == null || b.endsAt > m ? b.endsAt : m), null);
     const start = (lastEnd && lastEnd.slice(0, 10) === date ? lastEnd : game.startsAt).slice(11, 16);
     return (
@@ -551,7 +616,8 @@ function ManageSheet({ teamId, game, refereeView, onClose, onDone }: { teamId: n
             endsAt: nb.endsAt,
             slots: nb.slots,
           });
-          toast(`Zeitblock ${nb.label} hinzugefügt.`);
+          const label = nb.label;
+          toast(t`Time slot ${label} added.`);
           onDone();
         }}
       />
@@ -572,62 +638,89 @@ function ManageSheet({ teamId, game, refereeView, onClose, onDone }: { teamId: n
 
   const blocks = refereeView ? game.blocks.filter((b) => b.referee) : game.blocks;
   return (
-    <Sheet open onClose={onClose} title="Dienste verwalten">
+    <Sheet open onClose={onClose} title={t`Manage duties`}>
       <p class="muted">{eventLine(game)}</p>
-      <section class="stack-sm" aria-label="Zeitblöcke">
-        {blocks.map((b) => (
-          <div class="duty-block-row">
-            <button type="button" class="duty-block-label" aria-label={`${b.label}: Uhrzeit ändern`} disabled={b.referee} onClick={() => setSub({ edit: b })}>
-              <strong>{b.label}</strong>
-              <span class="small muted">{blockTime(b, game.startsAt)}</span>
-            </button>
-            <div class="duty-stepper-inline">
-              <button type="button" class="icon-btn icon-btn-sm" aria-label={`${b.label}: ein Platz weniger`} disabled={b.total <= 0} onClick={() => patchBlock(b, { slots: b.total - 1 })}>
-                −
+      <section class="stack-sm" aria-label={t`Time slots`}>
+        {blocks.map((b) => {
+          const label = b.label;
+          return (
+            <div class="duty-block-row">
+              <button type="button" class="duty-block-label" aria-label={t`${label}: change time`} disabled={b.referee} onClick={() => setSub({ edit: b })}>
+                <strong>{b.label}</strong>
+                <span class="small muted">{blockTime(b, game.startsAt)}</span>
               </button>
-              <strong aria-live="polite">{b.total}</strong>
-              <button type="button" class="icon-btn icon-btn-sm" aria-label={`${b.label}: ein Platz mehr`} disabled={b.total >= 20} onClick={() => patchBlock(b, { slots: b.total + 1 })}>
-                +
-              </button>
+              <div class="duty-stepper-inline">
+                <button
+                  type="button"
+                  class="icon-btn icon-btn-sm"
+                  aria-label={t`${label}: one slot fewer`}
+                  disabled={b.total <= 0}
+                  onClick={() => patchBlock(b, { slots: b.total - 1 })}
+                >
+                  −
+                </button>
+                <strong aria-live="polite">{b.total}</strong>
+                <button
+                  type="button"
+                  class="icon-btn icon-btn-sm"
+                  aria-label={t`${label}: one slot more`}
+                  disabled={b.total >= 20}
+                  onClick={() => patchBlock(b, { slots: b.total + 1 })}
+                >
+                  +
+                </button>
+              </div>
+              {!b.referee ? (
+                <button
+                  type="button"
+                  class="icon-btn icon-btn-sm"
+                  aria-label={t`Remove ${label}`}
+                  disabled={b.entries.length > 0}
+                  title={b.entries.length ? t`Remove all entries first` : undefined}
+                  onClick={async () => {
+                    if (
+                      !(await confirmDialog({
+                        title: t`Remove ${label}?`,
+                        message: t`The time slot is only removed from this event.`,
+                        confirmLabel: t`Remove`,
+                        danger: true,
+                      }))
+                    )
+                      return;
+                    try {
+                      await api.del(`/duties/blocks/${b.id}`);
+                      onDone();
+                    } catch (err) {
+                      toast(errorMessage(err), "error");
+                    }
+                  }}
+                >
+                  <Icon name="trash" size={16} />
+                </button>
+              ) : (
+                <span />
+              )}
             </div>
-            {!b.referee ? (
-              <button
-                type="button"
-                class="icon-btn icon-btn-sm"
-                aria-label={`${b.label} entfernen`}
-                disabled={b.entries.length > 0}
-                title={b.entries.length ? "Erst alle Einträge entfernen" : undefined}
-                onClick={async () => {
-                  if (!(await confirmDialog({ title: `${b.label} entfernen?`, message: "Der Zeitblock wird nur bei diesem Termin entfernt.", confirmLabel: "Entfernen", danger: true }))) return;
-                  try {
-                    await api.del(`/duties/blocks/${b.id}`);
-                    onDone();
-                  } catch (err) {
-                    toast(errorMessage(err), "error");
-                  }
-                }}
-              >
-                <Icon name="trash" size={16} />
-              </button>
-            ) : (
-              <span />
-            )}
-          </div>
-        ))}
-        {!blocks.length ? <p class="small muted">Noch keine Dienste.</p> : null}
+          );
+        })}
+        {!blocks.length ? (
+          <p class="small muted">
+            <Trans>No duties yet.</Trans>
+          </p>
+        ) : null}
         {!refereeView ? (
           <Button variant="dashed" size="sm" icon="plus" onClick={() => setSub("add")}>
-            Zeitblock hinzufügen
+            <Trans>Add time slot</Trans>
           </Button>
         ) : null}
         {game.kind === "special" && templates.data?.templates.length ? (
           <div class="duty-template-apply">
-            <Field label="Aus Vorlage übernehmen">
+            <Field label={t`Apply from template`}>
               {(id) => (
                 <select id={id} class="select" value={templateId} onChange={(e) => setTemplateId((e.target as HTMLSelectElement).value)}>
-                  <option value="">– Vorlage wählen –</option>
-                  {templates.data!.templates.map((t) => (
-                    <option value={String(t.id)}>{t.name}</option>
+                  <option value="">{t`– Choose template –`}</option>
+                  {templates.data!.templates.map((tpl) => (
+                    <option value={String(tpl.id)}>{tpl.name}</option>
                   ))}
                 </select>
               )}
@@ -637,18 +730,26 @@ function ManageSheet({ teamId, game, refereeView, onClose, onDone }: { teamId: n
               disabled={!templateId}
               onClick={async () => {
                 const res = await api.post<{ created: number }>(`/duties/events/${game.id}/apply-template`, { templateId: Number(templateId) });
-                toast(res.created === 1 ? "1 Zeitblock übernommen." : `${res.created} Zeitblöcke übernommen.`);
+                const created = res.created;
+                toast(
+                  plural(created, {
+                    one: "# time slot applied.",
+                    other: "# time slots applied.",
+                  }),
+                );
                 setTemplateId("");
                 onDone();
               }}
             >
-              Übernehmen
+              <Trans>Apply</Trans>
             </Button>
           </div>
         ) : null}
       </section>
-      <section class="stack-sm" aria-label="Einträge">
-        <strong>Einträge</strong>
+      <section class="stack-sm" aria-label={t`Entries`}>
+        <strong>
+          <Trans>Entries</Trans>
+        </strong>
         <ul class="list">
           {blocks.flatMap((b) =>
             b.entries.map((e) => (
@@ -657,7 +758,7 @@ function ManageSheet({ teamId, game, refereeView, onClose, onDone }: { teamId: n
                   <span class="title">{e.name}</span>
                   <span class="sub">
                     {b.label}
-                    {e.child ? ` · für ${e.child}` : ""}
+                    {e.child ? ` · ${forChild(e.child)}` : ""}
                   </span>
                 </span>
                 <Button
@@ -668,19 +769,23 @@ function ManageSheet({ teamId, game, refereeView, onClose, onDone }: { teamId: n
                     onDone();
                   }}
                 >
-                  Entfernen
+                  <Trans>Remove</Trans>
                 </Button>
               </li>
             )),
           )}
         </ul>
-        {!blocks.some((b) => b.entries.length) ? <p class="small muted">Noch niemand eingetragen.</p> : null}
+        {!blocks.some((b) => b.entries.length) ? (
+          <p class="small muted">
+            <Trans>No one signed up yet.</Trans>
+          </p>
+        ) : null}
       </section>
       {blocks.length ? <OnBehalfPicker game={game} blocks={blocks} onDone={onDone} /> : null}
       {game.kind === "game" && !refereeView ? (
         <SwitchRow
-          label="Im Helferplan ausblenden"
-          sub="Eltern sehen das Spiel dann nicht, z. B. bei einem Spiel ohne Bewirtung."
+          label={t`Hide in helper plan`}
+          sub={t`Parents then don't see the game, e.g. for a game without catering.`}
           checked={game.hidden}
           onChange={async (hidden) => {
             await api.patch(`/duties/games/${game.id}`, { hidden });
@@ -694,12 +799,12 @@ function ManageSheet({ teamId, game, refereeView, onClose, onDone }: { teamId: n
           icon="trash"
           onClick={async () => {
             await api.del(`/duties/games/${game.id}`);
-            toast("Spiel gelöscht.");
+            toast(t`Game deleted.`);
             onClose();
             onDone();
           }}
         >
-          Spiel löschen
+          <Trans>Delete game</Trans>
         </Button>
       ) : null}
     </Sheet>
@@ -707,25 +812,31 @@ function ManageSheet({ teamId, game, refereeView, onClose, onDone }: { teamId: n
 }
 
 function TopHelpers({ teamId }: { teamId: number }) {
-  const top = useQuery<{ top: { name: string; count: number; star: boolean }[] }>(`/duties/teams/${teamId}/top`);
+  const top = useQuery<{
+    top: { name: string; count: number; star: boolean }[];
+  }>(`/duties/teams/${teamId}/top`);
   if (!top.data) return <Spinner />;
   return (
-    <section class="stack-sm" aria-label="Top-Helfer">
-      <h2 class="section-title">Top-Helfer</h2>
+    <section class="stack-sm" aria-label={t`Top helpers`}>
+      <h2 class="section-title">
+        <Trans>Top helpers</Trans>
+      </h2>
       {top.data.top.length ? (
         <ol class="duty-top">
-          {top.data.top.map((t) => (
+          {top.data.top.map((h) => (
             <li>
               <span>
-                {t.name}
-                {t.star ? <span aria-label="Platz 1"> ★</span> : null}
+                {h.name}
+                {h.star ? <span aria-label={t`First place`}> ★</span> : null}
               </span>
-              <span class="muted">{t.count}</span>
+              <span class="muted">{h.count}</span>
             </li>
           ))}
         </ol>
       ) : (
-        <p class="small muted">Noch keine Einträge in dieser Mannschaft.</p>
+        <p class="small muted">
+          <Trans>No entries in this team yet.</Trans>
+        </p>
       )}
     </section>
   );

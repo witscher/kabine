@@ -1,3 +1,4 @@
+import { t } from "@lingui/core/macro";
 import { Hono } from "hono";
 import { z } from "zod";
 import { type AppEnv, intParam, requireActor } from "../app";
@@ -9,33 +10,33 @@ import { notifyPersons } from "../domain/notify";
 import { all, first, list, run, stmt } from "../lib/db";
 import { badRequest, forbidden, notFound, parse, readJson } from "../lib/http";
 import { addDays, isDate, isTime, nowLocal, todayLocal } from "../lib/time";
+import { isoWeekdayPlural } from "../../shared/dates";
+import { currentLocale } from "../i18n";
 
 export const planRoutes = new Hono<AppEnv>();
-
-const WEEKDAY_NAMES = ["", "montags", "dienstags", "mittwochs", "donnerstags", "freitags", "samstags", "sonntags"];
 
 const ruleSchema = z
   .object({
     weekday: z.number().int().min(1).max(7),
-    startsAt: z.string().refine(isTime, "Ungültige Uhrzeit"),
-    endsAt: z.string().refine(isTime, "Ungültige Uhrzeit"),
+    startsAt: z.string().refine(isTime, { error: () => t`Invalid time` }),
+    endsAt: z.string().refine(isTime, { error: () => t`Invalid time` }),
     locationId: z.number().int().positive(),
     teamIds: z.array(z.number().int().positive()).max(10).default([]),
   })
-  .refine((r) => r.startsAt < r.endsAt, "Das Ende muss nach dem Beginn liegen.");
+  .refine((r) => r.startsAt < r.endsAt, { error: () => t`The end must be after the start.` });
 
 const planSchema = z
   .object({
-    name: z.string().trim().min(1, "Bitte gib einen Namen ein.").max(80),
+    name: z.string().trim().min(1, { error: () => t`Please enter a name.` }).max(80),
     kind: z.enum(["regular", "holiday"]),
-    validFrom: z.string().refine(isDate, "Ungültiges Datum"),
-    validTo: z.string().refine(isDate, "Ungültiges Datum"),
+    validFrom: z.string().refine(isDate, { error: () => t`Invalid date` }),
+    validTo: z.string().refine(isDate, { error: () => t`Invalid date` }),
     declineHours: z.number().int().min(0).max(168).nullable().optional(),
-    /** Nur Ferienpläne: verknüpfter Ferienzeitraum, dessen Daten der Plan übernimmt */
+    /** Holiday plans only: linked holiday period whose dates the plan takes over */
     holidayPeriodId: z.number().int().positive().nullable().optional(),
     rules: z.array(ruleSchema).max(20).default([]),
   })
-  .refine((p) => p.validFrom <= p.validTo, "Das Ende muss nach dem Beginn liegen.");
+  .refine((p) => p.validFrom <= p.validTo, { error: () => t`The end must be after the start.` });
 
 interface PlanRow {
   id: number;
@@ -48,11 +49,11 @@ interface PlanRow {
   holiday_period_id: number | null;
 }
 
-/** Ferienplan mit Zeitraum: Daten kommen aus dem Ferienzeitraum. */
+/** Holiday plan with a period: the dates come from the holiday period. */
 async function linkedDates(db: D1Database, kind: "regular" | "holiday", periodId: number | null | undefined) {
   if (kind !== "holiday" || !periodId) return null;
   const period = await first<{ id: number; starts_on: string; ends_on: string }>(db, "SELECT id, starts_on, ends_on FROM holiday_periods WHERE id = ?", periodId);
-  if (!period) throw badRequest("Diesen Ferienzeitraum gibt es nicht mehr.");
+  if (!period) throw badRequest(t`This holiday period no longer exists.`);
   return { id: period.id, validFrom: period.starts_on, validTo: period.ends_on };
 }
 
@@ -101,7 +102,7 @@ planRoutes.get("/teams/:id/plans", async (c) => {
   const db = c.env.DB;
   const plans = await all<PlanRow>(db, "SELECT * FROM training_plans WHERE team_id = ? ORDER BY kind, valid_from", teamId);
   const rules = await rulesOf(db, plans.map((p) => p.id));
-  // Gemeinsame Regeln aus Plänen anderer Mannschaften, an denen diese Mannschaft beteiligt ist
+  // Shared rules from plans of other teams in which this team takes part
   const shared = await all<RuleView & { plan_name: string; owner_team: string; valid_from: string; valid_to: string }>(
     db,
     `SELECT r.id, r.plan_id, r.weekday, r.starts_at, r.ends_at, r.location_id, l.name AS location_name,
@@ -130,7 +131,7 @@ planRoutes.get("/teams/:id/plans", async (c) => {
       rules: rules.filter((r) => r.plan_id === p.id).map(ruleOut),
     })),
     sharedRules: shared.map((r) => ({ ...ruleOut(r), planName: r.plan_name, ownerTeam: r.owner_team, validFrom: r.valid_from, validTo: r.valid_to })),
-    // Alle kommenden Ferienzeiträume, auch nach Saisonende (z. B. Sommerferien)
+    // All upcoming holiday periods, also after the end of the season (e.g. summer holidays)
     holidays: (await holidayPeriods(db)).filter((h) => h.endsOn >= today),
     allTeams: await all<{ id: number; name: string }>(db, "SELECT id, name FROM teams WHERE kind = 'team' ORDER BY name"),
   });
@@ -145,22 +146,22 @@ async function checkRuleInputs(db: D1Database, actor: Actor, ownTeamId: number, 
   if (locationIds.length) {
     const locs = await all<{ id: number; kind: string }>(db, "SELECT id, kind FROM locations WHERE id IN (SELECT value FROM json_each(?))", list(locationIds));
     if (locs.length !== locationIds.length || locs.some((l) => l.kind === "external")) {
-      throw badRequest("Bitte wähle eine Vereinshalle oder einen angelegten Trainingsort.");
+      throw badRequest(t`Please choose a club hall or a saved training location.`);
     }
   }
   const teamIds = [...new Set(rules.flatMap((r) => r.teamIds))];
   if (teamIds.length) {
     const teams = await all<{ id: number }>(db, "SELECT id FROM teams WHERE kind = 'team' AND id IN (SELECT value FROM json_each(?))", list(teamIds));
-    if (teams.length !== teamIds.length) throw badRequest("Unbekannte Mannschaft.");
+    if (teams.length !== teamIds.length) throw badRequest(t`Unknown team.`);
   }
   for (const rule of rules) {
     const after = new Set([ownTeamId, ...rule.teamIds]);
     const changed = [...[...after].filter((t) => !before.includes(t) && t !== ownTeamId), ...before.filter((t) => !after.has(t))];
-    if (changed.some((t) => !isCoachOf(actor, t))) throw forbidden("Andere Mannschaften kannst du nur hinzufügen oder entfernen, wenn du sie auch trainierst.");
+    if (changed.some((t) => !isCoachOf(actor, t))) throw forbidden(t`You can only add or remove other teams if you coach them too.`);
   }
 }
 
-/** Regel anlegen; rule_teams verweist auf die soeben eingefügte Regel (gleiche Transaktion). */
+/** Creates a rule; rule_teams refers to the rule just inserted (same transaction). */
 function ruleStatements(db: D1Database, planId: number, teamId: number, rule: z.infer<typeof ruleSchema>) {
   const teamIds = [...new Set([teamId, ...rule.teamIds])];
   return [
@@ -204,7 +205,7 @@ planRoutes.post("/teams/:id/plans", async (c) => {
 
 async function planForCoach(db: D1Database, actor: Actor, planId: number): Promise<PlanRow> {
   const plan = await first<PlanRow>(db, "SELECT * FROM training_plans WHERE id = ?", planId);
-  if (!plan) throw notFound("Diesen Plan gibt es nicht.");
+  if (!plan) throw notFound(t`This plan does not exist.`);
   requireCoach(actor, plan.team_id);
   return plan;
 }
@@ -214,7 +215,7 @@ const planUpdateSchema = z.object({
   validFrom: z.string().refine(isDate).optional(),
   validTo: z.string().refine(isDate).optional(),
   declineHours: z.number().int().min(0).max(168).nullable().optional(),
-  /** null löst die Verknüpfung mit dem Ferienzeitraum */
+  /** null removes the link to the holiday period */
   holidayPeriodId: z.number().int().positive().nullable().optional(),
 });
 
@@ -222,13 +223,13 @@ planRoutes.patch("/plans/:id", async (c) => {
   const actor = requireActor(c);
   const plan = await planForCoach(c.env.DB, actor, intParam(c, "id"));
   const input = parse(planUpdateSchema, await readJson(c.req.raw));
-  // Neue Daten von Hand lösen die Verknüpfung, eine neue Verknüpfung setzt die Daten des Zeitraums
+  // New dates by hand remove the link; a new link sets the dates of the period
   const periodId =
     input.holidayPeriodId !== undefined ? input.holidayPeriodId : input.validFrom || input.validTo ? null : plan.holiday_period_id;
   const linked = await linkedDates(c.env.DB, plan.kind, periodId);
   const validFrom = linked?.validFrom ?? input.validFrom ?? plan.valid_from;
   const validTo = linked?.validTo ?? input.validTo ?? plan.valid_to;
-  if (validFrom > validTo) throw badRequest("Das Ende muss nach dem Beginn liegen.");
+  if (validFrom > validTo) throw badRequest(t`The end must be after the start.`);
   await run(
     c.env.DB,
     "UPDATE training_plans SET name = ?, valid_from = ?, valid_to = ?, decline_hours = ?, holiday_period_id = ? WHERE id = ?",
@@ -270,10 +271,10 @@ async function ruleForCoach(db: D1Database, actor: Actor, ruleId: number) {
        FROM training_rules r JOIN training_plans tp ON tp.id = r.plan_id WHERE r.id = ?`,
     ruleId,
   );
-  if (!rule) throw notFound("Diese Trainingszeit gibt es nicht.");
+  if (!rule) throw notFound(t`This training time does not exist.`);
   const teams = (await all<{ team_id: number }>(db, "SELECT team_id FROM rule_teams WHERE rule_id = ?", ruleId)).map((r) => r.team_id);
   if (!isCoachOf(actor, rule.team_id) && !teams.some((t) => isCoachOf(actor, t))) {
-    throw forbidden("Das dürfen nur Trainer der beteiligten Mannschaften.");
+    throw forbidden(t`Only coaches of the teams involved may do this.`);
   }
   return { rule, teams };
 }
@@ -299,14 +300,19 @@ planRoutes.patch("/rules/:id", async (c) => {
         WHERE tm.team_id IN (SELECT value FROM json_each(?)) AND tm.role = 'player' AND p.is_active = 1 AND p.is_former = 0`,
       list([...new Set([...teams, ...teamIds])]),
     );
+    const { startsAt, endsAt } = input;
+    const location = loc?.name ?? "";
     await notifyPersons(
       c.env,
       players.map((p) => p.person_id),
       "events",
-      {
-        title: "Trainingszeit geändert",
-        body: `Training jetzt ${WEEKDAY_NAMES[input.weekday]} ${input.startsAt}–${input.endsAt} Uhr, ${loc?.name ?? ""}.`,
-        url: "/termine",
+      () => {
+        const weekdays = isoWeekdayPlural(currentLocale(), input.weekday);
+        return {
+          title: t`Training time changed`,
+          body: t`Training now ${weekdays} ${startsAt}–${endsAt}, ${location}.`,
+          url: "/termine",
+        };
       },
       { teamIds: [...new Set([...teams, ...teamIds])], exclude: [actor.accountId] },
     );
@@ -331,7 +337,7 @@ const previewSchema = z.object({
   rules: z.array(z.object({ weekday: z.number().int().min(1).max(7), startsAt: z.string().refine(isTime), endsAt: z.string().refine(isTime) })).max(20),
 });
 
-/** Vorschau: wie viele Termine entstehen, und welche Ferien sind noch ohne Ferienplan? */
+/** Preview: how many events will be created, and which holidays still have no holiday plan? */
 planRoutes.post("/teams/:id/plans/preview", async (c) => {
   const actor = requireActor(c);
   const teamId = intParam(c, "id");

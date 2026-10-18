@@ -1,9 +1,9 @@
-// Kurze Neuigkeit auf der Terminübersicht (MotdBanner in src/howto.tsx) („Message of the Day“). Sie erscheint bis zum
-// Ablaufdatum, und nur bis man sie auf dem Gerät wegklickt. Neue Neuigkeit: neue id.
+// Short news item on the event overview (MotdBanner in src/howto.tsx) ("message of the day"). It appears until the
+// expiry date, and only until it is dismissed on the device. New news item: new id.
 
 export interface Motd {
   id: string;
-  /** Letzter Tag der Anzeige (lokales Datum) */
+  /** Last day of display (local date) */
   until: string;
   title: string;
   text: string;
@@ -11,7 +11,7 @@ export interface Motd {
 
 export const MOTD: Motd | null = null;
 
-/** Die Neuigkeit, falls sie heute gilt und auf diesem Gerät nicht weggeklickt wurde. */
+/** The news item, if it applies today and was not dismissed on this device. */
 export function activeMotd(motd: Motd | null, today: string, dismissed: (id: string) => boolean): Motd | null {
   return motd && today <= motd.until && !dismissed(motd.id) ? motd : null;
 }

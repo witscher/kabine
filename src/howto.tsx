@@ -1,6 +1,8 @@
-// Anleitungen: App installieren (Browser) und Benachrichtigungen einrichten (App-Modus).
-// Beide stehen dauerhaft unter Hilfe; als Hinweis auf der Startseite erscheinen sie,
-// bis man sie wegklickt.
+// Guides: install the app (browser) and set up notifications (app mode).
+// Both are always under help; as a hint on the start page they appear
+// until dismissed.
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 import { useEffect, useState } from "preact/hooks";
 import { todayLocal } from "./format";
 import { clubName } from "./club";
@@ -23,20 +25,24 @@ function remember(key: string) {
   try {
     localStorage.setItem(key, "1");
   } catch {
-    // Privater Modus: Hinweis kommt beim nächsten Mal wieder
+    // Private mode: the hint comes back next time
   }
 }
 
 export function InstallSteps() {
+  const club = clubName();
   return isIos() ? (
     <p>
-      In Safari unten auf <em>Teilen</em> tippen, dann <em>Zum Home-Bildschirm</em> und <em>Hinzufügen</em>. Danach startest du {clubName()} über das Symbol auf dem
-      Home-Bildschirm. Nur so funktionieren auf dem iPhone auch Benachrichtigungen.
+      <Trans>
+        In Safari, tap <em>Share</em> at the bottom, then <em>Add to Home Screen</em> and <em>Add</em>. After that you start {club} from the icon on the home
+        screen. Only then do notifications work on the iPhone.
+      </Trans>
     </p>
   ) : (
     <p>
-      Im Browsermenü <em>Zum Startbildschirm hinzufügen</em> bzw. <em>App installieren</em> wählen. Danach startest du {clubName()} über das Symbol auf dem
-      Startbildschirm.
+      <Trans>
+        In the browser menu, choose <em>Add to Home screen</em> or <em>Install app</em>. After that you start {club} from the icon on the home screen.
+      </Trans>
     </p>
   );
 }
@@ -44,18 +50,20 @@ export function InstallSteps() {
 export function PushSteps() {
   return (
     <p>
-      Unter <em>Profil</em> bei <em>Benachrichtigungen</em> auf <em>Auf diesem Gerät aktivieren</em> tippen und die Nachfrage erlauben. Mit <em>Testen</em> prüfst du,
-      ob alles ankommt. Unter <em>Was soll ich bekommen?</em> wählst du die Themen.
+      <Trans>
+        Under <em>Profile</em>, at <em>Notifications</em>, tap <em>Enable on this device</em> and allow the request. With <em>Test</em> you check that
+        everything arrives. Under <em>What should I receive?</em> you choose the topics.
+      </Trans>
     </p>
   );
 }
 
-/** Startseite: aktuelle Neuigkeit (shared/motd.ts), bis sie abläuft oder auf dem Gerät weggeklickt wird. */
+/** Start page: current news item (shared/motd.ts), until it expires or is dismissed on the device. */
 export function MotdBanner() {
   const [motd, setMotd] = useState(() => activeMotd(MOTD, todayLocal(), (id) => read(motdStorageKey(id))));
   if (!motd) return null;
   return (
-    <section class="card card-body motd" aria-label="Neuigkeit">
+    <section class="card card-body motd" aria-label={t`News`}>
       <div class="row-gap">
         <Icon name="car" size={22} />
         <h2 class="section-title" style={{ margin: 0, flex: 1 }}>
@@ -64,7 +72,7 @@ export function MotdBanner() {
         <button
           type="button"
           class="icon-btn"
-          aria-label="Neuigkeit ausblenden"
+          aria-label={t`Hide news`}
           onClick={() => {
             remember(motdStorageKey(motd.id));
             setMotd(null);
@@ -78,21 +86,21 @@ export function MotdBanner() {
   );
 }
 
-/** Startseite im Browser: Hinweis zum Installieren als App, bis er weggeklickt wird. */
+/** Start page in the browser: hint on installing as an app, until dismissed. */
 export function InstallBanner() {
   const [hidden, setHidden] = useState(() => isStandalone() || read(INSTALL_DISMISSED));
   if (hidden) return null;
   return (
-    <section class="card card-body howto" aria-label="App installieren">
+    <section class="card card-body howto" aria-label={t`Install app`}>
       <div class="row-gap">
         <Icon name="phone" size={22} />
         <h2 class="section-title" style={{ margin: 0, flex: 1 }}>
-          Als App installieren
+          <Trans>Install as an app</Trans>
         </h2>
         <button
           type="button"
           class="icon-btn"
-          aria-label="Hinweis ausblenden"
+          aria-label={t`Hide hint`}
           onClick={() => {
             remember(INSTALL_DISMISSED);
             setHidden(true);
@@ -102,12 +110,14 @@ export function InstallBanner() {
         </button>
       </div>
       <InstallSteps />
-      <p class="small muted">Die Anleitung findest du jederzeit unter Hilfe.</p>
+      <p class="small muted">
+        <Trans>You can find the guide at any time under help.</Trans>
+      </p>
     </section>
   );
 }
 
-/** Push auf diesem Gerät schon eingerichtet oder abgelehnt? Dann braucht es keinen Hinweis. */
+/** Push already set up or refused on this device? Then no hint is needed. */
 async function pushHandled(): Promise<boolean> {
   if (!("serviceWorker" in navigator) || !("PushManager" in window) || !("Notification" in window)) return true;
   if (Notification.permission !== "default") return true;
@@ -115,7 +125,7 @@ async function pushHandled(): Promise<boolean> {
   return !!(await reg?.pushManager.getSubscription());
 }
 
-/** Startseite im App-Modus: beim ersten Start Hinweis, wie man Benachrichtigungen einrichtet. */
+/** Start page in app mode: on first start a hint on how to set up notifications. */
 export function PushSetupBanner() {
   const [show, setShow] = useState(false);
   useEffect(() => {
@@ -131,21 +141,23 @@ export function PushSetupBanner() {
     setShow(false);
   };
   return (
-    <section class="card card-body howto" aria-label="Benachrichtigungen einrichten">
+    <section class="card card-body howto" aria-label={t`Set up notifications`}>
       <div class="row-gap">
         <Icon name="bell" size={22} />
         <h2 class="section-title" style={{ margin: 0, flex: 1 }}>
-          Benachrichtigungen einrichten
+          <Trans>Set up notifications</Trans>
         </h2>
-        <button type="button" class="icon-btn" aria-label="Hinweis ausblenden" onClick={close}>
+        <button type="button" class="icon-btn" aria-label={t`Hide hint`} onClick={close}>
           <Icon name="x" size={20} />
         </button>
       </div>
-      <p>So erfährst du sofort von neuen Terminen, Absagen, Nominierungen und Chatnachrichten.</p>
+      <p>
+        <Trans>This way you learn right away about new events, cancellations, nominations and chat messages.</Trans>
+      </p>
       <PushSteps />
       <a class="btn btn-primary" href="/profil" onClick={close}>
         <Icon name="bell" size={18} />
-        Zu den Benachrichtigungen
+        <Trans>Go to notifications</Trans>
       </a>
     </section>
   );

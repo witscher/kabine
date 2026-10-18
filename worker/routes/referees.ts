@@ -1,6 +1,7 @@
-// KiHaSL/JuHaSL: Rolle vergeben (Admin direkt oder über einen Link) und Link einlösen.
-// Der Link gibt die Rolle nur Personen, die schon in der App sind (angemeldet: man
-// selbst oder ein eigenes Kind). Siehe docs/handball-app-konzept.md, Abschnitt KiHaSL/JuHaSL.
+// KiHaSL/JuHaSL: grant the role (admin directly or through a link) and redeem the link.
+// The link only gives the role to persons who are already in the app (signed in: oneself
+// or one's own child). See docs/handball-app-konzept.md, section KiHaSL/JuHaSL.
+import { t } from "@lingui/core/macro";
 import { Hono } from "hono";
 import { z } from "zod";
 import { type AppEnv, intParam, requireActor } from "../app";
@@ -24,9 +25,9 @@ async function validLink(db: D1Database, token: string, now = Date.now()) {
     "SELECT id, expires_at, revoked_at FROM referee_links WHERE token_hash = ?",
     await sha256Hex(token),
   );
-  if (!row) throw badRequest("Dieser Link ist ungültig.", "link_invalid");
-  if (row.revoked_at) throw badRequest("Dieser Link wurde zurückgezogen. Bitte frag nach einem neuen Link.", "link_revoked");
-  if (Date.parse(row.expires_at) <= now) throw badRequest("Dieser Link ist abgelaufen. Bitte frag nach einem neuen Link.", "link_expired");
+  if (!row) throw badRequest(t`This link is invalid.`, "link_invalid");
+  if (row.revoked_at) throw badRequest(t`This link has been withdrawn. Please ask for a new link.`, "link_revoked");
+  if (Date.parse(row.expires_at) <= now) throw badRequest(t`This link has expired. Please ask for a new link.`, "link_expired");
   return row;
 }
 
@@ -58,7 +59,7 @@ refereeRoutes.delete("/admin/referee-links/:id", async (c) => {
   return c.json({ ok: true });
 });
 
-// Admin: Personen mit Rolle ------------------------------------------------------
+// Admin: persons with the role ---------------------------------------------------
 
 refereeRoutes.get("/admin/referees", async (c) => {
   requireAdmin(requireActor(c));
@@ -79,7 +80,7 @@ refereeRoutes.put("/admin/referees/:personId", async (c) => {
   requireAdmin(actor);
   const personId = intParam(c, "personId");
   const person = await first(c.env.DB, "SELECT 1 AS ok FROM persons WHERE id = ? AND is_former = 0", personId);
-  if (!person) throw notFound("Diese Person gibt es nicht.");
+  if (!person) throw notFound(t`This person does not exist.`);
   await run(c.env.DB, "INSERT OR IGNORE INTO referees (person_id, added_by) VALUES (?, ?)", personId, actor.personId);
   await syncAutoGroups(c.env.DB);
   return c.json({ ok: true });
@@ -92,13 +93,13 @@ refereeRoutes.delete("/admin/referees/:personId", async (c) => {
   return c.json({ ok: true });
 });
 
-// Ordentliche Mitglieder (verstecktes Merkmal, nur Admins) ---------------------------
+// Full club members (hidden flag, admins only) --------------------------------------
 
 refereeRoutes.put("/admin/club-members/:personId", async (c) => {
   const actor = requireActor(c);
   requireAdmin(actor);
   const personId = intParam(c, "personId");
-  if (!(await first(c.env.DB, "SELECT 1 AS ok FROM persons WHERE id = ? AND is_former = 0", personId))) throw notFound("Diese Person gibt es nicht.");
+  if (!(await first(c.env.DB, "SELECT 1 AS ok FROM persons WHERE id = ? AND is_former = 0", personId))) throw notFound(t`This person does not exist.`);
   await run(c.env.DB, "INSERT OR IGNORE INTO club_members (person_id, added_by) VALUES (?, ?)", personId, actor.personId);
   return c.json({ ok: true });
 });
@@ -109,9 +110,9 @@ refereeRoutes.delete("/admin/club-members/:personId", async (c) => {
   return c.json({ ok: true });
 });
 
-// Link einlösen (angemeldet) -------------------------------------------------------
+// Redeem the link (signed in) ------------------------------------------------------
 
-/** Wer kann über den Link freigeschaltet werden: man selbst und die eigenen Kinder. */
+/** Who can be enabled through the link: oneself and one's own children. */
 refereeRoutes.post("/referee/info", async (c) => {
   const { token } = parse(tokenSchema, await readJson(c.req.raw));
   const link = await validLink(c.env.DB, token);
@@ -144,7 +145,7 @@ refereeRoutes.post("/referee/accept", async (c) => {
   await validLink(c.env.DB, token);
   // Children only where parents are involved in their team, as everywhere else
   if (personId !== actor.personId && !(actor.children.some((ch) => ch.id === personId) && parentsInCharge(actor, personId))) {
-    throw badRequest("Freischalten kannst du nur dich selbst oder eines deiner Kinder.", "not_allowed");
+    throw badRequest(t`You can only enable yourself or one of your children.`, "not_allowed");
   }
   await run(c.env.DB, "INSERT OR IGNORE INTO referees (person_id, added_by) VALUES (?, ?)", personId, actor.personId);
   await syncAutoGroups(c.env.DB);

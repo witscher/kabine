@@ -1,18 +1,26 @@
-// Nur für Admins (vom Server geprüft): ?playerview=1, ?parentview=1, ?trainerview=1
-// setzen die Sicht als Cookie, das Banner beendet sie wieder.
+// Admins only (checked by the server): ?playerview=1, ?parentview=1, ?trainerview=1
+// set the view as a cookie, the banner ends it again.
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 import { clearCache } from "./store";
 import { useSession } from "./session";
 
 const COOKIE = "kabine_view";
 const FLAGS = { playerview: "player", parentview: "parent", trainerview: "trainer", refereeview: "referee" } as const;
-const LABEL = { player: "Spieler/in", parent: "Elternteil", trainer: "Trainer/in", referee: "KiHaSL/JuHaSL" } as const;
+const labels = () =>
+  ({
+    player: t({ message: "player", context: "view as" }),
+    parent: t({ message: "parent", context: "view as" }),
+    trainer: t({ message: "coach", context: "view as" }),
+    referee: "KiHaSL/JuHaSL",
+  }) as const;
 
 function setCookie(value: string | null) {
   const secure = location.protocol === "https:" ? "; Secure" : "";
   document.cookie = value ? `${COOKIE}=${value}; Path=/; SameSite=Lax${secure}` : `${COOKIE}=; Path=/; Max-Age=0; SameSite=Lax${secure}`;
 }
 
-/** Vor dem ersten Laden: Flag aus der Adresse übernehmen und aus der Adresse entfernen. */
+/** Before the first load: take the flag from the address and remove it from the address. */
 export function applyViewFlags() {
   const params = new URLSearchParams(location.search);
   const flag = (Object.keys(FLAGS) as (keyof typeof FLAGS)[]).find((f) => params.get(f) === "1");
@@ -32,14 +40,13 @@ export function ViewAsBanner() {
     clearCache();
     location.assign("/");
   };
+  const mode = labels()[view.mode];
+  const name = me.person.firstName;
   return (
     <div class="view-banner" role="note">
-      <span>
-        Ansicht als {LABEL[view.mode]}: {me.person.firstName}
-        {view.readOnly ? " · nur lesen" : ""}
-      </span>
+      <span>{view.readOnly ? t`View as ${mode}: ${name} · read only` : t`View as ${mode}: ${name}`}</span>
       <button type="button" onClick={end}>
-        Beenden
+        <Trans>End</Trans>
       </button>
     </div>
   );

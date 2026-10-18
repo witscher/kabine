@@ -1,7 +1,11 @@
-// Zeitblöcke der Helferdienste: Anzeige der Zeit und Formular „Zeitblock hinzufügen“.
-// Genutzt im Reiter Helfer (Dienste verwalten) und beim Anlegen eines Sondertermins.
+// Time slots of helper duties: time display and the "Add time slot" form.
+// Used in the Helpers tab (manage duties) and when creating a special event.
+import { plural, t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 import { useState } from "preact/hooks";
+import { intlTag } from "../shared/dates";
 import { time } from "./format";
+import { currentLocale } from "./i18n";
 import { useQuery } from "./store";
 import { Button, Field, Segmented, Sheet, TextField } from "./ui";
 
@@ -23,10 +27,16 @@ export interface TemplateInfo {
   id: number;
   name: string;
   defaultFor: "home" | "away" | null;
-  items: { dutyTypeId: number; slots: number; beforeMin: number; afterMin: number; taskWhen: "before" | "after" }[];
+  items: {
+    dutyTypeId: number;
+    slots: number;
+    beforeMin: number;
+    afterMin: number;
+    taskWhen: "before" | "after";
+  }[];
 }
 
-/** Lokale Zeit plus Minuten (für Vorschläge in der Oberfläche; der Server prüft). */
+/** Local time plus minutes (for suggestions in the UI; the server checks). */
 export function addMinutes(local: string, minutes: number): string {
   const [d, t] = local.split("T") as [string, string];
   const [y, m, day] = d.split("-").map(Number) as [number, number, number];
@@ -46,9 +56,9 @@ export function minutesBetween(from: string, to: string): number {
   return Math.round((ms(to) - ms(from)) / 60_000);
 }
 
-/** „13:00–16:00“ bzw. bei Aufgaben „Aufgabe · davor/danach“. */
+/** "13:00–16:00", or for tasks "Task · before/after". */
 export function blockTime(b: { mode: "onsite" | "task"; startsAt: string; endsAt: string }, eventStart: string): string {
-  if (b.mode === "task") return `Aufgabe · ${b.startsAt <= eventStart ? "davor" : "danach"}`;
+  if (b.mode === "task") return b.startsAt <= eventStart ? t`Task · before` : t`Task · after`;
   return `${time(b.startsAt)}–${time(b.endsAt)}`;
 }
 
@@ -57,13 +67,13 @@ export const DURATIONS = [30, 60, 90, 120, 180] as const;
 export function durationLabel(min: number): string {
   if (min < 60) return `${min} min`;
   const h = min / 60;
-  return `${String(h).replace(".", ",")} h`;
+  return `${new Intl.NumberFormat(intlTag(currentLocale())).format(h)} h`;
 }
 
 export interface NewBlock {
   dutyTypeId?: number;
   newTypeName?: string;
-  /** Anzeigename (für die Liste im Formular) */
+  /** Display name (for the list in the form) */
   label: string;
   startsAt: string;
   endsAt: string;
@@ -71,13 +81,13 @@ export interface NewBlock {
 }
 
 /**
- * Blatt „Zeitblock hinzufügen“: Dienst, Beginn, Dauer (Chips), Plätze, Vorschau.
- * allowNewType: Sonderdienst nur für diesen Termin (Sondertermine).
+ * "Add time slot" sheet: duty, start, duration (chips), slots, preview.
+ * allowNewType: special duty for this event only (special events).
  */
 export function BlockSheet(props: {
   date: string;
   start: string;
-  /** Ende des Termins für „bis Terminende“ */
+  /** End of the event for "until end of event" */
   eventEnd: string | null;
   allowNewType: boolean;
   initial?: Partial<NewBlock>;
@@ -97,24 +107,24 @@ export function BlockSheet(props: {
   const label = typeId === "new" ? newName.trim() : (selected?.name ?? "");
   const valid = !!label && !!start && endsAt > startsAt;
   return (
-    <Sheet open onClose={props.onClose} title="Zeitblock hinzufügen">
-      <Field label="Dienst">
+    <Sheet open onClose={props.onClose} title={t`Add time slot`}>
+      <Field label={t`Duty`}>
         {(id) => (
           <select id={id} class="select" value={typeId} onChange={(e) => setTypeId((e.target as HTMLSelectElement).value)}>
-            <option value="">– Dienst wählen –</option>
+            <option value="">{t`– Choose duty –`}</option>
             {choices.map((t) => (
               <option value={String(t.id)}>{t.name}</option>
             ))}
-            {props.allowNewType ? <option value="new">Neuer Sonderdienst …</option> : null}
+            {props.allowNewType ? <option value="new">{t`New special duty …`}</option> : null}
           </select>
         )}
       </Field>
-      {typeId === "new" ? (
-        <TextField label="Name des Sonderdienstes" value={newName} onInput={setNewName} maxLength={40} hint="Gilt nur für diesen Termin, z. B. Grill" />
-      ) : null}
-      <Field label="Beginn">{(id) => <input id={id} class="input" type="time" value={start} onInput={(e) => setStart((e.target as HTMLInputElement).value)} />}</Field>
-      <div class="field" role="group" aria-label="Dauer">
-        <span class="field-label">Dauer</span>
+      {typeId === "new" ? <TextField label={t`Name of the special duty`} value={newName} onInput={setNewName} maxLength={40} hint={t`Only for this event, e.g. barbecue`} /> : null}
+      <Field label={t`Start time`}>{(id) => <input id={id} class="input" type="time" value={start} onInput={(e) => setStart((e.target as HTMLInputElement).value)} />}</Field>
+      <div class="field" role="group" aria-label={t`Duration`}>
+        <span class="field-label">
+          <Trans>Duration</Trans>
+        </span>
         <div class="chips">
           {DURATIONS.map((d) => (
             <button type="button" class={`chip ${duration === d ? "selected" : ""}`} aria-pressed={duration === d ? "true" : "false"} onClick={() => setDuration(d)}>
@@ -123,24 +133,26 @@ export function BlockSheet(props: {
           ))}
           {props.eventEnd ? (
             <button type="button" class={`chip ${duration === "end" ? "selected" : ""}`} aria-pressed={duration === "end" ? "true" : "false"} onClick={() => setDuration("end")}>
-              bis Terminende
+              <Trans>until end of event</Trans>
             </button>
           ) : null}
         </div>
       </div>
       <div class="duty-stepper">
-        <span>Plätze</span>
-        <button type="button" class="icon-btn icon-btn-sm" aria-label="Ein Platz weniger" onClick={() => setSlots(Math.max(1, slots - 1))}>
+        <span>
+          <Trans>Slots</Trans>
+        </span>
+        <button type="button" class="icon-btn icon-btn-sm" aria-label={t`One slot fewer`} onClick={() => setSlots(Math.max(1, slots - 1))}>
           −
         </button>
         <strong aria-live="polite">{slots}</strong>
-        <button type="button" class="icon-btn icon-btn-sm" aria-label="Ein Platz mehr" onClick={() => setSlots(Math.min(20, slots + 1))}>
+        <button type="button" class="icon-btn icon-btn-sm" aria-label={t`One slot more`} onClick={() => setSlots(Math.min(20, slots + 1))}>
           +
         </button>
       </div>
       {valid ? (
         <p class="duty-preview">
-          {label} · {time(startsAt)}–{time(endsAt)} · {slots === 1 ? "1 Platz" : `${slots} Plätze`}
+          {label} · {time(startsAt)}–{time(endsAt)} · {plural(slots, { one: "# slot", other: "# slots" })}
         </p>
       ) : null}
       <Button
@@ -159,15 +171,21 @@ export function BlockSheet(props: {
           props.onClose();
         }}
       >
-        Hinzufügen
+        <Trans>Add</Trans>
       </Button>
     </Sheet>
   );
 }
 
-/** Uhrzeit und Plätze eines bestehenden Blocks ändern. */
+/** Change time and slots of an existing block. */
 export function BlockEditSheet(props: {
-  block: { label: string; mode: "onsite" | "task"; startsAt: string; endsAt: string; total: number };
+  block: {
+    label: string;
+    mode: "onsite" | "task";
+    startsAt: string;
+    endsAt: string;
+    total: number;
+  };
   onClose: () => void;
   onSave: (v: { startsAt: string; endsAt: string }) => Promise<void> | void;
 }) {
@@ -178,21 +196,23 @@ export function BlockEditSheet(props: {
   const task = props.block.mode === "task";
   return (
     <Sheet open onClose={props.onClose} title={props.block.label}>
-      <p class="small muted">Gilt nur für diesen Termin.</p>
+      <p class="small muted">
+        <Trans>Only applies to this event.</Trans>
+      </p>
       {task ? (
         <Segmented
-          label="Wann"
+          label={t`When`}
           value={when}
           onChange={setWhen}
           options={[
-            { value: "start", label: "Davor" },
-            { value: "end", label: "Danach" },
+            { value: "start", label: t`Before` },
+            { value: "end", label: t`After` },
           ]}
         />
       ) : (
         <div class="grid-2">
-          <Field label="Beginn">{(id) => <input id={id} class="input" type="time" value={start} onInput={(e) => setStart((e.target as HTMLInputElement).value)} />}</Field>
-          <Field label="Ende">{(id) => <input id={id} class="input" type="time" value={end} onInput={(e) => setEnd((e.target as HTMLInputElement).value)} />}</Field>
+          <Field label={t`Start time`}>{(id) => <input id={id} class="input" type="time" value={start} onInput={(e) => setStart((e.target as HTMLInputElement).value)} />}</Field>
+          <Field label={t`End time`}>{(id) => <input id={id} class="input" type="time" value={end} onInput={(e) => setEnd((e.target as HTMLInputElement).value)} />}</Field>
         </div>
       )}
       <Button
@@ -204,11 +224,15 @@ export function BlockEditSheet(props: {
           if (task) {
             const at = when === "start" ? `${date}T${start}` : `${date}T${end}`;
             await props.onSave({ startsAt: at, endsAt: at });
-          } else await props.onSave({ startsAt: `${date}T${start}`, endsAt: `${date}T${end}` });
+          } else
+            await props.onSave({
+              startsAt: `${date}T${start}`,
+              endsAt: `${date}T${end}`,
+            });
           props.onClose();
         }}
       >
-        Speichern
+        <Trans>Save</Trans>
       </Button>
     </Sheet>
   );

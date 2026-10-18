@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { matchLocale } from "../shared/i18n";
 import { currentLocale, withLocale } from "../worker/i18n";
 import { notFound } from "../worker/lib/http";
-import { exec, freshDb, loginAs, person, season } from "./helpers";
+import { api, exec, freshDb, loginAs, one, person, season } from "./helpers";
 
 async function message(headers: Record<string, string> = {}) {
   const res = await exports.default.fetch(new Request("http://localhost:5173/api/teams", { headers }));
@@ -40,5 +40,37 @@ describe("Sprache", () => {
     expect(matchLocale(["fr-FR", "de-AT"])).toBe("de");
     expect(matchLocale("en-GB,en;q=0.9")).toBe("en");
     expect(matchLocale(["fr"])).toBeNull();
+  });
+});
+
+describe("Sprache am Konto", () => {
+  it("PUT /api/me/locale speichert die Sprache, null setzt sie zurück", async () => {
+    const ada = await person("Ada");
+    const cookie = await loginAs(ada);
+    expect((await api("/session", { cookie })).body.me.locale).toBeNull();
+    expect((await api("/me/locale", { method: "PUT", cookie, body: { locale: "en" } })).status).toBe(200);
+    expect((await one<{ locale: string | null }>("SELECT locale FROM accounts WHERE person_id = ?", ada)).locale).toBe("en");
+    const session = await api("/session", { cookie });
+    expect(session.body.me.locale).toBe("en");
+    // Texts now follow the account, not the club default
+    expect((await api("/me/locale", { method: "PUT", cookie, body: { locale: "fr" } })).body.error.message).toBe("Invalid input. (locale)");
+    await api("/me/locale", { method: "PUT", cookie, body: { locale: null } });
+    expect((await api("/session", { cookie })).body.me.locale).toBeNull();
+    expect((await api("/me/locale", { method: "PUT", body: { locale: "en" } })).status).toBe(401);
+  });
+});
+
+describe("Sprache am Konto", () => {
+  it("merkt sich die Sprache der App beim ersten Aufruf, eine eigene Wahl bleibt", async () => {
+    await freshDb();
+    await season();
+    const ida = await person("Ida");
+    const cookie = await loginAs(ida);
+    await exports.default.fetch(new Request("http://localhost:5173/api/session", { headers: { cookie, "x-kabine-locale": "en" } }));
+    await new Promise((r) => setTimeout(r, 50));
+    expect(await one<{ locale: string }>("SELECT locale FROM accounts WHERE person_id = ?", ida)).toEqual({ locale: "en" });
+    await exports.default.fetch(new Request("http://localhost:5173/api/session", { headers: { cookie, "x-kabine-locale": "de" } }));
+    await new Promise((r) => setTimeout(r, 50));
+    expect(await one<{ locale: string }>("SELECT locale FROM accounts WHERE person_id = ?", ida)).toEqual({ locale: "en" });
   });
 });

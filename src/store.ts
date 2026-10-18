@@ -1,5 +1,5 @@
-// Kleiner Daten-Cache mit Abonnements: Seiten laden über useQuery, nach
-// Änderungen werden betroffene Schlüssel per invalidate() neu geladen.
+// Small data cache with subscriptions: pages load via useQuery, after
+// changes the affected keys are reloaded via invalidate().
 import { useCallback, useEffect, useReducer, useRef } from "preact/hooks";
 import { api, ApiError } from "./api";
 
@@ -57,8 +57,8 @@ export function useQuery<T>(path: string | null, opts: { refreshMs?: number } = 
     const fetcher = () => api.get<T>(path);
     fetchers.set(path, fetcher);
     const entry = cache.get(path);
-    // Zwischen dem Zeichnen und dieser Anmeldung kann die Antwort schon da sein.
-    // Die Benachrichtigung ging dann ins Leere: einmal neu zeichnen.
+    // Between rendering and this subscription the response may already have arrived.
+    // The notification then went nowhere: render once more.
     if (entry && (entry.data !== rendered.current.data || entry.error !== rendered.current.error)) fn();
     const tooOld = entry?.loadedAt && opts.refreshMs ? Date.now() - entry.loadedAt > opts.refreshMs : false;
     if (!entry || entry.stale || tooOld) void load(path, fetcher);
@@ -92,7 +92,7 @@ export function useQuery<T>(path: string | null, opts: { refreshMs?: number } = 
   };
 }
 
-/** Markiert alle Schlüssel mit diesem Präfix als veraltet und lädt sichtbare neu. */
+/** Marks all keys with this prefix as stale and reloads the visible ones. */
 export function invalidate(...prefixes: string[]) {
   for (const [key, entry] of cache) {
     if (!prefixes.some((p) => key.startsWith(p))) continue;
@@ -101,7 +101,7 @@ export function invalidate(...prefixes: string[]) {
   }
 }
 
-/** Alles neu laden: Sichtbares sofort (Promise wartet darauf), der Rest beim nächsten Öffnen. */
+/** Reload everything: visible data right away (the promise waits for it), the rest on next opening. */
 export function refreshVisible(): Promise<void> {
   const loads: Promise<void>[] = [];
   for (const [key, entry] of cache) {

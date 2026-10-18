@@ -1,10 +1,13 @@
+import { t } from "@lingui/core/macro";
 import { DurableObject } from "cloudflare:workers";
+import { LOCALES } from "../../shared/i18n";
+import { enterClubContext } from "../domain/club";
 import { enqueuePush, notifyPersons } from "../domain/notify";
+import { withLocale } from "../i18n";
 import { all, run } from "../lib/db";
 
-// Ein Chatraum pro Mannschaft. Der Worker prüft die Berechtigung und reicht
-// die Identität per Header weiter; das Durable Object ist von außen nicht
-// erreichbar.
+// One chat room per team. The worker checks permissions and passes the
+// identity on in headers; the Durable Object cannot be reached from outside.
 
 export interface ChatAttachment {
   accountId: number;
@@ -16,11 +19,13 @@ export interface ChatAttachment {
   isMod: boolean;
   /** May delete messages: moderator and not in a read-only admin view. Missing in attachments from older versions. */
   canModerate?: boolean;
-  /** Nur als Elternteil im Chat (nicht Mitglied, nicht Trainer). */
+  /** Only in the chat as a parent (not a member, not a coach). */
   viaChildren?: boolean;
+  /** Language of the person (texts the room sends to them). Missing in attachments from older versions. */
+  locale?: string;
 }
 
-/** announcement: Rundnachricht eines Admins aus der Verwaltung. */
+/** announcement: announcement by an admin from the admin area. */
 export type MessageKind = "user" | "system" | "announcement";
 
 export interface ChatMessage {
@@ -33,29 +38,29 @@ export interface ChatMessage {
   text: string | null;
   createdAt: string;
   deleted: boolean;
-  /** Erwähnte Personen (@Name). */
+  /** Mentioned persons (@name). */
   mentions: number[];
-  /** @alle, nur von Trainern und Admins. */
+  /** @all, only from coaches and admins. */
   mentionAll: boolean;
-  /** Emoji-Reaktionen, je Person höchstens eine. */
+  /** Emoji reactions, at most one per person. */
   reactions: ChatReaction[];
 }
 
 export interface ChatReaction {
   emoji: string;
-  /** Namen wie im Chat, Ehemalige nur für Trainer sichtbar. */
+  /** Names as in the chat, former players only visible to coaches. */
   names: string[];
-  /** Die Reaktion der verbundenen Person. */
+  /** The reaction of the connected person. */
   mine: boolean;
 }
 
-/** Erlaubte Reaktionen, in dieser Reihenfolge angezeigt. */
+/** Allowed reactions, shown in this order. */
 export const REACTIONS = ["👍", "❤️", "😂", "😢", "👋"] as const;
 
-/** In der Spalte mentions steht 0 für @alle (Personen-IDs beginnen bei 1). */
+/** In the mentions column 0 stands for @all (person IDs start at 1). */
 const ALL = 0;
 
-/** Wer per @ erwähnt werden kann: wer im Chat schon geschrieben hat, und Trainer. */
+/** Who can be mentioned with @: whoever has written in the chat, and coaches. */
 export interface Mentionable {
   personId: number;
   name: string;
@@ -79,11 +84,24 @@ type MessageRow = {
 const PAGE = 60;
 const MAX_LENGTH = 2000;
 const MAX_MENTIONS = 10;
-/** Pushes für neue Nachrichten werden gebündelt. */
+/** Pushes for new messages are bundled. */
 const PUSH_DELAY_MS = 20_000;
-export const FORMER_LABEL = "Ehemalige/r Spieler/in";
-/** Name gelöschter Personen in Chats, für alle gleich (auch für Trainer). */
+/** Shown instead of the name of former players (except to coaches). */
+export const formerLabel = () => t`Former player`;
+/**
+ * Name of deleted persons in chats, the same for everyone (coaches too). Stored in the authors table
+ * as a marker (existing rooms hold this value), shown translated (deletedName).
+ */
 export const DELETED_NAME = "Gelöschte Person";
+const deletedName = () => t`Deleted person`;
+/** Author labels of coaches and group leads. Stored in the language of the author, see mentionable(). */
+export const coachLabel = () => t({ message: "Coach", context: "chat author" });
+export const leadLabel = () => t({ message: "In charge", context: "chat author" });
+
+/** Runs fn in the language of the connected person. */
+function inLocale<T>(viewer: ChatAttachment, fn: () => T): T {
+  return withLocale(viewer.locale, fn);
+}
 
 export class ChatRoom extends DurableObject<Env> {
   private sql: SqlStorage;
@@ -117,22 +135,25 @@ export class ChatRoom extends DurableObject<Env> {
         PRIMARY KEY (message_id, person_id)
       );
     `);
-    // Spalte für Erwähnungen in bestehenden Chaträumen nachrüsten
+    // Add the mentions column to existing chat rooms
     const columns = this.sql.exec<{ name: string }>("PRAGMA table_info(messages)").toArray();
     if (!columns.some((c) => c.name === "mentions")) this.sql.exec("ALTER TABLE messages ADD COLUMN mentions TEXT");
   }
 
   /**
-   * Wen man mit @ erwähnen kann. Mannschaften: wer schon geschrieben hat, und die Trainer
-   * (Schutz der Kinder). Gruppen: alle Mitglieder und Verantwortlichen (docs/entscheidungen.md, Gruppen).
+   * Who can be mentioned with @. Teams: whoever has written already, and the coaches
+   * (protection of the children). Groups: all members and leads (docs/entscheidungen.md, Gruppen).
    */
   private async mentionable(): Promise<Mentionable[]> {
+    // Labels are stored in the language of each author: compare with the labels in every language
+    const leads = LOCALES.flatMap((l) => withLocale(l, () => [coachLabel(), leadLabel()]));
     const local = this.sql
       .exec<{ person_id: number; name: string }>(
         `SELECT a.person_id, a.name FROM authors a
           WHERE a.is_former = 0
-            AND (a.label IN ('Coach', 'Verantwortlich') OR EXISTS (SELECT 1 FROM messages m WHERE m.person_id = a.person_id AND m.kind = 'user' AND m.deleted_at IS NULL))
+            AND (a.label IN (SELECT value FROM json_each(?)) OR EXISTS (SELECT 1 FROM messages m WHERE m.person_id = a.person_id AND m.kind = 'user' AND m.deleted_at IS NULL))
           ORDER BY a.name`,
+        JSON.stringify([...new Set(leads)]),
       )
       .toArray()
       .map((r) => ({ personId: r.person_id, name: r.name }));
@@ -177,7 +198,7 @@ export class ChatRoom extends DurableObject<Env> {
         if (typeof body.text === "string" && body.text.trim()) await this.addMessage("system", null, body.text.trim().slice(0, 300));
         return Response.json({ ok: true });
       case "/announce": {
-        // Rundnachricht (worker/routes/chat.ts prüft, dass ein Admin sendet)
+        // Announcement (worker/routes/chat.ts checks that an admin sends it)
         const personId = Number(body.personId);
         const text = typeof body.text === "string" ? body.text.trim().slice(0, MAX_LENGTH) : "";
         if (!personId || !text) return Response.json({ ok: false }, { status: 400 });
@@ -186,7 +207,7 @@ export class ChatRoom extends DurableObject<Env> {
         return Response.json({ ok: true, id });
       }
       case "/forget": {
-        // Person wurde gelöscht: Nachrichten bleiben anonym, Reaktionen verschwinden
+        // Person was deleted: messages stay anonymous, reactions disappear
         const ids = Array.isArray(body.personIds) ? body.personIds.filter((x): x is number => typeof x === "number") : [];
         for (const id of ids) {
           this.sql.exec("UPDATE authors SET name = ?, label = NULL, is_former = 1 WHERE person_id = ?", DELETED_NAME, id);
@@ -206,10 +227,10 @@ export class ChatRoom extends DurableObject<Env> {
         this.setMuted(Number(body.personId), body.muted === true);
         return Response.json({ ok: true });
       case "/parents-off":
-        // Die Mannschaft wird ab jetzt ohne Eltern geführt
+        // From now on the team is run without parents
         for (const ws of this.ctx.getWebSockets()) {
           const att = ws.deserializeAttachment() as ChatAttachment | null;
-          if (att?.viaChildren) ws.close(4003, "In dieser Mannschaft sind keine Eltern eingebunden.");
+          if (att?.viaChildren) ws.close(4003, inLocale(att, () => t`Parents are not involved in this team.`));
         }
         return Response.json({ ok: true });
       case "/export":
@@ -241,6 +262,7 @@ export class ChatRoom extends DurableObject<Env> {
       isMod: h.get("x-is-mod") === "1",
       canModerate: h.get("x-can-moderate") === "1",
       viaChildren: h.get("x-via-children") === "1",
+      locale: h.get("x-locale") ?? undefined,
     };
     const pair = new WebSocketPair();
     const [client, server] = [pair[0], pair[1]];
@@ -297,7 +319,7 @@ export class ChatRoom extends DurableObject<Env> {
       if (!hits.length) continue;
       out.push({
         emoji,
-        names: hits.map((r) => (r.is_former === 1 && !viewer.isMod ? FORMER_LABEL : (r.name ?? "?"))),
+        names: hits.map((r) => (r.is_former === 1 && !viewer.isMod ? inLocale(viewer, formerLabel) : (r.name ?? "?"))),
         mine: hits.some((r) => r.person_id === viewer.personId),
       });
     }
@@ -313,7 +335,7 @@ export class ChatRoom extends DurableObject<Env> {
       id: r.id,
       kind: r.kind,
       authorId: hideName ? null : r.person_id,
-      authorName: r.kind === "system" ? null : deleted ? DELETED_NAME : hideName ? FORMER_LABEL : r.name,
+      authorName: r.kind === "system" ? null : deleted ? inLocale(viewer, deletedName) : hideName ? inLocale(viewer, formerLabel) : r.name,
       authorLabel: hideName ? null : r.label,
       isFormer: former,
       text: r.deleted_at ? null : r.text,
@@ -329,7 +351,7 @@ export class ChatRoom extends DurableObject<Env> {
     try {
       ws.send(JSON.stringify(data));
     } catch {
-      // Verbindung bereits geschlossen
+      // Connection already closed
     }
   }
 
@@ -378,17 +400,19 @@ export class ChatRoom extends DurableObject<Env> {
     return row.id;
   }
 
-  /** Erwähnte sofort benachrichtigen (bei Kindern auch die zuständigen Eltern) und für die Zahl am Icon merken. */
+  /** Notify mentioned persons at once (for children also the parents in charge) and remember them for the number on the icon. */
   private async notifyMentions(teamId: number, messageId: number, message: MessageRow, mentions: number[]) {
     try {
+      // Outside a request: the club's language for recipients without their own setting
+      await enterClubContext(this.env.DB);
       const all_ = mentions.includes(ALL);
       const persons = mentions.filter((id) => id !== ALL);
       const statements = persons.map((personId) =>
         this.env.DB.prepare("INSERT OR IGNORE INTO chat_mentions (team_id, message_id, person_id) VALUES (?, ?, ?)").bind(teamId, messageId, personId),
       );
       if (all_) {
-        // @alle: alle Mitglieder. Eltern zählen über ihre Kinder; ob ein Kind ohne
-        // Lesefreigabe mitzählt, entscheidet die Zählung (worker/domain/badge.ts)
+        // @all: all members. Parents count through their children; whether a child without
+        // read permission counts is decided by the count (worker/domain/badge.ts)
         statements.push(
           this.env.DB.prepare(
             `INSERT OR IGNORE INTO chat_mentions (team_id, message_id, person_id)
@@ -400,27 +424,28 @@ export class ChatRoom extends DurableObject<Env> {
       if (statements.length) await this.env.DB.batch(statements);
       const team = await all<{ name: string }>(this.env.DB, "SELECT name FROM teams WHERE id = ?", teamId);
       const author = await all<{ id: number }>(this.env.DB, "SELECT id FROM accounts WHERE person_id = ?", message.person_id);
-      const payload = {
+      const teamName = team[0]?.name ?? "";
+      const payload = () => ({
         title:
           message.kind === "announcement"
-            ? `Ankündigung im Chat ${team[0]?.name ?? ""}`.trim()
+            ? t`Announcement in chat ${teamName}`.trim()
             : all_
-              ? `An alle im Chat ${team[0]?.name ?? ""}`.trim()
-              : `Erwähnung im Chat ${team[0]?.name ?? ""}`.trim(),
+              ? t`To everyone in chat ${teamName}`.trim()
+              : t`Mention in chat ${teamName}`.trim(),
         body: `${message.name ?? ""}: ${message.text.slice(0, 140)}`,
         url: `/chat/${teamId}`,
         tag: `mention-${teamId}-${messageId}`,
-      };
+      });
       const exclude = author.map((a) => a.id);
       if (all_) {
-        // Dieselben Empfänger wie Chat-Pushes, aber nach der Einstellung für Erwähnungen
+        // The same recipients as chat pushes, but by the setting for mentions
         const recipients = await chatPushRecipients(this.env.DB, teamId, messageId, "mentions");
         await enqueuePush(this.env, [...new Set(recipients.map((r) => r.account_id))], payload, { exclude });
       } else {
         await notifyPersons(this.env, persons, "mentions", payload, { teamIds: [teamId], exclude });
       }
     } catch (err) {
-      console.warn("Erwähnung", err);
+      console.warn("Mention", err);
     }
   }
 
@@ -456,24 +481,25 @@ export class ChatRoom extends DurableObject<Env> {
       case "send": {
         const text = typeof msg.text === "string" ? msg.text.trim() : "";
         if (!att.baseCanWrite || att.muted) {
-          this.send(ws, { type: "error", message: att.muted ? "Du bist in diesem Chat stummgeschaltet." : "Du kannst in diesem Chat nur lesen." });
+          this.send(ws, { type: "error", message: inLocale(att, () => (att.muted ? t`You are muted in this chat.` : t`You can only read in this chat.`)) });
           return;
         }
         if (!text) return;
         if (text.length > MAX_LENGTH) {
-          this.send(ws, { type: "error", message: `Nachrichten dürfen höchstens ${MAX_LENGTH} Zeichen lang sein.` });
+          const max = MAX_LENGTH;
+          this.send(ws, { type: "error", message: inLocale(att, () => t`Messages can be at most ${max} characters long.`) });
           return;
         }
         if (!this.allowed(att.accountId)) {
-          this.send(ws, { type: "error", message: "Bitte nicht so schnell hintereinander." });
+          this.send(ws, { type: "error", message: inLocale(att, () => t`Please slow down a little.`) });
           return;
         }
-        // Nur Personen, die erwähnt werden dürfen, nie man selbst
+        // Only persons who may be mentioned, never oneself
         const allowed = new Set((await this.mentionable()).map((m) => m.personId));
         const mentions = Array.isArray(msg.mentions)
           ? [...new Set(msg.mentions.filter((m): m is number => typeof m === "number" && allowed.has(m) && m !== att.personId))].slice(0, MAX_MENTIONS)
           : [];
-        // @alle dürfen nur Trainer und Admins
+        // Only coaches and admins may use @all
         if (msg.mentionAll === true && att.isMod) mentions.unshift(ALL);
         const id = await this.addMessage("user", att.personId, text, mentions);
         this.send(ws, { type: "ack", clientId: msg.clientId ?? null, id });
@@ -489,10 +515,10 @@ export class ChatRoom extends DurableObject<Env> {
         return;
       }
       case "react": {
-        // Reagieren darf, wer schreiben darf; nie auf eigene Nachrichten
+        // Whoever may write may react; never to their own messages
         if (typeof msg.id !== "number") return;
         if (!att.baseCanWrite || att.muted) {
-          this.send(ws, { type: "error", message: att.muted ? "Du bist in diesem Chat stummgeschaltet." : "Du kannst in diesem Chat nur lesen." });
+          this.send(ws, { type: "error", message: inLocale(att, () => (att.muted ? t`You are muted in this chat.` : t`You can only read in this chat.`)) });
           return;
         }
         const emoji = msg.emoji === null ? null : REACTIONS.find((e) => e === msg.emoji);
@@ -502,7 +528,7 @@ export class ChatRoom extends DurableObject<Env> {
           .toArray()[0];
         if (!target || target.person_id === att.personId) return;
         if (!this.allowed(att.accountId)) {
-          this.send(ws, { type: "error", message: "Bitte nicht so schnell hintereinander." });
+          this.send(ws, { type: "error", message: inLocale(att, () => t`Please slow down a little.`) });
           return;
         }
         if (emoji) {
@@ -552,14 +578,16 @@ export class ChatRoom extends DurableObject<Env> {
     try {
       ws.close(code === 1005 ? 1000 : code, "bye");
     } catch {
-      // schon geschlossen
+      // already closed
     }
   }
 
-  /** Gebündelte Push an Mitglieder, die gerade nicht verbunden sind und noch nicht gelesen haben. */
+  /** Bundled push to members who are not connected right now and have not read yet. */
   override async alarm(): Promise<void> {
     const teamId = this.teamId();
     if (!teamId) return;
+    // Outside a request: the club's language for recipients without their own setting
+    await enterClubContext(this.env.DB);
     const pushedUpTo = Number(this.sql.exec<{ value: string }>("SELECT value FROM meta WHERE key = 'pushed_upto'").toArray()[0]?.value ?? 0);
     const fresh = this.sql
       .exec<MessageRow>(
@@ -581,31 +609,32 @@ export class ChatRoom extends DurableObject<Env> {
     const authors = new Set(fresh.map((m) => m.person_id));
     const recipients = await chatPushRecipients(this.env.DB, teamId, last.id);
     const team = await all<{ name: string }>(this.env.DB, "SELECT name FROM teams WHERE id = ?", teamId);
-    // Wer in der einzigen neuen Nachricht erwähnt wurde, hat dafür schon eine eigene Push
+    // Whoever was mentioned in the only new message already got a push of their own for it
     const mentionedOnly = fresh.length === 1 && last.mentions ? new Set(JSON.parse(last.mentions) as number[]) : new Set<number>();
-    // Bei @alle hat schon jeder eine Push bekommen
+    // With @all everyone has already got a push
     if (mentionedOnly.has(ALL)) return;
     const targets = recipients.filter(
       (r) => !connected.has(r.account_id) && !(authors.size === 1 && authors.has(r.person_id)) && !mentionedOnly.has(r.person_id),
     );
     if (!targets.length) return;
-    const author = last.is_former ? FORMER_LABEL : (last.name ?? "");
-    const body =
-      fresh.length === 1
-        ? `${author}: ${last.text.slice(0, 140)}`
-        : `${fresh.length} neue Nachrichten, zuletzt ${author}: ${last.text.slice(0, 100)}`;
-    await enqueuePush(this.env, [...new Set(targets.map((t) => t.account_id))], {
-      title: `Chat ${team[0]?.name ?? ""}`.trim(),
-      body,
-      url: `/chat/${teamId}`,
-      tag: `chat-${teamId}`,
+    const teamName = team[0]?.name ?? "";
+    const count = fresh.length;
+    await enqueuePush(this.env, [...new Set(targets.map((r) => r.account_id))], () => {
+      const author = last.is_former ? formerLabel() : (last.name ?? "");
+      const text = last.text.slice(0, count === 1 ? 140 : 100);
+      return {
+        title: t`Chat ${teamName}`.trim(),
+        body: count === 1 ? `${author}: ${text}` : t`${count} new messages, latest from ${author}: ${text}`,
+        url: `/chat/${teamId}`,
+        tag: `chat-${teamId}`,
+      };
     });
   }
 }
 
 /**
- * Accounts mit Lesezugriff auf den Chat einer Mannschaft, die Chat-Pushes
- * wollen und die Nachricht noch nicht gelesen haben.
+ * Accounts with read access to a team's chat that want chat pushes and
+ * have not read the message yet.
  */
 export async function chatPushRecipients(db: D1Database, teamId: number, upToId: number, topic: "chat" | "mentions" = "chat") {
   return all<{ account_id: number; person_id: number }>(

@@ -1,21 +1,24 @@
-// Fahrgemeinschaften bei Auswärtsspielen (siehe docs/entscheidungen.md, Fahrgemeinschaften).
-// Fahrer bieten freie Plätze an, Mitfahrer buchen selbst. Das System weist nichts zu, es benachrichtigt nur.
+// Carpools for away games (see docs/entscheidungen.md, Fahrgemeinschaften).
+// Drivers offer free seats, passengers book themselves. The system assigns nothing, it only notifies.
+import { plural, t } from "@lingui/core/macro";
 import type { CarpoolInfo, CarpoolOffer, CarpoolPersonRef, CarpoolRequest } from "../../shared/types";
 import { type Actor, actsFor, isCoachOfAny, parentsInChargeSql, scopePersonIds } from "../auth/actor";
 import { all, list, run } from "../lib/db";
 import { conflict } from "../lib/http";
 import { addDays, localToInstant, toLocal, todayLocal } from "../lib/time";
+import { clockTimeIn } from "../../shared/dates";
+import { currentLocale } from "../i18n";
 import { postSystemMessage } from "./chat";
 import { SHORT_NAME_SQL } from "./duties";
 import type { PersonRef } from "../../shared/types";
 import { type EventContext, type EventRow, EVENT_SELECT, eventTeams, eventTitle, loadEventContext } from "./events";
-import { notifyPersons, type PushPayload, shortDate, shortTime } from "./notify";
+import { notifyPersons, shortDate, shortTime } from "./notify";
 
-/** Höchstens so viele freie Plätze pro Fahrer. */
+/** At most this many free seats per driver. */
 export const MAX_SEATS = 8;
-/** Begleitpersonen pro Suche (Elternteile), Platzbedarf also 1 bis 3. */
+/** Companions per search (parents), so 1 to 3 seats needed. */
 export const MAX_COMPANIONS = 2;
-/** Chat-Hinweis am Vortag: ab diesen Stunden je einmal. */
+/** Chat note on the day before: once from each of these hours. */
 export const CHAT_REMINDER_HOURS = [10, 18] as const;
 
 export interface OfferRow {
@@ -33,7 +36,7 @@ export interface RequestRow {
   name: string;
 }
 
-/** Fahrgemeinschaften gibt es bei Auswärtsspielen. */
+/** Carpools exist for away games. */
 export function carpoolGame(e: EventRow): boolean {
   return e.kind === "game" && e.is_home === 0;
 }
@@ -55,8 +58,8 @@ export interface Rider {
 }
 
 /**
- * Mitfahren können Nominierte, die nicht abgesagt haben und aktiv sind, und die
- * Trainer der beteiligten Mannschaften.
+ * Passengers can be nominated players who have not declined and are active, and the
+ * coaches of the teams involved.
  */
 export async function eligibleRiders(db: D1Database, e: EventRow, ctx: EventContext): Promise<Rider[]> {
   const players: Rider[] = (ctx.participants.get(e.id) ?? [])
@@ -105,9 +108,9 @@ export function takenSeats(offerId: number, requests: RequestRow[]): number {
 }
 
 /**
- * Wer am Spiel beteiligt ist und die Fahrgemeinschaften sieht: Trainer und Admins,
- * wer selbst ein Angebot hat, und nach Veröffentlichung des Kaders Nominierte
- * und ihre zuständigen Eltern.
+ * Who is involved in the game and sees the carpools: coaches and admins, whoever
+ * has an offer, and once the squad is published the nominated players and
+ * their parents in charge.
  */
 export function mayViewCarpool(actor: Actor, e: EventRow, ctx: EventContext, offers: OfferRow[]): boolean {
   const teamIds = ctx.eventTeams.get(e.id) ?? [];
@@ -119,19 +122,19 @@ export function mayViewCarpool(actor: Actor, e: EventRow, ctx: EventContext, off
 }
 
 /**
- * Familienkonflikt: Wer fährt, sucht nicht für sich oder sein Kind, und umgekehrt.
- * driverId und playerId sind die beiden Seiten; geprüft wird die jeweils andere.
+ * Family conflict: whoever drives does not search for themselves or their child, and vice versa.
+ * driverId and playerId are the two sides; the other one is checked.
  */
-/** SQL: die Familie der Person ?2 (sie selbst, Eltern, Kinder, Geschwister). */
+/** SQL: the family of person ?2 (themselves, parents, children, siblings). */
 const FAMILY_SQL = `SELECT ?2 AS id
    UNION SELECT guardian_id FROM guardianships WHERE child_id = ?2
    UNION SELECT child_id FROM guardianships WHERE guardian_id = ?2
    UNION SELECT g2.child_id FROM guardianships g1 JOIN guardianships g2 ON g2.guardian_id = g1.guardian_id WHERE g1.child_id = ?2`;
 
 /**
- * Familienkonflikt: Fährt ein Familienmitglied (Eltern, Kinder, Geschwister), gilt die ganze Familie als versorgt.
- * Wer fährt, sucht also nicht für jemanden aus der Familie, und umgekehrt. Pro Familie gibt es höchstens eine
- * Suche; weitere Familienmitglieder fahren dort als Begleitung mit.
+ * Family conflict: if a family member (parents, children, siblings) drives, the whole family counts as covered.
+ * So whoever drives does not search for anyone in the family, and vice versa. There is at most one search
+ * per family; further family members ride along there as companions.
  */
 export async function familyConflict(
   db: D1Database,
@@ -154,8 +157,8 @@ export async function familyConflict(
 }
 
 /**
- * Fahrer, die Trainer eintragen können: Nominierte, ihre Eltern (wo Eltern
- * eingebunden sind) und die Trainer der beteiligten Mannschaften.
+ * Drivers coaches can enter: nominated players, their parents (where parents
+ * are involved) and the coaches of the teams involved.
  */
 export async function driverCandidates(db: D1Database, e: EventRow, ctx: EventContext): Promise<CarpoolPersonRef[]> {
   const teamIds = ctx.eventTeams.get(e.id) ?? [];
@@ -177,8 +180,8 @@ export async function driverCandidates(db: D1Database, e: EventRow, ctx: EventCo
 }
 
 /**
- * Kurzinfo für die Terminübersicht: belegte und angebotene Plätze, dazu wer noch sucht.
- * Nur kommende Auswärtsspiele mit mindestens einem Eintrag und nur für Beteiligte (wie die Detailansicht).
+ * Summary for the event overview: taken and offered seats, plus who is still looking.
+ * Only upcoming away games with at least one entry and only for those involved (like the detail view).
  */
 export async function loadCarpoolCounts(
   db: D1Database,
@@ -217,7 +220,7 @@ export async function loadCarpoolCounts(
   return out;
 }
 
-/** Fahrgemeinschaften für die Detailansicht; null, wenn es keine gibt oder der Account nicht beteiligt ist. */
+/** Carpools for the detail view; null if there are none or the account is not involved. */
 export async function loadCarpool(db: D1Database, actor: Actor, e: EventRow, ctx: EventContext, now: number): Promise<CarpoolInfo | null> {
   if (!carpoolGame(e)) return null;
   const { offers, requests } = await loadCarpoolRows(db, e.id);
@@ -249,10 +252,10 @@ export async function loadCarpool(db: D1Database, actor: Actor, e: EventRow, ctx
     mine: o.person_id === actor.personId,
     canEdit: open && (manage || o.person_id === actor.personId),
   }));
-  // Wer abgesagt hat oder nicht mehr nominiert ist, sucht nicht mehr (Suchen werden dabei gelöscht, das ist nur die Absicherung)
+  // Whoever declined or is no longer nominated no longer searches (searches are deleted then, this is only a safeguard)
   const waiting = requests.filter((r) => r.offer_id == null && riderIds.has(r.player_id)).map(toRequest);
-  // Fährt jemand aus der Familie (Eltern, Kinder, Geschwister), ist die Familie versorgt: keine Suche anbieten.
-  // Sucht schon jemand aus der Familie, fahren die anderen dort als Begleitung mit: keine zweite Suche.
+  // If someone in the family (parents, children, siblings) drives, the family is covered: offer no search.
+  // If someone in the family already searches, the others ride along there as companions: no second search.
   const drivers = new Set(offers.map((o) => o.person_id));
   const searchers = new Set(requests.map((r) => r.player_id));
   const links = drivers.size || searchers.size
@@ -272,7 +275,7 @@ export async function loadCarpool(db: D1Database, actor: Actor, e: EventRow, ctx
   };
   const driving = (pid: number) => familyOf(pid).some((x) => drivers.has(x));
   const othersSearch = (pid: number) => familyOf(pid).some((x) => x !== pid && searchers.has(x));
-  // Eltern der Mitfahrer mit Namen, als Begleitung zur Auswahl (nur für die eigene Familie und für Trainer)
+  // Parents of the passengers with names, to choose as companions (only for one's own family and for coaches)
   const guardianRows = await all<{ child_id: number; id: number; first_name: string; last_name: string | null }>(
     db,
     `SELECT g.child_id, p.id, p.first_name, p.last_name FROM guardianships g JOIN persons p ON p.id = g.guardian_id AND p.is_former = 0
@@ -304,7 +307,7 @@ export async function loadCarpool(db: D1Database, actor: Actor, e: EventRow, ctx
   };
 }
 
-// Benachrichtigungen ---------------------------------------------------------------
+// Notifications --------------------------------------------------------------------
 
 export interface CarpoolEvent {
   event: EventRow;
@@ -312,34 +315,45 @@ export interface CarpoolEvent {
   teamIds: number[];
 }
 
+/** "Game on Fri 2 Oct, 14:00", in the current language. */
 export function gameWhat(c: CarpoolEvent): string {
   const title = eventTitle(c.event, eventTeams(c.event, c.ctx));
-  return `${title} am ${shortDate(c.event.starts_at)}, ${shortTime(c.event.starts_at)} Uhr`;
+  const date = shortDate(c.event.starts_at);
+  const time = clockTimeIn(currentLocale(), shortTime(c.event.starts_at));
+  return t`${title} on ${date}, ${time}`;
 }
 
-function payload(c: CarpoolEvent, title: string, body: string): PushPayload {
-  return { title, body, url: `/termine/${c.event.id}`, tag: `carpool-${c.event.id}` };
+/**
+ * Push to persons (and their parents in charge), topic carpools. content builds title and body;
+ * it runs in the language of the recipients, so call gameWhat inside it.
+ */
+export async function notifyCarpool(
+  env: Env,
+  c: CarpoolEvent,
+  personIds: number[],
+  content: () => { title: string; body: string },
+  exclude: number[] = [],
+): Promise<number> {
+  return notifyPersons(env, personIds, "carpool", () => ({ ...content(), url: `/termine/${c.event.id}`, tag: `carpool-${c.event.id}` }), {
+    teamIds: c.teamIds,
+    exclude,
+  });
 }
 
-/** Push an Personen (und ihre zuständigen Eltern), Thema Fahrgemeinschaften. */
-export async function notifyCarpool(env: Env, c: CarpoolEvent, personIds: number[], title: string, body: string, exclude: number[] = []): Promise<number> {
-  return notifyPersons(env, personIds, "carpool", payload(c, title, body), { teamIds: c.teamIds, exclude });
-}
-
-/** Paar Angebot/Suche als benachrichtigt markieren; true, wenn es neu ist. */
+/** Mark an offer/search pair as notified; true if it is new. */
 async function claimMatch(db: D1Database, offerId: number, requestId: number): Promise<boolean> {
   const res = await run(db, "INSERT OR IGNORE INTO duty_notifications (kind, ref) VALUES ('carpool-match', ?)", `${offerId}:${requestId}`);
   return (res.meta.changes ?? 0) > 0;
 }
 
-/** Ohne Push markieren: Wer das Angebot schon kennt (gerade gesehen, gerade verlassen), bekommt keinen Hinweis darauf. */
+/** Mark without a push: whoever already knows the offer (just seen, just left) gets no note about it. */
 export async function suppressMatches(db: D1Database, pairs: [offerId: number, requestId: number][]): Promise<void> {
   for (const [o, r] of pairs) await claimMatch(db, o, r);
 }
 
 /**
- * Wartende, deren Platzbedarf in ein Angebot passt, bekommen einen Push.
- * Pro Paar Angebot/Suche höchstens einmal. Wer zuerst bucht, bekommt den Platz.
+ * Those waiting whose seats needed fit into an offer get a push.
+ * At most once per offer/search pair. Whoever books first gets the seat.
  */
 export async function notifyMatches(env: Env, c: CarpoolEvent, exclude: number[] = []): Promise<number> {
   if (!carpoolOpen(c.event, Date.now())) return 0;
@@ -355,12 +369,22 @@ export async function notifyMatches(env: Env, c: CarpoolEvent, exclude: number[]
       if (await claimMatch(env.DB, o.id, r.id)) best ??= o;
     }
     if (!best) continue;
+    const driver = best.name;
+    const seats = best.free;
     sent += await notifyCarpool(
       env,
       c,
       [r.player_id],
-      "Mitfahrgelegenheit frei",
-      `${best.name} hat ${best.free === 1 ? "einen freien Platz" : `${best.free} freie Plätze`}: ${gameWhat(c)}. In der App mitfahren.`,
+      () => {
+        const game = gameWhat(c);
+        return {
+          title: t`Lift available`,
+          body: plural(seats, {
+            one: `${driver} has one free seat: ${game}. Book it in the app.`,
+            other: `${driver} has # free seats: ${game}. Book it in the app.`,
+          }),
+        };
+      },
       exclude,
     );
   }
@@ -368,8 +392,8 @@ export async function notifyMatches(env: Env, c: CarpoolEvent, exclude: number[]
 }
 
 /**
- * Suchen von Spielern löschen, die abgesagt haben oder nicht mehr im Kader sind.
- * Gebuchte Fahrer erfahren es, frei gewordene Plätze gehen an Wartende.
+ * Delete searches of players who declined or are no longer in the squad.
+ * Booked drivers are told, seats that became free go to those waiting.
  */
 export async function releaseRequests(env: Env, c: CarpoolEvent, playerIds: number[], exclude: number[] = []): Promise<void> {
   if (!playerIds.length || !carpoolGame(c.event)) return;
@@ -380,7 +404,13 @@ export async function releaseRequests(env: Env, c: CarpoolEvent, playerIds: numb
   if (!carpoolOpen(c.event, Date.now())) return;
   for (const r of gone) {
     const offer = offers.find((o) => o.id === r.offer_id);
-    if (offer) await notifyCarpool(env, c, [offer.person_id], "Mitfahrt entfällt", `${riderLabel(r)} fährt nicht mit dir mit: ${gameWhat(c)}.`, exclude);
+    const rider = riderLabel(r);
+    if (offer) {
+      await notifyCarpool(env, c, [offer.person_id], () => {
+        const game = gameWhat(c);
+        return { title: t`Lift is off`, body: t`${rider} is not riding with you: ${game}.` };
+      }, exclude);
+    }
   }
   if (gone.some((r) => r.offer_id != null)) await notifyMatches(env, c, exclude);
 }
@@ -389,19 +419,19 @@ export function assertNoConflict(kind: "driving" | "searching" | null, side: "dr
   if (!kind) return;
   throw conflict(
     side === "driver"
-      ? "Für diese Familie gibt es schon eine Suche nach einer Mitfahrgelegenheit. Bitte die Suche zuerst löschen."
+      ? t`This family is already looking for a lift. Please delete the search first.`
       : kind === "driving"
-        ? "In dieser Familie fährt schon jemand. Bitte das Angebot zuerst zurückziehen."
-        : "Aus dieser Familie sucht schon jemand eine Mitfahrgelegenheit. Weitere Familienmitglieder fahren dort als Begleitung mit.",
+        ? t`Someone in this family is already driving. Please withdraw the offer first.`
+        : t`Someone in this family is already looking for a lift. Further family members ride along there as companions.`,
     "carpool_family",
   );
 }
 
-// Chat am Vortag ------------------------------------------------------------------
+// Chat on the day before ------------------------------------------------------------
 
 /**
- * Am Tag vor einem Auswärtsspiel um 10 und um 18 Uhr: Wer noch sucht, steht im
- * Mannschaftschat. Je Spiel, Mannschaft und Uhrzeit einmal, nur wenn jemand sucht.
+ * On the day before an away game at 10 am and 6 pm: who is still looking is posted in the
+ * team chat. Once per game, team and hour, only if someone is looking.
  */
 export async function sendCarpoolChatReminders(env: Env, now = Date.now()): Promise<number> {
   const hour = Number(toLocal(now).slice(11, 13));
@@ -433,23 +463,36 @@ export async function sendCarpoolChatReminders(env: Env, now = Date.now()): Prom
   return posted;
 }
 
-/** Höchstens 300 Zeichen (Grenze für Systemmeldungen im Chat). */
+/** At most 300 characters (limit for system messages in the chat). In the current language (cron: the club's). */
 export function chatText(e: EventRow, ctx: EventContext, waiting: { name: string; companions: number }[]): string {
   const title = eventTitle(e, eventTeams(e, ctx));
-  const head = `Fahrgemeinschaft für morgen, ${title} (${shortTime(e.starts_at)} Uhr): Es ${waiting.length === 1 ? "sucht" : "suchen"} noch `;
-  const tail = " eine Mitfahrgelegenheit. Wer Plätze frei hat, bitte im Termin eintragen.";
-  const names = waiting.map((r) => (r.companions ? `${r.name} (${seatsOf(r)} Plätze)` : r.name));
+  const time = clockTimeIn(currentLocale(), shortTime(e.starts_at));
+  const count = waiting.length;
+  const message = (names: string) =>
+    plural(count, {
+      one: `Carpool for tomorrow, ${title} (${time}): ${names} is still looking for a lift. If you have free seats, please add them in the event.`,
+      other: `Carpool for tomorrow, ${title} (${time}): ${names} are still looking for a lift. If you have free seats, please add them in the event.`,
+    });
+  const names = waiting.map((r) => {
+    const name = r.name;
+    const seats = seatsOf(r);
+    return r.companions ? t`${name} (${seats} seats)` : name;
+  });
   for (let shown = names.length; shown >= 1; shown--) {
     const rest = names.length - shown;
     const parts = names.slice(0, shown);
+    const list = parts.slice(0, -1).join(", ");
+    const listAll = parts.join(", ");
+    const last = parts.at(-1)!;
     const joined =
       rest > 0
-        ? `${parts.join(", ")} und ${rest} ${rest === 1 ? "weitere Person" : "weitere"}`
+        ? plural(rest, { one: `${listAll} and # other person`, other: `${listAll} and # others` })
         : parts.length > 1
-          ? `${parts.slice(0, -1).join(", ")} und ${parts.at(-1)}`
+          ? t`${list} and ${last}`
           : parts[0]!;
-    const text = head + joined + tail;
+    const text = message(joined);
     if (text.length <= 300) return text;
   }
-  return (head + `${names.length} Personen` + tail).slice(0, 300);
+  const total = names.length;
+  return message(plural(total, { one: "# person", other: "# people" })).slice(0, 300);
 }

@@ -1,3 +1,4 @@
+import { t } from "@lingui/core/macro";
 import type { ChildPermission, ChildPermissions, PersonRef, Role } from "../../shared/types";
 import { forbidden } from "../lib/http";
 import { utcIso } from "../lib/time";
@@ -7,11 +8,11 @@ export interface Membership {
   teamId: number;
   role: Role;
   helperTrainings: boolean;
-  /** In dieser Mannschaft sind Eltern eingebunden (Einstellung des Admins). */
+  /** Parents are involved in this team (admin setting). */
   parentsEnabled: boolean;
 }
 
-/** Wer handelt in dieser Anfrage, und was darf er? */
+/** Who acts in this request, and what may they do? */
 export interface Actor {
   session: SessionRow;
   accountId: number;
@@ -19,23 +20,23 @@ export interface Actor {
   firstName: string;
   lastName: string | null;
   isAdmin: boolean;
-  /** Verknüpfte Kinder. Für welche Mannschaften die Eltern zuständig sind, steht in childMemberships. */
+  /** Linked children. The teams the parents are in charge for are in childMemberships. */
   children: PersonRef[];
-  /** Diese Person ist ein Kind mit mindestens einem verknüpften Elternteil. */
+  /** This person is a child with at least one linked parent. */
   hasGuardians: boolean;
-  /** Freigaben der Eltern. Sie gelten nur in Mannschaften, in denen Eltern eingebunden sind. */
+  /** Permissions granted by the parents. They apply only in teams where parents are involved. */
   permissions: ChildPermissions;
   memberships: Membership[];
-  /** Mannschaften der verknüpften Kinder. */
+  /** Teams of the linked children. */
   childMemberships: Map<number, Membership[]>;
   coachTeamIds: number[];
-  /** Nur für Admins: App aus einer anderen Sicht ansehen (siehe worker/auth/view-as.ts). */
+  /** Admins only: view the app from another perspective (see worker/auth/view-as.ts). */
   viewAs?: ViewMode;
-  /** In dieser Sicht darf nichts geändert werden (fremde Person). */
+  /** Nothing may be changed in this view (another person). */
   readOnly?: boolean;
-  /** Admin-Sicht „referee“: zählt als KiHaSL/JuHaSL, ohne Eintrag in referees. */
+  /** Admin view "referee": counts as KiHaSL/JuHaSL without an entry in referees. */
   refereeOverride?: boolean;
-  /** Admin arbeitet als Trainer (accounts.coach_mode): Admin-Rechte ruhen, Schalter im Profil. */
+  /** Admin works as a coach (accounts.coach_mode): admin rights are suspended, switch in the profile. */
   adminSuspended?: boolean;
   /** Language chosen on the account (null: app or club default). */
   locale?: string | null;
@@ -78,12 +79,12 @@ export async function loadActor(db: D1Database, session: SessionRow): Promise<Ac
     .bind(session.account_id)
     .first<ActorRow & { coach_mode: number; locale: string | null }>();
   if (!row) return null;
-  // Admin im Trainer-Modus: Rechte wie ein Trainer, auch auf dem Server
+  // Admin in coach mode: rights like a coach, on the server too
   if (row.is_admin === 1 && row.coach_mode === 1) return { ...(await buildActor(db, session, { ...row, is_admin: 0 })), adminSuspended: true, locale: row.locale };
   return { ...(await buildActor(db, session, row)), locale: row.locale };
 }
 
-/** Actor für eine Person; die Ansichten für Admins nutzen das mit einer anderen Person. */
+/** Actor for a person; the admin views use this with another person. */
 export async function buildActor(db: D1Database, session: SessionRow, row: ActorRow): Promise<Actor> {
   const [children, perms, memberships] = await db.batch([
     db
@@ -150,21 +151,21 @@ export async function buildActor(db: D1Database, session: SessionRow, row: Actor
   };
 }
 
-/** Eigene Person und alle Kinder. */
+/** Own person and all children. */
 export function scopePersonIds(actor: Actor): number[] {
   return [actor.personId, ...actor.children.map((c) => c.id)];
 }
 
-/** Mannschaften der eigenen Person oder eines verknüpften Kindes. */
+/** Teams of the own person or of a linked child. */
 export function membershipsOf(actor: Actor, personId: number): Membership[] {
   return personId === actor.personId ? actor.memberships : (actor.childMemberships.get(personId) ?? []);
 }
 
 /**
- * Sind Eltern für diese Person zuständig? Bei einem Termin zählen die
- * Mannschaften des Termins, in denen die Person Mitglied ist. Ist sie dort
- * nicht Mitglied (Aushilfe) oder fehlt der Mannschaftsbezug, zählen alle
- * ihre Mannschaften: Eine Mannschaft mit Eltern reicht.
+ * Are parents in charge for this person? For an event, the event's teams in
+ * which the person is a member count. If the person is not a member there
+ * (stand-in) or there is no team context, all their teams count: one team
+ * with parents is enough.
  */
 export function parentsInCharge(actor: Actor, personId: number, teamIds?: readonly number[]): boolean {
   const own = membershipsOf(actor, personId);
@@ -173,9 +174,9 @@ export function parentsInCharge(actor: Actor, personId: number, teamIds?: readon
 }
 
 /**
- * Dieselbe Regel als SQL-Ausdruck. person ist ein Ausdruck für die Personen-ID,
- * teamSet eine Unterabfrage mit den Mannschaften des Kontexts (leer: alle
- * Mannschaften der Person zählen).
+ * The same rule as an SQL expression. person is an expression for the person ID,
+ * teamSet a subquery with the teams of the context (empty: all teams of the
+ * person count).
  */
 export function parentsInChargeSql(person: string, teamSet: string): string {
   return `(CASE
@@ -187,7 +188,7 @@ export function parentsInChargeSql(person: string, teamSet: string): string {
   END)`;
 }
 
-/** Handelt der Account für diese Person (selbst oder als zuständiges Elternteil)? */
+/** Does the account act for this person (themselves or as a parent in charge)? */
 export function actsFor(actor: Actor, personId: number, teamIds?: readonly number[]): boolean {
   if (personId === actor.personId) return true;
   return actor.children.some((c) => c.id === personId) && parentsInCharge(actor, personId, teamIds);
@@ -202,26 +203,26 @@ export function isCoachOfAny(actor: Actor, teamIds: readonly number[]): boolean 
 }
 
 export function requireCoach(actor: Actor, teamId: number): void {
-  if (!isCoachOf(actor, teamId)) throw forbidden("Das dürfen nur Trainer dieser Mannschaft.");
+  if (!isCoachOf(actor, teamId)) throw forbidden(t`Only coaches of this team may do this.`);
 }
 
 export function requireAdmin(actor: Actor): void {
-  if (!actor.isAdmin) throw forbidden("Das dürfen nur Admins.");
+  if (!actor.isAdmin) throw forbidden(t`Only admins may do this.`);
 }
 
-export const PARENTS_HANDLE_IT = "Deine Eltern kümmern sich darum.";
+export const PARENTS_HANDLE_IT = () => t`Your parents take care of this.`;
 
-export const PARENTS_NOT_INVOLVED = "In dieser Mannschaft sind keine Eltern eingebunden.";
+export const PARENTS_NOT_INVOLVED = () => t`Parents are not involved in this team.`;
 
-/** Gelten für die eigene Person gerade die Freigaben der Eltern? */
+/** Do the parents' permissions currently apply to the own person? */
 function restrictedBy(actor: Actor, permission: ChildPermission | undefined, teamIds?: readonly number[]): boolean {
   return !!permission && actor.hasGuardians && !actor.permissions[permission] && parentsInCharge(actor, actor.personId, teamIds);
 }
 
 /**
- * Darf der Account für diese Person handeln? Eltern nur in Mannschaften, in
- * denen Eltern eingebunden sind. Handelt ein Kind für sich selbst, gelten dort
- * zusätzlich die elterlichen Freigaben.
+ * May the account act for this person? Parents only in teams where parents
+ * are involved. When a child acts for themselves, the parents' permissions
+ * apply there as well.
  */
 export function mayActFor(actor: Actor, personId: number, permission?: ChildPermission, teamIds?: readonly number[]): boolean {
   if (!actsFor(actor, personId, teamIds)) return false;
@@ -230,10 +231,10 @@ export function mayActFor(actor: Actor, personId: number, permission?: ChildPerm
 
 export function requireActFor(actor: Actor, personId: number, permission?: ChildPermission, teamIds?: readonly number[]): void {
   if (personId !== actor.personId && actor.children.some((c) => c.id === personId) && !parentsInCharge(actor, personId, teamIds)) {
-    throw forbidden(PARENTS_NOT_INVOLVED);
+    throw forbidden(PARENTS_NOT_INVOLVED());
   }
-  if (!actsFor(actor, personId, teamIds)) throw forbidden("Du kannst nur für dich oder deine Kinder handeln.");
-  if (personId === actor.personId && restrictedBy(actor, permission, teamIds)) throw forbidden(PARENTS_HANDLE_IT);
+  if (!actsFor(actor, personId, teamIds)) throw forbidden(t`You can only act for yourself or your children.`);
+  if (personId === actor.personId && restrictedBy(actor, permission, teamIds)) throw forbidden(PARENTS_HANDLE_IT());
 }
 
 export function nowIso(): string {

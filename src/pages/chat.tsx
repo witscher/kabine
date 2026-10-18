@@ -1,3 +1,5 @@
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 import { useLocation } from "preact-iso";
 import { useEffect, useLayoutEffect, useRef, useState } from "preact/hooks";
 import { api } from "../api";
@@ -13,7 +15,7 @@ import { Button, Empty, ErrorBox, Notice, Sheet, Spinner, toast, TopBar, useDocu
 interface Room {
   teamId: number;
   teamName: string;
-  /** Gruppe (nur Chat und Sondertermine) statt Mannschaft. */
+  /** Group (chat and special events only) instead of a team. */
   isGroup: boolean;
   canRead: boolean;
   canWrite: boolean;
@@ -26,7 +28,7 @@ interface Room {
   reason: string | null;
   lastMessageAt: string | null;
   unread: boolean;
-  /** Nur als Admin sichtbar, erscheint nur unter "Alle Chats". */
+  /** Only visible as admin, appears only under "All chats". */
   adminOnly: boolean;
 }
 
@@ -52,24 +54,29 @@ interface Reaction {
   mine: boolean;
 }
 
-/** Wie auf dem Server (worker/chat/room.ts), mit Bezeichnung für Screenreader. */
-const REACTIONS: { emoji: string; label: string }[] = [
-  { emoji: "👍", label: "Daumen hoch" },
-  { emoji: "❤️", label: "Herz" },
-  { emoji: "😂", label: "Lachen" },
-  { emoji: "😢", label: "Traurig" },
-  { emoji: "👋", label: "Winken" },
+/** As on the server (worker/chat/room.ts), with a label for screen readers. */
+const reactionOptions = (): { emoji: string; label: string }[] => [
+  { emoji: "👍", label: t`Thumbs up` },
+  { emoji: "❤️", label: t`Heart` },
+  { emoji: "😂", label: t`Laughing` },
+  { emoji: "😢", label: t`Sad` },
+  { emoji: "👋", label: t`Waving` },
 ];
+
+/** "A and B and C" */
+function joinAnd(names: string[]): string {
+  return names.length ? names.reduce((first, next) => t`${first} and ${next}`) : "";
+}
 
 interface Mentionable {
   personId: number;
   name: string;
 }
 
-/** @alle für Trainer und Admins, Personen-ID 0 wie auf dem Server. */
+/** @alle for coaches and admins, person ID 0 as on the server. The name is part of the message text, so it is not translated. */
 const ALL: Mentionable = { personId: 0, name: "alle" };
 
-/** "@Teil" direkt vor dem Cursor, wenn gerade ein Name getippt wird. */
+/** "@part" right before the cursor while a name is being typed. */
 function mentionQuery(text: string, caret: number): { start: number; query: string } | null {
   const before = text.slice(0, caret);
   const at = before.lastIndexOf("@");
@@ -83,7 +90,7 @@ function escapeRegExp(s: string) {
   return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-/** Text mit hervorgehobenen @Namen. */
+/** Text with highlighted @names. */
 function MessageText({ text, names }: { text: string; names: string[] }) {
   if (!names.length) return <>{text}</>;
   const pattern = new RegExp(`(@(?:${names.map(escapeRegExp).join("|")}))`, "g");
@@ -92,8 +99,8 @@ function MessageText({ text, names }: { text: string; names: string[] }) {
 
 function ReactionPicker({ current, onPick }: { current: string | null; onPick: (emoji: string) => void }) {
   return (
-    <div class="reaction-picker" role="group" aria-label="Reaktion wählen">
-      {REACTIONS.map((r) => (
+    <div class="reaction-picker" role="group" aria-label={t`Choose reaction`}>
+      {reactionOptions().map((r) => (
         <button type="button" aria-label={r.label} aria-pressed={current === r.emoji ? "true" : "false"} onClick={() => onPick(r.emoji)}>
           {r.emoji}
         </button>
@@ -104,13 +111,10 @@ function ReactionPicker({ current, onPick }: { current: string | null; onPick: (
 
 function ReactionChips({ reactions, onOpen }: { reactions: Reaction[]; onOpen: () => void }) {
   if (!reactions.length) return null;
+  const options = reactionOptions();
+  const list = reactions.map((r) => `${options.find((x) => x.emoji === r.emoji)?.label ?? r.emoji} ${r.names.length}`).join(", ");
   return (
-    <button
-      type="button"
-      class="reactions"
-      onClick={onOpen}
-      aria-label={`Reaktionen: ${reactions.map((r) => `${REACTIONS.find((x) => x.emoji === r.emoji)?.label ?? r.emoji} ${r.names.length}`).join(", ")}. Wer hat reagiert?`}
-    >
+    <button type="button" class="reactions" onClick={onOpen} aria-label={t`Reactions: ${list}. Who reacted?`}>
       {reactions.map((r) => (
         <span class={`reaction ${r.mine ? "mine" : ""}`}>
           {r.emoji}
@@ -122,9 +126,9 @@ function ReactionChips({ reactions, onOpen }: { reactions: Reaction[]; onOpen: (
 }
 
 export function ChatListPage() {
-  useDocumentTitle("Chat");
+  useDocumentTitle(t`Chat`);
   const { route, query } = useLocation();
-  // Admins: alle Mannschaftschats über die Verwaltung, sonst nur die eigenen
+  // Admins: all team chats via the administration, otherwise only one's own
   const showAll = "alle" in query;
   const { data, error, loading, reload } = useQuery<{ rooms: Room[] }>("/chat/rooms");
   const rooms = (data?.rooms ?? []).filter((r) => showAll || !r.adminOnly);
@@ -133,39 +137,54 @@ export function ChatListPage() {
   }, [data]);
   return (
     <main class="page">
-      <TopBar title={showAll ? "Alle Chats" : "Chat"} kicker={showAll ? "Verwaltung" : "Mannschaften"} back={showAll ? "/verwaltung" : undefined} />
+      <TopBar title={showAll ? t`All chats` : t`Chat`} kicker={showAll ? t`Administration` : t`Teams`} back={showAll ? "/verwaltung" : undefined} />
       <div class="content">
         {error ? <ErrorBox error={error} onRetry={reload} /> : null}
         {loading ? <Spinner /> : null}
         {data && !rooms.length ? (
-          <Empty title="Noch kein Chat" icon="chat">
-            Sobald du zu einer Mannschaft gehörst, findest du hier ihren Chat.
+          <Empty title={t`No chat yet`} icon="chat">
+            <Trans>As soon as you belong to a team, you will find its chat here.</Trans>
           </Empty>
         ) : null}
         {rooms.length ? (
           <ul class="list">
-            {rooms.map((r) => (
+            {rooms.map((r) => {
+              const teamName = r.teamName;
+              const children = joinAnd(r.viaChildren);
+              const when = ago(r.lastMessageAt);
+              return (
               <li>
                 <a class="list-row" href={`/chat/${r.teamId}`}>
                   <span class="team-badge" style={{ minWidth: "44px", textAlign: "center" }}>
                     {r.teamName}
                   </span>
                   <span class="main">
-                    <span class="title">{r.isGroup ? "Gruppenchat" : "Mannschaftschat"} {r.teamName}</span>
+                    <span class="title">{r.isGroup ? t`Group chat ${teamName}` : t`Team chat ${teamName}`}</span>
                     <span class="sub">
                       {r.reason ??
-                        (r.viaChildren.length && !r.isMember ? `als Elternteil von ${r.viaChildren.join(" und ")}` : showAll && r.adminOnly ? `als Admin${r.lastMessageAt ? ` · letzte Nachricht ${ago(r.lastMessageAt)}` : ""}` : r.lastMessageAt ? `Letzte Nachricht ${ago(r.lastMessageAt)}` : "Noch keine Nachrichten")}
+                        (r.viaChildren.length && !r.isMember
+                          ? t`as parent of ${children}`
+                          : showAll && r.adminOnly
+                            ? r.lastMessageAt
+                              ? t`as admin · last message ${when}`
+                              : t`as admin`
+                            : r.lastMessageAt
+                              ? t`Last message ${when}`
+                              : t`No messages yet`)}
                     </span>
                   </span>
                   {r.unread ? (
                     <span class="pill pill-nominated">
-                      neu<span class="sr-only"> (ungelesene Nachrichten)</span>
+                      <Trans>
+                        new<span class="sr-only"> (unread messages)</span>
+                      </Trans>
                     </span>
                   ) : null}
                   <Icon name="chevron" size={18} />
                 </a>
               </li>
-            ))}
+              );
+            })}
           </ul>
         ) : null}
       </div>
@@ -175,13 +194,13 @@ export function ChatListPage() {
 
 type Conn = "connecting" | "open" | "closed";
 
-/** So lange darf der Verbindungsaufbau bis zur Begrüßung des Servers dauern. */
+/** How long connecting may take until the server's greeting. */
 const HELLO_TIMEOUT_MS = 8000;
 
 /**
- * iOS: Die Tastatur verkleinert nur den sichtbaren Bereich (visualViewport), nicht 100dvh. Das
- * Eingabefeld unten landete dann hinter Tastatur und Eingabeleiste von Safari. Solange die Tastatur
- * offen ist, liegt der Chat deshalb fest genau über dem sichtbaren Bereich.
+ * iOS: the keyboard only shrinks the visible area (visualViewport), not 100dvh. The input field at
+ * the bottom then ended up behind the keyboard and Safari's input bar. So while the keyboard is
+ * open, the chat is fixed exactly over the visible area.
  */
 function useKeyboardFit(pageRef: { current: HTMLElement | null }, logRef: { current: HTMLElement | null }) {
   useEffect(() => {
@@ -189,7 +208,7 @@ function useKeyboardFit(pageRef: { current: HTMLElement | null }, logRef: { curr
     if (!vv) return;
     let fitted = false;
     const update = () => {
-      // Die Seite kann erst nach dem Laden des Raums gerendert sein
+      // The page may only be rendered after the room has loaded
       const el = pageRef.current;
       if (!el) return;
       const keyboard = window.innerHeight - vv.height > 120;
@@ -221,7 +240,8 @@ export function ChatRoomPage({ teamId }: { teamId: string }) {
   const me = useMe();
   const rooms = useQuery<{ rooms: Room[] }>("/chat/rooms");
   const room = rooms.data?.rooms.find((r) => String(r.teamId) === teamId) ?? null;
-  useDocumentTitle(room ? `Chat ${room.teamName}` : "Chat");
+  const roomTeam = room?.teamName ?? "";
+  useDocumentTitle(room ? t`Chat ${roomTeam}` : t`Chat`);
   const [messages, setMessages] = useState<Message[]>([]);
   const [hasMore, setHasMore] = useState(false);
   const [state, setState] = useState<{ canWrite: boolean; isMod: boolean; muted: boolean }>({ canWrite: false, isMod: false, muted: false });
@@ -254,7 +274,7 @@ export function ChatRoomPage({ teamId }: { teamId: string }) {
     if (last && last.id > lastRead.current && document.visibilityState === "visible") {
       lastRead.current = last.id;
       send({ type: "read", id: last.id });
-      // Gelesene Erwähnungen verschwinden aus der Zahl am App-Icon
+      // Read mentions disappear from the number on the app icon
       refreshBadge(1500);
     }
   };
@@ -267,7 +287,7 @@ export function ChatRoomPage({ teamId }: { teamId: string }) {
       setConn("connecting");
       const socket = new WebSocket(`${location.protocol === "https:" ? "wss" : "ws"}://${location.host}/api/chat/${teamId}/connect`);
       ws.current = socket;
-      // Hängt der Aufbau (schlechter Empfang), kommt nie ein close. Dann selbst neu verbinden.
+      // If connecting hangs (poor reception), no close ever comes. Then reconnect ourselves.
       const helloTimeout = window.setTimeout(() => socket.close(), HELLO_TIMEOUT_MS);
       socket.onopen = () => {
         retry.current = 0;
@@ -277,7 +297,7 @@ export function ChatRoomPage({ teamId }: { teamId: string }) {
         switch (msg.type) {
           case "hello":
             window.clearTimeout(helloTimeout);
-            // Erst mit der Begrüßung stehen die Schreibrechte fest, vorher ginge ein Senden verloren
+            // Write permissions are only known with the greeting, sending earlier would be lost
             setConn("open");
             setState(msg.me);
             setMentionable(msg.mentionable ?? []);
@@ -289,7 +309,7 @@ export function ChatRoomPage({ teamId }: { teamId: string }) {
             setTimeout(() => markRead(msg.messages), 0);
             break;
           case "message":
-            // Wer schreibt, kann ab jetzt erwähnt werden
+            // Whoever writes can be mentioned from now on
             if (msg.message.authorId && msg.message.authorName && !msg.message.isFormer) {
               setMentionable((list) =>
                 list.some((m) => m.personId === msg.message.authorId) ? list : [...list, { personId: msg.message.authorId, name: msg.message.authorName }],
@@ -336,9 +356,9 @@ export function ChatRoomPage({ teamId }: { teamId: string }) {
         setConn("closed");
         if (!alive.current) return;
         if (ev.code === 4003) {
-          // Kein Zugriff mehr, z. B. weil die Mannschaft ohne Eltern geführt wird
+          // No access any more, e.g. because the team is run without parents
           setMessages([]);
-          toast(ev.reason || "Du hast keinen Zugriff mehr auf diesen Chat.", "error");
+          toast(ev.reason || t`You no longer have access to this chat.`, "error");
           invalidate("/chat/rooms");
           return;
         }
@@ -370,7 +390,7 @@ export function ChatRoomPage({ teamId }: { teamId: string }) {
     };
   }, [room?.canRead, teamId]);
 
-  // Offline: den zuletzt gesehenen Verlauf zeigen, bis die Verbindung steht
+  // Offline: show the last seen history until the connection is up
   useEffect(() => {
     if (!room?.canRead) return;
     let cancelled = false;
@@ -384,7 +404,7 @@ export function ChatRoomPage({ teamId }: { teamId: string }) {
     };
   }, [room?.canRead, teamId]);
 
-  // Sofort speichern: Wer den Chat gleich wieder verlässt, soll ihn trotzdem offline haben
+  // Save immediately: whoever leaves the chat right away should still have it offline
   useEffect(() => {
     if (conn !== "open" || !ready) return;
     void saveOffline(`chat-${teamId}`, messages.filter((m) => !m.pending).slice(-100));
@@ -399,19 +419,23 @@ export function ChatRoomPage({ teamId }: { teamId: string }) {
   if (!room) {
     return (
       <main class="page">
-        <TopBar title="Chat" back="/chat" />
+        <TopBar title={t`Chat`} back="/chat" />
         <div class="content">
-          <Notice kind="warn">Diesen Chat gibt es nicht oder du hast keinen Zugriff.</Notice>
+          <Notice kind="warn">
+            <Trans>This chat does not exist or you have no access.</Trans>
+          </Notice>
         </div>
       </main>
     );
   }
 
+  const teamName = room.teamName;
+
   const parentOnly = room.viaChildren.length > 0 && !room.isMember && !room.isMod;
 
   const header = (
     <header class="topbar" style={{ gap: "12px" }}>
-      <a class="icon-btn" href="/chat" aria-label="Zurück zur Chatliste" onClick={(e) => {
+      <a class="icon-btn" href="/chat" aria-label={t`Back to the chat list`} onClick={(e) => {
         e.preventDefault();
         if (history.length > 1) history.back();
         else location.assign("/chat");
@@ -423,23 +447,23 @@ export function ChatRoomPage({ teamId }: { teamId: string }) {
         style={{ width: "44px", height: "44px", fontSize: room.teamName.length > 3 ? "14px" : "18px", borderRadius: "12px", flexShrink: 0 }}
         aria-hidden="true"
       >
-        {/* Lange Namen (z. B. KiHaSL/JuHaSL) passen nicht in das Feld */}
+        {/* Long names (e.g. KiHaSL/JuHaSL) don't fit into the box */}
         {room.teamName.length > 5 ? <Icon name="chat" size={22} /> : room.teamName}
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
-        <h1 style={{ fontSize: "24px" }}>{room.isGroup ? "Gruppenchat" : "Mannschaftschat"}</h1>
+        <h1 style={{ fontSize: "24px" }}>{room.isGroup ? t`Group chat` : t`Team chat`}</h1>
         <div style={{ fontSize: "13px", color: "var(--on-dark-2)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
           {conn === "open"
             ? room.isGroup
               ? room.teamName
-              : "Spielerinnen, Trainer und Eltern"
+              : t`Players, coaches and parents`
             : conn === "connecting"
-              ? "Verbinde …"
-              : "Offline – verbinde neu …"}
+              ? t`Connecting …`
+              : t`Offline – reconnecting …`}
         </div>
       </div>
       {parentOnly ? (
-        <button type="button" class="icon-btn" aria-label="Chat-Einstellungen" onClick={() => setMenuOpen(true)}>
+        <button type="button" class="icon-btn" aria-label={t`Chat settings`} onClick={() => setMenuOpen(true)}>
           <Icon name="more" size={22} />
         </button>
       ) : null}
@@ -458,10 +482,10 @@ export function ChatRoomPage({ teamId }: { teamId: string }) {
               onClick={async () => {
                 await api.put(`/chat/${room.teamId}/optout`, { optedOut: false });
                 await rooms.reload();
-                toast("Du bist wieder im Chat angemeldet.");
+                toast(t`You have rejoined the chat.`);
               }}
             >
-              Wieder anmelden
+              <Trans>Rejoin</Trans>
             </Button>
           ) : null}
         </div>
@@ -473,7 +497,7 @@ export function ChatRoomPage({ teamId }: { teamId: string }) {
     const value = text.trim();
     if (!value || !state.canWrite) return;
     if (ws.current?.readyState !== WebSocket.OPEN) {
-      toast("Keine Verbindung. Die Nachricht wurde nicht gesendet.", "error");
+      toast(t`No connection. The message was not sent.`, "error");
       return;
     }
     const clientId = `c${Date.now()}`;
@@ -482,7 +506,7 @@ export function ChatRoomPage({ teamId }: { teamId: string }) {
       ...list,
       { id: Number.MAX_SAFE_INTEGER - list.length, kind: "user", authorId: me.person.id, authorName: me.person.firstName, authorLabel: null, isFormer: false, text: value, createdAt: new Date().toISOString(), deleted: false, pending: clientId },
     ]);
-    // Nur Erwähnungen, deren @Name noch im Text steht
+    // Only mentions whose @name is still in the text
     const used = [...chosen.current].filter(([name]) => value.includes(`@${name}`)).map(([, id]) => id);
     const mentions = used.filter((id) => id !== ALL.personId);
     const mentionAll = state.isMod && used.includes(ALL.personId);
@@ -504,7 +528,7 @@ export function ChatRoomPage({ teamId }: { teamId: string }) {
     const next = `${text.slice(0, query.start)}@${m.name} ${text.slice(caret)}`;
     chosen.current.set(m.name, m.personId);
     const pos = query.start + m.name.length + 2;
-    // Sofort ins Feld schreiben: wer gleich weitertippt, soll nicht im alten Text landen
+    // Write into the field immediately: whoever keeps typing should not end up in the old text
     const el = inputRef.current;
     if (el) {
       el.value = next;
@@ -515,6 +539,9 @@ export function ChatRoomPage({ teamId }: { teamId: string }) {
     setCaret(pos);
   };
 
+  const parentOf = joinAnd(room.viaChildren);
+  const selAuthor = selected?.authorName ?? "";
+  const excerpt = (selected?.text ?? "").slice(0, 120);
   let lastDay = "";
   return (
     <main class="chat-page" ref={pageRef}>
@@ -523,21 +550,21 @@ export function ChatRoomPage({ teamId }: { teamId: string }) {
         class="chat-log"
         ref={logRef}
         aria-live="polite"
-        aria-label="Nachrichten"
+        aria-label={t`Messages`}
         onScroll={(e) => {
           const el = e.currentTarget as HTMLDivElement;
           stickToBottom.current = el.scrollHeight - el.scrollTop - el.clientHeight < 80;
         }}
       >
-        {!ready ? <Spinner label="Nachrichten werden geladen" /> : null}
+        {!ready ? <Spinner label={t`Loading messages`} /> : null}
         {hasMore ? (
           <button type="button" class="btn btn-sm btn-ghost" style={{ alignSelf: "center" }} onClick={() => send({ type: "history", before: messages[0]?.id })}>
-            Ältere Nachrichten laden
+            <Trans>Load older messages</Trans>
           </button>
         ) : null}
         {ready && !messages.length ? (
-          <Empty title="Noch keine Nachrichten" icon="chat">
-            {room.isGroup ? `Schreib die erste Nachricht an die Gruppe ${room.teamName}.` : `Schreib die erste Nachricht an die ${room.teamName}.`}
+          <Empty title={t`No messages yet`} icon="chat">
+            {room.isGroup ? t`Write the first message to the group ${teamName}.` : t`Write the first message to ${teamName}.`}
           </Empty>
         ) : null}
         {messages.map((m) => {
@@ -557,6 +584,7 @@ export function ChatRoomPage({ teamId }: { teamId: string }) {
           }
           const mine = m.authorId === me.person.id;
           const isCoach = m.authorLabel === "Coach";
+          const author = m.authorName ?? "";
           if (m.kind === "announcement") {
             const reactionsA = m.reactions ?? [];
             const myA = reactionsA.find((r) => r.mine)?.emoji ?? null;
@@ -566,15 +594,15 @@ export function ChatRoomPage({ teamId }: { teamId: string }) {
                 {sep}
                 <div class="announcement">
                   {state.isMod && !m.deleted ? (
-                    <button type="button" class="announcement-head" onClick={() => setSelected(m)} aria-label={`Ankündigung von ${m.authorName}, Optionen`}>
-                      <Icon name="bell" size={16} /> Ankündigung · {m.authorName}
+                    <button type="button" class="announcement-head" onClick={() => setSelected(m)} aria-label={t`Announcement from ${author}, options`}>
+                      <Icon name="bell" size={16} /> {t`Announcement · ${author}`}
                     </button>
                   ) : (
                     <div class="announcement-head">
-                      <Icon name="bell" size={16} /> Ankündigung · {m.authorName}
+                      <Icon name="bell" size={16} /> {t`Announcement · ${author}`}
                     </div>
                   )}
-                  <div class="text">{m.deleted ? "Ankündigung wurde entfernt" : m.text}</div>
+                  <div class="text">{m.deleted ? t`Announcement was removed` : m.text}</div>
                   <div class="announcement-foot">
                     <ReactionChips reactions={reactionsA} onOpen={() => setWhoFor(m)} />
                     <span class="time">{clock(m.createdAt)}</span>
@@ -582,7 +610,7 @@ export function ChatRoomPage({ teamId }: { teamId: string }) {
                       <button
                         type="button"
                         class="react-btn"
-                        aria-label={picking === m.id ? "Reaktionen schließen" : `Auf Ankündigung von ${m.authorName} reagieren`}
+                        aria-label={picking === m.id ? t`Close reactions` : t`React to announcement from ${author}`}
                         aria-expanded={picking === m.id ? "true" : "false"}
                         onClick={() => setPicking(picking === m.id ? null : m.id)}
                       >
@@ -608,12 +636,12 @@ export function ChatRoomPage({ teamId }: { teamId: string }) {
               {!mine ? (
                 <div class="who">
                   <span class={`name ${m.isFormer ? "former" : ""}`}>{m.authorName}</span>
-                  {isCoach ? <span class="badge">Coach</span> : m.authorLabel ? <span class="role">{m.authorLabel}</span> : null}
+                  {isCoach ? <span class="badge">{t({ message: "Coach", context: "chat badge" })}</span> : m.authorLabel ? <span class="role">{m.authorLabel}</span> : null}
                 </div>
               ) : null}
               <div class="text">
                 {m.deleted ? (
-                  "Nachricht wurde von einem Trainer entfernt"
+                  t`Message was removed by a coach`
                 ) : (
                   <MessageText
                     text={m.text ?? ""}
@@ -621,11 +649,11 @@ export function ChatRoomPage({ teamId }: { teamId: string }) {
                   />
                 )}
               </div>
-              <div class="time">{m.pending ? "wird gesendet …" : clock(m.createdAt)}</div>
+              <div class="time">{m.pending ? t`sending …` : clock(m.createdAt)}</div>
             </>
           );
           const mentioned = !mine && (!!m.mentionAll || (m.mentions ?? []).some((id) => forMe.has(id)));
-          // Auf eigene Nachrichten reagiert man nicht, Ehemalige und System bleiben außen vor
+          // No reactions to one's own messages; former members and system messages are left out
           const canReact = state.canWrite && conn === "open" && !mine && !m.deleted && !m.pending && m.authorId != null;
           const reactions = m.reactions ?? [];
           const myReaction = reactions.find((r) => r.mine)?.emoji ?? null;
@@ -640,7 +668,7 @@ export function ChatRoomPage({ teamId }: { teamId: string }) {
                 {!mine ? <PersonAvatar personId={m.authorId} name={m.authorName ?? "?"} coach={isCoach} /> : null}
                 <div class="msg-body">
                   {state.isMod && !m.deleted && !m.pending ? (
-                    <button type="button" class={`bubble ${m.deleted ? "deleted" : ""}`} onClick={() => setSelected(m)} aria-label={`Nachricht von ${m.authorName}, Optionen`}>
+                    <button type="button" class={`bubble ${m.deleted ? "deleted" : ""}`} onClick={() => setSelected(m)} aria-label={t`Message from ${author}, options`}>
                       {bubble}
                     </button>
                   ) : (
@@ -653,7 +681,7 @@ export function ChatRoomPage({ teamId }: { teamId: string }) {
                   <button
                     type="button"
                     class="react-btn"
-                    aria-label={picking === m.id ? "Reaktionen schließen" : `Auf Nachricht von ${m.authorName} reagieren`}
+                    aria-label={picking === m.id ? t`Close reactions` : t`React to message from ${author}`}
                     aria-expanded={picking === m.id ? "true" : "false"}
                     onClick={() => setPicking(picking === m.id ? null : m.id)}
                   >
@@ -674,7 +702,7 @@ export function ChatRoomPage({ teamId }: { teamId: string }) {
           }}
         >
           {suggestions.length ? (
-            <ul class="mention-suggest" role="listbox" aria-label="Personen erwähnen">
+            <ul class="mention-suggest" role="listbox" aria-label={t`Mention people`}>
               {suggestions.map((m) => (
                 <li>
                   <button type="button" role="option" aria-selected="false" onMouseDown={(e) => e.preventDefault()} onClick={() => pickMention(m)}>
@@ -684,7 +712,7 @@ export function ChatRoomPage({ teamId }: { teamId: string }) {
                           @
                         </span>
                         <span>
-                          alle <span class="small muted">· alle im Chat benachrichtigen</span>
+                          {ALL.name} <span class="small muted">· {t`notify everyone in the chat`}</span>
                         </span>
                       </>
                     ) : (
@@ -699,7 +727,7 @@ export function ChatRoomPage({ teamId }: { teamId: string }) {
             </ul>
           ) : null}
           <label for="chat-input" class="sr-only">
-            Nachricht schreiben
+            <Trans>Write a message</Trans>
           </label>
           <textarea
             id="chat-input"
@@ -709,7 +737,7 @@ export function ChatRoomPage({ teamId }: { teamId: string }) {
             onKeyUp={(e) => setCaret((e.target as HTMLTextAreaElement).selectionStart ?? 0)}
             onClick={(e) => setCaret((e.target as HTMLTextAreaElement).selectionStart ?? 0)}
             maxLength={2000}
-            placeholder={`Nachricht an ${room.teamName}`}
+            placeholder={t`Message to ${teamName}`}
             onInput={(e) => {
               const el = e.target as HTMLTextAreaElement;
               setText(el.value);
@@ -729,22 +757,24 @@ export function ChatRoomPage({ teamId }: { teamId: string }) {
               }
             }}
           />
-          <button type="submit" class="send-btn" aria-label="Senden" disabled={!text.trim() || conn !== "open"}>
+          <button type="submit" class="send-btn" aria-label={t`Send`} disabled={!text.trim() || conn !== "open"}>
             <Icon name="send" size={20} stroke={2.2} />
           </button>
         </form>
       ) : (
         <div class="composer" style={{ justifyContent: "center" }}>
           <p class="small muted" style={{ textAlign: "center" }}>
-            {state.muted ? "Du wurdest in diesem Chat stummgeschaltet." : (room.reason ?? "Du kannst in diesem Chat nur lesen.")}
+            {state.muted ? t`You have been muted in this chat.` : (room.reason ?? t`You can only read in this chat.`)}
           </p>
         </div>
       )}
 
       {selected ? (
-        <Sheet open onClose={() => setSelected(null)} title="Moderation">
+        <Sheet open onClose={() => setSelected(null)} title={t`Moderation`}>
           <p class="muted">
-            Nachricht von {selected.authorName}: „{(selected.text ?? "").slice(0, 120)}“
+            <Trans>
+              Message from {selAuthor}: “{excerpt}”
+            </Trans>
           </p>
           <Button
             variant="danger"
@@ -752,31 +782,31 @@ export function ChatRoomPage({ teamId }: { teamId: string }) {
             onClick={() => {
               send({ type: "delete", id: selected.id });
               setSelected(null);
-              toast("Nachricht entfernt.");
+              toast(t`Message removed.`);
             }}
           >
-            Nachricht entfernen
+            <Trans>Remove message</Trans>
           </Button>
           {selected.authorId && selected.authorId !== me.person.id && selected.kind !== "announcement" ? (
             <>
               <Button
                 onClick={async () => {
                   await api.post(`/chat/${teamId}/mutes/${selected.authorId}`, { muted: true });
-                  toast(`${selected.authorName} ist stummgeschaltet.`);
+                  toast(t`${selAuthor} is muted.`);
                   setSelected(null);
                 }}
               >
-                {selected.authorName} stummschalten
+                <Trans>Mute {selAuthor}</Trans>
               </Button>
               <Button
                 variant="ghost"
                 onClick={async () => {
                   await api.post(`/chat/${teamId}/mutes/${selected.authorId}`, { muted: false });
-                  toast("Stummschaltung aufgehoben.");
+                  toast(t`Unmuted.`);
                   setSelected(null);
                 }}
               >
-                Stummschaltung aufheben
+                <Trans>Unmute</Trans>
               </Button>
             </>
           ) : null}
@@ -784,7 +814,7 @@ export function ChatRoomPage({ teamId }: { teamId: string }) {
       ) : null}
 
       {whoFor ? (
-        <Sheet open onClose={() => setWhoFor(null)} title="Reaktionen">
+        <Sheet open onClose={() => setWhoFor(null)} title={t`Reactions`}>
           <ul class="list">
             {(messages.find((x) => x.id === whoFor.id)?.reactions ?? []).flatMap((r) =>
               r.names.map((name) => (
@@ -794,7 +824,7 @@ export function ChatRoomPage({ teamId }: { teamId: string }) {
                   </span>
                   <span class="main">
                     <span class="title">{name}</span>
-                    <span class="sub">{REACTIONS.find((x) => x.emoji === r.emoji)?.label}</span>
+                    <span class="sub">{reactionOptions().find((x) => x.emoji === r.emoji)?.label}</span>
                   </span>
                 </li>
               )),
@@ -804,10 +834,12 @@ export function ChatRoomPage({ teamId }: { teamId: string }) {
       ) : null}
 
       {menuOpen ? (
-        <Sheet open onClose={() => setMenuOpen(false)} title="Chat-Einstellungen">
+        <Sheet open onClose={() => setMenuOpen(false)} title={t`Chat settings`}>
           <p class="muted">
-            Du bist als Elternteil von {room.viaChildren.join(" und ")} im Chat. Wenn du dich abmeldest, bekommst du keine Nachrichten und keine Chat-Benachrichtigungen
-            mehr. Anmelden kannst du dich jederzeit wieder.
+            <Trans>
+              You are in the chat as a parent of {parentOf}. If you leave, you will no longer get messages or chat notifications. You can rejoin at any
+              time.
+            </Trans>
           </p>
           <Button
             variant="danger"
@@ -815,10 +847,10 @@ export function ChatRoomPage({ teamId }: { teamId: string }) {
               await api.put(`/chat/${room.teamId}/optout`, { optedOut: true });
               setMenuOpen(false);
               await rooms.reload();
-              toast("Vom Chat abgemeldet.");
+              toast(t`Left the chat.`);
             }}
           >
-            Vom Chat abmelden
+            <Trans>Leave the chat</Trans>
           </Button>
         </Sheet>
       ) : null}

@@ -1,3 +1,4 @@
+import { t } from "@lingui/core/macro";
 import type { ApiErrorBody } from "../shared/types";
 import { currentLocale } from "./i18n";
 import { noteNetworkError, noteResponse } from "./offline";
@@ -20,7 +21,7 @@ async function request<T>(method: Method, path: string, body?: unknown): Promise
     res = await fetch(`/api${path}`, {
       method,
       credentials: "same-origin",
-      // FormData setzt den Content-Type (multipart mit Boundary) selbst
+      // FormData sets the content type (multipart with boundary) itself
       headers: {
         // Language of the app, for server texts when the account has none set
         "x-kabine-locale": currentLocale(),
@@ -30,7 +31,7 @@ async function request<T>(method: Method, path: string, body?: unknown): Promise
     });
   } catch {
     noteNetworkError();
-    throw new ApiError(0, "offline", "Keine Verbindung. Bitte prüfe deine Internetverbindung.");
+    throw new ApiError(0, "offline", t`No connection. Please check your internet connection.`);
   }
   noteResponse(res);
   const text = await res.text();
@@ -46,7 +47,7 @@ async function request<T>(method: Method, path: string, body?: unknown): Promise
     const err = (data as ApiErrorBody | null)?.error;
     if (res.status === 401) window.dispatchEvent(new CustomEvent("kabine:unauthorized"));
     if (res.status === 503 && err?.code === "maintenance") window.dispatchEvent(new CustomEvent("kabine:maintenance"));
-    throw new ApiError(res.status, err?.code ?? "error", err?.message ?? "Es ist ein Fehler aufgetreten.");
+    throw new ApiError(res.status, err?.code ?? "error", err?.message ?? t`An error occurred.`);
   }
   return data as T;
 }
@@ -57,15 +58,15 @@ export const api = {
   put: <T = { ok: true }>(path: string, body: unknown = {}) => request<T>("PUT", path, body),
   patch: <T = { ok: true }>(path: string, body: unknown = {}) => request<T>("PATCH", path, body),
   del: <T = { ok: true }>(path: string, body?: unknown) => request<T>("DELETE", path, body),
-  /** Datei unverändert hochladen (z. B. ein Bild). */
+  /** Upload a file unchanged (e.g. an image). */
   upload: <T = { ok: true }>(path: string, file: Blob) => request<T>("PUT", path, file),
-  /** Formular mit Dateien (multipart). */
+  /** Form with files (multipart). */
   form: <T = { ok: true }>(path: string, form: FormData) => request<T>("POST", path, form),
 };
 
 export function errorMessage(err: unknown): string {
   if (err instanceof ApiError) return err.message;
-  if (err instanceof DOMException && err.name === "NotAllowedError") return "Der Vorgang wurde abgebrochen.";
+  if (err instanceof DOMException && err.name === "NotAllowedError") return t`The operation was cancelled.`;
   if (err instanceof Error && err.message) return err.message;
-  return "Es ist ein Fehler aufgetreten.";
+  return t`An error occurred.`;
 }

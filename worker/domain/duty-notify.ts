@@ -1,22 +1,25 @@
-// Benachrichtigungen des Helferplans (täglich ab 8 Uhr, jede nur einmal):
-// - Erinnerung an Eingetragene 3 und 1 Tag vor dem Termin (Spiel oder Sondertermin)
-// - "Helfer gesucht" 3 Tage vorher an alle der Mannschaft, die noch nicht
-//   eingetragen sind und einen freien Dienst übernehmen könnten (Wer hilft je Dienstart)
-// - "Offene Plätze" 5 und 2 Tage vorher an Trainer und Admins
-// - "KiHaSL/JuHaSL gesucht" 3 Tage vorher an alle mit dieser Rolle (bzw. ihre Eltern)
-// Kanal (Push, Mail) je Konto und Thema, siehe notification_channels.
+// Notifications of the helper plan (daily from 8 am, each only once):
+// - reminder to those signed up 3 days and 1 day before the event (game or special event)
+// - "helpers wanted" 3 days before to everyone in the team who has not signed up yet
+//   and could take a free duty (who helps per duty type)
+// - "open places" 5 and 2 days before to coaches and admins
+// - "KiHaSL/JuHaSL wanted" 3 days before to everyone with this role (or their parents)
+// Channel (push, mail) per account and topic, see notification_channels.
+// Texts are built per recipient language: pushes once per language, mails per account (withLocale).
+import { plural, t } from "@lingui/core/macro";
 import { type DutyType, ensureEventDuties, loadAllDutyTypes, opponentOf } from "./duties";
 import { mailer } from "./email-login";
 import { enqueuePush, shortDate, shortTime } from "./notify";
 import { all, list, run } from "../lib/db";
 import { ownClubAbbr, ownClubShortName } from "./club";
+import { withLocale } from "../i18n";
 import { addDays, todayLocal, toLocal } from "../lib/time";
 
 export type DutyTopic = "duty_remind_3d" | "duty_remind_1d" | "duty_open" | "duty_coach_open" | "duty_referee_open";
 
-/** Ohne Einstellung: Push an, Mail aus. */
+/** Without a setting: push on, mail off. */
 const DEFAULT = { push: 1, mail: 0 };
-/** Ab dieser Stunde (Berlin) wird verschickt. */
+/** Sending starts at this hour (Berlin). */
 export const DUTY_NOTIFY_HOUR = 8;
 
 interface GameRow {
@@ -37,7 +40,7 @@ interface FreeBlock {
   free: number;
 }
 
-/** Nur einmal: true, wenn diese Benachrichtigung noch nicht verschickt war. */
+/** Only once: true if this notification had not been sent yet. */
 async function claim(db: D1Database, kind: string, ref: string): Promise<boolean> {
   const res = await run(db, "INSERT OR IGNORE INTO duty_notifications (kind, ref) VALUES (?, ?)", kind, ref);
   return (res.meta.changes ?? 0) > 0;
@@ -52,12 +55,15 @@ interface Message {
   mailText: string;
 }
 
-/** Verschickt je Konto nach gewähltem Kanal. Mail nur an bestätigte Adressen. */
-async function deliver(env: Env, accountIds: number[], topic: DutyTopic, msg: Message): Promise<number> {
+/**
+ * Sends per account by the chosen channel. Mail only to confirmed addresses.
+ * msg builds the texts; it runs in the language of each recipient.
+ */
+async function deliver(env: Env, accountIds: number[], topic: DutyTopic, msg: () => Message): Promise<number> {
   if (!accountIds.length) return 0;
-  const rows = await all<{ id: number; email: string | null; verified: number; push: number | null; mail: number | null }>(
+  const rows = await all<{ id: number; email: string | null; verified: number; push: number | null; mail: number | null; locale: string | null }>(
     env.DB,
-    `SELECT a.id, a.email, a.email_verified_at IS NOT NULL AS verified, nc.push, nc.mail
+    `SELECT a.id, a.email, a.email_verified_at IS NOT NULL AS verified, nc.push, nc.mail, a.locale
        FROM accounts a LEFT JOIN notification_channels nc ON nc.account_id = a.id AND nc.topic = ?
       WHERE a.id IN (SELECT value FROM json_each(?)) AND a.disabled_at IS NULL`,
     topic,
@@ -66,18 +72,23 @@ async function deliver(env: Env, accountIds: number[], topic: DutyTopic, msg: Me
   const push = rows.filter((r) => (r.push ?? DEFAULT.push) === 1).map((r) => r.id);
   const mail = rows.filter((r) => (r.mail ?? DEFAULT.mail) === 1 && r.email && r.verified === 1);
   let sent = 0;
-  if (push.length) sent += await enqueuePush(env, push, { title: msg.title, body: msg.body, url: msg.url, tag: msg.tag });
+  if (push.length) {
+    sent += await enqueuePush(env, push, () => {
+      const m = msg();
+      return { title: m.title, body: m.body, url: m.url, tag: m.tag };
+    });
+  }
   for (const r of mail) {
     try {
-      await mailer.send(env, {
-        to: r.email!,
-        subject: msg.mailSubject,
-        text: msg.mailText,
-        from: { email: env.MAIL_FROM, name: `${ownClubShortName()} Helferplan` },
+      const { subject, text, name } = withLocale(r.locale, () => {
+        const m = msg();
+        const club = ownClubShortName();
+        return { subject: m.mailSubject, text: m.mailText, name: t`${club} helper plan` };
       });
+      await mailer.send(env, { to: r.email!, subject, text, from: { email: env.MAIL_FROM, name } });
       sent++;
     } catch (err) {
-      console.warn("Helferplan-Mail fehlgeschlagen", err instanceof Error ? err.message : err);
+      console.warn("Helper plan mail failed", err instanceof Error ? err.message : err);
     }
   }
   return sent;
@@ -88,12 +99,15 @@ function appLink(env: Env, path: string): string {
   return `${env.ORIGIN}${path}`;
 }
 
-const FOOTER = "\n\nWelche Benachrichtigungen du per Push oder Mail bekommst, stellst du in der App unter Profil → Benachrichtigungen ein.";
+/** Mail text from paragraphs: greeting, content, footer. */
+function mailText(...paragraphs: string[]): string {
+  return [t`Hello,`, ...paragraphs, t`You can choose which notifications you get by push or mail in the app under Profile → Notifications.`].join("\n\n");
+}
 
 const GAME_COLUMNS = `e.id, e.kind, e.starts_at, e.is_home, e.home_team, e.guest_team, e.title, t.id AS team_id, t.name AS team_name, t.parents_enabled`;
 const FIRST_TEAM = `JOIN teams t ON t.id = (SELECT et.team_id FROM event_teams et WHERE et.event_id = e.id ORDER BY et.team_id LIMIT 1)`;
 
-/** Termine mit Helferdiensten an einem Tag: Spiele mit Helferplan (nicht ausgeblendet) und Sondertermine mit Blöcken. */
+/** Events with helper duties on a day: games with a helper plan (not hidden) and special events with blocks. */
 async function gamesOn(db: D1Database, date: string): Promise<GameRow[]> {
   return all<GameRow>(
     db,
@@ -105,7 +119,7 @@ async function gamesOn(db: D1Database, date: string): Promise<GameRow[]> {
   );
 }
 
-/** Termine mit KiHaSL/JuHaSL-Block an einem Tag, unabhängig vom Helferplan. */
+/** Events with a KiHaSL/JuHaSL block on a day, regardless of the helper plan. */
 async function refereeGamesOn(db: D1Database, date: string): Promise<GameRow[]> {
   return all<GameRow>(
     db,
@@ -116,7 +130,7 @@ async function refereeGamesOn(db: D1Database, date: string): Promise<GameRow[]> 
   );
 }
 
-/** Termine mit Einträgen an einem Tag (für Erinnerungen). */
+/** Events with entries on a day (for reminders). */
 async function gamesWithDutiesOn(db: D1Database, date: string): Promise<GameRow[]> {
   return all<GameRow>(
     db,
@@ -126,7 +140,7 @@ async function gamesWithDutiesOn(db: D1Database, date: string): Promise<GameRow[
   );
 }
 
-/** Freie Plätze je Block eines Termins (ohne KiHaSL/JuHaSL, die laufen über refereeWanted). */
+/** Free places per block of an event (without KiHaSL/JuHaSL, those go through refereeWanted). */
 async function freeBlocks(db: D1Database, g: GameRow, types: Map<number, DutyType>): Promise<FreeBlock[]> {
   const rows = await all<{ duty_type_id: number; free: number }>(
     db,
@@ -145,7 +159,7 @@ async function freeBlocks(db: D1Database, g: GameRow, types: Map<number, DutyTyp
   return out;
 }
 
-/** "KiHaSL/JuHaSL gesucht" an alle mit der Rolle (bzw. Eltern eines Kindes mit Rolle), die noch nicht eingetragen sind. */
+/** "KiHaSL/JuHaSL wanted" to everyone with the role (or parents of a child with the role) who has not signed up yet. */
 async function refereeWanted(env: Env, today: string): Promise<number> {
   const games = await refereeGamesOn(env.DB, addDays(today, 3));
   let sent = 0;
@@ -176,35 +190,47 @@ async function refereeWanted(env: Env, today: string): Promise<number> {
     for (const c of candidates) {
       if (busy.has(c.person_id)) continue;
       if (!(await claim(env.DB, "refopen", `${g.id}:${c.account_id}`))) continue;
-      sent += await deliver(env, [c.account_id], "duty_referee_open", {
-        title: `KiHaSL/JuHaSL gesucht · ${g.team_name}`,
-        body: `${gameText(g)}. ${free === 1 ? "Noch 1 Platz frei" : `Noch ${free} Plätze frei`}.`,
-        url: "/helfer?kihasl",
-        tag: `duty-referee-${g.id}`,
-        mailSubject: `KiHaSL/JuHaSL gesucht: ${g.team_name} ${opponentOf(g)}`,
-        mailText: `Hallo,\n\nfür das Spiel ${gameText(g)} wird noch ein KiHaSL/JuHaSL gesucht.\n\nEintragen: ${appLink(env, "/helfer?kihasl")}${FOOTER}`,
+      const team = g.team_name;
+      const link = appLink(env, "/helfer?kihasl");
+      sent += await deliver(env, [c.account_id], "duty_referee_open", () => {
+        const game = gameText(g);
+        const opponent = opponentOf(g);
+        return {
+          title: t`KiHaSL/JuHaSL wanted · ${team}`,
+          body: plural(free, { one: `${game}. # place still free.`, other: `${game}. # places still free.` }),
+          url: "/helfer?kihasl",
+          tag: `duty-referee-${g.id}`,
+          mailSubject: t`KiHaSL/JuHaSL wanted: ${team} ${opponent}`,
+          mailText: mailText(t`A KiHaSL/JuHaSL is still needed for the game ${game}.`, t`Sign up: ${link}`),
+        };
       });
     }
   }
   return sent;
 }
 
+/** "K wD vs X on Fri 2 Oct at 14:00", in the current language. */
 function gameText(g: GameRow): string {
-  return `${ownClubAbbr()} ${g.team_name} ${opponentOf(g)} am ${shortDate(g.starts_at)} um ${shortTime(g.starts_at)}`;
+  const club = ownClubAbbr();
+  const team = g.team_name;
+  const opponent = opponentOf(g);
+  const date = shortDate(g.starts_at);
+  const time = shortTime(g.starts_at);
+  return t`${club} ${team} ${opponent} on ${date} at ${time}`;
 }
 
 function freeText(free: FreeBlock[]): string {
   return free.map((f) => (f.free > 1 ? `${f.type.name} (${f.free})` : f.type.name)).join(", ");
 }
 
-/** Erinnerung an Eingetragene. */
+/** Reminder to those signed up. */
 async function remind(env: Env, today: string, days: 3 | 1): Promise<number> {
   const games = await gamesWithDutiesOn(env.DB, addDays(today, days));
   let sent = 0;
   for (const g of games) {
     const entries = await all<{ id: number; label: string; child: string | null; account_id: number; via_parent: number }>(
       env.DB,
-      // KiHaSL/JuHaSL-Kinder ohne eigenen Zugang: Erinnerung an die Eltern
+      // KiHaSL/JuHaSL children without their own access: reminder to the parents
       `SELECT d.id, dt.name AS label, CASE WHEN d.child_id = d.person_id THEN NULL ELSE ch.first_name END AS child, a.id AS account_id, 0 AS via_parent
          FROM duties d JOIN duty_types dt ON dt.id = d.duty_type_id JOIN accounts a ON a.person_id = d.person_id LEFT JOIN persons ch ON ch.id = d.child_id
         WHERE d.event_id = ?1
@@ -218,15 +244,23 @@ async function remind(env: Env, today: string, days: 3 | 1): Promise<number> {
     );
     for (const e of entries) {
       if (!(await claim(env.DB, `remind${days}`, e.via_parent ? `${e.id}:${e.account_id}` : String(e.id)))) continue;
-      const when = days === 1 ? "morgen" : `in ${days} Tagen`;
-      const what = `${e.label}${e.child ? ` (für ${e.child})` : ""}`;
-      sent += await deliver(env, [e.account_id], days === 3 ? "duty_remind_3d" : "duty_remind_1d", {
-        title: `Dein Helferdienst ${when}`,
-        body: `${what}: ${gameText(g)}`,
-        url: "/helfer",
-        tag: `duty-${e.id}`,
-        mailSubject: `Erinnerung: ${e.label} ${when}`,
-        mailText: `Hallo,\n\ndu bist ${when} bei ${gameText(g)} eingetragen: ${what}.\n\nAustragen oder ändern kannst du dich in der App: ${appLink(env, "/helfer")}${FOOTER}`,
+      const label = e.label;
+      const child = e.child;
+      const link = appLink(env, "/helfer");
+      sent += await deliver(env, [e.account_id], days === 3 ? "duty_remind_3d" : "duty_remind_1d", () => {
+        const game = gameText(g);
+        const what = child ? t`${label} (for ${child})` : label;
+        return {
+          title: days === 1 ? t`Your helper duty tomorrow` : t`Your helper duty in ${days} days`,
+          body: `${what}: ${game}`,
+          url: "/helfer",
+          tag: `duty-${e.id}`,
+          mailSubject: days === 1 ? t`Reminder: ${label} tomorrow` : t`Reminder: ${label} in ${days} days`,
+          mailText: mailText(
+            days === 1 ? t`You are signed up tomorrow at ${game}: ${what}.` : t`You are signed up in ${days} days at ${game}: ${what}.`,
+            t`You can sign off or change your entry in the app: ${link}`,
+          ),
+        };
       });
     }
   }
@@ -234,8 +268,8 @@ async function remind(env: Env, today: string, days: 3 | 1): Promise<number> {
 }
 
 /**
- * "Helfer gesucht" an alle der Mannschaft, die noch nicht eingetragen sind und einen freien
- * Dienst übernehmen könnten: Wer hilft je Dienstart, Vorkenntnisse nur mit Freigabe.
+ * "Helpers wanted" to everyone in the team who has not signed up yet and could take a free
+ * duty: who helps per duty type, skills only with consent.
  */
 async function helpWanted(env: Env, today: string, types: Map<number, DutyType>): Promise<number> {
   const games = await gamesOn(env.DB, addDays(today, 3));
@@ -243,7 +277,7 @@ async function helpWanted(env: Env, today: string, types: Map<number, DutyType>)
   for (const g of games) {
     const free = await freeBlocks(env.DB, g, types);
     if (!free.length) continue;
-    // parent: Elternteil eines Spielers (Mannschaft mit Eltern); player: Spieler selbst; coach: Trainer
+    // parent: parent of a player (team with parents); player: the player; coach: coach
     const candidates = await all<{ account_id: number; person_id: number; role: "parent" | "player" | "coach" }>(
       env.DB,
       `SELECT DISTINCT a.id AS account_id, a.person_id, 'parent' AS role
@@ -291,25 +325,32 @@ async function helpWanted(env: Env, today: string, types: Map<number, DutyType>)
       });
       if (!possible.length) continue;
       if (!(await claim(env.DB, "open", `${g.id}:${accountId}`))) continue;
-      sent += await deliver(env, [accountId], "duty_open", {
-        title: `Helfer gesucht · ${g.team_name}`,
-        body: `${gameText(g)}. Noch frei: ${freeText(possible)}`,
-        url: "/helfer",
-        tag: `duty-open-${g.id}`,
-        mailSubject: `Helfer gesucht: ${g.team_name} ${opponentOf(g)}`,
-        mailText: `Hallo,\n\nfür ${gameText(g)} werden noch Helfer gesucht. Noch frei: ${freeText(possible)}.\n\nEintragen: ${appLink(env, "/helfer")}${FOOTER}`,
+      const team = g.team_name;
+      const open = freeText(possible);
+      const link = appLink(env, "/helfer");
+      sent += await deliver(env, [accountId], "duty_open", () => {
+        const game = gameText(g);
+        const opponent = opponentOf(g);
+        return {
+          title: t`Helpers wanted · ${team}`,
+          body: t`${game}. Still free: ${open}`,
+          url: "/helfer",
+          tag: `duty-open-${g.id}`,
+          mailSubject: t`Helpers wanted: ${team} ${opponent}`,
+          mailText: mailText(t`Helpers are still needed for ${game}. Still free: ${open}.`, t`Sign up: ${link}`),
+        };
       });
     }
   }
   return sent;
 }
 
-/** "Offene Plätze" an Trainer der Mannschaft und Admins. */
+/** "Open places" to the coaches of the team and admins. */
 async function openSlotsToCoaches(env: Env, today: string, days: 5 | 2, types: Map<number, DutyType>): Promise<number> {
   const games = await gamesOn(env.DB, addDays(today, days));
   if (!games.length) return 0;
-  // Admins mit eigenem Bezug zu Mannschaften (Trainer oder Kind dort) bekommen nur deren Spiele, auch wenn
-  // keine davon den Helferplan nutzt. Nur Admins ganz ohne Mannschaftsbezug bekommen alle.
+  // Admins with their own link to teams (coach or child there) only get those teams' games, even if
+  // none of them uses the helper plan. Only admins without any team link get all.
   const admins = await all<{ account_id: number; teams: string | null }>(
     env.DB,
     `SELECT a.id AS account_id,
@@ -329,7 +370,7 @@ async function openSlotsToCoaches(env: Env, today: string, days: 5 | 2, types: M
         WHERE tm.team_id = ? AND tm.role = 'coach'`,
       g.team_id,
     );
-    // Bei Sonderterminen zusätzlich Ersteller und Organisatoren
+    // For special events also the creator and organisers
     const organizers = await all<{ account_id: number }>(
       env.DB,
       `SELECT a.id AS account_id FROM accounts a
@@ -344,25 +385,32 @@ async function openSlotsToCoaches(env: Env, today: string, days: 5 | 2, types: M
     }
     for (const accountId of targets) {
       if (!(await claim(env.DB, `coach${days}`, `${g.id}:${accountId}`))) continue;
-      sent += await deliver(env, [accountId], "duty_coach_open", {
-        title: `Noch offene Helferplätze · ${g.team_name}`,
-        body: `${gameText(g)}: ${freeText(free)}`,
-        url: "/helfer",
-        tag: `duty-coach-${g.id}`,
-        mailSubject: `Noch offene Helferplätze: ${g.team_name} ${opponentOf(g)}`,
-        mailText: `Hallo,\n\nbei ${gameText(g)} sind noch Plätze frei: ${freeText(free)}.\n\nHelferplan: ${appLink(env, "/helfer")}${FOOTER}`,
+      const team = g.team_name;
+      const open = freeText(free);
+      const link = appLink(env, "/helfer");
+      sent += await deliver(env, [accountId], "duty_coach_open", () => {
+        const game = gameText(g);
+        const opponent = opponentOf(g);
+        return {
+          title: t`Open helper places · ${team}`,
+          body: `${game}: ${open}`,
+          url: "/helfer",
+          tag: `duty-coach-${g.id}`,
+          mailSubject: t`Open helper places: ${team} ${opponent}`,
+          mailText: mailText(t`There are still free places at ${game}: ${open}.`, t`Helper plan: ${link}`),
+        };
       });
     }
   }
   return sent;
 }
 
-/** Stündlich aufgerufen, verschickt einmal am Tag ab 8 Uhr. */
+/** Called hourly, sends once a day from 8 am. */
 export async function sendDutyNotifications(env: Env, now = Date.now()): Promise<number> {
   const hour = Number(toLocal(now).slice(11, 13));
   if (hour < DUTY_NOTIFY_HOUR) return 0;
   const today = todayLocal(now);
-  // Blöcke der kommenden Spiele erzeugen bzw. nach Verschiebungen mitziehen
+  // Create the blocks of upcoming games or move them along after a game was moved
   await ensureEventDuties(env.DB, null, today);
   const types = await loadAllDutyTypes(env.DB);
   let sent = 0;

@@ -1,4 +1,5 @@
-// Anmeldung und Adressbestätigung per E-Mail-Code oder Link.
+import { t } from "@lingui/core/macro";
+// Sign-in and address confirmation by e-mail code or link.
 import { type Context, Hono } from "hono";
 import { z } from "zod";
 import { type AppEnv, requireActor } from "../app";
@@ -17,7 +18,7 @@ function ipOf(request: Request): string | null {
   return request.headers.get("cf-connecting-ip");
 }
 
-/** Code anfordern. Die Antwort verrät nicht, ob die Adresse bekannt ist. */
+/** Request a code. The response does not reveal whether the address is known. */
 emailRoutes.post("/auth/email/start", async (c) => {
   const { email } = parse(z.object({ email: emailSchema }), await readJson(c.req.raw));
   const known = await first<{ n: number }>(
@@ -32,7 +33,7 @@ emailRoutes.post("/auth/email/start", async (c) => {
     return c.json({ requestId });
   } catch (err) {
     if (err instanceof ApiError) throw err;
-    console.error("Anmelde-E-Mail nicht verschickt", err);
+    console.error("Sign-in e-mail not sent", err);
     return c.json({ requestId: randomToken(18) });
   }
 });
@@ -47,7 +48,7 @@ async function startSession(c: Context<AppEnv>, accountId: number) {
   c.header("Set-Cookie", sessionCookie(session.token, session.expiresAt), { append: true });
 }
 
-/** Code oder Link einlösen: anmelden, Zugang anlegen oder Adresse bestätigen. */
+/** Redeem a code or link: sign in, create access or confirm the address. */
 emailRoutes.post("/auth/email/verify", async (c) => {
   const input = parse(verifySchema, await readJson(c.req.raw));
   const row: EmailCodeRow = await checkEmailCode(c.env, "token" in input ? { token: input.token } : { requestId: input.requestId, code: input.code });
@@ -60,13 +61,13 @@ emailRoutes.post("/auth/email/verify", async (c) => {
         ORDER BY p.first_name, a.id`,
       row.email,
     );
-    if (!accounts.length) throw gone("Zu dieser Adresse gibt es keinen Zugang mehr.", "code_invalid");
-    // Mehrere Zugänge mit derselben Adresse (z. B. Familie): erst auswählen lassen
+    if (!accounts.length) throw gone(t`There is no longer any access for this address.`, "code_invalid");
+    // Several accesses with the same address (e.g. a family): let them choose first
     if (accounts.length > 1 && !input.accountId) {
       return c.json({ choose: accounts.map((a) => ({ accountId: a.id, firstName: a.first_name, lastName: a.last_name })) });
     }
     const account = accounts.find((a) => a.id === (input.accountId ?? accounts[0]!.id));
-    if (!account) throw badRequest("Ungültige Auswahl.");
+    if (!account) throw badRequest(t`Invalid selection.`);
     await markEmailCodeUsed(c.env.DB, row.id);
     await startSession(c, account.id);
     return c.json({ ok: true, kind: "login" });
@@ -80,7 +81,7 @@ emailRoutes.post("/auth/email/verify", async (c) => {
     return c.json({ ok: true, kind: "join" });
   }
 
-  // Adresse bestätigen
+  // Confirm the address
   await markEmailCodeUsed(c.env.DB, row.id);
   const res = await run(
     c.env.DB,
@@ -89,11 +90,11 @@ emailRoutes.post("/auth/email/verify", async (c) => {
     row.account_id,
     row.email,
   );
-  if (!res.meta.changes) throw gone("Die Adresse wurde inzwischen geändert. Bitte bestätige die neue Adresse.", "code_invalid");
+  if (!res.meta.changes) throw gone(t`The address has been changed in the meantime. Please confirm the new address.`, "code_invalid");
   return c.json({ ok: true, kind: "verify" });
 });
 
-/** Eigene Adresse setzen oder ändern. Gilt für die Anmeldung erst nach der Bestätigung. */
+/** Set or change the own address. It applies to sign-in only after confirmation. */
 emailRoutes.put("/me/email", async (c) => {
   const actor = requireActor(c);
   const { email } = parse(z.object({ email: emailSchema }), await readJson(c.req.raw));
@@ -117,7 +118,7 @@ emailRoutes.put("/me/email", async (c) => {
 emailRoutes.delete("/me/email", async (c) => {
   const actor = requireActor(c);
   const passkeys = await first<{ n: number }>(c.env.DB, "SELECT count(*) AS n FROM passkeys WHERE account_id = ?", actor.accountId);
-  if (!passkeys?.n) throw conflict("Ohne Passkey ist die E-Mail-Adresse dein einziger Weg in die App. Richte zuerst einen Passkey ein.");
+  if (!passkeys?.n) throw conflict(t`Without a passkey, the e-mail address is your only way into the app. Set up a passkey first.`);
   await run(c.env.DB, "UPDATE accounts SET email = NULL, email_verified_at = NULL WHERE id = ?", actor.accountId);
   return c.json({ ok: true });
 });

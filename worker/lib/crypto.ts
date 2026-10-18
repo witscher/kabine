@@ -1,4 +1,4 @@
-// Kleine Hilfen auf Basis der Web Crypto API.
+// Small helpers based on the Web Crypto API.
 
 export function randomBytes(length: number): Uint8Array<ArrayBuffer> {
   const bytes = new Uint8Array(length);
@@ -43,7 +43,7 @@ export async function hmacB64url(secret: string, message: string): Promise<strin
   return b64url(await crypto.subtle.sign("HMAC", key, encoder.encode(message)));
 }
 
-/** Vergleich in konstanter Zeit für gleich lange Strings. */
+/** Constant-time comparison for strings of equal length. */
 export function safeEqual(a: string, b: string): boolean {
   if (a.length !== b.length) return false;
   let diff = 0;

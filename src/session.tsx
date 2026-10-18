@@ -1,9 +1,11 @@
+import { t } from "@lingui/core/macro";
 import { startAuthentication, startRegistration } from "@simplewebauthn/browser";
 import type { PublicKeyCredentialCreationOptionsJSON, PublicKeyCredentialRequestOptionsJSON } from "@simplewebauthn/browser";
 import { createContext, type ComponentChildren } from "preact";
 import { useCallback, useContext, useEffect, useState } from "preact/hooks";
 import type { Me, SessionResponse } from "../shared/types";
 import { api, errorMessage } from "./api";
+import { adoptAccountLocale } from "./i18n";
 import { refreshBadge, setBadge } from "./badge";
 import { clearOfflineData } from "./offline";
 import { clearCache } from "./store";
@@ -31,6 +33,8 @@ export function SessionProvider({ children }: { children: ComponentChildren }) {
       const res = await api.get<SessionResponse>("/session");
       const next = res.authenticated ? res.me : null;
       setMe(next);
+      // The language chosen on the account (also on another device) wins over this device
+      if (next) adoptAccountLocale(next.locale);
       if (next) refreshBadge();
       else setBadge(0);
       return next;
@@ -58,7 +62,7 @@ export function SessionProvider({ children }: { children: ComponentChildren }) {
     const onOnline = () => void refresh();
     window.addEventListener("kabine:online", onOnline);
     window.addEventListener("kabine:unauthorized", onUnauthorized);
-    // Beim Zurückkehren in die App Session prüfen (gleitende Verlängerung).
+    // Check the session when returning to the app (sliding extension).
     const onVisible = () => {
       if (document.visibilityState === "visible") void refresh();
     };
@@ -79,7 +83,7 @@ export function useSession() {
 
 export function useMe(): Me {
   const { me } = useSession();
-  if (!me) throw new Error("Nicht angemeldet");
+  if (!me) throw new Error(t`Not signed in`);
   return me;
 }
 
@@ -87,10 +91,10 @@ export function passkeysSupported(): boolean {
   return typeof window !== "undefined" && typeof window.PublicKeyCredential === "function";
 }
 
-// iOS startet den Passkey-Dialog nur, solange die Erlaubnis aus dem Tippen
-// noch gilt. Eine Netzwerkanfrage zwischen Tippen und Dialog kann sie aufbrauchen,
-// besonders in der installierten App. Deshalb liegen die Optionen vorher bereit
-// und bleiben nach einem Abbruch für den nächsten Versuch erhalten.
+// iOS starts the passkey dialog only while the permission from the tap is
+// still valid. A network request between tap and dialog can use it up,
+// especially in the installed app. So the options are prepared beforehand
+// and kept after a cancellation for the next attempt.
 
 interface Prepared<T> {
   key: string;
@@ -99,7 +103,7 @@ interface Prepared<T> {
   at: number;
 }
 
-/** Challenges gelten auf dem Server 5 Minuten. */
+/** Challenges are valid on the server for 5 minutes. */
 const PREPARED_MAX_AGE_MS = 4 * 60_000;
 
 let preparedLogin: Prepared<PublicKeyCredentialRequestOptionsJSON> | null = null;
@@ -115,12 +119,12 @@ async function fetchLoginOptions(): Promise<Prepared<PublicKeyCredentialRequestO
   return preparedLogin;
 }
 
-/** Login-Optionen vorab holen, z. B. beim Öffnen der Anmeldeseite. */
+/** Fetch login options in advance, e.g. when opening the sign-in page. */
 export async function prepareLogin(): Promise<void> {
   await fetchLoginOptions().catch(() => undefined);
 }
 
-/** Passkey-Login. Muss aus einem Tippen heraus aufgerufen werden. */
+/** Passkey login. Must be called from a tap. */
 export async function loginWithPasskey(): Promise<void> {
   const ready = fresh(preparedLogin, "login");
   const prepared = ready ?? (await fetchLoginOptions());
@@ -141,12 +145,12 @@ async function fetchRegistrationOptions(base: string, body: Record<string, unkno
   return preparedRegistration;
 }
 
-/** Registrierungsoptionen vorab holen, sobald feststeht, für wen der Passkey ist. */
+/** Fetch registration options in advance, as soon as it is clear whom the passkey is for. */
 export async function prepareRegistration(base: string, body: Record<string, unknown>): Promise<void> {
   await fetchRegistrationOptions(base, body).catch(() => undefined);
 }
 
-/** Passkey-Registrierung über ein Endpunktpaar …/options und …/verify. */
+/** Passkey registration via an endpoint pair …/options and …/verify. */
 export async function registerPasskey(base: string, body: Record<string, unknown>): Promise<Record<string, unknown>> {
   const ready = fresh(preparedRegistration, `${base} ${JSON.stringify(body)}`);
   const prepared = ready ?? (await fetchRegistrationOptions(base, body));
@@ -161,7 +165,7 @@ export async function registerPasskey(base: string, body: Record<string, unknown
   return api.post<Record<string, unknown>>(`${base}/verify`, { challengeId: prepared.challengeId, response });
 }
 
-/** Meldet einen gescheiterten Passkey-Dialog an den Server (nur Technik, keine Personendaten). */
+/** Reports a failed passkey dialog to the server (technical only, no personal data). */
 function reportPasskeyError(kind: "login" | "register", err: unknown, preparedAgeMs: number | null) {
   const body = {
     kind,
@@ -173,7 +177,7 @@ function reportPasskeyError(kind: "login" | "register", err: unknown, preparedAg
   void fetch("/api/client-errors", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body), keepalive: true }).catch(() => undefined);
 }
 
-/** Technische Ursache für die Anzeige unter der Meldung. */
+/** Technical cause, shown below the message. */
 export function passkeyErrorDetail(err: unknown): string {
   if (!(err instanceof Error)) return "";
   const cause = (err as Error & { cause?: unknown }).cause;
@@ -181,15 +185,15 @@ export function passkeyErrorDetail(err: unknown): string {
   return `${base.name}: ${base.message}`;
 }
 
-/** Verständliche Meldung für Fehler aus dem Passkey-Dialog. */
+/** Understandable message for errors from the passkey dialog. */
 export function passkeyErrorMessage(err: unknown, kind: "login" | "register"): string {
   const name = err instanceof Error ? err.name : "";
   if (name === "NotAllowedError" || name === "AbortError") {
     return kind === "login"
-      ? "Das Gerät hat die Anmeldung mit dem Passkey abgelehnt oder sie wurde abgebrochen. Bitte tippe noch einmal."
-      : "Der Passkey wurde nicht angelegt, weil der Dialog abgebrochen wurde. Bitte tippe noch einmal.";
+      ? t`The device rejected the sign-in with the passkey or it was cancelled. Please tap again.`
+      : t`The passkey was not created because the dialog was cancelled. Please tap again.`;
   }
-  if (name === "InvalidStateError") return "Auf diesem Gerät gibt es schon einen Passkey für diesen Zugang. Melde dich damit an.";
+  if (name === "InvalidStateError") return t`This device already has a passkey for this access. Sign in with it.`;
   return errorMessage(err);
 }
 
@@ -197,7 +201,7 @@ export function isStandalone(): boolean {
   return window.matchMedia?.("(display-mode: standalone)").matches || (navigator as Navigator & { standalone?: boolean }).standalone === true;
 }
 
-/** iPhone, aber nicht Safari (Chrome, Firefox, Edge …). Passkeys landen dann evtl. nicht im iCloud-Schlüsselbund. */
+/** iPhone, but not Safari (Chrome, Firefox, Edge …). Passkeys may then not end up in the iCloud Keychain. */
 export function isIosOtherBrowser(): boolean {
   return isIos() && /CriOS|FxiOS|EdgiOS|OPiOS|GSA\//.test(navigator.userAgent);
 }

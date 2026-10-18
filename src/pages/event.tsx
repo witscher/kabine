@@ -1,3 +1,5 @@
+import { plural, t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 import { useState } from "preact/hooks";
 import type { EventDetail, LocationRef, MyParticipation, ParticipantDetail, RosterEntry } from "../../shared/types";
 import { api, errorMessage } from "../api";
@@ -7,12 +9,12 @@ import { BlockSheet } from "../duty-blocks";
 import { longDate, personName, shortName, stamp, time, timeRange, weekdayPlural } from "../format";
 import { Icon } from "../icons";
 import { GameReportLink, isLiveWindow, isReportWindow, LiveTickerLink } from "../live";
-import { DeclineSheet, deadlineText, PersonResponseRow, QUICK_REASONS, ResponseButtons, respondedByText, sendResponse } from "../respond";
+import { byGuardianText, DeclineSheet, deadlineText, PersonResponseRow, quickReasons, ResponseButtons, respondedByText, sendResponse } from "../respond";
 import { useMe, useSession } from "../session";
 import { invalidate, useQuery } from "../store";
 import { Button, confirmDialog, copyText, ErrorBox, Field, Notice, Sheet, Spinner, StatusPill, SwitchRow, TextField, toast, useDocumentTitle } from "../ui";
 
-const KIND = { training: "Training", game: "Spiel", special: "Termin" } as const;
+const kindLabel = (kind: EventDetail["kind"]) => ({ training: t`Training`, game: t`Game`, special: t`Event` })[kind];
 
 function weekdayOf(local: string): number {
   const [y, m, d] = local.slice(0, 10).split("-").map(Number) as [number, number, number];
@@ -21,9 +23,22 @@ function weekdayOf(local: string): number {
 }
 
 /**
- * Link, der die Karten- bzw. Navi-App des Geräts öffnet: auf iPhone/iPad Apple
- * Karten, auf Android die Auswahl der installierten Apps (geo:), sonst Google Maps im Browser.
+ * Link that opens the device's maps or navigation app: on iPhone/iPad Apple
+ * Maps, on Android the choice of installed apps (geo:), otherwise Google Maps in the browser.
  */
+/** Reason or other free text in quotation marks of the app's language. */
+function quoted(text: string): string {
+  return t`“${text}”`;
+}
+
+function permanentlyAbsent(weekdays: string): string {
+  return t`Permanently absent: ${weekdays}`;
+}
+
+function lastResponse(when: string): string {
+  return t`Last response: ${when}`;
+}
+
 export function mapsHref(location: LocationRef): string | null {
   if (!location.address) return location.mapUrl;
   const q = encodeURIComponent(location.address);
@@ -36,6 +51,7 @@ export function mapsHref(location: LocationRef): string | null {
 
 function MapLink({ location }: { location: LocationRef }) {
   const href = mapsHref(location);
+  const name = location.name;
   const content = (
     <>
       <Icon name="pin" size={18} />
@@ -43,7 +59,7 @@ function MapLink({ location }: { location: LocationRef }) {
     </>
   );
   return href ? (
-    <a href={href} target={href.startsWith("http") ? "_blank" : undefined} rel="noopener noreferrer" style={{ textUnderlineOffset: "3px" }} aria-label={`${location.name}, in der Karten-App öffnen`}>
+    <a href={href} target={href.startsWith("http") ? "_blank" : undefined} rel="noopener noreferrer" style={{ textUnderlineOffset: "3px" }} aria-label={t`${name}, open in the maps app`}>
       {content}
     </a>
   ) : (
@@ -55,17 +71,19 @@ export function EventPage({ id }: { id: string }) {
   const me = useMe();
   const { data: event, error, loading, reload } = useQuery<EventDetail>(`/events/${id}`, { refreshMs: 10_000 });
   const [declineFor, setDeclineFor] = useState<MyParticipation | null>(null);
-  useDocumentTitle(event ? `${KIND[event.kind]} ${longDate(event.startsAt)}` : "Termin");
+  useDocumentTitle(event ? `${kindLabel(event.kind)} ${longDate(event.startsAt)}` : t`Event`);
 
   if (loading) return <Spinner />;
   if (error || !event) {
     return (
       <main class="page">
         <header class="topbar">
-          <a class="icon-btn" href="/" aria-label="Zurück">
+          <a class="icon-btn" href="/" aria-label={t`Back`}>
             <Icon name="back" size={24} />
           </a>
-          <h1>Termin</h1>
+          <h1>
+            <Trans>Event</Trans>
+          </h1>
         </header>
         <div class="content">
           <ErrorBox error={error} onRetry={reload} />
@@ -76,20 +94,28 @@ export function EventPage({ id }: { id: string }) {
 
   const mine = event.mine.filter((m) => m.participant || m.helpRequest || event.kind === "game");
   const single = mine.length === 1 && mine[0]!.person.id === me.person.id ? mine[0]! : null;
+  const cancelledBy = event.cancelled?.byName;
+  const myReason = single?.reason;
+  const deadline = deadlineText(event);
+  const hours = event.deadlineHours;
 
   return (
     <main class="page">
       <header class="hero" style={{ paddingTop: "calc(14px + var(--safe-top))" }}>
         <div class="hero-top">
-          <button type="button" class="icon-btn" aria-label="Zurück" onClick={() => (history.length > 1 ? history.back() : location.assign("/"))} style={{ marginLeft: "-12px" }}>
+          <button type="button" class="icon-btn" aria-label={t`Back`} onClick={() => (history.length > 1 ? history.back() : location.assign("/"))} style={{ marginLeft: "-12px" }}>
             <Icon name="back" size={24} stroke={2.2} />
           </button>
           <div class="row-gap" style={{ gap: "6px" }}>
-            {event.clubWide ? <span class="team-badge">Verein</span> : event.teams.map((t) => <span class="team-badge">{t.name}</span>)}
-            {event.isDetached && event.kind === "training" ? <span class="team-badge outline">geändert</span> : null}
+            {event.clubWide ? <span class="team-badge">
+                <Trans>Club</Trans>
+              </span> : event.teams.map((t) => <span class="team-badge">{t.name}</span>)}
+            {event.isDetached && event.kind === "training" ? <span class="team-badge outline">
+                <Trans>changed</Trans>
+              </span> : null}
           </div>
         </div>
-        <div class="kicker">{event.kind === "special" ? event.title : KIND[event.kind]}</div>
+        <div class="kicker">{event.kind === "special" ? event.title : kindLabel(event.kind)}</div>
         <h1>{longDate(event.startsAt)}</h1>
         {event.kind === "game" ? <div style={{ fontWeight: 700, fontSize: "18px" }}>{event.title}</div> : null}
         <div class="meta-line">
@@ -106,7 +132,7 @@ export function EventPage({ id }: { id: string }) {
           <div class="notice warn" role="status">
             <Icon name="alert" />
             <div>
-              <strong>Abgesagt{event.cancelled.byName ? ` von ${event.cancelled.byName}` : ""}.</strong>
+              <strong>{cancelledBy ? t`Cancelled by ${cancelledBy}.` : t`Cancelled.`}</strong>
               {event.cancelled.reason ? ` ${event.cancelled.reason}` : ""}
             </div>
           </div>
@@ -117,38 +143,50 @@ export function EventPage({ id }: { id: string }) {
         {event.notes ? (
           <div class="card card-pad">
             <div class="small muted" style={{ fontWeight: 700 }}>
-              INFO
+              <Trans>INFO</Trans>
             </div>
             <p style={{ whiteSpace: "pre-wrap" }}>{event.notes}</p>
           </div>
         ) : null}
 
         {mine.length ? (
-          <section class="card card-body" aria-label="Deine Rückmeldung">
+          <section class="card card-body" aria-label={t`Your response`}>
             <h2 class="section-title" style={{ margin: 0 }}>
-              {single ? "Deine Rückmeldung" : "Rückmeldungen"}
+              {single ? t`Your response` : t`Responses`}
             </h2>
             {single && !single.helpRequest ? (
               <>
                 <div class="row-gap">
                   <StatusPill status={single.status} late={single.isLate} nominated={single.nominated} game={event.kind === "game"} />
-                  {single.unexcused ? <span class="badge warn">Unentschuldigt gefehlt</span> : null}
+                  {single.unexcused ? (
+                    <span class="badge warn">
+                      <Trans>Missed without excuse</Trans>
+                    </span>
+                  ) : null}
                   {single.respondedAt && respondedByText(single, me.person.id) ? (
                     <span class="small muted">
                       {respondedByText(single, me.person.id)}, {stamp(single.respondedAt)}
                     </span>
                   ) : null}
                 </div>
-                {event.kind === "game" && !single.participant ? <p class="muted">Du bist für dieses Spiel nicht nominiert.</p> : null}
+                {event.kind === "game" && !single.participant ? (
+                  <p class="muted">
+                    <Trans>You are not nominated for this game.</Trans>
+                  </p>
+                ) : null}
                 <ResponseButtons event={event} p={single} onDecline={setDeclineFor} />
-                {single.status === "no" && single.reason ? <p class="small muted">Dein Grund: „{single.reason}“</p> : null}
+                {single.status === "no" && myReason ? (
+                  <p class="small muted">
+                    <Trans>Your reason: “{myReason}”</Trans>
+                  </p>
+                ) : null}
               </>
             ) : (
               mine.map((m) => <PersonResponseRow key={m.person.id} event={event} p={m} onDecline={setDeclineFor} />)
             )}
             {event.deadline && !event.isPast && !event.cancelled && mine.some((m) => m.participant) ? (
               <p class="small muted">
-                Bitte sage rechtzeitig bis {deadlineText(event)} ({event.deadlineHours} Std. vorher) ab, damit deine Trainer besser planen können.
+                <Trans>Please decline in good time, by {deadline} ({hours} hrs before), so your coaches can plan better.</Trans>
               </p>
             ) : null}
           </section>
@@ -157,18 +195,24 @@ export function EventPage({ id }: { id: string }) {
         {event.carpool ? <CarpoolCard event={event} carpool={event.carpool} onChanged={reload} /> : null}
 
         {event.counts && !event.participants ? (
-          <section class="stats" aria-label="Rückmeldungen der Mannschaft">
+          <section class="stats" aria-label={t`Team responses`}>
             <div class="stat" style={{ background: "var(--card)" }}>
               <div class="n">{event.counts.yes}</div>
-              <div class="l">Nehmen teil</div>
+              <div class="l">
+                <Trans>Taking part</Trans>
+              </div>
             </div>
             <div class="stat" style={{ background: "var(--card)" }}>
               <div class="n">{event.counts.no + event.counts.standing}</div>
-              <div class="l">Absagen</div>
+              <div class="l">
+                <Trans>Declines</Trans>
+              </div>
             </div>
             <div class="stat" style={{ background: "var(--card)" }}>
               <div class="n">{event.counts.inactive}</div>
-              <div class="l">Inaktiv</div>
+              <div class="l">
+                <Trans>Inactive</Trans>
+              </div>
             </div>
           </section>
         ) : null}
@@ -186,11 +230,20 @@ function GameInfo({ event }: { event: EventDetail }) {
   const g = event.game!;
   const helperPlan = event.teams.some((t) => me.helperTeams.some((h) => h.id === t.id));
   const result = g.homeGoals != null && g.guestGoals != null ? `${g.homeGoals}:${g.guestGoals}` : null;
+  const gameNo = g.gameNo;
+  const text = event.myDuties.length ? dutyLines(event.myDuties).join(" · ") : event.helpersNeeded ? neededText(event.helpersNeeded) : null;
+  const point = g.meetingPoint ?? t`to follow`;
+  const meetTime = g.meetingTime;
+  const count = g.nominatedCount;
   return (
-    <section class="card card-pad stack-sm" aria-label="Spielinfos">
+    <section class="card card-pad stack-sm" aria-label={t`Game info`}>
       <div class="row-gap" style={{ justifyContent: "space-between" }}>
-        <span class="badge outline">{g.isHome ? "Heimspiel" : g.isHome === false ? "Auswärtsspiel" : "Spiel"}</span>
-        {g.gameNo ? <span class="small muted">Spiel-Nr. {g.gameNo}</span> : null}
+        <span class="badge outline">{g.isHome ? t`Home game` : g.isHome === false ? t`Away game` : t`Game`}</span>
+        {gameNo ? (
+          <span class="small muted">
+            <Trans>Game no. {gameNo}</Trans>
+          </span>
+        ) : null}
       </div>
       <div style={{ fontWeight: 700, fontSize: "17px" }}>
         {g.homeTeam} – {g.guestTeam}
@@ -200,7 +253,7 @@ function GameInfo({ event }: { event: EventDetail }) {
       {event.location?.address ? (
         <p class="small muted row-gap" style={{ gap: "6px", alignItems: "center" }}>
           <span>{event.location.address}</span>
-          <button type="button" class="icon-btn icon-btn-sm" aria-label="Adresse kopieren" onClick={() => copyText(event.location!.address!, "Adresse kopiert.")}>
+          <button type="button" class="icon-btn icon-btn-sm" aria-label={t`Copy address`} onClick={() => copyText(event.location!.address!, t`Address copied.`)}>
             <Icon name="copy" size={16} />
           </button>
         </p>
@@ -208,32 +261,43 @@ function GameInfo({ event }: { event: EventDetail }) {
       {helperPlan && !event.isPast ? (
         <a class="ext-link" href="/helfer">
           <Icon name="helping" size={16} />
-          {event.myDuties.length
-            ? `Helferplan · ${dutyLines(event.myDuties).join(" · ")}`
-            : event.helpersNeeded
-              ? `Helferplan · ${neededText(event.helpersNeeded)}`
-              : "Helferplan: Dienste für dieses Spiel"}
+          {text ? t`Helper plan · ${text}` : t`Helper plan: duties for this game`}
         </a>
       ) : null}
       {g.tableUrl ? (
         <a class="ext-link" href={g.tableUrl} target="_blank" rel="noopener noreferrer">
           <Icon name="link" size={16} />
-          Tabelle bei handball4all
+          <Trans>Table on handball4all</Trans>
         </a>
       ) : null}
       {g.meetingPoint || g.meetingTime ? (
         <p>
-          <strong>Treffpunkt:</strong> {g.meetingPoint ?? "folgt"}
-          {g.meetingTime ? `, ${g.meetingTime} Uhr` : ""}
+          {meetTime ? (
+            <Trans>
+              <strong>Meeting point:</strong> {point}, {meetTime}
+            </Trans>
+          ) : (
+            <Trans>
+              <strong>Meeting point:</strong> {point}
+            </Trans>
+          )}
         </p>
       ) : null}
       {g.coachNotes ? <p style={{ whiteSpace: "pre-wrap" }}>{g.coachNotes}</p> : null}
-      {g.squadPublished ? <p class="small muted">Kader: {g.nominatedCount} nominiert</p> : <p class="small muted">Der Kader ist noch nicht veröffentlicht.</p>}
+      {g.squadPublished ? (
+        <p class="small muted">
+          <Trans>Squad: {count} nominated</Trans>
+        </p>
+      ) : (
+        <p class="small muted">
+          <Trans>The squad has not been published yet.</Trans>
+        </p>
+      )}
     </section>
   );
 }
 
-// Trainer ------------------------------------------------------------------------
+// Coaches ------------------------------------------------------------------------
 
 function CoachView({ event, onChanged }: { event: EventDetail; onChanged: () => void }) {
   const parts = event.participants ?? [];
@@ -249,6 +313,8 @@ function CoachView({ event, onChanged }: { event: EventDetail; onChanged: () => 
   const open = parts.filter((p) => p.status === "open" && !p.unexcused);
   const grouped = event.teams.length > 1;
   const editable = !event.isPast;
+  const deadline = deadlineText(event);
+  const hours = event.deadlineHours;
 
   const refresh = () => {
     invalidate("/events");
@@ -257,31 +323,44 @@ function CoachView({ event, onChanged }: { event: EventDetail; onChanged: () => 
 
   const remind = async (personIds?: number[]) => {
     const res = await api.post<{ sent: number; persons: number }>(`/events/${event.id}/remind`, personIds ? { personIds } : {});
-    toast(res.sent ? `Erinnerung an ${res.persons} ${res.persons === 1 ? "Person" : "Personen"} gesendet.` : "Erinnert. Ohne aktivierte Push-Benachrichtigung kommt nichts an.");
+    const persons = res.persons;
+    toast(
+      res.sent
+        ? plural(persons, { one: "Reminder sent to # person.", other: "Reminder sent to # people." })
+        : t`Reminded. Without push notifications switched on, nothing arrives.`,
+    );
   };
 
   const teamName = (teamId: number) => event.teams.find((t) => t.id === teamId)?.name ?? "";
   const nameFor = (p: ParticipantDetail) =>
-    `${shortName(p.person)}${grouped ? ` (${(p.teamIds.length ? p.teamIds : [p.teamId]).map(teamName).join(" · ")})` : ""}${p.isHelper ? " · Aushilfe" : ""}`;
+    `${shortName(p.person)}${grouped ? ` (${(p.teamIds.length ? p.teamIds : [p.teamId]).map(teamName).join(" · ")})` : ""}${p.isHelper ? ` · ${t`Stand-in`}` : ""}`;
 
   return (
     <>
-      <div class="stat-tiles" role="group" aria-label="Übersicht">
+      <div class="stat-tiles" role="group" aria-label={t`Overview`}>
         <div class="stat-tile yellow">
           <div class="n">{yes.length}</div>
-          <div class="l">nehmen teil</div>
+          <div class="l">
+            <Trans>taking part</Trans>
+          </div>
         </div>
         <div class="stat-tile">
           <div class="n">{no.length}</div>
-          <div class="l">abgesagt</div>
+          <div class="l">
+            <Trans>declined</Trans>
+          </div>
         </div>
         <div class="stat-tile">
           <div class="n">{parts.filter((p) => p.status === "standing").length}</div>
-          <div class="l">abwesend</div>
+          <div class="l">
+            <Trans>absent</Trans>
+          </div>
         </div>
         <div class="stat-tile dark">
           <div class="n">{parts.filter((p) => p.status === "inactive").length}</div>
-          <div class="l">inaktiv</div>
+          <div class="l">
+            <Trans>inactive</Trans>
+          </div>
         </div>
       </div>
 
@@ -290,22 +369,28 @@ function CoachView({ event, onChanged }: { event: EventDetail; onChanged: () => 
           {event.kind === "game" ? (
             <>
               <a class="btn btn-primary" href={`/spiele/${event.id}/kader`}>
-                Kader nominieren
+                <Trans>Nominate squad</Trans>
               </a>
-              <Button onClick={() => setInfoOpen(true)}>Treffpunkt & Infos</Button>
+              <Button onClick={() => setInfoOpen(true)}>
+                <Trans>Meeting point & info</Trans>
+              </Button>
             </>
           ) : (
             <>
               <Button variant="primary" icon="bell" disabled={!open.length} onClick={() => remind()}>
-                Erinnern
+                <Trans>Remind</Trans>
               </Button>
               {event.kind === "special" ? (
-                <Button onClick={() => setEditOpen(true)}>Bearbeiten</Button>
+                <Button onClick={() => setEditOpen(true)}>
+                  <Trans>Edit</Trans>
+                </Button>
               ) : (
-                <Button onClick={() => setMoveOpen(true)}>Verschieben</Button>
+                <Button onClick={() => setMoveOpen(true)}>
+                  <Trans>Move</Trans>
+                </Button>
               )}
               <Button variant="danger" onClick={() => setCancelOpen(true)}>
-                Absagen
+                <Trans context="cancel event">Cancel</Trans>
               </Button>
             </>
           )}
@@ -315,27 +400,29 @@ function CoachView({ event, onChanged }: { event: EventDetail; onChanged: () => 
         <Button
           onClick={async () => {
             await api.post(`/events/${event.id}/uncancel`);
-            toast("Der Termin findet wieder statt.");
+            toast(t`The event is back on.`);
             refresh();
           }}
         >
-          Absage zurücknehmen
+          <Trans>Undo cancellation</Trans>
         </Button>
       ) : null}
       {event.kind === "game" && editable && !event.cancelled ? (
         <Button variant="ghost" size="sm" icon="bell" disabled={!open.length} onClick={() => remind()}>
-          Offene Rückmeldungen erinnern
+          <Trans>Remind missing responses</Trans>
         </Button>
       ) : null}
 
       {event.isPast && !event.cancelled && parts.length ? (
-        <p class="small muted">Wer zugesagt oder sich nicht gemeldet hat und trotzdem gefehlt hat: Namen antippen und „Fehlt unentschuldigt“ wählen.</p>
+        <p class="small muted">
+          <Trans>Anyone who accepted or did not respond and still missed it: tap the name and choose “Absent without excuse”.</Trans>
+        </p>
       ) : null}
 
       {missed.length ? (
-        <section class="card card-body" aria-label="Fehlt unentschuldigt">
+        <section class="card card-body" aria-label={t`Absent without excuse`}>
           <h2 class="section-title" style={{ margin: 0 }}>
-            Fehlt unentschuldigt · {missed.length}
+            <Trans>Absent without excuse</Trans> · {missed.length}
           </h2>
           <div class="chips">
             {missed.map((p) => (
@@ -348,9 +435,9 @@ function CoachView({ event, onChanged }: { event: EventDetail; onChanged: () => 
       ) : null}
 
       {yes.length ? (
-        <section class="card card-body" aria-label="Zugesagt">
+        <section class="card card-body" aria-label={t`Accepted`}>
           <h2 class="section-title" style={{ margin: 0 }}>
-            Zugesagt · {yes.length}
+            <Trans>Accepted</Trans> · {yes.length}
           </h2>
           <div class="chips">
             {yes.map((p) => (
@@ -363,9 +450,9 @@ function CoachView({ event, onChanged }: { event: EventDetail; onChanged: () => 
       ) : null}
 
       {no.length ? (
-        <section class="card card-body" aria-label="Abgesagt">
+        <section class="card card-body" aria-label={t`Declined`}>
           <h2 class="section-title" style={{ margin: 0 }}>
-            Abgesagt · {no.length}
+            <Trans>Declined</Trans> · {no.length}
           </h2>
           {no.map((p, i) => (
             <button
@@ -376,12 +463,16 @@ function CoachView({ event, onChanged }: { event: EventDetail; onChanged: () => 
             >
               <div class="row-gap" style={{ justifyContent: "space-between", width: "100%" }}>
                 <strong style={{ fontSize: "17px" }}>{nameFor(p)}</strong>
-                {p.isLate ? <span class="badge warn">Kurzfristig</span> : null}
+                {p.isLate ? (
+                  <span class="badge warn">
+                    <Trans>Short notice</Trans>
+                  </span>
+                ) : null}
               </div>
-              {p.reason ? <div style={{ fontSize: "16px" }}>„{p.reason}“</div> : null}
+              {p.reason ? <div style={{ fontSize: "16px" }}>{quoted(p.reason)}</div> : null}
               {p.respondedAt ? (
                 <div class="small muted">
-                  {stamp(p.respondedAt)} · {p.respondedBy === "guardian" ? `von ${p.respondedByName ?? "Elternteil"} (Elternteil)` : p.respondedBy === "self" ? "selbst" : (p.respondedByName ?? "")}
+                  {stamp(p.respondedAt)} · {p.respondedBy === "guardian" ? byGuardianText(p.respondedByName) : p.respondedBy === "self" ? t`themselves` : (p.respondedByName ?? "")}
                 </div>
               ) : null}
             </button>
@@ -390,30 +481,31 @@ function CoachView({ event, onChanged }: { event: EventDetail; onChanged: () => 
       ) : null}
 
       {away.length ? (
-        <section class="card card-body" aria-label="Abwesend">
+        <section class="card card-body" aria-label={t`Absent`}>
           <h2 class="section-title" style={{ margin: 0 }}>
-            Abwesend · {away.length}
+            <Trans>Absent</Trans> · {away.length}
           </h2>
           {away.map((p) => (
             <div class="row-gap" style={{ justifyContent: "space-between" }}>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <strong style={{ color: p.status === "inactive" ? "var(--text-3)" : undefined }}>{nameFor(p)}</strong>
-                <div class="small muted">{p.status === "inactive" ? "Inaktiv" : `Dauerhaft abwesend: ${weekdayPlural(weekdayOf(event.startsAt))}`}</div>
+                <div class="small muted">{p.status === "inactive" ? t`Inactive` : permanentlyAbsent(weekdayPlural(weekdayOf(event.startsAt)))}</div>
               </div>
               {p.status === "inactive" ? (
                 <Button
                   size="sm"
                   onClick={async () => {
                     await api.post(`/persons/${p.person.id}/active`, { active: true });
-                    toast(`${p.person.firstName} ist wieder aktiv.`);
+                    const name = p.person.firstName;
+                    toast(t`${name} is active again.`);
                     refresh();
                   }}
                 >
-                  Aktivieren
+                  <Trans>Activate</Trans>
                 </Button>
               ) : (
                 <Button size="sm" onClick={() => setPerson(p)}>
-                  Ändern
+                  <Trans>Change</Trans>
                 </Button>
               )}
             </div>
@@ -422,9 +514,9 @@ function CoachView({ event, onChanged }: { event: EventDetail; onChanged: () => 
       ) : null}
 
       {open.length ? (
-        <section class="card dark card-body" aria-label="Keine Rückmeldung">
+        <section class="card dark card-body" aria-label={t`No response`}>
           <h2 class="section-title" style={{ margin: 0, color: "var(--yellow)" }}>
-            Keine Rückmeldung · {open.length}
+            <Trans>No response</Trans> · {open.length}
           </h2>
           {open.map((p) => (
             <div class="row-gap" style={{ justifyContent: "space-between" }}>
@@ -433,7 +525,7 @@ function CoachView({ event, onChanged }: { event: EventDetail; onChanged: () => 
               </button>
               {editable && !event.cancelled ? (
                 <Button variant="accent" size="sm" onClick={() => remind([p.person.id])}>
-                  Erinnern
+                  <Trans>Remind</Trans>
                 </Button>
               ) : null}
             </div>
@@ -442,26 +534,26 @@ function CoachView({ event, onChanged }: { event: EventDetail; onChanged: () => 
       ) : null}
 
       {!parts.length ? (
-        <Notice>{event.kind === "game" ? "Noch niemand nominiert." : "Für diesen Termin gibt es keine Teilnehmer."}</Notice>
+        <Notice>{event.kind === "game" ? t`Nobody nominated yet.` : t`There are no participants for this event.`}</Notice>
       ) : null}
 
       <p class="small muted">
-        Absagefrist: {event.deadlineHours} Stunden vor Beginn ({deadlineText(event)}).
-        {event.ruleId == null && event.kind === "training" ? " Einzeltermin." : ""}
+        <Trans>Decline deadline: {hours} hours before the start ({deadline}).</Trans>
+        {event.ruleId == null && event.kind === "training" ? ` ${t`One-off event.`}` : ""}
       </p>
       {event.kind === "special" && editable ? (
         <Button
           variant="ghost"
           icon="trash"
           onClick={async () => {
-            if (!(await confirmDialog({ title: "Termin löschen?", message: "Der Termin und alle Rückmeldungen werden gelöscht.", confirmLabel: "Löschen", danger: true }))) return;
+            if (!(await confirmDialog({ title: t`Delete event?`, message: t`The event and all responses will be deleted.`, confirmLabel: t`Delete`, danger: true }))) return;
             await api.del(`/events/${event.id}`);
             invalidate("/events");
-            toast("Termin gelöscht.");
+            toast(t`Event deleted.`);
             history.back();
           }}
         >
-          Termin löschen
+          <Trans>Delete event</Trans>
         </Button>
       ) : null}
 
@@ -476,43 +568,48 @@ function CoachView({ event, onChanged }: { event: EventDetail; onChanged: () => 
 
 function CancelSheet({ event, onClose, onDone }: { event: EventDetail; onClose: () => void; onDone: () => void }) {
   const [reason, setReason] = useState("");
+  const date = longDate(event.startsAt);
+  const clock = time(event.startsAt);
+  const title = event.kind === "training" ? t`Cancel training` : event.kind === "game" ? t`Cancel game` : t`Cancel event`;
   return (
-    <Sheet open onClose={onClose} title={`${KIND[event.kind]} absagen`}>
+    <Sheet open onClose={onClose} title={title}>
       <p class="muted">
-        {longDate(event.startsAt)}, {time(event.startsAt)} Uhr. Alle Beteiligten werden benachrichtigt, im Mannschaftschat erscheint ein Hinweis.
+        <Trans>{date}, {clock}. Everyone involved will be notified, and a note appears in the team chat.</Trans>
       </p>
       <div class="chips">
-        {["Halle belegt", "Trainer verhindert", "Ferien", "Zu wenige Zusagen"].map((r) => (
+        {[t`Hall unavailable`, t`Coach unavailable`, t`School holidays`, t`Too few acceptances`].map((r) => (
           <button type="button" class={`chip ${reason === r ? "selected" : ""}`} onClick={() => setReason(r)}>
             {r}
           </button>
         ))}
       </div>
-      <TextField label="Grund" value={reason} onInput={setReason} maxLength={200} />
+      <TextField label={t`Reason`} value={reason} onInput={setReason} maxLength={200} />
       <Button
         variant="danger-solid"
         size="lg"
         block
         disabled={!reason.trim()}
         onClick={async () => {
-          // Rückfrage, weil Trainer „Absagen“ schon für die eigene Abwesenheit gehalten haben
-          const what = event.kind === "training" ? "Trainingstermin" : "Termin";
+          // Ask again, because coaches have mistaken "Cancel" for reporting their own absence
+          const training = event.kind === "training";
           if (
             !(await confirmDialog({
-              title: `${what} komplett für alle absagen?`,
-              message: `Der ${what} fällt für alle aus und alle Beteiligten werden benachrichtigt. Wenn nur du verhindert bist, nicht absagen.`,
-              confirmLabel: "Für alle absagen",
+              title: training ? t`Cancel this training session for everyone?` : t`Cancel this event for everyone?`,
+              message: training
+                ? t`The training session is off for everyone and everyone involved will be notified. If only you cannot make it, do not cancel.`
+                : t`The event is off for everyone and everyone involved will be notified. If only you cannot make it, do not cancel.`,
+              confirmLabel: t`Cancel for everyone`,
               danger: true,
             }))
           )
             return;
           await api.post(`/events/${event.id}/cancel`, { reason: reason.trim() });
-          toast("Abgesagt. Alle wurden informiert.");
+          toast(t`Cancelled. Everyone has been informed.`);
           onClose();
           onDone();
         }}
       >
-        Absagen und informieren
+        <Trans>Cancel and inform</Trans>
       </Button>
     </Sheet>
   );
@@ -523,8 +620,8 @@ export function useLocations(forTraining = true) {
 }
 
 /**
- * Sondertermin bearbeiten: Titel, Datum, Uhrzeit, Ort, Infos. Ändern sich Datum, Uhrzeit oder Ort,
- * benachrichtigt der Server alle Beteiligten; Titel und Infos werden still gespeichert.
+ * Edit a special event: title, date, time, location, info. If date, time or location change,
+ * the server notifies everyone involved; title and info are saved quietly.
  */
 function EditSheet({ event, onClose, onDone }: { event: EventDetail; onClose: () => void; onDone: () => void }) {
   const { data } = useLocations();
@@ -537,21 +634,23 @@ function EditSheet({ event, onClose, onDone }: { event: EventDetail; onClose: ()
   const past = event.isPast;
   const moved = `${date}T${start}` !== event.startsAt || (end ? `${date}T${end}` : null) !== (event.endsAt ?? null) || locationId !== (event.location?.id ?? null);
   return (
-    <Sheet open onClose={onClose} title="Termin bearbeiten">
-      <TextField label="Titel" value={title} onInput={setTitle} maxLength={80} />
+    <Sheet open onClose={onClose} title={t`Edit event`}>
+      <TextField label={t`Title`} value={title} onInput={setTitle} maxLength={80} />
       {past ? (
-        <p class="small muted">Der Termin hat schon begonnen, Datum, Uhrzeit und Ort lassen sich nicht mehr ändern.</p>
+        <p class="small muted">
+          <Trans>The event has already started, date, time and venue can no longer be changed.</Trans>
+        </p>
       ) : (
         <>
-          <Field label="Datum">{(id) => <input id={id} class="input" type="date" value={date} onInput={(e) => setDate((e.target as HTMLInputElement).value)} />}</Field>
+          <Field label={t`Date`}>{(id) => <input id={id} class="input" type="date" value={date} onInput={(e) => setDate((e.target as HTMLInputElement).value)} />}</Field>
           <div class="grid-2">
-            <Field label="Beginn">{(id) => <input id={id} class="input" type="time" value={start} onInput={(e) => setStart((e.target as HTMLInputElement).value)} />}</Field>
-            <Field label="Ende (optional)">{(id) => <input id={id} class="input" type="time" value={end} onInput={(e) => setEnd((e.target as HTMLInputElement).value)} />}</Field>
+            <Field label={t`Start time`}>{(id) => <input id={id} class="input" type="time" value={start} onInput={(e) => setStart((e.target as HTMLInputElement).value)} />}</Field>
+            <Field label={t`End time (optional)`}>{(id) => <input id={id} class="input" type="time" value={end} onInput={(e) => setEnd((e.target as HTMLInputElement).value)} />}</Field>
           </div>
-          <Field label="Ort (optional)">
+          <Field label={t`Venue (optional)`}>
             {(id) => (
               <select id={id} class="select" value={locationId ?? ""} onChange={(e) => setLocationId(Number((e.target as HTMLSelectElement).value) || null)}>
-                <option value="">Kein Ort</option>
+                <option value="">{t`No venue`}</option>
                 {(data?.locations ?? []).map((l) => (
                   <option value={l.id}>{l.name}</option>
                 ))}
@@ -560,11 +659,11 @@ function EditSheet({ event, onClose, onDone }: { event: EventDetail; onClose: ()
           </Field>
         </>
       )}
-      <Field label="Infos (optional)">
+      <Field label={t`Info (optional)`}>
         {(id) => <textarea id={id} class="textarea" value={notes} maxLength={1000} onInput={(e) => setNotes((e.target as HTMLTextAreaElement).value)} />}
       </Field>
       <p class="small muted">
-        {moved ? "Datum, Uhrzeit oder Ort ändern sich: Alle Beteiligten werden benachrichtigt." : "Titel und Infos werden still gespeichert, ohne Benachrichtigung."}
+        {moved ? t`Date, time or venue change: everyone involved will be notified.` : t`Title and info are saved quietly, without notification.`}
       </p>
       <Button
         variant="primary"
@@ -572,18 +671,18 @@ function EditSheet({ event, onClose, onDone }: { event: EventDetail; onClose: ()
         disabled={!title.trim() || !date || !start}
         onClick={async () => {
           if (end && end <= start) {
-            toast("Das Ende muss nach dem Beginn liegen.", "error");
+            toast(t`The end must be after the start.`, "error");
             return;
           }
           const body: Record<string, unknown> = { title: title.trim(), notes: notes.trim() || null };
           if (!past) Object.assign(body, { startsAt: `${date}T${start}`, endsAt: end ? `${date}T${end}` : null, locationId });
           await api.patch(`/events/${event.id}`, body);
-          toast(moved ? "Gespeichert, alle wurden informiert." : "Gespeichert.");
+          toast(moved ? t`Saved, everyone has been informed.` : t`Saved.`);
           onDone();
           onClose();
         }}
       >
-        {moved ? "Speichern und informieren" : "Speichern"}
+        {moved ? t`Save and inform` : t`Save`}
       </Button>
     </Sheet>
   );
@@ -596,14 +695,16 @@ function MoveSheet({ event, onClose, onDone }: { event: EventDetail; onClose: ()
   const [end, setEnd] = useState(time(event.endsAt));
   const [locationId, setLocationId] = useState<number | null>(event.location?.id ?? null);
   return (
-    <Sheet open onClose={onClose} title="Termin verschieben">
-      <p class="muted">Nur dieser eine Termin ändert sich, der Trainingsplan bleibt gleich. Alle Beteiligten werden benachrichtigt.</p>
-      <Field label="Datum">{(id) => <input id={id} class="input" type="date" value={date} onInput={(e) => setDate((e.target as HTMLInputElement).value)} />}</Field>
+    <Sheet open onClose={onClose} title={t`Move event`}>
+      <p class="muted">
+        <Trans>Only this one event changes, the training schedule stays the same. Everyone involved will be notified.</Trans>
+      </p>
+      <Field label={t`Date`}>{(id) => <input id={id} class="input" type="date" value={date} onInput={(e) => setDate((e.target as HTMLInputElement).value)} />}</Field>
       <div class="grid-2">
-        <Field label="Beginn">{(id) => <input id={id} class="input" type="time" value={start} onInput={(e) => setStart((e.target as HTMLInputElement).value)} />}</Field>
-        <Field label="Ende">{(id) => <input id={id} class="input" type="time" value={end} onInput={(e) => setEnd((e.target as HTMLInputElement).value)} />}</Field>
+        <Field label={t`Start time`}>{(id) => <input id={id} class="input" type="time" value={start} onInput={(e) => setStart((e.target as HTMLInputElement).value)} />}</Field>
+        <Field label={t`End time`}>{(id) => <input id={id} class="input" type="time" value={end} onInput={(e) => setEnd((e.target as HTMLInputElement).value)} />}</Field>
       </div>
-      <Field label="Ort">
+      <Field label={t`Venue`}>
         {(id) => (
           <select id={id} class="select" value={locationId ?? ""} onChange={(e) => setLocationId(Number((e.target as HTMLSelectElement).value) || null)}>
             {(data?.locations ?? []).map((l) => (
@@ -618,12 +719,12 @@ function MoveSheet({ event, onClose, onDone }: { event: EventDetail; onClose: ()
         block
         onClick={async () => {
           await api.patch(`/events/${event.id}`, { startsAt: `${date}T${start}`, endsAt: end ? `${date}T${end}` : null, locationId });
-          toast("Termin verschoben.");
+          toast(t`Event moved.`);
           onClose();
           onDone();
         }}
       >
-        Speichern und informieren
+        <Trans>Save and inform</Trans>
       </Button>
     </Sheet>
   );
@@ -634,15 +735,17 @@ function GameInfoSheet({ event, onClose, onDone }: { event: EventDetail; onClose
   const [meetingPoint, setMeetingPoint] = useState(g.meetingPoint ?? "");
   const [meetingTime, setMeetingTime] = useState(g.meetingTime ?? "");
   const [notes, setNotes] = useState(g.coachNotes ?? "");
-  // Schnellauswahl: die Vereinshallen (meist Reinhold-Crocoll-Halle) und der Spielort
+  // Quick selection: the club's halls (usually Reinhold-Crocoll-Halle) and the game venue
   const halls = useLocations(false).data?.locations.filter((l) => l.kind === "hall").map((l) => l.name) ?? [];
   const pointChoices = [...new Set([...halls, ...(event.location ? [event.location.name] : [])])];
   return (
-    <Sheet open onClose={onClose} title="Treffpunkt & Infos">
-      <p class="muted">Diese Angaben bleiben auch erhalten, wenn der Spielplan neu abgeglichen wird.</p>
-      <TextField label="Treffpunkt" value={meetingPoint} onInput={setMeetingPoint} placeholder="z. B. Parkplatz Halle" maxLength={200} />
+    <Sheet open onClose={onClose} title={t`Meeting point & info`}>
+      <p class="muted">
+        <Trans>These details are kept even when the fixture list is synced again.</Trans>
+      </p>
+      <TextField label={t`Meeting point`} value={meetingPoint} onInput={setMeetingPoint} placeholder={t`e.g. hall car park`} maxLength={200} />
       {pointChoices.length ? (
-        <div class="chips" role="group" aria-label="Treffpunkt wählen">
+        <div class="chips" role="group" aria-label={t`Choose meeting point`}>
           {pointChoices.map((name) => (
             <button type="button" class={`chip ${meetingPoint === name ? "selected" : ""}`} aria-pressed={meetingPoint === name ? "true" : "false"} onClick={() => setMeetingPoint(name)}>
               {name}
@@ -650,8 +753,8 @@ function GameInfoSheet({ event, onClose, onDone }: { event: EventDetail; onClose
           ))}
         </div>
       ) : null}
-      <Field label="Treffen um">{(id) => <input id={id} class="input" type="time" value={meetingTime} onInput={(e) => setMeetingTime((e.target as HTMLInputElement).value)} />}</Field>
-      <Field label="Hinweise">
+      <Field label={t`Meet at`}>{(id) => <input id={id} class="input" type="time" value={meetingTime} onInput={(e) => setMeetingTime((e.target as HTMLInputElement).value)} />}</Field>
+      <Field label={t`Notes`}>
         {(id) => <textarea id={id} class="textarea" value={notes} maxLength={1000} onInput={(e) => setNotes((e.target as HTMLTextAreaElement).value)} />}
       </Field>
       <Button
@@ -660,21 +763,22 @@ function GameInfoSheet({ event, onClose, onDone }: { event: EventDetail; onClose
         block
         onClick={async () => {
           await api.patch(`/events/${event.id}`, { meetingPoint: meetingPoint.trim() || null, meetingTime: meetingTime || null, coachNotes: notes.trim() || null });
-          toast("Gespeichert. Die Mannschaft wurde informiert.");
+          toast(t`Saved. The team has been informed.`);
           onClose();
           onDone();
         }}
       >
-        Speichern
+        <Trans>Save</Trans>
       </Button>
     </Sheet>
   );
 }
 
-/** Trainer tragen eine Rückmeldung für Spieler ein, z. B. für Familien ohne App. */
+/** Coaches enter a response for players, e.g. for families without the app. */
 function CoachResponse({ event, p, onDone }: { event: EventDetail; p: ParticipantDetail; onDone: () => void }) {
   const [declining, setDeclining] = useState(false);
   const [reason, setReason] = useState("");
+  const name = p.person.firstName;
   if (event.isPast || event.cancelled || p.status === "inactive") return null;
   if (p.status === "no") {
     return (
@@ -682,11 +786,11 @@ function CoachResponse({ event, p, onDone }: { event: EventDetail; p: Participan
         icon="check"
         onClick={async () => {
           await sendResponse(event, p.person.id, "yes");
-          toast(`${p.person.firstName} ist wieder zugesagt.`);
+          toast(t`${name} is accepted again.`);
           onDone();
         }}
       >
-        Wieder zusagen
+        <Trans>Accept again</Trans>
       </Button>
     );
   }
@@ -698,44 +802,46 @@ function CoachResponse({ event, p, onDone }: { event: EventDetail; p: Participan
             icon="check"
             onClick={async () => {
               await sendResponse(event, p.person.id, "yes");
-              toast(`Zusage für ${p.person.firstName} eingetragen.`);
+              toast(t`Acceptance entered for ${name}.`);
               onDone();
             }}
           >
-            Zusagen
+            <Trans>Accept</Trans>
           </Button>
         ) : null}
         <Button icon="x" onClick={() => setDeclining(true)}>
-          Diesen Termin absagen
+          <Trans>Decline this event</Trans>
         </Button>
       </div>
     );
   }
   return (
-    <div class="field card card-pad" aria-label="Absage eintragen">
-      <span class="field-label">Grund der Absage</span>
-      <div class="chips" role="group" aria-label="Schnellauswahl">
-        {QUICK_REASONS.map((r) => (
+    <div class="field card card-pad" aria-label={t`Enter decline`}>
+      <span class="field-label">
+        <Trans>Reason for declining</Trans>
+      </span>
+      <div class="chips" role="group" aria-label={t`Quick selection`}>
+        {quickReasons().map((r) => (
           <button type="button" class={`chip ${reason === r ? "selected" : ""}`} aria-pressed={reason === r ? "true" : "false"} onClick={() => setReason(r)}>
             {r}
           </button>
         ))}
       </div>
-      <input class="input" aria-label="Grund" value={reason} maxLength={200} placeholder="z. B. Schulveranstaltung" onInput={(e) => setReason((e.target as HTMLInputElement).value)} />
+      <input class="input" aria-label={t`Reason`} value={reason} maxLength={200} placeholder={t`e.g. school event`} onInput={(e) => setReason((e.target as HTMLInputElement).value)} />
       <div class="btn-row">
         <Button
           variant="primary"
           disabled={!reason.trim()}
           onClick={async () => {
             await sendResponse(event, p.person.id, "no", reason.trim());
-            toast(`Absage für ${p.person.firstName} eingetragen.`);
+            toast(t`Decline entered for ${name}.`);
             onDone();
           }}
         >
-          Absage eintragen
+          <Trans>Enter decline</Trans>
         </Button>
         <Button variant="ghost" onClick={() => setDeclining(false)}>
-          Abbrechen
+          <Trans>Cancel</Trans>
         </Button>
       </div>
     </div>
@@ -745,23 +851,29 @@ function CoachResponse({ event, p, onDone }: { event: EventDetail; p: Participan
 function ParticipantSheet({ event, p, onClose, onDone }: { event: EventDetail; p: ParticipantDetail; onClose: () => void; onDone: () => void }) {
   const wd = weekdayOf(event.startsAt);
   const teamId = p.teamId;
+  const name = p.person.firstName;
+  const weekdays = weekdayPlural(wd);
   return (
     <Sheet open onClose={onClose} title={personName(p.person)}>
       <div class="row-gap">
         <StatusPill status={p.status} late={p.isLate} />
-        {p.isHelper ? <span class="badge muted">Aushilfe</span> : null}
-        {p.unexcused ? <span class="badge warn">Fehlt unentschuldigt</span> : null}
+        {p.isHelper ? <span class="badge muted">{t`Stand-in`}</span> : null}
+        {p.unexcused ? (
+          <span class="badge warn">
+            <Trans>Absent without excuse</Trans>
+          </span>
+        ) : null}
       </div>
-      {p.reason ? <p>„{p.reason}“</p> : null}
+      {p.reason ? <p>{quoted(p.reason)}</p> : null}
       {event.isPast && !event.cancelled && (p.unexcused || p.status === "yes" || p.status === "open") ? (
         <div class="list">
           <SwitchRow
-            label="Fehlt unentschuldigt"
-            sub="Nicht abgesagt und trotzdem nicht da. Sehen nur Trainer, die Person selbst und ihre Eltern."
+            label={t`Absent without excuse`}
+            sub={t`Did not decline and still did not come. Only coaches, the person themselves and their parents see this.`}
             checked={p.unexcused}
             onChange={async (unexcused) => {
               await api.put(`/events/${event.id}/unexcused/${p.person.id}`, { unexcused });
-              toast(unexcused ? `${p.person.firstName}: fehlt unentschuldigt.` : "Markierung entfernt.");
+              toast(unexcused ? t`${name}: absent without excuse.` : t`Mark removed.`);
               onClose();
               onDone();
             }}
@@ -779,12 +891,12 @@ function ParticipantSheet({ event, p, onClose, onDone }: { event: EventDetail; p
       {event.kind === "training" && event.ruleId != null ? (
         <div class="list">
           <SwitchRow
-            label={`Dauerhaft abwesend (${weekdayPlural(wd)})`}
-            sub="Gilt für alle Trainings dieser Trainingszeit. Einzelne Zusagen bleiben möglich."
+            label={t`Permanently absent (${weekdays})`}
+            sub={t`Applies to all trainings in this training slot. Accepting individual sessions remains possible.`}
             checked={p.hasStandingAbsence}
             onChange={async (active) => {
               await api.put(`/rules/${event.ruleId}/standing-absences/${p.person.id}`, { active });
-              toast(active ? "Als dauerhaft abwesend markiert." : "Dauerabwesenheit entfernt.");
+              toast(active ? t`Marked as permanently absent.` : t`Permanent absence removed.`);
               onClose();
               onDone();
             }}
@@ -797,44 +909,44 @@ function ParticipantSheet({ event, p, onClose, onDone }: { event: EventDetail; p
             onClick={async () => {
               if (
                 !(await confirmDialog({
-                  title: `${p.person.firstName} inaktiv setzen?`,
-                  message: "Zum Beispiel bei Verletzung, Krankheit oder Schüleraustausch. Einen Grund speichert die App nicht. Für alle Termine gilt dann „abwesend (inaktiv)“, Erinnerungen entfallen.",
-                  confirmLabel: "Inaktiv setzen",
+                  title: t`Set ${name} to inactive?`,
+                  message: t`For example for an injury, illness or a school exchange. The app does not store a reason. All events then count as “absent (inactive)” and reminders stop.`,
+                  confirmLabel: t`Set inactive`,
                 }))
               )
                 return;
               await api.post(`/persons/${p.person.id}/active`, { active: false });
-              toast(`${p.person.firstName} ist jetzt inaktiv.`);
+              toast(t`${name} is now inactive.`);
               onClose();
               onDone();
             }}
           >
-            Inaktiv setzen
+            <Trans>Set inactive</Trans>
           </Button>
         ) : null}
         {teamId ? (
           <a class="btn btn-ghost" href={`/team/${teamId}/person/${p.person.id}`}>
-            Zur Person
+            <Trans>Go to person</Trans>
           </a>
         ) : null}
       </div>
-      {p.respondedAt ? <p class="small muted">Letzte Rückmeldung: {stamp(p.respondedAt)}</p> : null}
+      {p.respondedAt ? <p class="small muted">{lastResponse(stamp(p.respondedAt))}</p> : null}
     </Sheet>
   );
 }
 
-/** Mannschaft mit „Zu- und Absagen für alle sichtbar“: wer kommt, wer nicht (ohne Gründe). */
+/** Team with "responses visible to everyone": who is coming, who is not (without reasons). */
 function RosterList({ roster }: { roster: RosterEntry[] }) {
   const groups: { title: string; items: RosterEntry[] }[] = [
-    { title: "Zugesagt", items: roster.filter((r) => r.status === "yes") },
-    { title: "Abgesagt", items: roster.filter((r) => r.status === "no") },
-    { title: "Offen", items: roster.filter((r) => r.status === "open") },
-    { title: "Abwesend", items: roster.filter((r) => r.status === "standing" || r.status === "inactive") },
+    { title: t`Accepted`, items: roster.filter((r) => r.status === "yes") },
+    { title: t`Declined`, items: roster.filter((r) => r.status === "no") },
+    { title: t`Pending`, items: roster.filter((r) => r.status === "open") },
+    { title: t`Absent`, items: roster.filter((r) => r.status === "standing" || r.status === "inactive") },
   ].filter((g) => g.items.length);
   return (
-    <section class="card card-body stack-sm" aria-label="Wer kommt">
+    <section class="card card-body stack-sm" aria-label={t`Who is coming`}>
       <h2 class="section-title" style={{ margin: 0 }}>
-        Wer kommt
+        <Trans>Who is coming</Trans>
       </h2>
       {groups.map((g) => (
         <div>
@@ -849,8 +961,8 @@ function RosterList({ roster }: { roster: RosterEntry[] }) {
 }
 
 /**
- * Sondertermin: Hinweis auf eigene Dienste bzw. offene Plätze. Trainer, Ersteller und Organisatoren legen
- * Zeitblöcke an; Trainer, Admins und der Ersteller ordnen Organisatoren zu.
+ * Special event: note on your own duties or open spots. Coaches, the creator and organisers create
+ * time blocks; coaches, admins and the creator assign organisers.
  */
 function SpecialHelpers({ event, onChanged }: { event: EventDetail; onChanged: () => void }) {
   const me = useMe();
@@ -863,11 +975,11 @@ function SpecialHelpers({ event, onChanged }: { event: EventDetail; onChanged: (
   const showOrganizers = !!org && (org.editable || event.dutyManage || org.people.length > 0);
   if (!text && !event.dutyManage && !showOrganizers) return null;
   return (
-    <section class="card card-pad stack-sm" aria-label="Helfer">
+    <section class="card card-pad stack-sm" aria-label={t`Helpers`}>
       {text ? (
         <a class="ext-link" href="/helfer">
           <Icon name="helping" size={16} />
-          Helferplan · {text}
+          <Trans>Helper plan · {text}</Trans>
         </a>
       ) : null}
       {event.dutyManage ? (
@@ -875,52 +987,61 @@ function SpecialHelpers({ event, onChanged }: { event: EventDetail; onChanged: (
           {inHelperTab && !text ? (
             <a class="ext-link" href="/helfer">
               <Icon name="helping" size={16} />
-              Helferdienste im Reiter Helfer verwalten
+              <Trans>Manage helper duties in the Helpers tab</Trans>
             </a>
           ) : null}
           <Button size="sm" variant="dashed" icon="plus" onClick={() => setAdding(true)}>
-            Helfer: Zeitblock hinzufügen
+            <Trans>Helpers: add time block</Trans>
           </Button>
         </>
       ) : null}
       {showOrganizers && org ? (
-        <div class="stack-sm" aria-label="Organisatoren" role="group">
-          <strong>Organisatoren</strong>
+        <div class="stack-sm" aria-label={t`Organisers`} role="group">
+          <strong>
+            <Trans>Organisers</Trans>
+          </strong>
           <ul class="list">
             {org.creator ? (
               <li class="list-row">
                 <span class="main">
                   <span class="title">{org.creator.name}</span>
-                  <span class="sub">hat den Termin angelegt</span>
+                  <span class="sub">
+                    <Trans>created the event</Trans>
+                  </span>
                 </span>
               </li>
             ) : null}
-            {org.people.map((p) => (
-              <li class="list-row">
-                <span class="main">
-                  <span class="title">{p.name}</span>
-                </span>
-                {org.editable ? (
-                  <button
-                    type="button"
-                    class="icon-btn icon-btn-sm"
-                    aria-label={`${p.name} als Organisator entfernen`}
-                    onClick={async () => {
-                      await api.del(`/events/${event.id}/organizers/${p.id}`);
-                      toast(`${p.name} ist kein Organisator mehr.`);
-                      onChanged();
-                    }}
-                  >
-                    <Icon name="x" size={16} />
-                  </button>
-                ) : null}
-              </li>
-            ))}
+            {org.people.map((p) => {
+              const name = p.name;
+              return (
+                <li class="list-row">
+                  <span class="main">
+                    <span class="title">{p.name}</span>
+                  </span>
+                  {org.editable ? (
+                    <button
+                      type="button"
+                      class="icon-btn icon-btn-sm"
+                      aria-label={t`Remove ${name} as organiser`}
+                      onClick={async () => {
+                        await api.del(`/events/${event.id}/organizers/${p.id}`);
+                        toast(t`${name} is no longer an organiser.`);
+                        onChanged();
+                      }}
+                    >
+                      <Icon name="x" size={16} />
+                    </button>
+                  ) : null}
+                </li>
+              );
+            })}
           </ul>
-          <p class="small muted">Organisatoren verwalten die Helferdienste dieses Termins.</p>
+          <p class="small muted">
+            <Trans>Organisers manage the helper duties of this event.</Trans>
+          </p>
           {org.editable ? (
             <Button size="sm" variant="dashed" icon="plus" onClick={() => setAddOrganizer(true)}>
-              Organisator hinzufügen
+              <Trans>Add organiser</Trans>
             </Button>
           ) : null}
         </div>
@@ -939,7 +1060,8 @@ function SpecialHelpers({ event, onChanged }: { event: EventDetail; onChanged: (
               endsAt: b.endsAt,
               slots: b.slots,
             });
-            toast(`Zeitblock ${b.label} hinzugefügt. Er steht jetzt im Reiter Helfer.`);
+            const label = b.label;
+            toast(t`Time block ${label} added. It is now in the Helpers tab.`);
             invalidate("/duties");
             void refreshSession();
             onChanged();
@@ -951,7 +1073,7 @@ function SpecialHelpers({ event, onChanged }: { event: EventDetail; onChanged: (
   );
 }
 
-/** Organisator suchen: ordentliche Mitglieder mit Zugang, ohne Eingabe die der beteiligten Mannschaften. */
+/** Search for an organiser: full members with access, without input those of the teams involved. */
 function OrganizerSheet({ eventId, onClose, onDone }: { eventId: number; onClose: () => void; onDone: () => void }) {
   const [search, setSearch] = useState("");
   const q = search.trim();
@@ -961,9 +1083,15 @@ function OrganizerSheet({ eventId, onClose, onDone }: { eventId: number; onClose
   const needle = q.toLowerCase();
   const list = (people.data?.people ?? []).filter((p) => q.length >= 2 || !needle || p.name.toLowerCase().includes(needle));
   return (
-    <Sheet open onClose={onClose} title="Organisator hinzufügen">
-      <TextField label="Name suchen" value={search} onInput={setSearch} maxLength={60} hint="Ordentliche Mitglieder mit Zugang zur App. Ab 2 Buchstaben: alle im Verein." />
-      <ul class="list" aria-label="Personen">
+    <Sheet open onClose={onClose} title={t`Add organiser`}>
+      <TextField
+        label={t`Search by name`}
+        value={search}
+        onInput={setSearch}
+        maxLength={60}
+        hint={t`Full members with access to the app. From 2 letters: everyone in the club.`}
+      />
+      <ul class="list" aria-label={t`People`}>
         {list.slice(0, 30).map((p) => (
           <li>
             <button
@@ -972,7 +1100,8 @@ function OrganizerSheet({ eventId, onClose, onDone }: { eventId: number; onClose
               onClick={async () => {
                 try {
                   await api.post(`/events/${eventId}/organizers`, { personId: p.personId });
-                  toast(`${p.name} organisiert jetzt mit.`);
+                  const name = p.name;
+                  toast(t`${name} is now co-organising.`);
                   onDone();
                   onClose();
                 } catch (err) {
@@ -989,7 +1118,11 @@ function OrganizerSheet({ eventId, onClose, onDone }: { eventId: number; onClose
           </li>
         ))}
       </ul>
-      {people.data && !list.length ? <p class="small muted">Niemand gefunden.</p> : null}
+      {people.data && !list.length ? (
+        <p class="small muted">
+          <Trans>Nobody found.</Trans>
+        </p>
+      ) : null}
     </Sheet>
   );
 }

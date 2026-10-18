@@ -1,3 +1,4 @@
+import { t } from "@lingui/core/macro";
 import { Hono } from "hono";
 import { z } from "zod";
 import type { EventSummary, MyDuty } from "../../shared/types";
@@ -30,15 +31,15 @@ import { addDays, isDate, isLocalDateTime, isTime, localToInstant, nowLocal, tod
 export const eventRoutes = new Hono<AppEnv>();
 
 const rangeSchema = z.object({
-  from: z.string().refine(isDate, "Ungültiges Datum").optional(),
-  to: z.string().refine(isDate, "Ungültiges Datum").optional(),
+  from: z.string().refine(isDate, { error: () => t`Invalid date` }).optional(),
+  to: z.string().refine(isDate, { error: () => t`Invalid date` }).optional(),
   teamId: z.coerce.number().int().positive().optional(),
   kind: z.enum(["training", "game", "special"]).optional(),
-  /** Vergangene Termine der Saison, neueste zuerst (from/to werden dann ignoriert) */
+  /** Past events of the season, newest first (from/to are then ignored) */
   past: z.literal("1").optional(),
-  /** Seitenweise für die Terminübersicht: die nächsten `limit` relevanten Termine (from/to/teamId/kind entfallen) */
+  /** Page by page for the event overview: the next `limit` relevant events (from/to/teamId/kind are dropped) */
   limit: z.coerce.number().int().min(1).max(200).optional(),
-  /** Nur mit limit: Mannschaftsfilter der Terminübersicht, nach Sichtbarkeit und Relevanz */
+  /** Only with limit: team filter of the event overview, by visibility and relevance */
   team: z.coerce.number().int().positive().optional(),
 });
 
@@ -49,8 +50,8 @@ eventRoutes.get("/events", async (c) => {
   if (q.limit) return c.json(await loadEventPage(c.env.DB, actor, { limit: q.limit, past: !!q.past, teamId: q.team ?? null }));
   const from = q.from ?? todayLocal();
   const to = q.to ?? addDays(from, 70);
-  if (to < from) throw badRequest("Ungültiger Zeitraum.");
-  // Termine gibt es nur aus der laufenden Saison; der Saisonwechsel löscht die alten
+  if (to < from) throw badRequest(t`Invalid period.`);
+  // Events only exist for the current season; the season change deletes the old ones
   const rows = q.past
     ? (await listVisibleEvents(c.env.DB, actor, { from: "0000-01-01T00:00", to: nowLocal(), teamId: q.teamId, kind: q.kind })).reverse()
     : await listVisibleEvents(c.env.DB, actor, {
@@ -63,7 +64,7 @@ eventRoutes.get("/events", async (c) => {
   const [ctx, duties, needed] = await Promise.all([
     loadEventContext(c.env.DB, rows),
     loadMyDuties(c.env.DB, actor, gameIds),
-    // Vergangene Spiele brauchen keine Helfer mehr
+    // Past games need no more helpers
     q.past ? Promise.resolve(new Map<number, number>()) : loadHelpersNeeded(c.env.DB, actor, gameIds, nowLocal()),
   ]);
   const now = Date.now();
@@ -80,16 +81,16 @@ eventRoutes.get("/events", async (c) => {
   });
 });
 
-/** Helferplan an der Terminübersicht: eigene Dienste, sonst ggf. „Helfer benötigt“. */
+/** Helper plan on the event overview: own duties, else possibly "helpers needed". */
 function withDuties<T extends EventSummary>(e: T, duties: Map<number, MyDuty[]>, needed: Map<number, number>): T {
   const myDuties = duties.get(e.id) ?? [];
-  // Wer (oder wessen Familie) schon einen Dienst hat, bekommt keinen Aufruf
+  // Whoever (or whose family) already has a duty gets no call
   return { ...e, myDuties, helpersNeeded: myDuties.length ? 0 : (needed.get(e.id) ?? 0) };
 }
 
 async function visibleEventOr404(db: D1Database, actor: Actor, eventId: number): Promise<EventRow> {
   const event = await loadVisibleEvent(db, actor, eventId);
-  if (!event) throw notFound("Diesen Termin gibt es nicht oder du kannst ihn nicht sehen.");
+  if (!event) throw notFound(t`This event does not exist or you cannot see it.`);
   return event;
 }
 
@@ -112,7 +113,7 @@ eventRoutes.get("/events/:id", async (c) => {
   return c.json({ ...detail, ...info, organizing, carpool });
 });
 
-/** Ersteller und Organisatoren eines Sondertermins; sie verwalten die Helferdienste. */
+/** Creator and organisers of a special event; they manage the helper duties. */
 async function organizerInfo(db: D1Database, actor: Actor, eventId: number, kind: string, teamIds: number[]) {
   const managers = (await dutyManagers(db, [eventId])).get(eventId);
   const dutyManage = teamIds.length > 0 && (kind === "game" || kind === "special") && mayManageDuties(actor, teamIds, managers);
@@ -128,7 +129,7 @@ async function organizerInfo(db: D1Database, actor: Actor, eventId: number, kind
   return { dutyManage, organizers: { creator: creator ?? null, people, editable: mayEditOrganizers(actor, teamIds, creator?.id ?? null) } };
 }
 
-/** Organisatoren ändern: Trainer der Mannschaften, Admins und der Ersteller. */
+/** Who changes organisers: coaches of the teams, admins and the creator. */
 function mayEditOrganizers(actor: Actor, teamIds: number[], creatorId: number | null): boolean {
   return isCoachOfAny(actor, teamIds) || actor.isAdmin || creatorId === actor.personId;
 }
@@ -141,9 +142,9 @@ async function organizerEvent(db: D1Database, actor: Actor, eventId: number) {
        FROM events e WHERE e.id = ?`,
     eventId,
   );
-  if (!e || e.kind !== "special") throw notFound("Organisatoren gibt es nur bei Sonderterminen.");
+  if (!e || e.kind !== "special") throw notFound(t`Only special events have organisers.`);
   const teamIds = JSON.parse(e.team_ids) as number[];
-  if (!mayEditOrganizers(actor, teamIds, e.created_by)) throw forbidden("Organisatoren ändern Trainer, Admins und wer den Termin angelegt hat.");
+  if (!mayEditOrganizers(actor, teamIds, e.created_by)) throw forbidden(t`Organisers are changed by coaches, admins and whoever created the event.`);
   return { ...e, teamIds };
 }
 
@@ -159,14 +160,17 @@ eventRoutes.post("/events/:id/organizers", async (c) => {
         AND EXISTS (SELECT 1 FROM club_members cm WHERE cm.person_id = p.id)`,
     personId,
   );
-  if (!ok) throw badRequest("Organisator kann nur ein ordentliches Mitglied mit Zugang zur App sein.", "not_eligible");
+  if (!ok) throw badRequest(t`An organiser can only be a full member with access to the app.`, "not_eligible");
   const res = await run(db, "INSERT OR IGNORE INTO event_organizers (event_id, person_id, added_by) VALUES (?, ?, ?)", event.id, personId, actor.personId);
   if (res.meta.changes && personId !== actor.personId) {
     c.executionCtx.waitUntil(
-      notifyPersons(c.env, [personId], "events", {
-        title: `Du organisierst „${event.title ?? "Termin"}“ mit`,
-        body: "Du kannst jetzt die Helferdienste dieses Termins verwalten.",
-        url: `/termine/${event.id}`,
+      notifyPersons(c.env, [personId], "events", () => {
+        const eventName = event.title ?? t`Event`;
+        return {
+          title: t`You are co-organising “${eventName}”`,
+          body: t`You can now manage the helper duties of this event.`,
+          url: `/termine/${event.id}`,
+        };
       }, { teamIds: event.teamIds }),
     );
   }
@@ -182,12 +186,12 @@ eventRoutes.delete("/events/:id/organizers/:personId", async (c) => {
   return c.json({ ok: true });
 });
 
-// Zu- und Absagen ---------------------------------------------------------------
+// Responses ----------------------------------------------------------------------
 
 const respondSchema = z.object({
   personId: z.number().int().positive(),
   status: z.enum(["yes", "no"]),
-  reason: z.string().trim().max(200, "Die Begründung ist zu lang (höchstens 200 Zeichen).").optional(),
+  reason: z.string().trim().max(200, { error: () => t`The reason is too long (at most 200 characters).` }).optional(),
 });
 
 eventRoutes.post("/events/:id/responses", async (c) => {
@@ -209,23 +213,23 @@ export async function respond(
 ) {
   const ctx = await loadEventContext(env.DB, [event]);
   const teamIds = ctx.eventTeams.get(event.id) ?? [];
-  // Trainer der beteiligten Mannschaften und Admins dürfen für Teilnehmer antworten,
-  // z. B. für Familien ohne App. Elterliche Freigaben gelten dann nicht.
+  // Coaches of the teams involved and admins may respond for participants,
+  // e.g. for families without the app. Parental permissions do not apply then.
   const asCoach = personId !== actor.personId && !actor.children.some((ch) => ch.id === personId) && (event.club_wide === 1 ? actor.isAdmin : isCoachOfAny(actor, teamIds));
   if (!asCoach) requireActFor(actor, personId, status === "yes" ? "may_accept" : "may_decline", teamIds);
-  if (event.cancelled_at) throw conflict("Der Termin wurde abgesagt.");
-  if (localToInstant(event.starts_at) <= now) throw conflict("Der Termin hat schon begonnen.");
+  if (event.cancelled_at) throw conflict(t`The event has been cancelled.`);
+  if (localToInstant(event.starts_at) <= now) throw conflict(t`The event has already started.`);
 
   const participant = (ctx.participants.get(event.id) ?? []).find((p) => p.person.id === personId);
   if (!participant) {
-    throw forbidden(event.kind === "game" ? "Rückmeldungen sind nur für nominierte Spieler möglich." : "Diese Person nimmt an dem Termin nicht teil.");
+    throw forbidden(event.kind === "game" ? t`Only nominated players can respond.` : t`This person does not take part in the event.`);
   }
-  if (!participant.isActive) throw conflict("Derzeit inaktiv gemeldet. Bitte sprich mit deinem Trainer.");
-  // Zusagen heißt eine Absage zurücknehmen. Wer schon zugesagt ist (auch automatisch), bleibt es.
+  if (!participant.isActive) throw conflict(t`Currently marked as inactive. Please talk to your coach.`);
+  // Accepting means withdrawing a decline. Whoever has already accepted (also automatically) stays so.
   if (status === "yes" && participant.status === "yes") return toSummary(event, ctx, actor, now);
 
   const reason = status === "no" ? (reasonInput ?? "").trim() : null;
-  if (status === "no" && !reason) throw badRequest("Bitte gib kurz einen Grund für die Absage an.", "reason_required");
+  if (status === "no" && !reason) throw badRequest(t`Please give a short reason for declining.`, "reason_required");
 
   const teams = eventTeams(event, ctx);
   const isLate = status === "no" && now > deadlineInstant(event, teams);
@@ -246,37 +250,63 @@ export async function respond(
     utcIso(now),
   );
 
-  // Wer absagt, sucht keine Mitfahrgelegenheit mehr
+  // Whoever declines no longer looks for a ride
   if (status === "no" && carpoolGame(event)) await releaseRequests(env, { event, ctx, teamIds }, [personId], [actor.accountId]);
 
-  // Benachrichtigungen
-  const title = eventTitle(event, teams);
-  const when = `${shortDate(event.starts_at)}, ${shortTime(event.starts_at)}`;
+  // Notifications: texts per recipient language
   const name = participant.person.firstName;
-  const what = eventLabel(event.kind, title);
+  const actorName = actor.firstName;
+  const training = event.kind === "training";
+  const texts = () => ({
+    when: `${shortDate(event.starts_at)}, ${shortTime(event.starts_at)}`,
+    what: eventLabel(event.kind, eventTitle(event, teams)),
+  });
   if (isLate) {
     await notifyCoaches(
       env,
-      teams.map((t) => t.id),
-      {
-        title: "Kurzfristige Absage",
-        body: `${name} hat ${event.kind === "training" ? "das Training" : what} am ${when} kurzfristig abgesagt.`,
-        url: `/termine/${event.id}`,
-        tag: `late-${event.id}`,
+      teams.map((tm) => tm.id),
+      () => {
+        const { when, what } = texts();
+        return {
+          title: t`Short-notice decline`,
+          body: training ? t`${name} declined training on ${when} at short notice.` : t`${name} declined ${what} on ${when} at short notice.`,
+          url: `/termine/${event.id}`,
+          tag: `late-${event.id}`,
+        };
       },
       { exclude: [actor.accountId] },
     );
   }
-  // Eltern bzw. Kind informieren, wenn jemand anderes geantwortet hat.
+  // Inform parents or child when someone else responded.
   const hasOthers = actor.personId !== personId || actor.hasGuardians;
   if (hasOthers) {
     const accounts = await recipientsForPersons(env.DB, [personId], "responses", teamIds);
-    const verb = status === "yes" ? "zugesagt" : "abgesagt";
-    const body =
-      actor.personId === personId
-        ? `${name} hat für ${event.kind === "training" ? "das Training" : what} am ${when} ${verb}.`
-        : `${actor.firstName} hat für ${name} ${event.kind === "training" ? "das Training" : what} am ${when} ${verb}.`;
-    await enqueuePush(env, accounts, { title: `Rückmeldung: ${verb}`, body, url: `/termine/${event.id}` }, { exclude: [actor.accountId] });
+    const self = actor.personId === personId;
+    await enqueuePush(
+      env,
+      accounts,
+      () => {
+        const { when, what } = texts();
+        const body =
+          status === "yes"
+            ? self
+              ? training
+                ? t`${name} accepted training on ${when}.`
+                : t`${name} accepted ${what} on ${when}.`
+              : training
+                ? t`${actorName} accepted training on ${when} for ${name}.`
+                : t`${actorName} accepted ${what} on ${when} for ${name}.`
+            : self
+              ? training
+                ? t`${name} declined training on ${when}.`
+                : t`${name} declined ${what} on ${when}.`
+              : training
+                ? t`${actorName} declined training on ${when} for ${name}.`
+                : t`${actorName} declined ${what} on ${when} for ${name}.`;
+        return { title: status === "yes" ? t`Response: accepted` : t`Response: declined`, body, url: `/termine/${event.id}` };
+      },
+      { exclude: [actor.accountId] },
+    );
   }
 
   const fresh = (await loadEvent(env.DB, event.id))!;
@@ -284,19 +314,19 @@ export async function respond(
   return toSummary(fresh, freshCtx, actor, now);
 }
 
-// Verwaltung durch Trainer ------------------------------------------------------
+// Management by coaches ------------------------------------------------------
 
 async function managedEvent(db: D1Database, actor: Actor, eventId: number) {
   const event = await loadEvent(db, eventId);
-  if (!event) throw notFound("Diesen Termin gibt es nicht.");
+  if (!event) throw notFound(t`This event does not exist.`);
   const ctx = await loadEventContext(db, [event]);
   const teams = eventTeams(event, ctx);
   const allowed = event.club_wide === 1 ? actor.isAdmin : isCoachOfAny(actor, teams.map((t) => t.id));
-  if (!allowed) throw forbidden("Das dürfen nur Trainer der beteiligten Mannschaften.");
+  if (!allowed) throw forbidden(t`Only coaches of the teams involved may do this.`);
   return { event, ctx, teams };
 }
 
-/** Personen, die über Änderungen an einem Termin informiert werden. */
+/** Persons who are informed about changes to an event. */
 async function affectedPersons(event: EventRow, ctx: Awaited<ReturnType<typeof loadEventContext>>): Promise<number[]> {
   const parts = ctx.participants.get(event.id) ?? [];
   const ids = new Set(parts.filter((p) => p.status !== "inactive" && p.status !== "standing").map((p) => p.person.id));
@@ -306,20 +336,20 @@ async function affectedPersons(event: EventRow, ctx: Awaited<ReturnType<typeof l
   return [...ids];
 }
 
-/** Nach Beginn: Trainer markieren, wer trotz Zusage unentschuldigt gefehlt hat. */
+/** After the start: coaches mark who was absent without excuse despite accepting. */
 eventRoutes.put("/events/:id/unexcused/:personId", async (c) => {
   const actor = requireActor(c);
   const personId = intParam(c, "personId");
   const { unexcused } = parse(z.object({ unexcused: z.boolean() }), await readJson(c.req.raw));
   const { event, ctx } = await managedEvent(c.env.DB, actor, intParam(c, "id"));
-  if (event.cancelled_at) throw conflict("Der Termin wurde abgesagt.");
-  if (localToInstant(event.starts_at) > Date.now()) throw conflict("Das geht erst, wenn der Termin begonnen hat.");
+  if (event.cancelled_at) throw conflict(t`The event has been cancelled.`);
+  if (localToInstant(event.starts_at) > Date.now()) throw conflict(t`This is only possible once the event has started.`);
   const part = (ctx.participants.get(event.id) ?? []).find((p) => p.person.id === personId);
-  if (!part) throw notFound("Diese Person nimmt an dem Termin nicht teil.");
+  if (!part) throw notFound(t`This person does not take part in the event.`);
   if (unexcused && part.status !== "yes" && part.status !== "open") {
-    throw conflict("Wer abgesagt hat, dauerhaft abwesend oder inaktiv ist, fehlt entschuldigt.");
+    throw conflict(t`Anyone who declined, is permanently absent or inactive is excused.`);
   }
-  // Ist der Termin schon im Anwesenheitsprotokoll, wird es mitgezogen
+  // If the event is already in the attendance record, it is updated as well
   await c.env.DB.batch([
     unexcused
       ? stmt(c.env.DB, "INSERT OR IGNORE INTO unexcused_absences (event_id, person_id, marked_by) VALUES (?, ?, ?)", event.id, personId, actor.personId)
@@ -329,14 +359,14 @@ eventRoutes.put("/events/:id/unexcused/:personId", async (c) => {
   return c.json({ ok: true });
 });
 
-const cancelSchema = z.object({ reason: z.string().trim().min(1, "Bitte gib einen Grund an.").max(200) });
+const cancelSchema = z.object({ reason: z.string().trim().min(1, { error: () => t`Please give a reason.` }).max(200) });
 
 eventRoutes.post("/events/:id/cancel", async (c) => {
   const actor = requireActor(c);
   const { reason } = parse(cancelSchema, await readJson(c.req.raw));
   const { event, ctx, teams } = await managedEvent(c.env.DB, actor, intParam(c, "id"));
-  if (event.cancelled_at) throw conflict("Der Termin ist bereits abgesagt.");
-  if (localToInstant(event.starts_at) <= Date.now()) throw conflict("Vergangene Termine können nicht abgesagt werden.");
+  if (event.cancelled_at) throw conflict(t`The event is already cancelled.`);
+  if (localToInstant(event.starts_at) <= Date.now()) throw conflict(t`Past events cannot be cancelled.`);
   await run(
     c.env.DB,
     `UPDATE events SET cancelled_at = ?, cancelled_by = ?, cancel_reason = ?, is_detached = 1,
@@ -346,18 +376,27 @@ eventRoutes.post("/events/:id/cancel", async (c) => {
     reason,
     event.id,
   );
-  const title = eventTitle(event, teams);
-  const label = event.kind === "training" ? "Training" : title;
-  const when = `${shortDate(event.starts_at)}, ${shortTime(event.starts_at)}`;
+  const labelOf = () => (event.kind === "training" ? t`Training` : eventTitle(event, teams));
   await notifyPersons(
     c.env,
     await affectedPersons(event, ctx),
     "events",
-    { title: `Abgesagt: ${label}`, body: `${label} am ${when} fällt aus. Grund: ${reason}`, url: `/termine/${event.id}` },
-    { teamIds: teams.map((t) => t.id), exclude: [actor.accountId] },
+    () => {
+      const label = labelOf();
+      const when = `${shortDate(event.starts_at)}, ${shortTime(event.starts_at)}`;
+      return { title: t`Cancelled: ${label}`, body: t`${label} on ${when} is cancelled. Reason: ${reason}`, url: `/termine/${event.id}` };
+    },
+    { teamIds: teams.map((tm) => tm.id), exclude: [actor.accountId] },
   );
+  const actorName = actor.firstName;
+  const label = labelOf();
+  const date = shortDate(event.starts_at);
   c.executionCtx.waitUntil(
-    postSystemMessage(c.env, teams.map((t) => t.id), `${actor.firstName} hat ${event.kind === "training" ? "das Training" : label} am ${shortDate(event.starts_at)} abgesagt.`),
+    postSystemMessage(
+      c.env,
+      teams.map((tm) => tm.id),
+      event.kind === "training" ? t`${actorName} cancelled training on ${date}.` : t`${actorName} cancelled ${label} on ${date}.`,
+    ),
   );
   return c.json({ ok: true });
 });
@@ -365,27 +404,36 @@ eventRoutes.post("/events/:id/cancel", async (c) => {
 eventRoutes.post("/events/:id/uncancel", async (c) => {
   const actor = requireActor(c);
   const { event, ctx, teams } = await managedEvent(c.env.DB, actor, intParam(c, "id"));
-  if (!event.cancelled_at) throw conflict("Der Termin ist nicht abgesagt.");
-  if (localToInstant(event.starts_at) <= Date.now()) throw conflict("Der Termin liegt in der Vergangenheit.");
+  if (!event.cancelled_at) throw conflict(t`The event is not cancelled.`);
+  if (localToInstant(event.starts_at) <= Date.now()) throw conflict(t`The event is in the past.`);
   await run(
     c.env.DB,
     `UPDATE events SET cancelled_at = NULL, cancelled_by = NULL, cancel_reason = NULL,
        updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now') WHERE id = ?`,
     event.id,
   );
-  const label = event.kind === "training" ? "Training" : eventTitle(event, teams);
+  const labelOf = () => (event.kind === "training" ? t`Training` : eventTitle(event, teams));
   await notifyPersons(
     c.env,
     await affectedPersons(event, ctx),
     "events",
-    { title: `Findet statt: ${label}`, body: `${label} am ${shortDate(event.starts_at)}, ${shortTime(event.starts_at)} findet doch statt.`, url: `/termine/${event.id}` },
-    { teamIds: teams.map((t) => t.id), exclude: [actor.accountId] },
+    () => {
+      const label = labelOf();
+      const when = `${shortDate(event.starts_at)}, ${shortTime(event.starts_at)}`;
+      return { title: t`Going ahead: ${label}`, body: t`${label} on ${when} is going ahead after all.`, url: `/termine/${event.id}` };
+    },
+    { teamIds: teams.map((tm) => tm.id), exclude: [actor.accountId] },
   );
+  const actorName = actor.firstName;
+  const label = labelOf();
+  const date = shortDate(event.starts_at);
   c.executionCtx.waitUntil(
     postSystemMessage(
       c.env,
-      teams.map((t) => t.id),
-      `${actor.firstName} hat die Absage zurückgenommen: ${event.kind === "training" ? "Das Training" : label} am ${shortDate(event.starts_at)} findet doch statt.`,
+      teams.map((tm) => tm.id),
+      event.kind === "training"
+        ? t`${actorName} withdrew the cancellation: training on ${date} is going ahead after all.`
+        : t`${actorName} withdrew the cancellation: ${label} on ${date} is going ahead after all.`,
     ),
   );
   return c.json({ ok: true });
@@ -393,12 +441,12 @@ eventRoutes.post("/events/:id/uncancel", async (c) => {
 
 const updateSchema = z.object({
   title: z.string().trim().min(1).max(80).optional(),
-  startsAt: z.string().refine(isLocalDateTime, "Ungültige Uhrzeit").optional(),
-  endsAt: z.string().refine(isLocalDateTime, "Ungültige Uhrzeit").nullable().optional(),
+  startsAt: z.string().refine(isLocalDateTime, { error: () => t`Invalid time` }).optional(),
+  endsAt: z.string().refine(isLocalDateTime, { error: () => t`Invalid time` }).nullable().optional(),
   locationId: z.number().int().positive().nullable().optional(),
   notes: z.string().trim().max(1000).nullable().optional(),
   meetingPoint: z.string().trim().max(200).nullable().optional(),
-  meetingTime: z.string().refine(isTime, "Ungültige Uhrzeit").nullable().optional(),
+  meetingTime: z.string().refine(isTime, { error: () => t`Invalid time` }).nullable().optional(),
   coachNotes: z.string().trim().max(1000).nullable().optional(),
   declineHours: z.number().int().min(0).max(168).nullable().optional(),
 });
@@ -409,18 +457,18 @@ eventRoutes.patch("/events/:id", async (c) => {
   const { event, ctx, teams } = await managedEvent(c.env.DB, actor, intParam(c, "id"));
   const startsAt = input.startsAt ?? event.starts_at;
   const endsAt = input.endsAt === undefined ? event.ends_at : input.endsAt;
-  if (endsAt && endsAt <= startsAt) throw badRequest("Das Ende muss nach dem Beginn liegen.");
-  if (input.title && event.kind !== "special") throw badRequest("Nur Sondertermine haben einen Titel.");
+  if (endsAt && endsAt <= startsAt) throw badRequest(t`The end must be after the start.`);
+  if (input.title && event.kind !== "special") throw badRequest(t`Only special events have a title.`);
   if (event.kind === "game" && (input.startsAt || input.locationId !== undefined)) {
-    throw badRequest("Anwurf und Halle kommen aus dem Spielplan und lassen sich hier nicht ändern.");
+    throw badRequest(t`Throw-off and hall come from the schedule and cannot be changed here.`);
   }
   if (input.locationId != null) {
     const loc = await first(c.env.DB, "SELECT 1 AS ok FROM locations WHERE id = ?", input.locationId);
-    if (!loc) throw badRequest("Unbekannter Ort.");
+    if (!loc) throw badRequest(t`Unknown location.`);
   }
   const moved =
     startsAt !== event.starts_at || (input.locationId !== undefined && input.locationId !== event.location_id) || endsAt !== event.ends_at;
-  if (moved && localToInstant(event.starts_at) <= Date.now()) throw conflict("Vergangene Termine können nicht verschoben werden.");
+  if (moved && localToInstant(event.starts_at) <= Date.now()) throw conflict(t`Past events cannot be moved.`);
 
   await run(
     c.env.DB,
@@ -442,16 +490,32 @@ eventRoutes.patch("/events/:id", async (c) => {
 
   if (moved || input.meetingPoint !== undefined || input.meetingTime !== undefined) {
     const fresh = (await loadEvent(c.env.DB, event.id))!;
-    const label = event.kind === "training" ? "Training" : eventTitle(event, teams);
-    const body = moved
-      ? `${label} am ${shortDate(event.starts_at)} ist jetzt am ${shortDate(fresh.starts_at)} um ${shortTime(fresh.starts_at)}${fresh.loc_name ? `, ${fresh.loc_name}` : ""}.`
-      : `Neue Infos zu ${label} am ${shortDate(fresh.starts_at)}${fresh.meeting_point ? `: Treffpunkt ${fresh.meeting_point}` : ""}${fresh.meeting_time ? ` um ${fresh.meeting_time}` : ""}.`;
+    const location = fresh.loc_name;
+    const point = fresh.meeting_point;
+    const meetAt = fresh.meeting_time;
     await notifyPersons(
       c.env,
       await affectedPersons(event, ctx),
       "events",
-      { title: moved ? `Geändert: ${label}` : `Info: ${label}`, body, url: `/termine/${event.id}` },
-      { teamIds: teams.map((t) => t.id), exclude: [actor.accountId] },
+      () => {
+        const label = event.kind === "training" ? t`Training` : eventTitle(event, teams);
+        const oldDate = shortDate(event.starts_at);
+        const date = shortDate(fresh.starts_at);
+        const time = shortTime(fresh.starts_at);
+        const body = moved
+          ? location
+            ? t`${label} on ${oldDate} is now on ${date} at ${time}, ${location}.`
+            : t`${label} on ${oldDate} is now on ${date} at ${time}.`
+          : point
+            ? meetAt
+              ? t`New info on ${label} on ${date}: meeting point ${point} at ${meetAt}.`
+              : t`New info on ${label} on ${date}: meeting point ${point}.`
+            : meetAt
+              ? t`New info on ${label} on ${date} at ${meetAt}.`
+              : t`New info on ${label} on ${date}.`;
+        return { title: moved ? t`Changed: ${label}` : t`Info: ${label}`, body, url: `/termine/${event.id}` };
+      },
+      { teamIds: teams.map((tm) => tm.id), exclude: [actor.accountId] },
     );
   }
   const fresh = (await loadEvent(c.env.DB, event.id))!;
@@ -464,49 +528,52 @@ eventRoutes.post("/events/:id/remind", async (c) => {
   const actor = requireActor(c);
   const { personIds } = parse(remindSchema, await readJson(c.req.raw));
   const { event, ctx, teams } = await managedEvent(c.env.DB, actor, intParam(c, "id"));
-  if (event.cancelled_at || localToInstant(event.starts_at) <= Date.now()) throw conflict("Für diesen Termin sind keine Erinnerungen mehr möglich.");
+  if (event.cancelled_at || localToInstant(event.starts_at) <= Date.now()) throw conflict(t`Reminders are no longer possible for this event.`);
   const open = (ctx.participants.get(event.id) ?? []).filter((p) => p.status === "open").map((p) => p.person.id);
   const targets = personIds ? open.filter((id) => personIds.includes(id)) : open;
   if (!targets.length) return c.json({ sent: 0, persons: 0 });
-  // Nicht mehr als eine Sammel-Erinnerung pro Termin und Viertelstunde.
+  // No more than one group reminder per event and quarter of an hour.
   const key = `remind:${event.id}:${personIds ? targets.join(",") : "all"}`;
-  if (await c.env.KV.get(key)) throw conflict("Gerade wurde schon erinnert. Bitte warte ein paar Minuten.", "rate_limited");
+  if (await c.env.KV.get(key)) throw conflict(t`A reminder was just sent. Please wait a few minutes.`, "rate_limited");
   await c.env.KV.put(key, "1", { expirationTtl: 900 });
-  const label = event.kind === "training" ? "Training" : eventTitle(event, teams);
   const sent = await notifyPersons(
     c.env,
     targets,
     "reminders",
-    {
-      title: "Bitte gib Bescheid",
-      body: `${label} am ${shortDate(event.starts_at)}, ${shortTime(event.starts_at)}: Bist du dabei?`,
-      url: `/termine/${event.id}`,
-      tag: `remind-${event.id}`,
+    () => {
+      const label = event.kind === "training" ? t`Training` : eventTitle(event, teams);
+      const when = `${shortDate(event.starts_at)}, ${shortTime(event.starts_at)}`;
+      return {
+        title: t`Please let us know`,
+        body: t`${label} on ${when}: are you coming?`,
+        url: `/termine/${event.id}`,
+        tag: `remind-${event.id}`,
+      };
     },
-    { teamIds: teams.map((t) => t.id) },
+    { teamIds: teams.map((tm) => tm.id) },
   );
   return c.json({ sent, persons: targets.length });
 });
 
-// Sondertermine -----------------------------------------------------------------
+// Special events -----------------------------------------------------------------
 
 const specialSchema = z.object({
-  title: z.string().trim().min(1, "Bitte gib einen Titel ein.").max(80),
-  startsAt: z.string().refine(isLocalDateTime, "Ungültiger Beginn"),
-  endsAt: z.string().refine(isLocalDateTime, "Ungültiges Ende").nullable().optional(),
+  title: z.string().trim().min(1, { error: () => t`Please enter a title.` }).max(80),
+  startsAt: z.string().refine(isLocalDateTime, { error: () => t`Invalid start` }),
+  endsAt: z.string().refine(isLocalDateTime, { error: () => t`Invalid end` }).nullable().optional(),
   locationId: z.number().int().positive().nullable().optional(),
   notes: z.string().trim().max(1000).nullable().optional(),
   teamIds: z.array(z.number().int().positive()).max(30).default([]),
   clubWide: z.boolean().default(false),
   declineHours: z.number().int().min(0).max(168).nullable().optional(),
-  /** Helferdienste als Zeitblöcke; newTypeName legt einen Sonderdienst nur für diesen Termin an. */
+  /** Helper duties as time blocks; newTypeName creates a special duty for this event only. */
   duties: z
     .array(
       z.object({
         dutyTypeId: z.number().int().positive().optional(),
         newTypeName: z.string().trim().min(1).max(40).optional(),
-        startsAt: z.string().refine(isLocalDateTime, "Ungültige Uhrzeit"),
-        endsAt: z.string().refine(isLocalDateTime, "Ungültige Uhrzeit"),
+        startsAt: z.string().refine(isLocalDateTime, { error: () => t`Invalid time` }),
+        endsAt: z.string().refine(isLocalDateTime, { error: () => t`Invalid time` }),
         slots: z.number().int().min(1).max(20),
       }),
     )
@@ -519,13 +586,13 @@ eventRoutes.post("/events", async (c) => {
   const input = parse(specialSchema, await readJson(c.req.raw));
   if (input.clubWide) requireAdmin(actor);
   const teamIds = input.clubWide ? [] : [...new Set(input.teamIds)];
-  if (!input.clubWide && !teamIds.length) throw badRequest("Bitte wähle mindestens eine Mannschaft.");
+  if (!input.clubWide && !teamIds.length) throw badRequest(t`Please choose at least one team.`);
   if (teamIds.length > 1 && !actor.isAdmin && !teamIds.every((t) => actor.coachTeamIds.includes(t))) {
-    throw forbidden("Termine für mehrere Mannschaften legen Admins oder die Trainer aller Mannschaften an.");
+    throw forbidden(t`Events for several teams are created by admins or the coaches of all those teams.`);
   }
-  if (!actor.isAdmin && !teamIds.every((t) => actor.coachTeamIds.includes(t))) throw forbidden("Das dürfen nur Trainer dieser Mannschaft.");
-  if (input.startsAt <= nowLocal()) throw badRequest("Der Termin muss in der Zukunft liegen.");
-  if (input.endsAt && input.endsAt <= input.startsAt) throw badRequest("Das Ende muss nach dem Beginn liegen.");
+  if (!actor.isAdmin && !teamIds.every((t) => actor.coachTeamIds.includes(t))) throw forbidden(t`Only coaches of this team may do this.`);
+  if (input.startsAt <= nowLocal()) throw badRequest(t`The event must be in the future.`);
+  if (input.endsAt && input.endsAt <= input.startsAt) throw badRequest(t`The end must be after the start.`);
 
   const row = await first<{ id: number }>(
     c.env.DB,
@@ -546,21 +613,26 @@ eventRoutes.post("/events", async (c) => {
   if (input.duties.length && teamIds.length) await createDutyBlocks(c.env.DB, row!.id, input.duties);
   const event = (await loadEvent(c.env.DB, row!.id))!;
   const ctx = await loadEventContext(c.env.DB, [event]);
+  const title = input.title;
+  const location = event.loc_name;
   await notifyPersons(
     c.env,
     (ctx.participants.get(event.id) ?? []).filter((p) => p.isActive).map((p) => p.person.id),
     "events",
-    {
-      title: `Neuer Termin: ${input.title}`,
-      body: `${shortDate(input.startsAt)}, ${shortTime(input.startsAt)}${event.loc_name ? `, ${event.loc_name}` : ""}. Bitte gib Bescheid, ob du dabei bist.`,
-      url: `/termine/${event.id}`,
+    () => {
+      const when = `${shortDate(input.startsAt)}, ${shortTime(input.startsAt)}`;
+      return {
+        title: t`New event: ${title}`,
+        body: location ? t`${when}, ${location}. Please let us know if you are coming.` : t`${when}. Please let us know if you are coming.`,
+        url: `/termine/${event.id}`,
+      };
     },
     { teamIds, exclude: [actor.accountId] },
   );
   return c.json(toDetail(event, ctx, actor, Date.now()), 201);
 });
 
-/** Zeitblöcke eines neuen Sondertermins; Sonderdienste gleichen Namens werden einmal angelegt. */
+/** Time blocks of a new special event; special duties with the same name are created once. */
 async function createDutyBlocks(
   db: D1Database,
   eventId: number,
@@ -570,11 +642,11 @@ async function createDutyBlocks(
   const created = new Map<string, number>();
   const statements: D1PreparedStatement[] = [];
   for (const [i, b] of blocks.entries()) {
-    if (b.endsAt < b.startsAt) throw badRequest("Bei einem Zeitblock liegt das Ende vor dem Beginn.");
+    if (b.endsAt < b.startsAt) throw badRequest(t`In one time block the end is before the start.`);
     let typeId = b.dutyTypeId ?? null;
     if (typeId != null) {
-      const t = types.get(typeId);
-      if (!t || t.archived || t.whoReferees) throw badRequest("Diesen Dienst gibt es nicht.");
+      const type = types.get(typeId);
+      if (!type || type.archived || type.whoReferees) throw badRequest(t`This duty does not exist.`);
     } else if (b.newTypeName) {
       const key = b.newTypeName.toLowerCase();
       typeId = created.get(key) ?? null;
@@ -588,7 +660,7 @@ async function createDutyBlocks(
         typeId = row!.id;
         created.set(key, typeId);
       }
-    } else throw badRequest("Bitte wähle für jeden Zeitblock einen Dienst.");
+    } else throw badRequest(t`Please choose a duty for each time block.`);
     statements.push(
       stmt(db, "INSERT INTO event_duties (event_id, duty_type_id, starts_at, ends_at, slots, sort) VALUES (?, ?, ?, ?, ?, ?)", eventId, typeId, b.startsAt, b.endsAt, b.slots, i + 1),
     );
@@ -599,12 +671,12 @@ async function createDutyBlocks(
 eventRoutes.delete("/events/:id", async (c) => {
   const actor = requireActor(c);
   const { event } = await managedEvent(c.env.DB, actor, intParam(c, "id"));
-  if (event.kind !== "special") throw badRequest("Nur Sondertermine können gelöscht werden. Trainings und Spiele bitte absagen.");
+  if (event.kind !== "special") throw badRequest(t`Only special events can be deleted. Please cancel trainings and games instead.`);
   await run(c.env.DB, "DELETE FROM events WHERE id = ?", event.id);
   return c.json({ ok: true });
 });
 
-// Dauerhafte Abwesenheiten (nur Trainer) ------------------------------------------
+// Standing absences (coaches only) ------------------------------------------
 
 const standingSchema = z.object({
   active: z.boolean(),
@@ -625,15 +697,15 @@ eventRoutes.put("/rules/:ruleId/standing-absences/:personId", async (c) => {
     ruleId,
     ruleId,
   );
-  if (!ruleTeams.length) throw notFound("Diese Trainingszeit gibt es nicht.");
-  if (!isCoachOfAny(actor, ruleTeams.map((r) => r.team_id))) throw forbidden("Dauerabwesenheiten setzen nur Trainer.");
+  if (!ruleTeams.length) throw notFound(t`This training time does not exist.`);
+  if (!isCoachOfAny(actor, ruleTeams.map((r) => r.team_id))) throw forbidden(t`Only coaches set standing absences.`);
   const member = await first(
     c.env.DB,
     "SELECT 1 AS ok FROM team_memberships WHERE person_id = ? AND team_id IN (SELECT value FROM json_each(?)) AND role IN ('player', 'helper')",
     personId,
     list(ruleTeams.map((r) => r.team_id)),
   );
-  if (!member) throw badRequest("Diese Person gehört nicht zu den Mannschaften dieser Trainingszeit.");
+  if (!member) throw badRequest(t`This person does not belong to the teams of this training time.`);
   if (input.active) {
     await run(
       c.env.DB,

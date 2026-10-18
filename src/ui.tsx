@@ -1,3 +1,5 @@
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 import { clubName } from "./club";
 import type { ComponentChildren, JSX } from "preact";
 import { useEffect, useId, useRef, useState } from "preact/hooks";
@@ -5,7 +7,7 @@ import type { ParticipationStatus } from "../shared/types";
 import { errorMessage } from "./api";
 import { Icon, type IconName } from "./icons";
 
-// Kopfbereiche ------------------------------------------------------------------
+// Headers -------------------------------------------------------------------------
 
 export function TopBar(props: { title: string; kicker?: ComponentChildren; back?: string | (() => void); actions?: ComponentChildren }) {
   const goBack = () => {
@@ -16,7 +18,7 @@ export function TopBar(props: { title: string; kicker?: ComponentChildren; back?
   return (
     <header class="topbar">
       {props.back !== undefined ? (
-        <button type="button" class="icon-btn" aria-label="Zurück" onClick={goBack}>
+        <button type="button" class="icon-btn" aria-label={t`Back`} onClick={goBack}>
           <Icon name="back" size={24} stroke={2.2} />
         </button>
       ) : null}
@@ -38,7 +40,7 @@ type ButtonProps = Omit<JSX.HTMLAttributes<HTMLButtonElement>, "onClick" | "icon
   icon?: IconName;
   disabled?: boolean;
   type?: "button" | "submit";
-  /** Asynchrone Aktion: Button zeigt solange einen Ladezustand, Fehler als Toast. */
+  /** Asynchronous action: the button shows a loading state meanwhile, errors as a toast. */
   onClick?: (e: MouseEvent) => unknown;
 };
 
@@ -82,7 +84,13 @@ export function Button({ variant = "secondary", size = "md", block, icon, childr
       }}
     >
       {icon ? <Icon name={icon} size={18} stroke={2.4} /> : null}
-      {busy ? <span>Bitte warten …</span> : children}
+      {busy ? (
+        <span>
+          <Trans>Please wait …</Trans>
+        </span>
+      ) : (
+        children
+      )}
     </button>
   );
 }
@@ -105,7 +113,7 @@ export function toast(text: string, kind: "ok" | "error" = "ok") {
   toastListeners.forEach((fn) => fn());
   setTimeout(
     () => {
-      toastItems = toastItems.filter((t) => t.id !== item.id);
+      toastItems = toastItems.filter((x) => x.id !== item.id);
       toastListeners.forEach((fn) => fn());
     },
     kind === "error" ? 6000 : 3500,
@@ -121,10 +129,10 @@ export function Toasts() {
   }, []);
   return (
     <div class="toasts" role="status" aria-live="polite">
-      {toastItems.map((t) => (
-        <div key={t.id} class={`toast ${t.kind === "error" ? "error" : ""}`}>
-          <Icon name={t.kind === "error" ? "alert" : "check"} size={18} stroke={2.4} />
-          <span>{t.text}</span>
+      {toastItems.map((item) => (
+        <div key={item.id} class={`toast ${item.kind === "error" ? "error" : ""}`}>
+          <Icon name={item.kind === "error" ? "alert" : "check"} size={18} stroke={2.4} />
+          <span>{item.text}</span>
         </div>
       ))}
     </div>
@@ -134,8 +142,8 @@ export function Toasts() {
 // Bottom Sheet --------------------------------------------------------------------
 
 /**
- * Fokus aus dem Blatt nehmen, bevor es schließt. Verschwindet ein fokussiertes Eingabefeld samt
- * Tastatur, bleibt in der installierten App auf iOS die Navigationsleiste sonst verschoben.
+ * Take focus out of the sheet before it closes. If a focused input disappears together with the
+ * keyboard, the navigation bar otherwise stays shifted in the installed app on iOS.
  */
 function blurInside(el: HTMLElement | null) {
   const active = document.activeElement;
@@ -154,7 +162,7 @@ export function Sheet(props: { open: boolean; onClose: () => void; title: string
       d.close();
     }
   }, [props.open]);
-  // Auch wenn das Blatt samt Eingabefeld einfach verschwindet: erst Fokus lösen (siehe blurInside)
+  // Also when the sheet with its input simply disappears: release focus first (see blurInside)
   useEffect(() => () => blurInside(ref.current), []);
   return (
     <dialog
@@ -175,7 +183,7 @@ export function Sheet(props: { open: boolean; onClose: () => void; title: string
           <div class="sheet-grip" aria-hidden="true" />
           <div class="sheet-head">
             <h2 id={id}>{props.title}</h2>
-            <button type="button" class="icon-btn" aria-label="Schließen" onClick={props.onClose}>
+            <button type="button" class="icon-btn" aria-label={t`Close`} onClick={props.onClose}>
               <Icon name="x" size={22} />
             </button>
           </div>
@@ -186,7 +194,7 @@ export function Sheet(props: { open: boolean; onClose: () => void; title: string
   );
 }
 
-// Bestätigungsdialog (Promise-basiert) ---------------------------------------------------
+// Confirmation dialog (promise-based) ----------------------------------------------------
 
 interface ConfirmOptions {
   title: string;
@@ -222,16 +230,18 @@ export function ConfirmHost() {
     <Sheet open={!!state} onClose={() => close(false)} title={state?.title ?? ""}>
       <div class="muted">{state?.message}</div>
       <div class="btn-row">
-        <Button onClick={() => close(false)}>Abbrechen</Button>
+        <Button onClick={() => close(false)}>
+          <Trans>Cancel</Trans>
+        </Button>
         <Button variant={state?.danger ? "danger-solid" : "primary"} onClick={() => close(true)}>
-          {state?.confirmLabel ?? "Bestätigen"}
+          {state?.confirmLabel ?? t`Confirm`}
         </Button>
       </div>
     </Sheet>
   );
 }
 
-// Formularelemente ----------------------------------------------------------------
+// Form elements -------------------------------------------------------------------
 
 export function Field(props: { label: string; hint?: ComponentChildren; error?: string | null; children: (id: string) => ComponentChildren }) {
   const id = useId();
@@ -324,13 +334,13 @@ export function Segmented<T extends string>(props: { value: T; options: { value:
   );
 }
 
-// Zustände ----------------------------------------------------------------------
+// States ------------------------------------------------------------------------
 
-export function Spinner({ label = "Lädt …" }: { label?: string }) {
+export function Spinner({ label }: { label?: string }) {
   return (
     <div role="status">
       <div class="spinner" aria-hidden="true" />
-      <span class="sr-only">{label}</span>
+      <span class="sr-only">{label ?? t`Loading …`}</span>
     </div>
   );
 }
@@ -353,7 +363,7 @@ export function ErrorBox(props: { error: unknown; onRetry?: () => void }) {
         <span>{errorMessage(props.error)}</span>
         {props.onRetry ? (
           <button type="button" class="link-btn" style={{ color: "inherit", alignSelf: "flex-start" }} onClick={props.onRetry}>
-            Erneut versuchen
+            <Trans>Try again</Trans>
           </button>
         ) : null}
       </div>
@@ -374,12 +384,46 @@ export function Notice(props: { kind?: "info" | "warn" | "yellow"; icon?: IconNa
 
 export function StatusPill(props: { status: ParticipationStatus | null; late?: boolean; nominated?: boolean; game?: boolean }) {
   const { status } = props;
-  if (status === "yes") return <span class="pill pill-yes">Zugesagt</span>;
-  if (status === "no") return props.late ? <span class="pill pill-late">Kurzfristig abgesagt</span> : <span class="pill pill-no">Abgesagt</span>;
-  if (status === "standing") return <span class="pill pill-muted">Dauerhaft abwesend</span>;
-  if (status === "inactive") return <span class="pill pill-muted">Inaktiv</span>;
-  if (props.game && props.nominated) return <span class="pill pill-nominated">Nominiert</span>;
-  if (status === "open") return <span class="pill pill-open">Offen</span>;
+  if (status === "yes")
+    return (
+      <span class="pill pill-yes">
+        <Trans>Accepted</Trans>
+      </span>
+    );
+  if (status === "no")
+    return props.late ? (
+      <span class="pill pill-late">
+        <Trans>Declined at short notice</Trans>
+      </span>
+    ) : (
+      <span class="pill pill-no">
+        <Trans>Declined</Trans>
+      </span>
+    );
+  if (status === "standing")
+    return (
+      <span class="pill pill-muted">
+        <Trans>Away long-term</Trans>
+      </span>
+    );
+  if (status === "inactive")
+    return (
+      <span class="pill pill-muted">
+        <Trans>Inactive</Trans>
+      </span>
+    );
+  if (props.game && props.nominated)
+    return (
+      <span class="pill pill-nominated">
+        <Trans>Nominated</Trans>
+      </span>
+    );
+  if (status === "open")
+    return (
+      <span class="pill pill-open">
+        <Trans context="participation">Open</Trans>
+      </span>
+    );
   return null;
 }
 
@@ -399,16 +443,16 @@ export function useDocumentTitle(title: string) {
 }
 
 
-export async function copyText(text: string, done = "Kopiert."): Promise<void> {
+export async function copyText(text: string, done?: string): Promise<void> {
   try {
     await navigator.clipboard.writeText(text);
-    toast(done);
+    toast(done ?? t`Copied.`);
   } catch {
-    toast("Kopieren nicht möglich. Bitte den Text markieren.", "error");
+    toast(t`Copying not possible. Please select the text.`, "error");
   }
 }
 
-/** Teilen über das Teilen-Menü des Geräts; ohne url steckt der Link schon im Text. Ohne Teilen-Menü wird kopiert. */
+/** Share via the device's share menu; without url the link is already in the text. Without a share menu it is copied. */
 export async function shareLink(title: string, text: string, url: string): Promise<void> {
   if (navigator.share) {
     try {

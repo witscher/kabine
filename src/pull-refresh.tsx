@@ -1,17 +1,18 @@
-// Aktualisieren ohne Neustart der App: Ziehen zum Aktualisieren auf den Hauptseiten
-// und automatisches Neuladen, wenn man nach einer Weile in die App zurückkehrt.
+// Refreshing without restarting the app: pull to refresh on the main pages
+// and automatic reload when returning to the app after a while.
+import { t } from "@lingui/core/macro";
 import { useLocation } from "preact-iso";
 import { useEffect, useRef, useState } from "preact/hooks";
 import { Icon } from "./icons";
 import { refreshVisible } from "./store";
 
-/** Ab so langer Abwesenheit lädt die sichtbare Ansicht beim Zurückkehren neu. */
+/** After this long away, the visible view reloads on return. */
 const RESUME_AFTER_MS = 60_000;
-/** Zugweg (nach Dämpfung), ab dem Loslassen neu lädt. */
+/** Pull distance (after damping) from which releasing reloads. */
 const THRESHOLD = 70;
 const MAX_PULL = 110;
 
-/** Seiten mit eigener Aktualisierung (Chat) oder ohne Daten zum Neuladen. */
+/** Pages with their own refresh (chat) or without data to reload. */
 const EXCLUDED = [/^\/chat/, /^\/einladung/, /^\/einrichtung/, /^\/email/, /^\/datenschutz/, /^\/kihasl/];
 
 export function ResumeRefresh() {
@@ -44,17 +45,17 @@ export function PullToRefresh() {
         state.current = null;
         return;
       }
-      const t = e.touches[0]!;
-      state.current = { startX: t.clientX, startY: t.clientY, active: false, pull: 0 };
+      const touch = e.touches[0]!;
+      state.current = { startX: touch.clientX, startY: touch.clientY, active: false, pull: 0 };
     };
     const onMove = (e: TouchEvent) => {
       const s = state.current;
       if (!s) return;
-      const t = e.touches[0]!;
-      const dy = t.clientY - s.startY;
-      const dx = Math.abs(t.clientX - s.startX);
+      const touch = e.touches[0]!;
+      const dy = touch.clientY - s.startY;
+      const dx = Math.abs(touch.clientX - s.startX);
       if (!s.active) {
-        // Nur senkrecht nach unten von ganz oben; seitliches Wischen und Scrollen bleiben unberührt
+        // Only straight down from the very top; sideways swiping and scrolling stay untouched
         if (dy < 8 || dx > dy || window.scrollY > 0) {
           if (dy < -8 || dx > 12) state.current = null;
           return;
@@ -99,7 +100,7 @@ export function PullToRefresh() {
       <span class="ptr-icon" style={{ transform: busy ? undefined : `rotate(${pull * 3}deg)` }}>
         <Icon name="refresh" size={20} />
       </span>
-      <span class="sr-only">{busy ? "Wird aktualisiert" : ready ? "Loslassen zum Aktualisieren" : "Zum Aktualisieren ziehen"}</span>
+      <span class="sr-only">{busy ? t`Refreshing` : ready ? t`Release to refresh` : t`Pull to refresh`}</span>
     </div>
   );
 }

@@ -1191,3 +1191,15 @@ test("Verein: Admin ändert Name und Kürzel, Verwaltung und Datenschutz zeigen 
   await page.goto("/datenschutz");
   await expect(page.getByRole("link", { name: "example.org" })).toHaveAttribute("href", "https://example.org/datenschutz");
 });
+
+test("Sprache: Spielerin stellt auf Englisch um und wieder zurück", async () => {
+  const { page } = player;
+  await page.goto("/profil");
+  await page.getByRole("combobox", { name: "Sprache" }).selectOption("en");
+  await expect(page.getByRole("link", { name: "Profile" })).toBeVisible();
+  await page.goto("/");
+  await expect(page.getByRole("heading", { name: "Hi Ida" }).or(page.getByRole("heading", { name: /Ida/ }))).toBeVisible();
+  await page.goto("/profil");
+  await page.getByRole("combobox", { name: "Language" }).selectOption("de");
+  await expect(page.getByRole("link", { name: "Profil" })).toBeVisible();
+});

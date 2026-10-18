@@ -1,35 +1,39 @@
+import { t } from "@lingui/core/macro";
 import { Hono } from "hono";
 import { z } from "zod";
 import { type AppEnv, intParam, requireActor } from "../app";
 import { type Actor, isCoachOf, requireAdmin } from "../auth/actor";
+import { coachLabel, leadLabel } from "../chat/room";
 import { chatStub, postAnnouncement, setMuteInChat } from "../domain/chat";
+import { currentLocale } from "../i18n";
 import { all, first, run } from "../lib/db";
 import { badRequest, forbidden, notFound, parse, readJson } from "../lib/http";
+import { intlTag } from "../../shared/dates";
 
 export const chatRoutes = new Hono<AppEnv>();
 
 export interface ChatAccess {
   teamId: number;
   teamName: string;
-  /** Gruppe (nur Chat und Sondertermine) statt Mannschaft. */
+  /** Group (only chat and special events) instead of a team. */
   isGroup: boolean;
   canRead: boolean;
   canWrite: boolean;
-  /** Schreiben grundsätzlich erlaubt (ohne Stummschaltung). */
+  /** Writing allowed in principle (ignoring muting). */
   writeBase: boolean;
   isMod: boolean;
   muted: boolean;
-  /** Eltern können sich abmelden. */
+  /** Parents can opt out. */
   viaChildren: string[];
   optedOut: boolean;
   isMember: boolean;
   role: "player" | "coach" | "helper" | null;
   reason: string | null;
-  /** Nur über die Admin-Rechte sichtbar (weder Mitglied, Trainer noch Elternteil). */
+  /** Only visible through admin rights (neither member, coach nor parent). */
   adminOnly: boolean;
 }
 
-/** Wer darf welchen Mannschaftschat lesen und schreiben? */
+/** Who may read and write which team chat? */
 export async function chatAccess(db: D1Database, actor: Actor, teamIds?: number[]): Promise<ChatAccess[]> {
   const teams = await all<{ id: number; name: string; kind: string }>(
     db,
@@ -37,7 +41,7 @@ export async function chatAccess(db: D1Database, actor: Actor, teamIds?: number[
     ...(teamIds ? [JSON.stringify(teamIds)] : []),
   );
   const [childTeams, optouts, mutes] = await Promise.all([
-    // Eltern sind nur in Chats von Mannschaften mit Eltern dabei
+    // Parents only take part in chats of teams with parents
     all<{ team_id: number; first_name: string }>(
       db,
       `SELECT tm.team_id, p.first_name FROM team_memberships tm JOIN persons p ON p.id = tm.person_id
@@ -50,32 +54,32 @@ export async function chatAccess(db: D1Database, actor: Actor, teamIds?: number[
   ]);
 
   const out: ChatAccess[] = [];
-  for (const t of teams) {
-    const membership = actor.memberships.find((m) => m.teamId === t.id) ?? null;
-    const viaChildren = [...new Set(childTeams.filter((c) => c.team_id === t.id).map((c) => c.first_name))];
-    const isMod = isCoachOf(actor, t.id);
+  for (const team of teams) {
+    const membership = actor.memberships.find((m) => m.teamId === team.id) ?? null;
+    const viaChildren = [...new Set(childTeams.filter((c) => c.team_id === team.id).map((c) => c.first_name))];
+    const isMod = isCoachOf(actor, team.id);
     if (!membership && !viaChildren.length && !isMod) continue;
-    const optedOut = optouts.some((o) => o.team_id === t.id);
-    const muted = mutes.some((m) => m.team_id === t.id);
+    const optedOut = optouts.some((o) => o.team_id === team.id);
+    const muted = mutes.some((m) => m.team_id === team.id);
     let canRead = true;
-    // Schreibgeschützte Sicht eines Admins (fremde Person): nur mitlesen
+    // Read-only view of an admin (someone else): read only
     let canWriteBase = !actor.readOnly;
     let reason: string | null = null;
     const onlyAsChild = !!membership && !viaChildren.length && !isMod;
     if (onlyAsChild && actor.hasGuardians && membership.parentsEnabled) {
       canRead = actor.permissions.may_read_chat;
       canWriteBase = actor.permissions.may_write_chat && !actor.readOnly;
-      if (!canRead) reason = "Deine Eltern haben den Chat für dich noch nicht freigegeben.";
-      else if (!canWriteBase) reason = "Du kannst mitlesen. Schreiben haben deine Eltern noch nicht freigegeben.";
+      if (!canRead) reason = t`Your parents have not allowed the chat for you yet.`;
+      else if (!canWriteBase) reason = t`You can read along. Your parents have not allowed writing yet.`;
     }
     if (!membership && viaChildren.length && !isMod && optedOut) {
       canRead = false;
-      reason = "Du hast dich von diesem Chat abgemeldet.";
+      reason = t`You have opted out of this chat.`;
     }
     out.push({
-      teamId: t.id,
-      teamName: t.name,
-      isGroup: t.kind === "group",
+      teamId: team.id,
+      teamName: team.name,
+      isGroup: team.kind === "group",
       canRead,
       canWrite: canRead && canWriteBase && !muted,
       writeBase: canRead && canWriteBase,
@@ -85,8 +89,8 @@ export async function chatAccess(db: D1Database, actor: Actor, teamIds?: number[
       optedOut,
       isMember: !!membership,
       role: membership?.role ?? null,
-      reason: muted && canRead ? "Du wurdest in diesem Chat stummgeschaltet." : reason,
-      adminOnly: !membership && !viaChildren.length && !actor.coachTeamIds.includes(t.id),
+      reason: muted && canRead ? t`You have been muted in this chat.` : reason,
+      adminOnly: !membership && !viaChildren.length && !actor.coachTeamIds.includes(team.id),
     });
   }
   return out;
@@ -107,7 +111,7 @@ chatRoutes.get("/chat/rooms", async (c) => {
       return {
         ...r,
         lastMessageAt: s?.last_message_at ?? null,
-        // Fremde Chats zählen für Admins nicht als ungelesen (Punkt an der Navigation)
+        // Other people's chats do not count as unread for admins (dot in the navigation)
         unread: r.canRead && !r.adminOnly && !!s && s.last_message_id > (s.last_read_id ?? 0),
       };
     }),
@@ -121,23 +125,25 @@ function displayName(actor: Actor): string {
 chatRoutes.get("/chat/:teamId/connect", async (c) => {
   const actor = requireActor(c);
   const teamId = intParam(c, "teamId");
-  if (c.req.header("upgrade")?.toLowerCase() !== "websocket") throw badRequest("Erwarte eine WebSocket-Verbindung.");
+  if (c.req.header("upgrade")?.toLowerCase() !== "websocket") throw badRequest(t`Expected a WebSocket connection.`);
   const access = (await chatAccess(c.env.DB, actor, [teamId]))[0];
-  if (!access) throw forbidden("Du gehörst nicht zu dieser Mannschaft.");
-  if (!access.canRead) throw forbidden(access.reason ?? "Kein Zugriff auf diesen Chat.");
+  if (!access) throw forbidden(t`You are not part of this team.`);
+  if (!access.canRead) throw forbidden(access.reason ?? t`No access to this chat.`);
+  // Label next to the name, stored with the author in the language of the person connecting
+  const children = new Intl.ListFormat(intlTag(currentLocale()), { type: "conjunction" }).format(access.viaChildren);
   const label =
     access.role === "coach"
       ? access.isGroup
-        ? "Verantwortlich"
-        : "Coach"
+        ? leadLabel()
+        : coachLabel()
       : access.role === "helper"
-        ? "Aushilfe"
+        ? t({ message: "Helper", context: "chat author" })
         : access.role === "player"
           ? null
           : access.viaChildren.length
-            ? `Elternteil von ${access.viaChildren.join(" und ")}`
+            ? t`Parent of ${children}`
             : actor.isAdmin
-              ? "Admin"
+              ? t({ message: "Admin", context: "chat author" })
               : null;
   const headers = new Headers(c.req.raw.headers);
   headers.set("x-team-id", String(teamId));
@@ -145,6 +151,8 @@ chatRoutes.get("/chat/:teamId/connect", async (c) => {
   headers.set("x-person-id", String(actor.personId));
   headers.set("x-name", encodeURIComponent(displayName(actor)));
   if (label) headers.set("x-label", encodeURIComponent(label));
+  // Texts the chat room sends to this person (errors, labels) are in their language
+  headers.set("x-locale", currentLocale());
   headers.set("x-can-write", access.writeBase ? "1" : "0");
   headers.set("x-muted", access.muted ? "1" : "0");
   headers.set("x-is-mod", access.isMod ? "1" : "0");
@@ -159,7 +167,7 @@ chatRoutes.put("/chat/:teamId/optout", async (c) => {
   const teamId = intParam(c, "teamId");
   const { optedOut } = parse(z.object({ optedOut: z.boolean() }), await readJson(c.req.raw));
   const access = (await chatAccess(c.env.DB, actor, [teamId]))[0];
-  if (!access || !access.viaChildren.length || access.isMember) throw forbidden("Abmelden können sich nur Eltern.");
+  if (!access || !access.viaChildren.length || access.isMember) throw forbidden(t`Only parents can opt out.`);
   if (optedOut) await run(c.env.DB, "INSERT OR IGNORE INTO chat_optouts (account_id, team_id) VALUES (?, ?)", actor.accountId, teamId);
   else await run(c.env.DB, "DELETE FROM chat_optouts WHERE account_id = ? AND team_id = ?", actor.accountId, teamId);
   return c.json({ ok: true });
@@ -169,8 +177,8 @@ chatRoutes.post("/chat/:teamId/mutes/:personId", async (c) => {
   const actor = requireActor(c);
   const teamId = intParam(c, "teamId");
   const personId = intParam(c, "personId");
-  if (!isCoachOf(actor, teamId)) throw forbidden("Stummschalten dürfen Trainer und Admins.");
-  if (personId === actor.personId) throw badRequest("Du kannst dich nicht selbst stummschalten.");
+  if (!isCoachOf(actor, teamId)) throw forbidden(t`Only coaches and admins can mute people.`);
+  if (personId === actor.personId) throw badRequest(t`You cannot mute yourself.`);
   const { muted } = parse(z.object({ muted: z.boolean() }), await readJson(c.req.raw));
   const person = await first(c.env.DB, "SELECT 1 AS ok FROM persons WHERE id = ?", personId);
   if (!person) throw notFound();
@@ -181,13 +189,13 @@ chatRoutes.post("/chat/:teamId/mutes/:personId", async (c) => {
 });
 
 const broadcastSchema = z.object({
-  /** Leer: alle Mannschaften. */
+  /** Empty: all teams. */
   teamIds: z.array(z.number().int().positive()).max(100),
   text: z.string().trim().min(1).max(2000),
   notify: z.boolean(),
 });
 
-/** Rundnachricht an ausgewählte oder alle Mannschaftschats (nur Admins). */
+/** Announcement to selected or all team chats (admins only). */
 chatRoutes.post("/admin/broadcast", async (c) => {
   const actor = requireActor(c);
   requireAdmin(actor);
@@ -197,8 +205,8 @@ chatRoutes.post("/admin/broadcast", async (c) => {
     input.teamIds.length ? "SELECT id FROM teams WHERE id IN (SELECT value FROM json_each(?))" : "SELECT id FROM teams",
     ...(input.teamIds.length ? [JSON.stringify(input.teamIds)] : []),
   );
-  if (input.teamIds.length && teams.length !== new Set(input.teamIds).size) throw badRequest("Mindestens eine Mannschaft gibt es nicht.");
-  if (!teams.length) throw badRequest("Es gibt noch keine Mannschaft.");
-  await postAnnouncement(c.env, teams.map((t) => t.id), { personId: actor.personId, name: displayName(actor) }, input.text, input.notify);
+  if (input.teamIds.length && teams.length !== new Set(input.teamIds).size) throw badRequest(t`At least one of the teams does not exist.`);
+  if (!teams.length) throw badRequest(t`There are no teams yet.`);
+  await postAnnouncement(c.env, teams.map((x) => x.id), { personId: actor.personId, name: displayName(actor) }, input.text, input.notify);
   return c.json({ sent: teams.length });
 });

@@ -6,7 +6,7 @@ import { ClubMark, useClub } from "./club";
 import { todayLocal } from "./format";
 
 const LAST_SHOWN = "kabine-splash-day";
-/** Gesamtdauer inkl. Ausblenden; der Aufbau endet nach etwa 1,3 s. */
+/** Total duration including fade-out; the build-up ends after about 1.3 s. */
 const TOTAL_MS = 2500;
 
 function due(): boolean {
@@ -16,7 +16,7 @@ function due(): boolean {
   try {
     last = localStorage.getItem(LAST_SHOWN);
   } catch {
-    // Privater Modus: dann eben jedes Mal
+    // Private mode: then every time
   }
   return shouldShowSplash(last, todayLocal());
 }
@@ -25,7 +25,7 @@ function markShown() {
   try {
     localStorage.setItem(LAST_SHOWN, todayLocal());
   } catch {
-    // siehe oben
+    // see above
   }
 }
 
@@ -34,7 +34,7 @@ export function Splash() {
   const club = useClub();
 
   useEffect(() => {
-    // Das erste Öffnen des Tages kann auch das Zurückholen aus dem Hintergrund sein
+    // The first opening of the day can also be bringing it back from the background
     const onVisible = () => {
       if (document.visibilityState === "visible" && due()) setRun(true);
     };

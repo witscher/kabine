@@ -1,3 +1,4 @@
+import { t } from "@lingui/core/macro";
 import { appOrigin, enterClubContext } from "./domain/club";
 import { recordAttendance } from "./domain/attendance";
 import { sendCarpoolChatReminders } from "./domain/carpool";
@@ -11,46 +12,46 @@ import { all, run } from "./lib/db";
 import { maintenanceState } from "./lib/maintenance";
 import { addDays, addMinutesLocal, localToInstant, nowLocal, todayLocal, toLocal, utcIso } from "./lib/time";
 
-/** Begründungen von Absagen werden 60 Tage nach dem Termin gelöscht. */
+/** Reasons for declines are deleted 60 days after the event. */
 export const REASON_RETENTION_DAYS = 60;
 const REMIND_BEFORE_DEADLINE_MS = 24 * 3_600_000;
-/** So viele Tage vor einem Spiel werden die Nominierten erinnert. */
+/** This many days before a game the nominees are reminded. */
 export const GAME_REMINDER_DAYS = 3;
 
-/** Stündlicher Lauf. Was ansteht, hängt von der Berliner Uhrzeit ab. */
+/** Hourly run. What is due depends on the Berlin time. */
 export async function handleScheduled(baseEnv: Env, scheduledTime: number): Promise<void> {
   // Links in e-mails and push messages need the app address; without ORIGIN the one the app was last opened at
   const env = { ...baseEnv, ORIGIN: await appOrigin(baseEnv) } as Env;
   await enterClubContext(env.DB);
-  // Wartung: nichts erzeugen oder verschicken, der nächste Lauf danach holt alles nach
+  // Maintenance: generate or send nothing; the next run afterwards catches up
   if (await maintenanceState(env.KV)) {
-    console.log("Wartungsmodus aktiv, Cron-Lauf ausgelassen");
+    console.log("Maintenance mode active, cron run skipped");
     return;
   }
   const tasks: [string, () => Promise<unknown>][] = [
-    ["Termine erzeugen", () => ensureGenerated(env.DB, scheduledTime)],
-    ["Automatische Kader", () => syncAutoSquads(env.DB, null, scheduledTime)],
-    ["Erinnerungen", () => sendDeadlineReminders(env, scheduledTime)],
-    ["Spielerinnerungen", () => sendGameReminders(env, scheduledTime)],
-    ["Helferplan", () => sendDutyNotifications(env, scheduledTime)],
-    ["Anwesenheit", () => recordAttendance(env.DB, scheduledTime)],
-    ["Treffpunkt", () => sendMeetingReminders(env, scheduledTime)],
-    ["Fahrgemeinschaften", () => sendCarpoolChatReminders(env, scheduledTime)],
+    ["Generate events", () => ensureGenerated(env.DB, scheduledTime)],
+    ["Automatic squads", () => syncAutoSquads(env.DB, null, scheduledTime)],
+    ["Reminders", () => sendDeadlineReminders(env, scheduledTime)],
+    ["Game reminders", () => sendGameReminders(env, scheduledTime)],
+    ["Helper plan", () => sendDutyNotifications(env, scheduledTime)],
+    ["Attendance", () => recordAttendance(env.DB, scheduledTime)],
+    ["Meeting point", () => sendMeetingReminders(env, scheduledTime)],
+    ["Carpools", () => sendCarpoolChatReminders(env, scheduledTime)],
   ];
   const hour = Number(toLocal(scheduledTime).slice(11, 13));
-  if (hour === 3) tasks.push(["Aufräumen", () => cleanup(env.DB, scheduledTime)]);
-  // Sicherheitsnetz: KiHaSL/JuHaSL-Gruppe folgt Rolle und Admins (sonst bei jeder Änderung abgeglichen)
-  if (hour === 3) tasks.push(["Gruppen", () => syncAutoGroups(env.DB)]);
+  if (hour === 3) tasks.push(["Cleanup", () => cleanup(env.DB, scheduledTime)]);
+  // Safety net: the KiHaSL/JuHaSL group follows role and admins (otherwise synced on every change)
+  if (hour === 3) tasks.push(["Groups", () => syncAutoGroups(env.DB)]);
   for (const [name, task] of tasks) {
     try {
       await task();
     } catch (err) {
-      console.error(`Cron: ${name} fehlgeschlagen`, err);
+      console.error(`Cron: ${name} failed`, err);
     }
   }
 }
 
-/** Erinnerung 24 Stunden vor Ablauf der Absagefrist an alle ohne Rückmeldung. */
+/** Reminder 24 hours before the decline deadline to everyone without a response. */
 export async function sendDeadlineReminders(env: Env, now = Date.now()): Promise<number> {
   const nowL = nowLocal(now);
   const events = await all<EventRow>(
@@ -67,20 +68,27 @@ export async function sendDeadlineReminders(env: Env, now = Date.now()): Promise
     const deadline = deadlineInstant(e, eventTeams(e, ctx));
     if (deadline <= now || deadline - now > REMIND_BEFORE_DEADLINE_MS) continue;
     const open = (ctx.participants.get(e.id) ?? []).filter((p) => p.status === "open").map((p) => p.person.id);
-    const teams = eventTeams(e, ctx).map((t) => ({ id: t.id, name: t.name }));
-    const label = e.kind === "training" ? "Training" : eventTitle(e, teams);
+    const teams = eventTeams(e, ctx).map((tm) => ({ id: tm.id, name: tm.name }));
     if (open.length) {
+      const deadlineLocal = toLocal(deadline);
       sent += await notifyPersons(
         env,
         open,
         "reminders",
-        {
-          title: "Bist du dabei?",
-          body: `${label} am ${shortDate(e.starts_at)}, ${shortTime(e.starts_at)} Uhr. Absagen noch bis ${shortDate(toLocal(deadline))}, ${toLocal(deadline).slice(11)} Uhr.`,
-          url: `/termine/${e.id}`,
-          tag: `remind-${e.id}`,
+        () => {
+          const label = e.kind === "training" ? t`Training` : eventTitle(e, teams);
+          const date = shortDate(e.starts_at);
+          const time = shortTime(e.starts_at);
+          const untilDate = shortDate(deadlineLocal);
+          const untilTime = deadlineLocal.slice(11);
+          return {
+            title: t`Are you coming?`,
+            body: t`${label} on ${date}, ${time}. You can still decline until ${untilDate}, ${untilTime}.`,
+            url: `/termine/${e.id}`,
+            tag: `remind-${e.id}`,
+          };
         },
-        { teamIds: teams.map((t) => t.id) },
+        { teamIds: teams.map((tm) => tm.id) },
       );
     }
     await run(env.DB, "UPDATE events SET reminder_sent_at = ? WHERE id = ?", utcIso(now), e.id);
@@ -89,10 +97,9 @@ export async function sendDeadlineReminders(env: Env, now = Date.now()): Promise
 }
 
 /**
- * Erinnerung an alle Nominierten, die nicht abgesagt haben, einige Tage vor
- * dem Spiel. Ersetzt bei automatischen Kadern die Push zur Nominierung. Wurde
- * ein Kader von Hand gerade erst veröffentlicht (Push schon verschickt),
- * wartet die Erinnerung 24 Stunden.
+ * Reminder to all nominees who have not declined, a few days before the
+ * game. For automatic squads it replaces the nomination push. If a squad was
+ * only just published by hand (push already sent), the reminder waits 24 hours.
  */
 export async function sendGameReminders(env: Env, now = Date.now()): Promise<number> {
   const nowL = nowLocal(now);
@@ -108,12 +115,12 @@ export async function sendGameReminders(env: Env, now = Date.now()): Promise<num
   if (!events.length) return 0;
   const ctx = await loadEventContext(env.DB, events);
   events.sort((a, b) => a.starts_at.localeCompare(b.starts_at));
-  // Wer in zwei Mannschaften zeitgleich (±3 Stunden) im Kader steht, bekommt nur eine Erinnerung
+  // Whoever is in the squad of two teams at the same time (±3 hours) gets only one reminder
   const remindedAt = new Map<number, string[]>();
   const overlaps = (a: string, b: string) => Math.abs(localToInstant(a) - localToInstant(b)) < 3 * 3_600_000;
   let sent = 0;
   for (const e of events) {
-    const teams = eventTeams(e, ctx).map((t) => ({ id: t.id, name: t.name }));
+    const teams = eventTeams(e, ctx).map((tm) => ({ id: tm.id, name: tm.name }));
     const persons = (ctx.participants.get(e.id) ?? [])
       .filter((p) => p.status === "yes" || p.status === "open")
       .map((p) => p.person.id)
@@ -124,13 +131,18 @@ export async function sendGameReminders(env: Env, now = Date.now()): Promise<num
         env,
         persons,
         "squad",
-        {
-          title: "Du bist im Kader",
-          body: `${eventTitle(e, teams)} am ${shortDate(e.starts_at)}, ${shortTime(e.starts_at)} Uhr. Falls du nicht kannst, sag bitte ab.`,
-          url: `/termine/${e.id}`,
-          tag: `game-${e.id}`,
+        () => {
+          const title = eventTitle(e, teams);
+          const date = shortDate(e.starts_at);
+          const time = shortTime(e.starts_at);
+          return {
+            title: t`You are in the squad`,
+            body: t`${title} on ${date}, ${time}. If you can't make it, please decline.`,
+            url: `/termine/${e.id}`,
+            tag: `game-${e.id}`,
+          };
         },
-        { teamIds: teams.map((t) => t.id) },
+        { teamIds: teams.map((tm) => tm.id) },
       );
     }
     await run(env.DB, "UPDATE events SET game_reminder_sent_at = ? WHERE id = ?", utcIso(now), e.id);
@@ -149,13 +161,13 @@ export async function cleanup(db: D1Database, now = Date.now()): Promise<void> {
   ]);
 }
 
-/** So viele Tage vor einem Spiel erinnert die App die Trainer an Treffpunkt und Uhrzeit. */
+/** This many days before a game the app reminds the coaches of meeting point and time. */
 export const MEETING_REMINDER_DAYS = 3;
 const MEETING_REMINDER_HOUR = 8;
 
 /**
- * Trainer erinnern, Treffpunkt und Uhrzeit vor dem Spiel einzutragen, solange die Uhrzeit fehlt.
- * Einmal pro Spiel und Mannschaft, ab 8 Uhr, für Spiele in den nächsten 3 Tagen.
+ * Reminds coaches to enter meeting point and time before the game while the time is missing.
+ * Once per game and team, from 8 am, for games in the next 3 days.
  */
 export async function sendMeetingReminders(env: Env, now = Date.now()): Promise<number> {
   if (Number(toLocal(now).slice(11, 13)) < MEETING_REMINDER_HOUR) return 0;
@@ -174,11 +186,18 @@ export async function sendMeetingReminders(env: Env, now = Date.now()): Promise<
     const claimed = await run(env.DB, "INSERT OR IGNORE INTO duty_notifications (kind, ref) VALUES ('meeting', ?)", `${g.id}:${g.team_id}`);
     if (!claimed.meta.changes) continue;
     const opponent = g.is_home === 1 ? g.guest_team : g.is_home === 0 ? g.home_team : (g.title ?? g.guest_team);
-    sent += await notifyCoaches(env, [g.team_id], {
-      title: `Treffpunkt eintragen · ${g.team_name}`,
-      body: `Spiel${opponent ? ` gegen ${opponent}` : ""} am ${shortDate(g.starts_at)}, ${shortTime(g.starts_at)} Uhr: Bitte Treffpunkt und Uhrzeit eintragen.`,
-      url: `/termine/${g.id}`,
-      tag: `meeting-${g.id}`,
+    const teamName = g.team_name;
+    sent += await notifyCoaches(env, [g.team_id], () => {
+      const date = shortDate(g.starts_at);
+      const time = shortTime(g.starts_at);
+      return {
+        title: t`Enter meeting point · ${teamName}`,
+        body: opponent
+          ? t`Game against ${opponent} on ${date}, ${time}: please enter meeting point and time.`
+          : t`Game on ${date}, ${time}: please enter meeting point and time.`,
+        url: `/termine/${g.id}`,
+        tag: `meeting-${g.id}`,
+      };
     });
   }
   return sent;

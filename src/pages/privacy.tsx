@@ -1,70 +1,107 @@
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 import { useClub } from "../club";
 import { useSession } from "../session";
 import { TopBar, useDocumentTitle } from "../ui";
 
 export function PrivacyPage() {
-  useDocumentTitle("Datenschutz");
+  useDocumentTitle(t`Privacy`);
   const { me } = useSession();
   const club = useClub();
+  const clubName = club.name;
+  const host = club.privacyUrl ? new URL(club.privacyUrl).host : "";
   return (
     <main class={`page ${me ? "" : "no-tabs"}`}>
-      <TopBar title="Datenschutz und Quellen" back={me ? "/profil" : "/"} />
+      <TopBar title={t`Privacy and sources`} back={me ? "/profil" : "/"} />
       <div class="content">
         <section class="card card-pad stack">
-          <h2 style={{ fontSize: "22px" }}>Verantwortlich</h2>
+          <h2 style={{ fontSize: "22px" }}>
+            <Trans>Responsible</Trans>
+          </h2>
           <p>
-            Die App ist ein internes Angebot von {club.name}.{" "}
+            <Trans>The app is an internal service of {clubName}.</Trans>{" "}
             {club.privacyUrl ? (
               <>
-                Die vollständige Datenschutzerklärung und das Impressum des Vereins findest du auf <a href={club.privacyUrl}>{new URL(club.privacyUrl).host}</a>.{" "}
+                <Trans>
+                  You can find the club's full privacy policy and legal notice at <a href={club.privacyUrl}>{host}</a>.
+                </Trans>{" "}
               </>
             ) : null}
-            Die folgenden Hinweise beschreiben, was speziell in dieser App gespeichert wird.
+            <Trans>The following notes describe what is stored specifically in this app.</Trans>
           </p>
           {club.privacyText ? <p style={{ whiteSpace: "pre-line" }}>{club.privacyText}</p> : null}
         </section>
         <section class="card card-pad stack">
-          <h2 style={{ fontSize: "22px" }}>Welche Daten speichert die App?</h2>
+          <h2 style={{ fontSize: "22px" }}>
+            <Trans>What data does the app store?</Trans>
+          </h2>
           <p>
-            Von Spielerinnen, Spielern und Eltern nur Vorname, Nachname und (bei Spielern) das Geburtsjahr. Keine Telefonnummer, keine Anschrift. Admins sind
-            zusätzlich über ihre E-Mail-Adresse erkennbar.
+            <Trans>
+              Of players and parents only first name, last name and (for players) the year of birth. No phone number, no address. Admins can additionally be
+              identified by their e-mail address.
+            </Trans>
           </p>
           <p>
-            Die E-Mail-Adresse an deinem Zugang dient der Anmeldung. Erinnerungen zum Helferplan kommen nur per Mail, wenn du das im Profil einschaltest. Beim
-            Feedback geht sie nur mit, wenn du eine Antwort wünschst. Sonst sieht sie niemand, auch Trainer und Admins nicht.
+            <Trans>
+              The e-mail address on your access is used for signing in. Helper plan reminders only come by e-mail if you switch this on in your profile. With
+              feedback it is only sent along if you want a reply. Otherwise nobody sees it, not even coaches and admins.
+            </Trans>
           </p>
           <p>
-            Ein Profilbild ist freiwillig. Es sehen alle, die in der App angemeldet sind. Bei Minderjährigen gibt ein Elternteil das Bild frei, bevor andere es
-            sehen. Du kannst dein Bild jederzeit entfernen, beim Austritt aus dem Verein wird es gelöscht.
+            <Trans>
+              A profile picture is optional. Everyone signed in to the app can see it. For minors, a parent approves the picture before others see it. You can
+              remove your picture at any time; it is deleted when you leave the club.
+            </Trans>
           </p>
           <p>
-            Technisch notwendig sind außerdem: Passkeys (nur ein öffentlicher Schlüssel, nie biometrische Daten), Anmeldungen auf Geräten und Push-Abos für
-            Benachrichtigungen. Damit die App auch ohne Netz funktioniert, speichert sie die zuletzt geladenen Inhalte auf deinem Gerät. Beim Abmelden werden
-            sie gelöscht.
+            <Trans>
+              Also technically necessary are: passkeys (only a public key, never biometric data), sign-ins on devices and push subscriptions for notifications.
+              So that the app also works without network, it stores the last loaded content on your device. It is deleted when you sign out.
+            </Trans>
           </p>
           <p>
-            Zu- und Absagen mit Begründung sehen nur Trainer und Admins. Bitte gib bei Absagen keine Details zu Erkrankungen an, „krank“ genügt. Begründungen
-            werden 60 Tage nach dem Termin automatisch gelöscht.
+            <Trans>
+              Only coaches and admins see responses with reasons. Please do not give any details about illnesses when declining, “ill” is enough. Reasons are
+              deleted automatically 60 days after the event.
+            </Trans>
           </p>
           <p>
-            Im Helferplan sehen die Helfenden einer Mannschaft, wer welchen Dienst übernimmt, als „Vorname N.“. Der persönliche Kalender-Link enthält nur deine
-            eigenen Dienste und die deiner Kinder.
+            <Trans>
+              In the helper plan, the helpers of a team see who takes on which duty, as “First name L.”. The personal calendar link only contains your own duties
+              and those of your children.
+            </Trans>
           </p>
-          <p>Rückmeldungen über „Hilfe und Feedback“ gehen per Mail an den Betreuer der App und werden in der App nicht gespeichert.</p>
-          <p>Zu jedem Zugang speichert die App den Tag der letzten Nutzung, ohne Uhrzeit. Ihn sehen nur Admins, damit sie ungenutzte Zugänge erkennen.</p>
-          <p>Chatverläufe werden zum Saisonwechsel gelöscht. Nach einem Vereinsaustritt werden alle Daten spätestens beim nächsten Saisonwechsel gelöscht.</p>
+          <p>
+            <Trans>Feedback via “Help and feedback” goes by e-mail to the app's maintainer and is not stored in the app.</Trans>
+          </p>
+          <p>
+            <Trans>For each access the app stores the day of last use, without time. Only admins see it, so they can spot unused accesses.</Trans>
+          </p>
+          <p>
+            <Trans>Chat histories are deleted at the season change. After someone leaves the club, all their data is deleted at the next season change at the latest.</Trans>
+          </p>
         </section>
         <section class="card card-pad stack">
-          <h2 style={{ fontSize: "22px" }}>Quellen</h2>
+          <h2 style={{ fontSize: "22px" }}>
+            <Trans>Sources</Trans>
+          </h2>
           <p>
-            Ferientermine: <a href="https://www.openholidaysapi.org">OpenHolidays API</a>, Daten unter der{" "}
-            <a href="https://opendatacommons.org/licenses/odbl/">Open Database License (ODbL)</a>.
+            <Trans>
+              School holidays: <a href="https://www.openholidaysapi.org">OpenHolidays API</a>, data under the{" "}
+              <a href="https://opendatacommons.org/licenses/odbl/">Open Database License (ODbL)</a>.
+            </Trans>
           </p>
-          <p>Spielpläne: handball4all. Der Abruf erfolgt nur vom Gerät eines Trainers oder Admins.</p>
           <p>
-            Icon Helferplan: <a href="https://lucide.dev">Lucide</a> (ISC-Lizenz).
+            <Trans>Game schedules: handball4all. They are only fetched from the device of a coach or admin.</Trans>
           </p>
-          <p>Schriften: Barlow und Barlow Condensed (SIL Open Font License), direkt von dieser App ausgeliefert.</p>
+          <p>
+            <Trans>
+              Helper plan icon: <a href="https://lucide.dev">Lucide</a> (ISC licence).
+            </Trans>
+          </p>
+          <p>
+            <Trans>Fonts: Barlow and Barlow Condensed (SIL Open Font License), served directly by this app.</Trans>
+          </p>
         </section>
       </div>
     </main>

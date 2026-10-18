@@ -1,4 +1,6 @@
-// Verwaltung → Helferdienste: Dienstarten und Vorlagen (nur Admins ändern).
+// Admin → Helper duties: duty types and templates (only admins change them).
+import { plural, t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 import { useState } from "preact/hooks";
 import { api } from "../api";
 import type { DutyTypeInfo, TemplateInfo } from "../duty-blocks";
@@ -9,26 +11,34 @@ import { Button, confirmDialog, ErrorBox, Field, Notice, Segmented, Sheet, Spinn
 
 type TemplateItem = TemplateInfo["items"][number];
 
-function whoLabel(t: DutyTypeInfo): string {
-  if (t.whoReferees) return "KiHaSL-Rolle";
-  if (t.whoParents && t.whoPlayers && t.whoCoaches) return t.whoMembers ? "Alle, Mitglieder" : "Alle";
-  return [t.whoParents && "Eltern", t.whoPlayers && "Spieler", t.whoCoaches && "Trainer", t.whoMembers && "Mitglieder"].filter(Boolean).join(", ");
+function whoLabel(type: DutyTypeInfo): string {
+  if (type.whoReferees) return t`KiHaSL role`;
+  if (type.whoParents && type.whoPlayers && type.whoCoaches) return type.whoMembers ? t`All, members` : t`All`;
+  return [
+    type.whoParents && t`Parents`,
+    type.whoPlayers && t({ message: "Players", context: "short" }),
+    type.whoCoaches && t({ message: "Coaches", context: "short" }),
+    type.whoMembers && t`Members`,
+  ]
+    .filter(Boolean)
+    .join(", ");
 }
 
-function typeSub(t: DutyTypeInfo): string {
+function typeSub(type: DutyTypeInfo): string {
+  const who = whoLabel(type);
   return [
-    `Wer hilft: ${whoLabel(t)}`,
-    t.mode === "task" ? "Aufgabe" : null,
-    t.noteAllowed ? "mit Notiz" : null,
-    t.needsSkill ? "braucht Vorkenntnisse" : null,
-    t.archived ? "archiviert" : null,
+    t`Who helps: ${who}`,
+    type.mode === "task" ? t`Task` : null,
+    type.noteAllowed ? t`with note` : null,
+    type.needsSkill ? t`needs prior knowledge` : null,
+    type.archived ? t`archived` : null,
   ]
     .filter(Boolean)
     .join(" · ");
 }
 
 export function AdminDutiesPage() {
-  useDocumentTitle("Helferdienste");
+  useDocumentTitle(t`Helper duties`);
   const me = useMe();
   const types = useQuery<{ types: DutyTypeInfo[] }>(me.isAdmin ? "/duty-types?all=1" : null);
   const templates = useQuery<{ templates: TemplateInfo[] }>(me.isAdmin ? "/duty-templates" : null);
@@ -37,9 +47,11 @@ export function AdminDutiesPage() {
   if (!me.isAdmin) {
     return (
       <main class="page">
-        <TopBar title="Helferdienste" back="/verwaltung" />
+        <TopBar title={t`Helper duties`} back="/verwaltung" />
         <div class="content">
-          <Notice kind="warn">Dieser Bereich ist nur für Admins.</Notice>
+          <Notice kind="warn">
+            <Trans>This area is for admins only.</Trans>
+          </Notice>
         </div>
       </main>
     );
@@ -52,22 +64,26 @@ export function AdminDutiesPage() {
   const allTypes = types.data?.types ?? [];
   return (
     <main class="page">
-      <TopBar title="Helferdienste" kicker="Verwaltung" back="/verwaltung" />
+      <TopBar title={t`Helper duties`} kicker={t`Administration`} back="/verwaltung" />
       <div class="content">
         {types.error ? <ErrorBox error={types.error} onRetry={types.reload} /> : null}
         {templates.error ? <ErrorBox error={templates.error} onRetry={templates.reload} /> : null}
         {!types.data || !templates.data ? <Spinner /> : null}
 
-        <section class="stack-sm" aria-label="Dienstarten">
-          <h2 class="section-title">Dienstarten</h2>
-          <p class="small muted">Was es im Verein gibt und wer helfen darf.</p>
+        <section class="stack-sm" aria-label={t`Duty types`}>
+          <h2 class="section-title">
+            <Trans>Duty types</Trans>
+          </h2>
+          <p class="small muted">
+            <Trans>What the club has and who may help.</Trans>
+          </p>
           <ul class="list">
-            {allTypes.map((t) => (
+            {allTypes.map((type) => (
               <li>
-                <button type="button" class={`list-row ${t.archived ? "muted" : ""}`} onClick={() => setEditType(t)}>
+                <button type="button" class={`list-row ${type.archived ? "muted" : ""}`} onClick={() => setEditType(type)}>
                   <span class="main">
-                    <span class="title">{t.name}</span>
-                    <span class="sub">{typeSub(t)}</span>
+                    <span class="title">{type.name}</span>
+                    <span class="sub">{typeSub(type)}</span>
                   </span>
                   <Icon name="chevron" size={18} />
                 </button>
@@ -75,39 +91,44 @@ export function AdminDutiesPage() {
             ))}
           </ul>
           <Button variant="dashed" size="sm" icon="plus" onClick={() => setEditType("new")}>
-            Dienstart hinzufügen
+            <Trans>Add duty type</Trans>
           </Button>
         </section>
 
-        <section class="stack-sm" aria-label="Vorlagen">
-          <h2 class="section-title">Vorlagen</h2>
-          <p class="small muted">Welche Dienste ein Spiel braucht, mit Plätzen und Zeitraum rund um den Termin. Trainer wählen in ihrer Mannschaft die Vorlage für Heim- und Auswärtsspiele.</p>
+        <section class="stack-sm" aria-label={t`Templates`}>
+          <h2 class="section-title">
+            <Trans>Templates</Trans>
+          </h2>
+          <p class="small muted">
+            <Trans>Which duties a game needs, with slots and time span around the event. Coaches choose the template for home and away games in their team.</Trans>
+          </p>
           <ul class="list">
-            {(templates.data?.templates ?? []).map((t) => (
-              <li>
-                <button type="button" class="list-row" onClick={() => setEditTemplate(t)}>
-                  <span class="main">
-                    <span class="title">{t.name}</span>
-                    <span class="sub">
-                      {t.defaultFor === "home" ? "Standard für Heimspiele · " : t.defaultFor === "away" ? "Standard für Auswärtsspiele · " : ""}
-                      {t.items.length === 1 ? "1 Dienst" : `${t.items.length} Dienste`}
+            {(templates.data?.templates ?? []).map((tpl) => {
+              const count = tpl.items.length;
+              return (
+                <li>
+                  <button type="button" class="list-row" onClick={() => setEditTemplate(tpl)}>
+                    <span class="main">
+                      <span class="title">{tpl.name}</span>
+                      <span class="sub">
+                        {tpl.defaultFor === "home" ? `${t`Default for home games`} · ` : tpl.defaultFor === "away" ? `${t`Default for away games`} · ` : ""}
+                        {plural(count, { one: "# duty", other: "# duties" })}
+                      </span>
                     </span>
-                  </span>
-                  <Icon name="chevron" size={18} />
-                </button>
-              </li>
-            ))}
+                    <Icon name="chevron" size={18} />
+                  </button>
+                </li>
+              );
+            })}
           </ul>
           <Button variant="dashed" size="sm" icon="plus" onClick={() => setEditTemplate("new")}>
-            Vorlage hinzufügen
+            <Trans>Add template</Trans>
           </Button>
         </section>
       </div>
 
       {editType ? <DutyTypeSheet type={editType === "new" ? null : editType} onClose={() => setEditType(null)} onDone={reload} /> : null}
-      {editTemplate ? (
-        <TemplateSheet template={editTemplate === "new" ? null : editTemplate} types={allTypes} onClose={() => setEditTemplate(null)} onDone={reload} />
-      ) : null}
+      {editTemplate ? <TemplateSheet template={editTemplate === "new" ? null : editTemplate} types={allTypes} onClose={() => setEditTemplate(null)} onDone={reload} /> : null}
     </main>
   );
 }
@@ -132,53 +153,59 @@ function DutyTypeSheet({ type, onClose, onDone }: { type: DutyTypeInfo | null; o
     </button>
   );
   return (
-    <Sheet open onClose={onClose} title={type ? type.name : "Neue Dienstart"}>
-      <TextField label="Name" value={name} onInput={setName} maxLength={40} placeholder="z. B. Grill" />
+    <Sheet open onClose={onClose} title={type ? type.name : t`New duty type`}>
+      <TextField label={t`Name`} value={name} onInput={setName} maxLength={40} placeholder={t`e.g. barbecue`} />
       {referee ? (
-        <p class="small muted">Wer diesen Dienst übernimmt, legt die KiHaSL/JuHaSL-Rolle fest. Hier lässt sich nur der Name ändern.</p>
+        <p class="small muted">
+          <Trans>Who takes on this duty is set by the KiHaSL/JuHaSL role. Only the name can be changed here.</Trans>
+        </p>
       ) : (
         <>
-          <div class="field" role="group" aria-label="Wer hilft">
-            <span class="field-label">Wer hilft</span>
+          <div class="field" role="group" aria-label={t`Who helps`}>
+            <span class="field-label">
+              <Trans>Who helps</Trans>
+            </span>
             <div class="chips">
-              {chip("Eltern", who.parents, () => setWho({ ...who, parents: !who.parents }))}
-              {chip("Spieler", who.players, () => setWho({ ...who, players: !who.players }))}
-              {chip("Trainer", who.coaches, () => setWho({ ...who, coaches: !who.coaches }))}
-              {chip("Mitglieder", who.members, () => setWho({ ...who, members: !who.members }))}
-              {chip("Alle", all, () => setWho(all ? { ...who, parents: true, players: false, coaches: false } : { ...who, parents: true, players: true, coaches: true }))}
+              {chip(t`Parents`, who.parents, () => setWho({ ...who, parents: !who.parents }))}
+              {chip(t({ message: "Players", context: "short" }), who.players, () => setWho({ ...who, players: !who.players }))}
+              {chip(t({ message: "Coaches", context: "short" }), who.coaches, () => setWho({ ...who, coaches: !who.coaches }))}
+              {chip(t`Members`, who.members, () => setWho({ ...who, members: !who.members }))}
+              {chip(t`All`, all, () => setWho(all ? { ...who, parents: true, players: false, coaches: false } : { ...who, parents: true, players: true, coaches: true }))}
             </div>
             <span class="small muted">
-              Eltern tragen sich für ihr Kind ein. In Mannschaften ohne Eltern übernehmen das die Spieler selbst. Mitglieder: ordentliche Mitglieder des Vereins, die zur Mannschaft
-              gehören (Merkmal setzen Admins unter Personen).
+              <Trans>
+                Parents sign up for their child. In teams without parents, the players do this themselves. Members: full members of the club who belong to the team (admins set this
+                under People).
+              </Trans>
             </span>
           </div>
           <Segmented
-            label="Art"
+            label={t`Kind`}
             value={mode}
             onChange={setMode}
             options={[
-              { value: "onsite", label: "Vor Ort" },
-              { value: "task", label: "Aufgabe" },
+              { value: "onsite", label: t`On site` },
+              { value: "task", label: t`Task` },
             ]}
           />
           <p class="small muted">
-            {mode === "onsite" ? "Vor Ort: anwesend in einem Zeitraum, etwa an der Theke." : "Aufgabe: wird vor oder nach dem Termin erledigt, etwa Trikots waschen."}
+            {mode === "onsite" ? t`On site: present during a time span, for example at the counter.` : t`Task: done before or after the event, for example washing the shirts.`}
           </p>
           <ul class="list">
             <li>
-              <SwitchRow label="Notiz erlaubt" sub="Wer sich einträgt, kann etwas dazuschreiben, z. B. welcher Kuchen." checked={noteAllowed} onChange={setNoteAllowed} />
+              <SwitchRow label={t`Note allowed`} sub={t`Whoever signs up can add something, e.g. which cake.`} checked={noteAllowed} onChange={setNoteAllowed} />
             </li>
             <li>
               <SwitchRow
-                label="Braucht Vorkenntnisse"
-                sub="Angeboten wird der Dienst nur, wer ihn im Profil unter „Das kann ich“ einschaltet."
+                label={t`Needs prior knowledge`}
+                sub={t`The duty is only offered to those who turn it on in their profile under “I can do this”.`}
                 checked={needsSkill}
                 onChange={setNeedsSkill}
               />
             </li>
             {type ? (
               <li>
-                <SwitchRow label="Archiviert" sub="Nicht mehr für neue Vorlagen und Zeitblöcke wählbar. Bestehende Dienste bleiben." checked={archived} onChange={setArchived} />
+                <SwitchRow label={t`Archived`} sub={t`No longer available for new templates and time slots. Existing duties remain.`} checked={archived} onChange={setArchived} />
               </li>
             ) : null}
           </ul>
@@ -190,59 +217,81 @@ function DutyTypeSheet({ type, onClose, onDone }: { type: DutyTypeInfo | null; o
         block
         disabled={!name.trim() || (!referee && !who.parents && !who.players && !who.coaches && !who.members)}
         onClick={async () => {
-          const body = { name: name.trim(), mode, whoParents: who.parents, whoPlayers: who.players, whoCoaches: who.coaches, whoMembers: who.members, noteAllowed, needsSkill, archived };
+          const body = {
+            name: name.trim(),
+            mode,
+            whoParents: who.parents,
+            whoPlayers: who.players,
+            whoCoaches: who.coaches,
+            whoMembers: who.members,
+            noteAllowed,
+            needsSkill,
+            archived,
+          };
           if (type) await api.patch(`/admin/duty-types/${type.id}`, body);
           else await api.post("/admin/duty-types", body);
-          toast("Gespeichert.");
+          toast(t`Saved.`);
           onDone();
           onClose();
         }}
       >
-        Speichern
+        <Trans>Save</Trans>
       </Button>
     </Sheet>
   );
 }
 
 function TemplateSheet({ template, types, onClose, onDone }: { template: TemplateInfo | null; types: DutyTypeInfo[]; onClose: () => void; onDone: () => void }) {
-  const choices = types.filter((t) => !t.whoReferees && (!t.archived || template?.items.some((i) => i.dutyTypeId === t.id)));
+  const choices = types.filter((ty) => !ty.whoReferees && (!ty.archived || template?.items.some((i) => i.dutyTypeId === ty.id)));
   const [name, setName] = useState(template?.name ?? "");
   const [items, setItems] = useState<TemplateItem[]>(template?.items ?? []);
-  const typeOf = (id: number) => types.find((t) => t.id === id);
+  const typeOf = (id: number) => types.find((ty) => ty.id === id);
   const update = (i: number, patch: Partial<TemplateItem>) => setItems(items.map((it, n) => (n === i ? { ...it, ...patch } : it)));
   return (
-    <Sheet open onClose={onClose} title={template ? template.name : "Neue Vorlage"}>
-      <TextField label="Name" value={name} onInput={setName} maxLength={40} placeholder="z. B. Heimspiel mit Grill" />
+    <Sheet open onClose={onClose} title={template ? template.name : t`New template`}>
+      <TextField label={t`Name`} value={name} onInput={setName} maxLength={40} placeholder={t`e.g. home game with barbecue`} />
       <p class="small muted">
-        Zeiten beziehen sich auf Beginn und Ende des Termins. Bei Spielen ist der Beginn der Anpfiff, das Ende ergibt sich aus der Spieldauer der Altersklasse. Bei Sonderterminen gelten Beginn und Ende des
-        Termins.
+        <Trans>
+          Times refer to the start and end of the event. For games, the start is the throw-off and the end follows from the game length of the age group. For special events, the
+          start and end of the event apply.
+        </Trans>
       </p>
       {items.map((it, i) => {
-        const t = typeOf(it.dutyTypeId);
+        const type = typeOf(it.dutyTypeId);
+        const label = type?.name ?? t`Duty`;
         return (
-          <section class="tpl-item" aria-label={t?.name ?? "Dienst"}>
+          <section class="tpl-item" aria-label={label}>
             <div class="tpl-item-head">
-              <Field label="Dienst">
+              <Field label={t`Duty`}>
                 {(id) => (
-                  <select id={id} class="select" value={String(it.dutyTypeId)} onChange={(e) => update(i, { dutyTypeId: Number((e.target as HTMLSelectElement).value) })}>
+                  <select
+                    id={id}
+                    class="select"
+                    value={String(it.dutyTypeId)}
+                    onChange={(e) =>
+                      update(i, {
+                        dutyTypeId: Number((e.target as HTMLSelectElement).value),
+                      })
+                    }
+                  >
                     {choices.map((c) => (
                       <option value={String(c.id)}>{c.name}</option>
                     ))}
                   </select>
                 )}
               </Field>
-              <button type="button" class="icon-btn icon-btn-sm" aria-label={`${t?.name ?? "Dienst"} entfernen`} onClick={() => setItems(items.filter((_, n) => n !== i))}>
+              <button type="button" class="icon-btn icon-btn-sm" aria-label={t`Remove ${label}`} onClick={() => setItems(items.filter((_, n) => n !== i))}>
                 <Icon name="trash" size={16} />
               </button>
             </div>
-            {t?.mode === "task" ? (
+            {type?.mode === "task" ? (
               <Segmented
-                label="Wann"
+                label={t`When`}
                 value={it.taskWhen}
                 onChange={(v) => update(i, { taskWhen: v })}
                 options={[
-                  { value: "before", label: "Davor" },
-                  { value: "after", label: "Danach" },
+                  { value: "before", label: t`Before` },
+                  { value: "after", label: t`After` },
                 ]}
               />
             ) : (
@@ -256,12 +305,18 @@ function TemplateSheet({ template, types, onClose, onDone }: { template: Templat
                     max={600}
                     step={5}
                     value={it.beforeMin}
-                    aria-label="Minuten vor Beginn"
-                    onInput={(e) => update(i, { beforeMin: clampMin((e.target as HTMLInputElement).value) })}
+                    aria-label={t`Minutes before start`}
+                    onInput={(e) =>
+                      update(i, {
+                        beforeMin: clampMin((e.target as HTMLInputElement).value),
+                      })
+                    }
                   />{" "}
-                  min vor Beginn
+                  <Trans>min before start</Trans>
                 </label>
-                <span>bis</span>
+                <span>
+                  <Trans>to</Trans>
+                </span>
                 <label>
                   <input
                     class="input"
@@ -271,20 +326,26 @@ function TemplateSheet({ template, types, onClose, onDone }: { template: Templat
                     max={600}
                     step={5}
                     value={it.afterMin}
-                    aria-label="Minuten nach Ende"
-                    onInput={(e) => update(i, { afterMin: clampMin((e.target as HTMLInputElement).value) })}
+                    aria-label={t`Minutes after end`}
+                    onInput={(e) =>
+                      update(i, {
+                        afterMin: clampMin((e.target as HTMLInputElement).value),
+                      })
+                    }
                   />{" "}
-                  min nach Ende
+                  <Trans>min after end</Trans>
                 </label>
               </div>
             )}
             <div class="duty-stepper">
-              <span>Plätze</span>
-              <button type="button" class="icon-btn icon-btn-sm" aria-label="Ein Platz weniger" onClick={() => update(i, { slots: Math.max(1, it.slots - 1) })}>
+              <span>
+                <Trans>Slots</Trans>
+              </span>
+              <button type="button" class="icon-btn icon-btn-sm" aria-label={t`One slot fewer`} onClick={() => update(i, { slots: Math.max(1, it.slots - 1) })}>
                 −
               </button>
               <strong aria-live="polite">{it.slots}</strong>
-              <button type="button" class="icon-btn icon-btn-sm" aria-label="Ein Platz mehr" onClick={() => update(i, { slots: Math.min(20, it.slots + 1) })}>
+              <button type="button" class="icon-btn icon-btn-sm" aria-label={t`One slot more`} onClick={() => update(i, { slots: Math.min(20, it.slots + 1) })}>
                 +
               </button>
             </div>
@@ -296,13 +357,28 @@ function TemplateSheet({ template, types, onClose, onDone }: { template: Templat
         size="sm"
         icon="plus"
         disabled={!choices.length}
-        onClick={() => setItems([...items, { dutyTypeId: choices[0]!.id, slots: 1, beforeMin: 0, afterMin: 0, taskWhen: "after" }])}
+        onClick={() =>
+          setItems([
+            ...items,
+            {
+              dutyTypeId: choices[0]!.id,
+              slots: 1,
+              beforeMin: 0,
+              afterMin: 0,
+              taskWhen: "after",
+            },
+          ])
+        }
       >
-        Dienst hinzufügen
+        <Trans>Add duty</Trans>
       </Button>
-      <p class="small muted">0 heißt genau zum Beginn bzw. Ende. Änderungen gelten für kommende Spiele, bei denen sich noch niemand eingetragen hat.</p>
       <p class="small muted">
-        KiHaSL/JuHaSL steht in keiner Vorlage: Bei Heimspielen der Jugend F bis C kommt der Dienst immer automatisch dazu (1 Platz, 15 min vor Anpfiff bis Spielende).
+        <Trans>0 means exactly at the start or end. Changes apply to upcoming games where no one has signed up yet.</Trans>
+      </p>
+      <p class="small muted">
+        <Trans>
+          KiHaSL/JuHaSL is not part of any template: for youth home games F to C the duty is always added automatically (1 slot, 15 min before throw-off until the end of the game).
+        </Trans>
       </p>
       <Button
         variant="primary"
@@ -313,26 +389,35 @@ function TemplateSheet({ template, types, onClose, onDone }: { template: Templat
           const body = { name: name.trim(), items };
           if (template) await api.put(`/admin/duty-templates/${template.id}`, body);
           else await api.post("/admin/duty-templates", body);
-          toast("Vorlage gespeichert.");
+          toast(t`Template saved.`);
           onDone();
           onClose();
         }}
       >
-        Speichern
+        <Trans>Save</Trans>
       </Button>
       {template && !template.defaultFor ? (
         <Button
           variant="danger"
           icon="trash"
           onClick={async () => {
-            if (!(await confirmDialog({ title: `Vorlage ${template.name} löschen?`, message: "Mannschaften mit dieser Vorlage nutzen danach wieder den Standard.", confirmLabel: "Löschen", danger: true }))) return;
+            const templateName = template.name;
+            if (
+              !(await confirmDialog({
+                title: t`Delete template ${templateName}?`,
+                message: t`Teams with this template will then use the default again.`,
+                confirmLabel: t`Delete`,
+                danger: true,
+              }))
+            )
+              return;
             await api.del(`/admin/duty-templates/${template.id}`);
-            toast("Vorlage gelöscht.");
+            toast(t`Template deleted.`);
             onDone();
             onClose();
           }}
         >
-          Vorlage löschen
+          <Trans>Delete template</Trans>
         </Button>
       ) : null}
     </Sheet>

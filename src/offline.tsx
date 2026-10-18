@@ -1,6 +1,7 @@
-// Offline-Betrieb: Der Service Worker liefert ohne Netz den zuletzt geladenen
-// Stand (Kennzeichen x-kabine-offline). Hier merkt sich die App, ob sie gerade
-// offline ist, zeigt einen Hinweis und lädt alles neu, sobald das Netz zurück ist.
+// Offline use: without network the service worker delivers the last loaded
+// state (marker x-kabine-offline). Here the app remembers whether it is currently
+// offline, shows a notice and reloads everything as soon as the network is back.
+import { Trans } from "@lingui/react/macro";
 import { useEffect, useState } from "preact/hooks";
 import { Icon } from "./icons";
 
@@ -18,13 +19,13 @@ function set(value: boolean) {
   if (value) startProbe();
   else {
     stopProbe();
-    // Alles neu laden, was gerade angezeigt wird (siehe app.tsx)
+    // Reload everything currently shown (see app.tsx)
     window.dispatchEvent(new CustomEvent("kabine:online"));
   }
 }
 
 
-/** Vom API-Client nach jeder Antwort aufgerufen. */
+/** Called by the API client after every response. */
 export function noteResponse(res: Response) {
   set(res.headers.get("x-kabine-offline") === "1");
 }
@@ -38,7 +39,7 @@ async function checkOnline() {
     const res = await fetch("/api/health", { cache: "no-store" });
     if (res.ok) set(false);
   } catch {
-    // weiter offline
+    // still offline
   }
 }
 
@@ -59,22 +60,22 @@ export function startOfflineWatch() {
   if (offline) startProbe();
 }
 
-/** Gespeicherte Daten dieses Geräts verwerfen, z. B. beim Abmelden. */
+/** Discard stored data of this device, e.g. on sign-out. */
 export async function clearOfflineData() {
   try {
     await caches.delete(OFFLINE_DATA_CACHE);
   } catch {
-    // ohne Cache API nichts zu tun
+    // nothing to do without the Cache API
   }
 }
 
-/** Kleine Datenmengen (z. B. den Chatverlauf) für offline merken. */
+/** Remember small amounts of data (e.g. the chat history) for offline use. */
 export async function saveOffline(key: string, data: unknown) {
   try {
     const cache = await caches.open(OFFLINE_DATA_CACHE);
     await cache.put(`/offline/${key}`, new Response(JSON.stringify(data), { headers: { "content-type": "application/json" } }));
   } catch {
-    // nicht schlimm
+    // not a problem
   }
 }
 
@@ -104,7 +105,9 @@ export function OfflineBanner() {
   return (
     <div class="offline-banner" role="status">
       <Icon name="info" size={18} />
-      <span>Du bist gerade offline. Du siehst den zuletzt geladenen Stand.</span>
+      <span>
+        <Trans>You are offline. You are seeing the last loaded state.</Trans>
+      </span>
     </div>
   );
 }

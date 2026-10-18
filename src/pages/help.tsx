@@ -1,3 +1,5 @@
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 import { useEffect, useState } from "preact/hooks";
 import { api, errorMessage } from "../api";
 import { useClub } from "../club";
@@ -9,14 +11,14 @@ import { Button, Field, Notice, SwitchRow, toast, TopBar, useDocumentTitle } fro
 
 const MAX_SIDE = 1600;
 
-/** Bild verkleinern (längste Seite 1600 px) und als JPEG verschicken, damit die Mail klein bleibt. */
+/** Shrink the image (longest side 1600 px) and send it as JPEG, so the mail stays small. */
 async function shrink(file: File): Promise<Blob> {
   const url = URL.createObjectURL(file);
   try {
     const img = new Image();
     img.src = url;
     await img.decode().catch(() => {
-      throw new Error("Dieses Bildformat kann dein Browser nicht öffnen. Bitte ein Foto oder einen Screenshot als JPEG oder PNG wählen.");
+      throw new Error(t`Your browser cannot open this image format. Please choose a photo or screenshot as JPEG or PNG.`);
     });
     const scale = Math.min(1, MAX_SIDE / Math.max(img.naturalWidth, img.naturalHeight));
     const canvas = document.createElement("canvas");
@@ -28,16 +30,16 @@ async function shrink(file: File): Promise<Blob> {
     ctx.imageSmoothingQuality = "high";
     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
     const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.85));
-    if (!blob) throw new Error("Das Bild konnte nicht umgewandelt werden.");
+    if (!blob) throw new Error(t`The image could not be converted.`);
     return blob;
   } finally {
     URL.revokeObjectURL(url);
   }
 }
 
-/** Hilfe und Feedback: Rückmeldung zur App, optional mit Bild, geht per E-Mail an den Betreuer der App. */
+/** Help and feedback: feedback on the app, optionally with an image, goes by e-mail to the app's maintainer. */
 export function HelpPage() {
-  useDocumentTitle("Hilfe und Feedback");
+  useDocumentTitle(t`Help and feedback`);
   const me = useMe();
   const club = useClub();
   const [message, setMessage] = useState("");
@@ -45,6 +47,7 @@ export function HelpPage() {
   const [preview, setPreview] = useState<string | null>(null);
   const [reply, setReply] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const contact = club.contact;
 
   useEffect(() => {
     if (!image) return setPreview(null);
@@ -79,8 +82,8 @@ export function HelpPage() {
       setReply(false);
       toast(
         reply && !res.replyTo
-          ? "Danke, deine Nachricht ist angekommen. Für eine Antwort per E-Mail fehlt an deinem Zugang eine bestätigte Adresse (Profil)."
-          : "Danke, deine Nachricht ist angekommen.",
+          ? t`Thank you, your message has arrived. For a reply by e-mail, your access lacks a confirmed address (profile).`
+          : t`Thank you, your message has arrived.`,
       );
     } catch (err) {
       setError(errorMessage(err));
@@ -89,15 +92,19 @@ export function HelpPage() {
 
   return (
     <main class="page">
-      <TopBar title="Hilfe und Feedback" kicker="Hilfe" back={me.isAdmin ? "/verwaltung" : me.manageableTeams.length ? "/profil" : undefined} />
+      <TopBar title={t`Help and feedback`} kicker={t`Help`} back={me.isAdmin ? "/verwaltung" : me.manageableTeams.length ? "/profil" : undefined} />
       <div class="content">
         <FaqList />
-        <section class="stack-sm" aria-label="Anleitungen">
-          <h2 class="section-title">Anleitungen</h2>
+        <section class="stack-sm" aria-label={t`Guides`}>
+          <h2 class="section-title">
+            <Trans>Guides</Trans>
+          </h2>
           <details class="card howto-fold">
             <summary>
               <Icon name="phone" size={20} />
-              <span>App installieren</span>
+              <span>
+                <Trans>Install app</Trans>
+              </span>
               <Icon name="chevron" size={18} />
             </summary>
             <div class="card-body">
@@ -107,7 +114,9 @@ export function HelpPage() {
           <details class="card howto-fold">
             <summary>
               <Icon name="bell" size={20} />
-              <span>Benachrichtigungen einrichten</span>
+              <span>
+                <Trans>Set up notifications</Trans>
+              </span>
               <Icon name="chevron" size={18} />
             </summary>
             <div class="card-body">
@@ -115,13 +124,17 @@ export function HelpPage() {
             </div>
           </details>
         </section>
-        <h2 class="section-title">Feedback</h2>
+        <h2 class="section-title">
+          <Trans>Feedback</Trans>
+        </h2>
         <section class="card card-pad stack">
           <p>
-            Etwas funktioniert nicht, ist unklar oder du hast eine Idee? Schreib uns hier deine Rückmeldung zur App. Ein Screenshot hilft oft, ein Problem schnell zu
-            verstehen.
+            <Trans>
+              Something does not work, is unclear or you have an idea? Write your feedback on the app to us here. A screenshot often helps to understand a problem
+              quickly.
+            </Trans>
           </p>
-          <Field label="Deine Nachricht">
+          <Field label={t`Your message`}>
             {(id) => (
               <textarea
                 id={id}
@@ -129,39 +142,41 @@ export function HelpPage() {
                 rows={6}
                 value={message}
                 maxLength={4000}
-                placeholder="Was ist dir aufgefallen?"
+                placeholder={t`What did you notice?`}
                 onInput={(e) => setMessage((e.target as HTMLTextAreaElement).value)}
               />
             )}
           </Field>
           {preview ? (
             <div class="feedback-image">
-              <img src={preview} alt="Angehängtes Bild" />
+              <img src={preview} alt={t`Attached image`} />
               <Button size="sm" variant="ghost" icon="trash" onClick={() => setImage(null)}>
-                Bild entfernen
+                <Trans>Remove image</Trans>
               </Button>
             </div>
           ) : (
             <label class="btn btn-dashed feedback-pick">
               <Icon name="image" size={18} />
-              Screenshot oder Bild anhängen (optional)
+              <Trans>Attach screenshot or image (optional)</Trans>
               <input type="file" accept="image/*" class="sr-only" onChange={pick} />
             </label>
           )}
-          <SwitchRow label="Antwort per E-Mail erwünscht" sub="An die bestätigte E-Mail-Adresse deines Zugangs" checked={reply} onChange={setReply} />
+          <SwitchRow label={t`Reply by e-mail wanted`} sub={t`To the confirmed e-mail address of your access`} checked={reply} onChange={setReply} />
           {error ? <Notice kind="warn">{error}</Notice> : null}
           <Button variant="primary" icon="send" block disabled={message.trim().length < 3} onClick={send}>
-            Absenden
+            <Trans context="feedback">Send</Trans>
           </Button>
         </section>
         <p class="small muted credits">
-          {club.contact ? (
+          {contact ? (
             <>
-              Ansprechpartner für die App: {club.contact}
+              <Trans>Contact for the app: {contact}</Trans>
               <br />
             </>
           ) : null}
-          Kabine ist freie Software unter der Lizenz AGPL-3.0. <a href="https://github.com/witscher/kabine">Quellcode</a>
+          <Trans>
+            Kabine is free software under the AGPL-3.0 licence. <a href="https://github.com/witscher/kabine">Source code</a>
+          </Trans>
         </p>
       </div>
     </main>

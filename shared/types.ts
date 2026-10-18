@@ -1,4 +1,5 @@
-// Gemeinsame Typen für API-Antworten (Worker und Frontend).
+// Shared types for API responses (worker and frontend).
+import { t } from "@lingui/core/macro";
 
 export type Role = "player" | "coach" | "helper";
 
@@ -17,56 +18,58 @@ export type ChildPermission = "may_accept" | "may_decline" | "may_read_chat" | "
 
 export type ChildPermissions = Record<ChildPermission, boolean>;
 
-export const CHILD_PERMISSION_LABELS: Record<ChildPermission, string> = {
-  may_accept: "Absagen selbst zurücknehmen",
-  may_decline: "Selbst absagen",
-  may_read_chat: "Chat lesen",
-  may_write_chat: "Chat schreiben",
-  may_answer_help: "Aushilfe-Anfragen selbst beantworten",
-};
+export const childPermissionLabels = (): Record<ChildPermission, string> => ({
+  may_accept: t`Withdraw declines on their own`,
+  may_decline: t`Decline on their own`,
+  may_read_chat: t`Read chat`,
+  may_write_chat: t`Write in chat`,
+  may_answer_help: t`Answer stand-in requests on their own`,
+});
 
 export type NotificationTopic = "events" | "reminders" | "squad" | "responses" | "chat" | "mentions" | "coach" | "carpool";
 
-export const NOTIFICATION_TOPIC_LABELS: Record<NotificationTopic, string> = {
-  events: "Neue, geänderte und abgesagte Termine",
-  reminders: "Erinnerungen an offene Rückmeldungen",
-  squad: "Nominierungen, Erinnerungen vor Spielen und Aushilfe-Anfragen",
-  responses: "Rückmeldungen durch Eltern bzw. Kind",
-  chat: "Chatnachrichten",
-  mentions: "Erwähnungen im Chat (@Name)",
-  coach: "Trainer-Hinweise (kurzfristige Absagen, Aushilfen)",
-  carpool: "Fahrgemeinschaften (Mitfahrer, freie Plätze)",
-};
+export const notificationTopicLabels = (): Record<NotificationTopic, string> => ({
+  events: t`New, changed and cancelled events`,
+  reminders: t`Reminders about pending responses`,
+  squad: t`Nominations, reminders before games and stand-in requests`,
+  responses: t`Responses by parents or child`,
+  chat: t`Chat messages`,
+  mentions: t`Mentions in the chat (@name)`,
+  coach: t`Coach notes (short-notice declines, stand-ins)`,
+  carpool: t`Carpools (passengers, free seats)`,
+});
 
 export interface Me {
   accountId: number;
   person: PersonRef & { isAdmin: boolean };
   isAdmin: boolean;
   /**
-   * Verknüpfte Kinder, ohne die eigene Person. parentsInCharge: In mindestens
-   * einer Mannschaft des Kindes sind Eltern eingebunden.
+   * Linked children, without the own person. parentsInCharge: parents are involved in at least
+   * one of the child's teams.
    */
   children: (PersonRef & { teams: (TeamRef & { parentsEnabled: boolean })[]; parentsInCharge: boolean })[];
-  /** Eigene Mannschaftszugehörigkeiten. */
+  /** Own team memberships. */
   memberships: (TeamRef & { role: Role; parentsEnabled: boolean })[];
-  /** Mannschaften, die dieser Account verwalten darf (Trainer; Admins: alle). */
+  /** Teams this account may manage (coaches; admins: all). */
   manageableTeams: TeamRef[];
-  /** Kind mit verknüpften Eltern. */
+  /** Child with linked parents. */
   hasGuardians: boolean;
-  /** Die Freigaben der Eltern gelten (in mindestens einer eigenen Mannschaft sind Eltern eingebunden). */
+  /** The parents' permissions apply (parents are involved in at least one own team). */
   parentsInCharge: boolean;
   permissions: ChildPermissions;
   vapidPublicKey: string | null;
-  /** Mannschaften mit Helferplan, bei denen diese Person helfen oder ihn verwalten kann (Reiter "Helfer"); eigene (own) zuerst. */
+  /** Teams with a helper plan where this person can help or manage it ("Helfer" tab); own ones first. */
   helperTeams: (TeamRef & { own: boolean })[];
-  /** Nur Admins: aktuelle Sicht (Spieler, Elternteil, Trainer), sonst null. */
+  /** Admins only: current view (player, parent, coach), otherwise null. */
   viewAs: { mode: "player" | "parent" | "trainer" | "referee"; readOnly: boolean } | null;
-  /** Darf (selbst oder für ein Kind) KiHaSL/JuHaSL-Dienste übernehmen. */
+  /** May take on KiHaSL/JuHaSL duties (personally or for a child). */
   referee: boolean;
-  /** IDs aller Gruppen (nur Chat und Sondertermine, siehe docs/entscheidungen.md, Abschnitt Gruppen). */
+  /** IDs of all groups (chat and special events only, see docs/entscheidungen.md, section Gruppen). */
   groupIds: number[];
-  /** Nur Admins mit Trainerrolle: Umschalter Admin/Trainer im Profil (coachMode = arbeitet gerade als Trainer). */
+  /** Admins with a coach role only: admin/coach switch in the profile (coachMode = currently working as coach). */
   adminSwitch: { coachMode: boolean } | null;
+  /** Language chosen on the account; null: the app's language or the club default. */
+  locale: import("./i18n").Locale | null;
 }
 
 export type SessionResponse = { authenticated: false } | { authenticated: true; me: Me };
@@ -81,14 +84,14 @@ export interface LocationRef {
 
 export type EventKind = "training" | "game" | "special";
 
-/** Wirksamer Status einer Person bei einem Termin. */
+/** Effective status of a person for an event. */
 export type ParticipationStatus = "yes" | "no" | "open" | "standing" | "inactive";
 
 export type RespondedBy = "self" | "guardian" | "child" | "other";
 
 export interface MyParticipation {
   person: PersonRef;
-  /** false bei Spielen ohne Nominierung. */
+  /** false for games without nomination. */
   participant: boolean;
   nominated: boolean;
   isHelper: boolean;
@@ -98,9 +101,9 @@ export interface MyParticipation {
   respondedAt: string | null;
   respondedBy: RespondedBy | null;
   respondedByName: string | null;
-  /** Vom Trainer nach dem Termin als „fehlt unentschuldigt“ markiert */
+  /** Marked by the coach after the event as "absent without excuse" */
   unexcused: boolean;
-  /** Aktion für diesen Account erlaubt (Elternfreigaben, Inaktivität, Termin vorbei). */
+  /** Action allowed for this account (parental permissions, inactivity, event over). */
   canAccept: boolean;
   canDecline: boolean;
   blockedReason: string | null;
@@ -116,11 +119,11 @@ export interface EventCounts {
 }
 
 /**
- * Eine Seite der Terminübersicht (GET /events?limit=…). `events` in Datumsreihenfolge, bei
- * vergangenen Terminen neueste zuerst. `live`: heute schon angepfiffene Spiele. `next`: der nächste
- * eigene Termin für die große Karte (mit weiteren am selben Tag), wenn er hinter der Seite liegt.
- * `openHelp`: Termine mit offener Aushilfe-Anfrage, auch jenseits der Seite. `trainingsUntil`: bis
- * zu diesem Tag sind Trainings erzeugt, danach folgen nur Spiele und Sondertermine.
+ * One page of the event list (GET /events?limit=…). `events` in date order, past events newest
+ * first. `live`: games that have already started today. `next`: the next own event for the big
+ * card (with others on the same day) if it lies beyond the page. `openHelp`: events with an open
+ * stand-in request, also beyond the page. `trainingsUntil`: trainings are generated up to this
+ * day, after that only games and special events follow.
  */
 export interface EventPage {
   events: EventSummary[];
@@ -142,7 +145,7 @@ export interface EventSummary {
   clubWide: boolean;
   cancelled: { at: string; byName: string | null; reason: string | null } | null;
   notes: string | null;
-  deadline: string | null; // lokale Zeit
+  deadline: string | null; // local time
   deadlineHours: number;
   isPast: boolean;
   counts: EventCounts | null;
@@ -151,24 +154,24 @@ export interface EventSummary {
   game: GameInfo | null;
   isDetached: boolean;
   ruleId: number | null;
-  /** Eigene Dienste im Helferplan und die für die eigenen Kinder. */
+  /** Own duties in the helper plan and those for the own children. */
   myDuties: MyDuty[];
-  /** Ersteller oder Organisator dieses Sondertermins (verwaltet die Helferdienste). */
+  /** Creator or organiser of this special event (manages the helper duties). */
   organizing: boolean;
-  /** Fahrgemeinschaften kurz (nur kommende Auswärtsspiele mit Einträgen, nur für Beteiligte): belegte/angebotene Plätze, Suchende ohne Platz. */
+  /** Carpool summary (only upcoming away games with entries, only for those involved): taken/offered seats, people searching without a seat. */
   carpoolCount: { taken: number; seats: number; waiting: number } | null;
-  /** Freie Helferplätze, die man selbst (bzw. für das Kind) übernehmen könnte; 0 = keine oder schon eingetragen. */
+  /** Free helper slots one could take on (or for the child); 0 = none or already signed up. */
   helpersNeeded: number;
-  /** „Fehlt unentschuldigt“ bei diesem Termin, nur für Trainer und Admins (sonst 0). */
+  /** "Absent without excuse" at this event, only for coaches and admins (otherwise 0). */
   unexcusedCount: number;
 }
 
 export interface MyDuty {
   dutyTypeId: number;
-  /** KiHaSL/JuHaSL-Dienst (eigene Übersicht im Reiter Helfer) */
+  /** KiHaSL/JuHaSL duty (own overview in the "Helfer" tab) */
   referee: boolean;
   label: string;
-  /** Vorname des Kindes, wenn ein anderer den Dienst für mein Kind übernommen hat */
+  /** First name of the child if someone else took on the duty for my child */
   child: string | null;
   mine: boolean;
 }
@@ -185,20 +188,20 @@ export interface GameInfo {
   coachNotes: string | null;
   squadPublished: boolean;
   nominatedCount: number;
-  /** Ligatabelle bei handball4all, falls ein Spielplan hinterlegt ist. */
+  /** League table at handball4all if a schedule is set up. */
   tableUrl: string | null;
-  /** Spiel-ID bei handball4all (nur importierte Spiele). */
+  /** Game ID at handball4all (imported games only). */
   h4aGameId: string | null;
-  /** Spielplan-Abruf der Mannschaft; nur beim Antippen von „Liveticker“, um den Ticker-Token zu lesen. */
+  /** The team's schedule fetch URL; only when tapping "Liveticker", to read the ticker token. */
   liveUrl: string | null;
-  /** So viele Minuten nach Anpfiff gilt das Spiel als „läuft gerade“, danach gibt es den Spielbericht. */
+  /** For this many minutes after throw-off the game counts as "in progress", after that there is the game report. */
   liveMinutes: number;
 }
 
 export interface ParticipantDetail {
   person: PersonRef;
   teamId: number;
-  /** Alle beteiligten Mannschaften der Person (Spieler in zwei Mannschaften) */
+  /** All of the person's teams involved (players in two teams) */
   teamIds: number[];
   isHelper: boolean;
   status: ParticipationStatus;
@@ -208,34 +211,34 @@ export interface ParticipantDetail {
   respondedBy: RespondedBy | null;
   respondedByName: string | null;
   hasStandingAbsence: boolean;
-  /** „Fehlt unentschuldigt“ (nach Beginn vom Trainer markiert) */
+  /** "Absent without excuse" (marked by the coach after the start) */
   unexcused: boolean;
 }
 
 export interface EventDetail extends EventSummary {
-  /** Nur für Trainer und Admins. */
+  /** Coaches and admins only. */
   participants: ParticipantDetail[] | null;
-  /** Nur wenn die Mannschaft „Rückmeldungen für alle sichtbar“ eingeschaltet hat (ohne Gründe), sonst null. */
+  /** Only if the team has turned on "responses visible to all" (without reasons), otherwise null. */
   roster: RosterEntry[] | null;
-  /** Helferdienste dieses Termins verwalten (Trainer, Admins, Ersteller, Organisatoren). */
+  /** May manage this event's helper duties (coaches, admins, creator, organisers). */
   dutyManage: boolean;
-  /** Nur bei Sonderterminen: Ersteller und Organisatoren („Vorname N.“). */
+  /** Special events only: creator and organisers ("First name L."). */
   organizers: { creator: { id: number; name: string } | null; people: { id: number; name: string }[]; editable: boolean } | null;
-  /** Nur bei Auswärtsspielen und nur für Beteiligte (Nominierte, ihre Eltern, Trainer), sonst null. */
+  /** Away games only and only for those involved (nominated players, their parents, coaches), otherwise null. */
   carpool: CarpoolInfo | null;
 }
 
-/** Suche nach einer Mitfahrgelegenheit für einen Spieler; Platzbedarf = 1 + Begleitpersonen. */
+/** Search for a ride for a player; seats needed = 1 + companions. */
 export interface CarpoolRequest {
   id: number;
   playerId: number;
-  /** „Vorname N.“ */
+  /** "First name L." */
   name: string;
   companions: number;
   seats: number;
-  /** Gebucht bei diesem Angebot, null = sucht noch */
+  /** Booked with this offer, null = still searching */
   offerId: number | null;
-  /** Eigener Spieler bzw. eigenes Kind */
+  /** Own player or own child */
   mine: boolean;
   canEdit: boolean;
 }
@@ -243,12 +246,12 @@ export interface CarpoolRequest {
 export interface CarpoolOffer {
   id: number;
   personId: number;
-  /** „Vorname N.“ des Fahrers */
+  /** "First name L." of the driver */
   name: string;
   seats: number;
   free: number;
   riders: CarpoolRequest[];
-  /** Eigenes Angebot */
+  /** Own offer */
   mine: boolean;
   canEdit: boolean;
 }
@@ -258,30 +261,30 @@ export interface CarpoolPersonRef {
   name: string;
 }
 
-/** Wer mitfahren kann: Nominierte und die Trainer (coach). */
+/** Who can ride along: nominated players and the coaches (coach). */
 export interface CarpoolRider extends CarpoolPersonRef {
   coach: boolean;
-  /** Eltern („Vorname N.“) als mögliche Begleitung; nur für die eigene Familie und für Trainer */
+  /** Parents ("First name L.") as possible companions; only for the own family and for coaches */
   guardians: CarpoolPersonRef[];
 }
 
 export interface CarpoolInfo {
-  /** Eintragen möglich (Spiel nicht abgesagt und noch nicht begonnen). */
+  /** Sign-up possible (game not cancelled and not started yet). */
   open: boolean;
   offers: CarpoolOffer[];
-  /** Suchende ohne Platz */
+  /** People searching without a seat */
   waiting: CarpoolRequest[];
-  /** Mitfahrer, für die man selbst sucht (eigene Person, Kinder), mit ihrer Suche */
+  /** Riders one searches for (own person, children), with their search */
   mine: { player: CarpoolRider & { self: boolean }; request: CarpoolRequest | null }[];
-  /** Eigene Person darf als Fahrer anbieten (noch kein Angebot, Familie sucht nicht). */
+  /** The own person may offer to drive (no offer yet, family is not searching). */
   canOffer: boolean;
-  /** Trainer und Admins: für andere eintragen. */
+  /** Coaches and admins: sign up others. */
   coach: { drivers: CarpoolPersonRef[]; riders: CarpoolRider[] } | null;
 }
 
 export interface RosterEntry {
   personId: number;
-  /** „Vorname N.“ */
+  /** "First name L." */
   name: string;
   status: ParticipationStatus;
 }

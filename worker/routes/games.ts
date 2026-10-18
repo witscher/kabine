@@ -1,3 +1,4 @@
+import { t } from "@lingui/core/macro";
 import { Hono } from "hono";
 import { z } from "zod";
 import { type AppEnv, intParam, requireActor } from "../app";
@@ -9,12 +10,17 @@ import { notifyPersons, shortDate, shortTime } from "../domain/notify";
 import { all, first, list, run, stmt } from "../lib/db";
 import { ApiError, badRequest, conflict, notFound, parse, readJson } from "../lib/http";
 import { addMinutesLocal, nowLocal, utcIso } from "../lib/time";
+import { LOCALES } from "../../shared/i18n";
+import { withLocale } from "../i18n";
 
 export const gameRoutes = new Hono<AppEnv>();
 
-/** Abgleich nur von Hand, höchstens alle 10 Minuten. */
+/** Sync by hand only, at most every 10 minutes. */
 export const CLAIM_MS = 10 * 60_000;
-const IMPORT_CANCEL_REASON = "Spiel nicht mehr im Spielplan (handball4all)";
+/** Cancel reason of games that disappeared from the schedule; stored in the language of the import. */
+const importCancelReason = () => t`Game no longer in the schedule (handball4all)`;
+/** Recognises the reason in any language (the import may have run in another one). */
+const isImportCancelReason = (reason: string | null) => LOCALES.some((l) => withLocale(l, importCancelReason) === reason);
 
 interface TeamH4a {
   id: number;
@@ -33,7 +39,7 @@ async function teamH4a(db: D1Database, teamId: number): Promise<TeamH4a> {
     "SELECT id, name, h4a_org_id, h4a_league_id, h4a_team_id, h4a_imported_at, h4a_import_error, h4a_claimed_at FROM teams WHERE id = ?",
     teamId,
   );
-  if (!team) throw notFound("Diese Mannschaft gibt es nicht.");
+  if (!team) throw notFound(t`This team does not exist.`);
   return team;
 }
 
@@ -66,7 +72,7 @@ gameRoutes.put("/teams/:id/games/source", async (c) => {
     return c.json(sourceView(await teamH4a(c.env.DB, teamId)));
   }
   const ids = parsePortalUrl(portalUrl);
-  if (!ids) throw badRequest("Bitte füge den Link zur Mannschaftsseite aus dem handball4all-Portal ein (mit ogId, lId und tId).");
+  if (!ids) throw badRequest(t`Please paste the link to the team page from the handball4all portal (with ogId, lId and tId).`);
   await run(
     c.env.DB,
     "UPDATE teams SET h4a_org_id = ?, h4a_league_id = ?, h4a_team_id = ?, h4a_imported_at = NULL, h4a_import_error = NULL WHERE id = ?",
@@ -79,8 +85,8 @@ gameRoutes.put("/teams/:id/games/source", async (c) => {
 });
 
 /**
- * Ein Gerät reserviert den Abruf. So fragen nie mehrere Geräte gleichzeitig
- * bei handball4all an. Abrufe ohne `manual` lehnt der Server ab (fair use).
+ * One device reserves the fetch, so several devices never query handball4all
+ * at the same time. The server rejects fetches without `manual` (fair use).
  */
 gameRoutes.post("/teams/:id/games/claim", async (c) => {
   const actor = requireActor(c);
@@ -89,9 +95,9 @@ gameRoutes.post("/teams/:id/games/claim", async (c) => {
   const { manual } = parse(z.object({ manual: z.boolean().default(false) }), await readJson(c.req.raw));
   const team = await teamH4a(c.env.DB, teamId);
   const view = sourceView(team);
-  if (!view.configured) throw conflict("Für diese Mannschaft ist kein handball4all-Link hinterlegt.");
+  if (!view.configured) throw conflict(t`No handball4all link is set for this team.`);
   const now = Date.now();
-  // handball4all ist fair use: nur auf Knopfdruck von Trainer oder Admin, nie automatisch
+  // handball4all is fair use: only at the push of a button by a coach or admin, never automatically
   if (!manual) return c.json({ claimed: false, reason: "manual_only" });
   if (team.h4a_imported_at && now - Date.parse(team.h4a_imported_at) < CLAIM_MS) {
     return c.json({ claimed: false, reason: "recent", retryAt: utcIso(Date.parse(team.h4a_imported_at) + CLAIM_MS) });
@@ -107,7 +113,7 @@ gameRoutes.post("/teams/:id/games/claim", async (c) => {
   return c.json({ claimed: true, fetchUrl: view.fetchUrl });
 });
 
-/** Abruf auf dem Gerät fehlgeschlagen: Reservierung freigeben und Fehler merken. */
+/** Fetch on the device failed: release the reservation and remember the error. */
 gameRoutes.post("/teams/:id/games/release", async (c) => {
   const actor = requireActor(c);
   const teamId = intParam(c, "id");
@@ -116,7 +122,7 @@ gameRoutes.post("/teams/:id/games/release", async (c) => {
   await run(
     c.env.DB,
     "UPDATE teams SET h4a_claimed_at = NULL, h4a_import_error = ? WHERE id = ?",
-    error ? `Abruf fehlgeschlagen: ${error}` : null,
+    error ? t`Fetch failed: ${error}` : null,
     teamId,
   );
   return c.json({ ok: true });
@@ -129,20 +135,21 @@ gameRoutes.post("/teams/:id/games/import", async (c) => {
   const body = (await readJson(c.req.raw)) as { data?: unknown };
   const team = await teamH4a(c.env.DB, teamId);
   if (!team.h4a_claimed_at || Date.now() - Date.parse(team.h4a_claimed_at) > CLAIM_MS) {
-    throw conflict("Der Abruf wurde nicht reserviert oder ist abgelaufen. Bitte erneut versuchen.");
+    throw conflict(t`The fetch was not reserved or has expired. Please try again.`);
   }
   try {
     const summary = await importGames(c.env, team, body.data, Date.now(), (id) => isCoachOf(actor, id));
     return c.json(summary);
   } catch (err) {
+    const detail = err instanceof Error ? err.message : "";
     const message =
       err instanceof H4aFormatError
-        ? `Unerwartetes Format von handball4all: ${err.message}`
+        ? t`Unexpected format from handball4all: ${detail}`
         : err instanceof ApiError
           ? err.message
-          : "Der Spielplan konnte nicht verarbeitet werden.";
+          : t`The schedule could not be processed.`;
     await run(c.env.DB, "UPDATE teams SET h4a_import_error = ?, h4a_claimed_at = NULL WHERE id = ?", message, teamId);
-    if (!(err instanceof H4aFormatError) && !(err instanceof ApiError)) console.error("Spielplanimport", err);
+    if (!(err instanceof H4aFormatError) && !(err instanceof ApiError)) console.error("Schedule import", err);
     throw new ApiError(422, "import_failed", message);
   }
 });
@@ -171,19 +178,19 @@ export async function importGames(
   const db = env.DB;
   const schedule = parseSchedule(data);
   if (team.h4a_league_id != null && schedule.leagueId !== String(team.h4a_league_id)) {
-    throw new H4aFormatError(schedule.leagueId ? "Die Daten gehören zu einer anderen Liga" : "Die Daten nennen keine Liga");
+    throw new H4aFormatError(schedule.leagueId ? t`The data belongs to another league` : t`The data names no league`);
   }
   const halls = await all<{ id: number; h4a_gym_id: number | null }>(db, "SELECT id, h4a_gym_id FROM locations WHERE kind = 'hall'");
   const homeGyms = new Set(halls.map((h) => h.h4a_gym_id).filter((x): x is number => x != null));
   const hint = schedule.teams.find((t) => t.teamId === String(team.h4a_team_id))?.teamName ?? null;
-  // Spieltage tragen den Platzhalter „Spieltag …“ in jedem Eintrag; der eigene Name steht nur in echten Spielen
+  // Matchdays carry the placeholder "Spieltag …" in every entry; the own name only appears in real games
   const own = ownTeamName(
     schedule.games.filter((g) => matchdayHost(g) == null),
     hint,
     homeGyms,
   );
 
-  // Hallen anlegen bzw. wiederverwenden
+  // Create or reuse halls
   const gymIds = [...new Set(schedule.games.map((g) => g.gymId).filter((x): x is number => x != null))];
   const missing = new Map<number, (typeof schedule.games)[number]>();
   const known = await all<{ id: number; h4a_gym_id: number }>(
@@ -198,7 +205,7 @@ export async function importGames(
         stmt(
           db,
           "INSERT OR IGNORE INTO locations (name, address, map_url, kind, h4a_gym_id) VALUES (?, ?, ?, 'external', ?)",
-          g.gymName ?? "Halle",
+          g.gymName ?? t`Hall`,
           g.gymAddress,
           g.gymAddress ? `https://www.openstreetmap.org/search?query=${encodeURIComponent(g.gymAddress)}` : null,
           g.gymId,
@@ -295,7 +302,7 @@ export async function importGames(
       continue;
     }
     const moved = ex.starts_at !== startsAt || ex.location_id !== locationId;
-    const reopen = ex.cancelled_at != null && ex.cancelled_by == null && ex.cancel_reason === IMPORT_CANCEL_REASON;
+    const reopen = ex.cancelled_at != null && ex.cancelled_by == null && isImportCancelReason(ex.cancel_reason);
     statements.push(
       stmt(
         db,
@@ -327,10 +334,11 @@ export async function importGames(
 
   // Future games no longer delivered count as cancelled, but only those of this team alone
   const delivered = new Set(schedule.games.map((g) => g.gameId));
+  const cancelReason = importCancelReason();
   for (const ex of existing) {
     if (!delivered.has(ex.h4a_game_id) && ex.starts_at > nowL && !ex.cancelled_at && !ex.shared) {
       statements.push(
-        stmt(db, "UPDATE events SET cancelled_at = ?, cancel_reason = ?, cancelled_by = NULL WHERE id = ?", utcIso(now), IMPORT_CANCEL_REASON, ex.id),
+        stmt(db, "UPDATE events SET cancelled_at = ?, cancel_reason = ?, cancelled_by = NULL WHERE id = ?", utcIso(now), cancelReason, ex.id),
       );
       summary.cancelled++;
     }
@@ -339,10 +347,10 @@ export async function importGames(
     stmt(db, "UPDATE teams SET h4a_imported_at = ?, h4a_import_error = NULL, h4a_claimed_at = NULL WHERE id = ?", utcIso(now), team.id),
   );
   for (let i = 0; i < statements.length; i += 80) await db.batch(statements.slice(i, i + 80));
-  // Neue Spiele bekommen bei automatischem Kader gleich den Stammkader (ohne Push)
+  // With an automatic squad, new games get the core squad right away (without push)
   await syncAutoSquads(db, [team.id], now);
 
-  // Push bei geänderter Anwurfzeit oder Halle
+  // Push when the throw-off time or hall changed
   if (movedEvents.length) {
     const players = await all<{ person_id: number }>(
       db,
@@ -352,14 +360,20 @@ export async function importGames(
     );
     for (const m of movedEvents) {
       const loc = m.locationId ? await first<{ name: string }>(db, "SELECT name FROM locations WHERE id = ?", m.locationId) : null;
+      const teamName = team.name;
+      const location = loc?.name ?? null;
       await notifyPersons(
         env,
         players.map((p) => p.person_id),
         "events",
-        {
-          title: `Spiel verlegt (${team.name})`,
-          body: `Neuer Anwurf: ${shortDate(m.startsAt)}, ${shortTime(m.startsAt)} Uhr${loc ? `, ${loc.name}` : ""}.`,
-          url: `/termine/${m.id}`,
+        () => {
+          const date = shortDate(m.startsAt);
+          const time = shortTime(m.startsAt);
+          return {
+            title: t`Game moved (${teamName})`,
+            body: location ? t`New throw-off: ${date}, ${time}, ${location}.` : t`New throw-off: ${date}, ${time}.`,
+            url: `/termine/${m.id}`,
+          };
         },
         { teamIds: [team.id] },
       );

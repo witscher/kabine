@@ -49,6 +49,15 @@ Each milestone ends with typecheck, unit tests and e2e green, a commit on `main`
 - **K1 Club profile** done: profile in `app_meta` (name, short name, abbreviation, colours, logo in KV, privacy link and text, contact, owner), page *Verwaltung → Verein*, dynamic manifest, owner set by the first admin, neutral icons and splash, demo seed with invented names. Explainer videos removed (see open points).
 - **K2 Security checklist** done: twelve rules with a test each, see `docs/security.md`. Personal links on existing accounts always sign out the old devices (the switch in the UI is gone).
 
+## Design notes K3–K6 (October 2026)
+
+- **Language order:** account setting, else the browser language if Kabine has it, else the club default. The server translates in the language of the request (AsyncLocalStorage, `worker/i18n.ts`); texts for others (push, mail) are rendered per recipient language. See `docs/translation.md`.
+- **Age classes without gender:** age classes come from the sport profile (`shared/sports.ts`) with ages relative to the season's start year; a team has age class, gender (f/m/x) and level. Playing time and youth-referee duty are properties of the age class, not patterns in its code.
+- **Region:** country and subdivision (OpenHolidays codes) for school and public holidays, time zone and season start in the club profile.
+- **Mail:** Cloudflare Email Sending (binding) or the club's SMTP server (`worker/lib/smtp.ts`, TLS only). The SMTP password and the SMS API key are stored encrypted with a key derived from APP_SECRET (`worker/lib/secret-box.ts`).
+- **SMS:** module with provider adapter (`worker/lib/sms.ts`, seven.io). Phone number on the account only if the person enters it.
+- **Updates:** `.github/workflows/update.yml` runs in a club's copy, takes the latest release tag of Kabine and opens a pull request; the club's `wrangler.jsonc` is kept.
+
 ## Open points
 
 - Home screen icons from the club logo: render them in the browser from logo and colours (canvas) when the logo is saved, store in KV, point the manifest to them. Until then the neutral Kabine icons are used. (K7)

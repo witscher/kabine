@@ -1,4 +1,6 @@
-// KiHaSL/JuHaSL: Verwaltung (Admins) und Einlösen des Freischalt-Links.
+// KiHaSL/JuHaSL: administration (admins) and redeeming the activation link.
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 import { clubName } from "../club";
 import { useEffect, useState } from "preact/hooks";
 import { api, errorMessage } from "../api";
@@ -24,33 +26,43 @@ interface Referee {
   teams: string | null;
 }
 
-/** Verwaltung → KiHaSL/JuHaSL: Link erzeugen, Links widerrufen, Personen mit Rolle. */
+/** Admin → KiHaSL/JuHaSL: create a link, revoke links, people with the role. */
 export function AdminRefereesPage() {
   useDocumentTitle("KiHaSL/JuHaSL");
   const me = useMe();
   const links = useQuery<{ links: RefereeLink[] }>(me.isAdmin ? "/admin/referee-links" : null);
   const referees = useQuery<{ referees: Referee[] }>(me.isAdmin ? "/admin/referees" : null);
-  const [created, setCreated] = useState<{ url: string; expiresAt: string } | null>(null);
+  const [created, setCreated] = useState<{
+    url: string;
+    expiresAt: string;
+  } | null>(null);
   if (!me.isAdmin) {
     return (
       <main class="page">
         <TopBar title="KiHaSL/JuHaSL" back="/" />
         <div class="content">
-          <Notice kind="warn">Dieser Bereich ist nur für Admins.</Notice>
+          <Notice kind="warn">
+            <Trans>This area is for admins only.</Trans>
+          </Notice>
         </div>
       </main>
     );
   }
+  const createdUntil = created ? fullDate(isoToLocalDate(created.expiresAt)) : "";
   return (
     <main class="page">
-      <TopBar title="KiHaSL/JuHaSL" kicker="Verwaltung" back="/verwaltung" />
+      <TopBar title="KiHaSL/JuHaSL" kicker={t`Administration`} back="/verwaltung" />
       <div class="content">
         <p class="muted">
-          KiHaSL/JuHaSL pfeifen die Jugend-Heimspiele F bis C. Wer die Rolle hat, sieht im Reiter Helfer alle diese Spiele und trägt sich dort ein. Der Link
-          schaltet nur Personen frei, die schon in der App sind: Man öffnet ihn angemeldet und wählt sich selbst oder ein eigenes Kind.
+          <Trans>
+            KiHaSL/JuHaSL referee the youth home games F to C. Whoever has the role sees all these games in the Helpers tab and signs up there. The link only activates people who
+            are already in the app: you open it while signed in and choose yourself or your own child.
+          </Trans>
         </p>
-        <section class="card card-pad stack-sm" aria-label="Link">
-          <strong>Freischalt-Link</strong>
+        <section class="card card-pad stack-sm" aria-label={t`Link`}>
+          <strong>
+            <Trans>Activation link</Trans>
+          </strong>
           <Button
             icon="link"
             onClick={async () => {
@@ -58,80 +70,101 @@ export function AdminRefereesPage() {
               void links.reload();
             }}
           >
-            Neuen Link erzeugen
+            <Trans>Create new link</Trans>
           </Button>
           {created ? (
             <div class="stack-sm">
               <QrLink url={created.url} />
               <div class="url-box">{created.url}</div>
               <div class="btn-row">
-                <Button variant="primary" icon="share" onClick={() => shareLink(clubName(), "Freischaltung als KiHaSL/JuHaSL in der Appball App", created.url)}>
-                  Teilen
+                <Button variant="primary" icon="share" onClick={() => shareLink(clubName(), t`Activation as KiHaSL/JuHaSL in the Appball app`, created.url)}>
+                  <Trans>Share</Trans>
                 </Button>
                 <Button icon="copy" onClick={() => copyText(created.url)}>
-                  Kopieren
+                  <Trans>Copy</Trans>
                 </Button>
               </div>
-              <p class="small muted">Gültig bis {fullDate(isoToLocalDate(created.expiresAt))}, mehrfach verwendbar.</p>
+              <p class="small muted">
+                <Trans>Valid until {createdUntil}, can be used several times.</Trans>
+              </p>
             </div>
           ) : null}
           {links.data?.links.length ? (
-            <ul class="list" aria-label="Aktive Links">
-              {links.data.links.map((l) => (
-                <li class="list-row">
-                  <span class="main">
-                    <span class="title">Link vom {fullDate(isoToLocalDate(l.createdAt))}</span>
-                    <span class="sub">
-                      {l.createdBy ? `von ${l.createdBy} · ` : ""}gültig bis {fullDate(isoToLocalDate(l.expiresAt))}
+            <ul class="list" aria-label={t`Active links`}>
+              {links.data.links.map((l) => {
+                const date = fullDate(isoToLocalDate(l.createdAt));
+                const until = fullDate(isoToLocalDate(l.expiresAt));
+                const by = l.createdBy;
+                return (
+                  <li class="list-row">
+                    <span class="main">
+                      <span class="title">
+                        <Trans>Link from {date}</Trans>
+                      </span>
+                      <span class="sub">{by ? t`by ${by} · valid until ${until}` : t`valid until ${until}`}</span>
                     </span>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={async () => {
+                        if (
+                          !(await confirmDialog({
+                            title: t`Revoke link?`,
+                            message: t`After that it can no longer be redeemed.`,
+                            confirmLabel: t`Revoke link`,
+                            danger: true,
+                          }))
+                        )
+                          return;
+                        await api.del(`/admin/referee-links/${l.id}`);
+                        void links.reload();
+                      }}
+                    >
+                      <Trans>Revoke link</Trans>
+                    </Button>
+                  </li>
+                );
+              })}
+            </ul>
+          ) : null}
+        </section>
+
+        <section class="stack-sm" aria-label={t`People with the role`}>
+          <h2 class="section-title">
+            <Trans>Activated</Trans>
+          </h2>
+          {referees.error ? <ErrorBox error={referees.error} onRetry={referees.reload} /> : null}
+          {!referees.data && !referees.error ? <Spinner /> : null}
+          {referees.data && !referees.data.referees.length ? (
+            <Empty title={t`No one yet`} icon="whistle">
+              <Trans>The role can be given via the link or under Admin → People.</Trans>
+            </Empty>
+          ) : null}
+          <ul class="list">
+            {(referees.data?.referees ?? []).map((r) => {
+              const year = r.birthYear;
+              return (
+                <li class="list-row">
+                  <Icon name="whistle" size={20} />
+                  <span class="main">
+                    <span class="title">{personName(r)}</span>
+                    <span class="sub">{[r.teams, year ? t`Year of birth ${year}` : null].filter(Boolean).join(" · ") || t`No team`}</span>
                   </span>
                   <Button
                     size="sm"
                     variant="ghost"
                     onClick={async () => {
-                      if (!(await confirmDialog({ title: "Link zurückziehen?", message: "Danach lässt er sich nicht mehr einlösen.", confirmLabel: "Zurückziehen", danger: true }))) return;
-                      await api.del(`/admin/referee-links/${l.id}`);
-                      void links.reload();
+                      await api.del(`/admin/referees/${r.personId}`);
+                      const name = r.firstName;
+                      toast(t`${name} is no longer KiHaSL/JuHaSL.`);
+                      void referees.reload();
                     }}
                   >
-                    Zurückziehen
+                    <Trans>Remove</Trans>
                   </Button>
                 </li>
-              ))}
-            </ul>
-          ) : null}
-        </section>
-
-        <section class="stack-sm" aria-label="Personen mit Rolle">
-          <h2 class="section-title">Freigeschaltet</h2>
-          {referees.error ? <ErrorBox error={referees.error} onRetry={referees.reload} /> : null}
-          {!referees.data && !referees.error ? <Spinner /> : null}
-          {referees.data && !referees.data.referees.length ? (
-            <Empty title="Noch niemand" icon="whistle">
-              Über den Link oder unter Verwaltung → Personen lässt sich die Rolle vergeben.
-            </Empty>
-          ) : null}
-          <ul class="list">
-            {(referees.data?.referees ?? []).map((r) => (
-              <li class="list-row">
-                <Icon name="whistle" size={20} />
-                <span class="main">
-                  <span class="title">{personName(r)}</span>
-                  <span class="sub">{[r.teams, r.birthYear ? `Jahrgang ${r.birthYear}` : null].filter(Boolean).join(" · ") || "Keine Mannschaft"}</span>
-                </span>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={async () => {
-                    await api.del(`/admin/referees/${r.personId}`);
-                    toast(`${r.firstName} ist kein KiHaSL/JuHaSL mehr.`);
-                    void referees.reload();
-                  }}
-                >
-                  Entfernen
-                </Button>
-              </li>
-            ))}
+              );
+            })}
           </ul>
         </section>
       </div>
@@ -142,10 +175,15 @@ export function AdminRefereesPage() {
 interface LinkInfo {
   expiresAt: string;
   loggedIn: boolean;
-  candidates: { personId: number; name: string; self: boolean; already: boolean }[];
+  candidates: {
+    personId: number;
+    name: string;
+    self: boolean;
+    already: boolean;
+  }[];
 }
 
-/** /kihasl#token: angemeldet freischalten, für sich selbst oder ein eigenes Kind. */
+/** /kihasl#token: activate while signed in, for oneself or one's own child. */
 export function RefereeJoinPage() {
   useDocumentTitle("KiHaSL/JuHaSL");
   const { refresh } = useSession();
@@ -154,7 +192,7 @@ export function RefereeJoinPage() {
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState<string | null>(null);
   const [selected, setSelected] = useState<number | null>(null);
-  // Der Token steht im Hash und geht nur per POST an den Server
+  // The token is in the hash and only goes to the server by POST
   useEffect(() => {
     if (!token) return;
     api
@@ -165,41 +203,62 @@ export function RefereeJoinPage() {
       })
       .catch((err) => setError(errorMessage(err)));
   }, [token]);
+  const name = done;
   return (
     <main class="page">
-      <TopBar title="KiHaSL/JuHaSL" kicker="Freischaltung" />
+      <TopBar title="KiHaSL/JuHaSL" kicker={t`Activation`} />
       <div class="content">
-        {!token ? <Notice kind="warn">Dieser Link ist unvollständig.</Notice> : null}
+        {!token ? (
+          <Notice kind="warn">
+            <Trans>This link is incomplete.</Trans>
+          </Notice>
+        ) : null}
         {error ? <Notice kind="warn">{error}</Notice> : null}
         {!data && !error && token ? <Spinner /> : null}
         {done ? (
           <section class="card card-pad stack-sm">
-            <strong>Freigeschaltet</strong>
-            <p>{done} ist jetzt KiHaSL/JuHaSL. Im Reiter Helfer stehen alle Jugend-Heimspiele, bei denen ein Schiedsrichter gebraucht wird.</p>
+            <strong>
+              <Trans>Activated</Trans>
+            </strong>
+            <p>
+              <Trans>{name} is now KiHaSL/JuHaSL. The Helpers tab lists all youth home games that need a referee.</Trans>
+            </p>
             <a class="btn btn-primary" href="/helfer?kihasl">
-              Zu den Spielen
+              <Trans>Go to the games</Trans>
             </a>
           </section>
         ) : data ? (
           <section class="card card-pad stack-sm">
-            <p>Mit diesem Link wirst du (oder dein Kind) als KiHaSL/JuHaSL freigeschaltet und kannst dich dann bei den Jugend-Heimspielen F bis C eintragen.</p>
-            <div role="radiogroup" aria-label="Wer pfeift?" class="stack-sm">
-              {data.candidates.map((c) => (
-                <label class="list-row">
-                  <input type="radio" name="referee" checked={selected === c.personId} disabled={c.already} onChange={() => setSelected(c.personId)} />
-                  <span class="main">
-                    <span class="title">{c.self ? `${c.name} (ich)` : c.name}</span>
-                    {c.already ? <span class="sub">schon freigeschaltet</span> : null}
-                  </span>
-                </label>
-              ))}
+            <p>
+              <Trans>With this link you (or your child) are activated as KiHaSL/JuHaSL and can then sign up for the youth home games F to C.</Trans>
+            </p>
+            <div role="radiogroup" aria-label={t`Who referees?`} class="stack-sm">
+              {data.candidates.map((c) => {
+                const candidate = c.name;
+                return (
+                  <label class="list-row">
+                    <input type="radio" name="referee" checked={selected === c.personId} disabled={c.already} onChange={() => setSelected(c.personId)} />
+                    <span class="main">
+                      <span class="title">{c.self ? t`${candidate} (me)` : c.name}</span>
+                      {c.already ? (
+                        <span class="sub">
+                          <Trans>already activated</Trans>
+                        </span>
+                      ) : null}
+                    </span>
+                  </label>
+                );
+              })}
             </div>
             <Button
               variant="primary"
               disabled={selected == null}
               onClick={async () => {
                 try {
-                  await api.post("/referee/accept", { token, personId: selected });
+                  await api.post("/referee/accept", {
+                    token,
+                    personId: selected,
+                  });
                   await refresh();
                   setDone(data.candidates.find((c) => c.personId === selected)?.name ?? "");
                 } catch (err) {
@@ -207,7 +266,7 @@ export function RefereeJoinPage() {
                 }
               }}
             >
-              Freischalten
+              {t({ message: "Activate", context: "referee" })}
             </Button>
           </section>
         ) : null}

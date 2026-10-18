@@ -1,6 +1,6 @@
-// Wann zeigt die App die Startanimation? Einmal am Tag, beim ersten Öffnen (Berliner Kalendertag).
+// When does the app show the start animation? Once a day, on first opening (Berlin calendar day).
 
-/** lastShownDay und today als YYYY-MM-DD (Europe/Berlin). */
+/** lastShownDay and today as YYYY-MM-DD (Europe/Berlin). */
 export function shouldShowSplash(lastShownDay: string | null, today: string): boolean {
   return lastShownDay !== today;
 }

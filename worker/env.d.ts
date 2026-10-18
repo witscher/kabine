@@ -1,10 +1,10 @@
-// Secrets, die nicht in wrangler.jsonc stehen (wrangler secret put / .dev.vars).
+// Secrets that are not in wrangler.jsonc (wrangler secret put / .dev.vars).
 interface AppSecrets {
   ADMIN_BOOTSTRAP_TOKEN?: string;
   APP_SECRET: string;
   VAPID_PUBLIC_KEY?: string;
   VAPID_PRIVATE_KEY?: string;
-  /** Empfänger von „Hilfe und Feedback“ (worker/routes/feedback.ts). Nicht im Repository. */
+  /** Recipient of "Help and feedback" (worker/routes/feedback.ts). Not in the repository. */
   FEEDBACK_TO?: string;
 }
 

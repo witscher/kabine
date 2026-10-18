@@ -1,3 +1,4 @@
+import { t } from "@lingui/core/macro";
 import { Hono } from "hono";
 import { z } from "zod";
 import { type AppEnv, intParam, requireActor } from "../app";
@@ -6,14 +7,14 @@ import { isRelevantEvent } from "../../shared/relevance";
 import { listVisibleEvents, loadEventContext, toSummary } from "../domain/events";
 import { listExtraEvents } from "../domain/extra-events";
 import { generateTrainings } from "../domain/generate";
-import { HOLIDAY_SOURCE, holidayPeriods, MAX_HOLIDAY_DAYS } from "../domain/holidays";
+import { holidayPeriods, holidaySourceLabel, MAX_HOLIDAY_DAYS } from "../domain/holidays";
 import { all, first, run, stmt } from "../lib/db";
 import { badRequest, conflict, forbidden, notFound, parse, readJson } from "../lib/http";
 import { eachDay, isDate, nowLocal, utcIso } from "../lib/time";
 
 export const adminRoutes = new Hono<AppEnv>();
 
-// Trainingsorte -----------------------------------------------------------------
+// Training locations ------------------------------------------------------------
 
 adminRoutes.get("/locations", async (c) => {
   requireActor(c);
@@ -35,17 +36,17 @@ const urlField = z
   .string()
   .trim()
   .max(500)
-  .refine((u) => /^https:\/\//.test(u), "Bitte einen https-Link angeben.");
+  .refine((u) => /^https:\/\//.test(u), { error: () => t`Please enter an https link.` });
 
 const locationSchema = z.object({
-  name: z.string().trim().min(1, "Bitte gib einen Namen ein.").max(80),
+  name: z.string().trim().min(1, { error: () => t`Please enter a name.` }).max(80),
   address: z.string().trim().max(200).nullable().optional(),
   mapUrl: urlField.nullable().optional(),
 });
 
 adminRoutes.post("/locations", async (c) => {
   const actor = requireActor(c);
-  if (!actor.isAdmin && !actor.coachTeamIds.length) throw forbidden("Trainingsorte legen Trainer und Admins an.");
+  if (!actor.isAdmin && !actor.coachTeamIds.length) throw forbidden(t`Training locations are created by coaches and admins.`);
   const input = parse(locationSchema, await readJson(c.req.raw));
   const row = await first<{ id: number }>(
     c.env.DB,
@@ -83,36 +84,41 @@ adminRoutes.delete("/locations/:id", async (c) => {
   const actor = requireActor(c);
   const loc = await first<{ id: number; kind: string }>(c.env.DB, "SELECT id, kind FROM locations WHERE id = ?", intParam(c, "id"));
   if (!loc) throw notFound();
-  if (loc.kind === "hall") throw conflict("Die Vereinshallen können nicht gelöscht werden.");
+  if (loc.kind === "hall") throw conflict(t`The club's halls cannot be deleted.`);
   if (loc.kind === "external") requireAdmin(actor);
   else if (!actor.isAdmin && !actor.coachTeamIds.length) throw forbidden();
   const used = await first(c.env.DB, "SELECT 1 AS used FROM training_rules WHERE location_id = ?", loc.id);
-  if (used) throw conflict("Der Ort wird noch in einem Trainingsplan verwendet.");
+  if (used) throw conflict(t`The location is still used in a training plan.`);
   await run(c.env.DB, "DELETE FROM locations WHERE id = ?", loc.id);
   return c.json({ ok: true });
 });
 
-// Ferien --------------------------------------------------------------------------
+// Holidays ------------------------------------------------------------------------
 
 const holidaySchema = z
   .object({
-    name: z.string().trim().min(1, "Bitte gib einen Namen ein.").max(60),
-    startsOn: z.string().refine(isDate, "Ungültiges Datum"),
-    endsOn: z.string().refine(isDate, "Ungültiges Datum"),
+    name: z.string().trim().min(1, { error: () => t`Please enter a name.` }).max(60),
+    startsOn: z.string().refine(isDate, { error: () => t`Invalid date` }),
+    endsOn: z.string().refine(isDate, { error: () => t`Invalid date` }),
   })
-  .refine((h) => h.startsOn <= h.endsOn, "Das Ende muss nach dem Beginn liegen.")
-  .refine((h) => eachDay(h.startsOn, h.endsOn).length <= MAX_HOLIDAY_DAYS, `Ein Zeitraum darf höchstens ${MAX_HOLIDAY_DAYS} Tage lang sein.`);
+  .refine((h) => h.startsOn <= h.endsOn, { error: () => t`The end must be after the start.` })
+  .refine((h) => eachDay(h.startsOn, h.endsOn).length <= MAX_HOLIDAY_DAYS, {
+    error: () => {
+      const days = MAX_HOLIDAY_DAYS;
+      return t`A period may be at most ${days} days long.`;
+    },
+  });
 
 adminRoutes.get("/holidays", async (c) => {
   requireActor(c);
   const periods = await holidayPeriods(c.env.DB);
-  // Verknüpfte Ferienpläne je Zeitraum (ziehen bei Änderungen mit)
+  // Linked holiday plans per period (they follow changes)
   const plans = await all<{ holiday_period_id: number; n: number }>(
     c.env.DB,
     "SELECT holiday_period_id, count(*) AS n FROM training_plans WHERE holiday_period_id IS NOT NULL GROUP BY holiday_period_id",
   );
   const count = new Map(plans.map((p) => [p.holiday_period_id, p.n]));
-  return c.json({ periods: periods.map((p) => ({ ...p, plans: count.get(p.id) ?? 0 })), source: HOLIDAY_SOURCE });
+  return c.json({ periods: periods.map((p) => ({ ...p, plans: count.get(p.id) ?? 0 })), source: holidaySourceLabel() });
 });
 
 adminRoutes.post("/holidays", async (c) => {
@@ -128,7 +134,7 @@ adminRoutes.post("/holidays", async (c) => {
   return c.json({ id: row!.id }, 201);
 });
 
-/** Zeitraum ändern; verknüpfte Ferienpläne übernehmen die neuen Daten, Trainings werden neu berechnet. */
+/** Changes a period; linked holiday plans take the new dates, trainings are recalculated. */
 adminRoutes.patch("/holidays/:id", async (c) => {
   requireAdmin(requireActor(c));
   const id = intParam(c, "id");
@@ -137,21 +143,21 @@ adminRoutes.patch("/holidays/:id", async (c) => {
     stmt(c.env.DB, "UPDATE holiday_periods SET name = ?, starts_on = ?, ends_on = ?, updated_at = ? WHERE id = ?", input.name, input.startsOn, input.endsOn, utcIso(), id),
     stmt(c.env.DB, "UPDATE training_plans SET valid_from = ?, valid_to = ? WHERE holiday_period_id = ?", input.startsOn, input.endsOn, id),
   ]);
-  if (!res[0]!.meta.changes) throw notFound("Diesen Ferienzeitraum gibt es nicht.");
+  if (!res[0]!.meta.changes) throw notFound(t`This holiday period does not exist.`);
   await generateTrainings(c.env.DB);
   return c.json({ ok: true, plans: res[1]!.meta.changes });
 });
 
-/** Zeitraum löschen; verknüpfte Ferienpläne bleiben mit ihren Daten bestehen. */
+/** Deletes a period; linked holiday plans remain with their dates. */
 adminRoutes.delete("/holidays/:id", async (c) => {
   requireAdmin(requireActor(c));
   const id = intParam(c, "id");
   const res = await run(c.env.DB, "DELETE FROM holiday_periods WHERE id = ?", id);
-  if (!res.meta.changes) throw notFound("Diesen Ferienzeitraum gibt es nicht.");
+  if (!res.meta.changes) throw notFound(t`This holiday period does not exist.`);
   return c.json({ ok: true });
 });
 
-// Saison und Altersklassen ------------------------------------------------------
+// Season and age classes -------------------------------------------------------
 
 adminRoutes.get("/age-classes", async (c) => {
   requireActor(c);
@@ -194,14 +200,15 @@ adminRoutes.put("/age-classes", async (c) => {
   requireAdmin(requireActor(c));
   const { ageClasses } = parse(z.object({ ageClasses: z.array(ageClassSchema).max(40) }), await readJson(c.req.raw));
   const codes = new Set(ageClasses.map((a) => a.code));
-  if (codes.size !== ageClasses.length) throw badRequest("Jedes Kürzel darf nur einmal vorkommen.");
+  if (codes.size !== ageClasses.length) throw badRequest(t`Each code may appear only once.`);
   for (const a of ageClasses) {
     if (a.birthYearMin != null && a.birthYearMax != null && a.birthYearMin > a.birthYearMax) {
-      throw badRequest(`${a.name}: Der älteste Jahrgang muss vor dem jüngsten liegen.`);
+      const name = a.name;
+      throw badRequest(t`${name}: The oldest birth year must come before the youngest.`);
     }
   }
   const season = await first<{ id: number }>(c.env.DB, "SELECT id FROM seasons WHERE is_current = 1");
-  if (!season) throw conflict("Es gibt keine laufende Saison.");
+  if (!season) throw conflict(t`There is no current season.`);
   await c.env.DB.batch([
     stmt(c.env.DB, "DELETE FROM age_classes WHERE season_id = ?", season.id),
     ...ageClasses.map((a) =>
@@ -224,19 +231,19 @@ adminRoutes.put("/age-classes", async (c) => {
 });
 
 /**
- * Verwaltung → Sondertermine und Spiele: kommende, von Hand angelegte Termine aller Mannschaften
- * (Sondertermine und Spiele ohne handball4all), ohne die, die der Admin ohnehin unter Termine sieht.
+ * Administration → special events and games: upcoming, manually created events of all teams
+ * (special events and games without handball4all), without those the admin sees under events anyway.
  */
 adminRoutes.get("/admin/extra-events", async (c) => {
   const actor = requireActor(c);
   requireAdmin(actor);
   const db = c.env.DB;
   const events = await listExtraEvents(db, actor);
-  // Eigene Termine (wie in der Terminübersicht) stehen nicht in der Liste
+  // Own events (as in the event overview) are not in the list
   const own = await listVisibleEvents(db, actor, { from: nowLocal(), to: "9999-12-31T00:00" });
   const ownCtx = await loadEventContext(db, own);
   const now = Date.now();
-  // Selbst angelegte Termine bleiben in der Liste, damit Admins sie hier wiederfinden
+  // Self-created events stay in the list so admins find them here again
   const created = new Set((await all<{ id: number }>(db, "SELECT id FROM events WHERE created_by = ?", actor.personId)).map((r) => r.id));
   const ownIds = new Set(own.map((e) => toSummary(e, ownCtx, actor, now)).filter(isRelevantEvent).map((e) => e.id).filter((id) => !created.has(id)));
   return c.json({ events: events.filter((e) => !ownIds.has(e.id)) });

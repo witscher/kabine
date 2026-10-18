@@ -1,12 +1,11 @@
-// Automatischer Kader: Bei Mannschaften mit auto_squad gilt der Stammkader
-// als nominiert für alle künftigen Spiele, deren Kader der Trainer nicht
-// selbst bearbeitet hat (squad_manual = 0). Die Nominierungen werden als
-// echte Zeilen gepflegt, damit Sichtbarkeit, Überschneidungen und
-// Erinnerungen wie bei handverlesenen Kadern funktionieren.
+// Automatic squad: for teams with auto_squad the core squad counts as
+// nominated for all future games whose squad the coach has not edited
+// (squad_manual = 0). The nominations are kept as real rows so that
+// visibility, overlaps and reminders work as with hand-picked squads.
 import { list, stmt } from "../lib/db";
 import { nowLocal, utcIso } from "../lib/time";
 
-/** Künftige Spiele mit automatischem Kader (?1 jetzt, ?2 Mannschaften oder NULL für alle) und die Soll-Besetzung. */
+/** Future games with an automatic squad (?1 now, ?2 teams or NULL for all) and the target line-up. */
 const AUTO = `
   auto_games(event_id, team_id) AS (
     SELECT e.id, et.team_id FROM events e
@@ -24,11 +23,11 @@ const AUTO = `
   stale(event_id, person_id) AS (
     SELECT n.event_id, n.person_id FROM nominations n JOIN auto_games g ON g.event_id = n.event_id
      WHERE NOT EXISTS (SELECT 1 FROM target t WHERE t.team_id = g.team_id AND t.person_id = n.person_id)
-       -- Angenommene Aushilfe-Anfragen bleiben
+       -- Accepted help requests stay
        AND NOT EXISTS (SELECT 1 FROM help_requests h WHERE h.event_id = n.event_id AND h.person_id = n.person_id AND h.status = 'accepted')
   )`;
 
-/** Gleicht die automatischen Kader ab. teamIds = null: alle Mannschaften. Ohne Push. */
+/** Syncs the automatic squads. teamIds = null: all teams. Without push. */
 export async function syncAutoSquads(db: D1Database, teamIds: number[] | null, now = Date.now()): Promise<void> {
   const params = [nowLocal(now), teamIds ? list(teamIds) : null] as const;
   await db.batch([

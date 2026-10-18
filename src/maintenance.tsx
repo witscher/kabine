@@ -1,5 +1,6 @@
-// Wartungsmodus (siehe worker/lib/maintenance.ts): Nicht-Admins sehen einen Hinweis,
-// Admins ein rotes Banner. Der Zustand kommt aus /api/health und aus 503-Antworten der API.
+// Maintenance mode (see worker/lib/maintenance.ts): non-admins see a notice,
+// admins a red banner. The state comes from /api/health and from 503 responses of the API.
+import { Trans } from "@lingui/react/macro";
 import { useEffect, useState } from "preact/hooks";
 import { useSession } from "./session";
 
@@ -17,12 +18,12 @@ export async function checkMaintenance(): Promise<boolean> {
     const res = await fetch("/api/health", { cache: "no-store" });
     if (res.ok) set(!!((await res.json()) as { maintenance?: boolean }).maintenance);
   } catch {
-    // offline: Zustand unverändert
+    // offline: state unchanged
   }
   return active;
 }
 
-/** Aktiv? Prüft beim Start, beim Zurückkehren in die App und während der Wartung alle 20 Sekunden. */
+/** Active? Checks at start, when returning to the app and every 20 seconds during maintenance. */
 export function useMaintenance(): boolean {
   const [on, setOn] = useState(active);
   useEffect(() => {
@@ -46,7 +47,7 @@ export function useMaintenance(): boolean {
   return on;
 }
 
-/** Admins (auch im Trainer-Modus) kommen während der Wartung in die App. */
+/** Admins (also in coach mode) get into the app during maintenance. */
 export function useIsAdmin(): boolean {
   const { me } = useSession();
   return !!me && (me.isAdmin || me.person.isAdmin || me.adminSwitch != null);
@@ -58,7 +59,7 @@ export function MaintenanceBanner() {
   if (!on || !admin) return null;
   return (
     <div class="maintenance-banner" role="alert">
-      Wartungsmodus aktiv · Nur Admins können die App nutzen, Erinnerungen und Pushes aus dem Cron pausieren.
+      <Trans>Maintenance mode active · Only admins can use the app, reminders and pushes from the cron are paused.</Trans>
     </div>
   );
 }
@@ -66,7 +67,7 @@ export function MaintenanceBanner() {
 export function MaintenancePage() {
   const { refresh } = useSession();
   const on = useMaintenance();
-  // Wartung vorbei: Sitzung neu laden, die App erscheint wieder
+  // Maintenance over: reload the session, the app appears again
   useEffect(() => {
     if (!on) void refresh();
   }, [on]);
@@ -75,8 +76,12 @@ export function MaintenancePage() {
       <div class="content">
         <div class="empty">
           <img src="/icons/icon.svg" alt="" width="96" height="96" />
-          <div class="title">Die App wird gerade gewartet</div>
-          <p class="muted">Sie ist gleich wieder da. Die Seite lädt automatisch neu, sobald die Wartung vorbei ist.</p>
+          <div class="title">
+            <Trans>The app is currently under maintenance</Trans>
+          </div>
+          <p class="muted">
+            <Trans>It will be back shortly. The page reloads automatically as soon as maintenance is over.</Trans>
+          </p>
         </div>
       </div>
     </main>

@@ -1,3 +1,4 @@
+import { t } from "@lingui/core/macro";
 import { randomToken, sha256Hex } from "../lib/crypto";
 import { first, run, stmt } from "../lib/db";
 import { todayLocal, utcIso } from "../lib/time";
@@ -5,11 +6,11 @@ import { todayLocal, utcIso } from "../lib/time";
 export const SESSION_COOKIE = "__Host-kabine_session";
 
 const DAY = 86_400_000;
-/** Ohne Nutzung läuft eine Session nach 30 Tagen ab. */
+/** Without use, a session expires after 30 days. */
 export const IDLE_MS = 30 * DAY;
-/** Absolute Obergrenze ab Login, danach erneut Passkey-Login. */
+/** Absolute limit from login, after that a new passkey login. */
 export const ABSOLUTE_MS = 90 * DAY;
-/** Höchstens einmal täglich verlängern, das spart D1-Schreibzugriffe. */
+/** Extend at most once a day, which saves D1 writes. */
 export const EXTEND_EVERY_MS = DAY;
 
 export interface SessionRow {
@@ -39,7 +40,7 @@ export function clearedSessionCookie(): string {
   return `${SESSION_COOKIE}=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0`;
 }
 
-/** Kurze Gerätebezeichnung für die Geräteliste, ohne den vollen User-Agent zu speichern. */
+/** Short device label for the device list, without storing the full user agent. */
 export function deviceLabel(userAgent: string | null): string {
   const ua = userAgent ?? "";
   const device = /iPhone/.test(ua)
@@ -54,7 +55,7 @@ export function deviceLabel(userAgent: string | null): string {
             ? "Windows"
             : /Linux/.test(ua)
               ? "Linux"
-              : "Gerät";
+              : t`Device`;
   const browser = /Edg\//.test(ua)
     ? "Edge"
     : /SamsungBrowser/.test(ua)
@@ -95,10 +96,10 @@ export async function createSession(
 }
 
 /**
- * Verlängert eine gültige Session gleitend, höchstens einmal pro Tag und nie
- * über die absolute Obergrenze hinaus. Gibt das neue Ablaufdatum zurück, wenn
- * verlängert wurde. Im selben Schritt (also höchstens täglich) wird die letzte
- * Aktivität am Zugang vermerkt, auch wenn die Obergrenze erreicht ist.
+ * Extends a valid session on a sliding basis, at most once a day and never
+ * beyond the absolute limit. Returns the new expiry if it was extended. In the
+ * same step (so at most daily) the last activity is recorded on the account,
+ * even when the limit has been reached.
  */
 export async function extendSessionIfDue(db: D1Database, session: SessionRow, now = Date.now()): Promise<number | null> {
   if (now - Date.parse(session.extended_at) < EXTEND_EVERY_MS) return null;

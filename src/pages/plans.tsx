@@ -1,3 +1,5 @@
+import { plural, t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 import { useLocation } from "preact-iso";
 import { useEffect, useState } from "preact/hooks";
 import type { TeamRef } from "../../shared/types";
@@ -24,7 +26,7 @@ interface PlanView {
   validFrom: string;
   validTo: string;
   declineHours: number | null;
-  /** Ferienplan folgt diesem Ferienzeitraum */
+  /** Holiday plan follows this holiday period */
   holidayPeriodId: number | null;
   isCurrent: boolean;
   rules: RuleView[];
@@ -64,16 +66,20 @@ function RuleCard({ rule, ownTeamId, onEdit, onDelete }: { rule: RuleView; ownTe
           {rule.teams.map((t) => (
             <span class={`badge team ${t.id === ownTeamId ? "" : "other"}`}>{t.name}</span>
           ))}
-          {rule.teams.length > 1 ? <span class="small muted">gemeinsames Training</span> : null}
+          {rule.teams.length > 1 ? (
+            <span class="small muted">
+              <Trans>joint training</Trans>
+            </span>
+          ) : null}
         </div>
       </div>
       {onEdit ? (
-        <button type="button" class="icon-btn" aria-label="Trainingszeit bearbeiten" onClick={onEdit} style={{ width: "48px", height: "auto" }}>
+        <button type="button" class="icon-btn" aria-label={t`Edit training time`} onClick={onEdit} style={{ width: "48px", height: "auto" }}>
           <Icon name="edit" size={20} />
         </button>
       ) : null}
       {onDelete ? (
-        <button type="button" class="icon-btn" aria-label="Trainingszeit entfernen" onClick={onDelete} style={{ width: "44px", height: "auto" }}>
+        <button type="button" class="icon-btn" aria-label={t`Remove training time`} onClick={onDelete} style={{ width: "44px", height: "auto" }}>
           <Icon name="trash" size={18} />
         </button>
       ) : null}
@@ -82,108 +88,158 @@ function RuleCard({ rule, ownTeamId, onEdit, onDelete }: { rule: RuleView; ownTe
 }
 
 export function PlansPage({ id }: { id: string }) {
-  useDocumentTitle("Trainingspläne");
+  useDocumentTitle(t`Training plans`);
   const { route } = useLocation();
   const { data, error, loading, reload } = useQuery<PlansResponse>(`/teams/${id}/plans`);
   const today = todayLocal();
   const plans = data?.plans ?? [];
   const regular = plans.filter((p) => p.kind === "regular");
   const holiday = plans.filter((p) => p.kind === "holiday" && p.validTo >= today);
-  // Alle kommenden Ferien unter Verwaltung → Ferien, für die es noch keinen Ferienplan gibt
+  // All upcoming holidays under Administration → Holidays that have no holiday plan yet
   const upcomingHolidays = (data?.holidays ?? []).filter(
     (h) => h.endsOn >= today && !plans.some((p) => p.kind === "holiday" && (p.holidayPeriodId === h.id || (p.validFrom <= h.startsOn && h.endsOn <= p.validTo))),
   );
 
   return (
     <main class="page">
-      <TopBar title="Trainingspläne" kicker="Team" back={`/team/${id}`} />
+      <TopBar title={t`Training plans`} kicker={t`Team`} back={`/team/${id}`} />
       <div class="content">
         {error ? <ErrorBox error={error} onRetry={reload} /> : null}
         {loading ? <Spinner /> : null}
         <Button variant="primary" size="lg" icon="plus" onClick={() => route(`/team/${id}/plaene/neu`)}>
-          Trainingsplan anlegen
+          <Trans>Create training plan</Trans>
         </Button>
 
-        {regular.map((p) => (
+        {regular.map((p) => {
+          const from = fullDate(p.validFrom);
+          const to = fullDate(p.validTo);
+          return (
           <section class="stack-sm" aria-label={p.name}>
             <div class="row-gap" style={{ justifyContent: "space-between" }}>
               <div>
                 <h2 class="section-title">{p.name}</h2>
                 <div class="small muted" style={{ marginLeft: "2px" }}>
-                  {fullDate(p.validFrom)} bis {fullDate(p.validTo)} {p.isCurrent ? "· aktuell" : ""}
+                  {p.isCurrent ? t`${from} to ${to} · current` : t`${from} to ${to}`}
                 </div>
               </div>
               <a class="btn btn-sm" href={`/team/${id}/plaene/${p.id}`}>
-                Bearbeiten
+                <Trans>Edit</Trans>
               </a>
             </div>
             {p.rules.map((r) => (
               <RuleCard rule={r} ownTeamId={Number(id)} />
             ))}
-            {!p.rules.length ? <p class="small muted">Noch keine Trainingszeiten.</p> : null}
+            {!p.rules.length ? (
+              <p class="small muted">
+                <Trans>No training times yet.</Trans>
+              </p>
+            ) : null}
           </section>
-        ))}
+          );
+        })}
 
         {data?.sharedRules.length ? (
-          <section class="stack-sm" aria-label="Gemeinsame Trainings anderer Pläne">
-            <h2 class="section-title">Gemeinsam mit anderen</h2>
-            {data.sharedRules.map((r) => (
+          <section class="stack-sm" aria-label={t`Joint trainings from other plans`}>
+            <h2 class="section-title">
+              <Trans>Together with others</Trans>
+            </h2>
+            {data.sharedRules.map((r) => {
+              const planName = r.planName;
+              const ownerTeam = r.ownerTeam;
+              return (
               <div class="stack-sm">
                 <RuleCard rule={r} ownTeamId={Number(id)} />
                 <p class="small muted">
-                  Aus dem Plan „{r.planName}“ der {r.ownerTeam}.
+                  <Trans>From the plan “{planName}” of the {ownerTeam}.</Trans>
                 </p>
               </div>
-            ))}
+              );
+            })}
           </section>
         ) : null}
 
-        <section class="stack-sm" aria-label="Ferien">
-          <h2 class="section-title">Ferien</h2>
-          {holiday.map((p) => (
+        <section class="stack-sm" aria-label={t`Holidays`}>
+          <h2 class="section-title">
+            <Trans>Holidays</Trans>
+          </h2>
+          {holiday.map((p) => {
+            const from = fullDate(p.validFrom);
+            const to = fullDate(p.validTo);
+            const count = p.rules.length;
+            return (
             <a class="list-row card" href={`/team/${id}/plaene/${p.id}`}>
               <Icon name="sun" size={22} />
               <span class="main">
                 <span class="title">{p.name}</span>
                 <span class="sub">
-                  {fullDate(p.validFrom)} bis {fullDate(p.validTo)} · {p.rules.length ? `${p.rules.length} Trainingszeiten` : "Trainingspause"}
+                  {t`${from} to ${to}`} · {count ? plural(count, { one: "# training time", other: "# training times" }) : t`Training break`}
                 </span>
               </span>
               <Icon name="chevron" size={18} />
             </a>
-          ))}
-          {upcomingHolidays.map((h) => (
+            );
+          })}
+          {upcomingHolidays.map((h) => {
+            const from = fullDate(h.startsOn);
+            const to = fullDate(h.endsOn);
+            const holiday = h.name;
+            return (
             <div class="card card-pad stack-sm">
               <div>
                 <strong>{h.name}</strong>
                 <div class="small muted">
-                  {fullDate(h.startsOn)} bis {fullDate(h.endsOn)}: noch kein Ferienplan, der reguläre Plan läuft weiter.
+                  <Trans>
+                    {from} to {to}: no holiday plan yet, the regular plan continues.
+                  </Trans>
                 </div>
               </div>
               <div class="btn-row">
                 <Button
                   size="sm"
                   onClick={async () => {
-                    await api.post(`/teams/${id}/plans`, { name: `Pause ${h.name}`, kind: "holiday", validFrom: h.startsOn, validTo: h.endsOn, holidayPeriodId: h.id, rules: [] });
+                    await api.post(`/teams/${id}/plans`, { name: t`Break ${holiday}`, kind: "holiday", validFrom: h.startsOn, validTo: h.endsOn, holidayPeriodId: h.id, rules: [] });
                     invalidate("/events", `/teams/${id}/plans`);
-                    toast(`In den ${h.name} findet kein Training statt.`);
+                    toast(t`There is no training during the ${holiday}.`);
                     await reload();
                   }}
                 >
-                  Trainingspause
+                  <Trans>Training break</Trans>
                 </Button>
-                <Button size="sm" onClick={() => route(`/team/${id}/plaene/neu?kind=holiday&holiday=${h.id}&from=${h.startsOn}&to=${h.endsOn}&name=${encodeURIComponent(`Ferienplan ${h.name}`)}`)}>
-                  Ferienplan
+                <Button size="sm" onClick={() => route(`/team/${id}/plaene/neu?kind=holiday&holiday=${h.id}&from=${h.startsOn}&to=${h.endsOn}&name=${encodeURIComponent(t`Holiday plan ${holiday}`)}`)}>
+                  <Trans>Holiday plan</Trans>
                 </Button>
               </div>
             </div>
-          ))}
-          {!holiday.length && !upcomingHolidays.length ? <p class="small muted">Keine kommenden Ferien eingetragen.</p> : null}
-          <p class="small muted">Ein Ferienplan gilt nur in seinem Zeitraum und hat dort Vorrang vor dem regulären Plan.</p>
+            );
+          })}
+          {!holiday.length && !upcomingHolidays.length ? (
+            <p class="small muted">
+              <Trans>No upcoming holidays entered.</Trans>
+            </p>
+          ) : null}
+          <p class="small muted">
+            <Trans>A holiday plan only applies in its period and takes precedence over the regular plan there.</Trans>
+          </p>
         </section>
       </div>
     </main>
   );
+}
+
+/** Preview of the generated events, with a note on holidays that have no holiday plan yet. */
+function previewText(preview: { occurrences: number; weeks: number; uncoveredHolidays: { name: string; startsOn: string; endsOn: string }[] }): string {
+  const { occurrences, weeks } = preview;
+  const head = t`${occurrences} events will be created for the next ${weeks} weeks.`;
+  if (!preview.uncoveredHolidays.length) return head;
+  const list = preview.uncoveredHolidays
+    .map((h) => {
+      const holiday = h.name;
+      const from = fullDate(h.startsOn).slice(0, 6);
+      const to = fullDate(h.endsOn).slice(0, 6);
+      return t`During the ${holiday} (${from} to ${to})`;
+    })
+    .join(", ");
+  return `${head} ${t`${list} there is no holiday plan yet.`}`;
 }
 
 interface DraftRule {
@@ -215,7 +271,7 @@ function RuleEditor(props: { initial: DraftRule | null; ownTeamId: number; allTe
       <div class="kicker" style={{ color: "var(--black)", fontSize: "16px", letterSpacing: "0.05em" }}>
         {props.title}
       </div>
-      <div class="weekdays" role="group" aria-label="Wochentag">
+      <div class="weekdays" role="group" aria-label={t`Weekday`}>
         {[1, 2, 3, 4, 5, 6, 7].map((d) => (
           <button type="button" aria-pressed={weekday === d ? "true" : "false"} onClick={() => setWeekday(d)}>
             {weekdayShortIso(d)}
@@ -223,10 +279,10 @@ function RuleEditor(props: { initial: DraftRule | null; ownTeamId: number; allTe
         ))}
       </div>
       <div class="grid-2">
-        <Field label="Beginn">{(fid) => <input id={fid} class="input" type="time" value={start} onInput={(e) => setStart((e.target as HTMLInputElement).value)} />}</Field>
-        <Field label="Ende">{(fid) => <input id={fid} class="input" type="time" value={end} onInput={(e) => setEnd((e.target as HTMLInputElement).value)} />}</Field>
+        <Field label={t`Start`}>{(fid) => <input id={fid} class="input" type="time" value={start} onInput={(e) => setStart((e.target as HTMLInputElement).value)} />}</Field>
+        <Field label={t({ message: "End", context: "time" })}>{(fid) => <input id={fid} class="input" type="time" value={end} onInput={(e) => setEnd((e.target as HTMLInputElement).value)} />}</Field>
       </div>
-      <Field label="Ort">
+      <Field label={t`Location`}>
         {(fid) => (
           <select
             id={fid}
@@ -241,41 +297,50 @@ function RuleEditor(props: { initial: DraftRule | null; ownTeamId: number; allTe
             {locations.map((l) => (
               <option value={l.id}>{l.name}</option>
             ))}
-            <option value="new">+ Neuen Ort anlegen</option>
+            <option value="new">{t`+ Create new location`}</option>
           </select>
         )}
       </Field>
       <div class="stack-sm">
-        <span class="field-label">Mannschaften</span>
+        <span class="field-label">
+          <Trans>Teams</Trans>
+        </span>
         <div class="row-gap" style={{ gap: "6px" }}>
-          <span class="badge team">{props.allTeams.find((t) => t.id === props.ownTeamId)?.name}</span>
-          {teams.map((t) => (
-            <button type="button" class="badge team other" style={{ border: 0, minHeight: "32px" }} onClick={() => setTeams(teams.filter((x) => x !== t))} aria-label={`${props.allTeams.find((x) => x.id === t)?.name} entfernen`}>
-              {props.allTeams.find((x) => x.id === t)?.name} ✕
-            </button>
-          ))}
+          <span class="badge team">{props.allTeams.find((x) => x.id === props.ownTeamId)?.name}</span>
+          {teams.map((tid) => {
+            const teamName = props.allTeams.find((x) => x.id === tid)?.name ?? "";
+            return (
+              <button type="button" class="badge team other" style={{ border: 0, minHeight: "32px" }} onClick={() => setTeams(teams.filter((x) => x !== tid))} aria-label={t`Remove ${teamName}`}>
+                {props.allTeams.find((x) => x.id === tid)?.name} ✕
+              </button>
+            );
+          })}
           <button type="button" class="btn btn-sm btn-dashed" onClick={() => setTeamPicker(true)}>
-            + gemeinsam mit …
+            <Trans>+ together with …</Trans>
           </button>
         </div>
       </div>
       <div class="btn-row">
-        {props.onCancel ? <Button onClick={props.onCancel}>Abbrechen</Button> : null}
+        {props.onCancel ? (
+          <Button onClick={props.onCancel}>
+            <Trans>Cancel</Trans>
+          </Button>
+        ) : null}
         <Button
           variant="primary"
           onClick={async () => {
             if (!locationId) {
-              toast("Bitte einen Ort wählen.", "error");
+              toast(t`Please choose a location.`, "error");
               return;
             }
             if (start >= end) {
-              toast("Das Ende muss nach dem Beginn liegen.", "error");
+              toast(t`The end must be after the start.`, "error");
               return;
             }
             await props.onSave({ id: props.initial?.id, weekday, startsAt: start, endsAt: end, locationId, teamIds: teams });
           }}
         >
-          {props.initial?.id ? "Speichern" : "Hinzufügen"}
+          {props.initial?.id ? t`Save` : t`Add`}
         </Button>
       </div>
       {newLoc ? (
@@ -289,24 +354,26 @@ function RuleEditor(props: { initial: DraftRule | null; ownTeamId: number; allTe
         />
       ) : null}
       {teamPicker ? (
-        <Sheet open onClose={() => setTeamPicker(false)} title="Gemeinsam mit">
-          <p class="muted">Aus einer gemeinsamen Trainingszeit entsteht ein Termin, der bei allen Mannschaften erscheint. Alle beteiligten Trainer dürfen ihn bearbeiten.</p>
+        <Sheet open onClose={() => setTeamPicker(false)} title={t`Together with`}>
+          <p class="muted">
+            <Trans>A joint training time creates an event that appears for all teams. All coaches involved may edit it.</Trans>
+          </p>
           <div class="chips">
             {props.allTeams
-              .filter((t) => t.id !== props.ownTeamId)
-              .map((t) => (
+              .filter((team) => team.id !== props.ownTeamId)
+              .map((team) => (
                 <button
                   type="button"
-                  class={`chip ${teams.includes(t.id) ? "selected" : ""}`}
-                  aria-pressed={teams.includes(t.id) ? "true" : "false"}
-                  onClick={() => setTeams(teams.includes(t.id) ? teams.filter((x) => x !== t.id) : [...teams, t.id])}
+                  class={`chip ${teams.includes(team.id) ? "selected" : ""}`}
+                  aria-pressed={teams.includes(team.id) ? "true" : "false"}
+                  onClick={() => setTeams(teams.includes(team.id) ? teams.filter((x) => x !== team.id) : [...teams, team.id])}
                 >
-                  {t.name}
+                  {team.name}
                 </button>
               ))}
           </div>
           <Button variant="primary" onClick={() => setTeamPicker(false)}>
-            Fertig
+            <Trans>Done</Trans>
           </Button>
         </Sheet>
       ) : null}
@@ -318,10 +385,12 @@ export function NewLocationSheet({ onClose, onCreated }: { onClose: () => void; 
   const [name, setName] = useState("");
   const [address, setAddress] = useState("");
   return (
-    <Sheet open onClose={onClose} title="Neuer Trainingsort">
-      <p class="muted">Zum Beispiel eine Schulturnhalle oder ein Sportplatz. Der Ort steht danach allen Trainern zur Verfügung.</p>
-      <TextField label="Name" value={name} onInput={setName} maxLength={80} />
-      <TextField label="Adresse (optional)" value={address} onInput={setAddress} maxLength={200} />
+    <Sheet open onClose={onClose} title={t`New training location`}>
+      <p class="muted">
+        <Trans>For example a school gym or a sports ground. The location is then available to all coaches.</Trans>
+      </p>
+      <TextField label={t`Name`} value={name} onInput={setName} maxLength={80} />
+      <TextField label={t`Address (optional)`} value={address} onInput={setAddress} maxLength={200} />
       <Button
         variant="primary"
         size="lg"
@@ -330,11 +399,11 @@ export function NewLocationSheet({ onClose, onCreated }: { onClose: () => void; 
         onClick={async () => {
           const res = await api.post<{ id: number }>("/locations", { name: name.trim(), address: address.trim() || null });
           invalidate("/locations");
-          toast("Ort angelegt.");
+          toast(t`Location created.`);
           onCreated(res.id);
         }}
       >
-        Anlegen
+        <Trans>Create</Trans>
       </Button>
     </Sheet>
   );
@@ -346,13 +415,13 @@ export function PlanEditorPage({ id, planId }: { id: string; planId: string }) {
   const { data, error, reload } = useQuery<PlansResponse>(`/teams/${id}/plans`);
   const { data: locs } = useLocations();
   const existing = !isNew ? (data?.plans.find((p) => String(p.id) === planId) ?? null) : null;
-  useDocumentTitle(isNew ? "Trainingsplan anlegen" : "Trainingsplan");
+  useDocumentTitle(isNew ? t`Create training plan` : t`Training plan`);
   const today = todayLocal();
-  const [name, setName] = useState(query.name ?? "Regulärer Plan");
+  const [name, setName] = useState(query.name ?? t`Regular plan`);
   const [kind, setKind] = useState<"regular" | "holiday">((query.kind as "holiday") ?? "regular");
   const [from, setFrom] = useState(query.from ?? today);
   const [to, setTo] = useState(query.to ?? `${Number(today.slice(0, 4)) + (Number(today.slice(5, 7)) >= 8 ? 1 : 0)}-07-28`);
-  // Ferienplan mit Zeitraum: Daten folgen den Ferien unter Verwaltung → Ferien
+  // Holiday plan with a period: the dates follow the holidays under Administration → Holidays
   const [periodId, setPeriodId] = useState<number | null>(query.holiday ? Number(query.holiday) : null);
   const [declineHours, setDeclineHours] = useState("");
   const [rules, setRules] = useState<DraftRule[]>([]);
@@ -385,11 +454,12 @@ export function PlanEditorPage({ id, planId }: { id: string; planId: string }) {
 
   if (error) return <ErrorBox error={error} onRetry={reload} />;
   if (!data) return <Spinner />;
-  if (!isNew && !existing) return <ErrorBox error={new Error("Diesen Plan gibt es nicht.")} />;
+  if (!isNew && !existing) return <ErrorBox error={new Error(t`This plan does not exist.`)} />;
 
   const locName = (lid: number) => locs?.locations.find((l) => l.id === lid)?.name;
   const shared = rules.some((r) => r.teamIds.filter((t) => t !== ownTeamId).length > 0);
   const holidays = data.holidays.filter((h) => h.endsOn >= today);
+  const teamName = allTeams.find((x) => x.id === ownTeamId)?.name ?? "";
 
   const saveRule = async (r: DraftRule) => {
     if (isNew) {
@@ -401,7 +471,7 @@ export function PlanEditorPage({ id, planId }: { id: string; planId: string }) {
     if (r.id) await api.patch(`/rules/${r.id}`, body);
     else await api.post(`/plans/${existing!.id}/rules`, body);
     invalidate("/events", `/teams/${id}/plans`);
-    toast(r.id ? "Trainingszeit geändert. Zukünftige Termine sind angepasst." : "Trainingszeit hinzugefügt.");
+    toast(r.id ? t`Training time changed. Future events have been adjusted.` : t`Training time added.`);
     setEditing(null);
     await reload();
   };
@@ -409,39 +479,43 @@ export function PlanEditorPage({ id, planId }: { id: string; planId: string }) {
   return (
     <main class="page">
       <header class="topbar">
-        <button type="button" class="icon-btn" aria-label="Abbrechen" onClick={() => history.back()}>
+        <button type="button" class="icon-btn" aria-label={t`Cancel`} onClick={() => history.back()}>
           <Icon name="x" size={22} stroke={2.2} />
         </button>
         <div style={{ flex: 1 }}>
           <div class="kicker">
-            Team <span class="nocaps">{allTeams.find((t) => t.id === ownTeamId)?.name ?? ""}</span>
+            <Trans>
+              Team <span class="nocaps">{teamName}</span>
+            </Trans>
           </div>
-          <h1>{isNew ? "Trainingsplan anlegen" : "Trainingsplan"}</h1>
+          <h1>{isNew ? t`Create training plan` : t`Training plan`}</h1>
         </div>
       </header>
       <div class="content">
-        <TextField label="Name" value={name} onInput={setName} maxLength={80} />
+        <TextField label={t`Name`} value={name} onInput={setName} maxLength={80} />
         {isNew ? (
           <div class="field">
-            <span class="field-label">Art des Plans</span>
+            <span class="field-label">
+              <Trans>Kind of plan</Trans>
+            </span>
             <Segmented
-              label="Art des Plans"
+              label={t`Kind of plan`}
               value={kind}
               onChange={setKind}
               options={[
-                { value: "regular", label: "Regulär" },
-                { value: "holiday", label: "Ferienplan" },
+                { value: "regular", label: t`Regular` },
+                { value: "holiday", label: t`Holiday plan` },
               ]}
             />
             <span class="field-hint">
               {kind === "regular"
-                ? "Ein Ferienplan hat in seinem Zeitraum Vorrang. Danach gilt wieder dieser Plan."
-                : "Gilt nur in den gewählten Ferien und ersetzt dort den regulären Plan. Ohne Trainingszeiten bedeutet er Trainingspause."}
+                ? t`A holiday plan takes precedence in its period. After that this plan applies again.`
+                : t`Applies only in the chosen holidays and replaces the regular plan there. Without training times it means a training break.`}
             </span>
           </div>
         ) : null}
         {kind === "holiday" && (holidays.length || periodId) ? (
-          <Field label="Ferien" hint={periodId ? "Die Daten folgen dem Ferienzeitraum, auch wenn er unter Verwaltung → Ferien geändert wird." : undefined}>
+          <Field label={t`Holidays`} hint={periodId ? t`The dates follow the holiday period, even if it is changed under Administration → Holidays.` : undefined}>
             {(fid) => (
               <select
                 id={fid}
@@ -454,11 +528,12 @@ export function PlanEditorPage({ id, planId }: { id: string; planId: string }) {
                   if (h) {
                     setFrom(h.startsOn);
                     setTo(h.endsOn);
-                    if (isNew) setName(`Ferienplan ${h.name}`);
+                    const holiday = h.name;
+                    if (isNew) setName(t`Holiday plan ${holiday}`);
                   }
                 }}
               >
-                <option value="">Eigener Zeitraum</option>
+                <option value="">{t`Custom period`}</option>
                 {data.holidays
                   .filter((h) => h.endsOn >= today || h.id === periodId)
                   .map((h) => (
@@ -471,7 +546,7 @@ export function PlanEditorPage({ id, planId }: { id: string; planId: string }) {
           </Field>
         ) : null}
         <div class="grid-2">
-          <Field label="Gültig ab">
+          <Field label={t`Valid from`}>
             {(fid) => (
               <input
                 id={fid}
@@ -485,7 +560,7 @@ export function PlanEditorPage({ id, planId }: { id: string; planId: string }) {
               />
             )}
           </Field>
-          <Field label="Bis">
+          <Field label={t`Until`}>
             {(fid) => (
               <input
                 id={fid}
@@ -501,13 +576,13 @@ export function PlanEditorPage({ id, planId }: { id: string; planId: string }) {
           </Field>
         </div>
 
-        <section class="stack" aria-label="Trainingszeiten">
+        <section class="stack" aria-label={t`Training times`}>
           <h2 class="section-title" style={{ fontSize: "20px" }}>
-            Trainingszeiten
+            <Trans>Training times</Trans>
           </h2>
           {rules.map((r, i) =>
             editing === i ? (
-              <RuleEditor key={`edit-${i}`} title="Trainingszeit bearbeiten" initial={r} ownTeamId={ownTeamId} allTeams={allTeams} onSave={saveRule} onCancel={() => setEditing(null)} />
+              <RuleEditor key={`edit-${i}`} title={t`Edit training time`} initial={r} ownTeamId={ownTeamId} allTeams={allTeams} onSave={saveRule} onCancel={() => setEditing(null)} />
             ) : (
               <RuleCard
                 rule={{
@@ -515,7 +590,7 @@ export function PlanEditorPage({ id, planId }: { id: string; planId: string }) {
                   weekday: r.weekday,
                   startsAt: r.startsAt,
                   endsAt: r.endsAt,
-                  location: { id: r.locationId, name: locName(r.locationId) ?? "Ort" },
+                  location: { id: r.locationId, name: locName(r.locationId) ?? t`Location` },
                   teams: [ownTeamId, ...r.teamIds.filter((t) => t !== ownTeamId)].map((t) => allTeams.find((x) => x.id === t) ?? { id: t, name: "?" }),
                 }}
                 ownTeamId={ownTeamId}
@@ -525,7 +600,7 @@ export function PlanEditorPage({ id, planId }: { id: string; planId: string }) {
                     setRules(rules.filter((_, j) => j !== i));
                     return;
                   }
-                  if (!(await confirmDialog({ title: "Trainingszeit entfernen?", message: "Alle zukünftigen Termine dieser Trainingszeit und ihre Rückmeldungen werden gelöscht.", confirmLabel: "Entfernen", danger: true }))) return;
+                  if (!(await confirmDialog({ title: t`Remove training time?`, message: t`All future events of this training time and their responses will be deleted.`, confirmLabel: t`Remove`, danger: true }))) return;
                   await api.del(`/rules/${r.id}`);
                   invalidate("/events", `/teams/${id}/plans`);
                   await reload();
@@ -534,36 +609,35 @@ export function PlanEditorPage({ id, planId }: { id: string; planId: string }) {
             ),
           )}
           {editing === null || editing === -1 ? (
-            <RuleEditor key={`new-${rules.length}`} title="Neue Trainingszeit" initial={null} ownTeamId={ownTeamId} allTeams={allTeams} onSave={saveRule} />
+            <RuleEditor key={`new-${rules.length}`} title={t`New training time`} initial={null} ownTeamId={ownTeamId} allTeams={allTeams} onSave={saveRule} />
           ) : null}
         </section>
 
         {shared ? (
           <TextField
-            label="Absagefrist für gemeinsame Trainings (Std., optional)"
+            label={t`Decline deadline for joint trainings (hrs, optional)`}
             value={declineHours}
             onInput={setDeclineHours}
             inputMode="numeric"
             maxLength={3}
-            hint="Leer lassen: Es gilt die längste Frist der beteiligten Mannschaften."
+            hint={t`Leave empty: the longest deadline of the teams involved applies.`}
           />
         ) : null}
 
         {preview ? (
           <section class="notice" style={{ flexDirection: "column", gap: "6px" }} aria-live="polite">
-            <strong style={{ color: "var(--text)" }}>Vorschau</strong>
+            <strong style={{ color: "var(--text)" }}>
+              <Trans>Preview</Trans>
+            </strong>
             <span>
-              Für die nächsten {preview.weeks} Wochen werden {preview.occurrences} Termine erzeugt.
-              {preview.uncoveredHolidays.length
-                ? ` ${preview.uncoveredHolidays.map((h) => `In den ${h.name} (${fullDate(h.startsOn).slice(0, 6)} bis ${fullDate(h.endsOn).slice(0, 6)})`).join(", ")} ist noch kein Ferienplan hinterlegt.`
-                : ""}
+              {previewText(preview)}
             </span>
           </section>
         ) : null}
 
         <div class="btn-row">
           <Button size="lg" onClick={() => history.back()}>
-            Abbrechen
+            <Trans>Cancel</Trans>
           </Button>
           <Button
             variant="accent"
@@ -572,21 +646,22 @@ export function PlanEditorPage({ id, planId }: { id: string; planId: string }) {
             onClick={async () => {
               const dh = declineHours.trim() ? Number(declineHours) : null;
               if (dh != null && (!Number.isInteger(dh) || dh < 0 || dh > 168)) {
-                toast("Bitte eine Frist zwischen 0 und 168 Stunden angeben.", "error");
+                toast(t`Please enter a deadline between 0 and 168 hours.`, "error");
                 return;
               }
               if (isNew) {
                 const res = await api.post<{ id: number; created: number }>(`/teams/${id}/plans`, { name: name.trim(), kind, validFrom: from, validTo: to, declineHours: dh, holidayPeriodId: kind === "holiday" ? periodId : null, rules });
-                toast(`Plan gespeichert. ${res.created} Termine erzeugt.`);
+                const created = res.created;
+                toast(t`Plan saved. ${created} events created.`);
               } else {
                 await api.patch(`/plans/${existing!.id}`, { name: name.trim(), validFrom: from, validTo: to, declineHours: dh, holidayPeriodId: kind === "holiday" ? periodId : null });
-                toast("Plan gespeichert.");
+                toast(t`Plan saved.`);
               }
               invalidate("/events", `/teams/${id}/plans`);
               route(`/team/${id}/plaene`, true);
             }}
           >
-            Plan speichern
+            <Trans>Save plan</Trans>
           </Button>
         </div>
         {!isNew ? (
@@ -594,16 +669,20 @@ export function PlanEditorPage({ id, planId }: { id: string; planId: string }) {
             variant="ghost"
             icon="trash"
             onClick={async () => {
-              if (!(await confirmDialog({ title: "Plan löschen?", message: "Alle zukünftigen Termine aus diesem Plan werden gelöscht. Vergangene bleiben erhalten.", confirmLabel: "Löschen", danger: true }))) return;
+              if (!(await confirmDialog({ title: t`Delete plan?`, message: t`All future events from this plan will be deleted. Past ones are kept.`, confirmLabel: t`Delete`, danger: true }))) return;
               await api.del(`/plans/${existing!.id}`);
               invalidate("/events", `/teams/${id}/plans`);
               route(`/team/${id}/plaene`, true);
             }}
           >
-            Plan löschen
+            <Trans>Delete plan</Trans>
           </Button>
         ) : null}
-        {!isNew ? <Notice>Änderungen an Trainingszeiten gelten sofort. Rückmeldungen bleiben erhalten, solange das Datum gleich bleibt.</Notice> : null}
+        {!isNew ? (
+          <Notice>
+            <Trans>Changes to training times apply immediately. Responses are kept as long as the date stays the same.</Trans>
+          </Notice>
+        ) : null}
       </div>
     </main>
   );
