@@ -2,6 +2,10 @@
 
 Decisions not covered by `docs/plan.md`, with reasons. Newest first.
 
+## README in German first (October 2026)
+
+`README.md` is German, `README.en.md` English, each linked at the top of the other. Kabine is made for German clubs (holidays per state, handball4all, the name itself), and the people who find it on GitHub are mostly club admins in Germany. Code, comments and the technical documentation stay in English so others can contribute.
+
 ## Holiday plans in the timeline (October 2026)
 
 While a holiday plan applies, or before it starts, the event overview shows a note where it begins: "Autumn holidays, 26 Oct to 30 Oct: holiday training times for wD" or, for a plan without training times, "no training for wD". A plan that has already begun stands at the top with "until". So nobody wonders why trainings are at other times or missing. The notes come with the page of events (`breaks`) for the teams one plays, coaches or looks after and the children's teams; plans of several teams with the same name and period appear once. Public holidays and plain school holidays without a holiday plan get no note: trainings simply do not take place on public holidays, and without a holiday plan they go on as usual.

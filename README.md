@@ -1,88 +1,88 @@
-**Deutsch:** [README auf Deutsch](README.de.md)
+**English:** [README in English](README.en.md)
 
 # Kabine
 
-Kabine is a free team app for amateur sports clubs: trainings and games with yes/no responses, squad nominations, team chat, push notifications, helper duties and carpools, for players, parents and coaches. It runs as an installable web app on phones and computers, and each club runs its own copy in its own Cloudflare account.
+Kabine ist eine freie Mannschafts-App für Amateursportvereine: Training und Spiele mit Zu- und Absagen, Kadernominierung, Mannschaftschat, Push-Benachrichtigungen, Helferdienste und Fahrgemeinschaften, für Spieler, Eltern und Trainer. Sie läuft als installierbare Web-App auf Handy und Computer, und jeder Verein betreibt seine eigene Installation im eigenen Cloudflare-Konto.
 
-It started as the app of a handball club, where several hundred players, parents and coaches use it every day. Kabine is the same app for any club, in English and German.
+Entstanden ist sie als App eines Handballvereins, in dem sie mehrere hundert Spieler, Eltern und Trainer jeden Tag nutzen. Kabine ist dieselbe App für jeden Verein, auf Deutsch und Englisch.
 
 <table>
   <tr>
-    <td><img src="docs/screenshots/en/01-events.png" width="230" alt="Upcoming events of a player with the next training and her response"></td>
-    <td><img src="docs/screenshots/en/03-coach-responses.png" width="230" alt="A coach sees who accepted and who declined, with reasons"></td>
-    <td><img src="docs/screenshots/en/05-chat.png" width="230" alt="Team chat with coach, parent and player"></td>
+    <td><img src="docs/screenshots/de/01-events.png" width="230" alt="Nächste Termine einer Spielerin mit dem nächsten Training und ihrer Zusage"></td>
+    <td><img src="docs/screenshots/de/03-coach-responses.png" width="230" alt="Die Trainerin sieht, wer zu- und wer abgesagt hat, mit Gründen"></td>
+    <td><img src="docs/screenshots/de/05-chat.png" width="230" alt="Mannschaftschat mit Trainerin, Mutter und Spielerin"></td>
   </tr>
   <tr>
-    <td><img src="docs/screenshots/en/04-squad.png" width="230" alt="Nominating the squad for a game"></td>
-    <td><img src="docs/screenshots/en/07-helper-duties.png" width="230" alt="Helper duties for a home game"></td>
-    <td><img src="docs/screenshots/en/06-carpool.png" width="230" alt="Carpool to an away game"></td>
+    <td><img src="docs/screenshots/de/04-squad.png" width="230" alt="Kader für ein Spiel nominieren"></td>
+    <td><img src="docs/screenshots/de/07-helper-duties.png" width="230" alt="Helferdienste für ein Heimspiel"></td>
+    <td><img src="docs/screenshots/de/06-carpool.png" width="230" alt="Fahrgemeinschaft zu einem Auswärtsspiel"></td>
   </tr>
 </table>
 
-All pictures show an invented demo club. More in [docs/screenshots](docs/screenshots/en).
+Alle Bilder zeigen einen erfundenen Demo-Verein. Weitere in [docs/screenshots](docs/screenshots/de).
 
-## What it does
+## Was die App kann
 
-**Players** see their trainings, games and special events, accept or decline with a tap, and get a notification when something changes. Trainings count as accepted until someone declines, so nobody has to answer every week.
+**Spieler** sehen ihre Trainings, Spiele und Sondertermine, sagen mit einem Tipp zu oder ab und bekommen eine Benachrichtigung, wenn sich etwas ändert. Trainings gelten als zugesagt, bis jemand absagt. Niemand muss jede Woche antworten.
 
-**Parents** respond for their children, read along in the team chat, take on helper duties and offer seats for away games. They decide what their child may do in the app.
+**Eltern** sagen für ihre Kinder zu und ab, lesen im Mannschaftschat mit, übernehmen Helferdienste und bieten Plätze für Auswärtsspiele an. Sie entscheiden, was ihr Kind in der App darf.
 
-**Coaches** set up training plans once a season. The app creates the trainings, skips school holidays and public holidays, and shows who comes. Coaches nominate squads for games, cancel or move trainings with one notification to everyone, invite players and parents by link and see who cannot be reached yet.
+**Trainer** legen einmal pro Saison die Trainingszeiten fest. Die App erzeugt die Trainings, lässt Schulferien und Feiertage aus und zeigt, wer kommt. Trainer nominieren den Kader für Spiele, sagen Trainings ab oder verschieben sie mit einer Benachrichtigung an alle, laden Spieler und Eltern per Link ein und sehen, wer noch nicht erreichbar ist.
 
-**Admins** set up the club with a wizard: language, region, sport, teams, modules, e-mail. They manage teams, coaches and people, and run the season change once a year.
+**Admins** richten den Verein mit einem Assistenten ein: Sprache, Region, Sportart, Mannschaften, Module, E-Mail. Sie verwalten Mannschaften, Trainer und Personen und machen einmal im Jahr den Saisonwechsel.
 
-Optional modules: helper duties for home games and events, youth referees, carpools, game schedules from handball4all (German handball), sign-in codes and reminders by SMS. Games can also be imported from a spreadsheet.
+Zuschaltbare Module: Helferdienste bei Heimspielen und Veranstaltungen, Kinder- und Jugendschiedsrichter, Fahrgemeinschaften, Spielpläne aus handball4all, Anmeldecodes und Erinnerungen per SMS. Spiele lassen sich auch aus einer Tabelle übernehmen.
 
-## An internal app for one club
+## Eine interne App für einen Verein
 
-Kabine is deliberately not a platform and not in the app stores.
+Kabine ist bewusst keine Plattform und nicht in den App Stores.
 
-- **One installation per club.** The data stays in the club's own Cloudflare account. There is no central server, no account across clubs, and the authors of Kabine have no access to any club's data.
-- **No app store.** People open the club's address and add the app to their home screen. It works like an installed app, with notifications, also on iPhones. Without a store there are no store accounts, no age ratings and no review process between the club and its members, and every update reaches everyone at once.
-- **Invitations only.** There is no public sign-up and no public content. Coaches share invitation links in their team's group, admins hand out personal links. Sign-in is by passkey (Face ID, fingerprint, screen lock), so there are no passwords to forget or leak.
-- **Small on purpose.** Kabine covers what a team needs week by week. Membership fees, accounting and the club's website stay where they are.
+- **Eine Installation pro Verein.** Die Daten bleiben im eigenen Cloudflare-Konto des Vereins. Es gibt keinen zentralen Server, kein vereinsübergreifendes Konto, und die Entwickler von Kabine haben keinen Zugriff auf die Daten irgendeines Vereins.
+- **Kein App Store.** Man öffnet die Adresse des Vereins und legt die App auf den Startbildschirm. Sie verhält sich wie eine installierte App, mit Benachrichtigungen, auch auf dem iPhone. Ohne Store braucht niemand ein Store-Konto, es gibt keine Altersfreigaben und keine Prüfung zwischen Verein und Mitgliedern, und jedes Update erreicht alle sofort.
+- **Nur mit Einladung.** Es gibt keine öffentliche Registrierung und keine öffentlichen Inhalte. Trainer teilen Einladungslinks in der Gruppe ihrer Mannschaft, Admins vergeben persönliche Links. Angemeldet wird mit Passkey (Face ID, Fingerabdruck, Displaysperre), es gibt also keine Passwörter, die man vergessen oder verlieren kann.
+- **Absichtlich schlank.** Kabine deckt ab, was eine Mannschaft Woche für Woche braucht. Mitgliedsbeiträge, Buchhaltung und die Website des Vereins bleiben, wo sie sind.
 
-## Privacy and youth protection
+## Datenschutz und Jugendschutz
 
-Most users are children and teenagers. Of players and parents Kabine stores only first name, last name and the players' year of birth. No address, no date of birth, no phone number unless someone enters one for text messages.
+Die meisten Nutzer sind Kinder und Jugendliche. Von Spielern und Eltern speichert Kabine nur Vorname, Nachname und bei Spielern den Jahrgang. Keine Adresse, kein Geburtsdatum, keine Telefonnummer, außer jemand trägt selbst eine für SMS ein.
 
-- Reasons for declining are visible only to coaches and admins and are deleted 60 days after the event.
-- Parents of minors decide what their child may do in the app (accept, decline, read and write in the chat) and approve profile pictures before others see them.
-- Other parents and players see names shortened ("Kim M.") in helper duties and carpools.
-- Team chats always include the coaches, who can mute members and remove messages. There are no private messages.
-- No tracking, no advertising, no third-party scripts or fonts. The app loads nothing from other servers.
-- Leaving the club removes access at once and all data at the next season change at the latest. Chats, events and responses are deleted every season.
+- Absagegründe sehen nur Trainer und Admins. Sie werden 60 Tage nach dem Termin gelöscht.
+- Eltern von Minderjährigen legen fest, was ihr Kind in der App darf (zusagen, absagen, im Chat lesen und schreiben), und geben Profilbilder frei, bevor andere sie sehen.
+- Andere Eltern und Spieler sehen Namen bei Helferdiensten und Fahrgemeinschaften nur abgekürzt („Kim M.“).
+- In jedem Mannschaftschat sind die Trainer dabei. Sie können Mitglieder stummschalten und Nachrichten entfernen. Private Nachrichten gibt es nicht.
+- Kein Tracking, keine Werbung, keine fremden Skripte oder Schriften. Die App lädt nichts von anderen Servern.
+- Wer den Verein verlässt, verliert den Zugang sofort; alle Daten sind spätestens zum nächsten Saisonwechsel gelöscht. Chats, Termine und Rückmeldungen werden jede Saison gelöscht.
 
-The full list of stored data, who sees it and when it is deleted, plus a template for the club's privacy policy: [docs/privacy.md](docs/privacy.md).
+Die vollständige Liste der gespeicherten Daten, wer sie sieht und wann sie gelöscht werden, dazu eine Vorlage für die Datenschutzerklärung des Vereins: [docs/privacy.de.md](docs/privacy.de.md).
 
 ## Installation
 
 [![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/witscher/kabine)
 
-You need a Cloudflare account (the free plan is enough for a typical club), a GitHub account and ideally the club's domain. The button creates your copy and all resources; you choose one password for the first admin. Step by step, including e-mail and updates: [docs/install.md](docs/install.md). Running the app (backups, season change, maintenance, updates): [docs/operation.md](docs/operation.md).
+Nötig sind ein Cloudflare-Konto (der kostenlose Tarif reicht für einen üblichen Verein), ein GitHub-Konto und am besten eine Domain des Vereins. Der Knopf legt die eigene Kopie und alle Ressourcen an; man wählt nur ein Passwort für den ersten Admin. Schritt für Schritt, mit E-Mail und Updates: [docs/install.md](docs/install.md) (Englisch). Betrieb (Datensicherung, Saisonwechsel, Wartung, Updates): [docs/operation.md](docs/operation.md).
 
-## Languages
+## Sprachen
 
-English and German. Translations are gettext `.po` files in `locales/` that anyone can correct. Adding a language: [docs/translation.md](docs/translation.md).
+Deutsch und Englisch. Die Übersetzungen liegen als gettext-Dateien (`.po`) in `locales/`, jeder kann sie korrigieren. Eine Sprache hinzufügen: [docs/translation.md](docs/translation.md).
 
-## Development
+## Entwicklung
 
-Node.js 22 or newer.
+Node.js 22 oder neuer.
 
 ```sh
 npm ci
-npm run secrets:generate -- --dev   # local secrets in .dev.vars
-npm run db:reset:local              # local database with the invented demo club
+npm run secrets:generate -- --dev   # lokale Secrets in .dev.vars
+npm run db:reset:local              # lokale Datenbank mit dem erfundenen Demo-Verein
 npm run dev                         # http://localhost:5173
-npm run check                       # typecheck and tests
-npm run e2e                         # end-to-end tests (Playwright)
-npm run screenshots                 # the pictures above, in English and German
+npm run check                       # Typprüfung und Tests
+npm run e2e                         # Ende-zu-Ende-Tests (Playwright)
+npm run screenshots                 # die Bilder oben, auf Deutsch und Englisch
 ```
 
-The first admin is set up at `/einrichtung#<ADMIN_BOOTSTRAP_TOKEN>` (see `.dev.vars`).
+Der erste Admin richtet sich unter `/einrichtung#<ADMIN_BOOTSTRAP_TOKEN>` ein (siehe `.dev.vars`).
 
-Built with Cloudflare Workers, D1, Durable Objects and Queues, Hono, Preact and Lingui. Design decisions: [docs/design.md](docs/design.md) and [docs/decisions.md](docs/decisions.md). Security rules with a test each: [docs/security.md](docs/security.md).
+Gebaut mit Cloudflare Workers, D1, Durable Objects und Queues, Hono, Preact und Lingui. Code, Kommentare und die technische Dokumentation sind auf Englisch.
 
-## Licence
+## Lizenz
 
-AGPL-3.0-only, see [LICENSE](LICENSE). You may run, change and share Kabine. If you run a changed version for others, you must offer them its source code.
+AGPL-3.0-only, siehe [LICENSE](LICENSE). Kabine darf genutzt, verändert und weitergegeben werden. Wer eine veränderte Fassung für andere betreibt, muss ihnen den Quellcode anbieten.
