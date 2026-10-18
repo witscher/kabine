@@ -49,6 +49,11 @@ Each milestone ends with typecheck, unit tests and e2e green, a commit on `main`
 - **K1 Club profile** done: profile in `app_meta` (name, short name, abbreviation, colours, logo in KV, privacy link and text, contact, owner), page *Verwaltung → Verein*, dynamic manifest, owner set by the first admin, neutral icons and splash, demo seed with invented names. Explainer videos removed (see open points).
 - **K2 Security checklist** done: twelve rules with a test each, see `docs/security.md`. Personal links on existing accounts always sign out the old devices (the switch in the UI is gone).
 
+## Requested for the end (also for the original club app)
+
+- **Holiday plans visible:** while a holiday plan or a training break applies, a short note in the timeline of the event overview says so, so nobody wonders why trainings differ or are missing.
+- **Optional joint training:** a training time shared with other teams ("together with") can be mandatory or optional per team. Mandatory: everyone counts as accepted (as today). Optional: players accept by hand. Needs a column on the rule–team link, a switch per team in the training plan, and rules for reminders and "absent without excuse" (to be clarified before building).
+
 ## Design notes K3–K6 (October 2026)
 
 - **Language order:** account setting, else the browser language if Kabine has it, else the club default. The server translates in the language of the request (AsyncLocalStorage, `worker/i18n.ts`); texts for others (push, mail) are rendered per recipient language. See `docs/translation.md`.

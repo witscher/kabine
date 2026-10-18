@@ -1,9 +1,9 @@
 import { t } from "@lingui/core/macro";
 import { DurableObject } from "cloudflare:workers";
-import { LOCALES } from "../../shared/i18n";
+import { intlTag } from "../../shared/dates";
 import { enterClubContext } from "../domain/club";
 import { enqueuePush, notifyPersons } from "../domain/notify";
-import { withLocale } from "../i18n";
+import { currentLocale, withLocale } from "../i18n";
 import { all, run } from "../lib/db";
 
 // One chat room per team. The worker checks permissions and passes the
@@ -34,6 +34,8 @@ export interface ChatMessage {
   authorId: number | null;
   authorName: string | null;
   authorLabel: string | null;
+  /** coach, lead, helper, admin or parent */
+  authorRole: string | null;
   isFormer: boolean;
   text: string | null;
   createdAt: string;
@@ -94,9 +96,28 @@ export const formerLabel = () => t`Former player`;
  */
 export const DELETED_NAME = "Gelöschte Person";
 const deletedName = () => t`Deleted person`;
-/** Author labels of coaches and group leads. Stored in the language of the author, see mentionable(). */
-export const coachLabel = () => t({ message: "Coach", context: "chat author" });
-export const leadLabel = () => t({ message: "In charge", context: "chat author" });
+/**
+ * Role of an author, stored as a code ("coach", "lead", "helper", "admin", "parent:[names]") and shown
+ * in the reader's language.
+ */
+export function roleLabel(code: string | null): string | null {
+  if (!code) return null;
+  if (code === "coach") return t({ message: "Coach", context: "chat author" });
+  if (code === "lead") return t({ message: "In charge", context: "chat author" });
+  if (code === "helper") return t({ message: "Helper", context: "chat author" });
+  if (code === "admin") return t({ message: "Admin", context: "chat author" });
+  if (code.startsWith("parent:")) {
+    let names: string[] = [];
+    try {
+      names = JSON.parse(code.slice(7)) as string[];
+    } catch {
+      return null;
+    }
+    const children = new Intl.ListFormat(intlTag(currentLocale()), { type: "conjunction" }).format(names);
+    return t`Parent of ${children}`;
+  }
+  return code;
+}
 
 /** Runs fn in the language of the connected person. */
 function inLocale<T>(viewer: ChatAttachment, fn: () => T): T {
@@ -145,15 +166,12 @@ export class ChatRoom extends DurableObject<Env> {
    * (protection of the children). Groups: all members and leads (docs/entscheidungen.md, Gruppen).
    */
   private async mentionable(): Promise<Mentionable[]> {
-    // Labels are stored in the language of each author: compare with the labels in every language
-    const leads = LOCALES.flatMap((l) => withLocale(l, () => [coachLabel(), leadLabel()]));
     const local = this.sql
       .exec<{ person_id: number; name: string }>(
         `SELECT a.person_id, a.name FROM authors a
           WHERE a.is_former = 0
-            AND (a.label IN (SELECT value FROM json_each(?)) OR EXISTS (SELECT 1 FROM messages m WHERE m.person_id = a.person_id AND m.kind = 'user' AND m.deleted_at IS NULL))
+            AND (a.label IN ('coach', 'lead') OR EXISTS (SELECT 1 FROM messages m WHERE m.person_id = a.person_id AND m.kind = 'user' AND m.deleted_at IS NULL))
           ORDER BY a.name`,
-        JSON.stringify([...new Set(leads)]),
       )
       .toArray()
       .map((r) => ({ personId: r.person_id, name: r.name }));
@@ -336,7 +354,8 @@ export class ChatRoom extends DurableObject<Env> {
       kind: r.kind,
       authorId: hideName ? null : r.person_id,
       authorName: r.kind === "system" ? null : deleted ? inLocale(viewer, deletedName) : hideName ? inLocale(viewer, formerLabel) : r.name,
-      authorLabel: hideName ? null : r.label,
+      authorLabel: hideName ? null : inLocale(viewer, () => roleLabel(r.label)),
+      authorRole: hideName || !r.label ? null : r.label.split(":")[0]!,
       isFormer: former,
       text: r.deleted_at ? null : r.text,
       createdAt: r.created_at,

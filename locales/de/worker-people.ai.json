@@ -1,0 +1,8 @@
+{
+  "Invalid colour.": "Ungültige Farbe.",
+  "The link must start with https://.": "Der Link muss mit https:// beginnen.",
+  "Only the owner can hand over this role.": "Nur der Inhaber kann diese Rolle übergeben.",
+  "The new owner must be an admin.": "Der neue Inhaber muss Admin sein.",
+  "Please upload a PNG, JPEG, WebP or SVG file.": "Bitte lade eine PNG-, JPEG-, WebP- oder SVG-Datei hoch.",
+  "The logo may be at most 256 KB.": "Das Logo darf höchstens 256 KB groß sein."
+}

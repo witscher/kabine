@@ -1,6 +1,6 @@
 msgid ""
 msgstr ""
-"POT-Creation-Date: 2026-10-18 09:41+0000\n"
+"POT-Creation-Date: 2026-10-18 09:49+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -170,7 +170,7 @@ msgstr "Dienst hinzufügen"
 #: src/pages/admin.tsx
 #: src/pages/group.tsx
 #: src/pages/profile.tsx
-#: worker/routes/chat.ts
+#: worker/chat/room.ts
 msgid "Parent of {children}"
 msgstr "Elternteil von {children}"
 
@@ -1479,6 +1479,7 @@ msgstr "Über den Link oder unter Verwaltung → Personen lässt sich die Rolle 
 msgid "Invalid season."
 msgstr "Ungültige Saison."
 
+# ai
 #: worker/routes/club.ts
 msgid "Only the owner can hand over this role."
 msgstr "Nur der Inhaber kann diese Rolle übergeben."
@@ -2459,6 +2460,7 @@ msgstr "Das dürfen nur Trainer dieser Mannschaft."
 msgid "Link copied."
 msgstr "Link kopiert."
 
+# ai
 #: worker/routes/club.ts
 msgid "The new owner must be an admin."
 msgstr "Der neue Inhaber muss Admin sein."
@@ -3395,6 +3397,7 @@ msgstr "Angemeldet auf"
 msgid "You can only look for a lift for yourself or your children."
 msgstr "Du kannst nur für dich oder deine Kinder eine Mitfahrgelegenheit suchen."
 
+# ai
 #: worker/routes/club.ts
 msgid "The link must start with https://."
 msgstr "Der Link muss mit https:// beginnen."
@@ -3822,6 +3825,7 @@ msgstr "Mitfahrgelegenheit gesucht"
 msgid "Install app"
 msgstr "App installieren"
 
+# ai
 #: worker/routes/club.ts
 msgid "Please upload a PNG, JPEG, WebP or SVG file."
 msgstr "Bitte lade eine PNG-, JPEG-, WebP- oder SVG-Datei hoch."
@@ -6059,7 +6063,7 @@ msgstr "{count} neue Nachrichten, zuletzt {author}: {text}"
 msgid "No group yet"
 msgstr "Noch keine Gruppe"
 
-#: worker/routes/chat.ts
+#: worker/chat/room.ts
 msgctxt "chat author"
 msgid "Helper"
 msgstr "Aushilfe"
@@ -6429,7 +6433,7 @@ msgstr "Person suchen"
 msgid "Add person"
 msgstr "Person anlegen"
 
-#: worker/routes/chat.ts
+#: worker/chat/room.ts
 msgctxt "chat author"
 msgid "Admin"
 msgstr "Admin"
@@ -6483,6 +6487,7 @@ msgstr "Bild zuschneiden"
 msgid "Task"
 msgstr "Aufgabe"
 
+# ai
 #: worker/routes/club.ts
 msgid "Invalid colour."
 msgstr "Ungültige Farbe."
@@ -7978,6 +7983,7 @@ msgstr "Kader aktualisiert ({added} neu, {removed} entfernt)."
 msgid "{plans, plural, one {One holiday plan is linked to this period and takes over new dates automatically.} other {# holiday plans are linked to this period and take over new dates automatically.}}"
 msgstr "{plans, plural, one {Ein Ferienplan ist mit diesem Zeitraum verknüpft und übernehmen neue Daten automatisch.} other {# Ferienpläne sind mit diesem Zeitraum verknüpft und übernehmen neue Daten automatisch.}}"
 
+# ai
 #: worker/routes/club.ts
 msgid "The logo may be at most 256 KB."
 msgstr "Das Logo darf höchstens 256 KB groß sein."

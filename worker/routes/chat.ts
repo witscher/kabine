@@ -3,12 +3,10 @@ import { Hono } from "hono";
 import { z } from "zod";
 import { type AppEnv, intParam, requireActor } from "../app";
 import { type Actor, isCoachOf, requireAdmin } from "../auth/actor";
-import { coachLabel, leadLabel } from "../chat/room";
 import { chatStub, postAnnouncement, setMuteInChat } from "../domain/chat";
 import { currentLocale } from "../i18n";
 import { all, first, run } from "../lib/db";
 import { badRequest, forbidden, notFound, parse, readJson } from "../lib/http";
-import { intlTag } from "../../shared/dates";
 
 export const chatRoutes = new Hono<AppEnv>();
 
@@ -129,21 +127,20 @@ chatRoutes.get("/chat/:teamId/connect", async (c) => {
   const access = (await chatAccess(c.env.DB, actor, [teamId]))[0];
   if (!access) throw forbidden(t`You are not part of this team.`);
   if (!access.canRead) throw forbidden(access.reason ?? t`No access to this chat.`);
-  // Label next to the name, stored with the author in the language of the person connecting
-  const children = new Intl.ListFormat(intlTag(currentLocale()), { type: "conjunction" }).format(access.viaChildren);
-  const label =
+  // Role next to the name, stored as a code and shown in the language of each reader (room.ts, roleLabel)
+  const label: string | null =
     access.role === "coach"
       ? access.isGroup
-        ? leadLabel()
-        : coachLabel()
+        ? "lead"
+        : "coach"
       : access.role === "helper"
-        ? t({ message: "Helper", context: "chat author" })
+        ? "helper"
         : access.role === "player"
           ? null
           : access.viaChildren.length
-            ? t`Parent of ${children}`
+            ? `parent:${JSON.stringify(access.viaChildren)}`
             : actor.isAdmin
-              ? t({ message: "Admin", context: "chat author" })
+              ? "admin"
               : null;
   const headers = new Headers(c.req.raw.headers);
   headers.set("x-team-id", String(teamId));

@@ -1,4 +1,5 @@
-// Fills German translations into locales/de.po from locales/de/*.json ({ "English msgid": "Deutsch" })
+// Fills German translations into locales/de.po from locales/de/*.json ({ "English msgid": "Deutsch" }).
+// Files named *.ai.json hold machine translations: their entries get the comment "ai".
 // and checks the catalog: every message translated, same placeholders and tags as the source.
 // Entries translated by a machine carry the translator comment "ai" (see docs/translation.md).
 // Usage: npx lingui extract && node tools/i18n-fill.mjs [--check]
@@ -11,7 +12,7 @@ const mapping = new Map();
 for (const f of readdirSync(dir).filter((f) => f.endsWith(".json")).sort()) {
   for (const [id, text] of Object.entries(JSON.parse(readFileSync(new URL(f, dir), "utf8")))) {
     if (mapping.has(id) && mapping.get(id).text !== text) console.warn(`Different translations for "${id}" in ${mapping.get(id).file} and ${f}`);
-    mapping.set(id, { text, file: f });
+    mapping.set(id, { text, file: f, ai: f.endsWith(".ai.json") });
   }
 }
 
@@ -24,6 +25,8 @@ for (const item of po.items) {
   const key = item.msgctxt ? `${item.msgid}  [context: ${item.msgctxt}]` : item.msgid;
   if (!item.msgstr[0] && mapping.has(key)) {
     item.msgstr = [mapping.get(key).text];
+    // Machine translations are marked until a person has checked them
+    if (mapping.get(key).ai && !item.comments.includes("ai")) item.comments.push("ai");
     filled++;
   }
   if (!item.msgstr[0]) problems.push(`missing: ${JSON.stringify(key)}`);

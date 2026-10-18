@@ -6,7 +6,7 @@ Kabine is written in English (source language) and translated with [Lingui](http
 
 - Edit `msgstr` in `locales/<language>.po`. Keep placeholders such as `{name}` and tags such as `<0>…</0>` exactly as in `msgid`; they may move within the sentence.
 - Plurals use ICU: `{count, plural, one {# player} other {# players}}`. Translate the words inside the braces, keep the structure.
-- Entries written by a machine carry the translator comment `#. ai`. When you have checked or corrected one, delete that line. Machine translation never overwrites an entry without the marker, unless its English source changed.
+- Entries written by a machine carry the translator comment `# ai`. When you have checked or corrected one, delete that line. Machine translation never overwrites an entry without the marker, unless its English source changed.
 - New language: add it to `LOCALES` in `shared/i18n.ts` and `lingui.config.ts`, add a catalog loader in `src/i18n.ts` and `worker/i18n.ts`, run `npm run i18n`.
 
 ## For developers
@@ -49,4 +49,4 @@ npm run i18n          # extract messages into the catalogs, fill German from loc
 npm run i18n:check    # CI: every message translated, placeholders match
 ```
 
-`locales/de/*.json` holds German translations by English message (`{ "Send code": "Code senden" }`), one file per area. `node tools/i18n-msgids.mjs <files>` prints the messages of source files exactly as they appear in the catalog, so the keys match. After `npm run i18n` the `.po` file is the reference; the JSON files only fill empty entries.
+`locales/de/*.json` holds German translations by English message (`{ "Send code": "Code senden" }`), one file per area; files named `*.ai.json` hold machine translations, which get the `# ai` marker. `node tools/i18n-msgids.mjs <files>` prints the messages of source files exactly as they appear in the catalog, so the keys match. After `npm run i18n` the `.po` file is the reference; the JSON files only fill empty entries.

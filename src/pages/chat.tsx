@@ -38,6 +38,7 @@ interface Message {
   authorId: number | null;
   authorName: string | null;
   authorLabel: string | null;
+  authorRole?: string | null;
   isFormer: boolean;
   text: string | null;
   createdAt: string;
@@ -583,7 +584,7 @@ export function ChatRoomPage({ teamId }: { teamId: string }) {
             );
           }
           const mine = m.authorId === me.person.id;
-          const isCoach = m.authorLabel === "Coach";
+          const isCoach = m.authorRole === "coach";
           const author = m.authorName ?? "";
           if (m.kind === "announcement") {
             const reactionsA = m.reactions ?? [];

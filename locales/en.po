@@ -170,7 +170,7 @@ msgstr "Add duty"
 #: src/pages/admin.tsx
 #: src/pages/group.tsx
 #: src/pages/profile.tsx
-#: worker/routes/chat.ts
+#: worker/chat/room.ts
 msgid "Parent of {children}"
 msgstr "Parent of {children}"
 
@@ -6059,7 +6059,7 @@ msgstr "{count} new messages, latest from {author}: {text}"
 msgid "No group yet"
 msgstr "No group yet"
 
-#: worker/routes/chat.ts
+#: worker/chat/room.ts
 msgctxt "chat author"
 msgid "Helper"
 msgstr "Helper"
@@ -6429,7 +6429,7 @@ msgstr "Search person"
 msgid "Add person"
 msgstr "Add person"
 
-#: worker/routes/chat.ts
+#: worker/chat/room.ts
 msgctxt "chat author"
 msgid "Admin"
 msgstr "Admin"
