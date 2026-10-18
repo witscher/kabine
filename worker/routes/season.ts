@@ -475,6 +475,8 @@ export const EXPORT_EXCLUDED = [
   "calendar_tokens",
   "referee_links",
   "d1_migrations",
+  // Generated keys (worker/lib/instance-secrets.ts): never in a file that leaves the installation
+  "instance_secrets",
 ];
 
 function base64(bytes: ArrayBuffer | Uint8Array | number[]): string {

@@ -4,7 +4,7 @@ import { useLocation } from "preact-iso";
 import { useEffect, useState } from "preact/hooks";
 import type { TeamRef } from "../../shared/types";
 import { api } from "../api";
-import { fullDate, todayLocal, weekdayShortIso } from "../format";
+import { fullDate, todayLocal, weekdayShortIso, dayMonth } from "../format";
 import { Icon } from "../icons";
 import { invalidate, useQuery } from "../store";
 import { Button, confirmDialog, ErrorBox, Field, Notice, Segmented, Sheet, Spinner, TextField, toast, TopBar, useDocumentTitle } from "../ui";
@@ -234,8 +234,8 @@ function previewText(preview: { occurrences: number; weeks: number; uncoveredHol
   const list = preview.uncoveredHolidays
     .map((h) => {
       const holiday = h.name;
-      const from = fullDate(h.startsOn).slice(0, 6);
-      const to = fullDate(h.endsOn).slice(0, 6);
+      const from = dayMonth(h.startsOn);
+      const to = dayMonth(h.endsOn);
       return t`During the ${holiday} (${from} to ${to})`;
     })
     .join(", ");

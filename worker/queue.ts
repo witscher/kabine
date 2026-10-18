@@ -1,4 +1,5 @@
 import { badgeCount } from "./domain/badge";
+import { ensureInstanceSecrets } from "./lib/instance-secrets";
 import { type PushJob, pushConfigured } from "./domain/notify";
 import { all, first, list, run } from "./lib/db";
 import { loadVapid, type PushSubscriptionRow, sendWebPush } from "./lib/webpush";
@@ -15,6 +16,7 @@ export async function vapidSubject(env: Env): Promise<string | null> {
 }
 
 export async function handleQueue(batch: MessageBatch<PushJob>, env: Env): Promise<void> {
+  await ensureInstanceSecrets(env);
   const subject = pushConfigured(env) ? await vapidSubject(env) : null;
   if (!subject) {
     batch.ackAll();

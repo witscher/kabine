@@ -5,7 +5,7 @@ import { useLocation } from "preact-iso";
 import { useRef, useState } from "preact/hooks";
 import type { EventPage, EventSummary, MyParticipation } from "../../shared/types";
 import { DutyChips } from "../duties";
-import { dayOfMonth, longDate, monthLabel, monthShort, relativeDay, timeRange, time, weekdayShort } from "../format";
+import { dayOfMonth, longDate, monthLabel, monthShort, relativeDay, timeRange, time, weekdayShort, joinNames } from "../format";
 import { FirstStepsCard, InstallBanner, MotdBanner, PushSetupBanner } from "../howto";
 import { Ball, Icon } from "../icons";
 import { DeclineSheet, deadlineText, HelpRequestCard, PersonResponseRow, ResponseButtons } from "../respond";
@@ -17,11 +17,6 @@ import { isLiveWindow, LiveCard } from "../live";
 import { isRelevantEvent } from "../../shared/relevance";
 
 const kindLabel = () => ({ training: t`Training`, game: t`Game`, special: t`Event` }) as const;
-
-/** "A and B and C": names as one list, in the app's language. */
-function joinAnd(names: string[]): string {
-  return names.reduce((list, name) => (list ? t`${list} and ${name}` : name), "");
-}
 
 /** Card heading "Up next: game" or, for a further event on the same day, "Then: game". */
 function nextHeading(kind: EventSummary["kind"], later: boolean): string {
@@ -380,7 +375,7 @@ export function HomePage() {
   const team = teamFilter && teamNames.includes(teamFilter) ? teamFilter : null;
   // With a filter set: which children play in this team?
   const teamKids = team ? children.filter((c) => c.teams.some((t) => t.parentsEnabled && t.name === team)).map((c) => c.firstName) : [];
-  const kids = joinAnd(teamKids);
+  const kids = joinNames(teamKids);
   const pickTeam = (name: string) => {
     const next = team === name ? null : name;
     saveTeamFilter(next);
@@ -450,7 +445,7 @@ export function HomePage() {
   ) : null;
 
   const firstName = me.person.firstName;
-  const childNames = joinAnd(children.map((c) => c.firstName));
+  const childNames = joinNames(children.map((c) => c.firstName));
   let lastMonth = "";
   return (
     <main class="page">

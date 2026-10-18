@@ -1,5 +1,6 @@
 import { t } from "@lingui/core/macro";
 import { appOrigin, enterClubContext } from "./domain/club";
+import { ensureInstanceSecrets } from "./lib/instance-secrets";
 import { recordAttendance } from "./domain/attendance";
 import { sendCarpoolChatReminders } from "./domain/carpool";
 import { syncAutoSquads } from "./domain/auto-squad";
@@ -22,6 +23,7 @@ export const GAME_REMINDER_DAYS = 3;
 export async function handleScheduled(baseEnv: Env, scheduledTime: number): Promise<void> {
   // Links in e-mails and push messages need the app address; without ORIGIN the one the app was last opened at
   const env = { ...baseEnv, ORIGIN: await appOrigin(baseEnv) } as Env;
+  await ensureInstanceSecrets(env);
   await enterClubContext(env.DB);
   // Maintenance: generate or send nothing; the next run afterwards catches up
   if (await maintenanceState(env.KV)) {

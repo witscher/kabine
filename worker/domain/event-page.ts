@@ -1,7 +1,7 @@
 // Event overview page by page ("More events"). The server filters what the browser used to
 // filter (relevance, team) and returns only the next `limit` events. Only these are checked
 // and loaded with details, not all events of the season.
-// See docs/entscheidungen.md, Datenbank-Leselast.
+// See docs/design.md, Database read load.
 import { isRelevantEvent } from "../../shared/relevance";
 import type { EventPage, EventSummary } from "../../shared/types";
 import type { Actor } from "../auth/actor";

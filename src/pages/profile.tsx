@@ -7,7 +7,7 @@ import { useLocation } from "preact-iso";
 import type { ChildPermission, ChildPermissions, NotificationTopic, PersonRef } from "../../shared/types";
 import { childPermissionLabels, notificationTopicLabels } from "../../shared/types";
 import { api, ApiError, errorMessage } from "../api";
-import { personName, stamp } from "../format";
+import { personName, stamp, joinNames } from "../format";
 import { AvatarEditor, PersonAvatar } from "../avatar";
 import { EmailCodeForm, isEmail } from "../email";
 import { Icon } from "../icons";
@@ -23,11 +23,6 @@ const roleLabels = (): Record<string, string> => ({
   coach: t({ message: "Coach", context: "role" }),
   helper: t({ message: "Stand-in", context: "role" }),
 });
-
-/** "A and B and C" */
-function joinAnd(names: string[]): string {
-  return names.length ? names.reduce((first, next) => t`${first} and ${next}`) : "";
-}
 
 function urlBase64ToUint8Array(base64: string): Uint8Array<ArrayBuffer> {
   const padding = "=".repeat((4 - (base64.length % 4)) % 4);
@@ -230,7 +225,7 @@ export function ProfilePage() {
   const { route } = useLocation();
   const [nameOpen, setNameOpen] = useState(false);
   const roles = roleLabels();
-  const children = joinAnd(me.children.map((c) => c.firstName));
+  const children = joinNames(me.children.map((c) => c.firstName));
   return (
     <main class="page">
       <header class="hero hero-avatar">
@@ -593,20 +588,20 @@ interface DutyPrefs {
   smsAvailable?: boolean;
 }
 
-/** Helper plan "What I can do": the helper plan only offers duties that need prior knowledge after consent. */
+/** Helper plan "I can do this": the helper plan only offers duties that need prior knowledge after consent. */
 function SkillSwitches() {
   const { data, mutate } = useQuery<DutyPrefs>("/profile/duty-prefs");
   if (!data?.skills.length) return null;
   // Timekeeper and scorer are the same qualification: one switch, internally two consents
   const table = data.skills.filter((sk) => ["timekeeper", "scorer", "zeitnehmer", "sekretaer"].includes(sk.code ?? ""));
   const rows = [
-    ...(table.length ? [{ label: joinAnd(table.map((sk) => sk.name)), items: table }] : []),
+    ...(table.length ? [{ label: joinNames(table.map((sk) => sk.name)), items: table }] : []),
     ...data.skills.filter((sk) => !table.includes(sk)).map((sk) => ({ label: sk.name, items: [sk] })),
   ];
   return (
-    <section class="stack-sm" aria-label={t`What I can do`}>
+    <section class="stack-sm" aria-label={t`I can do this`}>
       <h2 class="section-title">
-        <Trans>What I can do</Trans>
+        <Trans>I can do this</Trans>
       </h2>
       <ul class="list">
         {rows.map((row) => (

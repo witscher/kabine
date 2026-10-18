@@ -14,6 +14,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "e2e": "playwright test",
+    "screenshots": "KABINE_SHOTS_LOCALE=de playwright test -c playwright.screenshots.config.ts && KABINE_SHOTS_LOCALE=en playwright test -c playwright.screenshots.config.ts",
     "check": "npm run typecheck && npm run test",
     "cf-typegen": "wrangler types --strict-vars=false worker/worker-configuration.d.ts",
     "db:migrate:local": "wrangler d1 migrations apply DB --local",
@@ -67,5 +68,24 @@
     "esbuild@0.28.1": true
   },
   "license": "AGPL-3.0-only",
-  "description": "Team app for sports clubs: events, attendance, squads, chat, push, helper duties. One installation per club on Cloudflare."
+  "description": "Team app for sports clubs: events, attendance, squads, chat, push, helper duties. One installation per club on Cloudflare.",
+  "cloudflare": {
+    "bindings": {
+      "ADMIN_BOOTSTRAP_TOKEN": {
+        "description": "A password you choose (at least 16 characters). The first admin opens https://<address of the app>/einrichtung#<this password> once."
+      },
+      "DB": {
+        "description": "The club's data (D1 database)."
+      },
+      "KV": {
+        "description": "Club logo, the maintenance switch and short-lived counters."
+      },
+      "PUSH_QUEUE": {
+        "description": "Queue for push notifications."
+      },
+      "EMAIL": {
+        "description": "Optional: Cloudflare Email Sending. Alternatively enter the club's SMTP server in the setup wizard."
+      }
+    }
+  }
 }

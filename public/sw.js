@@ -1,16 +1,16 @@
 // Service worker of Kabine: App offline nutzbar, Web Push.
 //
 // Offline: Die App-Dateien liegen vorab im Cache (Liste aus /version.json).
-// Daten der API holt der Service Worker immer zuerst aus dem Netz und merkt
-// sich die letzte Antwort. Ohne Netz liefert er diese mit dem Kennzeichen
-// x-kabine-offline aus, die App zeigt dann "Du bist gerade offline".
+// API data always comes from the network first; the service worker keeps the
+// last answer. Without network it serves that one with the header
+// x-kabine-offline, and the app shows "You are offline".
 const CACHE = "kabine-shell-v1";
 const API_CACHE = "kabine-api";
 const SHELL = ["/", "/icons/icon-192.png"];
-/** So lange warten wir auf das Netz, bevor der gespeicherte Stand kommt. */
+/** How long to wait for the network before the stored answer is used. */
 const NETWORK_TIMEOUT_MS = 6000;
 
-// Nie aus dem Cache: Anmeldung, Einladungen, Export und die Verbindungsprüfung
+// Never from the cache: sign-in, invitations, export and the connection check
 const API_NO_CACHE = [/^\/api\/auth\//, /^\/api\/join/, /^\/api\/email/, /^\/api\/admin\/export/, /^\/api\/health$/, /^\/api\/client-errors/];
 
 self.addEventListener("install", (event) => {
@@ -30,7 +30,7 @@ function isHtml(res) {
   return (res.headers.get("content-type") || "").includes("text/html");
 }
 
-/** Netz mit Zeitlimit. Die Antwort wird auch nach Ablauf noch gespeichert. */
+/** Network with a time limit. The answer is still stored after the limit. */
 function fetchWithTimeout(req, onResponse) {
   const network = fetch(req).then((res) => {
     onResponse(res.clone());
@@ -50,7 +50,7 @@ async function apiNetworkFirst(req) {
   const cache = await caches.open(API_CACHE);
   const { network, raced } = fetchWithTimeout(req, (res) => {
     if (res.ok) void cache.put(req, res);
-    // Abgemeldet: gespeicherte Daten dieses Geräts verwerfen
+    // Signed out: discard the data stored on this device
     else if (res.status === 401) void caches.delete(API_CACHE);
   });
   const res = await raced;
@@ -82,7 +82,7 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Gebaute Dateien haben einen Hash im Namen: aus dem Cache, sonst laden und merken.
+  // Built files have a hash in their name: from the cache, else load and keep.
   if (url.pathname.startsWith("/assets/") || url.pathname.startsWith("/icons/")) {
     event.respondWith(
       // ignoreVary: Vorab gespeicherte Dateien kamen ohne Origin-Header, Modul-Anfragen haben einen
@@ -90,8 +90,8 @@ self.addEventListener("fetch", (event) => {
         (hit) =>
           hit ||
           fetch(req).then((res) => {
-            // Eine Datei der alten Version gibt es nach einem Deployment nicht mehr.
-            // Statt der App-Seite (Fallback) ehrlich 404 liefern und nichts merken.
+            // A file of the old version no longer exists after a deployment.
+            // Answer an honest 404 instead of the app page (fallback), and keep nothing.
             if (isHtml(res)) return new Response(null, { status: 404 });
             if (res.ok) {
               const copy = res.clone();
@@ -104,14 +104,14 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Seiten: Netz zuerst, offline die zuletzt gespeicherte App-Hülle.
+  // Pages: network first, offline the last stored app shell.
   if (req.mode === "navigate") event.respondWith(shellNetworkFirst(req));
 });
 
 /**
- * Alle Dateien der aktuellen Version vorab speichern, damit auch noch nie
- * geöffnete Seiten offline gehen, und Dateien alter Versionen entfernen.
- * Nur auf Anstoß einer Seite, die selbst die aktuelle Version ist.
+ * Stores all files of the current version in advance, so that pages never
+ * opened before work offline too, and removes files of old versions.
+ * Only when asked by a page that is itself the current version.
  */
 async function precache(version) {
   const res = await fetch("/version.json", { cache: "no-store" });
@@ -125,7 +125,7 @@ async function precache(version) {
   }
   const missing = [];
   for (const href of wanted) if (!(await cache.match(href, { ignoreVary: true }))) missing.push(href);
-  // Parallel laden, fehlende (z. B. offline) beim nächsten Mal
+  // Load in parallel; missing ones (e.g. offline) next time
   await Promise.all(
     missing.map((href) =>
       fetch(href)
@@ -155,7 +155,7 @@ self.addEventListener("push", (event) => {
     data = { title: "Kabine", body: event.data ? event.data.text() : "" };
   }
   const title = data.title || "Kabine";
-  // Zahl am App-Icon: ungelesene Erwähnungen und offene Anfragen (vom Server mitgeschickt)
+  // Number on the app icon: unread mentions and open requests (sent along by the server)
   if (typeof data.badge === "number" && self.navigator.setAppBadge) {
     const badge = data.badge > 0 ? self.navigator.setAppBadge(data.badge) : self.navigator.clearAppBadge();
     event.waitUntil(badge.catch(() => {}));

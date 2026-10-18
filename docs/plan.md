@@ -58,6 +58,7 @@ Each milestone ends with typecheck, unit tests and e2e green, a commit on `main`
 - **K6 E-mail and SMS** done: Cloudflare Email Sending or the club's SMTP server with encrypted password and test mail; SMS module (seven.io) for sign-in codes and helper plan reminders, mobile number only on request and confirmed.
 - **K7 Setup wizard** done: wizard for admins (language and region, club, sport and season, modules, e-mail, first teams, privacy), first-steps card for new accounts, player list import for coaches, reachability overview in the invitations tab.
 - **K8 Staff role** done: role `staff` per team, added by coaches, sees events, names with status (no reasons) and chat, gets the team's event changes, is not a participant.
+- **K9 Release** mostly done: README in English and German with screenshots of the demo club (`npm run screenshots`), scope, privacy and youth protection; `docs/install.md`, `docs/operation.md`, `docs/privacy.md` (with data inventory and policy template, also in German), `docs/design.md`; deploy button with only the setup password as a prompt (the app generates `APP_SECRET` and the VAPID keys if they are not set); CHANGELOG. Open: demo installation on `yope.de` (needs Cloudflare access), first release tag.
 
 ## Requested for the end (also for the original club app)
 

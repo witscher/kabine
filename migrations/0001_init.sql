@@ -5,6 +5,12 @@ CREATE TABLE app_meta (
   key   TEXT PRIMARY KEY,
   value TEXT NOT NULL
 );
+-- Keys the installation generated itself when no secrets are set (worker/lib/instance-secrets.ts).
+-- Not part of the data export.
+CREATE TABLE instance_secrets (
+  key   TEXT PRIMARY KEY,
+  value TEXT NOT NULL
+);
 CREATE TABLE seasons (
   id         INTEGER PRIMARY KEY,
   name       TEXT NOT NULL UNIQUE,              -- '2026/27'
@@ -29,13 +35,13 @@ CREATE TABLE age_classes (
 CREATE TABLE persons (
   id                INTEGER PRIMARY KEY,
   first_name        TEXT NOT NULL,
-  last_name         TEXT,                       -- darf zunächst fehlen (Seed)
+  last_name         TEXT,                       -- may be missing at first
   birth_year        INTEGER CHECK (birth_year IS NULL OR birth_year BETWEEN 1900 AND 2100),
   is_active         INTEGER NOT NULL DEFAULT 1 CHECK (is_active IN (0, 1)),
   active_changed_at TEXT,
   active_changed_by INTEGER REFERENCES persons (id) ON DELETE SET NULL,
   is_admin          INTEGER NOT NULL DEFAULT 0 CHECK (is_admin IN (0, 1)),
-  admin_email       TEXT UNIQUE,                -- nur für Admins, sonst keine Kontaktdaten
+  admin_email       TEXT UNIQUE,                -- admins only, no other contact data
   is_former         INTEGER NOT NULL DEFAULT 0 CHECK (is_former IN (0, 1)),
   left_at           TEXT,
   created_at        TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
@@ -44,7 +50,7 @@ CREATE TABLE persons (
 CREATE TABLE accounts (
   id               INTEGER PRIMARY KEY,
   person_id        INTEGER NOT NULL UNIQUE REFERENCES persons (id) ON DELETE CASCADE,
-  webauthn_user_id TEXT NOT NULL UNIQUE,        -- zufälliges User-Handle (base64url)
+  webauthn_user_id TEXT NOT NULL UNIQUE,        -- random user handle (base64url)
   created_at       TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
   disabled_at      TEXT
 , email TEXT, email_verified_at TEXT, coach_mode INTEGER NOT NULL DEFAULT 0 CHECK (coach_mode IN (0, 1)), last_seen_on TEXT,
@@ -66,7 +72,7 @@ CREATE TABLE passkeys (
 CREATE TABLE sessions (
   id           TEXT PRIMARY KEY,                -- SHA-256 des Session-Tokens (hex)
   account_id   INTEGER NOT NULL REFERENCES accounts (id) ON DELETE CASCADE,
-  created_at   TEXT NOT NULL,                   -- Login-Zeitpunkt, Basis der absoluten Obergrenze
+  created_at   TEXT NOT NULL,                   -- sign-in time, base of the absolute limit
   expires_at   TEXT NOT NULL,
   extended_at  TEXT NOT NULL,
   device_label TEXT
@@ -98,7 +104,7 @@ CREATE TABLE child_permission_log (
 CREATE TABLE teams (
   id                     INTEGER PRIMARY KEY,
   name                   TEXT NOT NULL UNIQUE,  -- 'wD', 'wC1'
-  age_class_code         TEXT NOT NULL,         -- verweist auf age_classes.code der laufenden Saison
+  age_class_code         TEXT NOT NULL,         -- refers to age_classes.code of the current season
   level                  INTEGER NOT NULL DEFAULT 1 CHECK (level >= 1), -- 1 = 1. Mannschaft
   decline_hours_training INTEGER NOT NULL DEFAULT 6 CHECK (decline_hours_training BETWEEN 0 AND 168),
   decline_hours_game     INTEGER NOT NULL DEFAULT 6 CHECK (decline_hours_game BETWEEN 0 AND 168),
@@ -108,7 +114,7 @@ CREATE TABLE teams (
   h4a_team_id            INTEGER,
   h4a_imported_at        TEXT,
   h4a_import_error       TEXT,
-  h4a_claimed_at         TEXT,                  -- Abruf läuft gerade auf einem Trainergerät
+  h4a_claimed_at         TEXT,                  -- a coach's device is fetching right now
   created_at             TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
 , parents_enabled INTEGER NOT NULL DEFAULT 1 CHECK (parents_enabled IN (0, 1)), auto_squad INTEGER NOT NULL DEFAULT 0 CHECK (auto_squad IN (0, 1)), helper_plan INTEGER NOT NULL DEFAULT 0 CHECK (helper_plan IN (0, 1)), show_responses INTEGER NOT NULL DEFAULT 0 CHECK (show_responses IN (0, 1)), kind TEXT NOT NULL DEFAULT 'team' CHECK (kind IN ('team', 'group')), auto_members TEXT CHECK (auto_members IS NULL OR auto_members = 'referees'), home_template_id INTEGER REFERENCES duty_templates (id) ON DELETE SET NULL, away_template_id INTEGER REFERENCES duty_templates (id) ON DELETE SET NULL,
   gender TEXT NOT NULL DEFAULT 'x' CHECK (gender IN ('f', 'm', 'x')),
@@ -170,8 +176,8 @@ CREATE TABLE events (
   location_id        INTEGER REFERENCES locations (id) ON DELETE SET NULL,
   notes              TEXT,
   rule_id            INTEGER REFERENCES training_rules (id) ON DELETE SET NULL,
-  rule_date          TEXT,                      -- ursprüngliches Datum aus der Regel
-  is_detached        INTEGER NOT NULL DEFAULT 0 CHECK (is_detached IN (0, 1)), -- manuell geändert
+  rule_date          TEXT,                      -- original date from the rule
+  is_detached        INTEGER NOT NULL DEFAULT 0 CHECK (is_detached IN (0, 1)), -- changed by hand
   club_wide          INTEGER NOT NULL DEFAULT 0 CHECK (club_wide IN (0, 1)),
   decline_hours      INTEGER CHECK (decline_hours IS NULL OR decline_hours BETWEEN 0 AND 168),
   cancelled_at       TEXT,
@@ -186,7 +192,7 @@ CREATE TABLE events (
   is_home            INTEGER CHECK (is_home IS NULL OR is_home IN (0, 1)),
   home_goals         INTEGER,
   guest_goals        INTEGER,
-  -- Manuelle Ergänzungen der Trainer, vom Import nie überschrieben
+  -- Additions by the coaches, never overwritten by the import
   meeting_point      TEXT,
   meeting_time       TEXT,                      -- 'HH:MM'
   coach_notes        TEXT,
@@ -379,8 +385,8 @@ CREATE TABLE attendance (
   person_id INTEGER NOT NULL REFERENCES persons (id) ON DELETE CASCADE,
   team_id   INTEGER REFERENCES teams (id) ON DELETE SET NULL,
   kind      TEXT NOT NULL CHECK (kind IN ('training', 'game', 'special')),
-  -- present: zugesagt (auch stillschweigend) und nicht als unentschuldigt markiert
-  -- open: keine Rückmeldung (z. B. Aushilfe ohne Antwort)
+  -- present: accepted (also implicitly) and not marked absent without excuse
+  -- open: no response (e.g. stand-in without answer)
   status    TEXT NOT NULL CHECK (status IN ('present', 'open', 'declined', 'standing', 'inactive', 'unexcused')),
   is_helper INTEGER NOT NULL DEFAULT 0 CHECK (is_helper IN (0, 1)),
   recorded_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')), is_late INTEGER NOT NULL DEFAULT 0 CHECK (is_late IN (0, 1)),
@@ -474,7 +480,7 @@ CREATE TABLE club_members (
 CREATE TABLE carpool_offers (
   id         INTEGER PRIMARY KEY AUTOINCREMENT,
   event_id   INTEGER NOT NULL REFERENCES events (id) ON DELETE CASCADE,
-  -- Fahrer: immer eine angelegte Person, auch ohne Zugang (Trainer trägt ein)
+  -- Driver: always a person in the app, also without access (a coach enters them)
   person_id  INTEGER NOT NULL REFERENCES persons (id) ON DELETE CASCADE,
   seats      INTEGER NOT NULL CHECK (seats BETWEEN 1 AND 8),
   created_by INTEGER REFERENCES persons (id) ON DELETE SET NULL,

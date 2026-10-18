@@ -3,7 +3,7 @@ import { Trans } from "@lingui/react/macro";
 import { useLocation } from "preact-iso";
 import { useEffect, useLayoutEffect, useRef, useState } from "preact/hooks";
 import { api } from "../api";
-import { ago, clock, dayLabel, isoToLocalDate } from "../format";
+import { ago, clock, dayLabel, isoToLocalDate, joinNames } from "../format";
 import { PersonAvatar } from "../avatar";
 import { refreshBadge } from "../badge";
 import { loadOffline, saveOffline } from "../offline";
@@ -63,11 +63,6 @@ const reactionOptions = (): { emoji: string; label: string }[] => [
   { emoji: "😢", label: t`Sad` },
   { emoji: "👋", label: t`Waving` },
 ];
-
-/** "A and B and C" */
-function joinAnd(names: string[]): string {
-  return names.length ? names.reduce((first, next) => t`${first} and ${next}`) : "";
-}
 
 interface Mentionable {
   personId: number;
@@ -151,7 +146,7 @@ export function ChatListPage() {
           <ul class="list">
             {rooms.map((r) => {
               const teamName = r.teamName;
-              const children = joinAnd(r.viaChildren);
+              const children = joinNames(r.viaChildren);
               const when = ago(r.lastMessageAt);
               return (
               <li>
@@ -540,7 +535,7 @@ export function ChatRoomPage({ teamId }: { teamId: string }) {
     setCaret(pos);
   };
 
-  const parentOf = joinAnd(room.viaChildren);
+  const parentOf = joinNames(room.viaChildren);
   const selAuthor = selected?.authorName ?? "";
   const excerpt = (selected?.text ?? "").slice(0, 120);
   let lastDay = "";

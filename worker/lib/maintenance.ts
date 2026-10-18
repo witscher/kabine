@@ -1,6 +1,6 @@
 // Maintenance mode: only admins get into the app, cron runs pause. The switch lives in KV
 // (independent of the database, so it also applies during migrations) and is set with
-// `npm run maintenance:on` / `maintenance:off`. See docs/deployment.md, Wartungsmodus.
+// `npm run maintenance:on` / `maintenance:off`. See docs/operation.md, Maintenance mode.
 
 export const MAINTENANCE_KEY = "maintenance";
 

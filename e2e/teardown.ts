@@ -1,5 +1,5 @@
-// Stellt nach dem Lauf den Deploy-Verweis von vor dem E2E-Build wieder her,
-// damit `wrangler deploy` nie den E2E-Build mit seinen Test-Secrets erwischt.
+// After the run, restores the deploy pointer from before the E2E build, so that
+// `wrangler deploy` never picks up the E2E build with its test secrets.
 import { existsSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { DEPLOY_REDIRECT, DEPLOY_REDIRECT_BACKUP, isE2eRedirect } from "./deploy-redirect.mjs";
 

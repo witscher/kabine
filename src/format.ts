@@ -42,6 +42,19 @@ export function shortDate(local: string): string {
   return shortDateIn(currentLocale(), local);
 }
 
+/** de "02.10.", en "2 Oct" */
+export function dayMonth(local: string): string {
+  const { y, m, d } = dateParts(local);
+  return format(intlTag(currentLocale()), { day: currentLocale() === "de" ? "2-digit" : "numeric", month: currentLocale() === "de" ? "2-digit" : "short", timeZone: "UTC" })
+    .format(new Date(Date.UTC(y, m - 1, d)))
+    .replace(/(\d{2})\.(\d{2})$/, "$1.$2.");
+}
+
+/** "Kim, Alex and Jo" in the app's language. */
+export function joinNames(names: string[]): string {
+  return new Intl.ListFormat(intlTag(currentLocale()), { type: "conjunction" }).format(names);
+}
+
 /** de "02.10.2026", en "2 Oct 2026" */
 export function fullDate(dateOrLocal: string): string {
   return fullDateIn(currentLocale(), dateOrLocal);

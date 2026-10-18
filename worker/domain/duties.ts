@@ -1,7 +1,7 @@
 // Helper plan: duty types, templates and time blocks per event. A duty type defines
 // who helps (parents, players, coaches, KiHaSL/JuHaSL role) and whether it is an on-site
 // duty or a task. Games get their blocks from the team's template, special events by hand.
-// See docs/entscheidungen.md, section Helferdienste.
+// See docs/design.md, Helper duties.
 import { t } from "@lingui/core/macro";
 import type { Actor } from "../auth/actor";
 import { isCoachOf, isCoachOfAny } from "../auth/actor";

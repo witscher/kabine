@@ -214,7 +214,7 @@ const parents = (): Faq[] => [
         <Trans>
           In the <em>Helpers</em> tab, tap <em>Sign up</em> on the duty. Every duty has a time; tasks like washing jerseys you do before or after the event.
           Duties that need prior knowledge, such as timekeeper and secretary, are only offered to you if you switch them on under{" "}
-          <em>Profile → What I can do</em>. You can subscribe to your duties in your calendar under <em>Profile → My events</em>.
+          <em>Profile → I can do this</em>. You can subscribe to your duties in your calendar under <em>Profile → My events</em>.
         </Trans>
       </p>
     ),

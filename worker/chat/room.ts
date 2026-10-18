@@ -2,6 +2,7 @@ import { t } from "@lingui/core/macro";
 import { DurableObject } from "cloudflare:workers";
 import { intlTag } from "../../shared/dates";
 import { enterClubContext } from "../domain/club";
+import { ensureInstanceSecrets } from "../lib/instance-secrets";
 import { enqueuePush, notifyPersons } from "../domain/notify";
 import { currentLocale, withLocale } from "../i18n";
 import { all, run } from "../lib/db";
@@ -164,7 +165,7 @@ export class ChatRoom extends DurableObject<Env> {
 
   /**
    * Who can be mentioned with @. Teams: whoever has written already, and the coaches
-   * (protection of the children). Groups: all members and leads (docs/entscheidungen.md, Gruppen).
+   * (protection of the children). Groups: all members and leads (docs/design.md, Groups).
    */
   private async mentionable(): Promise<Mentionable[]> {
     const local = this.sql
@@ -424,6 +425,7 @@ export class ChatRoom extends DurableObject<Env> {
   private async notifyMentions(teamId: number, messageId: number, message: MessageRow, mentions: number[]) {
     try {
       // Outside a request: the club's language for recipients without their own setting
+      await ensureInstanceSecrets(this.env);
       await enterClubContext(this.env.DB);
       const all_ = mentions.includes(ALL);
       const persons = mentions.filter((id) => id !== ALL);
@@ -607,7 +609,8 @@ export class ChatRoom extends DurableObject<Env> {
     const teamId = this.teamId();
     if (!teamId) return;
     // Outside a request: the club's language for recipients without their own setting
-    await enterClubContext(this.env.DB);
+    await ensureInstanceSecrets(this.env);
+      await enterClubContext(this.env.DB);
     const pushedUpTo = Number(this.sql.exec<{ value: string }>("SELECT value FROM meta WHERE key = 'pushed_upto'").toArray()[0]?.value ?? 0);
     const fresh = this.sql
       .exec<MessageRow>(

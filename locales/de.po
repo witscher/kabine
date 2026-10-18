@@ -572,10 +572,6 @@ msgstr "Die Schulferien der Region des Vereins ersetzen beim Wechsel alle bisher
 msgid "The link signs out the previous devices, for example after losing a device."
 msgstr "Der Link meldet die bisherigen Geräte ab, zum Beispiel nach einem Geräteverlust."
 
-#: src/pages/privacy.tsx
-msgid "Feedback via “Help and feedback” goes by e-mail to the app's maintainer and is not stored in the app."
-msgstr "Rückmeldungen über „Hilfe und Feedback“ gehen per Mail an den Betreuer der App und werden in der App nicht gespeichert."
-
 # ai
 #: src/pages/setup-wizard.tsx
 msgid "Link your club's privacy policy and legal notice, and name a contact for questions about the app."
@@ -1063,11 +1059,6 @@ msgstr "Aufgabe · davor"
 #: src/pages/admin.tsx
 msgid "The association sets the birth years per season. Please check them against the competition rules. “Rank” orders the classes from young to old and determines which is the next higher youth class."
 msgstr "Die Jahrgänge legt der Verband pro Saison fest. Bitte mit den Durchführungsbestimmungen abgleichen. „Rang“ ordnet die Klassen von jung nach alt und bestimmt, welches die nächsthöhere Jugend ist."
-
-#: src/pages/profile.tsx
-#: src/pages/profile.tsx
-msgid "What I can do"
-msgstr "Das kann ich"
 
 #: worker/routes/plans.ts
 msgid "You can only add or remove other teams if you coach them too."
@@ -3352,10 +3343,6 @@ msgstr "Schon einen Elternzugang?"
 msgid "Hide in helper plan"
 msgstr "Im Helferplan ausblenden"
 
-#: src/faq.tsx
-msgid "In the <0>Helpers</0> tab, tap <1>Sign up</1> on the duty. Every duty has a time; tasks like washing jerseys you do before or after the event. Duties that need prior knowledge, such as timekeeper and secretary, are only offered to you if you switch them on under <2>Profile → What I can do</2>. You can subscribe to your duties in your calendar under <3>Profile → My events</3>."
-msgstr "Im Reiter <0>Helfer</0> beim Dienst auf <1>Eintragen</1> tippen. Jeder Dienst hat eine Uhrzeit, Aufgaben wie Trikots waschen erledigst du vor oder nach dem Termin. Dienste mit Vorkenntnissen, etwa Zeitnehmer und Sekretär, bietet dir die App nur an, wenn du sie unter <2>Profil → Das kann ich</2> einschaltest. Deine Dienste kannst du unter <3>Profil → Meine Termine</3> im Kalender abonnieren."
-
 #: src/pages/team.tsx
 msgid "{firstName} does not have their own access yet."
 msgstr "{firstName} hat noch keinen eigenen Zugang."
@@ -3611,6 +3598,10 @@ msgstr "Das ist kein Elternlink."
 #: worker/domain/duty-notify.ts
 msgid "{club} helper plan"
 msgstr "{club} Helferplan"
+
+#: src/faq.tsx
+msgid "In the <0>Helpers</0> tab, tap <1>Sign up</1> on the duty. Every duty has a time; tasks like washing jerseys you do before or after the event. Duties that need prior knowledge, such as timekeeper and secretary, are only offered to you if you switch them on under <2>Profile → I can do this</2>. You can subscribe to your duties in your calendar under <3>Profile → My events</3>."
+msgstr "Im Reiter <0>Helfer</0> beim Dienst auf <1>Eintragen</1> tippen. Jeder Dienst hat eine Uhrzeit, Aufgaben wie Trikots waschen erledigst du vor oder nach dem Termin. Dienste mit Vorkenntnissen, etwa Zeitnehmer und Sekretär, bietet dir die App nur an, wenn du sie unter <2>Profil → Das kann ich</2> einschaltest. Deine Dienste kannst du unter <3>Profil → Meine Termine</3> im Kalender abonnieren."
 
 #: src/pages/team.tsx
 msgid "The players sign up for duties at games themselves (\"Helpers\" tab)."
@@ -4274,6 +4265,11 @@ msgstr "Entziehen"
 #: src/pages/chat.tsx
 msgid "Team chat"
 msgstr "Mannschaftschat"
+
+#: src/pages/profile.tsx
+#: src/pages/profile.tsx
+msgid "I can do this"
+msgstr "Das kann ich"
 
 #: src/duty-blocks.tsx
 msgid "Name of the special duty"
@@ -4939,6 +4935,11 @@ msgstr "Deine Rückmeldung"
 msgid "Helpers only exist for events of teams."
 msgstr "Helfer gibt es nur bei Terminen von Mannschaften."
 
+# ai
+#: src/pages/privacy.tsx
+msgid "For carpools to away games, the nominated players and their parents see drivers and those looking for a seat as “First name L.”."
+msgstr "Bei Fahrgemeinschaften zu Auswärtsspielen sehen die Nominierten und ihre Eltern Fahrer und Suchende als „Vorname N.“."
+
 #: src/pages/season.tsx
 msgctxt "date"
 msgid "Start"
@@ -5573,6 +5574,11 @@ msgstr "Spielpläne: handball4all. Der Abruf erfolgt nur vom Gerät eines Traine
 #: src/pages/admin.tsx
 msgid "Group"
 msgstr "Gruppe"
+
+# ai
+#: src/pages/privacy.tsx
+msgid "A mobile number is only stored if you enter it yourself, for sign-in codes and reminders by text message. Nobody else sees it. You can delete it in your profile at any time. The messages are sent through a text message provider the club has chosen."
+msgstr "Eine Handynummer wird nur gespeichert, wenn du sie selbst einträgst, für Anmeldecodes und Erinnerungen per SMS. Niemand sonst sieht sie. Du kannst sie jederzeit im Profil löschen. Die SMS laufen über einen Anbieter, den der Verein gewählt hat."
 
 #: src/pages/games.tsx
 msgid "Sync now"
@@ -7241,11 +7247,6 @@ msgstr "Diesen Plan gibt es nicht."
 msgid "Test mail from Kabine"
 msgstr "Testmail von Kabine"
 
-#: src/pages/chat.tsx
-#: src/pages/profile.tsx
-msgid "{first} and {next}"
-msgstr "{first} und {next}"
-
 #: src/howto.tsx
 msgid "News"
 msgstr "Neuigkeit"
@@ -7305,6 +7306,11 @@ msgstr "Neuer Anwurf: {date}, {time} Uhr, {location}."
 #: src/pages/join.tsx
 msgid "already linked to you"
 msgstr "bereits mit dir verknüpft"
+
+# ai
+#: src/pages/privacy.tsx
+msgid "Team staff such as a physio or team manager see who accepted or declined, without reasons. If a team switches on “responses visible to everyone”, its players and parents see the same for trainings and special events."
+msgstr "Betreuer wie Physio oder Teammanager sehen, wer zu- oder abgesagt hat, ohne Gründe. Schaltet eine Mannschaft „Zu- und Absagen für alle sichtbar“ ein, sehen ihre Spieler und Eltern dasselbe bei Training und Sonderterminen."
 
 #: src/carpool.tsx
 msgid "{drivers, plural, one {# driver · {freeSeats} free} other {# drivers · {freeSeats} free}}"
@@ -7748,11 +7754,6 @@ msgstr "Du bist jetzt mit {names} verknüpft und siehst alle Termine der {teamNa
 #: src/pages/admin.tsx
 msgid "yesterday"
 msgstr "gestern"
-
-#: src/pages/home.tsx
-#: src/pages/join.tsx
-msgid "{list} and {name}"
-msgstr "{list} und {name}"
 
 #: src/carpool.tsx
 msgid "Delete ride request for {name}"
@@ -9628,6 +9629,11 @@ msgstr "{when}. Bitte gib Bescheid, ob du dabei bist."
 msgid "End"
 msgstr "Beenden"
 
+# ai
+#: src/pages/privacy.tsx
+msgid "Of players and parents only first name, last name and (for players) the year of birth. No address. Admins can additionally be identified by their e-mail address."
+msgstr "Von Spielern und Eltern nur Vorname, Nachname und (bei Spielern) der Jahrgang. Keine Adresse. Admins sind zusätzlich über ihre E-Mail-Adresse erkennbar."
+
 #: src/pages/club-settings.tsx
 msgid "Contact for the app (optional)"
 msgstr "Ansprechpartner für die App (optional)"
@@ -9680,6 +9686,11 @@ msgstr "Noch keine Dienste."
 #: src/pages/special.tsx
 msgid "Time slot"
 msgstr "Zeitblock"
+
+# ai
+#: src/pages/privacy.tsx
+msgid "Feedback via “Help and feedback” goes by e-mail to the people who run the app for the club and is not stored in the app."
+msgstr "Feedback über „Hilfe und Feedback“ geht per E-Mail an die Leute, die die App für den Verein betreuen, und wird nicht in der App gespeichert."
 
 #: src/pages/admin.tsx
 msgid "Activity"

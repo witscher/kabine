@@ -5,7 +5,7 @@ import { useLocation } from "preact-iso";
 import { useEffect, useState } from "preact/hooks";
 import { api, errorMessage } from "../api";
 import { EmailCodeForm, isEmail, startEmailLogin } from "../email";
-import { fullDate, isoToLocalDate } from "../format";
+import { fullDate, isoToLocalDate, joinNames } from "../format";
 import { Icon } from "../icons";
 import { isIosOtherBrowser, loginWithPasskey, passkeyErrorMessage, passkeysSupported, prepareLogin, prepareRegistration, registerPasskey, useSession } from "../session";
 import { clearCache } from "../store";
@@ -27,11 +27,6 @@ type JoinInfo =
       person: { name: string; hasAccount: boolean; isAdmin: boolean };
       revokeExisting: boolean;
     };
-
-/** "A and B and C": names as one list, in the app's language. */
-function joinAnd(names: string[]): string {
-  return names.reduce((list, name) => (list ? t`${list} and ${name}` : name), "");
-}
 
 function tokenFromHash(): string {
   return decodeURIComponent(location.hash.replace(/^#/, "")).trim();
@@ -256,7 +251,7 @@ export function JoinPage() {
     setFormError(null);
     if (isParent && me) {
       await api.post("/join/link-children", { token, childIds: selected });
-      const names = joinAnd(chosen.map((c) => c.name));
+      const names = joinNames(chosen.map((c) => c.name));
       const count = chosen.length;
       await finish(plural(count, { one: `${names} is now linked to your access.`, other: `${names} are now linked to your access.` }));
       return;
@@ -285,7 +280,7 @@ export function JoinPage() {
   };
 
   const finishTeamJoin = () => {
-    const names = joinAnd(chosen.map((c) => c.name.split(" ")[0]!));
+    const names = joinNames(chosen.map((c) => c.name.split(" ")[0]!));
     return finish(
       isParent
         ? t`You are now linked to ${names} and see all events of the ${teamName}.`

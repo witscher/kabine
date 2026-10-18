@@ -1,5 +1,6 @@
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
+import { moduleOn } from "../../shared/club";
 import { useClub } from "../club";
 import { useSession } from "../session";
 import { TopBar, useDocumentTitle } from "../ui";
@@ -10,6 +11,7 @@ export function PrivacyPage() {
   const club = useClub();
   const clubName = club.name;
   const host = club.privacyUrl ? new URL(club.privacyUrl).host : "";
+  const on = (m: Parameters<typeof moduleOn>[1]) => moduleOn(club.modules, m);
   return (
     <main class={`page ${me ? "" : "no-tabs"}`}>
       <TopBar title={t`Privacy and sources`} back={me ? "/profil" : "/"} />
@@ -36,11 +38,26 @@ export function PrivacyPage() {
             <Trans>What data does the app store?</Trans>
           </h2>
           <p>
-            <Trans>
-              Of players and parents only first name, last name and (for players) the year of birth. No phone number, no address. Admins can additionally be
-              identified by their e-mail address.
-            </Trans>
+            {on("sms") ? (
+              <Trans>
+                Of players and parents only first name, last name and (for players) the year of birth. No address. Admins can additionally be identified by their
+                e-mail address.
+              </Trans>
+            ) : (
+              <Trans>
+                Of players and parents only first name, last name and (for players) the year of birth. No phone number, no address. Admins can additionally be
+                identified by their e-mail address.
+              </Trans>
+            )}
           </p>
+          {on("sms") ? (
+            <p>
+              <Trans>
+                A mobile number is only stored if you enter it yourself, for sign-in codes and reminders by text message. Nobody else sees it. You can delete it in
+                your profile at any time. The messages are sent through a text message provider the club has chosen.
+              </Trans>
+            </p>
+          ) : null}
           <p>
             <Trans>
               The e-mail address on your access is used for signing in. Helper plan reminders only come by e-mail if you switch this on in your profile. With
@@ -67,12 +84,25 @@ export function PrivacyPage() {
           </p>
           <p>
             <Trans>
-              In the helper plan, the helpers of a team see who takes on which duty, as “First name L.”. The personal calendar link only contains your own duties
-              and those of your children.
+              Team staff such as a physio or team manager see who accepted or declined, without reasons. If a team switches on “responses visible to everyone”,
+              its players and parents see the same for trainings and special events.
             </Trans>
           </p>
+          {on("duties") ? (
+            <p>
+              <Trans>
+                In the helper plan, the helpers of a team see who takes on which duty, as “First name L.”. The personal calendar link only contains your own duties
+                and those of your children.
+              </Trans>
+            </p>
+          ) : null}
+          {on("carpools") ? (
+            <p>
+              <Trans>For carpools to away games, the nominated players and their parents see drivers and those looking for a seat as “First name L.”.</Trans>
+            </p>
+          ) : null}
           <p>
-            <Trans>Feedback via “Help and feedback” goes by e-mail to the app's maintainer and is not stored in the app.</Trans>
+            <Trans>Feedback via “Help and feedback” goes by e-mail to the people who run the app for the club and is not stored in the app.</Trans>
           </p>
           <p>
             <Trans>For each access the app stores the day of last use, without time. Only admins see it, so they can spot unused accesses.</Trans>
@@ -91,9 +121,11 @@ export function PrivacyPage() {
               <a href="https://opendatacommons.org/licenses/odbl/">Open Database License (ODbL)</a>.
             </Trans>
           </p>
-          <p>
-            <Trans>Game schedules: handball4all. They are only fetched from the device of a coach or admin.</Trans>
-          </p>
+          {on("handball4all") ? (
+            <p>
+              <Trans>Game schedules: handball4all. They are only fetched from the device of a coach or admin.</Trans>
+            </p>
+          ) : null}
           <p>
             <Trans>
               Helper plan icon: <a href="https://lucide.dev">Lucide</a> (ISC licence).

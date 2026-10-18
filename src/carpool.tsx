@@ -1,5 +1,5 @@
 // Carpools for away games: card in the event detail view.
-// Rules in the worker (worker/domain/carpool.ts), decisions in docs/entscheidungen.md.
+// Rules in the worker (worker/domain/carpool.ts), decisions in docs/design.md, Carpools.
 import { plural, t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { useState } from "preact/hooks";

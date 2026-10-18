@@ -6,6 +6,7 @@ import { clearedSessionCookie, extendSessionIfDue, findSession, readSessionToken
 import { maintenanceAllowed, maintenanceState } from "./lib/maintenance";
 import { ApiError, forbidden, unauthorized } from "./lib/http";
 import { enterClubContext, isModuleOn } from "./domain/club";
+import { ensureInstanceSecrets } from "./lib/instance-secrets";
 import { moduleOfPath } from "./lib/modules";
 import { currentLocale, withLocale } from "./i18n";
 import { isLocale } from "../shared/i18n";
@@ -45,6 +46,7 @@ export function createBaseApp(): Hono<AppEnv> {
   app.notFound((c) => c.json({ error: { code: "not_found", message: t`Unknown endpoint.` } }, 404));
 
   app.use("/api/*", async (c, next) => {
+    await ensureInstanceSecrets(c.env);
     const club = await enterClubContext(c.env.DB);
     // Language: the account's, else the app's (header), else the club's
     const asked = c.req.header("x-kabine-locale");

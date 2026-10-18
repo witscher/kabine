@@ -560,10 +560,6 @@ msgstr "The school holidays of the club's region replace all previous holiday pe
 msgid "The link signs out the previous devices, for example after losing a device."
 msgstr "The link signs out the previous devices, for example after losing a device."
 
-#: src/pages/privacy.tsx
-msgid "Feedback via “Help and feedback” goes by e-mail to the app's maintainer and is not stored in the app."
-msgstr "Feedback via “Help and feedback” goes by e-mail to the app's maintainer and is not stored in the app."
-
 #: src/pages/setup-wizard.tsx
 msgid "Link your club's privacy policy and legal notice, and name a contact for questions about the app."
 msgstr "Link your club's privacy policy and legal notice, and name a contact for questions about the app."
@@ -1044,11 +1040,6 @@ msgstr "Task · before"
 #: src/pages/admin.tsx
 msgid "The association sets the birth years per season. Please check them against the competition rules. “Rank” orders the classes from young to old and determines which is the next higher youth class."
 msgstr "The association sets the birth years per season. Please check them against the competition rules. “Rank” orders the classes from young to old and determines which is the next higher youth class."
-
-#: src/pages/profile.tsx
-#: src/pages/profile.tsx
-msgid "What I can do"
-msgstr "What I can do"
 
 #: worker/routes/plans.ts
 msgid "You can only add or remove other teams if you coach them too."
@@ -3290,10 +3281,6 @@ msgstr "Already have a parent access?"
 msgid "Hide in helper plan"
 msgstr "Hide in helper plan"
 
-#: src/faq.tsx
-msgid "In the <0>Helpers</0> tab, tap <1>Sign up</1> on the duty. Every duty has a time; tasks like washing jerseys you do before or after the event. Duties that need prior knowledge, such as timekeeper and secretary, are only offered to you if you switch them on under <2>Profile → What I can do</2>. You can subscribe to your duties in your calendar under <3>Profile → My events</3>."
-msgstr "In the <0>Helpers</0> tab, tap <1>Sign up</1> on the duty. Every duty has a time; tasks like washing jerseys you do before or after the event. Duties that need prior knowledge, such as timekeeper and secretary, are only offered to you if you switch them on under <2>Profile → What I can do</2>. You can subscribe to your duties in your calendar under <3>Profile → My events</3>."
-
 #: src/pages/team.tsx
 msgid "{firstName} does not have their own access yet."
 msgstr "{firstName} does not have their own access yet."
@@ -3543,6 +3530,10 @@ msgstr "This is not a parent link."
 #: worker/domain/duty-notify.ts
 msgid "{club} helper plan"
 msgstr "{club} helper plan"
+
+#: src/faq.tsx
+msgid "In the <0>Helpers</0> tab, tap <1>Sign up</1> on the duty. Every duty has a time; tasks like washing jerseys you do before or after the event. Duties that need prior knowledge, such as timekeeper and secretary, are only offered to you if you switch them on under <2>Profile → I can do this</2>. You can subscribe to your duties in your calendar under <3>Profile → My events</3>."
+msgstr "In the <0>Helpers</0> tab, tap <1>Sign up</1> on the duty. Every duty has a time; tasks like washing jerseys you do before or after the event. Duties that need prior knowledge, such as timekeeper and secretary, are only offered to you if you switch them on under <2>Profile → I can do this</2>. You can subscribe to your duties in your calendar under <3>Profile → My events</3>."
 
 #: src/pages/team.tsx
 msgid "The players sign up for duties at games themselves (\"Helpers\" tab)."
@@ -4196,6 +4187,11 @@ msgstr "Revoke"
 msgid "Team chat"
 msgstr "Team chat"
 
+#: src/pages/profile.tsx
+#: src/pages/profile.tsx
+msgid "I can do this"
+msgstr "I can do this"
+
 #: src/duty-blocks.tsx
 msgid "Name of the special duty"
 msgstr "Name of the special duty"
@@ -4847,6 +4843,10 @@ msgstr "Your response"
 msgid "Helpers only exist for events of teams."
 msgstr "Helpers only exist for events of teams."
 
+#: src/pages/privacy.tsx
+msgid "For carpools to away games, the nominated players and their parents see drivers and those looking for a seat as “First name L.”."
+msgstr "For carpools to away games, the nominated players and their parents see drivers and those looking for a seat as “First name L.”."
+
 #: src/pages/season.tsx
 msgctxt "date"
 msgid "Start"
@@ -5466,6 +5466,10 @@ msgstr "Game schedules: handball4all. They are only fetched from the device of a
 #: src/pages/admin.tsx
 msgid "Group"
 msgstr "Group"
+
+#: src/pages/privacy.tsx
+msgid "A mobile number is only stored if you enter it yourself, for sign-in codes and reminders by text message. Nobody else sees it. You can delete it in your profile at any time. The messages are sent through a text message provider the club has chosen."
+msgstr "A mobile number is only stored if you enter it yourself, for sign-in codes and reminders by text message. Nobody else sees it. You can delete it in your profile at any time. The messages are sent through a text message provider the club has chosen."
 
 #: src/pages/games.tsx
 msgid "Sync now"
@@ -7099,11 +7103,6 @@ msgstr "This plan does not exist."
 msgid "Test mail from Kabine"
 msgstr "Test mail from Kabine"
 
-#: src/pages/chat.tsx
-#: src/pages/profile.tsx
-msgid "{first} and {next}"
-msgstr "{first} and {next}"
-
 #: src/howto.tsx
 msgid "News"
 msgstr "News"
@@ -7163,6 +7162,10 @@ msgstr "New throw-off: {date}, {time}, {location}."
 #: src/pages/join.tsx
 msgid "already linked to you"
 msgstr "already linked to you"
+
+#: src/pages/privacy.tsx
+msgid "Team staff such as a physio or team manager see who accepted or declined, without reasons. If a team switches on “responses visible to everyone”, its players and parents see the same for trainings and special events."
+msgstr "Team staff such as a physio or team manager see who accepted or declined, without reasons. If a team switches on “responses visible to everyone”, its players and parents see the same for trainings and special events."
 
 #: src/carpool.tsx
 msgid "{drivers, plural, one {# driver · {freeSeats} free} other {# drivers · {freeSeats} free}}"
@@ -7601,11 +7604,6 @@ msgstr "You are now linked to {names} and see all events of the {teamName}."
 #: src/pages/admin.tsx
 msgid "yesterday"
 msgstr "yesterday"
-
-#: src/pages/home.tsx
-#: src/pages/join.tsx
-msgid "{list} and {name}"
-msgstr "{list} and {name}"
 
 #: src/carpool.tsx
 msgid "Delete ride request for {name}"
@@ -9450,6 +9448,10 @@ msgstr "{when}. Please let us know if you are coming."
 msgid "End"
 msgstr "End"
 
+#: src/pages/privacy.tsx
+msgid "Of players and parents only first name, last name and (for players) the year of birth. No address. Admins can additionally be identified by their e-mail address."
+msgstr "Of players and parents only first name, last name and (for players) the year of birth. No address. Admins can additionally be identified by their e-mail address."
+
 #: src/pages/club-settings.tsx
 msgid "Contact for the app (optional)"
 msgstr "Contact for the app (optional)"
@@ -9502,6 +9504,10 @@ msgstr "No duties yet."
 #: src/pages/special.tsx
 msgid "Time slot"
 msgstr "Time slot"
+
+#: src/pages/privacy.tsx
+msgid "Feedback via “Help and feedback” goes by e-mail to the people who run the app for the club and is not stored in the app."
+msgstr "Feedback via “Help and feedback” goes by e-mail to the people who run the app for the club and is not stored in the app."
 
 #: src/pages/admin.tsx
 msgid "Activity"

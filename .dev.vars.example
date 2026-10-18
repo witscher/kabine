@@ -1,5 +1,11 @@
-# Lokale Secrets. Erzeugen mit: npm run secrets:generate -- --dev
-APP_SECRET=
+# Secrets of an installation. The "Deploy to Cloudflare" button asks for the values listed here.
+#
+# ADMIN_BOOTSTRAP_TOKEN: a password you choose, at least 16 characters. The first admin opens
+# https://<address of the app>/einrichtung#<this value> once to set up their access.
 ADMIN_BOOTSTRAP_TOKEN=
-VAPID_PUBLIC_KEY=
-VAPID_PRIVATE_KEY=
+#
+# Optional. Without them the app creates its own keys on first start (stored in the database,
+# never in the export). Local development: npm run secrets:generate -- --dev writes .dev.vars.
+# APP_SECRET=
+# VAPID_PUBLIC_KEY=
+# VAPID_PRIVATE_KEY=

@@ -1,5 +1,4 @@
-// Erzeugt einen Satz Secrets für die App (gemeinsam genutzt von
-// generate-secrets.mjs und staging.mjs).
+// Creates a set of secrets for the app (used by generate-secrets.mjs).
 import { webcrypto as crypto } from "node:crypto";
 
 const b64url = (buf) => Buffer.from(buf).toString("base64url");

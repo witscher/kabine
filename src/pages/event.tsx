@@ -735,7 +735,7 @@ function GameInfoSheet({ event, onClose, onDone }: { event: EventDetail; onClose
   const [meetingPoint, setMeetingPoint] = useState(g.meetingPoint ?? "");
   const [meetingTime, setMeetingTime] = useState(g.meetingTime ?? "");
   const [notes, setNotes] = useState(g.coachNotes ?? "");
-  // Quick selection: the club's halls (usually Reinhold-Crocoll-Halle) and the game venue
+  // Quick selection: the club's halls and the game venue
   const halls = useLocations(false).data?.locations.filter((l) => l.kind === "hall").map((l) => l.name) ?? [];
   const pointChoices = [...new Set([...halls, ...(event.location ? [event.location.name] : [])])];
   return (

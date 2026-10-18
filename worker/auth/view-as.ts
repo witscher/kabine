@@ -1,5 +1,5 @@
 // Admins only, not linked anywhere in the app: view the app from another perspective
-// (cookie kabine_view, set via ?playerview=1, ?parentview=1, ?trainerview=1; see docs/entscheidungen.md).
+// (cookie kabine_view, set via ?playerview=1, ?parentview=1, ?trainerview=1; see docs/design.md, Admin views).
 // - player: first own child
 // - parent: oneself, without admin and coach rights
 // - referee: oneself as KiHaSL/JuHaSL, without admin and coach rights
