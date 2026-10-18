@@ -76,6 +76,8 @@ Each milestone ends with typecheck, unit tests and e2e green, a commit on `main`
 
 ## Open points
 
+- Person import from spreadsheets: (1) read .xlsx/.ods/.csv files directly in the browser without AI (exact, free); (2) optional module "AI import" with Workers AI for messy lists (one name column, dates of birth, extra columns): only first name, last name and birth year come back, everything else is dropped, always with preview. Off by default, privacy note for admins (names of minors go to a model at Cloudflare, no training on them). To be confirmed by the maintainer.
+
 - Home screen icons from the club logo: render them in the browser from logo and colours (canvas) when the logo is saved, store in KV, point the manifest to them. Until then the neutral Kabine icons are used. (K7)
 - AGPL source offer: done, the club profile has a source code link (empty: the Kabine repository), shown under Help.
 - The owner handover exists in the API (`PUT /api/admin/club/owner`), the UI follows with the wizard (K7).
