@@ -1,4 +1,4 @@
-// All modules of Kabine, one line each. `npm run new -- module <id>` adds the line.
+// All modules of Kabine. `npm run new -- module <name>` (or `connector`) adds the import and the entry.
 // Order: the order of the switches in administration. A module nested inside another module's API
 // paths must come before it (the first matching module wins).
 import carpools from "./carpools/module";
@@ -7,4 +7,11 @@ import handball4all from "./handball4all/module";
 import sms from "./sms/module";
 import youthReferees from "./youth-referees/module";
 
-export const MODULES = [youthReferees, duties, carpools, handball4all, sms] as const;
+export const MODULES = [
+  youthReferees,
+  duties,
+  carpools,
+  handball4all,
+  sms,
+  // new modules: above this line
+] as const;

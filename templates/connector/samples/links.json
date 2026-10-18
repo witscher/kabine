@@ -1,0 +1,6 @@
+[
+  {
+    "link": "https://www.__DOMAIN__/teams/999?league=555",
+    "source": { "leagueId": "555", "teamId": "999" }
+  }
+]

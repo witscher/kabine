@@ -73,7 +73,7 @@ modules/carpools/
 
 ## Adding a module
 
-1. Create `modules/<folder>/module.ts` with `defineModule({...})`, `status: "beta"`, `defaultOn: false`, and add the import to `modules/index.ts`.
+1. `npm run new -- module <folder> --label "Name" --label-de "Name"` creates the folder from `templates/module/` (manifest with `status: "beta"`, `defaultOn: false`, a route, a page, a test, a README), registers it in `modules/index.ts` and adds a row below. Connectors: `npm run new -- connector <folder> --vendor "Name" --domain example.org`.
 2. Put routes and hooks in `worker/index.ts` (`defineWorkerModule`), screens in `app/index.tsx` (`defineAppModule`). Every route path must match the manifest's `paths`; the contract test checks that and that each route answers 404 while the module is off.
 3. Check permissions on the server with the helpers in `worker/auth/actor.ts` (`requireCoach`, `isCoachOf`, `actsFor`, `requireAdmin`). Names and decline reasons only go to coaches and admins of the team.
 4. Schema changes are a new file in `migrations/` that runs safely for every club. List the module's tables in `exportTables` and clean them up in `personLeaves` (and `participantsDropped` if they hang on participants).
@@ -81,7 +81,7 @@ modules/carpools/
 6. Tests in `test/`, invented names only. `test/modules-contract.test.ts` runs for every module.
 7. A row in the table above and a `README.md` in the folder.
 
-`npm run check` and `npm run i18n:check` must pass.
+`npm run check` must pass.
 
 ## Other extension points
 

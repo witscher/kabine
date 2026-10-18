@@ -60,6 +60,8 @@ Each milestone ends with typecheck, unit tests and e2e green, a commit on `main`
 - **K8 Staff role** done: role `staff` per team, added by coaches, sees events, names with status (no reasons) and chat, gets the team's event changes, is not a participant.
 - **K9 Release** mostly done: README in English and German with screenshots of the demo club (`npm run screenshots`), scope, privacy and youth protection; `docs/install.md`, `docs/operation.md`, `docs/privacy.md` (with data inventory and policy template, also in German), `docs/design.md`; deploy button with only the setup password as a prompt (the app generates `APP_SECRET` and the VAPID keys if they are not set); CHANGELOG. Demo installation on `handball.kabine.dev` (nightly reset, auto-deploy from `main`) and project website `kabine.dev` built, see `docs/decisions.md`. Open: website deploy (needs the legal notice details), first release tag.
 
+- **Contributor structure** (October 2026): modules in their own folders with manifests, hooks and contract tests, fixture connector interface (handball4all as the first connector), generator `npm run new`, `AGENTS.md`. Carpools, handball4all, SMS, helper duties and youth referees are modules. See `docs/decisions.md`.
+
 ## Requested for the end (also for the original club app)
 
 - **Holiday plans visible:** done in Kabine (notes in the timeline, see `docs/decisions.md`). Still to port to the original club app.

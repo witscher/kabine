@@ -1,0 +1,9 @@
+{
+  "Game schedule from __VENDOR__": "Spielplan aus __VENDOR__",
+  "Coaches sync the games of their team from __VENDOR__.": "Trainer übernehmen die Spiele ihrer Mannschaft aus __VENDOR__.",
+  "Link to the team's page at {vendor}": "Link zur Seite der Mannschaft bei {vendor}",
+  "Open the team at {vendor} and paste the link from the address bar.": "Öffne die Mannschaft bei {vendor} und füge den Link aus der Adresszeile ein.",
+  "League {leagueId}, team {teamId}": "Liga {leagueId}, Mannschaft {teamId}",
+  "No game list found": "Keine Spielliste gefunden",
+  "The data belongs to another league": "Die Daten gehören zu einer anderen Liga"
+}

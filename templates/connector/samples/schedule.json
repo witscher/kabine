@@ -1,0 +1,28 @@
+{
+  "league": "555",
+  "team": "TV Heimverein",
+  "games": [
+    {
+      "id": "1001",
+      "number": "1",
+      "date": "2026-11-07",
+      "time": "14:00",
+      "home": "TV Heimverein",
+      "guest": "SG Beispielstadt",
+      "venue": { "id": "10", "name": "Sporthalle Musterstadt", "address": "Hallenweg 1, 76000 Musterstadt" },
+      "homeGoals": null,
+      "guestGoals": null
+    },
+    {
+      "id": "1002",
+      "number": "2",
+      "date": "2026-11-21",
+      "time": "16:30",
+      "home": "HSG Nachbarort",
+      "guest": "TV Heimverein",
+      "venue": { "id": "20", "name": "Gasthalle", "address": "Am Sportplatz 3, 76001 Nachbarort" },
+      "homeGoals": null,
+      "guestGoals": null
+    }
+  ]
+}
