@@ -71,7 +71,7 @@ feedbackRoutes.post("/feedback", async (c) => {
 
   // The mail goes to the app's maintainer: in the club's language, not the sender's
   const { subject, text } = withLocale(null, () => {
-    const ROLE = { player: t({ message: "Player", context: "feedback" }), coach: t({ message: "Coach", context: "feedback" }), helper: t`Stand-in` } as const;
+    const ROLE = { player: t({ message: "Player", context: "feedback" }), coach: t({ message: "Coach", context: "feedback" }), helper: t`Stand-in`, staff: t({ message: "Staff", context: "feedback" }) } as const;
     const roles = [
       ...(actor.isAdmin ? [t`Admin`] : []),
       ...actor.memberships.map((m) => `${ROLE[m.role]} ${teamNames.get(m.teamId) ?? ""}`.trim()),

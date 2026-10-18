@@ -162,7 +162,7 @@ teamRoutes.get("/teams/:id", async (c) => {
   const [members, guardians, core, invites, ac, unexcusedRows] = await Promise.all([
     all<{
       person_id: number;
-      role: "player" | "coach" | "helper";
+      role: "player" | "coach" | "helper" | "staff";
       helper_trainings: number;
       first_name: string;
       last_name: string | null;
@@ -265,6 +265,9 @@ teamRoutes.get("/teams/:id", async (c) => {
     coaches: members
       .filter((m) => m.role === "coach")
       .map((m) => ({ person: { id: m.person_id, firstName: m.first_name, lastName: m.last_name }, hasAccount: m.has_account === 1 })),
+    staff: members
+      .filter((m) => m.role === "staff")
+      .map((m) => ({ person: { id: m.person_id, firstName: m.first_name, lastName: m.last_name }, hasAccount: m.has_account === 1, hasPush: m.has_push === 1 })),
     players: players.map((m) => ({
       person: { id: m.person_id, firstName: m.first_name, lastName: m.last_name },
       birthYear: m.birth_year,
@@ -415,6 +418,28 @@ teamRoutes.post("/teams/:id/players", async (c) => {
   return c.json({ id: person!.id }, 201);
 });
 
+const staffSchema = z.object({ firstName: nameField, lastName: nameField.nullable().optional() });
+
+/**
+ * Coaches add team staff (physio, manager): a new person who sees everything of the team and gets
+ * its changes, but does not take part. Access via a personal link from the squad overview.
+ */
+teamRoutes.post("/teams/:id/staff", async (c) => {
+  const actor = requireActor(c);
+  const teamId = intParam(c, "id");
+  requireCoach(actor, teamId);
+  await requireTeam(c.env.DB, teamId);
+  const input = parse(staffSchema, await readJson(c.req.raw));
+  const person = await first<{ id: number }>(
+    c.env.DB,
+    "INSERT INTO persons (first_name, last_name) VALUES (?, ?) RETURNING id",
+    input.firstName,
+    input.lastName ?? null,
+  );
+  await run(c.env.DB, "INSERT INTO team_memberships (person_id, team_id, role) VALUES (?, ?, 'staff')", person!.id, teamId);
+  return c.json({ id: person!.id }, 201);
+});
+
 const importSchema = z.object({
   players: z.array(newPlayerSchema).min(1).max(80),
   /** false: only the preview, nothing is created */
@@ -476,14 +501,15 @@ teamRoutes.post("/teams/:id/players/import", async (c) => {
   return c.json({ rows, created });
 });
 
-const memberSchema = z.object({ personId: z.number().int().positive(), role: z.enum(["player", "coach"]) });
+const memberSchema = z.object({ personId: z.number().int().positive(), role: z.enum(["player", "coach", "staff"]) });
 
-/** Admins assign existing persons as players or coaches. */
+/** Admins assign existing persons as players, coaches or staff. */
 teamRoutes.post("/teams/:id/members", async (c) => {
   const actor = requireActor(c);
   requireAdmin(actor);
   const teamId = intParam(c, "id");
   const input = parse(memberSchema, await readJson(c.req.raw));
+  if (input.role === "staff") await requireTeam(c.env.DB, teamId);
   if ((await teamKind(c.env.DB, teamId)).autoMembers) throw badRequest(t`The members of this group are determined automatically.`, "auto_members");
   const person = await first(c.env.DB, "SELECT 1 AS ok FROM persons WHERE id = ? AND is_former = 0", input.personId);
   if (!person) throw notFound(t`This person does not exist.`);
@@ -502,7 +528,7 @@ teamRoutes.delete("/teams/:id/members/:personId", async (c) => {
   const actor = requireActor(c);
   const teamId = intParam(c, "id");
   const personId = intParam(c, "personId");
-  const { role } = parse(z.object({ role: z.enum(["player", "coach", "helper"]).default("player") }), { role: c.req.query("role") });
+  const { role } = parse(z.object({ role: z.enum(["player", "coach", "helper", "staff"]).default("player") }), { role: c.req.query("role") });
   if (role === "coach") requireAdmin(actor);
   else requireCoach(actor, teamId);
   if ((await teamKind(c.env.DB, teamId)).autoMembers) throw badRequest(t`The members of this group are determined automatically.`, "auto_members");

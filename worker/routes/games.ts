@@ -356,7 +356,7 @@ export async function importGames(
     const players = await all<{ person_id: number }>(
       db,
       `SELECT tm.person_id FROM team_memberships tm JOIN persons p ON p.id = tm.person_id
-        WHERE tm.team_id = ? AND tm.role IN ('player', 'helper') AND p.is_active = 1 AND p.is_former = 0`,
+        WHERE tm.team_id = ? AND tm.role IN ('player', 'helper', 'staff') AND p.is_active = 1 AND p.is_former = 0`,
       team.id,
     );
     for (const m of movedEvents) {

@@ -54,6 +54,10 @@ Each milestone ends with typecheck, unit tests and e2e green, a commit on `main`
 - **K2 Security checklist** done: twelve rules with a test each, see `docs/security.md`. Personal links on existing accounts always sign out the old devices (the switch in the UI is gone).
 - **K3 Languages** done: English source, German catalog (2,200+ messages), language per account, server texts per request and per recipient, language switch.
 - **K4 Sport and region profiles** done: age classes without gender (playing time and youth referee per class), team gender, sport profiles (handball, football, other), club country/subdivision/time zone, school and public holidays per region (no trainings on public holidays), age classes from the sport profile.
+- **K5 Modules** done: switches for helper duties, youth referees, carpools, handball4all and SMS; switched-off modules disappear from navigation and API; game schedule from a table (CSV) with preview.
+- **K6 E-mail and SMS** done: Cloudflare Email Sending or the club's SMTP server with encrypted password and test mail; SMS module (seven.io) for sign-in codes and helper plan reminders, mobile number only on request and confirmed.
+- **K7 Setup wizard** done: wizard for admins (language and region, club, sport and season, modules, e-mail, first teams, privacy), first-steps card for new accounts, player list import for coaches, reachability overview in the invitations tab.
+- **K8 Staff role** done: role `staff` per team, added by coaches, sees events, names with status (no reasons) and chat, gets the team's event changes, is not a participant.
 
 ## Requested for the end (also for the original club app)
 

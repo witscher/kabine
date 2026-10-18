@@ -23,7 +23,7 @@ import { dutyManagers, loadDutyTypes, loadHelpersNeeded, loadMyDuties, mayManage
 import { notifyDutyChange } from "../duties/hub";
 import { loadEventPage } from "../domain/event-page";
 import { ensureGenerated } from "../domain/generate";
-import { eventLabel, notifyCoaches, notifyPersons, recipientsForPersons, enqueuePush, shortDate, shortTime } from "../domain/notify";
+import { eventLabel, notifyCoaches, notifyPersons, recipientsForPersons, enqueuePush, shortDate, shortTime, staffOf } from "../domain/notify";
 import { all, first, list, run, stmt } from "../lib/db";
 import { badRequest, conflict, forbidden, notFound, parse, readJson } from "../lib/http";
 import { addDays, isDate, isLocalDateTime, isTime, localToInstant, nowLocal, todayLocal, utcIso } from "../lib/time";
@@ -327,12 +327,14 @@ async function managedEvent(db: D1Database, actor: Actor, eventId: number) {
 }
 
 /** Persons who are informed about changes to an event. */
-async function affectedPersons(event: EventRow, ctx: Awaited<ReturnType<typeof loadEventContext>>): Promise<number[]> {
+async function affectedPersons(db: D1Database, event: EventRow, ctx: Awaited<ReturnType<typeof loadEventContext>>): Promise<number[]> {
   const parts = ctx.participants.get(event.id) ?? [];
   const ids = new Set(parts.filter((p) => p.status !== "inactive" && p.status !== "standing").map((p) => p.person.id));
   if (event.kind === "game") {
     for (const m of ctx.members.get(event.id)?.values() ?? []) if (m.is_active === 1) ids.add(m.person_id);
   }
+  const teamIds = (await all<{ team_id: number }>(db, "SELECT team_id FROM event_teams WHERE event_id = ?", event.id)).map((r) => r.team_id);
+  for (const id of await staffOf(db, teamIds)) ids.add(id);
   return [...ids];
 }
 
@@ -379,7 +381,7 @@ eventRoutes.post("/events/:id/cancel", async (c) => {
   const labelOf = () => (event.kind === "training" ? t`Training` : eventTitle(event, teams));
   await notifyPersons(
     c.env,
-    await affectedPersons(event, ctx),
+    await affectedPersons(c.env.DB, event, ctx),
     "events",
     () => {
       const label = labelOf();
@@ -415,7 +417,7 @@ eventRoutes.post("/events/:id/uncancel", async (c) => {
   const labelOf = () => (event.kind === "training" ? t`Training` : eventTitle(event, teams));
   await notifyPersons(
     c.env,
-    await affectedPersons(event, ctx),
+    await affectedPersons(c.env.DB, event, ctx),
     "events",
     () => {
       const label = labelOf();
@@ -495,7 +497,7 @@ eventRoutes.patch("/events/:id", async (c) => {
     const meetAt = fresh.meeting_time;
     await notifyPersons(
       c.env,
-      await affectedPersons(event, ctx),
+      await affectedPersons(c.env.DB, event, ctx),
       "events",
       () => {
         const label = event.kind === "training" ? t`Training` : eventTitle(event, teams);
@@ -626,6 +628,17 @@ eventRoutes.post("/events", async (c) => {
         body: location ? t`${when}, ${location}. Please let us know if you are coming.` : t`${when}. Please let us know if you are coming.`,
         url: `/termine/${event.id}`,
       };
+    },
+    { teamIds, exclude: [actor.accountId] },
+  );
+  // Staff do not respond, so their message carries no request
+  await notifyPersons(
+    c.env,
+    await staffOf(c.env.DB, teamIds),
+    "events",
+    () => {
+      const when = `${shortDate(input.startsAt)}, ${shortTime(input.startsAt)}`;
+      return { title: t`New event: ${title}`, body: location ? `${when}, ${location}` : when, url: `/termine/${event.id}` };
     },
     { teamIds, exclude: [actor.accountId] },
   );

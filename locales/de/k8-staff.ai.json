@@ -1,0 +1,13 @@
+{
+  "Remove {name} from the team?": "{name} aus der Mannschaft entfernen?",
+  "Afterwards, open the person and create a personal link for the access.": "Danach die Person öffnen und einen persönlichen Link für den Zugang erzeugen.",
+  "access without notifications": "Zugang ohne Benachrichtigungen",
+  "Physio, team manager or kit manager: they see the events, who takes part and the chat, and get changes. They do not respond themselves.": "Physio, Teammanager oder Zeugwart: Sie sehen die Termine, wer dabei ist, und den Chat und bekommen Änderungen mit. Selbst sagen sie nicht zu oder ab.",
+  "Staff  [context: team role]": "Betreuer",
+  "Staff · {staffCount}": "Betreuer · {staffCount}",
+  "Personal one-time link, valid until {linkExpires}. Please pass it on directly to {name} only.": "Persönlicher Einmal-Link, gültig bis {linkExpires}. Bitte nur direkt an {name} weitergeben.",
+  "The person no longer sees the team's events and chat.": "Die Person sieht danach die Termine und den Chat der Mannschaft nicht mehr.",
+  "Staff  [context: feedback]": "Betreuer",
+  "Add staff": "Betreuer hinzufügen",
+  "Staff  [context: chat author]": "Betreuer"
+}

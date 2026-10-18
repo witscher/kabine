@@ -274,6 +274,7 @@ msgid "Decline this event"
 msgstr "Diesen Termin absagen"
 
 #: src/pages/team.tsx
+#: src/pages/team.tsx
 msgid "Remove from the team"
 msgstr "Aus der Mannschaft entfernen"
 
@@ -687,6 +688,7 @@ msgstr "Für ein Profilbild brauchst du die Zustimmung deiner Eltern. Mit deinem
 #: src/pages/admin.tsx
 #: src/pages/admin.tsx
 #: src/pages/profile.tsx
+#: src/pages/team.tsx
 #: src/pages/team.tsx
 #: src/pages/team.tsx
 msgid "Last name"
@@ -1211,6 +1213,11 @@ msgstr "{missing}. Tippe auf eine Person, um es zu ergänzen."
 msgid "Linked. Use \"Sync now\" to fetch the game schedule."
 msgstr "Verknüpft. Mit „Jetzt abgleichen“ holst du den Spielplan."
 
+# ai
+#: src/pages/team.tsx
+msgid "Remove {name} from the team?"
+msgstr "{name} aus der Mannschaft entfernen?"
+
 #: src/pages/login.tsx
 msgid "Sign in"
 msgstr "Anmelden"
@@ -1489,6 +1496,7 @@ msgstr "abwesend"
 msgid "Skip"
 msgstr "Überspringen"
 
+#: worker/routes/events.ts
 #: worker/routes/events.ts
 msgid "New event: {title}"
 msgstr "Neuer Termin: {title}"
@@ -2711,6 +2719,7 @@ msgid "Refreshing"
 msgstr "Wird aktualisiert"
 
 #: src/pages/team.tsx
+#: src/pages/team.tsx
 msgid "has access set up"
 msgstr "hat einen Zugang"
 
@@ -2981,6 +2990,11 @@ msgstr "Wer sich einträgt, kann etwas dazuschreiben, z. B. welcher Kuchen."
 msgid "Sender address"
 msgstr "Absenderadresse"
 
+# ai
+#: src/pages/team.tsx
+msgid "Afterwards, open the person and create a personal link for the access."
+msgstr "Danach die Person öffnen und einen persönlichen Link für den Zugang erzeugen."
+
 #: worker/routes/carpool.ts
 msgid "Entered as driver"
 msgstr "Als Fahrer eingetragen"
@@ -2994,6 +3008,7 @@ msgid "This browser does not support passkeys. Please use a current smartphone w
 msgstr "Dieser Browser unterstützt keine Passkeys. Bitte nutze ein aktuelles Smartphone mit Safari oder Chrome."
 
 #: src/pages/group.tsx
+#: src/pages/team.tsx
 #: src/pages/team.tsx
 msgid "no access yet"
 msgstr "noch kein Zugang"
@@ -4337,6 +4352,7 @@ msgstr "Hilfe und Feedback"
 #: src/pages/profile.tsx
 #: src/pages/referees.tsx
 #: src/pages/team.tsx
+#: src/pages/team.tsx
 msgid "Copy"
 msgstr "Kopieren"
 
@@ -4575,6 +4591,11 @@ msgstr "Du bist für diesen Dienst schon eingetragen."
 #: src/pages/admin.tsx
 msgid "Use them"
 msgstr "Übernehmen"
+
+# ai
+#: src/pages/team.tsx
+msgid "access without notifications"
+msgstr "Zugang ohne Benachrichtigungen"
 
 # ai
 #: src/player-import.tsx
@@ -4872,6 +4893,11 @@ msgstr "Vergangene Termine der {team} für {kids} in dieser Saison"
 #: src/pages/season.tsx
 msgid "Additional team"
 msgstr "Weitere Mannschaft"
+
+# ai
+#: src/pages/team.tsx
+msgid "Physio, team manager or kit manager: they see the events, who takes part and the chat, and get changes. They do not respond themselves."
+msgstr "Physio, Teammanager oder Zeugwart: Sie sehen die Termine, wer dabei ist, und den Chat und bekommen Änderungen mit. Selbst sagen sie nicht zu oder ab."
 
 #: src/app.tsx
 msgctxt "navigation"
@@ -5866,6 +5892,8 @@ msgstr "{playerName} spielt jetzt auch in der anderen Mannschaft (aufgenommen vo
 #: src/pages/team.tsx
 #: src/pages/team.tsx
 #: src/pages/team.tsx
+#: src/pages/team.tsx
+#: src/pages/team.tsx
 msgid "Add"
 msgstr "Hinzufügen"
 
@@ -6045,6 +6073,7 @@ msgstr "Eine <0>Gruppe</0> hat nur einen Chat und Sondertermine mit Zu- und Absa
 
 #: src/pages/team.tsx
 #: src/pages/team.tsx
+#: src/pages/team.tsx
 msgid "Link for new passkey"
 msgstr "Link für neuen Passkey"
 
@@ -6129,6 +6158,13 @@ msgstr "Stammkader übernehmen"
 #: src/pages/event.tsx
 msgid "Event deleted."
 msgstr "Termin gelöscht."
+
+# ai
+#: src/pages/group.tsx
+#: src/pages/team.tsx
+msgctxt "team role"
+msgid "Staff"
+msgstr "Betreuer"
 
 #: src/pages/join.tsx
 #: src/pages/profile.tsx
@@ -6760,6 +6796,11 @@ msgstr "Ordentliche Mitglieder mit Zugang zur App. Ab 2 Buchstaben: alle im Vere
 #: src/pages/join.tsx
 msgid "Admin access for"
 msgstr "Admin-Zugang für"
+
+# ai
+#: src/pages/team.tsx
+msgid "Staff · {staffCount}"
+msgstr "Betreuer · {staffCount}"
 
 #: worker/routes/events.ts
 msgid "Anyone who declined, is permanently absent or inactive is excused."
@@ -8011,6 +8052,11 @@ msgstr "Unbekannter Endpunkt."
 msgid "There is no search for this person."
 msgstr "Für diese Person gibt es keine Suche."
 
+# ai
+#: src/pages/team.tsx
+msgid "Personal one-time link, valid until {linkExpires}. Please pass it on directly to {name} only."
+msgstr "Persönlicher Einmal-Link, gültig bis {linkExpires}. Bitte nur direkt an {name} weitergeben."
+
 #: src/format.ts
 msgid "{mins} min. ago"
 msgstr "vor {mins} Min."
@@ -8095,6 +8141,7 @@ msgstr "Push-Benachrichtigungen"
 #: src/pages/profile.tsx
 #: src/pages/profile.tsx
 #: src/pages/referees.tsx
+#: src/pages/team.tsx
 #: src/pages/team.tsx
 #: src/pages/team.tsx
 msgid "Remove"
@@ -8415,6 +8462,11 @@ msgstr "z. B. Grill"
 msgid "Left the chat."
 msgstr "Vom Chat abgemeldet."
 
+# ai
+#: src/pages/team.tsx
+msgid "The person no longer sees the team's events and chat."
+msgstr "Die Person sieht danach die Termine und den Chat der Mannschaft nicht mehr."
+
 #: src/pages/chat.tsx
 msgid "Write the first message to the group {teamName}."
 msgstr "Schreib die erste Nachricht an die Gruppe {teamName}."
@@ -8490,6 +8542,7 @@ msgid "new<0> (unread messages)</0>"
 msgstr "neu<0> (ungelesene Nachrichten)</0>"
 
 #: src/pages/admin.tsx
+#: src/pages/team.tsx
 #: src/pages/team.tsx
 msgid "Your personal access to the {club} app"
 msgstr "Dein persönlicher Zugang zur App {club}"
@@ -8607,6 +8660,7 @@ msgstr "Speichern und weiter"
 msgid "There are no participants for this event."
 msgstr "Für diesen Termin gibt es keine Teilnehmer."
 
+#: src/pages/team.tsx
 #: src/pages/team.tsx
 msgid "Personal invitation link"
 msgstr "Persönlichen Einladungslink"
@@ -8793,6 +8847,7 @@ msgstr "handball4all antwortet mit Status {status}"
 #: src/pages/admin.tsx
 #: src/pages/admin.tsx
 #: src/pages/profile.tsx
+#: src/pages/team.tsx
 #: src/pages/team.tsx
 #: src/pages/team.tsx
 msgid "First name"
@@ -8997,6 +9052,12 @@ msgstr "Plätze"
 #: worker/routes/parents.ts
 msgid "{name} has turned off “{label}” for {childName}."
 msgstr "{name} hat für {childName} „{label}“ ausgeschaltet."
+
+# ai
+#: worker/routes/feedback.ts
+msgctxt "feedback"
+msgid "Staff"
+msgstr "Betreuer"
 
 #: src/pages/privacy.tsx
 msgid "The app is an internal service of {clubName}."
@@ -9654,6 +9715,11 @@ msgstr "Kind suchen"
 msgid "Team chat {teamName}"
 msgstr "Mannschaftschat {teamName}"
 
+# ai
+#: src/pages/team.tsx
+msgid "Add staff"
+msgstr "Betreuer hinzufügen"
+
 #: src/pages/admin.tsx
 msgid "{players, plural, one {# player} other {# players}}"
 msgstr "{players, plural, one {# Spieler} other {# Spieler}}"
@@ -9942,6 +10008,12 @@ msgstr "Vereinsaustritt eintragen?"
 msgid "How it works: open the link, enter your own name, select your child (siblings in the same team right away too) and set up a passkey."
 msgstr "So geht's: Link öffnen, euren eigenen Namen eingeben, euer Kind auswählen (Geschwister in derselben Mannschaft gleich mit) und einen Passkey einrichten."
 
+# ai
+#: worker/chat/room.ts
+msgctxt "chat author"
+msgid "Staff"
+msgstr "Betreuer"
+
 #: src/pages/team.tsx
 msgid "Squad for games"
 msgstr "Kader für Spiele"
@@ -10151,6 +10223,7 @@ msgstr "Ohne Mannschaft"
 #: src/pages/admin.tsx
 #: src/pages/profile.tsx
 #: src/pages/referees.tsx
+#: src/pages/team.tsx
 #: src/pages/team.tsx
 msgid "Share"
 msgstr "Teilen"
@@ -10459,4 +10532,3 @@ msgstr "Chat schreiben"
 #: worker/routes/events.ts
 msgid "In one time block the end is before the start."
 msgstr "Bei einem Zeitblock liegt das Ende vor dem Beginn."
-

@@ -16,7 +16,7 @@ import type { TeamDetail } from "./team";
 /** Role label: in groups "Member" and "Lead" instead of player and coach. */
 export function roleLabel(role: string, isGroup: boolean): string {
   if (isGroup) return role === "coach" ? t`Lead` : t`Member`;
-  return role === "coach" ? t`Coach` : role === "helper" ? t`Stand-in` : t`Player`;
+  return role === "coach" ? t`Coach` : role === "helper" ? t`Stand-in` : role === "staff" ? t({ message: "Staff", context: "team role" }) : t`Player`;
 }
 
 /** Explains the difference between a group and a team. */

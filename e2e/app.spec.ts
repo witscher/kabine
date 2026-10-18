@@ -1270,3 +1270,18 @@ test("Spielerliste: Trainer übernimmt Spieler aus einer Tabelle, Einladungen ze
   await expect(reach).toContainText("Liste Eins");
   await expect(reach).toContainText("ohne Zugang");
 });
+
+test("Betreuer: Trainer legt eine Physiotherapeutin an und erzeugt ihren Zugangslink", async () => {
+  const { page } = coach;
+  await page.goto("/team/1");
+  await page.getByRole("button", { name: "Kader", exact: true }).click();
+  const staff = page.getByRole("region", { name: "Betreuer" });
+  await staff.getByRole("button", { name: "Hinzufügen" }).click();
+  const sheet = page.getByRole("dialog", { name: "Betreuer hinzufügen" });
+  await sheet.getByLabel("Vorname").fill("Paula");
+  await sheet.getByLabel("Nachname").fill("Physio");
+  await sheet.getByRole("button", { name: "Hinzufügen" }).click();
+  await staff.getByRole("button", { name: /Paula Physio/ }).click();
+  await page.getByRole("button", { name: /Einladungslink/ }).click();
+  await expect(page.locator(".url-box")).toContainText("http");
+});

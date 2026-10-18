@@ -18,7 +18,7 @@ export const personRoutes = new Hono<AppEnv>();
 const nameField = z.string().trim().min(1, { error: () => t`Please enter a name.` }).max(50, { error: () => t`The name is too long.` });
 
 /**
- * Coaches manage players and stand-ins of their teams and their parents.
+ * Coaches manage players, stand-ins and staff of their teams and the players' parents.
  * Admins manage everyone.
  */
 export async function canManagePerson(db: D1Database, actor: Actor, personId: number): Promise<boolean> {
@@ -27,7 +27,7 @@ export async function canManagePerson(db: D1Database, actor: Actor, personId: nu
   const row = await first(
     db,
     `SELECT 1 AS ok FROM team_memberships
-      WHERE person_id = ?1 AND role IN ('player', 'helper') AND team_id IN (SELECT value FROM json_each(?2))
+      WHERE person_id = ?1 AND role IN ('player', 'helper', 'staff') AND team_id IN (SELECT value FROM json_each(?2))
      UNION
      SELECT 1 FROM guardianships g JOIN team_memberships tm ON tm.person_id = g.child_id
       WHERE g.guardian_id = ?1 AND tm.role IN ('player', 'helper') AND tm.team_id IN (SELECT value FROM json_each(?2))`,

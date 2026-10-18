@@ -57,6 +57,8 @@ export interface TeamDetail {
   showResponses: boolean;
   h4a: { orgId: number | null; leagueId: number | null; teamId: number | null; importedAt: string | null; error: string | null };
   coaches: { person: PersonRef; hasAccount: boolean }[];
+  /** Team staff (physio, manager): see everything of the team, take no part */
+  staff: { person: PersonRef; hasAccount: boolean; hasPush: boolean }[];
   players: {
     person: PersonRef;
     birthYear: number | null;
@@ -422,6 +424,8 @@ function RosterTab({ team, onChanged }: { team: TeamDetail; onChanged: () => voi
         )}
       </section>
 
+      <StaffSection team={team} onChanged={onChanged} />
+
       <section class="stack-sm" aria-label={t({ message: "Coaches", context: "short" })}>
         <h2 class="section-title">
           <Trans>Coaches · {coachCount}</Trans>
@@ -445,6 +449,131 @@ function RosterTab({ team, onChanged }: { team: TeamDetail; onChanged: () => voi
       {coreOpen ? <CoreSheet team={team} onClose={() => setCoreOpen(false)} onDone={onChanged} /> : null}
       {helperOpen ? <HelperSheet team={team} onClose={() => setHelperOpen(false)} onDone={onChanged} /> : null}
     </>
+  );
+}
+
+/** Team staff: physio, manager, kit manager. They see events, who takes part and the chat, without responding. */
+function StaffSection({ team, onChanged }: { team: TeamDetail; onChanged: () => void }) {
+  const [adding, setAdding] = useState(false);
+  const [open, setOpen] = useState<TeamDetail["staff"][number] | null>(null);
+  const [first, setFirst] = useState("");
+  const [last, setLast] = useState("");
+  const [link, setLink] = useState<{ url: string; expiresAt: string } | null>(null);
+  const staffCount = team.staff.length;
+  const close = () => {
+    setOpen(null);
+    setLink(null);
+  };
+  const name = open ? personName(open.person) : "";
+  const linkExpires = link ? fullDate(isoToLocalDate(link.expiresAt)) : "";
+  return (
+    <section class="stack-sm" aria-label={t({ message: "Staff", context: "team role" })}>
+      <div class="row-gap">
+        <h2 class="section-title" style={{ flex: 1 }}>
+          <Trans>Staff · {staffCount}</Trans>
+        </h2>
+        <Button size="sm" icon="plus" onClick={() => setAdding(true)}>
+          <Trans>Add</Trans>
+        </Button>
+      </div>
+      {team.staff.length ? (
+        <ul class="list">
+          {team.staff.map((m) => (
+            <li>
+              <button type="button" class="list-row" onClick={() => setOpen(m)}>
+                <span class="main">
+                  <span class="title">{personName(m.person)}</span>
+                  <span class="sub">{m.hasAccount ? (m.hasPush ? t`has access set up` : t`access without notifications`) : t`no access yet`}</span>
+                </span>
+                <Icon name="chevron" size={18} />
+              </button>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p class="small muted">
+          <Trans>Physio, team manager or kit manager: they see the events, who takes part and the chat, and get changes. They do not respond themselves.</Trans>
+        </p>
+      )}
+      {adding ? (
+        <Sheet open onClose={() => setAdding(false)} title={t`Add staff`}>
+          <TextField label={t`First name`} value={first} onInput={setFirst} maxLength={50} />
+          <TextField label={t`Last name`} value={last} onInput={setLast} maxLength={50} />
+          <Button
+            variant="primary"
+            size="lg"
+            block
+            disabled={!first.trim()}
+            onClick={async () => {
+              await api.post(`/teams/${team.id}/staff`, { firstName: first.trim(), lastName: last.trim() || null });
+              setFirst("");
+              setLast("");
+              setAdding(false);
+              onChanged();
+            }}
+          >
+            <Trans>Add</Trans>
+          </Button>
+          <p class="small muted">
+            <Trans>Afterwards, open the person and create a personal link for the access.</Trans>
+          </p>
+        </Sheet>
+      ) : null}
+      {open ? (
+        <Sheet open onClose={close} title={name}>
+          {link ? (
+            <>
+              <p class="small muted">
+                <Trans>Personal one-time link, valid until {linkExpires}. Please pass it on directly to {name} only.</Trans>
+              </p>
+              <QrLink url={link.url} />
+              <div class="url-box">{link.url}</div>
+              <div class="btn-row">
+                <Button
+                  variant="primary"
+                  icon="share"
+                  onClick={() => {
+                    const club = clubName();
+                    return shareLink(club, t`Your personal access to the ${club} app`, link.url);
+                  }}
+                >
+                  <Trans>Share</Trans>
+                </Button>
+                <Button icon="copy" onClick={() => copyText(link.url)}>
+                  <Trans>Copy</Trans>
+                </Button>
+              </div>
+            </>
+          ) : (
+            <Button
+              variant="primary"
+              block
+              onClick={async () => setLink(await api.post<{ url: string; expiresAt: string }>(`/persons/${open.person.id}/personal-link`, {}))}
+            >
+              {open.hasAccount ? t`Link for new passkey` : t`Personal invitation link`}
+            </Button>
+          )}
+          <Button
+            variant="ghost"
+            icon="trash"
+            onClick={async () => {
+              const ok = await confirmDialog({
+                title: t`Remove ${name} from the team?`,
+                message: t`The person no longer sees the team's events and chat.`,
+                confirmLabel: t`Remove`,
+                danger: true,
+              });
+              if (!ok) return;
+              await api.del(`/teams/${team.id}/members/${open.person.id}?role=staff`);
+              close();
+              onChanged();
+            }}
+          >
+            <Trans>Remove from the team</Trans>
+          </Button>
+        </Sheet>
+      ) : null}
+    </section>
   );
 }
 

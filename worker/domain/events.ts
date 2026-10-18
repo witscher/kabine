@@ -12,7 +12,7 @@ import type {
   RosterEntry,
   TeamRef,
 } from "../../shared/types";
-import { type Actor, isCoachOfAny, mayActFor, PARENTS_HANDLE_IT, parentsInCharge, parentsInChargeSql, scopePersonIds } from "../auth/actor";
+import { type Actor, isCoachOfAny, isStaffOfAny, mayActFor, PARENTS_HANDLE_IT, parentsInCharge, parentsInChargeSql, scopePersonIds } from "../auth/actor";
 import { all, list } from "../lib/db";
 import { ownClubAbbr } from "./club";
 import { localToInstant, toLocal } from "../lib/time";
@@ -550,6 +550,7 @@ export function toSummary(e: EventRow, ctx: EventContext, actor: Actor, now: num
     ruleId: e.rule_id,
     myDuties: [],
     organizing: false,
+    staff: !canManage && isStaffOfAny(actor, teamRefs.map((t) => t.id)),
     carpoolCount: null,
     helpersNeeded: 0,
   };
@@ -577,13 +578,15 @@ export function toDetail(e: EventRow, ctx: EventContext, actor: Actor, now: numb
   // Teams with "responses visible to everyone": players and involved parents see who
   // accepted or declined (without reasons). Not for games, not for club events.
   const teams = eventTeams(e, ctx);
+  // Staff see names and status of their team's events (games once the squad is published), never reasons.
   const showRoster =
     !summary.canManage &&
-    e.kind !== "game" &&
-    e.club_wide !== 1 &&
-    teams.length > 0 &&
-    teams.every((t) => t.show_responses === 1) &&
-    summary.mine.some((m) => m.participant);
+    ((summary.staff && (e.kind !== "game" || e.squad_published_at != null)) ||
+      (e.kind !== "game" &&
+        e.club_wide !== 1 &&
+        teams.length > 0 &&
+        teams.every((t) => t.show_responses === 1) &&
+        summary.mine.some((m) => m.participant)));
   const roster: RosterEntry[] | null = showRoster
     ? parts
         .map((p) => ({
@@ -602,7 +605,7 @@ function relatesSql(person: string): string {
     EXISTS (
       SELECT 1 FROM event_teams et JOIN team_memberships tm ON tm.team_id = et.team_id
        WHERE et.event_id = e.id AND tm.person_id = ${person}
-         AND (tm.role IN ('player', 'coach')
+         AND (tm.role IN ('player', 'coach', 'staff')
               OR (tm.role = 'helper' AND (e.kind = 'game' OR (e.kind = 'training' AND tm.helper_trainings = 1))))
     )
     OR EXISTS (SELECT 1 FROM nominations n WHERE n.event_id = e.id AND n.person_id = ${person})

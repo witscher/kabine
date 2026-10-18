@@ -198,6 +198,11 @@ export function isCoachOf(actor: Actor, teamId: number): boolean {
   return actor.isAdmin || actor.coachTeamIds.includes(teamId);
 }
 
+/** Staff (physio, manager) of one of these teams: sees everything of the team, takes no part. */
+export function isStaffOfAny(actor: Actor, teamIds: readonly number[]): boolean {
+  return actor.memberships.some((m) => m.role === "staff" && teamIds.includes(m.teamId));
+}
+
 export function isCoachOfAny(actor: Actor, teamIds: readonly number[]): boolean {
   return actor.isAdmin || teamIds.some((t) => actor.coachTeamIds.includes(t));
 }

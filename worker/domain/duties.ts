@@ -172,13 +172,13 @@ export async function helperTeams(db: D1Database, actor: Actor, types?: Map<numb
   for (const t of teams) {
     const canManage = isCoachOf(actor, t.id);
     const own = actor.memberships.find((m) => m.teamId === t.id);
-    const isPlayer = !!own && own.role !== "coach";
+    const isPlayer = !!own && (own.role === "player" || own.role === "helper");
     const isCoach = !!own && own.role === "coach";
     const childRoles: HelperRole[] = [];
     if (t.parents_enabled === 1) {
       for (const child of actor.children) {
         const ms = actor.childMemberships.get(child.id) ?? [];
-        if (ms.some((m) => m.teamId === t.id && m.role !== "coach")) childRoles.push({ childId: child.id, childName: child.firstName });
+        if (ms.some((m) => m.teamId === t.id && (m.role === "player" || m.role === "helper"))) childRoles.push({ childId: child.id, childName: child.firstName });
       }
     }
     const selfRole = canManage || isCoach || (isPlayer && (t.parents_enabled === 0 || anyPlayers)) || (anyMembers && (isPlayer || childRoles.length > 0));

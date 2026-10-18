@@ -25,7 +25,7 @@ export interface ChatAccess {
   viaChildren: string[];
   optedOut: boolean;
   isMember: boolean;
-  role: "player" | "coach" | "helper" | null;
+  role: "player" | "coach" | "helper" | "staff" | null;
   reason: string | null;
   /** Only visible through admin rights (neither member, coach nor parent). */
   adminOnly: boolean;
@@ -133,8 +133,8 @@ chatRoutes.get("/chat/:teamId/connect", async (c) => {
       ? access.isGroup
         ? "lead"
         : "coach"
-      : access.role === "helper"
-        ? "helper"
+      : access.role === "helper" || access.role === "staff"
+        ? access.role
         : access.role === "player"
           ? null
           : access.viaChildren.length

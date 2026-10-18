@@ -66,6 +66,18 @@ export async function recipientsForPersons(
   return rows.map((r) => r.account_id);
 }
 
+/** Staff of these teams (physio, manager): they get the event changes of the team without taking part. */
+export async function staffOf(db: D1Database, teamIds: readonly number[]): Promise<number[]> {
+  if (!teamIds.length) return [];
+  const rows = await all<{ person_id: number }>(
+    db,
+    `SELECT DISTINCT tm.person_id FROM team_memberships tm JOIN persons p ON p.id = tm.person_id
+      WHERE tm.team_id IN (SELECT value FROM json_each(?)) AND tm.role = 'staff' AND p.is_former = 0`,
+    list([...teamIds]),
+  );
+  return rows.map((r) => r.person_id);
+}
+
 /** Accounts of the coaches of these teams (topic "coach" of the own person). */
 export async function recipientsForCoaches(db: D1Database, teamIds: number[]): Promise<number[]> {
   if (!teamIds.length) return [];

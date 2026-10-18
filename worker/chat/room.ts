@@ -97,7 +97,7 @@ export const formerLabel = () => t`Former player`;
 export const DELETED_NAME = "Gelöschte Person";
 const deletedName = () => t`Deleted person`;
 /**
- * Role of an author, stored as a code ("coach", "lead", "helper", "admin", "parent:[names]") and shown
+ * Role of an author, stored as a code ("coach", "lead", "helper", "staff", "admin", "parent:[names]") and shown
  * in the reader's language.
  */
 export function roleLabel(code: string | null): string | null {
@@ -105,6 +105,7 @@ export function roleLabel(code: string | null): string | null {
   if (code === "coach") return t({ message: "Coach", context: "chat author" });
   if (code === "lead") return t({ message: "In charge", context: "chat author" });
   if (code === "helper") return t({ message: "Helper", context: "chat author" });
+  if (code === "staff") return t({ message: "Staff", context: "chat author" });
   if (code === "admin") return t({ message: "Admin", context: "chat author" });
   if (code.startsWith("parent:")) {
     let names: string[] = [];

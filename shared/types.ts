@@ -1,7 +1,8 @@
 // Shared types for API responses (worker and frontend).
 import { t } from "@lingui/core/macro";
 
-export type Role = "player" | "coach" | "helper";
+/** staff: team staff such as physio or manager, sees everything of the team but does not take part. */
+export type Role = "player" | "coach" | "helper" | "staff";
 
 export interface TeamRef {
   id: number;
@@ -158,6 +159,8 @@ export interface EventSummary {
   myDuties: MyDuty[];
   /** Creator or organiser of this special event (manages the helper duties). */
   organizing: boolean;
+  /** Staff of one of the event's teams: sees the event and who takes part, without responding. */
+  staff: boolean;
   /** Carpool summary (only upcoming away games with entries, only for those involved): taken/offered seats, people searching without a seat. */
   carpoolCount: { taken: number; seats: number; waiting: number } | null;
   /** Free helper slots one could take on (or for the child); 0 = none or already signed up. */

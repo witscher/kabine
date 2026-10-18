@@ -297,7 +297,7 @@ planRoutes.patch("/rules/:id", async (c) => {
     const players = await all<{ person_id: number }>(
       c.env.DB,
       `SELECT DISTINCT tm.person_id FROM team_memberships tm JOIN persons p ON p.id = tm.person_id
-        WHERE tm.team_id IN (SELECT value FROM json_each(?)) AND tm.role = 'player' AND p.is_active = 1 AND p.is_former = 0`,
+        WHERE tm.team_id IN (SELECT value FROM json_each(?)) AND tm.role IN ('player', 'staff') AND p.is_active = 1 AND p.is_former = 0`,
       list([...new Set([...teams, ...teamIds])]),
     );
     const { startsAt, endsAt } = input;

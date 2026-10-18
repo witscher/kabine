@@ -116,7 +116,7 @@ CREATE TABLE teams (
 CREATE TABLE team_memberships (
   person_id        INTEGER NOT NULL REFERENCES persons (id) ON DELETE CASCADE,
   team_id          INTEGER NOT NULL REFERENCES teams (id) ON DELETE CASCADE,
-  role             TEXT NOT NULL CHECK (role IN ('player', 'coach', 'helper')),
+  role             TEXT NOT NULL CHECK (role IN ('player', 'coach', 'helper', 'staff')),
   helper_trainings INTEGER NOT NULL DEFAULT 0 CHECK (helper_trainings IN (0, 1)),
   created_at       TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
   PRIMARY KEY (person_id, team_id, role)
