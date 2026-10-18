@@ -1,6 +1,7 @@
 // SMS module: provider settings, phone number with confirmation, sign-in code by SMS, helper plan
 // reminders by SMS. Numbers invented, provider replaced.
 import { env } from "cloudflare:workers";
+import { DEFAULT_MODULES } from "../../../shared/modules";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { saveClub } from "../../../worker/domain/club";
 import { smsTransport } from "../worker/settings";
@@ -12,7 +13,7 @@ let adminCookie: string;
 beforeEach(async () => {
   await freshDb();
   await season();
-  await saveClub(env.DB, { modules: { duties: true, carpools: true, youthReferees: true, handball4all: true, sms: true } });
+  await saveClub(env.DB, { modules: { ...DEFAULT_MODULES, sms: true } });
   adminCookie = await loginAs(await person("Ada", { admin: true }));
   texts = [];
   vi.spyOn(smsTransport, "send").mockImplementation(async (config, to, text) => void texts.push({ to, text, key: config.apiKey }));
@@ -50,7 +51,7 @@ describe("SMS-Modul", () => {
   });
 
   it("Modul aus: Wege gesperrt", async () => {
-    await saveClub(env.DB, { modules: { duties: true, carpools: true, youthReferees: true, handball4all: true, sms: false } });
+    await saveClub(env.DB, { modules: { ...DEFAULT_MODULES, sms: false } });
     expect((await api("/auth/sms/start", { body: { phone: "+4915123456789" } })).status).toBe(404);
     expect((await api("/admin/sms", { cookie: adminCookie })).status).toBe(404);
   });

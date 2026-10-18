@@ -2,6 +2,7 @@
 import { env } from "cloudflare:workers";
 import { beforeEach, describe, expect, it } from "vitest";
 import { moduleOn } from "../shared/club";
+import { DEFAULT_MODULES } from "../shared/modules";
 import { saveClub } from "../worker/domain/club";
 import { moduleOfPath } from "../worker/lib/modules";
 import { api, eventIn, exec, freshDb, loginAs, member, person, season, team } from "./helpers";
@@ -37,7 +38,7 @@ describe("Module", () => {
   });
 
   it("Jugendschiedsrichter brauchen Helferdienste", () => {
-    const all = { duties: true, carpools: true, youthReferees: true, handball4all: true, sms: false };
+    const all = { ...DEFAULT_MODULES, duties: true, youthReferees: true };
     expect(moduleOn(all, "youthReferees")).toBe(true);
     expect(moduleOn({ ...all, duties: false }, "youthReferees")).toBe(false);
   });
@@ -48,7 +49,7 @@ describe("Module", () => {
   });
 
   it("ausgeschaltet: Pfade 404, keine Helfer- und Fahrgemeinschaftsdaten", async () => {
-    await saveClub(env.DB, { modules: { duties: false, carpools: false, youthReferees: true, handball4all: false, sms: false } });
+    await saveClub(env.DB, { modules: { ...DEFAULT_MODULES, duties: false, carpools: false, youthReferees: true, handball4all: false, sms: false } });
     const duties = await api(`/duties?teamId=${wd}`, { cookie: coachCookie });
     expect(duties.status).toBe(404);
     expect(duties.body.error.code).toBe("module_off");
