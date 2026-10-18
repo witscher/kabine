@@ -53,12 +53,17 @@ emailRoutes.post("/auth/email/verify", async (c) => {
   const input = parse(verifySchema, await readJson(c.req.raw));
   const row: EmailCodeRow = await checkEmailCode(c.env, "token" in input ? { token: input.token } : { requestId: input.requestId, code: input.code });
 
+  const sms = row.channel === "sms";
   if (row.purpose === "login") {
     const accounts = await all<{ id: number; first_name: string; last_name: string | null }>(
       c.env.DB,
-      `SELECT a.id, p.first_name, p.last_name FROM accounts a JOIN persons p ON p.id = a.person_id
-        WHERE a.email = ? AND a.email_verified_at IS NOT NULL AND a.disabled_at IS NULL AND p.is_former = 0
-        ORDER BY p.first_name, a.id`,
+      sms
+        ? `SELECT a.id, p.first_name, p.last_name FROM accounts a JOIN persons p ON p.id = a.person_id
+            WHERE a.phone = ? AND a.phone_verified_at IS NOT NULL AND a.disabled_at IS NULL AND p.is_former = 0
+            ORDER BY p.first_name, a.id`
+        : `SELECT a.id, p.first_name, p.last_name FROM accounts a JOIN persons p ON p.id = a.person_id
+            WHERE a.email = ? AND a.email_verified_at IS NOT NULL AND a.disabled_at IS NULL AND p.is_former = 0
+            ORDER BY p.first_name, a.id`,
       row.email,
     );
     if (!accounts.length) throw gone(t`There is no longer any access for this address.`, "code_invalid");
@@ -81,11 +86,11 @@ emailRoutes.post("/auth/email/verify", async (c) => {
     return c.json({ ok: true, kind: "join" });
   }
 
-  // Confirm the address
+  // Confirm the address or phone number
   await markEmailCodeUsed(c.env.DB, row.id);
   const res = await run(
     c.env.DB,
-    "UPDATE accounts SET email_verified_at = ? WHERE id = ? AND email = ?",
+    sms ? "UPDATE accounts SET phone_verified_at = ? WHERE id = ? AND phone = ?" : "UPDATE accounts SET email_verified_at = ? WHERE id = ? AND email = ?",
     utcIso(),
     row.account_id,
     row.email,

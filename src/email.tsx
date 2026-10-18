@@ -46,7 +46,14 @@ function ChooseAccount(props: { choices: Choice[]; onPick: (accountId: number) =
 }
 
 /** Code entry after sending. onDone receives what happened. */
-export function EmailCodeForm(props: { requestId: string; email: string; onDone: (kind: EmailKind) => Promise<void> | void; onResend?: () => Promise<void> }) {
+export function EmailCodeForm(props: {
+  requestId: string;
+  email: string;
+  onDone: (kind: EmailKind) => Promise<void> | void;
+  onResend?: () => Promise<void>;
+  /** sms: the code went by text message to the phone number in `email` */
+  channel?: "email" | "sms";
+}) {
   const [code, setCode] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [choices, setChoices] = useState<Choice[] | null>(null);
@@ -71,13 +78,21 @@ export function EmailCodeForm(props: { requestId: string; email: string; onDone:
 
   return (
     <div class="stack-sm">
-      <p>
-        <Trans>
-          We have sent a six-digit code to <strong>{email}</strong> if an access belongs to this address. It is valid for 15 minutes. Please also check your
-          spam folder.
-        </Trans>
-      </p>
-      <TextField label={t`Code from the e-mail`} value={code} onInput={(v) => setCode(v.replace(/[^\d ]/g, ""))} inputMode="numeric" autoComplete="one-time-code" maxLength={7} />
+      {props.channel === "sms" ? (
+        <p>
+          <Trans>
+            We have sent a six-digit code by text message to <strong>{email}</strong> if an access belongs to this number. It is valid for 15 minutes.
+          </Trans>
+        </p>
+      ) : (
+        <p>
+          <Trans>
+            We have sent a six-digit code to <strong>{email}</strong> if an access belongs to this address. It is valid for 15 minutes. Please also check your
+            spam folder.
+          </Trans>
+        </p>
+      )}
+      <TextField label={props.channel === "sms" ? t`Code from the text message` : t`Code from the e-mail`} value={code} onInput={(v) => setCode(v.replace(/[^\d ]/g, ""))} inputMode="numeric" autoComplete="one-time-code" maxLength={7} />
       {error ? (
         <div class="notice warn" role="alert">
           <Icon name="alert" />

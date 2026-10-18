@@ -75,6 +75,7 @@ export function AdminPage() {
     { href: "/verwaltung/sondertermine", icon: "calendar", title: t`Special events and games`, sub: t`Upcoming events of other teams, create a special event` },
     { href: "/verwaltung/verein", icon: "settings", title: t`Club`, sub: t`Name, colours, logo, region, modules` },
     { href: "/verwaltung/mail", icon: "mail", title: t`E-mail`, sub: t`How the app sends e-mails` },
+    ...(moduleOn(club.modules, "sms") ? [{ href: "/verwaltung/sms", icon: "phone" as IconName, title: t`SMS`, sub: t`Provider for codes and reminders by SMS` }] : []),
     { href: "/verwaltung/saisonwechsel", icon: "refresh", title: t`Season change`, sub: t`Once a year, with preview` },
     { href: "/api/admin/export", icon: "download", title: t`Export`, sub: t`All data as a JSON file, for backup`, download: true },
     { href: "/hilfe", icon: "info", title: t`Help and feedback`, sub: t`Send feedback about the app` },

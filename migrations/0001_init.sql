@@ -48,7 +48,9 @@ CREATE TABLE accounts (
   created_at       TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
   disabled_at      TEXT
 , email TEXT, email_verified_at TEXT, coach_mode INTEGER NOT NULL DEFAULT 0 CHECK (coach_mode IN (0, 1)), last_seen_on TEXT,
-  locale TEXT);                                 -- chosen language ('en', 'de'), NULL: club default
+  locale TEXT,                                  -- chosen language ('en', 'de'), NULL: club default
+  phone TEXT,                                   -- only with the SMS module and only if the person enters it
+  phone_verified_at TEXT);
 CREATE TABLE passkeys (
   id           TEXT PRIMARY KEY,                -- Credential-ID (base64url)
   account_id   INTEGER NOT NULL REFERENCES accounts (id) ON DELETE CASCADE,
@@ -291,7 +293,8 @@ CREATE TABLE email_codes (
   id          INTEGER PRIMARY KEY,
   request_id  TEXT NOT NULL UNIQUE,
   purpose     TEXT NOT NULL CHECK (purpose IN ('login', 'verify', 'join')),
-  email       TEXT NOT NULL,
+  channel     TEXT NOT NULL DEFAULT 'email' CHECK (channel IN ('email', 'sms')),
+  email       TEXT NOT NULL,                    -- address the code went to (e-mail or phone number)
   account_id  INTEGER REFERENCES accounts (id) ON DELETE CASCADE,
   context     TEXT,
   token_hash  TEXT NOT NULL UNIQUE,
@@ -348,6 +351,7 @@ CREATE TABLE notification_channels (
   topic      TEXT NOT NULL CHECK (topic IN ('duty_remind_3d', 'duty_remind_1d', 'duty_open', 'duty_coach_open', 'duty_referee_open')),
   push       INTEGER NOT NULL CHECK (push IN (0, 1)),
   mail       INTEGER NOT NULL CHECK (mail IN (0, 1)),
+  sms        INTEGER NOT NULL DEFAULT 0 CHECK (sms IN (0, 1)),
   PRIMARY KEY (account_id, topic)
 );
 CREATE TABLE public_holidays (

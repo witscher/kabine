@@ -13,6 +13,7 @@ import { enqueuePush, shortDate, shortTime } from "./notify";
 import { all, list, run } from "../lib/db";
 import { isModuleOn, ownClubAbbr, ownClubShortName } from "./club";
 import { withLocale } from "../i18n";
+import { sendSmsTo } from "./sms";
 import { addDays, todayLocal, toLocal } from "../lib/time";
 
 export type DutyTopic = "duty_remind_3d" | "duty_remind_1d" | "duty_open" | "duty_coach_open" | "duty_referee_open";
@@ -61,9 +62,20 @@ interface Message {
  */
 async function deliver(env: Env, accountIds: number[], topic: DutyTopic, msg: () => Message): Promise<number> {
   if (!accountIds.length) return 0;
-  const rows = await all<{ id: number; email: string | null; verified: number; push: number | null; mail: number | null; locale: string | null }>(
+  const rows = await all<{
+    id: number;
+    email: string | null;
+    verified: number;
+    phone: string | null;
+    phone_verified: number;
+    push: number | null;
+    mail: number | null;
+    sms: number | null;
+    locale: string | null;
+  }>(
     env.DB,
-    `SELECT a.id, a.email, a.email_verified_at IS NOT NULL AS verified, nc.push, nc.mail, a.locale
+    `SELECT a.id, a.email, a.email_verified_at IS NOT NULL AS verified, a.phone, a.phone_verified_at IS NOT NULL AS phone_verified,
+            nc.push, nc.mail, nc.sms, a.locale
        FROM accounts a LEFT JOIN notification_channels nc ON nc.account_id = a.id AND nc.topic = ?
       WHERE a.id IN (SELECT value FROM json_each(?)) AND a.disabled_at IS NULL`,
     topic,
@@ -71,6 +83,7 @@ async function deliver(env: Env, accountIds: number[], topic: DutyTopic, msg: ()
   );
   const push = rows.filter((r) => (r.push ?? DEFAULT.push) === 1).map((r) => r.id);
   const mail = rows.filter((r) => (r.mail ?? DEFAULT.mail) === 1 && r.email && r.verified === 1);
+  const sms = isModuleOn("sms") ? rows.filter((r) => r.sms === 1 && r.phone && r.phone_verified === 1) : [];
   let sent = 0;
   if (push.length) {
     sent += await enqueuePush(env, push, () => {
@@ -89,6 +102,18 @@ async function deliver(env: Env, accountIds: number[], topic: DutyTopic, msg: ()
       sent++;
     } catch (err) {
       console.warn("Helper plan mail failed", err instanceof Error ? err.message : err);
+    }
+  }
+  for (const r of sms) {
+    try {
+      const text = withLocale(r.locale, () => {
+        const m = msg();
+        return `${m.title}: ${m.body}`;
+      });
+      await sendSmsTo(env, r.phone!, text);
+      sent++;
+    } catch (err) {
+      console.warn("Helper plan SMS failed", err instanceof Error ? err.message : err);
     }
   }
   return sent;

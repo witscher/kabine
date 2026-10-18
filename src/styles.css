@@ -2402,7 +2402,10 @@ button.announcement-head {
 
 .duty-channels [role="row"] {
   display: grid;
-  grid-template-columns: 1fr 52px 52px;
+  /* label, then one column per channel (push, mail, SMS if the module is on) */
+  grid-template-columns: 1fr;
+  grid-auto-columns: 52px;
+  grid-auto-flow: column;
   align-items: center;
   gap: 8px;
   padding: 8px 0;

@@ -267,6 +267,12 @@ export function ModulesSection({ modules, onChange }: { modules: ClubModules; on
         checked={modules.handball4all}
         onChange={(v) => set({ handball4all: v })}
       />
+      <SwitchRow
+        label={t`SMS`}
+        sub={t`Sign-in codes and helper plan reminders by text message, for people who enter a mobile number. Needs a provider account (costs per message).`}
+        checked={modules.sms}
+        onChange={(v) => set({ sms: v })}
+      />
     </section>
   );
 }

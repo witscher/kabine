@@ -344,6 +344,11 @@ msgstr "Alle Mitfahrer werden benachrichtigt und suchen wieder."
 msgid "Stand-in from the other team. Their coach maintains the personal data."
 msgstr "Aushilfe aus der anderen Mannschaft. Stammdaten pflegt deren Trainer."
 
+# ai
+#: worker/routes/sms.ts
+msgid "The test message could not be sent: {detail}"
+msgstr "Die Test-SMS konnte nicht verschickt werden: {detail}"
+
 #: worker/cron.ts
 msgid "Enter meeting point · {teamName}"
 msgstr "Treffpunkt eintragen · {teamName}"
@@ -941,6 +946,16 @@ msgstr "Rückmeldung: zugesagt"
 msgid "Anyone who accepted or did not respond and still missed it: tap the name and choose “Absent without excuse”."
 msgstr "Wer zugesagt oder sich nicht gemeldet hat und trotzdem gefehlt hat: Namen antippen und „Fehlt unentschuldigt“ wählen."
 
+# ai
+#: src/email.tsx
+msgid "Code from the text message"
+msgstr "Code aus der SMS"
+
+# ai
+#: src/pages/login.tsx
+msgid "Code by SMS"
+msgstr "Code per SMS"
+
 #: worker/routes/season.ts
 msgid "The new season must begin after the start of the current season {name}."
 msgstr "Die neue Saison muss nach dem Beginn der laufenden Saison {name} anfangen."
@@ -1126,6 +1141,11 @@ msgstr "Datenschutz und Kontakt"
 #: worker/domain/carpool.ts
 msgid "Lift available"
 msgstr "Mitfahrgelegenheit frei"
+
+# ai
+#: worker/routes/sms.ts
+msgid "Confirm a phone number in your profile first; the test message goes there."
+msgstr "Bestätige zuerst im Profil eine Handynummer; dorthin geht die Test-SMS."
 
 #: src/pages/admin.tsx
 msgid "Gender"
@@ -1663,6 +1683,7 @@ msgstr "Zu dieser Adresse gehören mehrere Zugänge. Mit welchem möchtest du di
 #: src/pages/mail-settings.tsx
 #: src/pages/referees.tsx
 #: src/pages/season.tsx
+#: src/pages/sms-settings.tsx
 msgid "Administration"
 msgstr "Verwaltung"
 
@@ -1935,6 +1956,11 @@ msgstr "Sicherheit"
 msgid "Frequently asked questions"
 msgstr "Häufige Fragen"
 
+# ai
+#: worker/routes/sms.ts
+msgid "Please enter a mobile number, e.g. +49 151 23456789."
+msgstr "Bitte gib eine Handynummer ein, z. B. +49 151 23456789."
+
 #: src/carpool.tsx
 msgid "How many seats are free? Not counting you and your own passengers."
 msgstr "Wie viele Plätze sind frei? Ohne dich und deine eigenen Mitfahrer gezählt."
@@ -2055,9 +2081,19 @@ msgstr "Jg. bis"
 msgid "There is a new version of the app."
 msgstr "Es gibt eine neue Version der App."
 
+# ai
+#: src/pages/login.tsx
+msgid "We send a code to the e-mail address or mobile number you confirmed for your access."
+msgstr "Wir schicken dir einen Code an die E-Mail-Adresse oder Handynummer, die du für deinen Zugang bestätigt hast."
+
 #: src/update.tsx
 msgid "Check your internet connection and reload the app."
 msgstr "Prüfe deine Internetverbindung und lade die App neu."
+
+# ai
+#: worker/domain/email-login.ts
+msgid "{code} is your code for {app}. It is valid for 15 minutes."
+msgstr "{code} ist dein Code für {app}. Er gilt 15 Minuten."
 
 #: worker/routes/carpool.ts
 msgid "{takenAfter} people are already riding along. Please choose whom you can no longer take."
@@ -2083,6 +2119,11 @@ msgstr "Nutzt du die App vom Home-Bildschirm? Dann bist du dort nicht automatisc
 #: src/pages/team.tsx
 msgid "Remove stand-in?"
 msgstr "Aushilfe entfernen?"
+
+# ai
+#: src/pages/profile.tsx
+msgid "Confirmed. You can sign in with a code by SMS."
+msgstr "Bestätigt. Du kannst dich mit einem Code per SMS anmelden."
 
 #: worker/routes/join.ts
 msgid "Please select who you are."
@@ -2250,6 +2291,11 @@ msgstr "die Zuordnung zu {teamNames}"
 #: worker/domain/calendar.ts
 msgid "Meeting point: {point}"
 msgstr "Treffpunkt: {point}"
+
+# ai
+#: worker/routes/sms.ts
+msgid "There is no phone number on your access."
+msgstr "An deinem Zugang ist keine Handynummer hinterlegt."
 
 #: src/pages/profile.tsx
 msgid "Open slots (coaches and admins)"
@@ -2559,6 +2605,11 @@ msgstr "Der neue Inhaber muss Admin sein."
 msgid "New info on {label} on {date}: meeting point {point} at {meetAt}."
 msgstr "Neue Infos zu {label} am {date}: Treffpunkt {point} um {meetAt}."
 
+# ai
+#: src/pages/sms-settings.tsx
+msgid "At most 11 letters and digits, e.g. the club's short name."
+msgstr "Höchstens 11 Buchstaben und Ziffern, z. B. der Kurzname des Vereins."
+
 #: src/app.tsx
 #: src/pages/help.tsx
 msgid "Help"
@@ -2646,6 +2697,11 @@ msgstr "Wie aktualisiere ich den Spielplan?"
 #: src/pages/home.tsx
 msgid "Game · {title}"
 msgstr "Spiel · {title}"
+
+# ai
+#: src/pages/sms-settings.tsx
+msgid "Send test message"
+msgstr "Test-SMS schicken"
 
 #: src/pages/admin.tsx
 msgid "Not active for over {staleDays} days"
@@ -2990,6 +3046,7 @@ msgstr "die Verknüpfung zu den Kindern"
 #: src/pages/plans.tsx
 #: src/pages/plans.tsx
 #: src/pages/profile.tsx
+#: src/pages/profile.tsx
 #: src/pages/season.tsx
 #: src/ui.tsx
 msgid "Cancel"
@@ -3312,6 +3369,11 @@ msgstr "Seite konnte nicht geladen werden"
 msgid "Today"
 msgstr "Heute"
 
+# ai
+#: src/pages/sms-settings.tsx
+msgid "Test message sent."
+msgstr "Test-SMS verschickt."
+
 #: src/app.tsx
 #: src/pages/event.tsx
 #: src/pages/helpers.tsx
@@ -3527,6 +3589,11 @@ msgstr "Die Anmeldung hat zu lange gedauert. Bitte versuche es noch einmal."
 msgid "<0>Already registered in the app? Then open this link on the device where the app is installed!</0> Or sign in here and then link this child to your access. Otherwise a second access will be created for you."
 msgstr "<0>Bist du schon in der App registriert? Dann öffne diesen Link auf dem Gerät, auf dem die App installiert ist!</0> Oder melde dich hier an und verknüpfe danach dieses Kind mit deinem Zugang. Sonst entsteht ein zweiter Zugang für dich."
 
+# ai
+#: src/pages/profile.tsx
+msgid "Only for codes and reminders you choose. Neither coaches nor admins see the number."
+msgstr "Nur für Codes und Erinnerungen, die du wählst. Weder Trainer noch Admins sehen die Nummer."
+
 #: src/pages/squad.tsx
 msgid "Save changes · {count}"
 msgstr "Änderungen speichern · {count}"
@@ -3726,6 +3793,11 @@ msgstr "Du hast keinen Zugriff mehr auf diesen Chat."
 #: src/pages/event.tsx
 msgid "to follow"
 msgstr "folgt"
+
+# ai
+#: worker/routes/sms.ts
+msgid "Sender: at most 11 letters and digits, or a phone number."
+msgstr "Absender: höchstens 11 Buchstaben und Ziffern oder eine Telefonnummer."
 
 #: worker/domain/duty-notify.ts
 msgid "You can choose which notifications you get by push or mail in the app under Profile → Notifications."
@@ -4079,6 +4151,7 @@ msgid "<0>Next steps:</0> Under teams, assign the coaches again; then the coache
 msgstr "<0>Nächste Schritte:</0> Unter Mannschaften die Trainer neu zuordnen, danach legen die Trainer ihre Trainingspläne an und verknüpfen den neuen handball4all-Link ihrer Mannschaft."
 
 #: src/pages/profile.tsx
+#: src/pages/profile.tsx
 msgid "Not confirmed yet."
 msgstr "Noch nicht bestätigt."
 
@@ -4154,6 +4227,11 @@ msgstr "Trainingsplan anlegen"
 #: src/faq.tsx
 msgid "Until when can I decline?"
 msgstr "Bis wann kann ich absagen?"
+
+# ai
+#: src/email.tsx
+msgid "We have sent a six-digit code by text message to <0>{email}</0> if an access belongs to this number. It is valid for 15 minutes."
+msgstr "Wir haben dir einen sechsstelligen Code per SMS an <0>{email}</0> geschickt, falls zu dieser Nummer ein Zugang gehört. Er gilt 15 Minuten."
 
 #: src/faq.tsx
 msgid "In the <0>Helpers</0> tab, on the card <1>Manage</1>: change time and slots per duty (0 hides it), add or remove a time block, sign someone up or hide the game. Friendlies, tournaments or match days without handball4all you create under <2>Team → Create event → Game</2>, the team then gets a message."
@@ -4406,6 +4484,7 @@ msgstr "Tabelle bei handball4all"
 
 #: src/pages/club-settings.tsx
 #: src/pages/mail-settings.tsx
+#: src/pages/sms-settings.tsx
 msgid "Saved"
 msgstr "Gespeichert"
 
@@ -4516,6 +4595,11 @@ msgstr "z. B. wC1, wC2, Damen 2"
 msgctxt "filter"
 msgid "Team"
 msgstr "Mannschaft"
+
+# ai
+#: src/pages/sms-settings.tsx
+msgid "API key"
+msgstr "API-Schlüssel"
 
 #: src/carpool.tsx
 msgid "{name} is no longer riding with {driver}. The driver will be notified."
@@ -4684,6 +4768,11 @@ msgstr "Trainingsorte"
 msgid "More actions"
 msgstr "Weitere Aktionen"
 
+# ai
+#: src/pages/profile.tsx
+msgid "Optional: with a confirmed mobile number you can sign in with a code by SMS and get helper plan reminders by SMS."
+msgstr "Freiwillig: Mit einer bestätigten Handynummer kannst du dich per SMS-Code anmelden und Erinnerungen zum Helferplan per SMS bekommen."
+
 #: src/pages/home.tsx
 msgid "Coming up"
 msgstr "Demnächst"
@@ -4692,6 +4781,11 @@ msgstr "Demnächst"
 #: src/pages/referees.tsx
 msgid "Activated"
 msgstr "Freigeschaltet"
+
+# ai
+#: src/pages/club-settings.tsx
+msgid "Sign-in codes and helper plan reminders by text message, for people who enter a mobile number. Needs a provider account (costs per message)."
+msgstr "Anmeldecodes und Erinnerungen zum Helferplan per SMS, für alle, die eine Handynummer eintragen. Braucht ein Konto bei einem Anbieter (Kosten pro Nachricht)."
 
 #: src/pages/season.tsx
 msgid "New season started"
@@ -5302,6 +5396,11 @@ msgstr "Trainingspause"
 msgid "Invalid selection."
 msgstr "Ungültige Auswahl."
 
+# ai
+#: src/pages/sms-settings.tsx
+msgid "Sender name"
+msgstr "Absendername"
+
 #: src/pages/admin.tsx
 msgid "{count, plural, one {Send to one chat} other {Send to # chats}}"
 msgstr "{count, plural, one {An einen Chat senden} other {An # Chats senden}}"
@@ -5329,6 +5428,7 @@ msgstr "Termin absagen"
 
 # ai
 #: src/pages/mail-settings.tsx
+#: src/pages/sms-settings.tsx
 msgid "Stored encrypted. Leave empty to keep it."
 msgstr "Wird verschlüsselt gespeichert. Leer lassen, um es zu behalten."
 
@@ -5364,6 +5464,7 @@ msgstr "4 · Ferien der neuen Saison"
 
 # ai
 #: src/pages/mail-settings.tsx
+#: src/pages/sms-settings.tsx
 msgid "Stored encrypted."
 msgstr "Wird verschlüsselt gespeichert."
 
@@ -5693,6 +5794,11 @@ msgstr "Auf Nachricht von {author} reagieren"
 #: src/pages/special.tsx
 msgid "Title"
 msgstr "Titel"
+
+# ai
+#: src/pages/profile.tsx
+msgid "Mobile number confirmed."
+msgstr "Handynummer bestätigt."
 
 #: src/pages/event.tsx
 msgid "Delete event"
@@ -6151,6 +6257,14 @@ msgstr "Zeitraum"
 msgid "Download export"
 msgstr "Export herunterladen"
 
+# ai
+#: src/pages/login.tsx
+#: src/pages/profile.tsx
+#: src/pages/profile.tsx
+#: src/pages/profile.tsx
+msgid "Mobile number"
+msgstr "Handynummer"
+
 #: src/pages/helpers.tsx
 msgid "Add “{name}” as a name without access"
 msgstr "„{name}“ als Name ohne Zugang eintragen"
@@ -6223,6 +6337,7 @@ msgstr "Neue Infos zu {label} am {date} um {meetAt}."
 #: src/carpool.tsx
 #: src/carpool.tsx
 #: src/pages/event.tsx
+#: src/pages/profile.tsx
 #: src/pages/profile.tsx
 msgid "Change"
 msgstr "Ändern"
@@ -6562,6 +6677,7 @@ msgstr "Vorlage für Heimspiele"
 
 #: src/pages/join.tsx
 #: src/pages/login.tsx
+#: src/pages/profile.tsx
 #: src/pages/profile.tsx
 #: src/pages/profile.tsx
 msgid "Send code"
@@ -7114,6 +7230,11 @@ msgstr "Zu dieser Adresse gibt es keinen Zugang mehr."
 msgid "not in a team"
 msgstr "keine Mannschaft"
 
+# ai
+#: src/pages/profile.tsx
+msgid "{label} by SMS"
+msgstr "{label} per SMS"
+
 #: src/pages/event.tsx
 msgid "created the event"
 msgstr "hat den Termin angelegt"
@@ -7328,6 +7449,11 @@ msgstr "Leeren Kader veröffentlichen?"
 #: src/pages/profile.tsx
 msgid "Recent changes"
 msgstr "Letzte Änderungen"
+
+# ai
+#: src/pages/profile.tsx
+msgid "Add number"
+msgstr "Nummer hinzufügen"
 
 #: src/pages/admin.tsx
 msgid "Edit periods (e.g. carnival)"
@@ -7678,6 +7804,7 @@ msgstr "Push-Benachrichtigungen"
 #: src/pages/profile.tsx
 #: src/pages/profile.tsx
 #: src/pages/profile.tsx
+#: src/pages/profile.tsx
 #: src/pages/referees.tsx
 #: src/pages/team.tsx
 #: src/pages/team.tsx
@@ -7769,6 +7896,15 @@ msgstr "Termine, Zu- und Absagen und der Mannschaftschat an einem Ort."
 msgid "This person does not belong to the teams of this training time."
 msgstr "Diese Person gehört nicht zu den Mannschaften dieser Trainingszeit."
 
+# ai
+#: src/pages/admin.tsx
+#: src/pages/club-settings.tsx
+#: src/pages/profile.tsx
+#: src/pages/sms-settings.tsx
+#: src/pages/sms-settings.tsx
+msgid "SMS"
+msgstr "SMS"
+
 #: src/carpool.tsx
 #: src/duty-blocks.tsx
 #: src/pages/admin.tsx
@@ -7785,6 +7921,7 @@ msgstr "Diese Person gehört nicht zu den Mannschaften dieser Trainingszeit."
 #: src/pages/plans.tsx
 #: src/pages/profile.tsx
 #: src/pages/season.tsx
+#: src/pages/sms-settings.tsx
 #: src/pages/team.tsx
 #: src/pages/team.tsx
 msgid "Save"
@@ -7853,6 +7990,11 @@ msgstr "An alle im Chat {teamName}"
 #: src/pages/home.tsx
 msgid "Create a training plan in the Team section, then the events will appear here."
 msgstr "Lege im Bereich Team einen Trainingsplan an, dann erscheinen hier die Termine."
+
+# ai
+#: worker/routes/sms.ts
+msgid "Test message from Kabine: SMS works."
+msgstr "Test-SMS von Kabine: SMS funktioniert."
 
 #: worker/routes/events.ts
 msgid "Past events cannot be moved."
@@ -8749,6 +8891,11 @@ msgstr "Vom Chat abmelden"
 msgid "This person does not (or no longer) belong to this team."
 msgstr "Diese Person gehört nicht (mehr) zu dieser Mannschaft."
 
+# ai
+#: src/pages/sms-settings.tsx
+msgid "SMS go through seven.io (a German provider with servers in the EU). Create an account there, top up credit and copy the API key. Each message costs a few cents, paid by the club."
+msgstr "SMS laufen über seven.io (ein deutscher Anbieter mit Servern in der EU). Lege dort ein Konto an, lade Guthaben auf und kopiere den API-Schlüssel. Jede Nachricht kostet ein paar Cent, die der Verein bezahlt."
+
 #: src/pages/plans.tsx
 msgid "Weekday"
 msgstr "Wochentag"
@@ -8877,6 +9024,11 @@ msgstr "<0>Noch kein Zugang?</0> Deine Trainerin oder dein Trainer schickt dir e
 #: src/pages/group.tsx
 msgid "Members"
 msgstr "Mitglieder"
+
+# ai
+#: src/pages/admin.tsx
+msgid "Provider for codes and reminders by SMS"
+msgstr "Anbieter für Codes und Erinnerungen per SMS"
 
 #: worker/domain/calendar.ts
 msgid "Meeting point {teams} · {what}"

@@ -9,6 +9,7 @@ const PATHS: [RegExp, ModuleId | null][] = [
   [/^\/api\/(duties|duty-|admin\/duty-|profile\/duty-prefs)/, "duties"],
   [/^\/api\/events\/\d+\/carpool/, "carpools"],
   [/^\/api\/teams\/\d+\/games\//, "handball4all"],
+  [/^\/api\/(admin\/sms|auth\/sms|me\/phone)/, "sms"],
 ];
 
 export function moduleOfPath(path: string): ModuleId | null {

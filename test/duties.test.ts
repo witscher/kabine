@@ -400,10 +400,10 @@ describe("Helferplan", () => {
 
   it("Profil: Kanäle je Benachrichtigung", async () => {
     const before = await api("/profile/duty-prefs", { cookie: monaCookie });
-    expect(before.body.channels.duty_remind_1d).toEqual({ push: true, mail: false });
+    expect(before.body.channels.duty_remind_1d).toEqual({ push: true, mail: false, sms: false });
     await api("/profile/duty-prefs", { method: "PUT", cookie: monaCookie, body: { channels: { duty_remind_1d: { push: false, mail: true } } } });
     const after = await api("/profile/duty-prefs", { cookie: monaCookie });
-    expect(after.body.channels.duty_remind_1d).toEqual({ push: false, mail: true });
+    expect(after.body.channels.duty_remind_1d).toEqual({ push: false, mail: true, sms: false });
     expect(await rows("SELECT topic, push, mail FROM notification_channels")).toEqual([{ topic: "duty_remind_1d", push: 0, mail: 1 }]);
   });
 });

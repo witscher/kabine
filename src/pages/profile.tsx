@@ -1,6 +1,6 @@
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
-import { clubName } from "../club";
+import { clubName, useModule } from "../club";
 import { MyCalendar } from "../calendar";
 import { useEffect, useState } from "preact/hooks";
 import { useLocation } from "preact-iso";
@@ -588,8 +588,9 @@ const dutyTopicLabels = (): Record<DutyTopic, string> => ({
 
 interface DutyPrefs {
   skills: { dutyTypeId: number; code: string | null; name: string; on: boolean }[];
-  channels: Record<DutyTopic, { push: boolean; mail: boolean }>;
+  channels: Record<DutyTopic, { push: boolean; mail: boolean; sms: boolean }>;
   mailAddressVerified: boolean;
+  smsAvailable?: boolean;
 }
 
 /** Helper plan "What I can do": the helper plan only offers duties that need prior knowledge after consent. */
@@ -640,7 +641,7 @@ function HelperPrefs() {
   const topics = (Object.keys(labels) as DutyTopic[]).filter(
     (topic) => (topic !== "duty_coach_open" || showCoach) && (topic !== "duty_referee_open" || me.referee) && (topic !== "duty_open" || me.helperTeams.length > 0),
   );
-  const setChannel = async (topic: DutyTopic, ch: { push: boolean; mail: boolean }) => {
+  const setChannel = async (topic: DutyTopic, ch: { push: boolean; mail: boolean; sms: boolean }) => {
     await api.put("/profile/duty-prefs", { channels: { [topic]: ch } });
     mutate({ ...data, channels: { ...data.channels, [topic]: ch } });
   };
@@ -660,6 +661,11 @@ function HelperPrefs() {
           <span role="columnheader">
             <Trans>Mail</Trans>
           </span>
+          {data.smsAvailable ? (
+            <span role="columnheader">
+              <Trans>SMS</Trans>
+            </span>
+          ) : null}
         </div>
         {topics.map((topic) => {
           const label = labels[topic];
@@ -682,6 +688,16 @@ function HelperPrefs() {
                   onChange={(e) => setChannel(topic, { ...data.channels[topic], mail: (e.target as HTMLInputElement).checked })}
                 />
               </span>
+              {data.smsAvailable ? (
+                <span role="cell">
+                  <input
+                    type="checkbox"
+                    aria-label={t`${label} by SMS`}
+                    checked={data.channels[topic].sms}
+                    onChange={(e) => setChannel(topic, { ...data.channels[topic], sms: (e.target as HTMLInputElement).checked })}
+                  />
+                </span>
+              ) : null}
             </div>
           );
         })}
@@ -704,6 +720,8 @@ function HelperPrefs() {
 interface Security {
   email: string | null;
   emailVerified: boolean;
+  phone: string | null;
+  phoneVerified: boolean;
   passkeys: { id: string; label: string | null; createdAt: string; lastUsedAt: string | null; synced: boolean }[];
   sessions: { id: string; deviceLabel: string; createdAt: string; expiresAt: string; current: boolean }[];
 }
@@ -801,8 +819,104 @@ function EmailSection(props: { data: Security; reload: () => Promise<unknown> })
   );
 }
 
+/** Mobile number for codes and reminders by SMS (SMS module). Nobody but you sees it. */
+function PhoneSection(props: { data: Security; reload: () => Promise<unknown> }) {
+  const { data } = props;
+  const [value, setValue] = useState(data.phone ?? "");
+  const [editing, setEditing] = useState(false);
+  const [pending, setPending] = useState<{ requestId: string; phone: string } | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const save = async (phone: string) => {
+    setError(null);
+    try {
+      const res = await api.put<{ verified: boolean; requestId?: string }>("/me/phone", { phone });
+      await props.reload();
+      if (res.requestId) setPending({ requestId: res.requestId, phone });
+      setEditing(false);
+    } catch (err) {
+      setError(errorMessage(err));
+    }
+  };
+
+  return (
+    <section class="stack-sm" aria-label={t`Mobile number`}>
+      <h2 class="section-title">
+        <Trans>Mobile number</Trans>
+      </h2>
+      <div class="card card-pad stack-sm">
+        {pending ? (
+          <EmailCodeForm
+            channel="sms"
+            requestId={pending.requestId}
+            email={pending.phone}
+            onDone={async () => {
+              setPending(null);
+              toast(t`Mobile number confirmed.`);
+              await props.reload();
+            }}
+            onResend={() => save(pending.phone)}
+          />
+        ) : editing ? (
+          <>
+            <TextField label={t`Mobile number`} type="tel" value={value} onInput={setValue} autoComplete="tel" inputMode="text" maxLength={30} placeholder="+49 151 23456789" />
+            {error ? <Notice kind="warn">{error}</Notice> : null}
+            <div class="btn-row">
+              <Button variant="primary" disabled={value.trim().length < 6} onClick={() => save(value.trim())}>
+                <Trans>Send code</Trans>
+              </Button>
+              <Button variant="ghost" onClick={() => setEditing(false)}>
+                <Trans>Cancel</Trans>
+              </Button>
+            </div>
+          </>
+        ) : (
+          <>
+            {data.phone ? (
+              <p>
+                <strong>{data.phone}</strong>
+                <br />
+                <span class="small muted">{data.phoneVerified ? t`Confirmed. You can sign in with a code by SMS.` : t`Not confirmed yet.`}</span>
+              </p>
+            ) : (
+              <p class="muted">
+                <Trans>Optional: with a confirmed mobile number you can sign in with a code by SMS and get helper plan reminders by SMS.</Trans>
+              </p>
+            )}
+            <div class="btn-row">
+              <Button
+                onClick={() => {
+                  setValue(data.phone ?? "");
+                  setEditing(true);
+                }}
+              >
+                {data.phone ? t`Change` : t`Add number`}
+              </Button>
+              {data.phone ? (
+                <Button
+                  variant="ghost"
+                  onClick={async () => {
+                    await api.del("/me/phone");
+                    await props.reload();
+                  }}
+                >
+                  <Trans>Remove</Trans>
+                </Button>
+              ) : null}
+            </div>
+          </>
+        )}
+        <p class="small muted">
+          <Trans>Only for codes and reminders you choose. Neither coaches nor admins see the number.</Trans>
+        </p>
+      </div>
+    </section>
+  );
+}
+
 export function DevicesPage() {
   useDocumentTitle(t`Passkeys and devices`);
+  const smsOn = useModule("sms");
   const { data, error, reload } = useQuery<Security>("/me/security");
   return (
     <main class="page">
@@ -821,6 +935,7 @@ export function DevicesPage() {
               </Notice>
             ) : null}
             <EmailSection data={data} reload={reload} />
+            {smsOn ? <PhoneSection data={data} reload={reload} /> : null}
             <section class="stack-sm" aria-label={t`Passkeys`}>
               <h2 class="section-title">
                 <Trans>Passkeys</Trans>

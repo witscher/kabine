@@ -1,6 +1,6 @@
 // Helper plan API. Rules in worker/domain/duties.ts.
 import { t } from "@lingui/core/macro";
-import { loadClub } from "../domain/club";
+import { isModuleOn, loadClub } from "../domain/club";
 import { type Context, Hono } from "hono";
 import { z } from "zod";
 import { type AppEnv, intParam, requireActor } from "../app";
@@ -790,14 +790,18 @@ dutyRoutes.get("/duties/teams/:id/live", async (c) => {
 export const DUTY_TOPICS = ["duty_remind_3d", "duty_remind_1d", "duty_open", "duty_coach_open", "duty_referee_open"] as const;
 export type DutyTopic = (typeof DUTY_TOPICS)[number];
 /** Default when nothing is set: push on, mail off. */
-export const DEFAULT_CHANNEL = { push: true, mail: false };
+export const DEFAULT_CHANNEL = { push: true, mail: false, sms: false };
 
 dutyRoutes.get("/profile/duty-prefs", async (c) => {
   const actor = requireActor(c);
   const db = c.env.DB;
   const [rows, email, types, consents] = await Promise.all([
-    all<{ topic: DutyTopic; push: number; mail: number }>(db, "SELECT topic, push, mail FROM notification_channels WHERE account_id = ?", actor.accountId),
-    first<{ email: string | null; email_verified_at: string | null }>(db, "SELECT email, email_verified_at FROM accounts WHERE id = ?", actor.accountId),
+    all<{ topic: DutyTopic; push: number; mail: number; sms: number }>(db, "SELECT topic, push, mail, sms FROM notification_channels WHERE account_id = ?", actor.accountId),
+    first<{ email: string | null; email_verified_at: string | null; phone: string | null; phone_verified_at: string | null }>(
+      db,
+      "SELECT email, email_verified_at, phone, phone_verified_at FROM accounts WHERE id = ?",
+      actor.accountId,
+    ),
     loadDutyTypes(db),
     skillConsents(db, actor.accountId),
   ]);
@@ -807,16 +811,18 @@ dutyRoutes.get("/profile/duty-prefs", async (c) => {
     channels: Object.fromEntries(
       DUTY_TOPICS.map((t) => {
         const r = rows.find((x) => x.topic === t);
-        return [t, r ? { push: r.push === 1, mail: r.mail === 1 } : DEFAULT_CHANNEL];
+        return [t, r ? { push: r.push === 1, mail: r.mail === 1, sms: r.sms === 1 } : DEFAULT_CHANNEL];
       }),
     ),
     mailAddressVerified: !!email?.email && !!email.email_verified_at,
+    // SMS only with the module on and a confirmed number
+    smsAvailable: isModuleOn("sms") && !!email?.phone && !!email.phone_verified_at,
   });
 });
 
 const prefsSchema = z.object({
   skills: z.array(z.object({ dutyTypeId: z.number().int().positive(), on: z.boolean() })).max(50).optional(),
-  channels: z.partialRecord(z.enum(DUTY_TOPICS), z.object({ push: z.boolean(), mail: z.boolean() })).optional(),
+  channels: z.partialRecord(z.enum(DUTY_TOPICS), z.object({ push: z.boolean(), mail: z.boolean(), sms: z.boolean().default(false) })).optional(),
 });
 
 dutyRoutes.put("/profile/duty-prefs", async (c) => {
@@ -835,11 +841,13 @@ dutyRoutes.put("/profile/duty-prefs", async (c) => {
     statements.push(
       stmt(
         db,
-        "INSERT INTO notification_channels (account_id, topic, push, mail) VALUES (?, ?, ?, ?) ON CONFLICT (account_id, topic) DO UPDATE SET push = excluded.push, mail = excluded.mail",
+        `INSERT INTO notification_channels (account_id, topic, push, mail, sms) VALUES (?, ?, ?, ?, ?)
+         ON CONFLICT (account_id, topic) DO UPDATE SET push = excluded.push, mail = excluded.mail, sms = excluded.sms`,
         actor.accountId,
         topic,
         ch.push ? 1 : 0,
         ch.mail ? 1 : 0,
+        ch.sms ? 1 : 0,
       ),
     );
   }

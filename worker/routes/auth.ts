@@ -137,9 +137,9 @@ authRoutes.post("/auth/logout", async (c) => {
 authRoutes.get("/me/security", async (c) => {
   const actor = requireActor(c);
   const [account, passkeys, sessions] = await Promise.all([
-    first<{ email: string | null; email_verified_at: string | null }>(
+    first<{ email: string | null; email_verified_at: string | null; phone: string | null; phone_verified_at: string | null }>(
       c.env.DB,
-      "SELECT email, email_verified_at FROM accounts WHERE id = ?",
+      "SELECT email, email_verified_at, phone, phone_verified_at FROM accounts WHERE id = ?",
       actor.accountId,
     ),
     all<{ id: string; label: string | null; created_at: string; last_used_at: string | null; backed_up: number; device_type: string | null }>(
@@ -157,6 +157,8 @@ authRoutes.get("/me/security", async (c) => {
   return c.json({
     email: account?.email ?? null,
     emailVerified: !!account?.email_verified_at,
+    phone: account?.phone ?? null,
+    phoneVerified: !!account?.phone_verified_at,
     passkeys: passkeys.map((p) => ({
       id: p.id,
       label: p.label,

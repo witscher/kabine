@@ -1,8 +1,8 @@
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
-import { ClubMark, clubName } from "../club";
+import { ClubMark, clubName, useModule } from "../club";
 import { useEffect, useState } from "preact/hooks";
-import { errorMessage } from "../api";
+import { api, errorMessage } from "../api";
 import { EmailCodeForm, isEmail, startEmailLogin } from "../email";
 import { Icon } from "../icons";
 import { LanguageSwitch } from "../language-switch";
@@ -36,7 +36,9 @@ export function LoginPage() {
   const { refresh } = useSession();
   const [error, setError] = useState<string | null>(null);
   const [detail, setDetail] = useState("");
-  const [emailMode, setEmailMode] = useState(false);
+  // Sign-in by code: e-mail, or SMS with the SMS module
+  const [codeMode, setCodeMode] = useState<"email" | "sms" | null>(null);
+  const smsOn = useModule("sms");
   const [email, setEmail] = useState("");
   const [requestId, setRequestId] = useState<string | null>(null);
   const [emailError, setEmailError] = useState<string | null>(null);
@@ -44,7 +46,9 @@ export function LoginPage() {
   const sendCode = async () => {
     setEmailError(null);
     try {
-      setRequestId(await startEmailLogin(email));
+      setRequestId(
+        codeMode === "sms" ? (await api.post<{ requestId: string }>("/auth/sms/start", { phone: email.trim() })).requestId : await startEmailLogin(email),
+      );
     } catch (err) {
       setEmailError(errorMessage(err));
     }
@@ -119,21 +123,33 @@ export function LoginPage() {
           </Trans>
         </p>
         <section class="card card-pad stack-sm" aria-label={t`Sign in by e-mail`}>
-          {!emailMode ? (
+          {!codeMode ? (
             <>
               <strong>
                 <Trans>No passkey on this device?</Trans>
               </strong>
               <p class="small muted">
-                <Trans>We send a code to the e-mail address you gave for your access.</Trans>
+                {smsOn ? (
+                  <Trans>We send a code to the e-mail address or mobile number you confirmed for your access.</Trans>
+                ) : (
+                  <Trans>We send a code to the e-mail address you gave for your access.</Trans>
+                )}
               </p>
-              <Button icon="mail" onClick={() => setEmailMode(true)}>
-                <Trans>Code by e-mail</Trans>
-              </Button>
+              <div class="btn-row">
+                <Button icon="mail" onClick={() => setCodeMode("email")}>
+                  <Trans>Code by e-mail</Trans>
+                </Button>
+                {smsOn ? (
+                  <Button icon="phone" onClick={() => setCodeMode("sms")}>
+                    <Trans>Code by SMS</Trans>
+                  </Button>
+                ) : null}
+              </div>
             </>
           ) : requestId ? (
             <>
               <EmailCodeForm
+                channel={codeMode}
                 requestId={requestId}
                 email={email.trim()}
                 onDone={async () => {
@@ -148,9 +164,13 @@ export function LoginPage() {
             </>
           ) : (
             <>
-              <TextField label={t`E-mail address`} type="email" value={email} onInput={setEmail} autoComplete="email" inputMode="email" maxLength={254} />
+              {codeMode === "sms" ? (
+                <TextField label={t`Mobile number`} type="tel" value={email} onInput={setEmail} autoComplete="tel" maxLength={30} placeholder="+49 151 23456789" />
+              ) : (
+                <TextField label={t`E-mail address`} type="email" value={email} onInput={setEmail} autoComplete="email" inputMode="email" maxLength={254} />
+              )}
               {emailError ? <p class="small" role="alert">{emailError}</p> : null}
-              <Button variant="primary" block disabled={!isEmail(email)} onClick={sendCode}>
+              <Button variant="primary" block disabled={codeMode === "sms" ? email.trim().length < 6 : !isEmail(email)} onClick={sendCode}>
                 <Trans>Send code</Trans>
               </Button>
             </>

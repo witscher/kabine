@@ -3,6 +3,7 @@ import { t } from "@lingui/core/macro";
 // option; e-mail is the way for devices without a passkey and for recovery.
 import { loadClub } from "./club";
 import { deliver, MailNotConfigured } from "./mail";
+import { sendSmsTo } from "./sms";
 import { z } from "zod";
 import { hmacB64url, randomToken, sha256Hex } from "../lib/crypto";
 import { first, run } from "../lib/db";
@@ -54,6 +55,8 @@ export interface EmailCodeRow {
   id: number;
   request_id: string;
   purpose: EmailPurpose;
+  channel: "email" | "sms";
+  /** Address the code went to: e-mail address or phone number */
   email: string;
   account_id: number | null;
   context: string | null;
@@ -121,19 +124,30 @@ function mailText(purpose: EmailPurpose, code: string, link: string, club: strin
 /** Creates a code and sends it. Returns the request ID for entering the code. */
 export async function issueEmailCode(
   env: Env,
-  input: { purpose: EmailPurpose; email: string; accountId?: number | null; context?: unknown; origin: string; ip: string | null },
+  input: {
+    purpose: EmailPurpose;
+    email: string;
+    accountId?: number | null;
+    context?: unknown;
+    origin: string;
+    ip: string | null;
+    /** sms: the code goes as a text message to the phone number in `email` (SMS module) */
+    channel?: "email" | "sms";
+  },
   now = Date.now(),
 ): Promise<string> {
-  await rateLimit(env, input.email, input.ip);
+  const channel = input.channel ?? "email";
+  await rateLimit(env, channel === "sms" ? `sms:${input.email}` : input.email, input.ip);
   const requestId = randomToken(18);
   const token = randomToken(24);
   const code = sixDigits();
   await run(
     env.DB,
-    `INSERT INTO email_codes (request_id, purpose, email, account_id, context, token_hash, code_hash, expires_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO email_codes (request_id, purpose, channel, email, account_id, context, token_hash, code_hash, expires_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     requestId,
     input.purpose,
+    channel,
     input.email,
     input.accountId ?? null,
     input.context === undefined ? null : JSON.stringify(input.context),
@@ -142,6 +156,11 @@ export async function issueEmailCode(
     utcIso(now + CODE_TTL_MS),
   );
   const club = await loadClub(env.DB);
+  if (channel === "sms") {
+    const app = club.shortName;
+    await sendSmsTo(env, input.email, t`${code} is your code for ${app}. It is valid for 15 minutes.`);
+    return requestId;
+  }
   await mailer.send(env, {
     to: input.email,
     subject: texts()[input.purpose].subject(code, club.shortName),
