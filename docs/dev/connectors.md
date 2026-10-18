@@ -26,7 +26,7 @@ modules/<folder>/
   README.md           the source, the kind of access, the terms, the samples' origin
 ```
 
-`FixtureConnector` ([`worker/module-api.ts`](../worker/module-api.ts)):
+`FixtureConnector` ([`worker/module-api.ts`](../../worker/module-api.ts)):
 
 | Member | Does |
 | --- | --- |

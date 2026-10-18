@@ -1,5 +1,5 @@
 // Groups: only chat and special events (e.g. coaching team, KiHaSL/JuHaSL). Internally a team with
-// kind = 'group', see docs/design.md, Groups.
+// kind = 'group', see docs/dev/design.md, Groups.
 import { plural, t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { useState } from "preact/hooks";

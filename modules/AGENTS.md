@@ -1,6 +1,6 @@
 # Modules – local contract
 
-One folder per module; read [docs/modules.md](../docs/modules.md) for the hooks and [docs/connectors.md](../docs/connectors.md) for game schedule sources.
+One folder per module; read [docs/dev/modules.md](../docs/dev/modules.md) for the hooks and [docs/dev/connectors.md](../docs/dev/connectors.md) for game schedule sources.
 
 - `module.ts` is pure data (`defineModule`); `worker/` only imports from `worker/`, `shared/` and this module; `app/` only from `src/`, `shared/` and this module. A module may import from a module it `requires`, never from others.
 - Register the manifest in `modules/index.ts` (the generator does it). Worker and app parts are found by the build.

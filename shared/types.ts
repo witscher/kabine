@@ -71,7 +71,7 @@ export interface Me {
   viewAs: { mode: "player" | "parent" | "trainer" | "referee"; readOnly: boolean } | null;
   /** May take on KiHaSL/JuHaSL duties (personally or for a child). */
   referee: boolean;
-  /** IDs of all groups (chat and special events only, see docs/design.md, Groups). */
+  /** IDs of all groups (chat and special events only, see docs/dev/design.md, Groups). */
   groupIds: number[];
   /** Admins with a coach role only: admin/coach switch in the profile (coachMode = currently working as coach). */
   adminSwitch: { coachMode: boolean } | null;

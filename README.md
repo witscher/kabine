@@ -148,7 +148,7 @@ Nötig sind ein Cloudflare-Konto (der kostenlose Tarif reicht für einen üblich
 
 ## Sprachen
 
-Deutsch und Englisch. Die Übersetzungen liegen als gettext-Dateien (`.po`) in `locales/`, jeder kann sie korrigieren. Eine Sprache hinzufügen: [docs/translation.md](docs/translation.md).
+Deutsch und Englisch. Die Übersetzungen liegen als gettext-Dateien (`.po`) in `locales/`, jeder kann sie korrigieren. Eine Sprache hinzufügen: [docs/dev/translation.md](docs/dev/translation.md).
 
 ## Entwicklung
 

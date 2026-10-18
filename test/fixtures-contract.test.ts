@@ -1,4 +1,4 @@
-// The contract every fixture connector keeps (docs/connectors.md), checked with the samples its module
+// The contract every fixture connector keeps (docs/dev/connectors.md), checked with the samples its module
 // records in modules/<folder>/samples/: links.json (links a coach would paste, with the expected source)
 // and any other *.json (responses of the source). A new connector only has to pass it.
 import { describe, expect, it } from "vitest";

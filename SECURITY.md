@@ -18,4 +18,4 @@ You get a first answer within a week. Please give us time to fix and release bef
 - Every installation runs in the club's own Cloudflare account. The maintainers have no access to any club's data and cannot look into a club's installation; a problem in one club's setup (for example a leaked setup password) is the club's to fix, with our help.
 - Never test against an installation of a club that is not yours, and never against the public demo with other people's sessions.
 
-The rules every change follows (permissions on the server, data minimisation, who sees names and reasons) are in [AGENTS.md](AGENTS.md); the checks are in `docs/security.md` and `test/security.test.ts`.
+The rules every change follows (permissions on the server, data minimisation, who sees names and reasons) are in [AGENTS.md](AGENTS.md); the checks are in `docs/dev/security.md` and `test/security.test.ts`.

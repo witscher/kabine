@@ -20,4 +20,4 @@ Drivers offer seats for away games, players (or their parents) look for one and 
 | `app/card.tsx` | the carpool card with its sheets |
 | `test/carpool.test.ts` | API tests |
 
-Decisions: `docs/design.md`, Carpools.
+Decisions: `docs/dev/design.md`, Carpools.

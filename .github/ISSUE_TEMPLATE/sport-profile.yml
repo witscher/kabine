@@ -5,7 +5,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        A sport profile is one file in `sports/`. `npm run new -- sport <id>` creates it. Guide: [docs/sports.md](https://github.com/witscher/kabine/blob/main/docs/sports.md).
+        A sport profile is one file in `sports/`. `npm run new -- sport <id>` creates it. Guide: [docs/dev/sports.md](https://github.com/witscher/kabine/blob/main/docs/dev/sports.md).
   - type: input
     id: sport
     attributes:

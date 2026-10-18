@@ -1,5 +1,5 @@
 // __NAME__. TODO: describe which association's rules the age classes follow (country, federation).
-// Guide: docs/sports.md. Names are not machine-translated at runtime: write every language here.
+// Guide: docs/dev/sports.md. Names are not machine-translated at runtime: write every language here.
 import { defineSport, DUTY_KIOSK, DUTY_SHIRTS } from "../shared/sport-api";
 
 export default defineSport({

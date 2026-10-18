@@ -1,5 +1,5 @@
 // The app side of a module (modules/<id>/app/index.tsx): pages and the places in the core screens where
-// it shows something. Guide: docs/modules.md. Nothing of a module shows while it is switched off.
+// it shows something. Guide: docs/dev/modules.md. Nothing of a module shows while it is switched off.
 import type { ComponentType } from "preact";
 import type { IconName } from "./icons";
 import type { ModuleManifest } from "../shared/module-api";

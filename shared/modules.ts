@@ -1,5 +1,5 @@
 // What the rest of Kabine knows about modules, derived from the manifests in modules/index.ts.
-// A module is a folder modules/<id>/ (guide: docs/modules.md); nothing here changes when one is added.
+// A module is a folder modules/<id>/ (guide: docs/dev/modules.md); nothing here changes when one is added.
 //   - ClubModules, DEFAULT_MODULES and moduleOn (everywhere in worker and app)
 //   - moduleOfPath: the API paths of a module, checked on every request (worker/app.ts)
 import { MODULES } from "../modules";

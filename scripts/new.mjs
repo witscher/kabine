@@ -3,7 +3,7 @@
 //   npm run new -- connector <name> --vendor "nuLiga" --domain nuliga.example [--sport handball]
 //   npm run new -- sport <id> --name "Basketball" [--name-de "Basketball"]
 // <name> is the folder (kebab-case, e.g. "match-reports"); the module id is its camelCase form.
-// Afterwards: npm run i18n && npm run check, then fill in README.md and the TODOs. Guide: docs/modules.md.
+// Afterwards: npm run i18n && npm run check, then fill in README.md and the TODOs. Guide: docs/dev/modules.md.
 import { cpSync, existsSync, readdirSync, readFileSync, renameSync, statSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
@@ -86,15 +86,15 @@ const withEntry = withImport.replace("  // new modules: above this line", `  ${v
 if (withEntry === index || !withEntry.includes(`./${folder}/module`)) fail("Could not update modules/index.ts.");
 writeFileSync("modules/index.ts", withEntry);
 
-// A row in docs/modules.md (the contract test looks for it)
-const docs = readFileSync("docs/modules.md", "utf8");
+// A row in docs/dev/modules.md (the contract test looks for it)
+const docs = readFileSync("docs/dev/modules.md", "utf8");
 const label = kind === "module" ? values.__NAME__ : `Game schedule from ${values.__VENDOR__}`;
 const row = `| \`${id}\` | ${label} | off (beta) | \`modules/${folder}/\` |\n`;
 const table = docs.indexOf("| Id | Switch | Default | Code |");
 const end = docs.indexOf("\n\n", table);
-if (table < 0 || end < 0) fail("Could not find the module table in docs/modules.md.");
-writeFileSync("docs/modules.md", `${docs.slice(0, end + 1)}${row}${docs.slice(end + 1)}`);
+if (table < 0 || end < 0) fail("Could not find the module table in docs/dev/modules.md.");
+writeFileSync("docs/dev/modules.md", `${docs.slice(0, end + 1)}${row}${docs.slice(end + 1)}`);
 
 console.log(`Created ${target}/ (module id "${id}", beta, off by default).`);
 console.log("Next: npm run i18n && npm run check, then fill in README.md and the module's code.");
-if (kind === "connector") console.log("Connector: replace the invented format in worker/connector.ts and record real samples (docs/connectors.md).");
+if (kind === "connector") console.log("Connector: replace the invented format in worker/connector.ts and record real samples (docs/dev/connectors.md).");

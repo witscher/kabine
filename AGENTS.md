@@ -8,12 +8,12 @@ Contributions with the help of a coding agent are welcome. A person sends the pu
 
 | You want to add | Where | Guide |
 | --- | --- | --- |
-| A function clubs can switch on (polls, documents, statistics, …) | a module: `modules/<name>/` | [docs/modules.md](docs/modules.md) |
-| Game schedules from another association system (handball360, nuLiga, SAMS, basketball-bund, …) | a fixture connector module | [docs/connectors.md](docs/connectors.md) |
-| Another sport (age classes, playing times, typical helper duties) | a file in `sports/` | [docs/sports.md](docs/sports.md) |
+| A function clubs can switch on (polls, documents, statistics, …) | a module: `modules/<name>/` | [docs/dev/modules.md](docs/dev/modules.md) |
+| Game schedules from another association system (handball360, nuLiga, SAMS, basketball-bund, …) | a fixture connector module | [docs/dev/connectors.md](docs/dev/connectors.md) |
+| Another sport (age classes, playing times, typical helper duties) | a file in `sports/` | [docs/dev/sports.md](docs/dev/sports.md) |
 | Another SMS provider | `modules/sms/worker/provider.ts` | `modules/sms/README.md` |
-| A language or a better translation | `locales/` | [docs/translation.md](docs/translation.md) |
-| A fix or improvement of the core | `worker/`, `src/`, `shared/` | this file, `docs/design.md` |
+| A language or a better translation | `locales/` | [docs/dev/translation.md](docs/dev/translation.md) |
+| A fix or improvement of the core | `worker/`, `src/`, `shared/` | this file, [docs/dev/architecture.md](docs/dev/architecture.md), `docs/dev/design.md` |
 
 Start a module or connector with the generator; it creates the folder, registers it and adds a row in the docs, and `npm run check` passes right after:
 
@@ -38,7 +38,8 @@ New modules start as `status: "beta"`, switched off. Modules never change core f
 | `locales/` | translations (gettext `.po`, German entries filled from `locales/de/*.json`) |
 | `test/` | Vitest in the Workers pool, incl. the contract tests every module and connector must pass |
 | `e2e/` | Playwright tests against a local build with invented data |
-| `docs/` | for clubs: install, operation, privacy; for contributors: modules, connectors, design, security, translation, decisions |
+| `docs/` | for clubs: install, operation, privacy (also in German) |
+| `docs/dev/` | for contributors: [architecture](docs/dev/architecture.md), modules, connectors, sports, translation, design, security, decisions, roadmap |
 
 ## Rules
 
@@ -56,7 +57,7 @@ New modules start as `status: "beta"`, switched off. Modules never change core f
 
 **Code**
 - Times are stored and computed as local time in the club's time zone (`worker/lib/time.ts`), not UTC.
-- Every text a person reads goes through Lingui (`t`, `<Trans>`, plurals via ICU), English source, German translation in the same change (machine translations in `locales/de/*.ai.json`, marked `# ai`). Identifiers and comments in English. See [docs/translation.md](docs/translation.md).
+- Every text a person reads goes through Lingui (`t`, `<Trans>`, plurals via ICU), English source, German translation in the same change (machine translations in `locales/de/*.ai.json`, marked `# ai`). Identifiers and comments in English. See [docs/dev/translation.md](docs/dev/translation.md).
 - Keep D1 reads low: start queries from a candidate set, use indexes, page lists. `test/query-plans.test.ts` checks the hot queries.
 - Match the surrounding code: its naming, comment density and idioms. Short comments that say why.
 

@@ -1,7 +1,7 @@
 // Fills German translations into locales/de.po from locales/de/*.json ({ "English msgid": "Deutsch" }).
 // Files named *.ai.json hold machine translations: their entries get the comment "ai".
 // and checks the catalog: every message translated, same placeholders and tags as the source.
-// Entries translated by a machine carry the translator comment "ai" (see docs/translation.md).
+// Entries translated by a machine carry the translator comment "ai" (see docs/dev/translation.md).
 // Usage: npx lingui extract && node tools/i18n-fill.mjs [--check]
 import { readdirSync, readFileSync, writeFileSync } from "node:fs";
 import PO from "pofile";

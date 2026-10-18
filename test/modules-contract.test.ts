@@ -1,8 +1,8 @@
-// The contract every module keeps (docs/modules.md). Runs for all modules, also the ones added later,
+// The contract every module keeps (docs/dev/modules.md). Runs for all modules, also the ones added later,
 // so a new module only has to pass it. Invented names only.
 import { env } from "cloudflare:workers";
 import { beforeEach, describe, expect, it } from "vitest";
-import modulesDoc from "../docs/modules.md?raw";
+import modulesDoc from "../docs/dev/modules.md?raw";
 import type { ModuleManifest } from "../shared/module-api";
 import { DEFAULT_MODULES, MODULES, moduleOfPath } from "../shared/modules";
 import { saveClub } from "../worker/domain/club";
@@ -28,7 +28,7 @@ describe("module manifests", () => {
       const privacy = m.privacy();
       if (privacy) for (const [k, v] of Object.entries(privacy)) expect(v.trim(), `${m.id}: privacy.${k}`).not.toBe("");
       for (const topic of m.notificationTopics ?? []) expect(topic.label().trim(), `${m.id}: topic ${topic.id}`).not.toBe("");
-      expect(modulesDoc, `${m.id}: row in docs/modules.md`).toContain(`| \`${m.id}\` |`);
+      expect(modulesDoc, `${m.id}: row in docs/dev/modules.md`).toContain(`| \`${m.id}\` |`);
       expect(DEFAULT_MODULES[m.id as keyof typeof DEFAULT_MODULES]).toBe(m.defaultOn);
     }
   });

@@ -660,7 +660,7 @@ const PEOPLE = "SELECT value FROM json_each(?1) UNION ALL SELECT value FROM json
  * Preselection for VISIBLE_SQL: all events that could be visible (a superset).
  * It takes the same persons as VISIBLE_SQL (?1 oneself, ?2 the children) and every role,
  * so that no visible event is missing. VISIBLE_SQL still decides; the preselection only
- * saves checking every event in the range one by one (see docs/design.md, Database read load).
+ * saves checking every event in the range one by one (see docs/dev/design.md, Database read load).
  * In two groups because D1 allows at most five parts per UNION. Result: CTE `ids`.
  */
 export const CANDIDATES_CTE = `

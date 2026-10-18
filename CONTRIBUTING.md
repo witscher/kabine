@@ -2,7 +2,7 @@
 
 Thank you for helping. Kabine is AGPL-3.0; by sending a pull request you agree that your contribution is released under the same licence.
 
-Good first contributions: a translation, a sport profile, a fixture connector for another league system, an SMS provider, a new module. Where things live, the rules and the commands are in [AGENTS.md](AGENTS.md), which coding agents read on their own; modules: [docs/modules.md](docs/modules.md), connectors: [docs/connectors.md](docs/connectors.md).
+Good first contributions: a translation, a sport profile, a fixture connector for another league system, an SMS provider, a new module. Where things live, the rules and the commands are in [AGENTS.md](AGENTS.md), which coding agents read on their own; modules: [docs/dev/modules.md](docs/dev/modules.md), connectors: [docs/dev/connectors.md](docs/dev/connectors.md).
 
 ## Pull requests written with a coding agent
 
@@ -26,7 +26,7 @@ npm run e2e                # end-to-end tests (for changes to screens)
 
 - One topic per pull request, with a short description of what changes for whom.
 - `npm run check` passes (it includes the translation check); a test for new behaviour.
-- Every text a person reads goes through Lingui, English source plus the German translation in the same change (machine translations marked `# ai`, see [docs/translation.md](docs/translation.md)).
+- Every text a person reads goes through Lingui, English source plus the German translation in the same change (machine translations marked `# ai`, see [docs/dev/translation.md](docs/dev/translation.md)).
 - Schema changes are new files in `migrations/`; they must run safely for every club.
 
 ## Rules of the project

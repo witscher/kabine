@@ -1,5 +1,5 @@
 // Game schedule from __VENDOR__. Access: describe the permitted access here (official API, public export or
-// the association's permission) and link the terms of use in README.md. Guide: docs/connectors.md.
+// the association's permission) and link the terms of use in README.md. Guide: docs/dev/connectors.md.
 //
 // This template reads an invented JSON format, see ../samples/schedule.json. Replace parseLink, request and
 // parse with the real format of the source, then record real (or realistic) samples.

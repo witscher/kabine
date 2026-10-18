@@ -81,6 +81,6 @@ Then continue with step 2.
 
 ## Costs and limits
 
-The free plan of Cloudflare Workers covers a club with several hundred members: requests, D1 reads and writes, KV, Durable Objects and queues all have daily allowances. Kabine is built to stay well below them (see `docs/design.md`, Database read load). Check the current limits on Cloudflare's pricing pages. If a limit is reached, the app answers with errors until the next day; the paid plan (5 USD per month at the time of writing) removes that risk.
+The free plan of Cloudflare Workers covers a club with several hundred members: requests, D1 reads and writes, KV, Durable Objects and queues all have daily allowances. Kabine is built to stay well below them (see `docs/dev/design.md`, Database read load). Check the current limits on Cloudflare's pricing pages. If a limit is reached, the app answers with errors until the next day; the paid plan (5 USD per month at the time of writing) removes that risk.
 
 SMS cost money per message with the provider (seven.io). The module is off by default.

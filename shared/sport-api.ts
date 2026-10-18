@@ -1,7 +1,7 @@
 // What a sport profile is (sports/<id>.ts): age classes, playing times and default helper duties as
 // data. The setup wizard creates the age classes of the season and the duty types from the chosen
 // profile; admins adjust them afterwards. Age classes carry no gender: a team is age class + gender +
-// level. Guide: docs/sports.md.
+// level. Guide: docs/dev/sports.md.
 import type { Locale } from "./i18n";
 
 export interface AgeClassTemplate {

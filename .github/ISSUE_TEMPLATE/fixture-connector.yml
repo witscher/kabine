@@ -5,7 +5,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        A connector reads the game schedule of one team from an association's system. Only **permitted access** is accepted: an official API, a public JSON or iCal export, or written permission from the association. No reading of HTML pages against the terms of use. Guide: [docs/connectors.md](https://github.com/witscher/kabine/blob/main/docs/connectors.md).
+        A connector reads the game schedule of one team from an association's system. Only **permitted access** is accepted: an official API, a public JSON or iCal export, or written permission from the association. No reading of HTML pages against the terms of use. Guide: [docs/dev/connectors.md](https://github.com/witscher/kabine/blob/main/docs/dev/connectors.md).
   - type: input
     id: source
     attributes:

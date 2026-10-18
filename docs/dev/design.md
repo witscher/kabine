@@ -1,6 +1,6 @@
 # Design decisions
 
-The reasons behind behaviour that is not obvious from the code. Newer decisions about Kabine itself are in `docs/decisions.md`.
+The reasons behind behaviour that is not obvious from the code. Newer decisions about Kabine itself are in `docs/dev/decisions.md`.
 
 ## Sign-in and security
 
@@ -318,7 +318,7 @@ The choice is stored on the account (`accounts.coach_mode`) and applies on all d
 
 Each team has the switch "Responses visible to everyone" (Team → Settings, coaches and admins), off by default. Youth teams usually keep it off, so that declines by others do not cause a domino effect; adult teams often want to see who is coming.
 
-When it is on, players and involved parents who take part in the event themselves or through their child see "Kim M." and the status (accepted, declined, open, absent) for trainings and special events. Decline reasons never. For joint events only if all teams involved have the switch on. Games and club-wide events are excluded; a second switch for games is planned. Team staff always see names and status, never reasons (see `docs/decisions.md`).
+When it is on, players and involved parents who take part in the event themselves or through their child see "Kim M." and the status (accepted, declined, open, absent) for trainings and special events. Decline reasons never. For joint events only if all teams involved have the switch on. Games and club-wide events are excluded; a second switch for games is planned. Team staff always see names and status, never reasons (see `docs/dev/decisions.md`).
 
 ## Sharing invitation links
 

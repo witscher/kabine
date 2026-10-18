@@ -1,4 +1,4 @@
-// Security checklist (docs/security.md): each case recreates the misuse and checks that it fails. Invented names.
+// Security checklist (docs/dev/security.md): each case recreates the misuse and checks that it fails. Invented names.
 // Finding 1 (schedule import links foreign games) is tested in modules/handball4all/test/handball4all.test.ts.
 import { env, exports } from "cloudflare:workers";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";

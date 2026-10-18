@@ -1,4 +1,4 @@
-// Carpools for away games (see docs/design.md, Carpools).
+// Carpools for away games (see docs/dev/design.md, Carpools).
 // Drivers offer free seats, passengers book themselves. The system assigns nothing, it only notifies.
 import { plural, t } from "@lingui/core/macro";
 import type { CarpoolInfo, CarpoolOffer, CarpoolPersonRef, CarpoolRequest } from "../types";

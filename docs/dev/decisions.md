@@ -1,6 +1,6 @@
 # Decisions
 
-Decisions not covered by `docs/plan.md`, with reasons. Newest first.
+Decisions not covered by `docs/dev/roadmap.md`, with reasons. Newest first.
 
 ## Modules in their own folders, for contributions with coding agents (October 2026)
 
@@ -54,7 +54,7 @@ The abbreviation is needed in many synchronous places (titles in lists, push tex
 
 ## No explainer videos in the repository (K1, October 2026)
 
-The videos of the original app were screen recordings with real names and the club's design. Kabine shows the steps as text under *Hilfe → Anleitungen*. Videos can come back later, generated from the demo in both languages (see open points in `docs/plan.md`).
+The videos of the original app were screen recordings with real names and the club's design. Kabine shows the steps as text under *Hilfe → Anleitungen*. Videos can come back later, generated from the demo in both languages (see open points in `docs/dev/roadmap.md`).
 
 ## Demo data instead of a seed (K1, October 2026)
 

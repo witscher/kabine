@@ -1,5 +1,5 @@
 // Contract every sport profile (sports/<id>.ts) must fulfil. A new sport only needs its file and a line
-// in sports/index.ts; this test tells what is missing. Guide: docs/sports.md.
+// in sports/index.ts; this test tells what is missing. Guide: docs/dev/sports.md.
 import { describe, expect, it } from "vitest";
 import { LOCALES } from "../shared/i18n";
 import { MODULES } from "../shared/modules";

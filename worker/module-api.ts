@@ -1,5 +1,5 @@
 // The worker side of a module (modules/<id>/worker/index.ts): its routes and the hooks the core calls.
-// Guide: docs/modules.md. Data hooks (routes, cron, event data, notifications) only run while the
+// Guide: docs/dev/modules.md. Data hooks (routes, cron, event data, notifications) only run while the
 // module is on; cleanup hooks always run, because data may exist from a time it was on.
 import type { Hono } from "hono";
 import type { ModuleManifest } from "../shared/module-api";
@@ -64,7 +64,7 @@ export type FixtureSource = Record<string, string | number | null>;
 
 /**
  * Game schedules from an association's system (module kind "fixtures"). Only permitted access:
- * an official API, a public export or the association's permission (docs/connectors.md).
+ * an official API, a public export or the association's permission (docs/dev/connectors.md).
  */
 export interface FixtureConnector {
   /** Brand name of the source, not translated ("handball4all"). */

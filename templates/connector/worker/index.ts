@@ -1,4 +1,4 @@
-// Worker part of the __VENDOR__ connector. Linking and syncing are the core's; guide: docs/connectors.md.
+// Worker part of the __VENDOR__ connector. Linking and syncing are the core's; guide: docs/dev/connectors.md.
 import { defineWorkerModule } from "../../../worker/module-api";
 import manifest from "../module";
 import { connector } from "./connector";

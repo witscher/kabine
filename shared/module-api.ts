@@ -1,6 +1,6 @@
 // What a module declares about itself (modules/<id>/module.ts). Pure data, shared by worker and app.
 // The worker part (modules/<id>/worker/, worker/module-api.ts) and the app part
-// (modules/<id>/app/, src/module-api.ts) build on it. Guide: docs/modules.md.
+// (modules/<id>/app/, src/module-api.ts) build on it. Guide: docs/dev/modules.md.
 import type { SportId } from "./sports";
 
 export type ModuleKind =

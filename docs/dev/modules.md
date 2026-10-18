@@ -1,6 +1,6 @@
 # Modules and extension points
 
-Kabine has a small core (events, responses, squads, chat, push) and **modules** a club switches on or off under *Administration → Club → Modules*. A module lives in one folder, `modules/<id>/`. While it is off, it disappears from the app and its API paths answer 404. Contributions are welcome as pull requests: start with [CONTRIBUTING.md](../CONTRIBUTING.md).
+Kabine has a small core (events, responses, squads, chat, push) and **modules** a club switches on or off under *Administration → Club → Modules*. A module lives in one folder, `modules/<id>/`. While it is off, it disappears from the app and its API paths answer 404. Contributions are welcome as pull requests: start with [CONTRIBUTING.md](../../CONTRIBUTING.md).
 
 ## A module folder
 
@@ -18,7 +18,7 @@ modules/carpools/
 
 `modules/index.ts` lists the manifests, one line per module. A module may import from a module it `requires` (youth referees build on the helper plan), never from others. The worker and app parts are found by the build (`import.meta.glob`), so nothing else in the core needs to change. Code in `worker/` may only import from the worker, `shared/` and the module itself; code in `app/` only from `src/`, `shared/` and the module itself.
 
-### Manifest (`module.ts`, [`shared/module-api.ts`](../shared/module-api.ts))
+### Manifest (`module.ts`, [`shared/module-api.ts`](../../shared/module-api.ts))
 
 | Field | Meaning |
 | --- | --- |
@@ -31,7 +31,7 @@ modules/carpools/
 | `privacy()` | What it stores about people, who sees it, when it is deleted; shown on every installation's privacy page. `null` if it stores no personal data. |
 | `notificationTopics` | Topics people can switch off under *Profile → Notifications*. |
 
-### Worker part (`worker/index.ts`, [`worker/module-api.ts`](../worker/module-api.ts))
+### Worker part (`worker/index.ts`, [`worker/module-api.ts`](../../worker/module-api.ts))
 
 | Hook | Called | Runs while off |
 | --- | --- | --- |
@@ -46,7 +46,7 @@ modules/carpools/
 | `fixtures` | a fixture connector (kind `fixtures`, [connectors.md](connectors.md)) | no |
 | `texts` | text messages (SMS) for sign-in codes and reminders (`worker/domain/texts.ts`) | no |
 
-### App part (`app/index.tsx`, [`src/module-api.ts`](../src/module-api.ts))
+### App part (`app/index.tsx`, [`src/module-api.ts`](../../src/module-api.ts))
 
 | Hook | Shows |
 | --- | --- |
@@ -57,7 +57,7 @@ modules/carpools/
 | `eventSection` | a section on the event page |
 | `gameLinks` | links of a fixture module for a game (live ticker, game report) on the "In progress" card and the event page |
 
-[`modules/carpools/`](../modules/carpools/) uses all of the event hooks and is the reference module.
+[`modules/carpools/`](../../modules/carpools/) uses all of the event hooks and is the reference module.
 
 ## The modules
 

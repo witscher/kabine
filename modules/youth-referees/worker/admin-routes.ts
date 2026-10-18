@@ -1,6 +1,6 @@
 // KiHaSL/JuHaSL: grant the role (admin directly or through a link) and redeem the link.
 // The link only gives the role to persons who are already in the app (signed in: oneself
-// or one's own child). See docs/design.md, Youth referees (KiHaSL/JuHaSL).
+// or one's own child). See docs/dev/design.md, Youth referees (KiHaSL/JuHaSL).
 import { t } from "@lingui/core/macro";
 import { Hono } from "hono";
 import { z } from "zod";

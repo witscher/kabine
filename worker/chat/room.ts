@@ -165,7 +165,7 @@ export class ChatRoom extends DurableObject<Env> {
 
   /**
    * Who can be mentioned with @. Teams: whoever has written already, and the coaches
-   * (protection of the children). Groups: all members and leads (docs/design.md, Groups).
+   * (protection of the children). Groups: all members and leads (docs/dev/design.md, Groups).
    */
   private async mentionable(): Promise<Mentionable[]> {
     const local = this.sql

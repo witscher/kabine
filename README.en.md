@@ -148,7 +148,7 @@ You need a Cloudflare account (the free plan is enough for a typical club), a Gi
 
 ## Languages
 
-English and German. Translations are gettext `.po` files in `locales/` that anyone can correct. Adding a language: [docs/translation.md](docs/translation.md).
+English and German. Translations are gettext `.po` files in `locales/` that anyone can correct. Adding a language: [docs/dev/translation.md](docs/dev/translation.md).
 
 ## Development
 
@@ -166,7 +166,7 @@ npm run screenshots                 # the pictures above, in English and German
 
 The first admin is set up at `/einrichtung#<ADMIN_BOOTSTRAP_TOKEN>` (see `.dev.vars`).
 
-Built with Cloudflare Workers, D1, Durable Objects and Queues, Hono, Preact and Lingui. Design decisions: [docs/design.md](docs/design.md) and [docs/decisions.md](docs/decisions.md). Security rules with a test each: [docs/security.md](docs/security.md).
+Built with Cloudflare Workers, D1, Durable Objects and Queues, Hono, Preact and Lingui. Design decisions: [docs/dev/design.md](docs/dev/design.md) and [docs/dev/decisions.md](docs/dev/decisions.md). Security rules with a test each: [docs/dev/security.md](docs/dev/security.md).
 
 ## Contributing
 

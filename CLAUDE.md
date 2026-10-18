@@ -4,7 +4,7 @@
 
 These apply to work in the maintainer's own checkout.
 
-Read `docs/plan.md` before every task: decisions, milestones, open points. Changes from the original club app that still need porting are listed in `docs/upstream-tasks.md`. Decisions not covered there go into `docs/decisions.md` with a reason.
+Read `docs/dev/roadmap.md` before every task: decisions, milestones, open points. Changes from the original club app that still need porting are listed in `docs/dev/upstream-tasks.md`. Decisions not covered there go into `docs/dev/decisions.md` with a reason.
 
 ## Cloudflare
 
