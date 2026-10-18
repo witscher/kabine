@@ -1983,6 +1983,11 @@ msgstr "Es gibt noch keine Mannschaft."
 msgid "Your club"
 msgstr "Dein Verein"
 
+# ai
+#: src/pages/club-settings.tsx
+msgid "Source code (optional)"
+msgstr "Quellcode (optional)"
+
 #: src/pages/helpers.tsx
 msgid "KiHaSL list"
 msgstr "KiHaSL-Liste"
@@ -3282,6 +3287,11 @@ msgstr "Fahrgemeinschaften gibt es nur bei Auswärtsspielen."
 #: src/pages/home.tsx
 msgid "Meet"
 msgstr "Treffen"
+
+# ai
+#: src/pages/club-settings.tsx
+msgid "Only if your club runs a changed version of Kabine: the link to your copy. The licence (AGPL) asks you to offer its source code."
+msgstr "Nur wenn euer Verein eine veränderte Fassung von Kabine betreibt: der Link zu eurer Kopie. Die Lizenz (AGPL) verlangt, deren Quellcode anzubieten."
 
 #: src/pages/team.tsx
 msgid "Saves nominating for every game. Changes for individual games remain possible. Instead of a push about the nomination, a reminder comes three days before each game."
@@ -10563,3 +10573,4 @@ msgstr "Chat schreiben"
 #: worker/routes/events.ts
 msgid "In one time block the end is before the start."
 msgstr "Bei einem Zeitblock liegt das Ende vor dem Beginn."
+

@@ -32,6 +32,7 @@ const clubSchema = z.object({
   privacyUrl: z.string().trim().url().max(300).nullable().optional(),
   privacyText: z.string().trim().max(5000).nullable().optional(),
   contact: z.string().trim().max(200).nullable().optional(),
+  sourceUrl: z.string().trim().url().max(300).nullable().optional(),
   defaultLocale: z.enum(LOCALES).optional(),
   sport: z.enum(["handball", "football", "other"]).optional(),
   country: z.string().regex(/^[A-Z]{2}$/).optional(),
@@ -48,7 +49,7 @@ clubRoutes.put("/admin/club", async (c) => {
   const actor = requireActor(c);
   requireAdmin(actor);
   const input = parse(clubSchema, await readJson(c.req.raw));
-  if (input.privacyUrl && !/^https:\/\//.test(input.privacyUrl)) throw badRequest(t`The link must start with https://.`);
+  for (const url of [input.privacyUrl, input.sourceUrl]) if (url && !/^https:\/\//.test(url)) throw badRequest(t`The link must start with https://.`);
   const current = await loadClub(c.env.DB);
   const { modules: changed, ...rest } = input;
   const modules: ClubModules = { ...current.modules };

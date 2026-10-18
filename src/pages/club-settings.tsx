@@ -3,7 +3,7 @@
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { useState } from "preact/hooks";
-import { type ClubModules, type ClubProfile, isHexColor } from "../../shared/club";
+import { type ClubModules, type ClubProfile, isHexColor, KABINE_SOURCE } from "../../shared/club";
 import { LOCALE_NAMES, LOCALES, type Locale } from "../../shared/i18n";
 import { useQuery } from "../store";
 import { api, errorMessage } from "../api";
@@ -28,6 +28,7 @@ export function ClubProfileForm({ onSaved, submitLabel, parts = ALL_PARTS }: { o
   const [privacyUrl, setPrivacyUrl] = useState(club.privacyUrl ?? "");
   const [privacyText, setPrivacyText] = useState(club.privacyText ?? "");
   const [contact, setContact] = useState(club.contact ?? "");
+  const [sourceUrl, setSourceUrl] = useState(club.sourceUrl ?? "");
   const [defaultLocale, setDefaultLocale] = useState<Locale>(club.defaultLocale);
   const [country, setCountry] = useState(club.country);
   const [subdivision, setSubdivision] = useState(club.subdivision ?? "");
@@ -47,6 +48,7 @@ export function ClubProfileForm({ onSaved, submitLabel, parts = ALL_PARTS }: { o
         privacyUrl: privacyUrl.trim() || null,
         privacyText: privacyText.trim() || null,
         contact: contact.trim() || null,
+        sourceUrl: sourceUrl.trim() || null,
         defaultLocale,
         country,
         subdivision: subdivision || null,
@@ -164,6 +166,15 @@ export function ClubProfileForm({ onSaved, submitLabel, parts = ALL_PARTS }: { o
             onInput={setContact}
             maxLength={200}
             hint={t`Name and e-mail address, appears under help`}
+          />
+          <TextField
+            label={t`Source code (optional)`}
+            type="url"
+            inputMode="url"
+            value={sourceUrl}
+            onInput={setSourceUrl}
+            placeholder={KABINE_SOURCE}
+            hint={t`Only if your club runs a changed version of Kabine: the link to your copy. The licence (AGPL) asks you to offer its source code.`}
           />
         </section>
       ) : null}

@@ -77,7 +77,7 @@ Each milestone ends with typecheck, unit tests and e2e green, a commit on `main`
 ## Open points
 
 - Home screen icons from the club logo: render them in the browser from logo and colours (canvas) when the logo is saved, store in KV, point the manifest to them. Until then the neutral Kabine icons are used. (K7)
-- AGPL source offer: the link under Help points to the upstream repository. A club running changed code must point it to its own copy; make the URL a setting (wizard, K7/K9).
+- AGPL source offer: done, the club profile has a source code link (empty: the Kabine repository), shown under Help.
 - The owner handover exists in the API (`PUT /api/admin/club/owner`), the UI follows with the wizard (K7).
 
 - Explainer videos: generate from the demo with Playwright in both languages instead of recording real data.

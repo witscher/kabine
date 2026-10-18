@@ -1948,6 +1948,10 @@ msgstr "There are no teams yet."
 msgid "Your club"
 msgstr "Your club"
 
+#: src/pages/club-settings.tsx
+msgid "Source code (optional)"
+msgstr "Source code (optional)"
+
 #: src/pages/helpers.tsx
 msgid "KiHaSL list"
 msgstr "KiHaSL list"
@@ -3219,6 +3223,10 @@ msgstr "Carpools only exist for away games."
 #: src/pages/home.tsx
 msgid "Meet"
 msgstr "Meet"
+
+#: src/pages/club-settings.tsx
+msgid "Only if your club runs a changed version of Kabine: the link to your copy. The licence (AGPL) asks you to offer its source code."
+msgstr "Only if your club runs a changed version of Kabine: the link to your copy. The licence (AGPL) asks you to offer its source code."
 
 #: src/pages/team.tsx
 msgid "Saves nominating for every game. Changes for individual games remain possible. Instead of a push about the nomination, a reminder comes three days before each game."

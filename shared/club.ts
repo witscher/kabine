@@ -47,6 +47,11 @@ export interface ClubProfile {
   privacyText: string | null;
   /** Contact for questions about the app, shown under Help (optional). */
   contact: string | null;
+  /**
+   * Source code of this installation (AGPL). Empty: the Kabine repository. A club running a changed
+   * version links its own copy here.
+   */
+  sourceUrl: string | null;
   /** Sport profile (shared/sports.ts): age classes, playing times, default duties. */
   sport: SportId;
   /** ISO country code and subdivision (OpenHolidays codes, e.g. "DE-BW") for school and public holidays. */
@@ -61,6 +66,9 @@ export interface ClubProfile {
   setupDone: boolean;
 }
 
+/** Upstream repository, the source code link when a club has not set its own. */
+export const KABINE_SOURCE = "https://github.com/witscher/kabine";
+
 export const DEFAULT_CLUB: ClubProfile = {
   name: "Kabine",
   shortName: "Kabine",
@@ -70,6 +78,7 @@ export const DEFAULT_CLUB: ClubProfile = {
   privacyUrl: null,
   privacyText: null,
   contact: null,
+  sourceUrl: null,
   sport: "handball",
   country: "DE",
   subdivision: null,

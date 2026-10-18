@@ -1,4 +1,5 @@
 import { t } from "@lingui/core/macro";
+import { KABINE_SOURCE } from "../../shared/club";
 import { Trans } from "@lingui/react/macro";
 import { useEffect, useState } from "preact/hooks";
 import { api, errorMessage } from "../api";
@@ -48,6 +49,7 @@ export function HelpPage() {
   const [reply, setReply] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const contact = club.contact;
+  const sourceUrl = club.sourceUrl ?? KABINE_SOURCE;
 
   useEffect(() => {
     if (!image) return setPreview(null);
@@ -175,7 +177,7 @@ export function HelpPage() {
             </>
           ) : null}
           <Trans>
-            Kabine is free software under the AGPL-3.0 licence. <a href="https://github.com/witscher/kabine">Source code</a>
+            Kabine is free software under the AGPL-3.0 licence. <a href={sourceUrl}>Source code</a>
           </Trans>
         </p>
       </div>
