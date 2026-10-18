@@ -2,6 +2,10 @@
 
 Decisions not covered by `docs/plan.md`, with reasons. Newest first.
 
+## Holiday plans in the timeline (October 2026)
+
+While a holiday plan applies, or before it starts, the event overview shows a note where it begins: "Autumn holidays, 26 Oct to 30 Oct: holiday training times for wD" or, for a plan without training times, "no training for wD". A plan that has already begun stands at the top with "until". So nobody wonders why trainings are at other times or missing. The notes come with the page of events (`breaks`) for the teams one plays, coaches or looks after and the children's teams; plans of several teams with the same name and period appear once. Public holidays and plain school holidays without a holiday plan get no note: trainings simply do not take place on public holidays, and without a holiday plan they go on as usual.
+
 ## Team staff see names, not reasons (K8, October 2026)
 
 Physios, team managers and kit managers are members of a team with the role `staff`. They see all events of the team, the chat, and who accepted or declined (as "Kim M.", for games once the squad is published), and they get the event changes of the team (cancellations, moves, new events, training times). They are not participants: no response of their own, not nominated, not counted in squad numbers or statistics, not in the helper plan as players.

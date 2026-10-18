@@ -3,7 +3,7 @@
 // and loaded with details, not all events of the season.
 // See docs/design.md, Database read load.
 import { isRelevantEvent } from "../../shared/relevance";
-import type { EventPage, EventSummary } from "../../shared/types";
+import type { EventPage, EventSummary, TrainingBreak } from "../../shared/types";
 import type { Actor } from "../auth/actor";
 import { all, list } from "../lib/db";
 import { addDays, nowLocal, todayLocal } from "../lib/time";
@@ -191,5 +191,35 @@ export async function loadEventPage(db: D1Database, actor: Actor, opts: { limit:
     next: next.map(finish),
     openHelp: openHelp.map(finish),
     trainingsUntil: opts.past ? null : addDays(today, HORIZON_DAYS),
+    breaks: opts.past ? [] : await trainingBreaks(db, actor, today, opts.teamId),
   };
+}
+
+/**
+ * Holiday plans of the teams one plays, coaches or looks after (and the children's), so the
+ * timeline can say why trainings differ or are missing. Plans with the same name and period
+ * are shown once with all their teams.
+ */
+export async function trainingBreaks(db: D1Database, actor: Actor, today: string, teamId: number | null): Promise<TrainingBreak[]> {
+  const own = [...actor.memberships.map((m) => m.teamId), ...[...actor.childMemberships.values()].flat().map((m) => m.teamId)];
+  const teamIds = teamId != null ? own.filter((id) => id === teamId) : own;
+  if (!teamIds.length) return [];
+  const rows = await all<{ name: string; valid_from: string; valid_to: string; training: number; team_name: string }>(
+    db,
+    `SELECT p.name, p.valid_from, p.valid_to, t.name AS team_name,
+            EXISTS (SELECT 1 FROM training_rules r WHERE r.plan_id = p.id) AS training
+       FROM training_plans p JOIN teams t ON t.id = p.team_id
+      WHERE p.kind = 'holiday' AND p.valid_to >= ? AND p.team_id IN (SELECT value FROM json_each(?))
+      ORDER BY p.valid_from, p.valid_to, t.name`,
+    today,
+    list([...new Set(teamIds)]),
+  );
+  const out = new Map<string, TrainingBreak>();
+  for (const r of rows) {
+    const key = `${r.name}|${r.valid_from}|${r.valid_to}|${r.training}`;
+    const entry = out.get(key) ?? { name: r.name, startsOn: r.valid_from, endsOn: r.valid_to, training: r.training === 1, teams: [] };
+    if (!entry.teams.includes(r.team_name)) entry.teams.push(r.team_name);
+    out.set(key, entry);
+  }
+  return [...out.values()];
 }

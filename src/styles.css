@@ -2699,3 +2699,20 @@ button.announcement-head {
   background: var(--yellow);
   transition: width 0.2s ease;
 }
+
+/* Holiday plan or training break in the timeline */
+.break-note {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  margin: 4px 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--yellow) 18%, var(--card));
+  font-size: 14px;
+  line-height: 1.4;
+}
+.break-note svg {
+  flex: none;
+  margin-top: 1px;
+}

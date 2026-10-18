@@ -133,6 +133,20 @@ export interface EventPage {
   next: EventSummary[];
   openHelp: EventSummary[];
   trainingsUntil: string | null;
+  /** Holiday plans and training breaks of the own teams (and the children's) that are not over yet. */
+  breaks: TrainingBreak[];
+}
+
+/**
+ * A holiday plan of one or more teams in the timeline. `training`: the plan has training times
+ * (other times than usual); without, it is a training break.
+ */
+export interface TrainingBreak {
+  name: string;
+  startsOn: string;
+  endsOn: string;
+  training: boolean;
+  teams: string[];
 }
 
 export interface EventSummary {

@@ -109,6 +109,11 @@ msgstr "Einmal im Jahr, mit Vorschau"
 msgid "{withoutCount, plural, one {# without access} other {# without access}}"
 msgstr "{withoutCount, plural, one {# ohne Zugang} other {# ohne Zugang}}"
 
+# ai
+#: src/pages/home.tsx
+msgid "{name} until {to}: holiday training times for {teams}."
+msgstr "{name} bis {to}: Ferien-Trainingszeiten für {teams}."
+
 #: src/pages/admin.tsx
 #: src/pages/admin.tsx
 #: src/pages/duty-admin.tsx
@@ -1567,6 +1572,11 @@ msgstr "Schule"
 #: src/pages/profile.tsx
 msgid "The settings apply to all your devices. Whether a device gets notifications at all is set in your profile."
 msgstr "Die Einstellungen gelten für alle deine Geräte. Ob ein Gerät überhaupt Benachrichtigungen bekommt, legst du im Profil fest."
+
+# ai
+#: src/pages/home.tsx
+msgid "{name}, {from} to {to}: no training for {teams}."
+msgstr "{name}, {from} bis {to}: kein Training für {teams}."
 
 # ai
 #: src/pages/mail-settings.tsx
@@ -4143,6 +4153,11 @@ msgstr "Helferplan ausgeschaltet. Einträge bleiben erhalten."
 #: src/carpool.tsx
 msgid "Save change"
 msgstr "Änderung speichern"
+
+# ai
+#: src/pages/home.tsx
+msgid "{name} until {to}: no training for {teams}."
+msgstr "{name} bis {to}: kein Training für {teams}."
 
 #: src/pages/event.tsx
 msgid "{name} is now co-organising."
@@ -8196,6 +8211,11 @@ msgstr "Laufende Saison: keine"
 #: src/format.ts
 msgid "tomorrow"
 msgstr "morgen"
+
+# ai
+#: src/pages/home.tsx
+msgid "{name}, {from} to {to}: holiday training times for {teams}."
+msgstr "{name}, {from} bis {to}: Ferien-Trainingszeiten für {teams}."
 
 #: src/pages/admin.tsx
 msgid "Notify everyone immediately"

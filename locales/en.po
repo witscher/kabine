@@ -107,6 +107,10 @@ msgstr "Once a year, with preview"
 msgid "{withoutCount, plural, one {# without access} other {# without access}}"
 msgstr "{withoutCount, plural, one {# without access} other {# without access}}"
 
+#: src/pages/home.tsx
+msgid "{name} until {to}: holiday training times for {teams}."
+msgstr "{name} until {to}: holiday training times for {teams}."
+
 #: src/pages/admin.tsx
 #: src/pages/admin.tsx
 #: src/pages/duty-admin.tsx
@@ -1540,6 +1544,10 @@ msgstr "School"
 #: src/pages/profile.tsx
 msgid "The settings apply to all your devices. Whether a device gets notifications at all is set in your profile."
 msgstr "The settings apply to all your devices. Whether a device gets notifications at all is set in your profile."
+
+#: src/pages/home.tsx
+msgid "{name}, {from} to {to}: no training for {teams}."
+msgstr "{name}, {from} to {to}: no training for {teams}."
 
 #: src/pages/mail-settings.tsx
 msgid "This installation has no e-mail binding."
@@ -4067,6 +4075,10 @@ msgstr "Helper plan switched off. Entries are kept."
 #: src/carpool.tsx
 msgid "Save change"
 msgstr "Save change"
+
+#: src/pages/home.tsx
+msgid "{name} until {to}: no training for {teams}."
+msgstr "{name} until {to}: no training for {teams}."
 
 #: src/pages/event.tsx
 msgid "{name} is now co-organising."
@@ -8041,6 +8053,10 @@ msgstr "Current season: none"
 #: src/format.ts
 msgid "tomorrow"
 msgstr "tomorrow"
+
+#: src/pages/home.tsx
+msgid "{name}, {from} to {to}: holiday training times for {teams}."
+msgstr "{name}, {from} to {to}: holiday training times for {teams}."
 
 #: src/pages/admin.tsx
 msgid "Notify everyone immediately"

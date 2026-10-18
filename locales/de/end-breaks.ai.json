@@ -1,0 +1,6 @@
+{
+  "{name} until {to}: holiday training times for {teams}.": "{name} bis {to}: Ferien-Trainingszeiten für {teams}.",
+  "{name}, {from} to {to}: no training for {teams}.": "{name}, {from} bis {to}: kein Training für {teams}.",
+  "{name} until {to}: no training for {teams}.": "{name} bis {to}: kein Training für {teams}.",
+  "{name}, {from} to {to}: holiday training times for {teams}.": "{name}, {from} bis {to}: Ferien-Trainingszeiten für {teams}."
+}

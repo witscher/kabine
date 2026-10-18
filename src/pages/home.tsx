@@ -3,9 +3,9 @@ import { Trans } from "@lingui/react/macro";
 import { clubName } from "../club";
 import { useLocation } from "preact-iso";
 import { useRef, useState } from "preact/hooks";
-import type { EventPage, EventSummary, MyParticipation } from "../../shared/types";
+import type { EventPage, EventSummary, MyParticipation, TrainingBreak } from "../../shared/types";
 import { DutyChips } from "../duties";
-import { dayOfMonth, longDate, monthLabel, monthShort, relativeDay, timeRange, time, weekdayShort, joinNames } from "../format";
+import { dayMonth, dayOfMonth, longDate, monthLabel, monthShort, relativeDay, timeRange, time, todayLocal, weekdayShort, joinNames } from "../format";
 import { FirstStepsCard, InstallBanner, MotdBanner, PushSetupBanner } from "../howto";
 import { Ball, Icon } from "../icons";
 import { DeclineSheet, deadlineText, HelpRequestCard, PersonResponseRow, ResponseButtons } from "../respond";
@@ -17,6 +17,28 @@ import { isLiveWindow, LiveCard } from "../live";
 import { isRelevantEvent } from "../../shared/relevance";
 
 const kindLabel = () => ({ training: t`Training`, game: t`Game`, special: t`Event` }) as const;
+
+/** Note in the timeline: a holiday plan with other training times, or a training break. */
+function BreakNote({ item }: { item: TrainingBreak }) {
+  const name = item.name;
+  const from = dayMonth(item.startsOn);
+  const to = dayMonth(item.endsOn);
+  const teams = joinNames(item.teams);
+  const running = item.startsOn <= todayLocal();
+  const text = item.training
+    ? running
+      ? t`${name} until ${to}: holiday training times for ${teams}.`
+      : t`${name}, ${from} to ${to}: holiday training times for ${teams}.`
+    : running
+      ? t`${name} until ${to}: no training for ${teams}.`
+      : t`${name}, ${from} to ${to}: no training for ${teams}.`;
+  return (
+    <p class="break-note" role="note">
+      <Icon name="sun" size={18} />
+      <span>{text}</span>
+    </p>
+  );
+}
 
 /** Card heading "Up next: game" or, for a further event on the same day, "Then: game". */
 function nextHeading(kind: EventSummary["kind"], later: boolean): string {
@@ -428,6 +450,15 @@ export function HomePage() {
   const horizonAt =
     trainingsUntil && upcoming.some((e) => e.kind === "training") ? rest.findIndex((e) => e.startsAt.slice(0, 10) > trainingsUntil) : -1;
   const until = trainingsUntil ? longDate(`${trainingsUntil}T00:00`) : "";
+  // Holiday plans and training breaks: a note where they begin (at the top while one applies),
+  // beyond the loaded events only once there are no more
+  const today = todayLocal();
+  const breaks = (when === "upcoming" ? (shown?.breaks ?? []) : []).map((b) => ({
+    b,
+    at: b.startsOn <= today ? 0 : rest.findIndex((e) => e.startsAt.slice(0, 10) >= b.startsOn),
+  }));
+  const breaksAt = (i: number) => breaks.filter((x) => x.at === i).map((x) => <BreakNote key={`${x.b.name}${x.b.startsOn}`} item={x.b} />);
+  const trailingBreaks = shown?.hasMore ? [] : breaksAt(-1);
   const moreButton = shown?.hasMore ? (
     <div class="stack-sm" style={{ alignItems: "center" }}>
       {growing && error ? (
@@ -566,6 +597,7 @@ export function HomePage() {
                 </>
               );
             })}
+            {rest.length ? trailingBreaks : breaks.map((x) => <BreakNote key={`${x.b.name}${x.b.startsOn}`} item={x.b} />)}
           </section>
         ) : null}
         {when === "past" ? moreButton : null}
@@ -591,7 +623,7 @@ export function HomePage() {
           )
         ) : null}
 
-        {rest.length ? (
+        {rest.length || breaks.length ? (
           <section class="stack" aria-label={t`Other events`}>
             <h2 class="section-title">
               <Trans>Coming up</Trans>
@@ -602,6 +634,7 @@ export function HomePage() {
               lastMonth = month;
               return (
                 <>
+                  {breaksAt(i)}
                   {i === horizonAt && trainingsUntil ? (
                     <p class="small muted horizon-note">
                       <Trans>Trainings are scheduled until {until}. After that only games and special events follow.</Trans>

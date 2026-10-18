@@ -1285,3 +1285,15 @@ test("Betreuer: Trainer legt eine Physiotherapeutin an und erzeugt ihren Zugangs
   await page.getByRole("button", { name: /Einladungslink/ }).click();
   await expect(page.locator(".url-box")).toContainText("http");
 });
+
+test("Ferienplan: Trainingspause erscheint als Hinweis in der Terminübersicht", async () => {
+  const day = (n: number) => new Date(Date.now() + n * 86_400_000).toLocaleDateString("sv-SE", { timeZone: "Europe/Berlin" });
+  const res = await coach.page.request.post("/api/teams/1/plans", { data: { name: "Hallensperrung", kind: "holiday", validFrom: day(3), validTo: day(5) } });
+  expect(res.ok()).toBe(true);
+  const { id } = (await res.json()) as { id: number };
+  const { page } = player;
+  await page.goto("/");
+  const note = page.getByRole("note").filter({ hasText: "Hallensperrung" });
+  await expect(note).toContainText("kein Training für wT");
+  expect((await coach.page.request.delete(`/api/plans/${id}`)).ok()).toBe(true);
+});
