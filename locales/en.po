@@ -103,6 +103,10 @@ msgstr "Invalid end"
 msgid "Once a year, with preview"
 msgstr "Once a year, with preview"
 
+#: src/pages/team.tsx
+msgid "{withoutCount, plural, one {# without access} other {# without access}}"
+msgstr "{withoutCount, plural, one {# without access} other {# without access}}"
+
 #: src/pages/admin.tsx
 #: src/pages/admin.tsx
 #: src/pages/duty-admin.tsx
@@ -1111,6 +1115,7 @@ msgstr "You did not decline and still were not there. The coach enters this afte
 #: src/avatar.tsx
 #: src/avatar.tsx
 #: src/avatar.tsx
+#: src/howto.tsx
 #: src/pages/profile.tsx
 msgid "Profile picture"
 msgstr "Profile picture"
@@ -1525,6 +1530,10 @@ msgstr "Requests are no longer possible for this game."
 #: src/pages/team.tsx
 msgid "Connection removed."
 msgstr "Connection removed."
+
+#: src/howto.tsx
+msgid "Got it"
+msgstr "Got it"
 
 #: src/respond.tsx
 msgid "School"
@@ -2093,6 +2102,10 @@ msgstr "Test mail sent to {to}."
 msgid "Coaches add stand-ins in their own team."
 msgstr "Coaches add stand-ins in their own team."
 
+#: src/howto.tsx
+msgid "Calendar"
+msgstr "Calendar"
+
 #: worker/routes/squad.ts
 msgid "another game"
 msgstr "another game"
@@ -2230,6 +2243,10 @@ msgstr "Already {teamRole} everywhere."
 #: shared/types.ts
 msgid "Answer stand-in requests on their own"
 msgstr "Answer stand-in requests on their own"
+
+#: src/pages/team.tsx
+msgid "From a list"
+msgstr "From a list"
 
 #: src/pages/home.tsx
 msgid "Up next: game"
@@ -2835,6 +2852,10 @@ msgstr "{club} is an internal club app. If no code arrives, this address is not 
 msgid "In the browser menu, choose <0>Add to Home screen</0> or <1>Install app</1>. After that you start {club} from the icon on the home screen."
 msgstr "In the browser menu, choose <0>Add to Home screen</0> or <1>Install app</1>. After that you start {club} from the icon on the home screen."
 
+#: src/player-import.tsx
+msgid "already in the team, skipped"
+msgstr "already in the team, skipped"
+
 #: src/pages/admin.tsx
 msgid "Delete team?"
 msgstr "Delete team?"
@@ -2946,6 +2967,7 @@ msgstr "{count, plural, one {The announcement appears in one team chat.} other {
 msgid "{title} on {date}, {time}. If you can't make it, please decline."
 msgstr "{title} on {date}, {time}. If you can't make it, please decline."
 
+#: src/howto.tsx
 #: src/howto.tsx
 #: src/howto.tsx
 msgid "Hide hint"
@@ -3331,6 +3353,10 @@ msgstr "One companion"
 msgid "Language and region"
 msgstr "Language and region"
 
+#: src/player-import.tsx
+msgid "Line {line}: no first name"
+msgstr "Line {line}: no first name"
+
 #: worker/routes/chat.ts
 msgid "No access to this chat."
 msgstr "No access to this chat."
@@ -3463,6 +3489,10 @@ msgstr "Linked holiday plans keep their dates but no longer follow changes."
 #: worker/routes/games.ts
 msgid "Please paste the link to the team page from the handball4all portal (with ogId, lId and tId)."
 msgstr "Please paste the link to the team page from the handball4all portal (with ogId, lId and tId)."
+
+#: src/pages/team.tsx
+msgid "Without notifications people only see changes when they open the app. The guide under help shows how to switch them on. Parents count for their child."
+msgstr "Without notifications people only see changes when they open the app. The guide under help shows how to switch them on. Parents count for their child."
 
 #: src/pages/admin.tsx
 msgid "e.g. 2015"
@@ -4141,6 +4171,10 @@ msgstr "{fullName} will then no longer be an admin."
 msgid "2 · Age classes {upcomingName}"
 msgstr "2 · Age classes {upcomingName}"
 
+#: src/pages/team.tsx
+msgid "{quietCount, plural, one {# without notifications} other {# without notifications}}"
+msgstr "{quietCount, plural, one {# without notifications} other {# without notifications}}"
+
 #: src/pages/admin.tsx
 msgid "Revoke"
 msgstr "Revoke"
@@ -4325,6 +4359,10 @@ msgstr "Remove {teamName}"
 msgid "Reload"
 msgstr "Reload"
 
+#: src/howto.tsx
+msgid "Subscribe to your events in the calendar app of your phone."
+msgstr "Subscribe to your events in the calendar app of your phone."
+
 #: src/pages/profile.tsx
 msgid "<0>Set up a passkey.</0> It is the safest way to sign in: Face ID, fingerprint or screen lock, without a password and without a code by e-mail."
 msgstr "<0>Set up a passkey.</0> It is the safest way to sign in: Face ID, fingerprint or screen lock, without a password and without a code by e-mail."
@@ -4368,6 +4406,10 @@ msgstr "Mute {selAuthor}"
 #: src/faq.tsx
 msgid "How do I nominate the squad for a game?"
 msgstr "How do I nominate the squad for a game?"
+
+#: src/howto.tsx
+msgid "Your children: {children}"
+msgstr "Your children: {children}"
 
 #: src/pages/event.tsx
 msgid "{date}, {clock}. Everyone involved will be notified, and a note appears in the team chat."
@@ -4449,6 +4491,10 @@ msgstr "You are already signed up for this duty."
 #: src/pages/admin.tsx
 msgid "Use them"
 msgstr "Use them"
+
+#: src/player-import.tsx
+msgid "will be added"
+msgstr "will be added"
 
 #: src/calendar.tsx
 msgid "Calendar link"
@@ -4878,6 +4924,10 @@ msgstr "Send"
 msgid "Remove public holiday {name}"
 msgstr "Remove public holiday {name}"
 
+#: src/pages/team.tsx
+msgid "Everyone in the squad can be reached with notifications."
+msgstr "Everyone in the squad can be reached with notifications."
+
 #: worker/routes/carpool.ts
 msgid "This offer no longer exists."
 msgstr "This offer no longer exists."
@@ -4909,6 +4959,10 @@ msgstr "Country"
 #: worker/routes/mail.ts
 msgid "Please enter the sender address."
 msgstr "Please enter the sender address."
+
+#: src/player-import.tsx
+msgid "One player per line: first name, last name, birth year. Copy the columns from a spreadsheet or separate them with a semicolon."
+msgstr "One player per line: first name, last name, birth year. Copy the columns from a spreadsheet or separate them with a semicolon."
 
 #: src/pages/home.tsx
 msgid "Then: game"
@@ -4977,6 +5031,10 @@ msgstr "{firstName} is now an admin."
 #: src/pages/home.tsx
 msgid "Declines"
 msgstr "Declines"
+
+#: src/pages/team.tsx
+msgid "Not reached yet"
+msgstr "Not reached yet"
 
 #: src/pages/join.tsx
 msgid "Please provide a valid e-mail address."
@@ -5140,6 +5198,10 @@ msgstr "Your name is missing or already taken? Let your coach know."
 #: src/pages/team.tsx
 msgid "Remove access"
 msgstr "Remove access"
+
+#: src/player-import.tsx
+msgid "Player list"
+msgstr "Player list"
 
 #: src/howto.tsx
 msgid "Go to notifications"
@@ -5407,6 +5469,10 @@ msgstr "You can sign off or change your entry in the app: {link}"
 msgid "Duty {range}"
 msgstr "Duty {range}"
 
+#: src/howto.tsx
+msgid "Language: {language}"
+msgstr "Language: {language}"
+
 #: worker/routes/games.ts
 msgid "The data names no league"
 msgstr "The data names no league"
@@ -5545,6 +5611,11 @@ msgstr "Create upcoming season"
 #: src/pages/squad.tsx
 msgid "Turned down"
 msgstr "Turned down"
+
+#: src/howto.tsx
+#: src/howto.tsx
+msgid "First steps"
+msgstr "First steps"
 
 #: src/duty-blocks.tsx
 msgid "Task · after"
@@ -5755,6 +5826,10 @@ msgstr "Wait until someone offers seats"
 #: worker/routes/carpool.ts
 msgid "{driver} can no longer take {rider}: {game}. The search continues."
 msgstr "{driver} can no longer take {rider}: {game}. The search continues."
+
+#: src/pages/team.tsx
+msgid "Reachability"
+msgstr "Reachability"
 
 #: worker/routes/squad.ts
 msgid "This request has already been answered."
@@ -6529,6 +6604,10 @@ msgstr "All future events of this training time and their responses will be dele
 msgid "Looking for a lift for {name}: {game} (entered by {coach})."
 msgstr "Looking for a lift for {name}: {game} (entered by {coach})."
 
+#: src/player-import.tsx
+msgid "plays in {teams}: add under “From another team”, skipped here"
+msgstr "plays in {teams}: add under “From another team”, skipped here"
+
 #: src/pages/admin.tsx
 #: src/pages/admin.tsx
 #: src/pages/team.tsx
@@ -6741,6 +6820,10 @@ msgstr "Delete {periodName}?"
 #: src/pages/group.tsx
 msgid "Delete group {teamName}?"
 msgstr "Delete group {teamName}?"
+
+#: src/player-import.tsx
+msgid "{fresh, plural, one {Add # player} other {Add # players}}"
+msgstr "{fresh, plural, one {Add # player} other {Add # players}}"
 
 #: worker/routes/events.ts
 msgid "{label} on {when} is cancelled. Reason: {reason}"
@@ -7338,6 +7421,8 @@ msgstr "Setup"
 
 #: src/game-import.tsx
 #: src/pages/plans.tsx
+#: src/player-import.tsx
+#: src/player-import.tsx
 msgid "Preview"
 msgstr "Preview"
 
@@ -7510,6 +7595,10 @@ msgstr "Recent changes"
 #: src/pages/profile.tsx
 msgid "Add number"
 msgstr "Add number"
+
+#: src/howto.tsx
+msgid "You respond for them and see their events here."
+msgstr "You respond for them and see their events here."
 
 #: src/pages/admin.tsx
 msgid "Edit periods (e.g. carnival)"
@@ -8191,6 +8280,10 @@ msgstr "Helpers needed"
 msgid "The app stores only first name, last name and birth year of players and parents, plus e-mail address and mobile number if someone enters them for signing in. Profile pictures of minors need their parents' consent. The privacy page of the app explains this to everyone."
 msgstr "The app stores only first name, last name and birth year of players and parents, plus e-mail address and mobile number if someone enters them for signing in. Profile pictures of minors need their parents' consent. The privacy page of the app explains this to everyone."
 
+#: src/player-import.tsx
+msgid "These lines are skipped:"
+msgstr "These lines are skipped:"
+
 #: worker/routes/push.ts
 msgid "Push is not set up on the server yet (VAPID keys missing)."
 msgstr "Push is not set up on the server yet (VAPID keys missing)."
@@ -8602,6 +8695,10 @@ msgstr "{fullName} can then no longer sign in and appears in the chat as \"forme
 msgid "Privacy and sources"
 msgstr "Privacy and sources"
 
+#: src/howto.tsx
+msgid "Optional. Your team sees it in the chat and in the squad."
+msgstr "Optional. Your team sees it in the chat and in the squad."
+
 #: worker/domain/email-login.ts
 msgid "please confirm your e-mail address for {app} with this code:"
 msgstr "please confirm your e-mail address for {app} with this code:"
@@ -8688,6 +8785,10 @@ msgstr "Thank you, your message has arrived. For a reply by e-mail, your access 
 #: src/pages/helpers.tsx
 msgid "Own teams"
 msgstr "Own teams"
+
+#: src/howto.tsx
+msgid "Change it in your profile."
+msgstr "Change it in your profile."
 
 #: worker/routes/plans.ts
 msgid "This holiday period no longer exists."
@@ -9618,6 +9719,10 @@ msgstr "Create team"
 msgid "{label} on {oldDate} is now on {date} at {time}, {location}."
 msgstr "{label} on {oldDate} is now on {date} at {time}, {location}."
 
+#: src/player-import.tsx
+msgid "Only first name, last name and birth year. The app stores no further data about players."
+msgstr "Only first name, last name and birth year. The app stores no further data about players."
+
 #: src/pages/admin.tsx
 msgid "Age groups of the sport"
 msgstr "Age groups of the sport"
@@ -9830,6 +9935,10 @@ msgstr "Home game vs {opponent}"
 msgid "Loading app"
 msgstr "Loading app"
 
+#: src/player-import.tsx
+msgid "Line {line}: “{value}” is not a birth year"
+msgstr "Line {line}: “{value}” is not a birth year"
+
 #: src/pages/admin.tsx
 msgid "All members, admins, access links"
 msgstr "All members, admins, access links"
@@ -9985,6 +10094,10 @@ msgstr "Please let us know"
 #: src/pages/duty-admin.tsx
 msgid "Template saved."
 msgstr "Template saved."
+
+#: src/player-import.tsx
+msgid "{created, plural, one {# player added} other {# players added}}"
+msgstr "{created, plural, one {# player added} other {# players added}}"
 
 #: src/carpool.tsx
 #: src/carpool.tsx

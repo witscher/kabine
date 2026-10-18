@@ -6,7 +6,7 @@ import { useRef, useState } from "preact/hooks";
 import type { EventPage, EventSummary, MyParticipation } from "../../shared/types";
 import { DutyChips } from "../duties";
 import { dayOfMonth, longDate, monthLabel, monthShort, relativeDay, timeRange, time, weekdayShort } from "../format";
-import { InstallBanner, MotdBanner, PushSetupBanner } from "../howto";
+import { FirstStepsCard, InstallBanner, MotdBanner, PushSetupBanner } from "../howto";
 import { Ball, Icon } from "../icons";
 import { DeclineSheet, deadlineText, HelpRequestCard, PersonResponseRow, ResponseButtons } from "../respond";
 import { useMe } from "../session";
@@ -518,6 +518,7 @@ export function HomePage() {
 
         <InstallBanner />
         <PushSetupBanner />
+        <FirstStepsCard />
 
         {openHelp.map((e) => {
           const date = longDate(e.startsAt);

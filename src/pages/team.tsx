@@ -14,6 +14,7 @@ import { Icon } from "../icons";
 import { ExtraEventList } from "../extra-events";
 import { GroupPage } from "./group";
 import { useMe, useSession } from "../session";
+import { PlayerListImport } from "../player-import";
 import { GameImport } from "../game-import";
 import { invalidate, useQuery } from "../store";
 import {
@@ -61,11 +62,13 @@ export interface TeamDetail {
     birthYear: number | null;
     isActive: boolean;
     hasAccount: boolean;
+    /** Push on at least one device */
+    hasPush: boolean;
     isCore: boolean;
     /** How often absent without excuse this season */
     unexcused: number;
     ageWarning: string | null;
-    guardians: { id: number; firstName: string; lastName: string | null; hasAccount: boolean }[];
+    guardians: { id: number; firstName: string; lastName: string | null; hasAccount: boolean; hasPush: boolean }[];
   }[];
   helpers: { person: PersonRef; homeTeam: string | null; trainings: boolean; isActive: boolean; isCore: boolean; unexcused: number }[];
   invites: { player: InviteView | null; parent: InviteView | null };
@@ -449,7 +452,7 @@ function AddPlayerSheet({ team, onClose, onDone }: { team: TeamDetail; onClose: 
   const [first, setFirst] = useState("");
   const [last, setLast] = useState("");
   const [year, setYear] = useState("");
-  const [mode, setMode] = useState<"new" | "existing">("new");
+  const [mode, setMode] = useState<"new" | "list" | "existing">("new");
   return (
     <Sheet open onClose={onClose} title={t`Add player`}>
       <Segmented
@@ -457,10 +460,12 @@ function AddPlayerSheet({ team, onClose, onDone }: { team: TeamDetail; onClose: 
         value={mode}
         options={[
           { value: "new", label: t`Create new` },
+          { value: "list", label: t`From a list` },
           { value: "existing", label: t`From another team` },
         ]}
         onChange={setMode}
       />
+      {mode === "list" ? <PlayerListImport teamId={team.id} onDone={onDone} /> : null}
       {mode === "existing" ? <ExistingPlayerPicker team={team} onDone={onDone} /> : null}
       {mode === "new" ? (
         <>
@@ -769,6 +774,7 @@ function InvitesTab({ team, onChanged }: { team: TeamDetail; onChanged: () => vo
           <Trans>Before sharing, please add the last names where first names are the same ({names}).</Trans>
         </Notice>
       ) : null}
+      <ReachOverview team={team} />
       <InviteCard team={team} kind="player" invite={team.invites.player} onChanged={onChanged} />
       {team.parentsEnabled ? (
         <InviteCard team={team} kind="parent" invite={team.invites.parent} onChanged={onChanged} />
@@ -784,6 +790,47 @@ function InvitesTab({ team, onChanged }: { team: TeamDetail; onChanged: () => vo
         <Trans>Lost device or new passkey: open the person in the squad overview and create a personal one-time link.</Trans>
       </p>
     </>
+  );
+}
+
+/** Who cannot be reached yet: no access at all (neither own nor parents'), or no notifications. */
+function ReachOverview({ team }: { team: TeamDetail }) {
+  const players = team.players.filter((p) => p.isActive);
+  const unreachable = players.filter((p) => !p.hasAccount && !p.guardians.some((g) => g.hasAccount));
+  const noPush = players.filter((p) => (p.hasAccount || p.guardians.some((g) => g.hasAccount)) && !p.hasPush && !p.guardians.some((g) => g.hasPush));
+  if (!unreachable.length && !noPush.length) {
+    return (
+      <Notice kind="info" icon="check">
+        <Trans>Everyone in the squad can be reached with notifications.</Trans>
+      </Notice>
+    );
+  }
+  const names = (list: typeof players) => list.map((p) => personName(p.person)).join(", ");
+  const without = names(unreachable);
+  const quiet = names(noPush);
+  const withoutCount = unreachable.length;
+  const quietCount = noPush.length;
+  return (
+    <section class="card card-pad stack-sm" aria-label={t`Reachability`}>
+      <h2 class="section-title" style={{ margin: 0 }}>
+        <Trans>Not reached yet</Trans>
+      </h2>
+      {unreachable.length ? (
+        <p class="small">
+          <strong>{plural(withoutCount, { one: "# without access", other: "# without access" })}:</strong> {without}
+        </p>
+      ) : null}
+      {noPush.length ? (
+        <p class="small">
+          <strong>{plural(quietCount, { one: "# without notifications", other: "# without notifications" })}:</strong> {quiet}
+        </p>
+      ) : null}
+      <p class="small muted">
+        <Trans>
+          Without notifications people only see changes when they open the app. The guide under help shows how to switch them on. Parents count for their child.
+        </Trans>
+      </p>
+    </section>
   );
 }
 

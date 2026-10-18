@@ -1248,3 +1248,25 @@ test("Einrichtungsassistent: Admin geht alle Schritte durch", async () => {
   await expect(page.getByRole("link", { name: /Einrichtungsassistent/ })).toBeVisible();
   await expect(page.getByText("Einrichtung nicht abgeschlossen")).toHaveCount(0);
 });
+
+test("Spielerliste: Trainer übernimmt Spieler aus einer Tabelle, Einladungen zeigen, wer noch fehlt", async () => {
+  const { page } = coach;
+  await page.goto("/team/1");
+  await page.getByRole("button", { name: "Kader", exact: true }).click();
+  const roster = page.getByRole("region", { name: "Spielerinnen und Spieler" });
+  await roster.getByRole("button", { name: "Hinzufügen" }).click();
+  const sheet = page.getByRole("dialog", { name: "Spieler hinzufügen" });
+  await sheet.getByRole("button", { name: "Aus einer Liste" }).click();
+  await sheet.getByLabel("Spielerliste").fill("Vorname\tNachname\tJahrgang\nListe\tEins\t2014\nListe\tZwei\t2015\nKaputt\tDrei\t3015");
+  await sheet.getByRole("button", { name: "Vorschau" }).click();
+  await expect(sheet.getByText("Zeile 4: „3015“ ist kein Jahrgang")).toBeVisible();
+  await expect(sheet.getByText("wird angelegt")).toHaveCount(2);
+  await sheet.getByRole("button", { name: "2 Spieler anlegen" }).click();
+  await expect(page.getByText("2 Spieler angelegt")).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(roster).toContainText("Liste Eins");
+  await page.getByRole("button", { name: "Einladungen" }).click();
+  const reach = page.getByRole("region", { name: "Erreichbarkeit" });
+  await expect(reach).toContainText("Liste Eins");
+  await expect(reach).toContainText("ohne Zugang");
+});

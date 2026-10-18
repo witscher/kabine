@@ -169,11 +169,13 @@ teamRoutes.get("/teams/:id", async (c) => {
       birth_year: number | null;
       is_active: number;
       has_account: number;
+      has_push: number;
       home_team: string | null;
     }>(
       db,
       `SELECT tm.person_id, tm.role, tm.helper_trainings, p.first_name, p.last_name, p.birth_year, p.is_active,
               EXISTS (SELECT 1 FROM accounts a WHERE a.person_id = p.id AND a.disabled_at IS NULL) AS has_account,
+              EXISTS (SELECT 1 FROM accounts a JOIN push_subscriptions ps ON ps.account_id = a.id WHERE a.person_id = p.id AND a.disabled_at IS NULL) AS has_push,
               (SELECT group_concat(name, ' · ') FROM (SELECT t2.name FROM team_memberships m2 JOIN teams t2 ON t2.id = m2.team_id
                 WHERE m2.person_id = p.id AND m2.role = 'player' AND m2.team_id <> tm.team_id AND t2.kind = 'team' ORDER BY t2.name)) AS home_team
          FROM team_memberships tm JOIN persons p ON p.id = tm.person_id
@@ -181,10 +183,11 @@ teamRoutes.get("/teams/:id", async (c) => {
         ORDER BY p.first_name, p.last_name, p.id`,
       teamId,
     ),
-    all<{ child_id: number; guardian_id: number; first_name: string; last_name: string | null; has_account: number }>(
+    all<{ child_id: number; guardian_id: number; first_name: string; last_name: string | null; has_account: number; has_push: number }>(
       db,
       `SELECT g.child_id, g.guardian_id, p.first_name, p.last_name,
-              EXISTS (SELECT 1 FROM accounts a WHERE a.person_id = p.id AND a.disabled_at IS NULL) AS has_account
+              EXISTS (SELECT 1 FROM accounts a WHERE a.person_id = p.id AND a.disabled_at IS NULL) AS has_account,
+              EXISTS (SELECT 1 FROM accounts a JOIN push_subscriptions ps ON ps.account_id = a.id WHERE a.person_id = p.id AND a.disabled_at IS NULL) AS has_push
          FROM guardianships g JOIN persons p ON p.id = g.guardian_id
         WHERE g.child_id IN (SELECT person_id FROM team_memberships WHERE team_id = ? AND role IN ('player', 'helper'))
           AND p.is_former = 0 AND ? = 1
@@ -267,12 +270,13 @@ teamRoutes.get("/teams/:id", async (c) => {
       birthYear: m.birth_year,
       isActive: m.is_active === 1,
       hasAccount: m.has_account === 1,
+      hasPush: m.has_push === 1,
       isCore: coreIds.has(m.person_id),
       unexcused: unexcused.get(m.person_id) ?? 0,
       ageWarning: ageWarning(m.birth_year, ac),
       guardians: guardians
         .filter((g) => g.child_id === m.person_id)
-        .map((g) => ({ id: g.guardian_id, firstName: g.first_name, lastName: g.last_name, hasAccount: g.has_account === 1 })),
+        .map((g) => ({ id: g.guardian_id, firstName: g.first_name, lastName: g.last_name, hasAccount: g.has_account === 1, hasPush: g.has_push === 1 })),
     })),
     helpers: members
       .filter((m) => m.role === "helper")
@@ -409,6 +413,67 @@ teamRoutes.post("/teams/:id/players", async (c) => {
   await run(c.env.DB, "INSERT INTO team_memberships (person_id, team_id, role) VALUES (?, ?, 'player')", person!.id, teamId);
   await clubMemberStmt(c.env.DB, [person!.id], teamId).run();
   return c.json({ id: person!.id }, 201);
+});
+
+const importSchema = z.object({
+  players: z.array(newPlayerSchema).min(1).max(80),
+  /** false: only the preview, nothing is created */
+  commit: z.boolean().default(false),
+});
+
+/**
+ * Player list of a coach (from a spreadsheet): new players are created. Names already in the team
+ * are skipped; players of a team the coach may take players from are pointed out (taken in via
+ * "existing player", so their history stays), nothing else is revealed about other persons.
+ */
+teamRoutes.post("/teams/:id/players/import", async (c) => {
+  const actor = requireActor(c);
+  const teamId = intParam(c, "id");
+  requireCoach(actor, teamId);
+  await requireTeam(c.env.DB, teamId);
+  const { players, commit } = parse(importSchema, await readJson(c.req.raw));
+  const key = (first: string, last: string | null | undefined) => `${first.trim().toLowerCase()}|${(last ?? "").trim().toLowerCase()}`;
+  const own = new Set(
+    (
+      await all<{ first_name: string; last_name: string | null }>(
+        c.env.DB,
+        `SELECT p.first_name, p.last_name FROM team_memberships tm JOIN persons p ON p.id = tm.person_id
+          WHERE tm.team_id = ? AND tm.role = 'player' AND p.is_former = 0`,
+        teamId,
+      )
+    ).map((r) => key(r.first_name, r.last_name)),
+  );
+  const elsewhere = new Map<string, string>();
+  for (const r of await teamCandidates(c.env.DB, teamId, "player")) {
+    const k = key(r.first_name, r.last_name);
+    elsewhere.set(k, elsewhere.has(k) ? `${elsewhere.get(k)}, ${r.team_name}` : r.team_name);
+  }
+  const seen = new Set<string>();
+  const rows = players.map((p) => {
+    const k = key(p.firstName, p.lastName);
+    const status = own.has(k) || seen.has(k) ? ("in_team" as const) : elsewhere.has(k) ? ("other_team" as const) : ("new" as const);
+    seen.add(k);
+    return { firstName: p.firstName, lastName: p.lastName ?? null, birthYear: p.birthYear ?? null, status, teams: elsewhere.get(k) ?? null };
+  });
+  let created = 0;
+  if (commit) {
+    for (const r of rows.filter((x) => x.status === "new")) {
+      const person = await first<{ id: number }>(
+        c.env.DB,
+        "INSERT INTO persons (first_name, last_name, birth_year) VALUES (?, ?, ?) RETURNING id",
+        r.firstName,
+        r.lastName,
+        r.birthYear,
+      );
+      await c.env.DB.batch([
+        stmt(c.env.DB, "INSERT INTO team_memberships (person_id, team_id, role) VALUES (?, ?, 'player')", person!.id, teamId),
+        clubMemberStmt(c.env.DB, [person!.id], teamId),
+      ]);
+      created++;
+    }
+    if (created) await syncAutoSquads(c.env.DB, [teamId]);
+  }
+  return c.json({ rows, created });
 });
 
 const memberSchema = z.object({ personId: z.number().int().positive(), role: z.enum(["player", "coach"]) });

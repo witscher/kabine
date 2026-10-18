@@ -6,12 +6,15 @@ import { Trans } from "@lingui/react/macro";
 import { useEffect, useState } from "preact/hooks";
 import { todayLocal } from "./format";
 import { clubName } from "./club";
-import { Icon } from "./icons";
+import { Icon, type IconName } from "./icons";
 import { activeMotd, MOTD, motdStorageKey } from "../shared/motd";
-import { isIos, isStandalone } from "./session";
+import { isIos, isStandalone, useMe } from "./session";
+import { LOCALE_NAMES } from "../shared/i18n";
+import { currentLocale } from "./i18n";
 
 const INSTALL_DISMISSED = "kabine-hint-install";
 const PUSH_DISMISSED = "kabine-hint-push";
+const FIRST_STEPS_DISMISSED = "kabine-hint-first-steps";
 
 function read(key: string): boolean {
   try {
@@ -159,6 +162,68 @@ export function PushSetupBanner() {
         <Icon name="bell" size={18} />
         <Trans>Go to notifications</Trans>
       </a>
+    </section>
+  );
+}
+
+/**
+ * Start page, after the install and notification hints: the remaining first steps for a new
+ * account (language, picture, calendar, children), until dismissed.
+ */
+export function FirstStepsCard() {
+  const me = useMe();
+  const [show, setShow] = useState(false);
+  useEffect(() => {
+    if (read(FIRST_STEPS_DISMISSED)) return;
+    if (!isStandalone()) {
+      setShow(read(INSTALL_DISMISSED));
+      return;
+    }
+    void pushHandled().then((handled) => setShow(handled || read(PUSH_DISMISSED)));
+  }, []);
+  if (!show) return null;
+  const close = () => {
+    remember(FIRST_STEPS_DISMISSED);
+    setShow(false);
+  };
+  const language = LOCALE_NAMES[currentLocale()];
+  const children = me.children.map((c) => c.firstName).join(", ");
+  const rows: { href: string; icon: IconName; title: string; sub: string }[] = [
+    { href: "/profil", icon: "settings", title: t`Language: ${language}`, sub: t`Change it in your profile.` },
+    { href: "/profil", icon: "user", title: t`Profile picture`, sub: t`Optional. Your team sees it in the chat and in the squad.` },
+    { href: "/profil", icon: "calendar", title: t`Calendar`, sub: t`Subscribe to your events in the calendar app of your phone.` },
+    ...(me.children.length
+      ? [{ href: "/profil", icon: "users" as IconName, title: t`Your children: ${children}`, sub: t`You respond for them and see their events here.` }]
+      : []),
+  ];
+  return (
+    <section class="card card-body howto" aria-label={t`First steps`}>
+      <div class="row-gap">
+        <Icon name="check" size={22} />
+        <h2 class="section-title" style={{ margin: 0, flex: 1 }}>
+          <Trans>First steps</Trans>
+        </h2>
+        <button type="button" class="icon-btn" aria-label={t`Hide hint`} onClick={close}>
+          <Icon name="x" size={20} />
+        </button>
+      </div>
+      <ul class="list">
+        {rows.map((r) => (
+          <li>
+            <a class="list-row" href={r.href}>
+              <Icon name={r.icon} size={20} />
+              <span class="main">
+                <span class="title">{r.title}</span>
+                <span class="sub">{r.sub}</span>
+              </span>
+              <Icon name="chevron" size={18} />
+            </a>
+          </li>
+        ))}
+      </ul>
+      <button type="button" class="btn" onClick={close}>
+        <Trans>Got it</Trans>
+      </button>
     </section>
   );
 }

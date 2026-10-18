@@ -104,6 +104,11 @@ msgstr "Ungültiges Ende"
 msgid "Once a year, with preview"
 msgstr "Einmal im Jahr, mit Vorschau"
 
+# ai
+#: src/pages/team.tsx
+msgid "{withoutCount, plural, one {# without access} other {# without access}}"
+msgstr "{withoutCount, plural, one {# ohne Zugang} other {# ohne Zugang}}"
+
 #: src/pages/admin.tsx
 #: src/pages/admin.tsx
 #: src/pages/duty-admin.tsx
@@ -1129,6 +1134,7 @@ msgstr "Du hast nicht abgesagt und warst trotzdem nicht da. Das trägt der Train
 #: src/avatar.tsx
 #: src/avatar.tsx
 #: src/avatar.tsx
+#: src/howto.tsx
 #: src/pages/profile.tsx
 msgid "Profile picture"
 msgstr "Profilbild"
@@ -1549,6 +1555,11 @@ msgstr "Für dieses Spiel sind keine Anfragen mehr möglich."
 #: src/pages/team.tsx
 msgid "Connection removed."
 msgstr "Verknüpfung gelöst."
+
+# ai
+#: src/howto.tsx
+msgid "Got it"
+msgstr "Verstanden"
 
 #: src/respond.tsx
 msgid "School"
@@ -2127,6 +2138,11 @@ msgstr "Testmail an {to} verschickt."
 msgid "Coaches add stand-ins in their own team."
 msgstr "Aushilfen tragen die Trainer in ihrer Mannschaft ein."
 
+# ai
+#: src/howto.tsx
+msgid "Calendar"
+msgstr "Kalender"
+
 #: worker/routes/squad.ts
 msgid "another game"
 msgstr "ein anderes Spiel"
@@ -2267,6 +2283,11 @@ msgstr "Überall schon {teamRole}."
 #: shared/types.ts
 msgid "Answer stand-in requests on their own"
 msgstr "Aushilfe-Anfragen selbst beantworten"
+
+# ai
+#: src/pages/team.tsx
+msgid "From a list"
+msgstr "Aus einer Liste"
 
 #: src/pages/home.tsx
 msgid "Up next: game"
@@ -2882,6 +2903,11 @@ msgstr "{club} ist eine interne Vereins-App. Kommt kein Code, ist diese Adresse 
 msgid "In the browser menu, choose <0>Add to Home screen</0> or <1>Install app</1>. After that you start {club} from the icon on the home screen."
 msgstr "Im Browsermenü <0>Zum Startbildschirm hinzufügen</0> bzw. <1>App installieren</1> wählen. Danach startest du {club} über das Symbol auf dem Startbildschirm."
 
+# ai
+#: src/player-import.tsx
+msgid "already in the team, skipped"
+msgstr "schon in der Mannschaft, wird übersprungen"
+
 #: src/pages/admin.tsx
 msgid "Delete team?"
 msgstr "Mannschaft löschen?"
@@ -2996,6 +3022,7 @@ msgstr "{count, plural, one {Die Ankündigung erscheint in einem Mannschaftschat
 msgid "{title} on {date}, {time}. If you can't make it, please decline."
 msgstr "{title} am {date}, {time} Uhr. Falls du nicht kannst, sag bitte ab."
 
+#: src/howto.tsx
 #: src/howto.tsx
 #: src/howto.tsx
 msgid "Hide hint"
@@ -3388,6 +3415,11 @@ msgstr "Eine Begleitperson"
 msgid "Language and region"
 msgstr "Sprache und Region"
 
+# ai
+#: src/player-import.tsx
+msgid "Line {line}: no first name"
+msgstr "Zeile {line}: kein Vorname"
+
 #: worker/routes/chat.ts
 msgid "No access to this chat."
 msgstr "Kein Zugriff auf diesen Chat."
@@ -3522,6 +3554,11 @@ msgstr "Verknüpfte Ferienpläne bleiben mit ihren Daten bestehen, ziehen aber n
 #: worker/routes/games.ts
 msgid "Please paste the link to the team page from the handball4all portal (with ogId, lId and tId)."
 msgstr "Bitte füge den Link zur Mannschaftsseite aus dem handball4all-Portal ein (mit ogId, lId und tId)."
+
+# ai
+#: src/pages/team.tsx
+msgid "Without notifications people only see changes when they open the app. The guide under help shows how to switch them on. Parents count for their child."
+msgstr "Ohne Benachrichtigungen sieht man Änderungen erst, wenn man die App öffnet. Die Anleitung unter Hilfe zeigt, wie man sie einschaltet. Eltern zählen für ihr Kind."
 
 #: src/pages/admin.tsx
 msgid "e.g. 2015"
@@ -4210,6 +4247,11 @@ msgstr "{fullName} ist danach kein Admin mehr."
 msgid "2 · Age classes {upcomingName}"
 msgstr "2 · Altersklassen {upcomingName}"
 
+# ai
+#: src/pages/team.tsx
+msgid "{quietCount, plural, one {# without notifications} other {# without notifications}}"
+msgstr "{quietCount, plural, one {# ohne Benachrichtigungen} other {# ohne Benachrichtigungen}}"
+
 #: src/pages/admin.tsx
 msgid "Revoke"
 msgstr "Entziehen"
@@ -4396,6 +4438,11 @@ msgstr "{teamName} entfernen"
 msgid "Reload"
 msgstr "Neu laden"
 
+# ai
+#: src/howto.tsx
+msgid "Subscribe to your events in the calendar app of your phone."
+msgstr "Abonniere deine Termine in der Kalender-App deines Handys."
+
 #: src/pages/profile.tsx
 msgid "<0>Set up a passkey.</0> It is the safest way to sign in: Face ID, fingerprint or screen lock, without a password and without a code by e-mail."
 msgstr "<0>Richte einen Passkey ein.</0> Er ist die sicherste Anmeldung: Face ID, Fingerabdruck oder Gerätesperre, ohne Passwort und ohne Code per E-Mail."
@@ -4439,6 +4486,11 @@ msgstr "{selAuthor} stummschalten"
 #: src/faq.tsx
 msgid "How do I nominate the squad for a game?"
 msgstr "Wie nominiere ich den Kader für ein Spiel?"
+
+# ai
+#: src/howto.tsx
+msgid "Your children: {children}"
+msgstr "Deine Kinder: {children}"
 
 #: src/pages/event.tsx
 msgid "{date}, {clock}. Everyone involved will be notified, and a note appears in the team chat."
@@ -4523,6 +4575,11 @@ msgstr "Du bist für diesen Dienst schon eingetragen."
 #: src/pages/admin.tsx
 msgid "Use them"
 msgstr "Übernehmen"
+
+# ai
+#: src/player-import.tsx
+msgid "will be added"
+msgstr "wird angelegt"
 
 #: src/calendar.tsx
 msgid "Calendar link"
@@ -4958,6 +5015,11 @@ msgstr "Senden"
 msgid "Remove public holiday {name}"
 msgstr "Feiertag {name} entfernen"
 
+# ai
+#: src/pages/team.tsx
+msgid "Everyone in the squad can be reached with notifications."
+msgstr "Alle im Kader sind mit Benachrichtigungen erreichbar."
+
 #: worker/routes/carpool.ts
 msgid "This offer no longer exists."
 msgstr "Dieses Angebot gibt es nicht mehr."
@@ -4992,6 +5054,11 @@ msgstr "Land"
 #: worker/routes/mail.ts
 msgid "Please enter the sender address."
 msgstr "Bitte gib die Absenderadresse ein."
+
+# ai
+#: src/player-import.tsx
+msgid "One player per line: first name, last name, birth year. Copy the columns from a spreadsheet or separate them with a semicolon."
+msgstr "Ein Spieler pro Zeile: Vorname, Nachname, Jahrgang. Kopiere die Spalten aus einer Tabelle oder trenne sie mit Semikolon."
 
 #: src/pages/home.tsx
 msgid "Then: game"
@@ -5060,6 +5127,11 @@ msgstr "{firstName} ist jetzt Admin."
 #: src/pages/home.tsx
 msgid "Declines"
 msgstr "Absagen"
+
+# ai
+#: src/pages/team.tsx
+msgid "Not reached yet"
+msgstr "Noch nicht erreicht"
 
 #: src/pages/join.tsx
 msgid "Please provide a valid e-mail address."
@@ -5224,6 +5296,11 @@ msgstr "Dein Name fehlt oder ist schon vergeben? Sag deinem Trainer Bescheid."
 #: src/pages/team.tsx
 msgid "Remove access"
 msgstr "Zugang lösen"
+
+# ai
+#: src/player-import.tsx
+msgid "Player list"
+msgstr "Spielerliste"
 
 #: src/howto.tsx
 msgid "Go to notifications"
@@ -5495,6 +5572,11 @@ msgstr "Austragen oder ändern kannst du dich in der App: {link}"
 msgid "Duty {range}"
 msgstr "Dienst {range} Uhr"
 
+# ai
+#: src/howto.tsx
+msgid "Language: {language}"
+msgstr "Sprache: {language}"
+
 #: worker/routes/games.ts
 msgid "The data names no league"
 msgstr "Die Daten nennen keine Liga"
@@ -5637,6 +5719,12 @@ msgstr "Kommende Saison anlegen"
 #: src/pages/squad.tsx
 msgid "Turned down"
 msgstr "Abgelehnt"
+
+# ai
+#: src/howto.tsx
+#: src/howto.tsx
+msgid "First steps"
+msgstr "Erste Schritte"
 
 #: src/duty-blocks.tsx
 msgid "Task · after"
@@ -5848,6 +5936,11 @@ msgstr "Warten, bis jemand Plätze anbietet"
 #: worker/routes/carpool.ts
 msgid "{driver} can no longer take {rider}: {game}. The search continues."
 msgstr "{driver} kann {rider} nicht mehr mitnehmen: {game}. Die Suche läuft weiter."
+
+# ai
+#: src/pages/team.tsx
+msgid "Reachability"
+msgstr "Erreichbarkeit"
 
 #: worker/routes/squad.ts
 msgid "This request has already been answered."
@@ -6637,6 +6730,11 @@ msgstr "Alle zukünftigen Termine dieser Trainingszeit und ihre Rückmeldungen w
 msgid "Looking for a lift for {name}: {game} (entered by {coach})."
 msgstr "Für {name} wird eine Mitfahrgelegenheit gesucht: {game} (eingetragen von {coach})."
 
+# ai
+#: src/player-import.tsx
+msgid "plays in {teams}: add under “From another team”, skipped here"
+msgstr "spielt in {teams}: unter „Aus anderer Mannschaft“ aufnehmen, wird hier übersprungen"
+
 #: src/pages/admin.tsx
 #: src/pages/admin.tsx
 #: src/pages/team.tsx
@@ -6850,6 +6948,11 @@ msgstr "{periodName} löschen?"
 #: src/pages/group.tsx
 msgid "Delete group {teamName}?"
 msgstr "Gruppe {teamName} löschen?"
+
+# ai
+#: src/player-import.tsx
+msgid "{fresh, plural, one {Add # player} other {Add # players}}"
+msgstr "{fresh, plural, one {# Spieler anlegen} other {# Spieler anlegen}}"
 
 #: worker/routes/events.ts
 msgid "{label} on {when} is cancelled. Reason: {reason}"
@@ -7456,6 +7559,8 @@ msgstr "Einrichtung"
 
 #: src/game-import.tsx
 #: src/pages/plans.tsx
+#: src/player-import.tsx
+#: src/player-import.tsx
 msgid "Preview"
 msgstr "Vorschau"
 
@@ -7632,6 +7737,11 @@ msgstr "Letzte Änderungen"
 #: src/pages/profile.tsx
 msgid "Add number"
 msgstr "Nummer hinzufügen"
+
+# ai
+#: src/howto.tsx
+msgid "You respond for them and see their events here."
+msgstr "Du sagst für sie zu und ab und siehst hier ihre Termine."
 
 #: src/pages/admin.tsx
 msgid "Edit periods (e.g. carnival)"
@@ -8319,6 +8429,11 @@ msgstr "Helfer benötigt"
 msgid "The app stores only first name, last name and birth year of players and parents, plus e-mail address and mobile number if someone enters them for signing in. Profile pictures of minors need their parents' consent. The privacy page of the app explains this to everyone."
 msgstr "Die App speichert von Spielern und Eltern nur Vorname, Nachname und Geburtsjahr, dazu E-Mail-Adresse und Handynummer, wenn jemand sie für die Anmeldung einträgt. Profilbilder von Minderjährigen brauchen die Freigabe der Eltern. Die Datenschutzseite der App erklärt das allen."
 
+# ai
+#: src/player-import.tsx
+msgid "These lines are skipped:"
+msgstr "Diese Zeilen werden übersprungen:"
+
 #: worker/routes/push.ts
 msgid "Push is not set up on the server yet (VAPID keys missing)."
 msgstr "Push ist auf dem Server noch nicht eingerichtet (VAPID-Schlüssel fehlen)."
@@ -8736,6 +8851,11 @@ msgstr "{fullName} kann sich danach nicht mehr anmelden und erscheint im Chat al
 msgid "Privacy and sources"
 msgstr "Datenschutz und Quellen"
 
+# ai
+#: src/howto.tsx
+msgid "Optional. Your team sees it in the chat and in the squad."
+msgstr "Freiwillig. Deine Mannschaft sieht es im Chat und im Kader."
+
 #: worker/domain/email-login.ts
 msgid "please confirm your e-mail address for {app} with this code:"
 msgstr "bitte bestätige deine E-Mail-Adresse für {app} mit diesem Code:"
@@ -8822,6 +8942,11 @@ msgstr "Danke, deine Nachricht ist angekommen. Für eine Antwort per E-Mail fehl
 #: src/pages/helpers.tsx
 msgid "Own teams"
 msgstr "Meine Teams"
+
+# ai
+#: src/howto.tsx
+msgid "Change it in your profile."
+msgstr "Ändern kannst du sie im Profil."
 
 #: worker/routes/plans.ts
 msgid "This holiday period no longer exists."
@@ -9767,6 +9892,11 @@ msgid "{label} on {oldDate} is now on {date} at {time}, {location}."
 msgstr "{label} am {oldDate} ist jetzt am {date} um {time}, {location}."
 
 # ai
+#: src/player-import.tsx
+msgid "Only first name, last name and birth year. The app stores no further data about players."
+msgstr "Nur Vorname, Nachname und Jahrgang. Weitere Daten zu Spielern speichert die App nicht."
+
+# ai
 #: src/pages/admin.tsx
 msgid "Age groups of the sport"
 msgstr "Altersklassen der Sportart"
@@ -9981,6 +10111,11 @@ msgstr "Heimspiel gegen {opponent}"
 msgid "Loading app"
 msgstr "App wird geladen"
 
+# ai
+#: src/player-import.tsx
+msgid "Line {line}: “{value}” is not a birth year"
+msgstr "Zeile {line}: „{value}“ ist kein Jahrgang"
+
 #: src/pages/admin.tsx
 msgid "All members, admins, access links"
 msgstr "Alle Mitglieder, Admins, Zugangslinks"
@@ -10137,6 +10272,11 @@ msgstr "Bitte gib Bescheid"
 #: src/pages/duty-admin.tsx
 msgid "Template saved."
 msgstr "Vorlage gespeichert."
+
+# ai
+#: src/player-import.tsx
+msgid "{created, plural, one {# player added} other {# players added}}"
+msgstr "{created, plural, one {# Spieler angelegt} other {# Spieler angelegt}}"
 
 #: src/carpool.tsx
 #: src/carpool.tsx
@@ -10319,3 +10459,4 @@ msgstr "Chat schreiben"
 #: worker/routes/events.ts
 msgid "In one time block the end is before the start."
 msgstr "Bei einem Zeitblock liegt das Ende vor dem Beginn."
+
