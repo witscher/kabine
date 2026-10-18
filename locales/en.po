@@ -1876,9 +1876,9 @@ msgstr "This is only possible once the event has started."
 msgid "Absent without excuse {unexcused}× this season. You can change this in the respective event under <0>Events → Past</0>."
 msgstr "Absent without excuse {unexcused}× this season. You can change this in the respective event under <0>Events → Past</0>."
 
+#: shared/module-texts.ts
 #: src/carpool.tsx
 #: src/carpool.tsx
-#: src/pages/club-settings.tsx
 msgid "Carpools"
 msgstr "Carpools"
 
@@ -3209,7 +3209,7 @@ msgstr "For players"
 msgid "vs {opponent}"
 msgstr "vs {opponent}"
 
-#: src/pages/club-settings.tsx
+#: shared/module-texts.ts
 msgid "Drivers offer seats for away games, players book them."
 msgstr "Drivers offer seats for away games, players book them."
 
@@ -3662,7 +3662,7 @@ msgstr "The image could not be converted."
 msgid "Add more admins"
 msgstr "Add more admins"
 
-#: src/pages/club-settings.tsx
+#: shared/module-texts.ts
 msgid "Youth referees"
 msgstr "Youth referees"
 
@@ -4737,7 +4737,7 @@ msgstr "First add the players."
 msgid "{loggedInAs} is currently signed in on this device. If you continue, an access will be created for the selected person and they will be signed in."
 msgstr "{loggedInAs} is currently signed in on this device. If you continue, an access will be created for the selected person and they will be signed in."
 
-#: src/pages/club-settings.tsx
+#: shared/module-texts.ts
 msgid "Home games of the marked age groups get a youth referee duty, with a role granted by link. Needs helper duties."
 msgstr "Home games of the marked age groups get a youth referee duty, with a role granted by link. Needs helper duties."
 
@@ -4942,7 +4942,7 @@ msgstr "Coming up"
 msgid "Activated"
 msgstr "Activated"
 
-#: src/pages/club-settings.tsx
+#: shared/module-texts.ts
 msgid "Sign-in codes and helper plan reminders by text message, for people who enter a mobile number. Needs a provider account (costs per message)."
 msgstr "Sign-in codes and helper plan reminders by text message, for people who enter a mobile number. Needs a provider account (costs per message)."
 
@@ -6660,9 +6660,9 @@ msgstr "Helper plan · {text}"
 msgid "The club's language applies to everyone who has not chosen one, and to e-mails. The region decides school holidays and public holidays."
 msgstr "The club's language applies to everyone who has not chosen one, and to e-mails. The region decides school holidays and public holidays."
 
+#: shared/module-texts.ts
 #: src/calendar.tsx
 #: src/pages/admin.tsx
-#: src/pages/club-settings.tsx
 #: src/pages/duty-admin.tsx
 #: src/pages/duty-admin.tsx
 #: src/pages/duty-admin.tsx
@@ -7771,7 +7771,7 @@ msgstr "Cancelled by {cancelledBy}."
 msgid "{name} is no longer riding with {driver}: {game}. The search continues (entered by {coach})."
 msgstr "{name} is no longer riding with {driver}: {game}. The search continues (entered by {coach})."
 
-#: src/pages/club-settings.tsx
+#: shared/module-texts.ts
 msgid "Coaches sync the games of their team from the handball4all portal (German handball associations)."
 msgstr "Coaches sync the games of their team from the handball4all portal (German handball associations)."
 
@@ -8179,8 +8179,8 @@ msgstr "Events, responses and the team chat in one place."
 msgid "This person does not belong to the teams of this training time."
 msgstr "This person does not belong to the teams of this training time."
 
+#: shared/module-texts.ts
 #: src/pages/admin.tsx
-#: src/pages/club-settings.tsx
 #: src/pages/profile.tsx
 #: src/pages/sms-settings.tsx
 #: src/pages/sms-settings.tsx
@@ -8361,7 +8361,7 @@ msgstr "Decline entered for {name}."
 msgid "Events"
 msgstr "Events"
 
-#: src/pages/club-settings.tsx
+#: shared/module-texts.ts
 msgid "Game schedule from handball4all"
 msgstr "Game schedule from handball4all"
 
@@ -9733,7 +9733,7 @@ msgstr "{teamName} (without parents)"
 msgid "Special events and own games"
 msgstr "Special events and own games"
 
-#: src/pages/club-settings.tsx
+#: shared/module-texts.ts
 msgid "Parents or players sign up for duties at games and special events (cake, timekeeping, washing shirts)."
 msgstr "Parents or players sign up for duties at games and special events (cake, timekeeping, washing shirts)."
 

@@ -1913,9 +1913,9 @@ msgstr "Das geht erst, wenn der Termin begonnen hat."
 msgid "Absent without excuse {unexcused}× this season. You can change this in the respective event under <0>Events → Past</0>."
 msgstr "In dieser Saison {unexcused}× unentschuldigt gefehlt. Ändern lässt sich das im jeweiligen Termin unter <0>Termine → Vergangen</0>."
 
+#: shared/module-texts.ts
 #: src/carpool.tsx
 #: src/carpool.tsx
-#: src/pages/club-settings.tsx
 msgid "Carpools"
 msgstr "Fahrgemeinschaften"
 
@@ -3279,7 +3279,7 @@ msgid "vs {opponent}"
 msgstr "gegen {opponent}"
 
 # ai
-#: src/pages/club-settings.tsx
+#: shared/module-texts.ts
 msgid "Drivers offer seats for away games, players book them."
 msgstr "Fahrer bieten Plätze zu Auswärtsspielen an, Spieler buchen sie."
 
@@ -3745,7 +3745,7 @@ msgid "Add more admins"
 msgstr "Weitere Admins ernennen"
 
 # ai
-#: src/pages/club-settings.tsx
+#: shared/module-texts.ts
 msgid "Youth referees"
 msgstr "Jugendschiedsrichter"
 
@@ -4841,7 +4841,7 @@ msgid "{loggedInAs} is currently signed in on this device. If you continue, an a
 msgstr "Auf diesem Gerät ist gerade {loggedInAs} angemeldet. Wenn du fortfährst, wird ein Zugang für die ausgewählte Person angelegt und diese angemeldet."
 
 # ai
-#: src/pages/club-settings.tsx
+#: shared/module-texts.ts
 msgid "Home games of the marked age groups get a youth referee duty, with a role granted by link. Needs helper duties."
 msgstr "Heimspiele der markierten Altersklassen bekommen einen Dienst für Jugendschiedsrichter, die Rolle wird per Link vergeben. Setzt Helferdienste voraus."
 
@@ -5052,7 +5052,7 @@ msgid "Activated"
 msgstr "Freigeschaltet"
 
 # ai
-#: src/pages/club-settings.tsx
+#: shared/module-texts.ts
 msgid "Sign-in codes and helper plan reminders by text message, for people who enter a mobile number. Needs a provider account (costs per message)."
 msgstr "Anmeldecodes und Erinnerungen zum Helferplan per SMS, für alle, die eine Handynummer eintragen. Braucht ein Konto bei einem Anbieter (Kosten pro Nachricht)."
 
@@ -6812,9 +6812,9 @@ msgstr "Helferplan · {text}"
 msgid "The club's language applies to everyone who has not chosen one, and to e-mails. The region decides school holidays and public holidays."
 msgstr "Die Sprache des Vereins gilt für alle, die keine gewählt haben, und für E-Mails. Nach der Region richten sich Schulferien und Feiertage."
 
+#: shared/module-texts.ts
 #: src/calendar.tsx
 #: src/pages/admin.tsx
-#: src/pages/club-settings.tsx
 #: src/pages/duty-admin.tsx
 #: src/pages/duty-admin.tsx
 #: src/pages/duty-admin.tsx
@@ -7945,7 +7945,7 @@ msgid "{name} is no longer riding with {driver}: {game}. The search continues (e
 msgstr "{name} fährt nicht mehr bei {driver} mit: {game}. Die Suche läuft weiter (eingetragen von {coach})."
 
 # ai
-#: src/pages/club-settings.tsx
+#: shared/module-texts.ts
 msgid "Coaches sync the games of their team from the handball4all portal (German handball associations)."
 msgstr "Trainer gleichen die Spiele ihrer Mannschaft mit dem handball4all-Portal ab (deutsche Handballverbände)."
 
@@ -8357,8 +8357,8 @@ msgid "This person does not belong to the teams of this training time."
 msgstr "Diese Person gehört nicht zu den Mannschaften dieser Trainingszeit."
 
 # ai
+#: shared/module-texts.ts
 #: src/pages/admin.tsx
-#: src/pages/club-settings.tsx
 #: src/pages/profile.tsx
 #: src/pages/sms-settings.tsx
 #: src/pages/sms-settings.tsx
@@ -8541,7 +8541,7 @@ msgid "Events"
 msgstr "Termine"
 
 # ai
-#: src/pages/club-settings.tsx
+#: shared/module-texts.ts
 msgid "Game schedule from handball4all"
 msgstr "Spielplan von handball4all"
 
@@ -9945,7 +9945,7 @@ msgid "Special events and own games"
 msgstr "Sondertermine und eigene Spiele"
 
 # ai
-#: src/pages/club-settings.tsx
+#: shared/module-texts.ts
 msgid "Parents or players sign up for duties at games and special events (cake, timekeeping, washing shirts)."
 msgstr "Eltern oder Spieler tragen sich für Dienste bei Spielen und Sonderterminen ein (Kuchen, Zeitnehmer, Trikots waschen)."
 
@@ -10703,4 +10703,3 @@ msgstr "Chat schreiben"
 #: worker/routes/events.ts
 msgid "In one time block the end is before the start."
 msgstr "Bei einem Zeitblock liegt das Ende vor dem Beginn."
-

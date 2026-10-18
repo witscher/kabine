@@ -2,6 +2,9 @@
 import { env } from "cloudflare:workers";
 import { beforeEach, describe, expect, it } from "vitest";
 import { moduleOn } from "../shared/club";
+import { MODULES } from "../shared/modules";
+import { moduleTexts } from "../shared/module-texts";
+import modulesDoc from "../docs/modules.md?raw";
 import { saveClub } from "../worker/domain/club";
 import { moduleOfPath } from "../worker/lib/modules";
 import { api, eventIn, exec, freshDb, loginAs, member, person, season, team } from "./helpers";
@@ -20,6 +23,20 @@ beforeEach(async () => {
   coachCookie = await loginAs(coach);
   game = await eventIn(wd, 5, { kind: "game", time: "14:00" });
   await exec("UPDATE events SET is_home = 0, home_team = 'SG Gegner', guest_team = 'SV Musterstadt' WHERE id = ?", game);
+});
+
+describe("Modulregister", () => {
+  it("jedes Modul hat Pfade, einen Schaltertext und eine Zeile in docs/modules.md", () => {
+    const texts = moduleTexts();
+    const ids = MODULES.map((m) => m.id as string);
+    expect(new Set(ids).size).toBe(ids.length);
+    for (const m of MODULES) {
+      expect(m.paths.length, `${m.id}: paths`).toBeGreaterThan(0);
+      if ("requires" in m) expect(ids, `${m.id}: requires`).toContain(m.requires);
+      expect(texts[m.id].label, `${m.id}: label`).toBeTruthy();
+      expect(modulesDoc, `${m.id}: row in docs/modules.md`).toContain(`| \`${m.id}\` |`);
+    }
+  });
 });
 
 describe("Module", () => {

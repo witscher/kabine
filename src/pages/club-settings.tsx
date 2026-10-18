@@ -4,9 +4,11 @@ import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { useState } from "preact/hooks";
 import { type ClubModules, type ClubProfile, isHexColor, KABINE_SOURCE } from "../../shared/club";
+import { MODULES, type ModuleId } from "../../shared/modules";
 import { LOCALE_NAMES, LOCALES, type Locale } from "../../shared/i18n";
 import { useQuery } from "../store";
 import { api, errorMessage } from "../api";
+import { moduleTexts } from "../../shared/module-texts";
 import { ClubMark, loadClub, setClub, useClub } from "../club";
 import { Button, Field, Notice, SwitchRow, TextField, toast, TopBar, useDocumentTitle } from "../ui";
 import { AdminOnly } from "./admin";
@@ -265,38 +267,21 @@ export function RegionSection(props: {
 
 /** Functions the club uses; switched-off modules disappear from the app and the API. */
 export function ModulesSection({ modules, onChange }: { modules: ClubModules; onChange: (m: ClubModules) => void }) {
-  const set = (patch: Partial<ClubModules>) => onChange({ ...modules, ...patch });
+  const texts = moduleTexts();
   return (
     <section class="card card-pad stack-sm" aria-label={t`Modules`}>
       <h2 class="section-title" style={{ margin: 0 }}>
         <Trans>Modules</Trans>
       </h2>
-      <SwitchRow
-        label={t`Helper duties`}
-        sub={t`Parents or players sign up for duties at games and special events (cake, timekeeping, washing shirts).`}
-        checked={modules.duties}
-        onChange={(v) => set({ duties: v })}
-      />
-      <SwitchRow
-        label={t`Youth referees`}
-        sub={t`Home games of the marked age groups get a youth referee duty, with a role granted by link. Needs helper duties.`}
-        checked={modules.youthReferees}
-        disabled={!modules.duties}
-        onChange={(v) => set({ youthReferees: v })}
-      />
-      <SwitchRow label={t`Carpools`} sub={t`Drivers offer seats for away games, players book them.`} checked={modules.carpools} onChange={(v) => set({ carpools: v })} />
-      <SwitchRow
-        label={t`Game schedule from handball4all`}
-        sub={t`Coaches sync the games of their team from the handball4all portal (German handball associations).`}
-        checked={modules.handball4all}
-        onChange={(v) => set({ handball4all: v })}
-      />
-      <SwitchRow
-        label={t`SMS`}
-        sub={t`Sign-in codes and helper plan reminders by text message, for people who enter a mobile number. Needs a provider account (costs per message).`}
-        checked={modules.sms}
-        onChange={(v) => set({ sms: v })}
-      />
+      {MODULES.map((m) => (
+        <SwitchRow
+          label={texts[m.id].label}
+          sub={texts[m.id].sub}
+          checked={modules[m.id]}
+          disabled={"requires" in m && !modules[m.requires as ModuleId]}
+          onChange={(v) => onChange({ ...modules, [m.id]: v })}
+        />
+      ))}
     </section>
   );
 }

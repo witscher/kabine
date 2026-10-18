@@ -86,6 +86,10 @@ The first admin is set up at `/einrichtung#<ADMIN_BOOTSTRAP_TOKEN>` (see `.dev.v
 
 Built with Cloudflare Workers, D1, Durable Objects and Queues, Hono, Preact and Lingui. Design decisions: [docs/design.md](docs/design.md) and [docs/decisions.md](docs/decisions.md). Security rules with a test each: [docs/security.md](docs/security.md).
 
+## Contributing
+
+Pull requests are welcome: translations, sports, connectors to fixture systems, SMS providers and new modules. Where things live and how to add a module: [docs/modules.md](docs/modules.md); rules and process: [CONTRIBUTING.md](CONTRIBUTING.md).
+
 ## Licence
 
 AGPL-3.0-only, see [LICENSE](LICENSE). You may run, change and share Kabine. If you run a changed version for others, you must offer them its source code.

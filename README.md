@@ -86,6 +86,10 @@ Der erste Admin richtet sich unter `/einrichtung#<ADMIN_BOOTSTRAP_TOKEN>` ein (s
 
 Gebaut mit Cloudflare Workers, D1, Durable Objects und Queues, Hono, Preact und Lingui. Code, Kommentare und die technische Dokumentation sind auf Englisch.
 
+## Mitmachen
+
+Beiträge als Pull Request sind willkommen: Übersetzungen, Sportarten, Anbindungen an Spielplan-Systeme, SMS-Anbieter und eigene Module. Wo was liegt und wie man ein Modul hinzufügt: [docs/modules.md](docs/modules.md) (Englisch), Regeln und Ablauf: [CONTRIBUTING.md](CONTRIBUTING.md).
+
 ## Lizenz
 
 AGPL-3.0-only, siehe [LICENSE](LICENSE). Kabine darf genutzt, verändert und weitergegeben werden. Wer eine veränderte Fassung für andere betreibt, muss ihnen den Quellcode anbieten.

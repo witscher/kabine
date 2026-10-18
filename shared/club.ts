@@ -2,29 +2,8 @@
 import type { Locale } from "./i18n";
 import type { SportId } from "./sports";
 
-/** Modules the club switches on or off (administration → club, setup wizard). */
-export interface ClubModules {
-  /** Helper duties at games and special events (helper plan). */
-  duties: boolean;
-  /** Carpools to away games. */
-  carpools: boolean;
-  /** Youth referees at home games of the marked age classes (needs duties; handball: KiHaSL/JuHaSL). */
-  youthReferees: boolean;
-  /** Fixture import from handball4all (German handball associations). */
-  handball4all: boolean;
-  /** Login codes and notifications by SMS (needs a provider account). */
-  sms: boolean;
-}
-
-export type ModuleId = keyof ClubModules;
-
-export const DEFAULT_MODULES: ClubModules = { duties: true, carpools: true, youthReferees: true, handball4all: true, sms: false };
-
-/** Is the module on? Youth referees need the duties module. */
-export function moduleOn(modules: ClubModules, id: ModuleId): boolean {
-  if (id === "youthReferees") return modules.duties && modules.youthReferees;
-  return modules[id];
-}
+export { type ClubModules, DEFAULT_MODULES, type ModuleId, moduleOn } from "./modules";
+import { type ClubModules, DEFAULT_MODULES } from "./modules";
 
 export interface ClubProfile {
   /** Full name, e.g. "SV Musterstadt 1900 Handball". */

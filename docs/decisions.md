@@ -2,6 +2,10 @@
 
 Decisions not covered by `docs/plan.md`, with reasons. Newest first.
 
+## Module registry for contributors (October 2026)
+
+Modules were spread over the club profile type, a path table, the settings screen and the API schema, so a new one meant finding four places. `shared/modules.ts` is now the single registry (id, default, dependency, API paths); the settings switches, the club schema, `ClubModules`, `moduleOn` and the path gate all derive from it, and `shared/module-texts.ts` must have a text per module (TypeScript). `test/modules.test.ts` also requires a row per module in `docs/modules.md`. Code stays in the existing folders by layer (routes, domain, pages) for now; moving each module into its own folder is possible later, but it would touch many files and make open pull requests conflict. `CONTRIBUTING.md` and the pull request template carry the project rules.
+
 ## Public demo and project website (October 2026)
 
 `handball.kabine.dev` is the environment `demo` of `wrangler.jsonc` (Worker `kabine-demo`, own D1, KV, queue, Durable Objects; `APP_ENV=demo`). Visitors sign in by link per role (`/api/demo/login/<player|parent|coach|admin>?lang=de|en`), without passkeys. Four shared accounts, so everything that could lock others out or leave the demo (passkeys, e-mail, SMS, owner handover, invitations, feedback) is blocked (`worker/demo/routes.ts`). At 3:00 Berlin time the cron wipes database, KV and chats and fills them again from `seed/demo.sql` plus scenes made through the app's own API (`worker/demo/reset.ts`), so games and responses are always dated relative to today and the season moves on by itself. The cron runs hourly and checks the Berlin hour, which covers summer and winter time. Secret `DEMO_RESET_TOKEN` allows a manual reset (`npm run demo:reset`). The demo is deployed from `main` by `.github/workflows/deploy-demo.yml` (needs the repository secrets `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, `DEMO_RESET_TOKEN`), so it always runs the latest version.
