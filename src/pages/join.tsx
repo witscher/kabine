@@ -1,6 +1,8 @@
 import { plural, t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
+import { isWorkersDevHost } from "../../shared/addresses";
 import { clubName } from "../club";
+import { useSignInMethods } from "../sign-in-methods";
 import { useLocation } from "preact-iso";
 import { useEffect, useState } from "preact/hooks";
 import { api, errorMessage } from "../api";
@@ -96,6 +98,8 @@ export function JoinPage() {
   const [email, setEmail] = useState("");
   const [done, setDone] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
+  // Access by e-mail code only once the club has set up sending
+  const emailCodes = !!useSignInMethods()?.email;
 
   const load = async () => {
     setError(null);
@@ -224,7 +228,7 @@ export function JoinPage() {
           <p class="small muted">
             <Trans>The passkey is the safest way to sign in: Face ID, fingerprint or screen lock, without a password.</Trans>
           </p>
-          {needsEmail ? <JoinByEmail body={joinBody} email={email.trim()} onDone={() => finish(t`Your access is set up. You sign in with an e-mail code.`)} /> : null}
+          {needsEmail && emailCodes ? <JoinByEmail body={joinBody} email={email.trim()} onDone={() => finish(t`Your access is set up. You sign in with an e-mail code.`)} /> : null}
           <p class="small muted">
             <Trans>Valid until {until}. The link only works once.</Trans>
           </p>
@@ -385,7 +389,7 @@ export function JoinPage() {
             </Trans>
           </p>
         ) : null}
-        {needsEmail ? <JoinByEmail body={joinBody} email={email.trim()} onDone={finishTeamJoin} /> : null}
+        {needsEmail && emailCodes ? <JoinByEmail body={joinBody} email={email.trim()} onDone={finishTeamJoin} /> : null}
       </div>
     </main>
   );
@@ -399,6 +403,7 @@ function ExistingParentLogin({ onLoggedIn }: { onLoggedIn: () => Promise<void> }
   const [emailMode, setEmailMode] = useState(false);
   const [email, setEmail] = useState("");
   const [requestId, setRequestId] = useState<string | null>(null);
+  const emailCodes = !!useSignInMethods()?.email;
   const send = async () => setRequestId(await startEmailLogin(email));
   return (
     <section class="notice yellow" style={{ flexDirection: "column", alignItems: "stretch", gap: "10px" }} aria-label={t`Already have a parent access?`}>
@@ -425,9 +430,11 @@ function ExistingParentLogin({ onLoggedIn }: { onLoggedIn: () => Promise<void> }
           >
             <Trans>Sign in with passkey</Trans>
           </Button>
-          <Button icon="mail" onClick={() => setEmailMode(true)}>
-            <Trans>Code by e-mail</Trans>
-          </Button>
+          {emailCodes ? (
+            <Button icon="mail" onClick={() => setEmailMode(true)}>
+              <Trans>Code by e-mail</Trans>
+            </Button>
+          ) : null}
         </div>
       ) : requestId ? (
         <EmailCodeForm requestId={requestId} email={email.trim()} onDone={onLoggedIn} onResend={send} />
@@ -500,23 +507,58 @@ function SafariHint() {
   );
 }
 
+interface BootstrapInfo {
+  name: string | null;
+  email: string | null;
+  /** Fresh installation: the first admin enters name and e-mail here. */
+  needsPerson: boolean;
+}
+
+/**
+ * Setup of the first admin. Reached by the setup link (/einrichtung#<password>) or, on a fresh installation,
+ * by opening the app at all: then it asks for the setup password chosen when deploying.
+ */
 export function BootstrapPage() {
   useDocumentTitle(t`Setup`);
   const { refresh } = useSession();
-  const [token] = useState(tokenFromHash);
-  const [info, setInfo] = useState<{ name: string; email: string | null } | null>(null);
+  const [token, setToken] = useState(tokenFromHash);
+  const [password, setPassword] = useState("");
+  const [info, setInfo] = useState<BootstrapInfo | null>(null);
   const [error, setError] = useState<unknown>(null);
   const [done, setDone] = useState(false);
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  // Passkeys are bound to the host name: on Cloudflare's test address, first point to the club's domain
+  const host = location.hostname;
+  const [testAddressOk, setTestAddressOk] = useState(!isWorkersDevHost(host));
+
+  const person = info?.needsPerson ? { firstName: firstName.trim(), lastName: lastName.trim(), email: email.trim() } : null;
+  const personReady = !person || (!!person.firstName && !!person.lastName && isEmail(person.email));
+  const body = person ? { token, ...person } : { token };
 
   useEffect(() => {
+    if (!token) return;
+    setError(null);
     api
-      .post<{ name: string; email: string | null }>("/bootstrap/info", { token })
+      .post<BootstrapInfo>("/bootstrap/info", { token })
       .then((res) => {
         setInfo(res);
-        void prepareRegistration("/bootstrap", { token });
+        if (!res.needsPerson) void prepareRegistration("/bootstrap", { token });
       })
-      .catch(setError);
+      .catch((err) => {
+        setError(err);
+        // A mistyped password can be entered again
+        if (!tokenFromHash()) setToken("");
+      });
   }, [token]);
+
+  // Fresh installation: prepare the passkey dialog once name and e-mail are complete (as on the invitation page)
+  useEffect(() => {
+    if (!person || !personReady) return;
+    const timer = window.setTimeout(() => void prepareRegistration("/bootstrap", body), 400);
+    return () => window.clearTimeout(timer);
+  }, [info, firstName, lastName, email]);
 
   if (done) return <Done title={t`Admin access`} text={t`Your admin access is set up. The setup link is now invalid.`} />;
 
@@ -525,18 +567,78 @@ export function BootstrapPage() {
       <TopBar title={t`Setup`} kicker={clubName()} />
       <div class="content">
         <SafariHint />
-        {error ? <ErrorBox error={error} /> : null}
-        {!info && !error ? <Spinner /> : null}
-        {info ? (
+        {!testAddressOk ? (
+          <div class="card card-pad stack">
+            <h2 style={{ fontSize: "26px" }}>
+              <Trans>First give the app the club's address</Trans>
+            </h2>
+            <Notice kind="warn">
+              <Trans>
+                You opened the app at Cloudflare's test address <strong>{host}</strong>. Passkeys only work at the address they were created at: an admin
+                access set up here will not work later at the club's own address.
+              </Trans>
+            </Notice>
+            <p>
+              <Trans>
+                Add a subdomain of the club first, for example <em>app.your-club.org</em>: in the Cloudflare dashboard under{" "}
+                <em>Workers &amp; Pages → this Worker → Settings → Domains &amp; Routes → Add → Custom domain</em>. Then open the app at that address and
+                continue there.
+              </Trans>
+            </p>
+            <Button variant="secondary" block onClick={() => setTestAddressOk(true)}>
+              <Trans>Continue here anyway (only for trying out)</Trans>
+            </Button>
+          </div>
+        ) : null}
+        {testAddressOk && !token ? (
+          <form
+            class="card card-pad stack"
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (password.trim()) setToken(password.trim());
+            }}
+          >
+            <h2 style={{ fontSize: "26px" }}>
+              <Trans>Set up Kabine</Trans>
+            </h2>
+            <p>
+              <Trans>
+                Kabine is installed. Enter the setup password you chose when deploying (<em>ADMIN_BOOTSTRAP_TOKEN</em>). It works once and makes you the first
+                admin.
+              </Trans>
+            </p>
+            {error ? <ErrorBox error={error} /> : null}
+            <TextField label={t`Setup password`} type="password" autoComplete="off" value={password} onInput={setPassword} required />
+            <Button variant="primary" block type="submit" disabled={!password.trim()}>
+              <Trans>Continue</Trans>
+            </Button>
+          </form>
+        ) : null}
+        {testAddressOk && token && error ? <ErrorBox error={error} /> : null}
+        {testAddressOk && token && !info && !error ? <Spinner /> : null}
+        {testAddressOk && info ? (
           <>
             <div class="card card-pad stack">
               <p class="kicker" style={{ color: "var(--text-2)" }}>
-                <Trans>Admin access for</Trans>
+                {person ? <Trans>First admin</Trans> : <Trans>Admin access for</Trans>}
               </p>
-              <h2 style={{ fontSize: "30px" }}>{info.name}</h2>
-              {info.email ? <p class="muted">{info.email}</p> : null}
+              {person ? (
+                <>
+                  <p class="muted">
+                    <Trans>You become the first admin and the owner of this installation. Your e-mail address is for signing in; besides you, only other admins see it.</Trans>
+                  </p>
+                  <TextField label={t`First name`} value={firstName} onInput={setFirstName} autoComplete="given-name" maxLength={60} required />
+                  <TextField label={t`Last name`} value={lastName} onInput={setLastName} autoComplete="family-name" maxLength={60} required />
+                  <TextField label={t`E-mail address`} type="email" inputMode="email" value={email} onInput={setEmail} autoComplete="email" required />
+                </>
+              ) : (
+                <>
+                  <h2 style={{ fontSize: "30px" }}>{info.name}</h2>
+                  {info.email ? <p class="muted">{info.email}</p> : null}
+                </>
+              )}
               <p class="muted">
-                <Trans>Set up your passkey now. The setup link only works a single time.</Trans>
+                <Trans>Set up your passkey now. The setup works a single time only.</Trans>
               </p>
             </div>
             <Button
@@ -544,9 +646,10 @@ export function BootstrapPage() {
               size="lg"
               block
               icon="key"
+              disabled={!personReady}
               onClick={async () => {
                 try {
-                  await registerPasskey("/bootstrap", { token });
+                  await registerPasskey("/bootstrap", body);
                 } catch (err) {
                   toast(passkeyErrorMessage(err, "register"), "error");
                   return;

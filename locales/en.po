@@ -388,6 +388,10 @@ msgstr "Enter meeting point · {teamName}"
 msgid "Text with link copied."
 msgstr "Text with link copied."
 
+#: src/pages/join.tsx
+msgid "You opened the app at Cloudflare's test address <0>{host}</0>. Passkeys only work at the address they were created at: an admin access set up here will not work later at the club's own address."
+msgstr "You opened the app at Cloudflare's test address <0>{host}</0>. Passkeys only work at the address they were created at: an admin access set up here will not work later at the club's own address."
+
 #: worker/routes/events.ts
 msgid "{actorName} cancelled {label} on {date}."
 msgstr "{actorName} cancelled {label} on {date}."
@@ -687,6 +691,7 @@ msgstr "For a profile picture you need your parents' consent. But no parent is l
 
 #: src/pages/admin.tsx
 #: src/pages/admin.tsx
+#: src/pages/join.tsx
 #: src/pages/profile.tsx
 #: src/pages/team.tsx
 #: src/pages/team.tsx
@@ -1057,6 +1062,10 @@ msgstr "The automatic squad is switched off for this team."
 #: src/pages/profile.tsx
 msgid "Hear straight away about new events, cancellations, nominations and chat messages."
 msgstr "Hear straight away about new events, cancellations, nominations and chat messages."
+
+#: src/pages/join.tsx
+msgid "Add a subdomain of the club first, for example <0>app.your-club.org</0>: in the Cloudflare dashboard under <1>Workers & Pages → this Worker → Settings → Domains & Routes → Add → Custom domain</1>. Then open the app at that address and continue there."
+msgstr "Add a subdomain of the club first, for example <0>app.your-club.org</0>: in the Cloudflare dashboard under <1>Workers & Pages → this Worker → Settings → Domains & Routes → Add → Custom domain</1>. Then open the app at that address and continue there."
 
 #: src/duty-blocks.tsx
 msgid "Task · before"
@@ -1830,6 +1839,10 @@ msgstr "Coaches and players come next. These are the usual steps."
 msgid "– Choose template –"
 msgstr "– Choose template –"
 
+#: src/pages/join.tsx
+msgid "First admin"
+msgstr "First admin"
+
 #: worker/routes/admin.ts
 msgid "Please enter an https link."
 msgstr "Please enter an https link."
@@ -2528,6 +2541,10 @@ msgstr "Training plan"
 msgid "Matchday at {host}"
 msgstr "Matchday at {host}"
 
+#: src/pages/login.tsx
+msgid "We send a code to the mobile number you confirmed for your access."
+msgstr "We send a code to the mobile number you confirmed for your access."
+
 #: src/pages/season.tsx
 msgid "Stay in their team unless something else is chosen."
 msgstr "Stay in their team unless something else is chosen."
@@ -3046,6 +3063,10 @@ msgstr "allowed"
 msgid "Open the team in the portal and paste the link from the address bar. It contains ogId, lId and tId."
 msgstr "Open the team in the portal and paste the link from the address bar. It contains ogId, lId and tId."
 
+#: src/pages/join.tsx
+msgid "Set up Kabine"
+msgstr "Set up Kabine"
+
 #: modules/duties/worker/routes.ts
 msgid "The default template cannot be deleted."
 msgstr "The default template cannot be deleted."
@@ -3138,6 +3159,10 @@ msgstr "Team <0>{teamName}</0>"
 #: modules/duties/app/helpers.tsx
 msgid "You are not signed up for any upcoming duty."
 msgstr "You are not signed up for any upcoming duty."
+
+#: src/pages/join.tsx
+msgid "You become the first admin and the owner of this installation. Your e-mail address is for signing in; besides you, only other admins see it."
+msgstr "You become the first admin and the owner of this installation. Your e-mail address is for signing in; besides you, only other admins see it."
 
 #: src/pages/squad.tsx
 #: src/pages/squad.tsx
@@ -4069,6 +4094,7 @@ msgid "Taken over from the previous season and shifted by one year. Please check
 msgstr "Taken over from the previous season and shifted by one year. Please check against the association's implementing regulations."
 
 #: worker/routes/join.ts
+#: worker/routes/join.ts
 msgid "The admin access is already set up."
 msgstr "The admin access is already set up."
 
@@ -4755,6 +4781,10 @@ msgstr "All slots are taken."
 msgid "Leave empty: the longest deadline of the teams involved applies."
 msgstr "Leave empty: the longest deadline of the teams involved applies."
 
+#: src/pages/join.tsx
+msgid "Kabine is installed. Enter the setup password you chose when deploying (<0>ADMIN_BOOTSTRAP_TOKEN</0>). It works once and makes you the first admin."
+msgstr "Kabine is installed. Enter the setup password you chose when deploying (<0>ADMIN_BOOTSTRAP_TOKEN</0>). It works once and makes you the first admin."
+
 #: src/pages/season.tsx
 msgid "No automatic assignment without year of birth. Suggestion: previous team."
 msgstr "No automatic assignment without year of birth. Suggestion: previous team."
@@ -5123,6 +5153,10 @@ msgstr "Please enter the sender address."
 #: src/player-import.tsx
 msgid "One player per line: first name, last name, birth year. Copy the columns from a spreadsheet or separate them with a semicolon."
 msgstr "One player per line: first name, last name, birth year. Copy the columns from a spreadsheet or separate them with a semicolon."
+
+#: src/pages/join.tsx
+msgid "Set up your passkey now. The setup works a single time only."
+msgstr "Set up your passkey now. The setup works a single time only."
 
 #: src/pages/home.tsx
 msgid "Then: game"
@@ -6963,6 +6997,10 @@ msgstr "An admin assigns coaches."
 msgid "Chat {teamName}"
 msgstr "Chat {teamName}"
 
+#: src/pages/join.tsx
+msgid "Setup password"
+msgstr "Setup password"
+
 #: src/pages/event.tsx
 #: src/pages/event.tsx
 msgid "Teams at this training"
@@ -7748,6 +7786,10 @@ msgstr "Please enter a valid e-mail address."
 #: src/pages/team.tsx
 msgid "no own access"
 msgstr "no own access"
+
+#: src/pages/join.tsx
+msgid "Continue here anyway (only for trying out)"
+msgstr "Continue here anyway (only for trying out)"
 
 #: src/pages/admin.tsx
 msgid "Use the sport's age groups?"
@@ -8919,6 +8961,7 @@ msgstr "At most {max} players can be nominated."
 
 #: src/pages/admin.tsx
 #: src/pages/admin.tsx
+#: src/pages/join.tsx
 #: src/pages/profile.tsx
 #: src/pages/team.tsx
 #: src/pages/team.tsx
@@ -9738,6 +9781,7 @@ msgstr "Same names in the squad: <0>{names}</0>. Please add the last names befor
 msgid "Only people with the KiHaSL/JuHaSL role."
 msgstr "Only people with the KiHaSL/JuHaSL role."
 
+#: src/pages/join.tsx
 #: src/pages/season.tsx
 #: src/pages/setup-wizard.tsx
 msgid "Continue"
@@ -9775,6 +9819,7 @@ msgstr "Activity"
 msgid "Same as last game"
 msgstr "Same as last game"
 
+#: src/pages/join.tsx
 #: src/pages/login.tsx
 #: src/pages/profile.tsx
 msgid "E-mail address"
@@ -10388,10 +10433,6 @@ msgid "What is new"
 msgstr "What is new"
 
 #: src/pages/join.tsx
-msgid "Set up your passkey now. The setup link only works a single time."
-msgstr "Set up your passkey now. The setup link only works a single time."
-
-#: src/pages/join.tsx
 msgid "Access for"
 msgstr "Access for"
 
@@ -10470,6 +10511,10 @@ msgstr "{name} ({seats} seats)"
 #: modules/carpools/app/card.tsx
 msgid "Withdraw offer"
 msgstr "Withdraw offer"
+
+#: src/pages/join.tsx
+msgid "First give the app the club's address"
+msgstr "First give the app the club's address"
 
 #: src/pages/chat.tsx
 msgid "as admin"

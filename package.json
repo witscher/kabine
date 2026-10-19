@@ -23,7 +23,7 @@
     "db:reset:local": "node scripts/reset-local.mjs",
     "db:migrate:remote": "wrangler d1 migrations apply DB --remote",
     "secrets:generate": "node scripts/generate-secrets.mjs",
-    "deploy": "npm run build && wrangler d1 migrations apply DB --remote && wrangler deploy",
+    "deploy": "npm run build && wrangler d1 migrations apply DB --remote && wrangler deploy && node scripts/after-deploy.mjs",
     "deploy:demo": "CLOUDFLARE_ENV=demo vite build && wrangler d1 migrations apply DB --remote --env demo && wrangler deploy",
     "site:build": "node scripts/site-build.mjs",
     "site:dev": "node scripts/site-build.mjs --preview && wrangler dev --config site/wrangler.jsonc --port 8790",
@@ -78,7 +78,7 @@
   "cloudflare": {
     "bindings": {
       "ADMIN_BOOTSTRAP_TOKEN": {
-        "description": "A password you choose (at least 16 characters). The first admin opens https://<address of the app>/einrichtung#<this password> once."
+        "description": "A password you choose (at least 16 characters); you need it once to become the first admin. **After the deploy, first give the app the club's address**, e.g. `app.your-club.org` (*Workers & Pages → this Worker → Settings → Domains & Routes → Add → Custom domain*; the club's domain must be managed in Cloudflare), because passkeys are bound to it. Then open that address: the app asks for this password and sets up the first admin. [Step by step](https://github.com/witscher/kabine/blob/main/docs/install.md)"
       },
       "DB": {
         "description": "The club's data (D1 database)."

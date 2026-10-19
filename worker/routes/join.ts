@@ -31,7 +31,8 @@ export type JoinContext =
       revokeExisting: boolean;
       email: string | null;
     }
-  | { kind: "bootstrap"; personId: number; userId: string; email: string | null };
+  /** personId null: a fresh installation; the first admin is created from newPerson once the passkey exists. */
+  | { kind: "bootstrap"; personId: number | null; newPerson: { firstName: string; lastName: string } | null; userId: string; email: string | null };
 
 function fullName(first: string, last: string | null): string {
   return last ? `${first} ${last}` : first;
@@ -398,12 +399,24 @@ async function createJoinAccount(env: Env, request: Request, context: JoinContex
   // Admin bootstrap
   const used = await first(db, "SELECT 1 AS used FROM app_meta WHERE key = 'bootstrap_used_at'");
   if (used) throw gone(t`The setup link has already been used.`);
+  let personId = context.personId;
+  if (personId == null) {
+    // Fresh installation: the first admin only comes into being with the passkey, so a cancelled dialog leaves nothing behind
+    if (await first(db, "SELECT 1 AS found FROM persons WHERE is_admin = 1 AND is_former = 0")) throw gone(t`The admin access is already set up.`);
+    personId = (await first<{ id: number }>(
+      db,
+      "INSERT INTO persons (first_name, last_name, is_admin, admin_email) VALUES (?, ?, 1, ?) RETURNING id",
+      context.newPerson!.firstName,
+      context.newPerson!.lastName,
+      context.email,
+    ))!.id;
+  }
   let accountId: number;
   try {
     accountId = (await first<{ id: number }>(
       db,
       "INSERT INTO accounts (person_id, webauthn_user_id) VALUES (?, ?) RETURNING id",
-      context.personId,
+      personId,
       context.userId,
     ))!.id;
   } catch (err) {
@@ -487,6 +500,19 @@ async function bootstrapPerson(env: Env, token: string) {
   );
 }
 
+/** A fresh installation waits for its first admin: the app then opens the setup instead of the sign-in. */
+export async function setupPending(env: Env): Promise<boolean> {
+  const expected = env.ADMIN_BOOTSTRAP_TOKEN;
+  if (!expected || expected.length < 16) return false;
+  const row = await first<{ used: number; admin: number }>(
+    env.DB,
+    `SELECT EXISTS (SELECT 1 FROM app_meta WHERE key = 'bootstrap_used_at') AS used,
+            EXISTS (SELECT 1 FROM persons p JOIN accounts a ON a.person_id = p.id
+                     WHERE p.is_admin = 1 AND p.is_former = 0 AND a.disabled_at IS NULL) AS admin`,
+  );
+  return !row?.used && !row?.admin;
+}
+
 joinRoutes.post("/bootstrap/info", async (c) => {
   const { token } = parse(tokenSchema, await readJson(c.req.raw));
   const person = await bootstrapPerson(c.env, token);
@@ -502,23 +528,27 @@ const bootstrapOptionsSchema = tokenSchema.extend({
 
 joinRoutes.post("/bootstrap/options", async (c) => {
   const input = parse(bootstrapOptionsSchema, await readJson(c.req.raw));
-  let person = await bootstrapPerson(c.env, input.token);
-  if (!person) {
+  const person = await bootstrapPerson(c.env, input.token);
+  let context: JoinContext;
+  let name: string;
+  if (person) {
+    name = fullName(person.first_name, person.last_name);
+    context = { kind: "bootstrap", personId: person.id, newPerson: null, userId: newWebauthnUserId(), email: person.admin_email?.toLowerCase() ?? null };
+  } else {
     if (!input.firstName || !input.lastName || !input.email) throw badRequest(t`Please enter first name, last name and e-mail address.`);
-    person = await first<{ id: number; first_name: string; last_name: string | null; admin_email: string | null }>(
-      c.env.DB,
-      "INSERT INTO persons (first_name, last_name, is_admin, admin_email) VALUES (?, ?, 1, ?) RETURNING id, first_name, last_name, admin_email",
-      input.firstName,
-      input.lastName,
-      input.email.toLowerCase(),
-    );
+    name = fullName(input.firstName, input.lastName);
+    context = {
+      kind: "bootstrap",
+      personId: null,
+      newPerson: { firstName: input.firstName, lastName: input.lastName },
+      userId: newWebauthnUserId(),
+      email: input.email.toLowerCase(),
+    };
   }
-  const name = fullName(person!.first_name, person!.last_name);
-  const context: JoinContext = { kind: "bootstrap", personId: person!.id, userId: newWebauthnUserId(), email: person!.admin_email?.toLowerCase() ?? null };
   return c.json(
     await startRegistration(c.env, c.req.raw, {
       webauthnUserId: context.userId,
-      userName: person!.admin_email ?? name,
+      userName: context.email ?? name,
       displayName: name,
       context,
     }),
@@ -536,7 +566,8 @@ joinRoutes.post("/bootstrap/verify", async (c) => {
   if (context.kind !== "bootstrap") throw badRequest(t`Invalid request.`);
   const accountId = await finishJoin(c.env, c.req.raw, context, credential);
   // The person who sets up the installation is its protected owner
-  if ((await loadClub(c.env.DB)).ownerPersonId === null) await saveClub(c.env.DB, { ownerPersonId: context.personId });
+  const owner = await first<{ person_id: number }>(c.env.DB, "SELECT person_id FROM accounts WHERE id = ?", accountId);
+  if ((await loadClub(c.env.DB)).ownerPersonId === null) await saveClub(c.env.DB, { ownerPersonId: owner!.person_id });
   await rememberOrigin(c.env.DB, new URL(c.req.url).origin);
   c.executionCtx.waitUntil(requestEmailConfirmation(c.env, c.req.raw, accountId));
   const session = await createSession(c.env.DB, accountId, c.req.header("user-agent") ?? null);

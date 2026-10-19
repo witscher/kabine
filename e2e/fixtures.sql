@@ -3,7 +3,7 @@ INSERT INTO seasons (id, name, starts_on, ends_on, is_current) VALUES (1, '2026/
 INSERT INTO age_classes (season_id, code, name, rank, is_youth, birth_year_min, birth_year_max, game_minutes, youth_referee) VALUES
   (1, 'wD', 'weibliche D-Jugend', 2, 1, 2014, 2015, 90, 1),
   (1, 'wC', 'weibliche C-Jugend', 3, 1, 2012, 2013, 90, 1);
-INSERT INTO persons (id, first_name, last_name, is_admin, admin_email) VALUES (1, 'Ada', 'Admin', 1, 'admin@example.org');
+-- No admin yet: the first test sets up Ada Admin like a fresh installation from the deploy button
 INSERT INTO persons (id, first_name, last_name) VALUES (2, 'Theo', 'Trainer');
 INSERT INTO persons (id, first_name, last_name, birth_year) VALUES
   (11, 'Ida', 'Probe', 2014),

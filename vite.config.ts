@@ -46,6 +46,8 @@ export default defineConfig({
               vars: {
                 APP_SECRET: "e2e-app-secret-0123456789abcdef",
                 ADMIN_BOOTSTRAP_TOKEN: "e2e-einrichtung-0123456789",
+                // E-mail sending is set up, so sign-in by e-mail code is offered (Miniflare keeps the mails locally)
+                MAIL_FROM: "app@example.org",
               },
             },
           }

@@ -22,13 +22,17 @@ In the Worker's settings under *Build*, check that the deploy command is `npm ru
 
 ## 2. Add your domain
 
-In the Cloudflare dashboard open *Workers & Pages → kabine → Settings → Domains & Routes* and add a custom domain, for example `app.your-club.org`. Cloudflare creates the DNS record and the certificate.
+Do this before anyone signs in. In the Cloudflare dashboard open *Workers & Pages → kabine → Settings → Domains & Routes → Add → Custom domain* and enter a subdomain of the club, for example `app.your-club.org`. Cloudflare creates the DNS record and the certificate.
 
-From now on, use only this address. Passkeys created under the `workers.dev` address do not work on the club domain.
+The club's domain has to be managed in the same Cloudflare account (its DNS at Cloudflare). If it is managed elsewhere, ask whoever runs the club's domain to move its DNS to Cloudflare (free), or register a new domain for the app in Cloudflare.
+
+From now on, use only this address. Passkeys created under the `workers.dev` address do not work on the club domain; the setup page warns when it is opened there.
 
 ## 3. First admin
 
-Open `https://app.your-club.org/einrichtung#<your ADMIN_BOOTSTRAP_TOKEN>`. Enter your name and e-mail address and create a passkey (Face ID, fingerprint or the screen lock of your device). The setup link works once.
+Open `https://app.your-club.org`. A new installation goes straight to its setup: enter the setup password you chose when deploying (`ADMIN_BOOTSTRAP_TOKEN`), then your name and e-mail address, and create a passkey (Face ID, fingerprint or the screen lock of your device). The password works once. (The direct link `https://app.your-club.org/einrichtung#<password>` does the same without typing.)
+
+The build log of the deploy ends with these steps as well.
 
 The setup wizard opens right after:
 
@@ -44,7 +48,7 @@ Everything can be changed later under *Administration*. "Continue later" leaves 
 
 ## 4. E-mail (optional, recommended)
 
-Kabine sends e-mails for sign-in codes on new devices, access links and helper plan reminders. Without e-mail, people sign in with passkeys and the links coaches hand out.
+Kabine sends e-mails for sign-in codes on new devices, access links and helper plan reminders. Without e-mail, people sign in with passkeys and the links coaches hand out; the sign-in page only offers "Code by e-mail" once sending is set up.
 
 - **Cloudflare Email Sending:** the domain must be set up for sending in Cloudflare (*Email → Email Sending*). Enter the sender address in the wizard, for example `no-reply@your-club.org`.
 - **SMTP:** the club's mail server, with TLS on port 465 or STARTTLS on port 587. The password is stored encrypted.

@@ -13,6 +13,9 @@ import { finishLogin, finishRegistration, startLogin, startRegistration, type St
 import { all, first, run } from "../lib/db";
 import { badRequest, conflict, forbidden, notFound, parse, readJson } from "../lib/http";
 import { utcIso } from "../lib/time";
+import { loadMailSettings } from "../domain/mail";
+import { textsAvailable } from "../domain/texts";
+import { setupPending } from "./join";
 import { isLocale, LOCALES } from "../../shared/i18n";
 
 export async function buildMe(env: Env, actor: Actor): Promise<Me> {
@@ -76,6 +79,21 @@ authRoutes.get("/session", async (c) => {
   const actor = c.get("actor");
   const body: SessionResponse = actor ? { authenticated: true, me: await buildMe(c.env, actor) } : { authenticated: false };
   return c.json(body);
+});
+
+/**
+ * Ways to sign in besides passkeys, for the sign-in and invitation pages: codes by e-mail only once an admin set up
+ * sending, by SMS only with the module and a provider. setupPending: a fresh installation without an admin yet.
+ */
+authRoutes.get("/auth/methods", async (c) => {
+  const mail = await loadMailSettings(c.env);
+  return c.json({
+    email:
+      (mail.mode === "smtp" && !!mail.smtp?.passwordSealed && !!(mail.from || c.env.MAIL_FROM)) ||
+      (mail.mode === "cloudflare" && !!c.env.EMAIL && !!(mail.from || c.env.MAIL_FROM)),
+    sms: await textsAvailable(c.env.DB),
+    setupPending: await setupPending(c.env),
+  });
 });
 
 authRoutes.post("/auth/login/options", async (c) => {

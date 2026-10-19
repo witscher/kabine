@@ -79,8 +79,17 @@ test.afterAll(async () => {
 test("Admin richtet den Zugang über den Einrichtungslink ein", async ({ browser }) => {
   admin = await newUser(browser);
   const { page } = admin;
-  await page.goto("/einrichtung#e2e-einrichtung-0123456789");
-  await expect(page.getByRole("heading", { name: "Ada Admin" })).toBeVisible();
+  // Fresh installation: opening the app leads to the setup, which asks for the password chosen when deploying
+  await page.goto("/");
+  await expect(page).toHaveURL(/\/einrichtung$/);
+  await page.getByLabel("Einrichtungspasswort").fill("falsches-passwort-123456");
+  await page.getByRole("button", { name: "Weiter" }).click();
+  await expect(page.getByText("Dieser Einrichtungslink ist ungültig.")).toBeVisible();
+  await page.getByLabel("Einrichtungspasswort").fill("e2e-einrichtung-0123456789");
+  await page.getByRole("button", { name: "Weiter" }).click();
+  await page.getByLabel("Vorname").fill("Ada");
+  await page.getByLabel("Nachname").fill("Admin");
+  await page.getByLabel("E-Mail-Adresse").fill("admin@example.org");
   await page.getByRole("button", { name: "Passkey einrichten" }).click();
   await expect(page.getByText("Geschafft!")).toBeVisible();
   await page.getByRole("button", { name: "Zur App" }).click();

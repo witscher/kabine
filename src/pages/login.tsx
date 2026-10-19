@@ -1,12 +1,14 @@
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { ClubMark, clubName, useModule } from "../club";
+import { useLocation } from "preact-iso";
 import { useEffect, useState } from "preact/hooks";
 import { api, errorMessage } from "../api";
 import { EmailCodeForm, isEmail, startEmailLogin } from "../email";
 import { Icon } from "../icons";
 import { LanguageSwitch } from "../language-switch";
 import { isIos, isStandalone, loginWithPasskey, passkeyErrorDetail, passkeyErrorMessage, passkeysSupported, prepareLogin, useSession } from "../session";
+import { useSignInMethods } from "../sign-in-methods";
 import { Button, Notice, TextField, useDocumentTitle } from "../ui";
 
 export function InstallHint() {
@@ -38,7 +40,9 @@ export function LoginPage() {
   const [detail, setDetail] = useState("");
   // Sign-in by code: e-mail, or SMS with the SMS module
   const [codeMode, setCodeMode] = useState<"email" | "sms" | null>(null);
-  const smsOn = useModule("sms");
+  const methods = useSignInMethods();
+  const smsOn = useModule("sms") && !!methods?.sms;
+  const emailOn = !!methods?.email;
   const [email, setEmail] = useState("");
   const [requestId, setRequestId] = useState<string | null>(null);
   const [emailError, setEmailError] = useState<string | null>(null);
@@ -54,6 +58,12 @@ export function LoginPage() {
     }
   };
   const supported = passkeysSupported();
+  const { route } = useLocation();
+
+  // A fresh installation has nobody to sign in yet: open the setup of the first admin
+  useEffect(() => {
+    if (methods?.setupPending) route("/einrichtung", true);
+  }, [methods?.setupPending]);
 
   // Optionen bereitlegen, damit der Passkey-Dialog direkt aus dem Tippen startet
   useEffect(() => {
@@ -122,6 +132,7 @@ export function LoginPage() {
             password.
           </Trans>
         </p>
+        {emailOn || smsOn ? (
         <section class="card card-pad stack-sm" aria-label={t`Sign in by e-mail`}>
           {!codeMode ? (
             <>
@@ -129,16 +140,20 @@ export function LoginPage() {
                 <Trans>No passkey on this device?</Trans>
               </strong>
               <p class="small muted">
-                {smsOn ? (
+                {smsOn && emailOn ? (
                   <Trans>We send a code to the e-mail address or mobile number you confirmed for your access.</Trans>
+                ) : smsOn ? (
+                  <Trans>We send a code to the mobile number you confirmed for your access.</Trans>
                 ) : (
                   <Trans>We send a code to the e-mail address you gave for your access.</Trans>
                 )}
               </p>
               <div class="btn-row">
-                <Button icon="mail" onClick={() => setCodeMode("email")}>
-                  <Trans>Code by e-mail</Trans>
-                </Button>
+                {emailOn ? (
+                  <Button icon="mail" onClick={() => setCodeMode("email")}>
+                    <Trans>Code by e-mail</Trans>
+                  </Button>
+                ) : null}
                 {smsOn ? (
                   <Button icon="phone" onClick={() => setCodeMode("sms")}>
                     <Trans>Code by SMS</Trans>
@@ -176,6 +191,7 @@ export function LoginPage() {
             </>
           )}
         </section>
+        ) : null}
         <p class="muted">
           <Trans>
             <strong style={{ color: "var(--text)" }}>No access yet?</strong> Your coach sends you an invitation link, for example in the team's WhatsApp group.

@@ -1,0 +1,11 @@
+{
+  "Set up Kabine": "Kabine einrichten",
+  "Kabine is installed. Enter the setup password you chose when deploying (<0>ADMIN_BOOTSTRAP_TOKEN</0>). It works once and makes you the first admin.": "Kabine ist installiert. Gib das Einrichtungspasswort ein, das du beim Deploy gewählt hast (<0>ADMIN_BOOTSTRAP_TOKEN</0>). Es funktioniert einmal und macht dich zum ersten Admin.",
+  "Setup password": "Einrichtungspasswort",
+  "You opened the app at Cloudflare's test address <0>{host}</0>. Passkeys only work at the address they were created at: an admin access set up here will not work later at the club's own address.": "Du hast die App unter der Test-Adresse von Cloudflare geöffnet: <0>{host}</0>. Passkeys funktionieren nur unter der Adresse, unter der sie angelegt wurden. Ein Admin-Zugang, den du hier einrichtest, funktioniert später unter der Adresse des Vereins nicht.",
+  "Add a subdomain of the club first, for example <0>app.your-club.org</0>: in the Cloudflare dashboard under <1>Workers & Pages → this Worker → Settings → Domains & Routes → Add → Custom domain</1>. Then open the app at that address and continue there.": "Lege zuerst eine Subdomain des Vereins an, zum Beispiel <0>app.dein-verein.de</0>: im Cloudflare-Dashboard unter <1>Workers & Pages → dieser Worker → Settings → Domains & Routes → Add → Custom domain</1>. Öffne die App danach unter dieser Adresse und mach dort weiter.",
+  "We send a code to the mobile number you confirmed for your access.": "Wir schicken einen Code an die Handynummer, die du für deinen Zugang bestätigt hast.",
+  "You become the first admin and the owner of this installation. Your e-mail address is for signing in; besides you, only other admins see it.": "Du wirst der erste Admin und Inhaber dieser Installation. Deine E-Mail-Adresse dient der Anmeldung; außer dir sehen sie nur andere Admins.",
+  "First admin": "Erster Admin",
+  "Set up your passkey now. The setup works a single time only.": "Richte jetzt deinen Passkey ein. Die Einrichtung funktioniert nur ein einziges Mal."
+}
