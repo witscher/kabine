@@ -3,12 +3,12 @@
 // starts with everything seen, so only later updates and modules count as news.
 import { CHANGELOG, entriesSince, KABINE_VERSION } from "../../shared/changelog";
 import type { ModuleManifest } from "../../shared/module-api";
-import { MODULES } from "../../shared/modules";
+import { MODULES, moduleOffered } from "../../shared/modules";
 import type { AdminNews } from "../../shared/types";
 import { first, run } from "../lib/db";
 
 /** Modules offered to a club of this sport (the others are not shown in the settings either). */
-const offered = (sport: string) => (MODULES as readonly ModuleManifest[]).filter((m) => !m.sports || m.sports.includes(sport as never));
+const offered = (sport: string) => (MODULES as readonly ModuleManifest[]).filter((m) => moduleOffered(m, sport));
 
 export async function adminNews(db: D1Database, accountId: number, sport: string): Promise<AdminNews | null> {
   const row = await first<{ changelog_seen: string | null; modules_seen: string | null }>(

@@ -1241,6 +1241,16 @@ test("Einrichtungsassistent: Admin geht alle Schritte durch", async () => {
   await expect(page.getByText("Aktuelle Saison:")).toBeVisible();
   await page.getByRole("button", { name: "Speichern und weiter" }).click();
   await expect(page.getByRole("heading", { name: "Funktionen" })).toBeVisible();
+  // A switched-off module stays in the list and can be switched on again
+  const switches = await page.getByRole("switch").count();
+  for (const name of [/Jugendschiedsrichter/, /Fahrgemeinschaften/, /handball4all/]) {
+    const sw = page.getByRole("switch", { name });
+    await sw.click();
+    await expect(sw).toHaveAttribute("aria-checked", "false");
+    await expect(page.getByRole("switch")).toHaveCount(switches);
+    await sw.click();
+    await expect(sw).toHaveAttribute("aria-checked", "true");
+  }
   await page.getByRole("button", { name: "Speichern und weiter" }).click();
   await expect(page.getByRole("heading", { name: "E-Mail", exact: true })).toBeVisible();
   await page.getByRole("button", { name: "Überspringen" }).click();

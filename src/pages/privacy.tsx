@@ -12,7 +12,7 @@ export function PrivacyPage() {
   const club = useClub();
   const clubName = club.name;
   const host = club.privacyUrl ? new URL(club.privacyUrl).host : "";
-  const on = (m: Parameters<typeof moduleOn>[1]) => moduleOn(club.modules, m);
+  const on = (m: Parameters<typeof moduleOn>[1]) => moduleOn(club, m);
   // Brand names of the switched-on game schedule sources (fixture modules), e.g. "handball4all"
   const scheduleSources = MODULES.flatMap((m) => (m.kind === "fixtures" && "vendor" in m && on(m.id) ? [m.vendor] : [])).join(", ");
   return (
@@ -134,7 +134,7 @@ export function PrivacyPage() {
 /** What the club's active modules store, from their manifests (modules/<id>/module.ts, privacy()). */
 function ModulePrivacy() {
   const club = useClub();
-  const list = MODULES.filter((m) => moduleOn(club.modules, m.id))
+  const list = MODULES.filter((m) => moduleOn(club, m.id))
     .map((m) => ({ label: m.label(), privacy: m.privacy() }))
     .filter((m) => m.privacy);
   if (!list.length) return null;

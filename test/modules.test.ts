@@ -2,7 +2,7 @@
 import { env } from "cloudflare:workers";
 import { beforeEach, describe, expect, it } from "vitest";
 import { moduleOn } from "../shared/club";
-import { DEFAULT_MODULES } from "../shared/modules";
+import { DEFAULT_MODULES, moduleManifest, moduleOffered } from "../shared/modules";
 import { saveClub } from "../worker/domain/club";
 import { moduleOfPath } from "../worker/lib/modules";
 import { api, eventIn, exec, freshDb, loginAs, member, person, season, team } from "./helpers";
@@ -39,8 +39,22 @@ describe("Module", () => {
 
   it("Jugendschiedsrichter brauchen Helferdienste", () => {
     const all = { ...DEFAULT_MODULES, duties: true, youthReferees: true };
-    expect(moduleOn(all, "youthReferees")).toBe(true);
-    expect(moduleOn({ ...all, duties: false }, "youthReferees")).toBe(false);
+    expect(moduleOn({ modules: all, sport: "handball" }, "youthReferees")).toBe(true);
+    expect(moduleOn({ modules: { ...all, duties: false }, sport: "handball" }, "youthReferees")).toBe(false);
+  });
+
+  it("Handball-Module sind bei anderen Sportarten aus, auch wenn sie gespeichert an sind", () => {
+    const all = { ...DEFAULT_MODULES, duties: true, youthReferees: true, handball4all: true, carpools: true };
+    expect(moduleOn({ modules: all, sport: "football" }, "youthReferees")).toBe(false);
+    expect(moduleOn({ modules: all, sport: "football" }, "handball4all")).toBe(false);
+    expect(moduleOn({ modules: all, sport: "football" }, "carpools")).toBe(true);
+    expect(moduleOffered(moduleManifest("handball4all"), "football")).toBe(false);
+    expect(moduleOffered(moduleManifest("carpools"), "football")).toBe(true);
+  });
+
+  it("Fußballverein: handball4all-Pfade antworten 404, obwohl das Modul gespeichert an ist", async () => {
+    await saveClub(env.DB, { sport: "football", modules: { ...DEFAULT_MODULES, handball4all: true } });
+    expect((await api(`/teams/${wd}/games/claim`, { cookie: coachCookie, body: { manual: true } })).status).toBe(404);
   });
 
   it("eingeschaltet: Helferplan und Fahrgemeinschaft da", async () => {

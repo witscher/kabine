@@ -5,7 +5,7 @@ import { Trans } from "@lingui/react/macro";
 import { useState } from "preact/hooks";
 import { type ClubModules, type ClubProfile, isHexColor, KABINE_SOURCE } from "../../shared/club";
 import type { ModuleManifest } from "../../shared/module-api";
-import { MODULES, type ModuleId } from "../../shared/modules";
+import { MODULES, type ModuleId, moduleOffered } from "../../shared/modules";
 import { LOCALE_NAMES, LOCALES, type Locale } from "../../shared/i18n";
 import { useQuery } from "../store";
 import { api, errorMessage } from "../api";
@@ -281,9 +281,9 @@ export function ModulesSection({ modules, onChange }: { modules: ClubModules; on
   const fresh = new Set(useSession().me?.news?.newModules.map((m) => m.id) ?? []);
   // How many teams use each source, to warn before one is switched off
   const usage = useQuery<{ sources: { id: string; teams: number }[] }>("/admin/fixture-sources");
-  const offered = (MODULES as readonly ModuleManifest[]).filter(
-    (m) => !m.sports || (m.sports as readonly string[]).includes(club.sport) || modules[m.id as ModuleId],
-  );
+  // Which modules are offered depends on the club's sport only, never on the switches: a switched-off module stays
+  // in the list, so it can be switched on again
+  const offered = (MODULES as readonly ModuleManifest[]).filter((m) => moduleOffered(m, club.sport));
   const row = (m: ModuleManifest) => {
     const id = m.id as ModuleId;
     const teams = usage.data?.sources.find((x) => x.id === m.id)?.teams ?? 0;

@@ -96,5 +96,5 @@ export function clubTimeZone(): string {
 
 /** Is a module of the club on? Re-renders when the profile changes. */
 export function useModule(id: ModuleId): boolean {
-  return moduleOn(useClub().modules, id);
+  return moduleOn(useClub(), id);
 }

@@ -25,7 +25,7 @@ modules/carpools/
 | `id` | Key in the club profile, camelCase. Never rename it: clubs have it stored. |
 | `kind` | `feature`, `fixtures` (game schedules from an association's system) or `provider` (a paid service outside Cloudflare). Sources of kind `fixtures` exclude each other per team: the club may switch on several, they form their own group in the settings, and each team picks one (or none). |
 | `status` | `stable`, or `beta`: off by default and marked “Beta” in the settings. New modules start as `beta`. |
-| `defaultOn`, `requires`, `sports` | State for a new club, a module it needs, the sports it is offered for. |
+| `defaultOn`, `requires`, `sports` | State for a new club, a module it needs, the sports it is made for. For a club of another sport the module is not offered and counts as off, whatever is stored (`moduleOn` in `shared/modules.ts`). |
 | `paths` | Regular expressions of its API paths. The core answers 404 for them while the module is off. |
 | `label()`, `description()` | Switch text in administration (Lingui, English with German translation). |
 | `privacy()` | What it stores about people, who sees it, when it is deleted; shown on every installation's privacy page. `null` if it stores no personal data. |

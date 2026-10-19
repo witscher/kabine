@@ -18,10 +18,18 @@ export function moduleManifest(id: ModuleId): ModuleManifest {
   return MODULES.find((m) => m.id === id)!;
 }
 
-/** Is the module on? A module that needs another one is off while that one is off. */
-export function moduleOn(modules: ClubModules, id: ModuleId): boolean {
+/** Is the module made for this sport? Modules without `sports` are for every sport. */
+export function moduleOffered(manifest: ModuleManifest, sport: string): boolean {
+  return !manifest.sports || (manifest.sports as readonly string[]).includes(sport);
+}
+
+/**
+ * Is the module on for this club? Off while it is switched off, while a module it needs is off, and for a
+ * club of a sport it is not made for (a handball module stays off for a football club, whatever is stored).
+ */
+export function moduleOn(club: { modules: ClubModules; sport: string }, id: ModuleId): boolean {
   const def = moduleManifest(id);
-  return modules[id] && (!def.requires || moduleOn(modules, def.requires as ModuleId));
+  return club.modules[id] && moduleOffered(def, club.sport) && (!def.requires || moduleOn(club, def.requires as ModuleId));
 }
 
 /** The module an API path belongs to, null for paths of the base. The first matching module wins. */

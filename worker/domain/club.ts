@@ -72,7 +72,7 @@ let ownSport: string = DEFAULT_CLUB.sport;
 
 /** Is a module of this club on? (set with the club context of the request or cron run) */
 export function isModuleOn(id: ModuleId): boolean {
-  return moduleOn(ownModules, id);
+  return moduleOn({ modules: ownModules, sport: ownSport }, id);
 }
 
 export function ownClubAbbr(): string {

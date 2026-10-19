@@ -13,5 +13,5 @@ export const APP_MODULES: readonly AppModule[] = Object.keys(found)
 /** App parts of the modules the club has switched on. */
 export function useActiveModules(): AppModule[] {
   const club = useClub();
-  return APP_MODULES.filter((m) => moduleOn(club.modules, m.manifest.id as ModuleId));
+  return APP_MODULES.filter((m) => moduleOn(club, m.manifest.id as ModuleId));
 }
