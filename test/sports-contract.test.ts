@@ -11,6 +11,10 @@ describe.each(SPORT_LIST.map((s) => [s.id, s] as const))("sport %s", (id, sport)
     for (const l of LOCALES) expect(sport.name[l], `name.${l}`).toBeTruthy();
   });
 
+  it("says where it is played (texts pick hall, pitch or neutral wording)", () => {
+    expect(["hall", "pitch", "venue"]).toContain(sport.venue);
+  });
+
   it("has a valid season start", () => {
     const { month, day } = sport.seasonStart;
     expect(month >= 1 && month <= 12).toBe(true);

@@ -223,6 +223,8 @@ test("Trainer: Helferplan an, Heimspiel anlegen, Fußball-Dienste, Mutter übern
   await page.getByRole("link", { name: "Termin anlegen" }).click();
   await page.getByRole("group", { name: "Art des Termins" }).getByRole("button", { name: "Spiel" }).click();
   await page.getByLabel("Gegner oder Turnier").fill("SV Nachbarort");
+  // Football is played on a pitch, not in a hall
+  await expect(page.getByLabel("Platz (optional)")).toBeVisible();
   const date = new Date(Date.now() + 9 * 86_400_000).toLocaleDateString("sv-SE", { timeZone: "Europe/Berlin" });
   await page.getByLabel("Datum").fill(date);
   await page.getByLabel("Spielbeginn").fill("11:00");
@@ -307,6 +309,8 @@ test("Jede Seite lädt ohne Fehler: Admin, Trainer, Spieler und Eltern", async (
   const session = (await (await coach.page.request.get("/api/session")).json()) as { me: { manageableTeams: { id: number }[] } };
   const teamId = session.me.manageableTeams[0]!.id;
   const common = ["/", "/chat", "/profil", "/profil/benachrichtigungen", "/profil/geraete", "/hilfe", "/datenschutz", "/helfer"];
+  await admin.page.goto("/verwaltung");
+  await expect(admin.page.getByText("Vereinsplätze und weitere Orte")).toBeVisible();
   const adminProblems = await visitAll(admin.page, [
     ...common,
     "/team",

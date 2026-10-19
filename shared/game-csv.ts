@@ -25,7 +25,7 @@ const HEADERS: Record<Column, RegExp> = {
   time: /^(time|zeit|uhrzeit|anwurf|anpfiff|kick-?off|beginn)$/i,
   opponent: /^(opponent|gegner|gegner\/in|team)$/i,
   home: /^(home|heim|home\/away|heim\/auswärts|h\/a|ort\?|spielort)$/i,
-  venue: /^(venue|halle|ort|place|location|adresse|address)$/i,
+  venue: /^(venue|halle|hall|platz|pitch|spielstätte|sportstätte|ort|place|location|adresse|address)$/i,
 };
 
 function splitLine(line: string, sep: string): string[] {

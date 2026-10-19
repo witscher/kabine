@@ -1,4 +1,4 @@
-import { t } from "@lingui/core/macro";
+import { select, t } from "@lingui/core/macro";
 import { Hono } from "hono";
 import { z } from "zod";
 import { type AppEnv, intParam, requireActor } from "../app";
@@ -12,6 +12,7 @@ import { badRequest, forbidden, notFound, parse, readJson } from "../lib/http";
 import { addDays, isDate, isTime, nowLocal, todayLocal } from "../lib/time";
 import { isoWeekdayPlural } from "../../shared/dates";
 import { currentLocale } from "../i18n";
+import { ownVenue } from "../domain/club";
 
 export const planRoutes = new Hono<AppEnv>();
 
@@ -157,7 +158,8 @@ async function checkRuleInputs(db: D1Database, actor: Actor, ownTeamId: number, 
   if (locationIds.length) {
     const locs = await all<{ id: number; kind: string }>(db, "SELECT id, kind FROM locations WHERE id IN (SELECT value FROM json_each(?))", list(locationIds));
     if (locs.length !== locationIds.length || locs.some((l) => l.kind === "external")) {
-      throw badRequest(t`Please choose a club hall or a saved training location.`);
+      const venue = ownVenue();
+      throw badRequest(select(venue, { hall: "Please choose a club hall or a saved training location.", pitch: "Please choose a club pitch or a saved training location.", other: "Please choose a club venue or a saved training location." }));
     }
   }
   const teamIds = [...new Set(rules.flatMap((r) => r.teamIds))];

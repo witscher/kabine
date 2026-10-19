@@ -4,6 +4,7 @@ import { defineSport, DUTY_KIOSK, DUTY_SHIRTS } from "../shared/sport-api";
 export default defineSport({
   id: "football",
   name: { en: "Football", de: "Fußball" },
+  venue: "pitch",
   seasonStart: { month: 7, day: 1 },
   ageClasses: [
     { code: "U7", name: { en: "U7", de: "G-Jugend (U7)" }, rank: 0, youth: true, ageFrom: null, ageTo: 6, gameMinutes: 60 },

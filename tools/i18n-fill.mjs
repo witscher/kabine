@@ -19,6 +19,7 @@ for (const f of readdirSync(dir).filter((f) => f.endsWith(".json")).sort()) {
 const file = new URL("../locales/de.po", import.meta.url);
 const po = PO.parse(readFileSync(file, "utf8"));
 const tokens = (s) => [...s.matchAll(/\{[^{}]+\}|<\/?\d+\/?>/g)].map((m) => m[0].replace(/^\{(\w+)[^}]*\}$/, "{$1}")).sort().join(" ");
+const cases = (s) => [...s.matchAll(/(?:^\{\w+, select,|\}) ?(\w+) \{/g)].map((m) => m[1]).sort().join(" ");
 let filled = 0;
 const problems = [];
 for (const item of po.items) {
@@ -30,7 +31,10 @@ for (const item of po.items) {
     filled++;
   }
   if (!item.msgstr[0]) problems.push(`missing: ${JSON.stringify(key)}`);
-  else if (!item.msgid.includes("{0, plural") && !item.msgid.includes(", plural,") && tokens(item.msgid) !== tokens(item.msgstr[0])) {
+  else if (item.msgid.includes(", select,")) {
+    // ICU select (e.g. hall/pitch/other by sport): the same cases in both languages
+    if (cases(item.msgid) !== cases(item.msgstr[0])) problems.push(`select cases differ: ${JSON.stringify(item.msgid)} -> ${JSON.stringify(item.msgstr[0])}`);
+  } else if (!item.msgid.includes("{0, plural") && !item.msgid.includes(", plural,") && tokens(item.msgid) !== tokens(item.msgstr[0])) {
     problems.push(`placeholders differ: ${JSON.stringify(item.msgid)} -> ${JSON.stringify(item.msgstr[0])}`);
   }
 }

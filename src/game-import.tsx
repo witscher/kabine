@@ -1,11 +1,12 @@
 // Game schedule from a table (CSV): paste or choose a file, check the preview, create the games.
-import { plural, t } from "@lingui/core/macro";
+import { plural, select, t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { useState } from "preact/hooks";
 import { api, errorMessage } from "./api";
 import { fullDate } from "./format";
 import { invalidate } from "./store";
 import { Button, Field, Notice, toast } from "./ui";
+import { useVenue } from "./club";
 
 interface PreviewGame {
   line: number;
@@ -25,6 +26,7 @@ interface ImportResult {
 }
 
 export function GameImport({ teamId }: { teamId: number }) {
+  const venue = useVenue();
   const [csv, setCsv] = useState("");
   const [result, setResult] = useState<ImportResult | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -49,10 +51,11 @@ export function GameImport({ teamId }: { teamId: number }) {
   return (
     <div class="stack-sm">
       <p class="small muted">
-        <Trans>
-          Without a connection to the association: paste a table (for example from a spreadsheet) with the columns date, time, opponent, home or away and
-          venue, or choose a CSV file.
-        </Trans>
+        {select(venue, {
+          hall: "Without a connection to the association: paste a table (for example from a spreadsheet) with the columns date, time, opponent, home or away and hall, or choose a CSV file.",
+          pitch: "Without a connection to the association: paste a table (for example from a spreadsheet) with the columns date, time, opponent, home or away and pitch, or choose a CSV file.",
+          other: "Without a connection to the association: paste a table (for example from a spreadsheet) with the columns date, time, opponent, home or away and venue, or choose a CSV file.",
+        })}
       </p>
       <Field label={t`Game schedule as a table`}>
         {(id) => (
@@ -61,7 +64,7 @@ export function GameImport({ teamId }: { teamId: number }) {
             class="textarea"
             rows={5}
             value={csv}
-            placeholder={t`Date;Time;Opponent;Home;Venue`}
+            placeholder={select(venue, { hall: "Date;Time;Opponent;Home;Hall", pitch: "Date;Time;Opponent;Home;Pitch", other: "Date;Time;Opponent;Home;Venue" })}
             onInput={(e) => {
               setCsv((e.target as HTMLTextAreaElement).value);
               setResult(null);

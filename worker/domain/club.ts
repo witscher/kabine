@@ -2,6 +2,7 @@
 // and edited in the setup wizard, never in code. One installation serves exactly one club.
 import type { ClubProfile } from "../../shared/club";
 import { clubAbbr, type ClubModules, DEFAULT_CLUB, DEFAULT_MODULES, type ModuleId, moduleOn } from "../../shared/club";
+import { venueOf, type VenueKind } from "../../shared/sports";
 import { setClubDefaultLocale } from "../i18n";
 import { setTimeZone } from "../lib/time";
 import { first, run } from "../lib/db";
@@ -82,6 +83,11 @@ export function ownClubAbbr(): string {
 /** Sport of this club (set with the club context of the request or cron run). */
 export function ownClubSport(): string {
   return ownSport;
+}
+
+/** Where the club's sport is played (hall, pitch or neutral), for texts sent outside a request. */
+export function ownVenue(): VenueKind {
+  return venueOf(ownSport);
 }
 
 export function ownClubShortName(): string {

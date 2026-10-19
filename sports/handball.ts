@@ -4,6 +4,7 @@ import { defineSport, DUTY_KIOSK, DUTY_SHIRTS } from "../shared/sport-api";
 export default defineSport({
   id: "handball",
   name: { en: "Handball", de: "Handball" },
+  venue: "hall",
   seasonStart: { month: 7, day: 1 },
   ageClasses: [
     { code: "Bambini", name: { en: "Bambini", de: "Bambini" }, rank: 0, youth: true, ageFrom: null, ageTo: 5, gameMinutes: 60 },

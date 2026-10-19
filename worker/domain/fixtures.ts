@@ -1,7 +1,7 @@
 // Game schedules from fixture connectors (modules of kind "fixtures", worker/module-api.ts): which
 // connector a team uses, and the sync that is the same for every source: halls, home or away, new,
 // moved and cancelled games, notifications. The connector only knows its source.
-import { t } from "@lingui/core/macro";
+import { select, t } from "@lingui/core/macro";
 import { LOCALES } from "../../shared/i18n";
 import type { ModuleId } from "../../shared/modules";
 import { withLocale } from "../i18n";
@@ -10,7 +10,7 @@ import { addMinutesLocal, nowLocal, utcIso } from "../lib/time";
 import type { FixtureConnector, FixtureGame, FixtureSource } from "../module-api";
 import { WORKER_MODULES } from "../modules";
 import { syncAutoSquads } from "./auto-squad";
-import { isModuleOn } from "./club";
+import { isModuleOn, ownVenue } from "./club";
 import { notifyPersons, shortDate, shortTime } from "./notify";
 
 /** A connector with the id of its module. */
@@ -178,6 +178,7 @@ export async function importGames(
       (l) => l.external_ref,
     ),
   );
+  const venue = ownVenue();
   const missing = new Map<string, FixtureGame["venue"]>();
   for (const g of schedule.games) if (g.venue && !known.has(ref(g.venue.externalId))) missing.set(ref(g.venue.externalId), g.venue);
   if (missing.size) {
@@ -186,7 +187,7 @@ export async function importGames(
         stmt(
           db,
           "INSERT OR IGNORE INTO locations (name, address, map_url, kind, external_ref) VALUES (?, ?, ?, 'external', ?)",
-          v!.name ?? t`Hall`,
+          v!.name ?? select(venue, { hall: "Hall", pitch: "Pitch", other: "Venue" }),
           v!.address,
           v!.address ? `https://www.openstreetmap.org/search?query=${encodeURIComponent(v!.address)}` : null,
           r,

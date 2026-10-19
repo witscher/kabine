@@ -1,11 +1,11 @@
-import { plural, t } from "@lingui/core/macro";
+import { plural, select, t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { useLocation } from "preact-iso";
 import { useEffect, useMemo, useState } from "preact/hooks";
 import type { LocationRef, PersonRef } from "../../shared/types";
 import { api } from "../api";
 import { moduleOn } from "../../shared/club";
-import { clubName, useClub } from "../club";
+import { clubName, useClub, useVenue } from "../club";
 import { useActiveModules } from "../modules";
 import { daysBetween, fullDate, isoToLocalDate, personName, todayLocal } from "../format";
 import { downloadExport } from "../export";
@@ -39,6 +39,7 @@ export function AdminPage() {
   useDocumentTitle(t`Administration`);
   const me = useMe();
   const club = useClub();
+  const venue = useVenue();
   const modules = useActiveModules();
   const teamsQuery = useQuery<{ teams: { id: number; name: string; kind: "team" | "group"; players: number; coaches: number }[] }>("/teams");
   const teams = { ...teamsQuery, data: teamsQuery.data && { teams: teamsQuery.data.teams.filter((x) => x.kind === "team") } };
@@ -65,7 +66,7 @@ export function AdminPage() {
     { href: "/verwaltung/personen", icon: "user", title: t`People`, sub: t`All members, admins, access links` },
     { href: "/verwaltung/altersklassen", icon: "calendar", title: t`Age groups`, sub: t`Birth years of the current season` },
     { href: "/verwaltung/ferien", icon: "sun", title: t`Holidays`, sub: t`Edit periods (e.g. carnival)` },
-    { href: "/verwaltung/orte", icon: "pin", title: t`Training venues`, sub: t`Club halls and other venues` },
+    { href: "/verwaltung/orte", icon: "pin", title: t`Training venues`, sub: select(venue, { hall: "Club halls and other locations", pitch: "Club pitches and other locations", other: "Club venues and other locations" }) },
     { href: "/verwaltung/rundnachricht", icon: "bell", title: t`Broadcast`, sub: t`Announcement in all or selected team chats` },
     // Pages of the switched-on modules (modules/<id>/app, adminMenu)
     ...modules.flatMap((m) => m.adminMenu?.() ?? []),
@@ -1694,10 +1695,11 @@ export function AdminLocationsPage() {
   useDocumentTitle(t`Training venues`);
   const { data, error, reload } = useQuery<{ locations: (LocationRef & { inUse: boolean })[] }>("/locations?all=1");
   const [edit, setEdit] = useState<(LocationRef & { inUse: boolean }) | null>(null);
+  const venue = useVenue();
   const groups: { kind: LocationRef["kind"]; title: string }[] = [
-    { kind: "hall", title: t`Club halls` },
+    { kind: "hall", title: select(venue, { hall: "Club halls", pitch: "Club pitches", other: "Club venues" }) },
     { kind: "custom", title: t`Other training venues` },
-    { kind: "external", title: t`Opponents' halls (from the fixture list)` },
+    { kind: "external", title: select(venue, { hall: "Opponents' halls (from the fixture list)", pitch: "Opponents' pitches (from the fixture list)", other: "Opponents' venues (from the fixture list)" }) },
   ];
   return (
     <AdminOnly>

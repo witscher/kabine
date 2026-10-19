@@ -4,6 +4,7 @@ import { defineSport, DUTY_KIOSK, DUTY_SHIRTS } from "../shared/sport-api";
 export default defineSport({
   id: "other",
   name: { en: "Other sport", de: "Andere Sportart" },
+  venue: "venue",
   seasonStart: { month: 8, day: 1 },
   ageClasses: [
     { code: "Kids", name: { en: "Children", de: "Kinder" }, rank: 0, youth: true, ageFrom: null, ageTo: 11, gameMinutes: 90 },

@@ -1,4 +1,4 @@
-import { plural, t } from "@lingui/core/macro";
+import { plural, select, t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { useEffect, useMemo, useState } from "preact/hooks";
 import type { EventSummary, ParticipationStatus, PersonRef } from "../../shared/types";
@@ -7,6 +7,7 @@ import { personName, shortDate, shortName, time } from "../format";
 import { Icon } from "../icons";
 import { invalidate, useQuery } from "../store";
 import { Button, confirmDialog, ErrorBox, Notice, Sheet, Spinner, toast, useDocumentTitle } from "../ui";
+import { useVenue } from "../club";
 
 interface Candidate {
   person: PersonRef;
@@ -34,6 +35,7 @@ interface SquadData {
 
 export function SquadPage({ id }: { id: string }) {
   useDocumentTitle(t`Nominate squad`);
+  const venue = useVenue();
   const { data, error, loading, reload } = useQuery<SquadData>(`/events/${id}/squad`);
   const [picked, setPicked] = useState<number[] | null>(null);
   const [helpOpen, setHelpOpen] = useState(false);
@@ -94,7 +96,7 @@ export function SquadPage({ id }: { id: string }) {
               {shortDate(ev.startsAt).toUpperCase()} · {time(ev.startsAt)}
             </div>
             <div style={{ fontFamily: "var(--font-cond)", fontWeight: 700, fontSize: "24px", lineHeight: 1.1 }}>{ev.title}</div>
-            <div style={{ fontSize: "14px" }}>{ev.location?.name ?? t`Venue to follow`}</div>
+            <div style={{ fontSize: "14px" }}>{ev.location?.name ?? select(venue, { hall: "Hall to follow", pitch: "Pitch to follow", other: "Venue to follow" })}</div>
           </div>
           <div>
             <div class="squad-count" aria-live="polite">

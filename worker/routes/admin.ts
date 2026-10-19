@@ -1,4 +1,4 @@
-import { t } from "@lingui/core/macro";
+import { select, t } from "@lingui/core/macro";
 import { Hono } from "hono";
 import { z } from "zod";
 import { type AppEnv, intParam, requireActor } from "../app";
@@ -11,7 +11,7 @@ import { holidayPeriods, holidaySourceLabel, MAX_HOLIDAY_DAYS } from "../domain/
 import { all, first, run, stmt } from "../lib/db";
 import { badRequest, conflict, forbidden, notFound, parse, readJson } from "../lib/http";
 import { eachDay, isDate, nowLocal, todayLocal, utcIso } from "../lib/time";
-import { loadClub } from "../domain/club";
+import { loadClub, ownVenue } from "../domain/club";
 import { birthYears, SPORTS, type SportId } from "../../shared/sports";
 import type { Locale } from "../../shared/i18n";
 
@@ -87,7 +87,8 @@ adminRoutes.delete("/locations/:id", async (c) => {
   const actor = requireActor(c);
   const loc = await first<{ id: number; kind: string }>(c.env.DB, "SELECT id, kind FROM locations WHERE id = ?", intParam(c, "id"));
   if (!loc) throw notFound();
-  if (loc.kind === "hall") throw conflict(t`The club's halls cannot be deleted.`);
+  const venue = ownVenue();
+  if (loc.kind === "hall") throw conflict(select(venue, { hall: "The club's halls cannot be deleted.", pitch: "The club's pitches cannot be deleted.", other: "The club's own venues cannot be deleted." }));
   if (loc.kind === "external") requireAdmin(actor);
   else if (!actor.isAdmin && !actor.coachTeamIds.length) throw forbidden();
   const used = await first(c.env.DB, "SELECT 1 AS used FROM training_rules WHERE location_id = ?", loc.id);

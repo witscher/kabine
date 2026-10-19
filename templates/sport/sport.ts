@@ -5,6 +5,8 @@ import { defineSport, DUTY_KIOSK, DUTY_SHIRTS } from "../shared/sport-api";
 export default defineSport({
   id: "__ID__",
   name: { en: "__NAME__", de: "__NAME_DE__" },
+  // TODO: where it is played: "hall", "pitch" or "venue" (neutral wording)
+  venue: "hall",
   // TODO: first day of a season in this sport
   seasonStart: { month: 8, day: 1 },
   // TODO: the age classes of the federation. Ages are those reached in the calendar year the season

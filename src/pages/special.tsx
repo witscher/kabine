@@ -1,4 +1,4 @@
-import { plural, t } from "@lingui/core/macro";
+import { plural, select, t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { useLocation } from "preact-iso";
 import { useState } from "preact/hooks";
@@ -20,6 +20,7 @@ import {
   useDocumentTitle,
 } from "../ui";
 import { useLocations } from "./event";
+import { useVenue } from "../club";
 
 type NewKind = "game" | "special";
 
@@ -258,6 +259,7 @@ function NewGameForm({
   locations: { id: number; name: string }[];
 }) {
   const { route } = useLocation();
+  const venue = useVenue();
   const [opponent, setOpponent] = useState("");
   const [where, setWhere] = useState<"home" | "away">("home");
   const [date, setDate] = useState(addDays(todayLocal(), 7));
@@ -305,7 +307,7 @@ function NewGameForm({
           )}
         </Field>
       </div>
-      <Field label={t`Hall (optional)`}>
+      <Field label={select(venue, { hall: "Hall (optional)", pitch: "Pitch (optional)", other: "Venue (optional)" })}>
         {(fid) => (
           <select
             id={fid}
@@ -317,7 +319,7 @@ function NewGameForm({
               )
             }
           >
-            <option value="">{t`No hall given`}</option>
+            <option value="">{select(venue, { hall: "No hall given", pitch: "No pitch given", other: "No venue given" })}</option>
             {locations.map((l) => (
               <option value={l.id}>{l.name}</option>
             ))}

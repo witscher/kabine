@@ -43,7 +43,14 @@ export interface SportProfile {
   /** Duty templates for home and away games: duty code, slots, minutes before kick-off/after the end. */
   homeTemplate: { duty: string; slots: number; before: number; after: number }[];
   awayTemplate: { duty: string; slots: number; before: number; after: number }[];
+  /**
+   * Where the sport is played: the app says "hall" (handball, basketball, volleyball), "pitch" (football,
+   * hockey on grass) or, for "venue", a neutral word. Texts pick their wording with ICU select (venueOf).
+   */
+  venue: VenueKind;
 }
+
+export type VenueKind = "hall" | "pitch" | "venue";
 
 /** Declares a sport profile; keeps the literal id (it becomes part of SportId). */
 export function defineSport<const S extends SportProfile>(profile: S): S {

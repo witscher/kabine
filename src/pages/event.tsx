@@ -1,4 +1,4 @@
-import { plural, t } from "@lingui/core/macro";
+import { plural, select, t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { useState } from "preact/hooks";
 import type { EventDetail, LocationRef, MyParticipation, ParticipantDetail, RosterEntry } from "../../shared/types";
@@ -13,6 +13,7 @@ import { useActiveModules } from "../modules";
 import { useMe, useSession } from "../session";
 import { invalidate, useQuery } from "../store";
 import { Button, confirmDialog, copyText, ErrorBox, Field, Notice, Segmented, Sheet, Spinner, StatusPill, SwitchRow, TextField, toast, useDocumentTitle } from "../ui";
+import { useVenue } from "../club";
 
 const kindLabel = (kind: EventDetail["kind"]) => ({ training: t`Training`, game: t`Game`, special: t`Event` })[kind];
 
@@ -595,6 +596,7 @@ function CoachView({ event, onChanged }: { event: EventDetail; onChanged: () => 
 }
 
 function CancelSheet({ event, onClose, onDone }: { event: EventDetail; onClose: () => void; onDone: () => void }) {
+  const venue = useVenue();
   const [reason, setReason] = useState("");
   const date = longDate(event.startsAt);
   const clock = time(event.startsAt);
@@ -605,7 +607,7 @@ function CancelSheet({ event, onClose, onDone }: { event: EventDetail; onClose: 
         <Trans>{date}, {clock}. Everyone involved will be notified, and a note appears in the team chat.</Trans>
       </p>
       <div class="chips">
-        {[t`Hall unavailable`, t`Coach unavailable`, t`School holidays`, t`Too few acceptances`].map((r) => (
+        {[select(venue, { hall: "Hall unavailable", pitch: "Pitch unavailable", other: "Venue unavailable" }), t`Coach unavailable`, t`School holidays`, t`Too few acceptances`].map((r) => (
           <button type="button" class={`chip ${reason === r ? "selected" : ""}`} onClick={() => setReason(r)}>
             {r}
           </button>
@@ -760,6 +762,7 @@ function MoveSheet({ event, onClose, onDone }: { event: EventDetail; onClose: ()
 
 function GameInfoSheet({ event, onClose, onDone }: { event: EventDetail; onClose: () => void; onDone: () => void }) {
   const g = event.game!;
+  const venue = useVenue();
   const [meetingPoint, setMeetingPoint] = useState(g.meetingPoint ?? "");
   const [meetingTime, setMeetingTime] = useState(g.meetingTime ?? "");
   const [notes, setNotes] = useState(g.coachNotes ?? "");
@@ -771,7 +774,7 @@ function GameInfoSheet({ event, onClose, onDone }: { event: EventDetail; onClose
       <p class="muted">
         <Trans>These details are kept even when the fixture list is synced again.</Trans>
       </p>
-      <TextField label={t`Meeting point`} value={meetingPoint} onInput={setMeetingPoint} placeholder={t`e.g. hall car park`} maxLength={200} />
+      <TextField label={t`Meeting point`} value={meetingPoint} onInput={setMeetingPoint} placeholder={select(venue, { hall: "e.g. hall car park", pitch: "e.g. car park at the pitch", other: "e.g. car park at the venue" })} maxLength={200} />
       {pointChoices.length ? (
         <div class="chips" role="group" aria-label={t`Choose meeting point`}>
           {pointChoices.map((name) => (

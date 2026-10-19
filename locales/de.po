@@ -229,10 +229,6 @@ msgstr "Noch keine Nachrichten"
 msgid "{name} (you)"
 msgstr "{name} (du)"
 
-#: src/pages/event.tsx
-msgid "e.g. hall car park"
-msgstr "z. B. Parkplatz Halle"
-
 #: modules/duties/worker/routes.ts
 msgid "Others take on this duty."
 msgstr "Diesen Dienst übernehmen andere."
@@ -580,6 +576,11 @@ msgstr "Letzte Bestätigung"
 msgid "Whole country"
 msgstr "Ganzes Land"
 
+# ai
+#: worker/routes/admin.ts
+msgid "{venue, select, hall {The club's halls cannot be deleted.} pitch {The club's pitches cannot be deleted.} other {The club's own venues cannot be deleted.}}"
+msgstr "{venue, select, hall {Die Vereinshallen können nicht gelöscht werden.} pitch {Die Vereinsplätze können nicht gelöscht werden.} other {Die eigenen Spielstätten des Vereins können nicht gelöscht werden.}}"
+
 #: src/pages/chat.tsx
 msgid "React to announcement from {author}"
 msgstr "Auf Ankündigung von {author} reagieren"
@@ -812,10 +813,6 @@ msgstr "So erfährst du sofort von neuen Terminen, Absagen, Nominierungen und Ch
 msgid "Stand-ins"
 msgstr "Aushilfen"
 
-#: src/pages/special.tsx
-msgid "Hall (optional)"
-msgstr "Halle (optional)"
-
 #: src/pages/season.tsx
 msgid "Start season {nextName}?"
 msgstr "Saison {nextName} starten?"
@@ -835,11 +832,6 @@ msgstr "Fahrgemeinschaften (Mitfahrer, freie Plätze)"
 #: worker/domain/email-login.ts
 msgid "The e-mail address is too long."
 msgstr "Die E-Mail-Adresse ist zu lang."
-
-# ai
-#: src/game-import.tsx
-msgid "Date;Time;Opponent;Home;Venue"
-msgstr "Datum;Uhrzeit;Gegner;Heim;Halle"
 
 #: src/pages/group.tsx
 msgid "An admin assigns members."
@@ -873,14 +865,6 @@ msgstr "Bitte gib das Passwort des Mail-Kontos ein."
 #: src/pages/join.tsx
 msgid "I am {playerName} – set up passkey"
 msgstr "Ich bin {playerName} – Passkey einrichten"
-
-#: src/pages/admin.tsx
-msgid "Club halls"
-msgstr "Vereinshallen"
-
-#: worker/domain/fixtures.ts
-msgid "Hall"
-msgstr "Halle"
 
 #: src/pages/admin.tsx
 msgid "Revoke admin rights?"
@@ -936,10 +920,6 @@ msgstr "Zugang nie benutzt"
 #: src/pages/profile.tsx
 msgid "Since {created}"
 msgstr "Seit {created}"
-
-#: src/pages/squad.tsx
-msgid "Venue to follow"
-msgstr "Halle folgt"
 
 #: modules/duties/app/helpers.tsx
 msgid "me"
@@ -2470,6 +2450,11 @@ msgstr "Gast"
 msgid "Device: {device}"
 msgstr "Gerät: {device}"
 
+# ai
+#: src/game-import.tsx
+msgid "{venue, select, hall {Without a connection to the association: paste a table (for example from a spreadsheet) with the columns date, time, opponent, home or away and hall, or choose a CSV file.} pitch {Without a connection to the association: paste a table (for example from a spreadsheet) with the columns date, time, opponent, home or away and pitch, or choose a CSV file.} other {Without a connection to the association: paste a table (for example from a spreadsheet) with the columns date, time, opponent, home or away and venue, or choose a CSV file.}}"
+msgstr "{venue, select, hall {Ohne Anbindung an den Verband: Füge eine Tabelle ein (zum Beispiel aus einer Tabellenkalkulation) mit den Spalten Datum, Uhrzeit, Gegner, Heim oder auswärts und Halle, oder wähle eine CSV-Datei.} pitch {Ohne Anbindung an den Verband: Füge eine Tabelle ein (zum Beispiel aus einer Tabellenkalkulation) mit den Spalten Datum, Uhrzeit, Gegner, Heim oder auswärts und Platz, oder wähle eine CSV-Datei.} other {Ohne Anbindung an den Verband: Füge eine Tabelle ein (zum Beispiel aus einer Tabellenkalkulation) mit den Spalten Datum, Uhrzeit, Gegner, Heim oder auswärts und Ort, oder wähle eine CSV-Datei.}}"
+
 #: src/calendar.tsx
 msgid "Google Calendar: on a computer, go to calendar.google.com → Other calendars → From URL and paste the link. It then also appears in the app. Google only updates every few hours."
 msgstr "Google Kalender: am Computer unter calendar.google.com → Weitere Kalender → Per URL den Link einfügen. Danach erscheint er auch in der App. Google aktualisiert nur alle paar Stunden."
@@ -2523,6 +2508,11 @@ msgstr "An deinem Zugang ist keine Handynummer hinterlegt."
 #: src/pages/profile.tsx
 msgid "Open slots (coaches and admins)"
 msgstr "Offene Plätze (Trainer und Admins)"
+
+# ai
+#: src/pages/admin.tsx
+msgid "{venue, select, hall {Club halls} pitch {Club pitches} other {Club venues}}"
+msgstr "{venue, select, hall {Vereinshallen} pitch {Vereinsplätze} other {Eigene Spielstätten}}"
 
 #: src/pages/event.tsx
 #: src/pages/event.tsx
@@ -2773,6 +2763,11 @@ msgstr "Plätze anbieten"
 msgid "Game info"
 msgstr "Spielinfos"
 
+# ai
+#: src/pages/admin.tsx
+msgid "{venue, select, hall {Opponents' halls (from the fixture list)} pitch {Opponents' pitches (from the fixture list)} other {Opponents' venues (from the fixture list)}}"
+msgstr "{venue, select, hall {Gegnerische Hallen (aus dem Spielplan)} pitch {Gegnerische Plätze (aus dem Spielplan)} other {Spielstätten der Gegner (aus dem Spielplan)}}"
+
 #: src/pages/admin.tsx
 msgid "{firstName} is a full club member."
 msgstr "{firstName} ist ordentliches Mitglied."
@@ -2958,10 +2953,6 @@ msgstr "Am sichersten meldest du dich mit einem Passkey an (Face ID, Fingerabdru
 #: worker/routes/feedback.ts
 msgid "wanted, but no confirmed e-mail address on the access"
 msgstr "erwünscht, aber keine bestätigte E-Mail-Adresse am Zugang"
-
-#: src/pages/admin.tsx
-msgid "Opponents' halls (from the fixture list)"
-msgstr "Gegnerische Hallen (aus dem Spielplan)"
 
 #: src/pages/team.tsx
 msgid "There is no one in the matching teams who does not already play here."
@@ -3645,10 +3636,6 @@ msgstr "Ferienzeitraum gelöscht."
 msgid "Lift booked"
 msgstr "Mitfahrt eingetragen"
 
-#: src/pages/event.tsx
-msgid "Hall unavailable"
-msgstr "Halle belegt"
-
 #: modules/duties/worker/routes.ts
 #: worker/routes/manual-games.ts
 msgid "Invalid time."
@@ -3913,6 +3900,11 @@ msgstr "Kinder"
 msgid "{name} accepted {what} on {when}."
 msgstr "{name} hat für {what} am {when} zugesagt."
 
+# ai
+#: src/pages/special.tsx
+msgid "{venue, select, hall {No hall given} pitch {No pitch given} other {No venue given}}"
+msgstr "{venue, select, hall {Keine Angabe} pitch {Keine Angabe} other {Keine Angabe}}"
+
 #: src/pages/help.tsx
 msgid "Contact for the app: {contact}"
 msgstr "Ansprechpartner für die App: {contact}"
@@ -4023,6 +4015,11 @@ msgstr "{name} möchte ein neues Profilbild verwenden. Schau es dir an und gib e
 #: worker/domain/email-login.ts
 msgid "Many e-mails have just been sent. Please try again in an hour."
 msgstr "Es wurden gerade viele E-Mails verschickt. Bitte versuche es in einer Stunde noch einmal."
+
+# ai
+#: src/pages/admin.tsx
+msgid "{venue, select, hall {Club halls and other locations} pitch {Club pitches and other locations} other {Club venues and other locations}}"
+msgstr "{venue, select, hall {Vereinshallen und weitere Orte} pitch {Vereinsplätze und weitere Orte} other {Eigene Spielstätten und weitere Orte}}"
 
 #: src/pages/team.tsx
 msgid "Template for away games"
@@ -4306,10 +4303,6 @@ msgstr "Heim oder auswärts"
 msgid "Add members"
 msgstr "Mitglieder hinzufügen"
 
-#: src/pages/special.tsx
-msgid "No hall given"
-msgstr "Keine Angabe"
-
 #: src/pages/admin.tsx
 #: src/pages/admin.tsx
 msgid "Role"
@@ -4394,6 +4387,11 @@ msgstr "Ungültiger Schlüssel"
 #: src/pages/team.tsx
 msgid "Core squad saved ({count})."
 msgstr "Stammkader gespeichert ({count})."
+
+# ai
+#: src/pages/event.tsx
+msgid "{venue, select, hall {Hall unavailable} pitch {Pitch unavailable} other {Venue unavailable}}"
+msgstr "{venue, select, hall {Halle belegt} pitch {Platz belegt} other {Spielstätte belegt}}"
 
 # ai
 #: src/pages/games.tsx
@@ -4732,6 +4730,11 @@ msgstr "{selAuthor} stummschalten"
 #: src/faq.tsx
 msgid "How do I nominate the squad for a game?"
 msgstr "Wie nominiere ich den Kader für ein Spiel?"
+
+# ai
+#: src/game-import.tsx
+msgid "{venue, select, hall {Date;Time;Opponent;Home;Hall} pitch {Date;Time;Opponent;Home;Pitch} other {Date;Time;Opponent;Home;Venue}}"
+msgstr "{venue, select, hall {Datum;Uhrzeit;Gegner;Heim;Halle} pitch {Datum;Uhrzeit;Gegner;Heim;Platz} other {Datum;Uhrzeit;Gegner;Heim;Ort}}"
 
 # ai
 #: src/howto.tsx
@@ -5642,9 +5645,10 @@ msgstr "Gruppen legen Admins an."
 msgid "The following notes describe what is stored specifically in this app."
 msgstr "Die folgenden Hinweise beschreiben, was speziell in dieser App gespeichert wird."
 
-#: worker/routes/admin.ts
-msgid "The club's halls cannot be deleted."
-msgstr "Die Vereinshallen können nicht gelöscht werden."
+# ai
+#: worker/routes/plans.ts
+msgid "{venue, select, hall {Please choose a club hall or a saved training location.} pitch {Please choose a club pitch or a saved training location.} other {Please choose a club venue or a saved training location.}}"
+msgstr "{venue, select, hall {Bitte wähle eine Vereinshalle oder einen angelegten Trainingsort.} pitch {Bitte wähle einen Vereinsplatz oder einen angelegten Trainingsort.} other {Bitte wähle eine eigene Spielstätte oder einen angelegten Trainingsort.}}"
 
 #: modules/duties/app/helpers.tsx
 msgid "at {home}"
@@ -5751,11 +5755,6 @@ msgstr "Auf dem iPhone funktionieren Benachrichtigungen nur, wenn die App auf de
 #: worker/routes/admin.ts
 msgid "There is no current season."
 msgstr "Es gibt keine laufende Saison."
-
-# ai
-#: src/game-import.tsx
-msgid "Without a connection to the association: paste a table (for example from a spreadsheet) with the columns date, time, opponent, home or away and venue, or choose a CSV file."
-msgstr "Ohne Anbindung an den Verband: Füge eine Tabelle ein (zum Beispiel aus einer Tabellenkalkulation) mit den Spalten Datum, Uhrzeit, Gegner, Heim oder auswärts und Halle, oder wähle eine CSV-Datei."
 
 #: worker/cron.ts
 msgid "Are you coming?"
@@ -7877,10 +7876,6 @@ msgstr "Staging · Testsystem mit kopierten Daten"
 msgid "Kick-off {kickoff}"
 msgstr "Anpfiff {kickoff} Uhr"
 
-#: worker/routes/plans.ts
-msgid "Please choose a club hall or a saved training location."
-msgstr "Bitte wähle eine Vereinshalle oder einen angelegten Trainingsort."
-
 #: src/avatar.tsx
 msgid "Visible to everyone signed in to the app."
 msgstr "Sichtbar für alle, die in der App angemeldet sind."
@@ -8468,6 +8463,11 @@ msgid "taking part"
 msgstr "nehmen teil"
 
 # ai
+#: src/pages/squad.tsx
+msgid "{venue, select, hall {Hall to follow} pitch {Pitch to follow} other {Venue to follow}}"
+msgstr "{venue, select, hall {Halle folgt} pitch {Platz folgt} other {Spielort folgt}}"
+
+# ai
 #: src/pages/setup-wizard.tsx
 msgid "Create person"
 msgstr "Person anlegen"
@@ -8590,6 +8590,11 @@ msgstr "Archiviert"
 #: src/pages/login.tsx
 msgid "Events, responses and the team chat in one place."
 msgstr "Termine, Zu- und Absagen und der Mannschaftschat an einem Ort."
+
+# ai
+#: src/pages/event.tsx
+msgid "{venue, select, hall {e.g. hall car park} pitch {e.g. car park at the pitch} other {e.g. car park at the venue}}"
+msgstr "{venue, select, hall {z. B. Parkplatz Halle} pitch {z. B. Parkplatz am Sportplatz} other {z. B. Parkplatz an der Spielstätte}}"
 
 #: worker/routes/events.ts
 msgid "This person does not belong to the teams of this training time."
@@ -10553,6 +10558,11 @@ msgstr "Offene Rückmeldungen erinnern"
 msgid "Loading messages"
 msgstr "Nachrichten werden geladen"
 
+# ai
+#: src/pages/special.tsx
+msgid "{venue, select, hall {Hall (optional)} pitch {Pitch (optional)} other {Venue (optional)}}"
+msgstr "{venue, select, hall {Halle (optional)} pitch {Platz (optional)} other {Spielstätte (optional)}}"
+
 #: src/pages/admin.tsx
 msgid "Make admin"
 msgstr "Zum Admin machen"
@@ -10573,10 +10583,6 @@ msgstr "Du hast schon einen Kalender-Link. Aus Sicherheitsgründen zeigt die App
 #: src/pages/group.tsx
 msgid "Tap an event to edit, cancel or delete it."
 msgstr "Antippen öffnet den Termin zum Bearbeiten, Absagen oder Löschen."
-
-#: src/pages/admin.tsx
-msgid "Club halls and other venues"
-msgstr "Vereinshallen und weitere Orte"
 
 #: src/pages/plans.tsx
 msgid "joint training"
@@ -10674,6 +10680,11 @@ msgstr "Zeile {line}: „{value}“ ist kein Jahrgang"
 #: src/pages/admin.tsx
 msgid "All members, admins, access links"
 msgstr "Alle Mitglieder, Admins, Zugangslinks"
+
+# ai
+#: worker/domain/fixtures.ts
+msgid "{venue, select, hall {Hall} pitch {Pitch} other {Venue}}"
+msgstr "{venue, select, hall {Halle} pitch {Platz} other {Spielstätte}}"
 
 #: src/calendar.tsx
 msgid "The calendar on your devices will no longer be updated afterwards."

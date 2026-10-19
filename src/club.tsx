@@ -2,6 +2,7 @@
 // device so the first paint and offline use show the right club.
 import { useEffect, useState } from "preact/hooks";
 import { type ClubProfile, clubAbbr, DEFAULT_CLUB, DEFAULT_MODULES, type ModuleId, moduleOn } from "../shared/club";
+import { venueOf, type VenueKind } from "../shared/sports";
 
 const CACHE_KEY = "kabine-club";
 
@@ -92,6 +93,11 @@ export function ClubMark({ class: cls = "logo-mark" }: { class?: string }) {
 /** IANA time zone of the club, for dates and "now". */
 export function clubTimeZone(): string {
   return current.timeZone;
+}
+
+/** Where the club's sport is played: hall, pitch or neutral (texts choose their wording with select). */
+export function useVenue(): VenueKind {
+  return venueOf(useClub().sport);
 }
 
 /** Is a module of the club on? Re-renders when the profile changes. */
