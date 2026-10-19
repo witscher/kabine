@@ -294,6 +294,11 @@ msgstr "Diesen Termin absagen"
 msgid "Remove from the team"
 msgstr "Aus der Mannschaft entfernen"
 
+# ai
+#: worker/routes/events.ts
+msgid "Start of play and venue come from the game schedule and cannot be changed here."
+msgstr "Spielbeginn und Spielort kommen aus dem Spielplan und lassen sich hier nicht ändern."
+
 #: src/live.tsx
 msgid "Game in progress"
 msgstr "Spiel läuft gerade"
@@ -1878,6 +1883,11 @@ msgstr "Für Admins Pflicht. Damit kommst du auch ohne Passkey per Code in die A
 #: src/pages/setup-wizard.tsx
 msgid "Coaches and players come next. These are the usual steps."
 msgstr "Als Nächstes kommen Trainer und Spieler dazu. Das sind die üblichen Schritte."
+
+# ai
+#: worker/domain/fixtures.ts
+msgid "New start of play: {date}, {time}, {location}."
+msgstr "Neuer Spielbeginn: {date}, {time} Uhr, {location}."
 
 #: modules/duties/app/helpers.tsx
 #: src/pages/special.tsx
@@ -5615,10 +5625,6 @@ msgstr "Diesen Kader hast du von Hand angepasst. Änderungen am Stammkader wirke
 msgid "You do not manage this person."
 msgstr "Diese Person verwaltest du nicht."
 
-#: worker/routes/events.ts
-msgid "Throw-off and hall come from the schedule and cannot be changed here."
-msgstr "Anwurf und Halle kommen aus dem Spielplan und lassen sich hier nicht ändern."
-
 #: src/pages/setup-wizard.tsx
 #: src/respond.tsx
 msgid "Other sport"
@@ -5937,10 +5943,6 @@ msgstr "Wird verschlüsselt gespeichert. Leer lassen, um es zu behalten."
 #: src/pages/group.tsx
 msgid "Leads"
 msgstr "Verantwortliche"
-
-#: modules/duties/app/admin.tsx
-msgid "Times refer to the start and end of the event. For games, the start is the throw-off and the end follows from the game length of the age group. For special events, the start and end of the event apply."
-msgstr "Zeiten beziehen sich auf Beginn und Ende des Termins. Bei Spielen ist der Beginn der Anpfiff, das Ende ergibt sich aus der Spieldauer der Altersklasse. Bei Sonderterminen gelten Beginn und Ende des Termins."
 
 #: src/pages/admin.tsx
 msgid "Team or group"
@@ -7111,6 +7113,11 @@ msgstr "Betreuer · {staffCount}"
 msgid "Anyone who declined, is permanently absent or inactive is excused."
 msgstr "Wer abgesagt hat, dauerhaft abwesend oder inaktiv ist, fehlt entschuldigt."
 
+# ai
+#: modules/duties/app/admin.tsx
+msgid "Times refer to the start and end of the event. For games, they begin with the start of play and end after the game length of the age group. For special events, the start and end of the event apply."
+msgstr "Zeiten beziehen sich auf Beginn und Ende des Termins. Bei Spielen gelten der Spielbeginn und das Ende nach der Spieldauer der Altersklasse. Bei Sonderterminen gelten Beginn und Ende des Termins."
+
 #: modules/duties/app/helpers.tsx
 msgid "Signed up: {label}."
 msgstr "Eingetragen: {label}."
@@ -7410,10 +7417,6 @@ msgstr "{yes} von {total} zugesagt"
 msgid "Only with free slots"
 msgstr "Nur mit freien Plätzen"
 
-#: worker/domain/fixtures.ts
-msgid "New throw-off: {date}, {time}."
-msgstr "Neuer Anwurf: {date}, {time} Uhr."
-
 #: worker/routes/season.ts
 msgid "You cannot mark yourself as former."
 msgstr "Du kannst dich nicht selbst als ehemalig markieren."
@@ -7631,10 +7634,6 @@ msgstr "Test-Benachrichtigung ist unterwegs."
 #: modules/duties/app/admin.tsx
 msgid "KiHaSL/JuHaSL is not part of any template: for youth home games F to C the duty is always added automatically (1 slot, 15 min before throw-off until the end of the game)."
 msgstr "KiHaSL/JuHaSL steht in keiner Vorlage: Bei Heimspielen der Jugend F bis C kommt der Dienst immer automatisch dazu (1 Platz, 15 min vor Anpfiff bis Spielende)."
-
-#: worker/domain/fixtures.ts
-msgid "New throw-off: {date}, {time}, {location}."
-msgstr "Neuer Anwurf: {date}, {time} Uhr, {location}."
 
 #: src/pages/join.tsx
 msgid "already linked to you"
@@ -8448,11 +8447,6 @@ msgstr "Freigegeben."
 msgid "{firstName} has their own access."
 msgstr "{firstName} hat einen eigenen Zugang."
 
-#: worker/domain/calendar.ts
-#: worker/domain/calendar.ts
-msgid "Throw-off {throwOff}"
-msgstr "Anpfiff {throwOff} Uhr"
-
 #: src/pages/group.tsx
 msgid "All KiHaSL/JuHaSL"
 msgstr "Alle KiHaSL/JuHaSL"
@@ -9204,6 +9198,11 @@ msgstr "{name} ist danach nicht mehr Mitglied in der Gruppe {teamName}. Die Pers
 msgid "The app has been updated"
 msgstr "Die App wurde aktualisiert"
 
+# ai
+#: worker/domain/fixtures.ts
+msgid "New start of play: {date}, {time}."
+msgstr "Neuer Spielbeginn: {date}, {time} Uhr."
+
 #: src/pages/team.tsx
 msgid "From another team"
 msgstr "Aus anderer Mannschaft"
@@ -9279,6 +9278,11 @@ msgstr "Willkommen! Nach ein paar Schritten kann dein Verein loslegen. Alles lä
 #: src/pages/plans.tsx
 msgid "Break {holiday}"
 msgstr "Pause {holiday}"
+
+# ai
+#: src/pages/plans.tsx
+msgid "Choose a location …"
+msgstr "Ort wählen …"
 
 #: modules/carpools/worker/routes.ts
 msgid "Please cancel the current lift first."
@@ -10339,10 +10343,6 @@ msgstr "Gültig bis {createdUntil}, mehrfach verwendbar."
 msgid "Training"
 msgstr "Training"
 
-#: src/pages/special.tsx
-msgid "Throw-off"
-msgstr "Anwurf"
-
 #: worker/routes/join.ts
 msgid "The selection of children is no longer valid."
 msgstr "Die Auswahl der Kinder ist nicht mehr gültig."
@@ -10528,6 +10528,12 @@ msgstr "optional"
 #: src/pages/plans.tsx
 msgid "Valid from"
 msgstr "Gültig ab"
+
+# ai
+#: worker/domain/calendar.ts
+#: worker/domain/calendar.ts
+msgid "Start of play {throwOff}"
+msgstr "Spielbeginn {throwOff}"
 
 # ai
 #: worker/routes/events.ts
@@ -10882,6 +10888,11 @@ msgstr "Erwähnungen im Chat (@Name)"
 #: src/pages/group.tsx
 msgid "Upcoming special events"
 msgstr "Kommende Sondertermine"
+
+# ai
+#: src/pages/special.tsx
+msgid "Start of play"
+msgstr "Spielbeginn"
 
 #: src/pages/team.tsx
 msgid "Invitations"

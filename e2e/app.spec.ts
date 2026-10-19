@@ -441,7 +441,7 @@ test("Helferplan: einschalten, Spiel unter Team anlegen, Dienst übernehmen, liv
   await page.getByRole("group", { name: "Art des Termins" }).getByRole("button", { name: "Spiel" }).click();
   await page.getByLabel("Gegner oder Turnier").fill("Turnier Musterstadt");
   await page.getByLabel("Datum").fill("2099-05-01");
-  await page.getByLabel("Anwurf").fill("10:00");
+  await page.getByLabel("Spielbeginn").fill("10:00");
   await page.getByRole("button", { name: "Spiel anlegen" }).click();
   await expect(page).toHaveURL(/\/termine\/\d+/);
   await page.getByRole("link", { name: "Helfer", exact: true }).click();

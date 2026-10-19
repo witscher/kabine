@@ -14,6 +14,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "e2e": "playwright test",
+    "journey": "playwright test -c playwright.journey.config.ts",
     "screenshots": "KABINE_SHOTS_LOCALE=de playwright test -c playwright.screenshots.config.ts && KABINE_SHOTS_LOCALE=en playwright test -c playwright.screenshots.config.ts",
     "check": "npm run typecheck && npm run test && npm run i18n:check",
     "new": "node scripts/new.mjs",

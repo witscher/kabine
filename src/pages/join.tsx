@@ -26,7 +26,7 @@ type JoinInfo =
       kind: "personal";
       expiresAt: string;
       loggedInAs: string | null;
-      person: { name: string; hasAccount: boolean; isAdmin: boolean };
+      person: { name: string; hasAccount: boolean; isAdmin: boolean; email?: string | null };
       revokeExisting: boolean;
     };
 
@@ -104,7 +104,10 @@ export function JoinPage() {
   const load = async () => {
     setError(null);
     try {
-      setInfo(await api.post<JoinInfo>("/join/info", { token }));
+      const res = await api.post<JoinInfo>("/join/info", { token });
+      setInfo(res);
+      // An admin's address entered with the admin role: no need to type it again
+      if (res.kind === "personal" && res.person.email) setEmail(res.person.email);
     } catch (err) {
       setError(err);
     }

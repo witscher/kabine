@@ -252,7 +252,7 @@ function TemplateSheet({ template, types, onClose, onDone }: { template: Templat
       <TextField label={t`Name`} value={name} onInput={setName} maxLength={40} placeholder={t`e.g. home game with barbecue`} />
       <p class="small muted">
         <Trans>
-          Times refer to the start and end of the event. For games, the start is the throw-off and the end follows from the game length of the age group. For special events, the
+          Times refer to the start and end of the event. For games, they begin with the start of play and end after the game length of the age group. For special events, the
           start and end of the event apply.
         </Trans>
       </p>

@@ -29,6 +29,8 @@ jobs:
         run: npx playwright install --with-deps chromium
       - name: End-to-end tests
         run: npm run e2e
+      - name: A club from zero (empty database, every role)
+        run: npm run journey
       - uses: actions/upload-artifact@v4
         if: failure()
         with:

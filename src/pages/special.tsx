@@ -293,7 +293,7 @@ function NewGameForm({
             />
           )}
         </Field>
-        <Field label={t`Throw-off`}>
+        <Field label={t`Start of play`}>
           {(fid) => (
             <input
               id={fid}

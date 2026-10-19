@@ -1,8 +1,11 @@
 import { plural, t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { useState } from "preact/hooks";
+import type { ModuleManifest } from "../../shared/module-api";
+import { MODULES, type ModuleId, moduleOn } from "../../shared/modules";
 import type { TeamRef } from "../../shared/types";
 import { api, errorMessage } from "../api";
+import { useClub } from "../club";
 import { ago, fullDate, isoToLocalDate } from "../format";
 import { invalidate, useQuery } from "../store";
 import { Button, confirmDialog, Field, toast } from "../ui";
@@ -66,9 +69,15 @@ export async function syncGames(teamId: number, name: string): Promise<ImportSum
   return summary;
 }
 
+/** Is any game schedule source switched on? Without one the schedule routes do not exist. */
+function useFixturesOn(): boolean {
+  const club = useClub();
+  return (MODULES as readonly ModuleManifest[]).some((m) => m.kind === "fixtures" && moduleOn(club, m.id as ModuleId));
+}
+
 /** State of the game schedule with a button to sync it (Team → Settings). */
 export function SourceBar({ team }: { team: TeamRef }) {
-  const source = useQuery<Source>(`/teams/${team.id}/games/source`);
+  const source = useQuery<Source>(useFixturesOn() ? `/teams/${team.id}/games/source` : null);
   const [syncing, setSyncing] = useState(false);
   if (!source.data?.configured) return null;
   const when = source.data.importedAt ? ago(source.data.importedAt) : "";
@@ -107,7 +116,7 @@ export function SourceBar({ team }: { team: TeamRef }) {
  * they are, only no longer synced.
  */
 export function ScheduleSection({ team, onChanged }: { team: TeamRef; onChanged: () => void }) {
-  const source = useQuery<Source>(`/teams/${team.id}/games/source`);
+  const source = useQuery<Source>(useFixturesOn() ? `/teams/${team.id}/games/source` : null);
   const [link, setLink] = useState("");
   const [picked, setPicked] = useState<string | null>(null);
   const data = source.data;

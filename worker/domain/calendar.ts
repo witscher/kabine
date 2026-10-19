@@ -245,7 +245,7 @@ export function calendarItems(
     const meeting = meetAt ? (point ? t`Meet at ${meetAt} · ${point}` : t`Meet at ${meetAt}`) : point ? t`Meeting point: ${point}` : null;
     const throwOff = e.startsAt.slice(11, 16);
     const description = [
-      e.kind === "game" ? t`Throw-off ${throwOff}` : null,
+      e.kind === "game" ? t`Start of play ${throwOff}` : null,
       meeting,
       `${opts.origin}/termine/${e.id}`,
     ]
@@ -276,7 +276,7 @@ export function calendarItems(
       durationMinutes: Math.max(15, minutesBetween(meetStart, e.startsAt)),
       summary: meetingSummary(e),
       location: g.meetingPoint ?? locationText(e),
-      description: [t`Throw-off ${throwOff}`, `${opts.origin}/termine/${e.id}`].join("\n"),
+      description: [t`Start of play ${throwOff}`, `${opts.origin}/termine/${e.id}`].join("\n"),
       cancelled: false,
     });
   }

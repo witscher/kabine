@@ -486,7 +486,7 @@ eventRoutes.patch("/events/:id", async (c) => {
   if (endsAt && endsAt <= startsAt) throw badRequest(t`The end must be after the start.`);
   if (input.title && event.kind !== "special") throw badRequest(t`Only special events have a title.`);
   if (event.kind === "game" && (input.startsAt || input.locationId !== undefined)) {
-    throw badRequest(t`Throw-off and hall come from the schedule and cannot be changed here.`);
+    throw badRequest(t`Start of play and venue come from the game schedule and cannot be changed here.`);
   }
   if (input.locationId != null) {
     const loc = await first(c.env.DB, "SELECT 1 AS ok FROM locations WHERE id = ?", input.locationId);

@@ -88,6 +88,7 @@ Node.js 22 or newer.
 | Extract texts and fill German translations | `npm run i18n` |
 | Typecheck, tests, translations | `npm run check` |
 | End-to-end tests (Playwright) | `npm run e2e` |
+| A club from zero: empty database, setup, wizard, every role (Playwright) | `npm run journey` |
 | Screenshots of the demo club | `npm run screenshots` |
 
 The first admin of a local installation signs in at `/einrichtung#<ADMIN_BOOTSTRAP_TOKEN>` (see `.dev.vars`).

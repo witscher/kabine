@@ -1,0 +1,9 @@
+{
+  "Choose a location …": "Ort wählen …",
+  "Start of play": "Spielbeginn",
+  "Start of play {throwOff}": "Spielbeginn {throwOff}",
+  "Start of play and venue come from the game schedule and cannot be changed here.": "Spielbeginn und Spielort kommen aus dem Spielplan und lassen sich hier nicht ändern.",
+  "New start of play: {date}, {time}, {location}.": "Neuer Spielbeginn: {date}, {time} Uhr, {location}.",
+  "New start of play: {date}, {time}.": "Neuer Spielbeginn: {date}, {time} Uhr.",
+  "Times refer to the start and end of the event. For games, they begin with the start of play and end after the game length of the age group. For special events, the start and end of the event apply.": "Zeiten beziehen sich auf Beginn und Ende des Termins. Bei Spielen gelten der Spielbeginn und das Ende nach der Spieldauer der Altersklasse. Bei Sonderterminen gelten Beginn und Ende des Termins."
+}

@@ -1,13 +1,13 @@
 // Language switch (profile and sign-in page): saves the choice on the account if signed in,
 // remembers it on the device and reloads the app in the new language.
 import { t } from "@lingui/core/macro";
-import { useId } from "preact/hooks";
 import { LOCALE_NAMES, LOCALES, type Locale, isLocale } from "../shared/i18n";
 import { api } from "./api";
 import { currentLocale, switchLocale } from "./i18n";
+import { useUniqueId } from "./ui";
 
 export function LanguageSwitch() {
-  const id = useId();
+  const id = useUniqueId();
   const current = currentLocale();
   const change = async (value: string) => {
     if (!isLocale(value) || value === current) return;

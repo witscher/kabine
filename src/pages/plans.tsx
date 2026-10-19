@@ -45,6 +45,8 @@ interface PlansResponse {
   sharedRules: (RuleView & { planName: string; ownerTeam: string; validFrom: string; validTo: string })[];
   holidays: HolidayPeriod[];
   allTeams: TeamRef[];
+  /** End of the current season, the default end of a new plan. */
+  seasonEnd: string | null;
 }
 
 function RuleCard({ rule, ownTeamId, onEdit, onDelete }: { rule: RuleView; ownTeamId: number; onEdit?: () => void; onDelete?: () => void }) {
@@ -301,6 +303,12 @@ function RuleEditor(props: { initial: DraftRule | null; ownTeamId: number; allTe
               else setLocationId(Number(v));
             }}
           >
+            {/* Without a location yet, "create new" must not be the preselected option: choosing it would change nothing */}
+            {locationId == null ? (
+              <option value="" disabled>
+                {t`Choose a location …`}
+              </option>
+            ) : null}
             {locations.map((l) => (
               <option value={l.id}>{l.name}</option>
             ))}
@@ -466,6 +474,10 @@ export function PlanEditorPage({ id, planId }: { id: string; planId: string }) {
   const [kind, setKind] = useState<"regular" | "holiday">((query.kind as "holiday") ?? "regular");
   const [from, setFrom] = useState(query.from ?? today);
   const [to, setTo] = useState(query.to ?? `${Number(today.slice(0, 4)) + (Number(today.slice(5, 7)) >= 8 ? 1 : 0)}-07-28`);
+  // A new plan runs until the end of the current season (the fallback above only covers a club without a season)
+  useEffect(() => {
+    if (isNew && !query.to && data?.seasonEnd) setTo(data.seasonEnd);
+  }, [data?.seasonEnd]);
   // Holiday plan with a period: the dates follow the holidays under Administration → Holidays
   const [periodId, setPeriodId] = useState<number | null>(query.holiday ? Number(query.holiday) : null);
   const [declineHours, setDeclineHours] = useState("");

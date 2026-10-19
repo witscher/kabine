@@ -2,7 +2,7 @@ import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { clubName } from "./club";
 import type { ComponentChildren, JSX } from "preact";
-import { useEffect, useId, useRef, useState } from "preact/hooks";
+import { useEffect, useRef, useState } from "preact/hooks";
 import type { ParticipationStatus } from "../shared/types";
 import { errorMessage } from "./api";
 import { Icon, type IconName } from "./icons";
@@ -150,9 +150,21 @@ function blurInside(el: HTMLElement | null) {
   if (el && active instanceof HTMLElement && el.contains(active)) active.blur();
 }
 
+let idCounter = 0;
+
+/**
+ * An id unique on the page, for label/field and dialog/title pairs. Preact's useId can hand out the same id twice
+ * across lazily loaded pages, which tied the sport select's label to a hidden dialog.
+ */
+export function useUniqueId(): string {
+  const ref = useRef<string | null>(null);
+  if (ref.current === null) ref.current = `k${++idCounter}`;
+  return ref.current;
+}
+
 export function Sheet(props: { open: boolean; onClose: () => void; title: string; children: ComponentChildren }) {
   const ref = useRef<HTMLDialogElement>(null);
-  const id = useId();
+  const id = useUniqueId();
   useEffect(() => {
     const d = ref.current;
     if (!d) return;
@@ -244,7 +256,7 @@ export function ConfirmHost() {
 // Form elements -------------------------------------------------------------------
 
 export function Field(props: { label: string; hint?: ComponentChildren; error?: string | null; children: (id: string) => ComponentChildren }) {
-  const id = useId();
+  const id = useUniqueId();
   return (
     <div class="field">
       <label class="field-label" for={id}>

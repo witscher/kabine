@@ -10,6 +10,7 @@ import { LOCALE_NAMES, LOCALES, type Locale } from "../../shared/i18n";
 import { useQuery } from "../store";
 import { api, errorMessage } from "../api";
 import { ClubMark, loadClub, setClub, useClub } from "../club";
+import { currentLocale } from "../i18n";
 import { useSession } from "../session";
 import { Button, Field, Notice, SwitchRow, TextField, toast, TopBar, useDocumentTitle } from "../ui";
 import { AdminOnly } from "./admin";
@@ -33,7 +34,8 @@ export function ClubProfileForm({ onSaved, submitLabel, parts = ALL_PARTS }: { o
   const [privacyText, setPrivacyText] = useState(club.privacyText ?? "");
   const [contact, setContact] = useState(club.contact ?? "");
   const [sourceUrl, setSourceUrl] = useState(club.sourceUrl ?? "");
-  const [defaultLocale, setDefaultLocale] = useState<Locale>(club.defaultLocale);
+  // A fresh installation proposes the language the admin uses the app in, not the built-in default
+  const [defaultLocale, setDefaultLocale] = useState<Locale>(club.setupDone ? club.defaultLocale : currentLocale());
   const [country, setCountry] = useState(club.country);
   const [subdivision, setSubdivision] = useState(club.subdivision ?? "");
   const [timeZone, setTimeZone] = useState(club.timeZone);

@@ -140,9 +140,10 @@ describe("Zugang über Einladungslink", () => {
     expect(code.status).toBe(400);
     expect(code.body.error.code).toBe("email_required");
 
-    // Persönlicher Link für einen Admin ohne Zugang: Adresse Pflicht
+    // Persönlicher Link für einen Admin ohne Zugang: Adresse Pflicht, außer sie wurde mit der Admin-Rolle schon eingetragen
     const admin = await person("Ada", { admin: true });
     const other = await person("Alma", { admin: true });
+    await exec("UPDATE persons SET admin_email = NULL WHERE id = ?", other);
     const link = await api(`/persons/${other}/personal-link`, { cookie: await loginAs(admin), body: { revokeExisting: false } });
     expect(link.status).toBe(201);
     const adminToken = String(link.body.url).split("#")[1]!;
@@ -150,6 +151,12 @@ describe("Zugang über Einladungslink", () => {
     expect(res.status).toBe(400);
     expect(res.body.error.code).toBe("email_required");
     expect((await api("/join/options", { body: { token: adminToken, email: "alma@example.org" } })).status).toBe(200);
+
+    const third = await person("Anna", { admin: true });
+    const thirdLink = await api(`/persons/${third}/personal-link`, { cookie: await loginAs(admin), body: { revokeExisting: false } });
+    const thirdToken = String(thirdLink.body.url).split("#")[1]!;
+    expect((await api("/join/info", { body: { token: thirdToken } })).body.person.email).toBe("anna@example.org");
+    expect((await api("/join/options", { body: { token: thirdToken } })).status).toBe(200);
   });
 
   it("richtet den Zugang ohne Passkey per Code ein, die Adresse ist danach bestätigt", async () => {

@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "preact/hooks";
 import { api, errorMessage } from "../../../src/api";
 import { dayOfMonth, monthShort, shortDate, time, todayLocal, weekdayShort } from "../../../src/format";
 import { Icon } from "../../../src/icons";
+import { useModule } from "../../../src/club";
 import { useMe } from "../../../src/session";
 import { useQuery } from "../../../src/store";
 import { BlockEditSheet, BlockSheet, blockTime, type TemplateInfo } from "../../../src/duty-blocks";
@@ -174,7 +175,8 @@ export function HelpersPage() {
   const helperTeams = hasOwn && hasOthers && scope === "own" ? me.helperTeams.filter((ht) => ht.own) : me.helperTeams;
   // KiHaSL/JuHaSL: first for everyone with the role, last for coaches and admins
   const refereeChip = { id: REFEREE, name: "KiHaSL/JuHaSL", own: true };
-  const showReferee = me.referee || me.isAdmin || me.manageableTeams.length > 0;
+  // Only with the youth referee module (handball); otherwise the tab would only show "switched off"
+  const showReferee = useModule("youthReferees") && (me.referee || me.isAdmin || me.manageableTeams.length > 0);
   const teams = !showReferee ? helperTeams : me.referee ? [refereeChip, ...helperTeams] : [...helperTeams, refereeChip];
   const [teamId, setTeamId] = useState<number | null>(() => (showReferee && new URLSearchParams(location.search).has("kihasl") ? REFEREE : (teams[0]?.id ?? null)));
   const isReferee = teamId === REFEREE;

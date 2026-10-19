@@ -143,6 +143,8 @@ planRoutes.get("/teams/:id/plans", async (c) => {
     // All upcoming holiday periods, also after the end of the season (e.g. summer holidays)
     holidays: (await holidayPeriods(db)).filter((h) => h.endsOn >= today),
     allTeams: await all<{ id: number; name: string }>(db, "SELECT id, name FROM teams WHERE kind = 'team' ORDER BY name"),
+    // A new plan runs until the end of the season by default
+    seasonEnd: (await first<{ ends_on: string }>(db, "SELECT ends_on FROM seasons WHERE is_current = 1"))?.ends_on ?? null,
   });
 });
 

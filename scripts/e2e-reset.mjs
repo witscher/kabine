@@ -1,4 +1,5 @@
 // Fresh local data for the end-to-end tests (invented test data).
+//   --empty: migrations only, like a club right after the deploy button (journey/, npm run journey)
 import { execSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { DEPLOY_REDIRECT, DEPLOY_REDIRECT_BACKUP, isE2eRedirect } from "../e2e/deploy-redirect.mjs";
@@ -16,5 +17,5 @@ writeFileSync(DEPLOY_REDIRECT_BACKUP, JSON.stringify({ previous }));
 
 const run = (cmd) => execSync(cmd, { stdio: "pipe", env: { ...process.env, CI: "1" } });
 run("npx wrangler d1 migrations apply DB --local --persist-to .wrangler/e2e-state");
-run("npx wrangler d1 execute DB --local --persist-to .wrangler/e2e-state --file e2e/fixtures.sql");
-console.log("E2E data ready.");
+if (!process.argv.includes("--empty")) run("npx wrangler d1 execute DB --local --persist-to .wrangler/e2e-state --file e2e/fixtures.sql");
+console.log(process.argv.includes("--empty") ? "E2E database ready, empty." : "E2E data ready.");

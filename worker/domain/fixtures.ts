@@ -346,7 +346,7 @@ export async function importGames(
           const time = shortTime(m.startsAt);
           return {
             title: t`Game moved (${teamName})`,
-            body: location ? t`New throw-off: ${date}, ${time}, ${location}.` : t`New throw-off: ${date}, ${time}.`,
+            body: location ? t`New start of play: ${date}, ${time}, ${location}.` : t`New start of play: ${date}, ${time}.`,
             url: `/termine/${m.id}`,
           };
         },

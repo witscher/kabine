@@ -16,7 +16,7 @@ import { ApiError, badRequest, conflict, forbidden, gone, parse, readJson } from
 import { utcIso } from "../lib/time";
 import { distinctShortNames } from "../../shared/names";
 import { insertPasskey } from "./auth";
-import { withLocale } from "../i18n";
+import { currentLocale, withLocale } from "../i18n";
 
 /** email: address for sign-in. Required as soon as a new access is created. */
 export type JoinContext =
@@ -90,16 +90,22 @@ joinRoutes.post("/join/info", async (c) => {
     });
   }
 
-  const person = await first<{ first_name: string; last_name: string | null; has_account: number; is_admin: number }>(
+  const person = await first<{ first_name: string; last_name: string | null; has_account: number; is_admin: number; admin_email: string | null }>(
     c.env.DB,
-    "SELECT first_name, last_name, is_admin, EXISTS (SELECT 1 FROM accounts WHERE person_id = persons.id) AS has_account FROM persons WHERE id = ?",
+    "SELECT first_name, last_name, is_admin, admin_email, EXISTS (SELECT 1 FROM accounts WHERE person_id = persons.id) AS has_account FROM persons WHERE id = ?",
     invite.person_id,
   );
   return c.json({
     kind: "personal",
     expiresAt: invite.expires_at,
     loggedInAs,
-    person: { name: fullName(person!.first_name, person!.last_name), hasAccount: person!.has_account === 1, isAdmin: person!.is_admin === 1 },
+    person: {
+      name: fullName(person!.first_name, person!.last_name),
+      hasAccount: person!.has_account === 1,
+      isAdmin: person!.is_admin === 1,
+      // The admin's own address, entered when the admin role was given: only the holder of the link sees it
+      email: person!.has_account === 1 ? null : person!.admin_email,
+    },
     revokeExisting: person!.has_account === 1,
   });
 });
@@ -124,7 +130,7 @@ const adminEmailRequired = () => t`Please enter your e-mail address. It is requi
  */
 async function buildJoinContext(env: Env, input: JoinInput): Promise<{ context: JoinContext; name: string; exclude: { id: string }[] }> {
   const invite = await findValidInvite(env, input.token);
-  const email = input.email || null;
+  let email = input.email || null;
 
   if (invite.kind === "player") {
     if (!input.personId) throw badRequest(t`Please select who you are.`);
@@ -156,9 +162,9 @@ async function buildJoinContext(env: Env, input: JoinInput): Promise<{ context: 
   }
 
   // Personal link: new passkey (or e-mail) for an existing person.
-  const person = await first<{ id: number; first_name: string; last_name: string | null; is_admin: number }>(
+  const person = await first<{ id: number; first_name: string; last_name: string | null; is_admin: number; admin_email: string | null }>(
     env.DB,
-    "SELECT id, first_name, last_name, is_admin FROM persons WHERE id = ? AND is_former = 0",
+    "SELECT id, first_name, last_name, is_admin, admin_email FROM persons WHERE id = ? AND is_former = 0",
     invite.person_id,
   );
   if (!person) throw gone(t`This person no longer exists.`);
@@ -169,6 +175,8 @@ async function buildJoinContext(env: Env, input: JoinInput): Promise<{ context: 
     "SELECT id, webauthn_user_id, email, email_verified_at FROM accounts WHERE person_id = ?",
     person.id,
   );
+  // An admin whose address was entered with the admin role need not type it again
+  if (!account && !email && person.is_admin && person.admin_email) email = person.admin_email.toLowerCase();
   if (!account && !email && person.is_admin) throw badRequest(adminEmailRequired(), "email_required");
   // A link never replaces a confirmed address: whoever holds it could otherwise take over the e-mail login
   if (account?.email_verified_at && email && email !== account.email) {
@@ -567,7 +575,10 @@ joinRoutes.post("/bootstrap/verify", async (c) => {
   const accountId = await finishJoin(c.env, c.req.raw, context, credential);
   // The person who sets up the installation is its protected owner
   const owner = await first<{ person_id: number }>(c.env.DB, "SELECT person_id FROM accounts WHERE id = ?", accountId);
-  if ((await loadClub(c.env.DB)).ownerPersonId === null) await saveClub(c.env.DB, { ownerPersonId: owner!.person_id });
+  const club = await loadClub(c.env.DB);
+  if (club.ownerPersonId === null) await saveClub(c.env.DB, { ownerPersonId: owner!.person_id });
+  // Until the wizard has run, the club speaks the language the first admin uses (age groups, duties, mails)
+  if (!club.setupDone) await saveClub(c.env.DB, { defaultLocale: currentLocale() });
   await rememberOrigin(c.env.DB, new URL(c.req.url).origin);
   c.executionCtx.waitUntil(requestEmailConfirmation(c.env, c.req.raw, accountId));
   const session = await createSession(c.env.DB, accountId, c.req.header("user-agent") ?? null);
