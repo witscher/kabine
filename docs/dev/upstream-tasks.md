@@ -8,7 +8,7 @@ Format per entry: date, title, what changed and why, where in the code (file and
 
 ## Open
 
-_Nothing open._
+- **2026-10-19 Parent invitation: own name, not the child's.** Parents kept entering their child's name as their own when joining through the parent link. The first-name field now carries a bold hint ("Your own name, not your child's! You pick your child further down."). If the entered first name (first word, case-insensitive) equals the first name of any player listed on the link, a warning appears under the name fields: "Not your child's name! <Name> is also a child of <team>. Put your own name here, so coaches and other parents know who you are." A button "That's right, my name is <Name> too" confirms it, because parents can share a first name with their child. Until confirmed, passkey registration and the e-mail code are blocked with "Please enter your own first name, not your child's." Client side only. Code: `src/pages/join.tsx` (`JoinPage`: `confirmedName`, `nameClash`, `NAME_CLASH`; `JoinByEmail` gets an optional `check`), e2e test "Elternlink: Warnung, wenn der Vorname dem eines Kindes gleicht". Kabine: texts through Lingui with German translation, the e2e test in English.
 
 ## Done
 
