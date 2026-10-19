@@ -33,21 +33,32 @@ jobs:
       )
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    env:
+      # Without the repository secrets the job only says so and stays green (no failure mail on every push)
+      DEPLOY_CONFIGURED: ${{ secrets.CLOUDFLARE_API_TOKEN != '' && secrets.CLOUDFLARE_ACCOUNT_ID != '' }}
     steps:
+      - name: Secrets missing
+        if: env.DEPLOY_CONFIGURED != 'true'
+        run: 'echo "::notice::Demo not deployed, the repository secrets CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID and DEMO_RESET_TOKEN are missing."'
       - uses: actions/checkout@v4
+        if: env.DEPLOY_CONFIGURED == 'true'
         with:
           ref: ${{ github.event.workflow_run.head_sha || github.sha }}
       - uses: actions/setup-node@v4
+        if: env.DEPLOY_CONFIGURED == 'true'
         with:
           node-version: 22
           cache: npm
       - run: npm ci
+        if: env.DEPLOY_CONFIGURED == 'true'
       - name: Build, migrate and deploy the demo
+        if: env.DEPLOY_CONFIGURED == 'true'
         run: npm run deploy:demo
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
       - name: Start the demo over
+        if: env.DEPLOY_CONFIGURED == 'true'
         run: node scripts/demo-reset.mjs
         env:
           DEMO_RESET_TOKEN: ${{ secrets.DEMO_RESET_TOKEN }}
