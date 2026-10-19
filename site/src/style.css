@@ -65,6 +65,15 @@ img { max-width: 100%; height: auto; display: block; }
 .hero-shots img { width: 46%; border-radius: 22px; box-shadow: 0 18px 40px rgba(0, 0, 0, 0.5); border: 1px solid #333; }
 @media (max-width: 860px) { .hero .wrap { grid-template-columns: 1fr; } .hero-shots { transform: none; } .hero-shots img { width: 44%; } }
 
+/* Promise band right under the hero: invitation only, data stays with the club */
+.promise { background: var(--yellow); color: var(--black); padding: 30px 0; }
+.promise .wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 22px 48px; }
+.promise-item { display: flex; gap: 16px; align-items: flex-start; }
+.promise-item svg { flex: none; margin-top: 2px; }
+.promise-item h2 { font-size: clamp(28px, 3.6vw, 38px); }
+.promise-item p { margin-top: 6px; font-size: 17px; line-height: 1.45; }
+@media (max-width: 760px) { .promise .wrap { grid-template-columns: 1fr; } }
+
 /* Sections */
 section { padding: 64px 0; }
 section.alt { background: var(--muted); }
