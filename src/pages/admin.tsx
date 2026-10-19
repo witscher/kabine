@@ -76,6 +76,7 @@ export function AdminPage() {
     { href: "/verwaltung/verein", icon: "settings", title: t`Club`, sub: t`Name, colours, logo, region, modules`, dot: !!me?.news?.newModules.length },
     { href: "/verwaltung/mail", icon: "mail", title: t`E-mail`, sub: t`How the app sends e-mails` },
     { href: "/verwaltung/saisonwechsel", icon: "refresh", title: t`Season change`, sub: t`Once a year, with preview` },
+    { href: "/verwaltung/updates", icon: "refresh", title: t`Updates and maintenance`, sub: t`Installed version, last update, maintenance mode` },
     { href: "/api/admin/export", icon: "download", title: t`Export`, sub: t`All data as a JSON file, for backup`, download: true },
     { href: "/hilfe", icon: "info", title: t`Help and feedback`, sub: t`Send feedback about the app` },
   ];

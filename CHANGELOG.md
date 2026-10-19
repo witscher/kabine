@@ -2,6 +2,13 @@
 
 Release notes per version. The update workflow of a club's copy (`.github/workflows/update.yml`) shows the section of the new version in its pull request.
 
+Changes that are merged but not released yet go under *Unreleased*, one line each, written for the people who run a club's installation. On a release the section becomes `## vX.Y.Z`, with an entry in `shared/changelog.ts` for the app (`test/changelog.test.ts`).
+
+## Unreleased
+
+- Controlled updates: a release with database changes puts the app into "being updated" for about a minute while the migrations run (admins included, reminders pause) and notes a restore point first. The update pull request says whether the release changes the database.
+- *Administration → Updates and maintenance*: installed version, last update with its restore point and the command to go back, maintenance switch.
+
 ## v0.1.0
 
 First release.

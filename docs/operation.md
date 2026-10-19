@@ -15,10 +15,10 @@ Training plans, coaches and staff are set again after the change. Holidays and p
 
 ## Maintenance mode
 
-Before risky work on the data, switch on maintenance mode. Only admins can use the app, the hourly cron run pauses.
+Before risky work on the data, switch on maintenance mode in *Administration → Updates and maintenance*. Only admins can use the app, everyone else sees a maintenance page, and the hourly cron run (reminders, automatic messages) pauses. It takes effect within about a minute. From a checkout:
 
 ```sh
-npm run maintenance:on      # takes effect within about a minute
+npm run maintenance:on
 npm run maintenance:status
 npm run maintenance:off
 ```
@@ -27,9 +27,22 @@ The switch lives in KV (key `maintenance`), independent of the database.
 
 ## Updates
 
-A pull request "Update Kabine to vX.Y.Z" appears in the club's copy when a release is out (`.github/workflows/update.yml`, weekly). Read the notes, check whether `wrangler.jsonc` needs new entries, merge. Workers Builds deploys the new version with `npm run deploy`, which applies the database migrations first.
+A pull request "Update Kabine to vX.Y.Z" appears in the club's copy when a release is out (`.github/workflows/update.yml`, weekly). It says whether the release changes the database and whether `wrangler.jsonc` needs new entries. You choose when to merge; Workers Builds then deploys with `npm run deploy` (`scripts/deploy.mjs`):
 
-For a release with database migrations, maintenance mode during the merge avoids people writing into a half-migrated database. Note the current version (*Workers & Pages → kabine → Deployments*) and a Time Travel bookmark before, so you can go back: roll back the Worker version in the dashboard and restore the bookmark.
+1. **No database changes:** build and upload. The app keeps running; open pages pick up the new version on their next start.
+2. **With database changes:** the script first notes a **restore point** (D1 Time Travel bookmark, printed in the build log), then marks the update in the database. For about a minute everyone, admins included, sees "Kabine is being updated", and the cron run pauses. The migrations run, the new version is uploaded, the mark is removed and the app reloads by itself. If the build is cut off, the mark expires after 15 minutes.
+
+*Administration → Updates and maintenance* shows the installed version and the last update: when, which database changes, and the restore point with the command to go back. Merge releases with database changes at a quiet time, not right before a game.
+
+**Going back.** Migrations keep the previous release working (`migrations/README.md`), so rolling back only the Worker is usually enough: *Workers & Pages → this Worker → Deployments → Rollback*. Only if the data itself is wrong, restore the database to the restore point as well:
+
+```sh
+npx wrangler d1 time-travel restore DB --bookmark=<restore point>
+```
+
+Restoring discards everything written after the restore point. Switch maintenance mode on before, and off when you have checked the app.
+
+If you would rather check a release on your own first, switch maintenance mode on, merge, check the app as an admin and switch it off again.
 
 ## Logs
 

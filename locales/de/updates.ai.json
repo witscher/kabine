@@ -1,0 +1,23 @@
+{
+  "Maintenance mode": "Wartungsmodus",
+  "no database changes": "keine Datenbankänderungen",
+  "Updates and maintenance": "Updates und Wartung",
+  "Version": "Version",
+  "Maintenance mode off. It takes effect within a minute.": "Wartungsmodus aus. Das wirkt innerhalb einer Minute.",
+  "Maintenance mode on. It takes effect within a minute.": "Wartungsmodus an. Das wirkt innerhalb einer Minute.",
+  "On since {since}. Only admins can use the app; reminders and other automatic messages pause.": "An seit {since}. Nur Admins können die App nutzen, Erinnerungen und andere automatische Nachrichten pausieren.",
+  "An update is being installed right now. The app is back in about a minute.": "Gerade wird ein Update installiert. Die App ist in etwa einer Minute wieder da.",
+  "Only admins can use the app; reminders and other automatic messages pause. For work on the data, or before an update you want to check first.": "Nur Admins können die App nutzen, Erinnerungen und andere automatische Nachrichten pausieren. Für Arbeiten an den Daten oder vor einem Update, das du erst selbst prüfen willst.",
+  "Last update": "Letztes Update",
+  "Copy command": "Befehl kopieren",
+  "Restore point from just before the database changes. If something is wrong after the update: roll back the Worker in the Cloudflare dashboard (Workers & Pages → this Worker → Deployments), then restore the database with this command in your copy:": "Wiederherstellungspunkt von kurz vor den Datenbankänderungen. Falls nach dem Update etwas nicht stimmt: Rolle den Worker im Cloudflare-Dashboard zurück (Workers & Pages → dieser Worker → Deployments) und stelle danach mit diesem Befehl in deiner Kopie die Datenbank wieder her:",
+  "This takes about a minute. The page reloads automatically as soon as the update is done.": "Das dauert etwa eine Minute. Die Seite lädt von selbst neu, sobald das Update fertig ist.",
+  "Kabine is being updated": "Kabine wird aktualisiert",
+  "New versions arrive as a pull request in your club's copy on GitHub. Merging it installs the update; you choose when. Updates that change the database put the app into maintenance mode for about a minute, so merge those at a quiet time.": "Neue Versionen kommen als Pull Request in die Kopie deines Vereins auf GitHub. Mit dem Mergen installierst du das Update, du bestimmst den Zeitpunkt. Updates, die die Datenbank ändern, schalten die App für etwa eine Minute in den Wartungsmodus. Merge sie deshalb zu einer ruhigen Zeit.",
+  "Kabine is being updated and will be back in a minute.": "Kabine wird gerade aktualisiert und ist in einer Minute wieder da.",
+  "No update recorded yet. The next deploy records it here.": "Noch kein Update aufgezeichnet. Der nächste Deploy trägt sich hier ein.",
+  "{migrationCount, plural, one {# database change} other {# database changes}}": "{migrationCount, plural, one {# Datenbankänderung} other {# Datenbankänderungen}}",
+  "Installed version, last update, maintenance mode": "Installierte Version, letztes Update, Wartungsmodus",
+  "{lastAt}, version {lastVersion}": "{lastAt}, Version {lastVersion}",
+  "Installed version": "Installierte Version"
+}

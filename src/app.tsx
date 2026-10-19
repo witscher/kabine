@@ -4,7 +4,7 @@ import { ErrorBoundary, LocationProvider, Route, Router, useLocation } from "pre
 import type { ComponentChildren } from "preact";
 import { useEffect } from "preact/hooks";
 import { EnvBanner } from "./env-banner";
-import { MaintenanceBanner, MaintenancePage, useIsAdmin, useMaintenance } from "./maintenance";
+import { MaintenanceBanner, MaintenancePage, maintenanceIsUpdate, useIsAdmin, useMaintenance } from "./maintenance";
 import { ViewAsBanner } from "./view-as";
 import { OfflineBanner } from "./offline";
 import { PullToRefresh, ResumeRefresh } from "./pull-refresh";
@@ -48,6 +48,7 @@ const AdminAgeClassesPage = lazyPage(() => import("./pages/admin").then((m) => m
 const AdminLocationsPage = lazyPage(() => import("./pages/admin").then((m) => m.AdminLocationsPage));
 const AdminClubPage = lazyPage(() => import("./pages/club-settings").then((m) => m.AdminClubPage));
 const AdminMailPage = lazyPage(() => import("./pages/mail-settings").then((m) => m.AdminMailPage));
+const AdminUpdatesPage = lazyPage(() => import("./pages/updates").then((m) => m.AdminUpdatesPage));
 const SetupWizardPage = lazyPage(() => import("./pages/setup-wizard").then((m) => m.SetupWizardPage));
 const SeasonChangePage = lazyPage(() => import("./pages/season").then((m) => m.SeasonChangePage));
 
@@ -161,7 +162,8 @@ function Shell({ children }: { children: ComponentChildren }) {
   const isPublic = PUBLIC_PATHS.some((p) => path.startsWith(p));
   const maintenance = useMaintenance();
   const isAdmin = useIsAdmin();
-  if (maintenance && !isAdmin) {
+  // During an update nobody gets in, admins neither; the switch in administration lets admins through
+  if (maintenance && (!isAdmin || maintenanceIsUpdate())) {
     return (
       <div class="app">
         <MaintenancePage />
@@ -281,6 +283,7 @@ export function App() {
               <Route path="/verwaltung/orte" component={AdminLocationsPage} />
               <Route path="/verwaltung/verein" component={AdminClubPage} />
               <Route path="/verwaltung/mail" component={AdminMailPage} />
+              <Route path="/verwaltung/updates" component={AdminUpdatesPage} />
               <Route path="/verwaltung/saisonwechsel" component={SeasonChangePage} />
               <Route path="/verwaltung/einrichtung" component={SetupWizardPage} />
               <Route path="/verwaltung/termin-neu" component={SpecialEventPage} />

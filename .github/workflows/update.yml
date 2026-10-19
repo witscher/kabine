@@ -57,6 +57,8 @@ jobs:
           git show "upstream/$VERSION:wrangler.jsonc" > /tmp/wrangler.release.jsonc
           echo "$VERSION" > .kabine-version
           git add -A
+          # New migrations change the database: the deploy then puts the app into maintenance for about a minute
+          git diff --cached --name-only --diff-filter=A -- migrations/ | grep '\.sql$' > /tmp/new-migrations.txt || true
           git commit --quiet -m "Kabine $VERSION" || true
           git push --quiet origin "kabine-update-$VERSION"
       - name: Open the pull request
@@ -69,8 +71,13 @@ jobs:
           if ! diff -q <(sed 's/"database_id": *"[^"]*"//;s/"id": *"[^"]*"//' /tmp/wrangler.release.jsonc) <(sed 's/"database_id": *"[^"]*"//;s/"id": *"[^"]*"//' wrangler.jsonc) >/dev/null; then
             wrangler_note=$'\n\n**Check wrangler.jsonc:** the release changes the Cloudflare configuration (for example a new binding). Compare your wrangler.jsonc with the one of the release and add new entries before merging.'
           fi
+          if [ -s /tmp/new-migrations.txt ]; then
+            migration_note=$'\n\n**Database changes:** this release changes the database ('"$(sed 's/.*\///' /tmp/new-migrations.txt | paste -sd, - | sed 's/,/, /g')"$'). While the deploy runs, the app shows "being updated" for about a minute, so merge at a quiet time. The deploy log and Administration → Updates show a restore point.'
+          else
+            migration_note=$'\n\nNo database changes: the app keeps running during the deploy.'
+          fi
           {
-            echo "Kabine $VERSION is available. Merging this pull request deploys it, database migrations included.${wrangler_note:-}"
+            echo "Kabine $VERSION is available. Merging this pull request deploys it.${migration_note}${wrangler_note:-}"
             echo
             echo "$notes"
           } > /tmp/pr-body.md

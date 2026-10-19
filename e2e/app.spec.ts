@@ -429,6 +429,25 @@ test("Admin schickt eine Rundnachricht, sie erscheint als Ankündigung im Chat",
   await player.page.screenshot({ path: process.env.E2E_SHOT ?? "test-results/announcement.png" });
 });
 
+test("Admin schaltet unter Updates und Wartung den Wartungsmodus ein und wieder aus", async () => {
+  const { page } = admin;
+  await page.goto("/verwaltung");
+  await page.getByRole("link", { name: /Updates und Wartung/ }).click();
+  await expect(page.getByRole("region", { name: "Version" })).toContainText(/Kabine \d+\.\d+\.\d+/);
+  await expect(page.getByText("Noch kein Update aufgezeichnet.", { exact: false })).toBeVisible();
+  await page.getByRole("switch", { name: /Wartungsmodus/ }).click();
+  await expect(page.getByText("Wartungsmodus an.", { exact: false })).toBeVisible();
+  await expect(page.getByRole("switch", { name: /Wartungsmodus/ })).toHaveAttribute("aria-checked", "true");
+
+  await player.page.goto("/");
+  await expect(player.page.getByText("Die App wird gerade gewartet")).toBeVisible();
+
+  await page.getByRole("switch", { name: /Wartungsmodus/ }).click();
+  await expect(page.getByRole("switch", { name: /Wartungsmodus/ })).toHaveAttribute("aria-checked", "false");
+  await player.page.goto("/");
+  await expect(player.page.getByRole("heading", { name: /^Hallo/ })).toBeVisible();
+});
+
 test("Helferplan: einschalten, Spiel unter Team anlegen, Dienst übernehmen, live beim Admin", async () => {
   const { page } = coach;
   await page.goto("/team/1");

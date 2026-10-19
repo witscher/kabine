@@ -46,7 +46,7 @@ New modules start as `status: "beta"`, switched off. Modules never change core f
 **Platform**
 - Cloudflare Developer Platform only: Workers with static assets, D1, KV, Durable Objects, Queues, Cron Triggers, Email Sending. Exceptions only where the club chooses them: its own SMTP server, an SMS provider, the fixture connectors it switches on.
 - Code runs in the Workers runtime: Web Crypto instead of Node `crypto`, no libraries with Node dependencies. TypeScript.
-- The D1 schema changes only through migrations that run safely for every club. Until the first release `migrations/0001_init.sql` is edited directly; after that every change is a new file named `YYYYMMDDHHMM_<area>_<what>.sql` ([migrations/README.md](migrations/README.md)).
+- The D1 schema changes only through new migration files named `YYYYMMDDHHMM_<area>_<what>.sql`; `migrations/0001_init.sql` is frozen. A migration runs safely for every club, keeps the previous release working (add now, drop in a later release) and has an upgrade test ([migrations/README.md](migrations/README.md)).
 - No secrets in code or in the repository. No club-specific data in code: names, domains, e-mail addresses, logos and texts of a club belong in the club profile (database).
 
 **People and data**
@@ -72,6 +72,7 @@ New modules start as `status: "beta"`, switched off. Modules never change core f
 - `npm run check` passes (typecheck, all tests including the module and connector contract tests, translations complete).
 - New behaviour has a test; screens that change are covered by `npm run e2e` where it matters.
 - The module's `README.md` and the docs say what it does and what it stores.
+- A change clubs notice gets a line under *Unreleased* in `CHANGELOG.md`.
 - One topic per pull request, with a short description of what changes for whom.
 
 ## Commands

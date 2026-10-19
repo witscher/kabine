@@ -5,7 +5,7 @@ import { readViewMode, viewAsActor } from "./auth/view-as";
 import { clearedSessionCookie, extendSessionIfDue, findSession, readSessionToken, sessionCookie } from "./auth/session";
 import { maintenanceAllowed, maintenanceState } from "./lib/maintenance";
 import { ApiError, forbidden, unauthorized } from "./lib/http";
-import { enterClubContext, isModuleOn } from "./domain/club";
+import { enterClubContext, isModuleOn, updateInProgress } from "./domain/club";
 import { ensureInstanceSecrets } from "./lib/instance-secrets";
 import { moduleOfPath } from "./lib/modules";
 import { currentLocale, withLocale } from "./i18n";
@@ -87,6 +87,10 @@ export function createBaseApp(): Hono<AppEnv> {
         );
       }
       return withLocale(locale, async () => {
+        // An update with database migrations is running (scripts/deploy.mjs): nobody writes, admins neither
+        if (updateInProgress() && !maintenanceAllowed(c.req.path, !!actor)) {
+          return c.json({ error: { code: "updating", message: t`Kabine is being updated and will be back in a minute.` } }, 503);
+        }
         // Maintenance mode: admins only (also in coach mode or in a view)
         if (!(actor?.isAdmin || actor?.adminSuspended) && !maintenanceAllowed(c.req.path, !!actor)) {
           if (await maintenanceState(c.env.KV)) {

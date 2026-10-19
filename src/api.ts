@@ -46,7 +46,9 @@ async function request<T>(method: Method, path: string, body?: unknown): Promise
   if (!res.ok) {
     const err = (data as ApiErrorBody | null)?.error;
     if (res.status === 401) window.dispatchEvent(new CustomEvent("kabine:unauthorized"));
-    if (res.status === 503 && err?.code === "maintenance") window.dispatchEvent(new CustomEvent("kabine:maintenance"));
+    if (res.status === 503 && (err?.code === "maintenance" || err?.code === "updating")) {
+      window.dispatchEvent(new CustomEvent("kabine:maintenance", { detail: { updating: err.code === "updating" } }));
+    }
     throw new ApiError(res.status, err?.code ?? "error", err?.message ?? t`An error occurred.`);
   }
   return data as T;

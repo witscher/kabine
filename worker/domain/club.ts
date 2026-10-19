@@ -5,7 +5,7 @@ import { clubAbbr, type ClubModules, DEFAULT_CLUB, DEFAULT_MODULES, type ModuleI
 import { venueOf, type VenueKind } from "../../shared/sports";
 import { setClubDefaultLocale } from "../i18n";
 import { setTimeZone } from "../lib/time";
-import { first, run } from "../lib/db";
+import { all, first, run } from "../lib/db";
 import { randomToken } from "../lib/crypto";
 
 export interface ClubSettings extends ClubProfile {
@@ -18,7 +18,11 @@ const KEY = "club";
 /** Club profile with defaults for missing fields (fresh installation, older data). */
 export async function loadClub(db: D1Database): Promise<ClubSettings> {
   const row = await first<{ value: string }>(db, "SELECT value FROM app_meta WHERE key = ?", KEY);
-  const stored = row ? (JSON.parse(row.value) as Partial<ClubSettings>) : {};
+  return clubFromStored(row?.value ?? null);
+}
+
+function clubFromStored(value: string | null): ClubSettings {
+  const stored = value ? (JSON.parse(value) as Partial<ClubSettings>) : {};
   return {
     ...DEFAULT_CLUB,
     ownerPersonId: null,
@@ -26,6 +30,35 @@ export async function loadClub(db: D1Database): Promise<ClubSettings> {
     colors: { ...DEFAULT_CLUB.colors, ...stored.colors },
     modules: { ...DEFAULT_MODULES, ...stored.modules },
   };
+}
+
+/**
+ * Set by the deploy script (scripts/deploy.mjs) while database migrations run: the app answers "being updated"
+ * to everyone, admins included. It expires on its own (`until`) in case a build is cut off.
+ */
+export const UPDATE_KEY = "update_in_progress";
+
+export interface UpdateInProgress {
+  since: string;
+  until: string;
+  version: string | null;
+}
+
+let ownUpdate: UpdateInProgress | null = null;
+
+/** The running update, as read with the club profile at the start of this request or cron run. */
+export function updateInProgress(now = Date.now()): UpdateInProgress | null {
+  return ownUpdate && Date.parse(ownUpdate.until) > now ? ownUpdate : null;
+}
+
+function parseUpdate(value: string | undefined): UpdateInProgress | null {
+  if (!value) return null;
+  try {
+    const v = JSON.parse(value) as Partial<UpdateInProgress>;
+    return typeof v.since === "string" && typeof v.until === "string" ? { since: v.since, until: v.until, version: v.version ?? null } : null;
+  } catch {
+    return null;
+  }
 }
 
 export async function saveClub(db: D1Database, patch: Partial<ClubSettings>): Promise<ClubSettings> {
@@ -95,7 +128,10 @@ export function ownClubShortName(): string {
 }
 
 export async function enterClubContext(db: D1Database): Promise<ClubSettings> {
-  const club = await loadClub(db);
+  // One read for both: the profile and the update marker of a running deploy
+  const rows = await all<{ key: string; value: string }>(db, "SELECT key, value FROM app_meta WHERE key IN (?, ?)", KEY, UPDATE_KEY);
+  const club = clubFromStored(rows.find((r) => r.key === KEY)?.value ?? null);
+  ownUpdate = parseUpdate(rows.find((r) => r.key === UPDATE_KEY)?.value);
   ownAbbr = clubAbbr(club);
   ownShortName = club.shortName;
   ownModules = club.modules;

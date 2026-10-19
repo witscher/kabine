@@ -1,5 +1,5 @@
 import { t } from "@lingui/core/macro";
-import { appOrigin, enterClubContext } from "./domain/club";
+import { appOrigin, enterClubContext, updateInProgress } from "./domain/club";
 import { ensureInstanceSecrets } from "./lib/instance-secrets";
 import { recordAttendance } from "./domain/attendance";
 import { syncAutoSquads } from "./domain/auto-squad";
@@ -25,6 +25,10 @@ export async function handleScheduled(baseEnv: Env, scheduledTime: number): Prom
   await ensureInstanceSecrets(env);
   await enterClubContext(env.DB);
   // Maintenance: generate or send nothing; the next run afterwards catches up
+  if (updateInProgress()) {
+    console.log("Update in progress, cron run skipped");
+    return;
+  }
   if (await maintenanceState(env.KV)) {
     console.log("Maintenance mode active, cron run skipped");
     return;

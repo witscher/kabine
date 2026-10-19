@@ -5,18 +5,29 @@ import { useEffect, useState } from "preact/hooks";
 import { useSession } from "./session";
 
 let active = false;
+/** An update with database migrations is running: everyone waits, admins too (scripts/deploy.mjs). */
+let updating = false;
 const listeners = new Set<(on: boolean) => void>();
 
-function set(on: boolean) {
-  if (on === active) return;
+function set(on: boolean, isUpdate = false) {
+  if (on === active && isUpdate === updating) return;
   active = on;
+  updating = on && isUpdate;
   listeners.forEach((fn) => fn(on));
+}
+
+/** Is the current maintenance an update (nobody gets in) rather than the admins' switch? */
+export function maintenanceIsUpdate(): boolean {
+  return updating;
 }
 
 export async function checkMaintenance(): Promise<boolean> {
   try {
     const res = await fetch("/api/health", { cache: "no-store" });
-    if (res.ok) set(!!((await res.json()) as { maintenance?: boolean }).maintenance);
+    if (res.ok) {
+      const health = (await res.json()) as { maintenance?: boolean; updating?: boolean };
+      set(!!health.maintenance, !!health.updating);
+    }
   } catch {
     // offline: state unchanged
   }
@@ -29,7 +40,7 @@ export function useMaintenance(): boolean {
   useEffect(() => {
     listeners.add(setOn);
     void checkMaintenance();
-    const onEvent = () => set(true);
+    const onEvent = (e: Event) => set(true, !!(e as CustomEvent<{ updating?: boolean }>).detail?.updating);
     const onVisible = () => document.visibilityState === "visible" && void checkMaintenance();
     window.addEventListener("kabine:maintenance", onEvent);
     document.addEventListener("visibilitychange", onVisible);
@@ -77,10 +88,14 @@ export function MaintenancePage() {
         <div class="empty">
           <img src="/icons/icon.svg" alt="" width="96" height="96" />
           <div class="title">
-            <Trans>The app is currently under maintenance</Trans>
+            {maintenanceIsUpdate() ? <Trans>Kabine is being updated</Trans> : <Trans>The app is currently under maintenance</Trans>}
           </div>
           <p class="muted">
-            <Trans>It will be back shortly. The page reloads automatically as soon as maintenance is over.</Trans>
+            {maintenanceIsUpdate() ? (
+              <Trans>This takes about a minute. The page reloads automatically as soon as the update is done.</Trans>
+            ) : (
+              <Trans>It will be back shortly. The page reloads automatically as soon as maintenance is over.</Trans>
+            )}
           </p>
         </div>
       </div>

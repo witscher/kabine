@@ -2,6 +2,14 @@
 
 Decisions not covered by `docs/dev/roadmap.md`, with reasons. Newest first.
 
+## Controlled updates (October 2026)
+
+Clubs update by merging a pull request, so the deploy itself has to be safe without anyone watching. `npm run deploy` (`scripts/deploy.mjs`) replaces the plain chain of build, migrations and upload. With pending migrations it notes a D1 Time Travel bookmark, sets a mark in `app_meta` (`update_in_progress`, expires after 15 minutes), applies the migrations, uploads and removes the mark; it records the last update in `app_meta` (`last_update`) for *Administration → Updates and maintenance*. While the mark is set the API answers 503 `updating` to everyone, admins included, and the cron run pauses, so nobody writes into a half-migrated database. Without migrations nothing pauses.
+
+The mark is in D1, not in KV like the manual maintenance switch: the script only knows the database binding of the club's `wrangler.jsonc` (the deploy button fills in the KV ID, the script cannot read it reliably), and the Worker reads the mark in the same query as the club profile, so it costs no extra read. Admins get the maintenance switch on the same page.
+
+`0001_init.sql` is frozen from now on: the repository is public and installations run it. Every migration keeps the previous release working (expand now, contract in a later release), because the old Worker runs on the new schema for the seconds between migration and upload and after a rollback in the dashboard. Every migration has an upgrade test (`upgradeFrom` in `test/helpers.ts`), `test/migrations.test.ts` enforces both the hash of `0001_init.sql` and the test.
+
 ## Picking players from other teams (October 2026)
 
 When a coach adds a player from another team, picks a permanent stand-in or requests a stand-in for a game, the list can be filtered by the team the people come from (chips only when there is more than one). Whoever is in the core squad of their own team is marked and listed first, since that is usually what the coach wants to know. The hint names the actual source teams instead of "the second team": stand-ins come from lower-ranked teams of the same age class (higher level, e.g. wC3 for the wC2) and the next younger youth team, and players can be added from any other team of the same age class or the next younger one. `teamCandidates` (`worker/routes/squad.ts`) returns `teams: { id, name, core }[]` per person; the list is `src/candidates.tsx`.

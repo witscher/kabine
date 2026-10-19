@@ -106,6 +106,13 @@ msgstr "Sortierung"
 msgid "{count, plural, one {Publish squad · # person} other {Publish squad · # people}}"
 msgstr "{count, plural, one {Kader veröffentlichen · # Person} other {Kader veröffentlichen · # Personen}}"
 
+# ai
+#: src/pages/updates.tsx
+#: src/pages/updates.tsx
+#: src/pages/updates.tsx
+msgid "Maintenance mode"
+msgstr "Wartungsmodus"
+
 #: worker/routes/events.ts
 msgid "Invalid end"
 msgstr "Ungültiges Ende"
@@ -622,6 +629,11 @@ msgstr "Ferienzeiträume"
 #: modules/carpools/worker/domain.ts
 msgid "{title} on {date}, {time}"
 msgstr "{title} am {date}, {time}"
+
+# ai
+#: src/pages/updates.tsx
+msgid "no database changes"
+msgstr "keine Datenbankänderungen"
 
 #: modules/duties/app/admin.tsx
 msgid "New duty type"
@@ -1162,6 +1174,13 @@ msgstr "Du hast nicht abgesagt und warst trotzdem nicht da. Das trägt der Train
 #: src/pages/profile.tsx
 msgid "Profile picture"
 msgstr "Profilbild"
+
+# ai
+#: src/pages/admin.tsx
+#: src/pages/updates.tsx
+#: src/pages/updates.tsx
+msgid "Updates and maintenance"
+msgstr "Updates und Wartung"
 
 #: src/pages/plans.tsx
 msgid "Changes to training times apply immediately. Responses are kept as long as the date stays the same."
@@ -1795,6 +1814,7 @@ msgstr "Zu dieser Adresse gehören mehrere Zugänge. Mit welchem möchtest du di
 #: src/pages/group.tsx
 #: src/pages/mail-settings.tsx
 #: src/pages/season.tsx
+#: src/pages/updates.tsx
 msgid "Administration"
 msgstr "Verwaltung"
 
@@ -3716,6 +3736,11 @@ msgstr "Helfer"
 msgid "Add time slot"
 msgstr "Zeitblock hinzufügen"
 
+# ai
+#: src/pages/updates.tsx
+msgid "Version"
+msgstr "Version"
+
 #: src/pages/admin.tsx
 msgid "Age groups saved."
 msgstr "Altersklassen gespeichert."
@@ -4782,6 +4807,11 @@ msgstr "Kurzfristig"
 msgid "Create"
 msgstr "Anlegen"
 
+# ai
+#: src/pages/updates.tsx
+msgid "Maintenance mode off. It takes effect within a minute."
+msgstr "Wartungsmodus aus. Das wirkt innerhalb einer Minute."
+
 #: src/pages/squad.tsx
 msgid "The squad follows the core squad again."
 msgstr "Der Kader folgt wieder dem Stammkader."
@@ -4935,6 +4965,11 @@ msgstr "{name} ist jetzt Aushilfe."
 #: src/pages/profile.tsx
 msgid "Notifications"
 msgstr "Benachrichtigungen"
+
+# ai
+#: src/pages/updates.tsx
+msgid "On since {since}. Only admins can use the app; reminders and other automatic messages pause."
+msgstr "An seit {since}. Nur Admins können die App nutzen, Erinnerungen und andere automatische Nachrichten pausieren."
 
 #: src/pages/admin.tsx
 msgid "no access"
@@ -5887,6 +5922,11 @@ msgid "Group"
 msgstr "Gruppe"
 
 # ai
+#: src/pages/updates.tsx
+msgid "An update is being installed right now. The app is back in about a minute."
+msgstr "Gerade wird ein Update installiert. Die App ist in etwa einer Minute wieder da."
+
+# ai
 #: src/pages/privacy.tsx
 msgid "A mobile number is only stored if you enter it yourself, for sign-in codes and reminders by text message. Nobody else sees it. You can delete it in your profile at any time. The messages are sent through a text message provider the club has chosen."
 msgstr "Eine Handynummer wird nur gespeichert, wenn du sie selbst einträgst, für Anmeldecodes und Erinnerungen per SMS. Niemand sonst sieht sie. Du kannst sie jederzeit im Profil löschen. Die SMS laufen über einen Anbieter, den der Verein gewählt hat."
@@ -6146,6 +6186,11 @@ msgstr "Bitte gib deine E-Mail-Adresse an. Dorthin schicken wir den Code."
 #: modules/duties/app/helpers.tsx
 msgid "Parents then don't see the game, e.g. for a game without catering."
 msgstr "Eltern sehen das Spiel dann nicht, z. B. bei einem Spiel ohne Bewirtung."
+
+# ai
+#: src/pages/updates.tsx
+msgid "Only admins can use the app; reminders and other automatic messages pause. For work on the data, or before an update you want to check first."
+msgstr "Nur Admins können die App nutzen, Erinnerungen und andere automatische Nachrichten pausieren. Für Arbeiten an den Daten oder vor einem Update, das du erst selbst prüfen willst."
 
 #: src/pages/chat.tsx
 msgid "as parent of {children}"
@@ -6965,6 +7010,12 @@ msgstr "Ändern"
 msgid "Announcement in chat {teamName}"
 msgstr "Ankündigung im Chat {teamName}"
 
+# ai
+#: src/pages/updates.tsx
+#: src/pages/updates.tsx
+msgid "Last update"
+msgstr "Letztes Update"
+
 #: src/pages/season.tsx
 msgid "Additional team for {name}"
 msgstr "Weitere Mannschaft für {name}"
@@ -7161,6 +7212,11 @@ msgstr "Wer abgesagt hat, dauerhaft abwesend oder inaktiv ist, fehlt entschuldig
 msgid "Times refer to the start and end of the event. For games, they begin with the start of play and end after the game length of the age group. For special events, the start and end of the event apply."
 msgstr "Zeiten beziehen sich auf Beginn und Ende des Termins. Bei Spielen gelten der Spielbeginn und das Ende nach der Spieldauer der Altersklasse. Bei Sonderterminen gelten Beginn und Ende des Termins."
 
+# ai
+#: src/pages/updates.tsx
+msgid "Copy command"
+msgstr "Befehl kopieren"
+
 #: modules/duties/app/helpers.tsx
 msgid "Signed up: {label}."
 msgstr "Eingetragen: {label}."
@@ -7233,6 +7289,11 @@ msgstr "Keine passenden Spieler gefunden."
 #: worker/routes/feedback.ts
 msgid "Please write briefly what it is about."
 msgstr "Bitte schreib kurz, worum es geht."
+
+# ai
+#: src/pages/updates.tsx
+msgid "Restore point from just before the database changes. If something is wrong after the update: roll back the Worker in the Cloudflare dashboard (Workers & Pages → this Worker → Deployments), then restore the database with this command in your copy:"
+msgstr "Wiederherstellungspunkt von kurz vor den Datenbankänderungen. Falls nach dem Update etwas nicht stimmt: Rolle den Worker im Cloudflare-Dashboard zurück (Workers & Pages → dieser Worker → Deployments) und stelle danach mit diesem Befehl in deiner Kopie die Datenbank wieder her:"
 
 #: src/pages/team.tsx
 #: src/pages/team.tsx
@@ -7387,6 +7448,11 @@ msgstr "Du kannst dich jederzeit wieder mit deinem Passkey anmelden."
 #: src/pages/season.tsx
 msgid "Export started ({today}). Please check that the file was saved."
 msgstr "Export gestartet ({today}). Bitte prüfen, ob die Datei gespeichert wurde."
+
+# ai
+#: src/maintenance.tsx
+msgid "This takes about a minute. The page reloads automatically as soon as the update is done."
+msgstr "Das dauert etwa eine Minute. Die Seite lädt von selbst neu, sobald das Update fertig ist."
 
 #: src/pages/profile.tsx
 msgid "This device"
@@ -8011,6 +8077,11 @@ msgstr "Jedes Kürzel darf nur einmal vorkommen."
 #: worker/routes/chat.ts
 msgid "Only parents can opt out."
 msgstr "Abmelden können sich nur Eltern."
+
+# ai
+#: src/maintenance.tsx
+msgid "Kabine is being updated"
+msgstr "Kabine wird aktualisiert"
 
 #: modules/carpools/app/card.tsx
 msgid "is riding with {driver} ({seats})"
@@ -8695,6 +8766,11 @@ msgstr "Funktionen dieses Vereins"
 msgid "Birth year"
 msgstr "Geburtsjahr"
 
+# ai
+#: src/pages/updates.tsx
+msgid "New versions arrive as a pull request in your club's copy on GitHub. Merging it installs the update; you choose when. Updates that change the database put the app into maintenance mode for about a minute, so merge those at a quiet time."
+msgstr "Neue Versionen kommen als Pull Request in die Kopie deines Vereins auf GitHub. Mit dem Mergen installierst du das Update, du bestimmst den Zeitpunkt. Updates, die die Datenbank ändern, schalten die App für etwa eine Minute in den Wartungsmodus. Merge sie deshalb zu einer ruhigen Zeit."
+
 #: src/pages/chat.tsx
 #: worker/routes/chat.ts
 msgid "You have been muted in this chat."
@@ -8779,6 +8855,11 @@ msgstr "Reaktionen: {list}. Wer hat reagiert?"
 #: modules/carpools/app/card.tsx
 msgid "Your offer"
 msgstr "Dein Angebot"
+
+# ai
+#: worker/app.ts
+msgid "Kabine is being updated and will be back in a minute."
+msgstr "Kabine wird gerade aktualisiert und ist in einer Minute wieder da."
 
 #: src/pages/squad.tsx
 #: worker/routes/squad.ts
@@ -9358,6 +9439,11 @@ msgstr "Dauerhaft abwesend ({weekdays})"
 msgid "Core squad"
 msgstr "Stammkader"
 
+# ai
+#: src/pages/updates.tsx
+msgid "No update recorded yet. The next deploy records it here."
+msgstr "Noch kein Update aufgezeichnet. Der nächste Deploy trägt sich hier ein."
+
 #: src/pages/admin.tsx
 msgid "Not assigned to any team yet."
 msgstr "Noch keiner Mannschaft zugeordnet."
@@ -9649,6 +9735,11 @@ msgstr "Ein Platz weniger"
 msgid "New training time"
 msgstr "Neue Trainingszeit"
 
+# ai
+#: src/pages/updates.tsx
+msgid "{migrationCount, plural, one {# database change} other {# database changes}}"
+msgstr "{migrationCount, plural, one {# Datenbankänderung} other {# Datenbankänderungen}}"
+
 #: src/export.tsx
 msgid "Understood, download"
 msgstr "Verstanden, herunterladen"
@@ -9935,6 +10026,11 @@ msgstr "Abgeglichen {when}"
 #: worker/domain/email-login.ts
 msgid "If you use the app from the home screen, it is best to enter the code there directly."
 msgstr "Nutzt du die App vom Home-Bildschirm, gib den Code am besten direkt dort ein."
+
+# ai
+#: src/pages/updates.tsx
+msgid "Maintenance mode on. It takes effect within a minute."
+msgstr "Wartungsmodus an. Das wirkt innerhalb einer Minute."
 
 # ai
 #: src/env-banner.tsx
@@ -10730,6 +10826,11 @@ msgid "All members, admins, access links"
 msgstr "Alle Mitglieder, Admins, Zugangslinks"
 
 # ai
+#: src/pages/admin.tsx
+msgid "Installed version, last update, maintenance mode"
+msgstr "Installierte Version, letztes Update, Wartungsmodus"
+
+# ai
 #: worker/domain/fixtures.ts
 msgid "{venue, select, hall {Hall} pitch {Pitch} other {Venue}}"
 msgstr "{venue, select, hall {Halle} pitch {Platz} other {Spielstätte}}"
@@ -10795,6 +10896,11 @@ msgstr "Deine Eltern kümmern sich um Absagen."
 #: src/pages/profile.tsx
 msgid "Saved. The other parent will be notified."
 msgstr "Gespeichert. Das andere Elternteil wird informiert."
+
+# ai
+#: src/pages/updates.tsx
+msgid "{lastAt}, version {lastVersion}"
+msgstr "{lastAt}, Version {lastVersion}"
 
 #: src/pages/games.tsx
 msgid "Link schedule"
@@ -10943,6 +11049,11 @@ msgstr "Wer bist du?"
 #: shared/types.ts
 msgid "Mentions in the chat (@name)"
 msgstr "Erwähnungen im Chat (@Name)"
+
+# ai
+#: src/pages/updates.tsx
+msgid "Installed version"
+msgstr "Installierte Version"
 
 #: src/pages/group.tsx
 msgid "Upcoming special events"

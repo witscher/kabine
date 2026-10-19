@@ -103,6 +103,12 @@ msgstr "Sort by"
 msgid "{count, plural, one {Publish squad · # person} other {Publish squad · # people}}"
 msgstr "{count, plural, one {Publish squad · # person} other {Publish squad · # people}}"
 
+#: src/pages/updates.tsx
+#: src/pages/updates.tsx
+#: src/pages/updates.tsx
+msgid "Maintenance mode"
+msgstr "Maintenance mode"
+
 #: worker/routes/events.ts
 msgid "Invalid end"
 msgstr "Invalid end"
@@ -601,6 +607,10 @@ msgstr "Holiday periods"
 #: modules/carpools/worker/domain.ts
 msgid "{title} on {date}, {time}"
 msgstr "{title} on {date}, {time}"
+
+#: src/pages/updates.tsx
+msgid "no database changes"
+msgstr "no database changes"
 
 #: modules/duties/app/admin.tsx
 msgid "New duty type"
@@ -1132,6 +1142,12 @@ msgstr "You did not decline and still were not there. The coach enters this afte
 #: src/pages/profile.tsx
 msgid "Profile picture"
 msgstr "Profile picture"
+
+#: src/pages/admin.tsx
+#: src/pages/updates.tsx
+#: src/pages/updates.tsx
+msgid "Updates and maintenance"
+msgstr "Updates and maintenance"
 
 #: src/pages/plans.tsx
 msgid "Changes to training times apply immediately. Responses are kept as long as the date stays the same."
@@ -1751,6 +1767,7 @@ msgstr "Several accesses belong to this address. Which one do you want to sign i
 #: src/pages/group.tsx
 #: src/pages/mail-settings.tsx
 #: src/pages/season.tsx
+#: src/pages/updates.tsx
 msgid "Administration"
 msgstr "Administration"
 
@@ -3601,6 +3618,10 @@ msgstr "Helpers"
 msgid "Add time slot"
 msgstr "Add time slot"
 
+#: src/pages/updates.tsx
+msgid "Version"
+msgstr "Version"
+
 #: src/pages/admin.tsx
 msgid "Age groups saved."
 msgstr "Age groups saved."
@@ -4638,6 +4659,10 @@ msgstr "Short notice"
 msgid "Create"
 msgstr "Create"
 
+#: src/pages/updates.tsx
+msgid "Maintenance mode off. It takes effect within a minute."
+msgstr "Maintenance mode off. It takes effect within a minute."
+
 #: src/pages/squad.tsx
 msgid "The squad follows the core squad again."
 msgstr "The squad follows the core squad again."
@@ -4786,6 +4811,10 @@ msgstr "{name} is now a stand-in."
 #: src/pages/profile.tsx
 msgid "Notifications"
 msgstr "Notifications"
+
+#: src/pages/updates.tsx
+msgid "On since {since}. Only admins can use the app; reminders and other automatic messages pause."
+msgstr "On since {since}. Only admins can use the app; reminders and other automatic messages pause."
 
 #: src/pages/admin.tsx
 msgid "no access"
@@ -5705,6 +5734,10 @@ msgstr "as admin · last message {when}"
 msgid "Group"
 msgstr "Group"
 
+#: src/pages/updates.tsx
+msgid "An update is being installed right now. The app is back in about a minute."
+msgstr "An update is being installed right now. The app is back in about a minute."
+
 #: src/pages/privacy.tsx
 msgid "A mobile number is only stored if you enter it yourself, for sign-in codes and reminders by text message. Nobody else sees it. You can delete it in your profile at any time. The messages are sent through a text message provider the club has chosen."
 msgstr "A mobile number is only stored if you enter it yourself, for sign-in codes and reminders by text message. Nobody else sees it. You can delete it in your profile at any time. The messages are sent through a text message provider the club has chosen."
@@ -5958,6 +5991,10 @@ msgstr "Please enter your e-mail address. We will send the code there."
 #: modules/duties/app/helpers.tsx
 msgid "Parents then don't see the game, e.g. for a game without catering."
 msgstr "Parents then don't see the game, e.g. for a game without catering."
+
+#: src/pages/updates.tsx
+msgid "Only admins can use the app; reminders and other automatic messages pause. For work on the data, or before an update you want to check first."
+msgstr "Only admins can use the app; reminders and other automatic messages pause. For work on the data, or before an update you want to check first."
 
 #: src/pages/chat.tsx
 msgid "as parent of {children}"
@@ -6756,6 +6793,11 @@ msgstr "Change"
 msgid "Announcement in chat {teamName}"
 msgstr "Announcement in chat {teamName}"
 
+#: src/pages/updates.tsx
+#: src/pages/updates.tsx
+msgid "Last update"
+msgstr "Last update"
+
 #: src/pages/season.tsx
 msgid "Additional team for {name}"
 msgstr "Additional team for {name}"
@@ -6944,6 +6986,10 @@ msgstr "Anyone who declined, is permanently absent or inactive is excused."
 msgid "Times refer to the start and end of the event. For games, they begin with the start of play and end after the game length of the age group. For special events, the start and end of the event apply."
 msgstr "Times refer to the start and end of the event. For games, they begin with the start of play and end after the game length of the age group. For special events, the start and end of the event apply."
 
+#: src/pages/updates.tsx
+msgid "Copy command"
+msgstr "Copy command"
+
 #: modules/duties/app/helpers.tsx
 msgid "Signed up: {label}."
 msgstr "Signed up: {label}."
@@ -7016,6 +7062,10 @@ msgstr "No matching players found."
 #: worker/routes/feedback.ts
 msgid "Please write briefly what it is about."
 msgstr "Please write briefly what it is about."
+
+#: src/pages/updates.tsx
+msgid "Restore point from just before the database changes. If something is wrong after the update: roll back the Worker in the Cloudflare dashboard (Workers & Pages → this Worker → Deployments), then restore the database with this command in your copy:"
+msgstr "Restore point from just before the database changes. If something is wrong after the update: roll back the Worker in the Cloudflare dashboard (Workers & Pages → this Worker → Deployments), then restore the database with this command in your copy:"
 
 #: src/pages/team.tsx
 #: src/pages/team.tsx
@@ -7164,6 +7214,10 @@ msgstr "You can sign in again with your passkey at any time."
 #: src/pages/season.tsx
 msgid "Export started ({today}). Please check that the file was saved."
 msgstr "Export started ({today}). Please check that the file was saved."
+
+#: src/maintenance.tsx
+msgid "This takes about a minute. The page reloads automatically as soon as the update is done."
+msgstr "This takes about a minute. The page reloads automatically as soon as the update is done."
 
 #: src/pages/profile.tsx
 msgid "This device"
@@ -7774,6 +7828,10 @@ msgstr "Each code may appear only once."
 #: worker/routes/chat.ts
 msgid "Only parents can opt out."
 msgstr "Only parents can opt out."
+
+#: src/maintenance.tsx
+msgid "Kabine is being updated"
+msgstr "Kabine is being updated"
 
 #: modules/carpools/app/card.tsx
 msgid "is riding with {driver} ({seats})"
@@ -8439,6 +8497,10 @@ msgstr "Functions of this club"
 msgid "Birth year"
 msgstr "Birth year"
 
+#: src/pages/updates.tsx
+msgid "New versions arrive as a pull request in your club's copy on GitHub. Merging it installs the update; you choose when. Updates that change the database put the app into maintenance mode for about a minute, so merge those at a quiet time."
+msgstr "New versions arrive as a pull request in your club's copy on GitHub. Merging it installs the update; you choose when. Updates that change the database put the app into maintenance mode for about a minute, so merge those at a quiet time."
+
 #: src/pages/chat.tsx
 #: worker/routes/chat.ts
 msgid "You have been muted in this chat."
@@ -8521,6 +8583,10 @@ msgstr "Reactions: {list}. Who reacted?"
 #: modules/carpools/app/card.tsx
 msgid "Your offer"
 msgstr "Your offer"
+
+#: worker/app.ts
+msgid "Kabine is being updated and will be back in a minute."
+msgstr "Kabine is being updated and will be back in a minute."
 
 #: src/pages/squad.tsx
 #: worker/routes/squad.ts
@@ -9082,6 +9148,10 @@ msgstr "Permanently absent ({weekdays})"
 msgid "Core squad"
 msgstr "Core squad"
 
+#: src/pages/updates.tsx
+msgid "No update recorded yet. The next deploy records it here."
+msgstr "No update recorded yet. The next deploy records it here."
+
 #: src/pages/admin.tsx
 msgid "Not assigned to any team yet."
 msgstr "Not assigned to any team yet."
@@ -9366,6 +9436,10 @@ msgstr "One slot fewer"
 msgid "New training time"
 msgstr "New training time"
 
+#: src/pages/updates.tsx
+msgid "{migrationCount, plural, one {# database change} other {# database changes}}"
+msgstr "{migrationCount, plural, one {# database change} other {# database changes}}"
+
 #: src/export.tsx
 msgid "Understood, download"
 msgstr "Understood, download"
@@ -9646,6 +9720,10 @@ msgstr "Synced {when}"
 #: worker/domain/email-login.ts
 msgid "If you use the app from the home screen, it is best to enter the code there directly."
 msgstr "If you use the app from the home screen, it is best to enter the code there directly."
+
+#: src/pages/updates.tsx
+msgid "Maintenance mode on. It takes effect within a minute."
+msgstr "Maintenance mode on. It takes effect within a minute."
 
 #: src/env-banner.tsx
 msgid "Demo · invented club, data is reset every night at 3:00"
@@ -10412,6 +10490,10 @@ msgstr "Line {line}: “{value}” is not a birth year"
 msgid "All members, admins, access links"
 msgstr "All members, admins, access links"
 
+#: src/pages/admin.tsx
+msgid "Installed version, last update, maintenance mode"
+msgstr "Installed version, last update, maintenance mode"
+
 #: worker/domain/fixtures.ts
 msgid "{venue, select, hall {Hall} pitch {Pitch} other {Venue}}"
 msgstr "{venue, select, hall {Hall} pitch {Pitch} other {Venue}}"
@@ -10476,6 +10558,10 @@ msgstr "Your parents take care of declining."
 #: src/pages/profile.tsx
 msgid "Saved. The other parent will be notified."
 msgstr "Saved. The other parent will be notified."
+
+#: src/pages/updates.tsx
+msgid "{lastAt}, version {lastVersion}"
+msgstr "{lastAt}, version {lastVersion}"
 
 #: src/pages/games.tsx
 msgid "Link schedule"
@@ -10619,6 +10705,10 @@ msgstr "Who are you?"
 #: shared/types.ts
 msgid "Mentions in the chat (@name)"
 msgstr "Mentions in the chat (@name)"
+
+#: src/pages/updates.tsx
+msgid "Installed version"
+msgstr "Installed version"
 
 #: src/pages/group.tsx
 msgid "Upcoming special events"

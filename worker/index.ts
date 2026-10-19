@@ -3,6 +3,7 @@ import { handleScheduled } from "./cron";
 import { demoGuard, demoRoutes } from "./demo/routes";
 import { demoLocalHour, resetDemo } from "./demo/reset";
 import type { PushJob } from "./domain/notify";
+import { updateInProgress } from "./domain/club";
 import { maintenanceState } from "./lib/maintenance";
 import { WORKER_MODULES } from "./modules";
 import { handleQueue } from "./queue";
@@ -29,13 +30,16 @@ import { manualGameRoutes } from "./routes/manual-games";
 import { seasonRoutes } from "./routes/season";
 import { squadRoutes } from "./routes/squad";
 import { teamRoutes } from "./routes/teams";
+import { updateRoutes } from "./routes/updates";
 
 export { ChatRoom } from "./chat/room";
 export { DutyHub } from "./duties/hub";
 
 export const app = createBaseApp();
 // env: "staging" makes the app show a banner (see src/env-banner.tsx)
-app.get("/api/health", async (c) => c.json({ ok: true, env: c.env.APP_ENV || "production", maintenance: !!(await maintenanceState(c.env.KV)) }));
+app.get("/api/health", async (c) =>
+  c.json({ ok: true, env: c.env.APP_ENV || "production", maintenance: !!updateInProgress() || !!(await maintenanceState(c.env.KV)), updating: !!updateInProgress() }),
+);
 app.use("/api/*", demoGuard);
 for (const routes of [
   demoRoutes((request, env, ctx) => app.fetch(request, env, ctx)),
@@ -46,6 +50,7 @@ for (const routes of [
   eventRoutes,
   squadRoutes,
   teamRoutes,
+  updateRoutes,
   personRoutes,
   planRoutes,
   adminRoutes,

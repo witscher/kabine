@@ -11,6 +11,23 @@ export async function freshDb() {
   await germanClub();
 }
 
+/**
+ * Upgrade test (migrations/README.md): a database on the schema just before `migration`, with all older
+ * migrations applied. Insert the data a club already has, then call migrateRest().
+ */
+export async function upgradeFrom(migration: string) {
+  const all = env.TEST_MIGRATIONS;
+  if (!all.some((m) => m.name === migration)) throw new Error(`Unknown migration ${migration}`);
+  await reset();
+  await applyD1Migrations(env.DB, all.filter((m) => m.name < migration));
+  await germanClub();
+}
+
+/** Applies the migrations not yet applied, as the deploy of an update does. */
+export async function migrateRest() {
+  await applyD1Migrations(env.DB, env.TEST_MIGRATIONS);
+}
+
 /** Club default language German, as the assertions expect German texts. */
 export async function germanClub() {
   await env.DB.prepare("INSERT OR REPLACE INTO app_meta (key, value) VALUES ('club', ?)").bind(JSON.stringify({ defaultLocale: "de" })).run();
