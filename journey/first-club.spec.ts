@@ -112,6 +112,9 @@ test("Assistent: erste Personen mit Links, Datenschutz, fertig", async () => {
   await expect(page.getByRole("heading", { name: "Datenschutz" })).toBeVisible();
   await page.getByRole("button", { name: "Speichern und weiter" }).click();
   await expect(page.getByRole("heading", { name: "Die App ist eingerichtet" })).toBeVisible();
+  // "Set up" only shows once the server has it: opening the app right away must not lead back into the wizard
+  // (found on a real installation, where the confirmation arrived after the next page load)
+  expect(((await (await page.request.get("/api/club")).json()) as { setupDone: boolean }).setupDone).toBe(true);
   await page.goto("/");
   await expect(page.getByRole("heading", { name: "Hallo Vera" })).toBeVisible();
 });

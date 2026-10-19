@@ -525,7 +525,16 @@ function PrivacyStep({ onNext }: { onNext: () => void }) {
       <p class="muted">
         <Trans>Link your club's privacy policy and legal notice, and name a contact for questions about the app.</Trans>
       </p>
-      <ClubProfileForm parts={["privacy"]} submitLabel={t`Save and continue`} onSaved={onNext} />
+      <ClubProfileForm
+        parts={["privacy"]}
+        submitLabel={t`Save and continue`}
+        onSaved={async () => {
+          // The last step finishes the setup and waits for the server, so "set up" is only shown once it is true
+          await api.post("/admin/setup/done", {});
+          await loadClub();
+          onNext();
+        }}
+      />
     </>
   );
 }

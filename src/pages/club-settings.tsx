@@ -21,7 +21,7 @@ export type ClubFormPart = "name" | "look" | "region" | "modules" | "privacy";
 const ALL_PARTS: ClubFormPart[] = ["name", "look", "region", "modules", "privacy"];
 
 /** The whole club profile, or some parts of it (steps of the setup wizard). Saving sends all fields. */
-export function ClubProfileForm({ onSaved, submitLabel, parts = ALL_PARTS }: { onSaved?: () => void; submitLabel?: string; parts?: ClubFormPart[] }) {
+export function ClubProfileForm({ onSaved, submitLabel, parts = ALL_PARTS }: { onSaved?: () => void | Promise<void>; submitLabel?: string; parts?: ClubFormPart[] }) {
   const club = useClub();
   const { refresh: refreshSession } = useSession();
   const show = (p: ClubFormPart) => parts.includes(p);
@@ -65,7 +65,7 @@ export function ClubProfileForm({ onSaved, submitLabel, parts = ALL_PARTS }: { o
       // Saving the switches marks new modules as seen (dot and "New" badge)
       void refreshSession();
       toast(t`Saved`);
-      onSaved?.();
+      await onSaved?.();
     } catch (err) {
       setError(errorMessage(err));
     }

@@ -19,7 +19,7 @@ import { PrivacyPage } from "./pages/privacy";
 import { SessionProvider, useSession } from "./session";
 import { Splash } from "./splash";
 import { invalidate, useQuery } from "./store";
-import { useClub } from "./club";
+import { clubIsFresh, useClub } from "./club";
 import { APP_MODULES, useActiveModules } from "./modules";
 import { ConfirmHost, Spinner, Toasts } from "./ui";
 
@@ -201,8 +201,10 @@ function SetupRedirect() {
   const { me } = useSession();
   const club = useClub();
   const { path, route } = useLocation();
+  // Only with the profile from the server: the device's cache may still say "not set up" after the wizard
+  const loaded = clubIsFresh();
   useEffect(() => {
-    if (!me?.isAdmin || club.setupDone || path !== "/") return;
+    if (!loaded || !me?.isAdmin || club.setupDone || path !== "/") return;
     let postponed = false;
     try {
       postponed = sessionStorage.getItem("kabine.setup.later") === "1";
@@ -210,7 +212,7 @@ function SetupRedirect() {
       // no storage: open the wizard
     }
     if (!postponed) route("/verwaltung/einrichtung", true);
-  }, [me?.isAdmin, club.setupDone, path]);
+  }, [loaded, me?.isAdmin, club.setupDone, path]);
   return null;
 }
 

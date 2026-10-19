@@ -37,8 +37,17 @@ function apply(club: ClubProfile) {
 
 apply(current);
 
+/** The profile came from the server in this visit (not only from the device's cache). */
+let fresh = false;
+
+/** Decisions that must not rest on an old cached profile (e.g. opening the setup wizard) wait for this. */
+export function clubIsFresh(): boolean {
+  return fresh;
+}
+
 export function setClub(club: ClubProfile) {
   current = club;
+  fresh = true;
   try {
     localStorage.setItem(CACHE_KEY, JSON.stringify(club));
   } catch {
