@@ -8,10 +8,11 @@ Format per entry: date, title, what changed and why, where in the code (file and
 
 ## Open
 
-- **2026-10-19 Parent invitation: own name, not the child's.** Parents kept entering their child's name as their own when joining through the parent link. The first-name field now carries a bold hint ("Your own name, not your child's! You pick your child further down."). If the entered first name (first word, case-insensitive) equals the first name of any player listed on the link, a warning appears under the name fields: "Not your child's name! <Name> is also a child of <team>. Put your own name here, so coaches and other parents know who you are." A button "That's right, my name is <Name> too" confirms it, because parents can share a first name with their child. Until confirmed, passkey registration and the e-mail code are blocked with "Please enter your own first name, not your child's." Client side only. Code: `src/pages/join.tsx` (`JoinPage`: `confirmedName`, `nameClash`, `NAME_CLASH`; `JoinByEmail` gets an optional `check`), e2e test "Elternlink: Warnung, wenn der Vorname dem eines Kindes gleicht". Kabine: texts through Lingui with German translation, the e2e test in English.
+_Nothing open._
 
 ## Done
 
+- **2026-10-19 Parent invitation: own name, not the child's.** Bold hint under the first name, warning with a confirm button when the first name is a child's of the team, passkey and e-mail code wait until confirmed. Kabine: see the commit "Parent link: own name, not the child's".
 - **2026-10-19 Picking players from other teams: filter by team, core squad marked, correct source teams in the hints.** Shared candidate list with team filter chips and a core squad badge in the three pickers; hints name lower-ranked teams of the same age class and the next younger youth team. Kabine: `8c96fdb`.
 - **2026-10-18 Holiday plans in the timeline.** Notes "Autumn holidays, 26 Oct to 30 Oct: no training for wD" in the event overview. Kabine: `b3b1eb2`.
 - **2026-10-18 Optional joint training.** Per team and training mandatory or optional, players accept by hand. Kabine: `ccc0934`, `13d83be`.

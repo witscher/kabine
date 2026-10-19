@@ -1093,6 +1093,28 @@ test("Elternlink: Hinweis für bestehende Zugänge oben", async ({ browser }) =>
   await guest.context.close();
 });
 
+test("Parent link: warning when the first name is a child's of the team", async ({ browser }) => {
+  const res = await coach.page.request.post("/api/teams/1/invites", { data: { kind: "parent" } });
+  const { url } = (await res.json()) as { url: string };
+  const guest = await newUser(browser);
+  const { page } = guest;
+  await page.goto(url);
+  await expect(page.getByText("Dein eigener Name, nicht der deines Kindes!")).toBeVisible();
+  await page.getByLabel("Dein Vorname").fill("Kim");
+  await page.getByLabel("Dein Nachname").fill("Probe");
+  await expect(page.getByText(/Nicht der Name deines Kindes! Kim heißt auch ein Kind/)).toBeVisible();
+  // Passkey and e-mail code wait until the name is confirmed
+  await page.getByRole("checkbox", { name: /Kim P\./ }).click();
+  await page.getByRole("button", { name: /Passkey einrichten/ }).click();
+  await expect(page.getByText("Bitte trag deinen eigenen Vornamen ein, nicht den deines Kindes.")).toBeVisible();
+  // Parents can share a first name with their child
+  await page.getByRole("button", { name: "Stimmt, ich heiße auch Kim" }).click();
+  await expect(page.getByText(/Nicht der Name deines Kindes!/)).toHaveCount(0);
+  await page.getByLabel("Dein Vorname").fill("Karla");
+  await expect(page.getByText(/Nicht der Name deines Kindes!/)).toHaveCount(0);
+  await guest.context.close();
+});
+
 test("Einladungen: Begleittext zum Spielerlink mit Hinweis auf einmalige Nutzung", async () => {
   const { page } = coach;
   await page.goto("/team/1");

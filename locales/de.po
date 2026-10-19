@@ -3969,6 +3969,11 @@ msgid "This link has already been used. Please ask for a new link."
 msgstr "Dieser Link wurde bereits verwendet. Bitte frag nach einem neuen Link."
 
 # ai
+#: src/pages/join.tsx
+msgid "That's right, my name is {clashName} too"
+msgstr "Stimmt, ich heiße auch {clashName}"
+
+# ai
 #: worker/routes/events.ts
 msgid "The training was optional for this person."
 msgstr "Das Training war für diese Person optional."
@@ -4691,6 +4696,11 @@ msgid "Reload"
 msgstr "Neu laden"
 
 # ai
+#: src/pages/join.tsx
+msgid "Not your child's name! {clashName} is also the name of a child in the {teamName}. Put your own name here, so coaches and other parents know who you are."
+msgstr "Nicht der Name deines Kindes! {clashName} heißt auch ein Kind in der {teamName}. Trag hier deinen eigenen Namen ein, damit Trainer und andere Eltern wissen, wer du bist."
+
+# ai
 #: src/howto.tsx
 msgid "Subscribe to your events in the calendar app of your phone."
 msgstr "Abonniere deine Termine in der Kalender-App deines Handys."
@@ -5295,6 +5305,11 @@ msgstr "Deine Eltern kümmern sich darum."
 #: worker/routes/teams.ts
 msgid "The name is too long."
 msgstr "Der Name ist zu lang."
+
+# ai
+#: src/pages/join.tsx
+msgid "Please enter your own first name, not your child's."
+msgstr "Bitte trag deinen eigenen Vornamen ein, nicht den deines Kindes."
 
 #: src/pages/club-settings.tsx
 #: src/pages/club-settings.tsx
@@ -10033,6 +10048,11 @@ msgstr "Rückmeldungen der Mannschaft"
 #: modules/duties/app/helpers.tsx
 msgid "What are you bringing? (optional)"
 msgstr "Was bringst du mit? (optional)"
+
+# ai
+#: src/pages/join.tsx
+msgid "Your own name, not your child's! You pick your child further down."
+msgstr "Dein eigener Name, nicht der deines Kindes! Dein Kind wählst du weiter unten aus."
 
 #: src/faq.tsx
 msgid "<0>Inactive</0> applies to all events, for example during an injury or a stay abroad. <1>Away long-term</1> applies only to a certain training time, for example every Tuesday. In both cases nobody has to decline and there are no reminders."

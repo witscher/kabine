@@ -98,6 +98,8 @@ export function JoinPage() {
   const [email, setEmail] = useState("");
   const [done, setDone] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
+  // Parent link: the first name the parent confirmed although a child of the team has it too
+  const [confirmedName, setConfirmedName] = useState<string | null>(null);
   // Access by e-mail code only once the club has set up sending
   const emailCodes = !!useSignInMethods()?.email;
 
@@ -253,6 +255,13 @@ export function JoinPage() {
   const playerName = chosen[0]?.name.split(" ")[0] ?? "";
   const teamName = info.team.name;
   const loggedInAs = info.loggedInAs;
+  // Parents often type their child's name as their own: warn when the first name is one of the team's children
+  const typedFirst = firstName.trim().split(/\s+/)[0] ?? "";
+  const clashChild =
+    isParent && !me && typedFirst ? info.persons.find((p) => p.name.split(" ")[0]!.toLowerCase() === typedFirst.toLowerCase()) : undefined;
+  const clashName = clashChild?.name.split(" ")[0] ?? "";
+  const nameClash = !!clashChild && confirmedName?.toLowerCase() !== typedFirst.toLowerCase();
+  const ownNameProblem = () => (nameClash ? t`Please enter your own first name, not your child's.` : null);
 
   const submit = async () => {
     setFormError(null);
@@ -265,6 +274,11 @@ export function JoinPage() {
     }
     if (isParent && (!firstName.trim() || !lastName.trim())) {
       setFormError(t`Please enter your first and last name.`);
+      return;
+    }
+    const nameProblem = ownNameProblem();
+    if (nameProblem) {
+      setFormError(nameProblem);
       return;
     }
     if (!selected.length) {
@@ -338,8 +352,34 @@ export function JoinPage() {
           </h2> : null}
         {isParent && !me ? (
           <div class="stack">
-            <TextField label={t`Your first name`} value={firstName} onInput={setFirstName} autoComplete="given-name" maxLength={50} />
+            <TextField
+              label={t`Your first name`}
+              value={firstName}
+              onInput={setFirstName}
+              autoComplete="given-name"
+              maxLength={50}
+              hint={
+                <strong>
+                  <Trans>Your own name, not your child's! You pick your child further down.</Trans>
+                </strong>
+              }
+            />
             <TextField label={t`Your last name`} value={lastName} onInput={setLastName} autoComplete="family-name" maxLength={50} />
+            {nameClash ? (
+              <Notice kind="warn">
+                <div class="stack-sm">
+                  <span>
+                    <Trans>
+                      Not your child's name! {clashName} is also the name of a child in the {teamName}. Put your own name here, so coaches and other parents
+                      know who you are.
+                    </Trans>
+                  </span>
+                  <Button size="sm" onClick={() => setConfirmedName(typedFirst)}>
+                    {t`That's right, my name is ${clashName} too`}
+                  </Button>
+                </div>
+              </Notice>
+            ) : null}
           </div>
         ) : null}
         <div class="stack-sm">
@@ -392,7 +432,7 @@ export function JoinPage() {
             </Trans>
           </p>
         ) : null}
-        {needsEmail && emailCodes ? <JoinByEmail body={joinBody} email={email.trim()} onDone={finishTeamJoin} /> : null}
+        {needsEmail && emailCodes ? <JoinByEmail body={joinBody} email={email.trim()} onDone={finishTeamJoin} check={ownNameProblem} /> : null}
       </div>
     </main>
   );
@@ -474,9 +514,14 @@ function EmailField(props: { value: string; onInput: (v: string) => void; requir
 }
 
 /** Access without a passkey: send a code to the given address and let it be entered. */
-function JoinByEmail(props: { body: () => Record<string, unknown> | null; email: string; onDone: () => Promise<void> }) {
+function JoinByEmail(props: { body: () => Record<string, unknown> | null; email: string; onDone: () => Promise<void>; check?: () => string | null }) {
   const [requestId, setRequestId] = useState<string | null>(null);
   const send = async () => {
+    const problem = props.check?.();
+    if (problem) {
+      toast(problem, "error");
+      return;
+    }
     if (!isEmail(props.email)) {
       toast(t`For the code by e-mail we need your e-mail address.`, "error");
       return;

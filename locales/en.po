@@ -3846,6 +3846,10 @@ msgstr "The link must start with https://."
 msgid "This link has already been used. Please ask for a new link."
 msgstr "This link has already been used. Please ask for a new link."
 
+#: src/pages/join.tsx
+msgid "That's right, my name is {clashName} too"
+msgstr "That's right, my name is {clashName} too"
+
 #: worker/routes/events.ts
 msgid "The training was optional for this person."
 msgstr "The training was optional for this person."
@@ -4552,6 +4556,10 @@ msgstr "Remove {teamName}"
 msgid "Reload"
 msgstr "Reload"
 
+#: src/pages/join.tsx
+msgid "Not your child's name! {clashName} is also the name of a child in the {teamName}. Put your own name here, so coaches and other parents know who you are."
+msgstr "Not your child's name! {clashName} is also the name of a child in the {teamName}. Put your own name here, so coaches and other parents know who you are."
+
 #: src/howto.tsx
 msgid "Subscribe to your events in the calendar app of your phone."
 msgstr "Subscribe to your events in the calendar app of your phone."
@@ -5136,6 +5144,10 @@ msgstr "Your parents take care of this."
 #: worker/routes/teams.ts
 msgid "The name is too long."
 msgstr "The name is too long."
+
+#: src/pages/join.tsx
+msgid "Please enter your own first name, not your child's."
+msgstr "Please enter your own first name, not your child's."
 
 #: src/pages/club-settings.tsx
 #: src/pages/club-settings.tsx
@@ -9744,6 +9756,10 @@ msgstr "Team responses"
 #: modules/duties/app/helpers.tsx
 msgid "What are you bringing? (optional)"
 msgstr "What are you bringing? (optional)"
+
+#: src/pages/join.tsx
+msgid "Your own name, not your child's! You pick your child further down."
+msgstr "Your own name, not your child's! You pick your child further down."
 
 #: src/faq.tsx
 msgid "<0>Inactive</0> applies to all events, for example during an injury or a stay abroad. <1>Away long-term</1> applies only to a certain training time, for example every Tuesday. In both cases nobody has to decline and there are no reminders."
