@@ -495,11 +495,32 @@ joinRoutes.post("/join/link-children", async (c) => {
 
 // Admin bootstrap -----------------------------------------------------------
 
+/**
+ * A setup password without what copying tends to add around it: spaces, a line break, or the backticks and
+ * quotes of a chat or Markdown note ("`K7mQ…`" counts as "K7mQ…").
+ */
+function bareSetupPassword(value: string): string {
+  let v = value.trim();
+  while (v.length >= 2 && /^[`'"]/.test(v) && v.endsWith(v[0]!)) v = v.slice(1, -1).trim();
+  return v;
+}
+
+/** The setup password chosen when deploying; shorter than 16 characters means setup is off. */
+function setupPassword(env: Env): string | null {
+  const value = bareSetupPassword(env.ADMIN_BOOTSTRAP_TOKEN ?? "");
+  return value.length >= 16 ? value : null;
+}
+
 /** First admin of the installation; null on a fresh installation (the setup creates it). */
 async function bootstrapPerson(env: Env, token: string) {
-  const expected = env.ADMIN_BOOTSTRAP_TOKEN;
-  if (!expected || expected.length < 16) throw new ApiError(404, "bootstrap_disabled", t`Setup is not enabled.`);
-  if (!safeEqual(token, expected)) throw forbidden(t`This setup link is invalid.`);
+  const expected = setupPassword(env);
+  if (!expected) throw new ApiError(404, "bootstrap_disabled", t`Setup is not enabled.`);
+  if (!safeEqual(bareSetupPassword(token), expected)) {
+    throw forbidden(
+      t`This setup password is not correct. If nobody knows it any more, set ADMIN_BOOTSTRAP_TOKEN anew in the Cloudflare dashboard under Workers & Pages → this Worker → Settings → Variables and Secrets.`,
+      "bootstrap_wrong",
+    );
+  }
   const used = await first(env.DB, "SELECT 1 AS used FROM app_meta WHERE key = 'bootstrap_used_at'");
   if (used) throw gone(t`The setup link has already been used. Sign in with your passkey.`, "bootstrap_used");
   return first<{ id: number; first_name: string; last_name: string | null; admin_email: string | null }>(
@@ -510,8 +531,7 @@ async function bootstrapPerson(env: Env, token: string) {
 
 /** A fresh installation waits for its first admin: the app then opens the setup instead of the sign-in. */
 export async function setupPending(env: Env): Promise<boolean> {
-  const expected = env.ADMIN_BOOTSTRAP_TOKEN;
-  if (!expected || expected.length < 16) return false;
+  if (!setupPassword(env)) return false;
   const row = await first<{ used: number; admin: number }>(
     env.DB,
     `SELECT EXISTS (SELECT 1 FROM app_meta WHERE key = 'bootstrap_used_at') AS used,

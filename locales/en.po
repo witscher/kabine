@@ -851,10 +851,6 @@ msgstr "Revoke admin rights?"
 msgid "Step {step}"
 msgstr "Step {step}"
 
-#: worker/routes/join.ts
-msgid "This setup link is invalid."
-msgstr "This setup link is invalid."
-
 #: src/pages/group.tsx
 msgid "Rename"
 msgstr "Rename"
@@ -1144,6 +1140,10 @@ msgstr "Changes to training times apply immediately. Responses are kept as long 
 #: src/pages/profile.tsx
 msgid "Notification"
 msgstr "Notification"
+
+#: worker/routes/join.ts
+msgid "This setup password is not correct. If nobody knows it any more, set ADMIN_BOOTSTRAP_TOKEN anew in the Cloudflare dashboard under Workers & Pages → this Worker → Settings → Variables and Secrets."
+msgstr "This setup password is not correct. If nobody knows it any more, set ADMIN_BOOTSTRAP_TOKEN anew in the Cloudflare dashboard under Workers & Pages → this Worker → Settings → Variables and Secrets."
 
 #: modules/duties/app/helpers.tsx
 msgid "{created, plural, one {# time slot applied.} other {# time slots applied.}}"

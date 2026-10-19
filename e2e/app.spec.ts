@@ -84,7 +84,7 @@ test("Admin richtet den Zugang über den Einrichtungslink ein", async ({ browser
   await expect(page).toHaveURL(/\/einrichtung$/);
   await page.getByLabel("Einrichtungspasswort").fill("falsches-passwort-123456");
   await page.getByRole("button", { name: "Weiter" }).click();
-  await expect(page.getByText("Dieser Einrichtungslink ist ungültig.")).toBeVisible();
+  await expect(page.getByText(/Dieses Einrichtungspasswort stimmt nicht/)).toBeVisible();
   await page.getByLabel("Einrichtungspasswort").fill("e2e-einrichtung-0123456789");
   await page.getByRole("button", { name: "Weiter" }).click();
   await page.getByLabel("Vorname").fill("Ada");
