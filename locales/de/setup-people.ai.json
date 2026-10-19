@@ -1,0 +1,15 @@
+{
+  "Under people: create them, assign teams, hand out personal links. A second admin helps when you are away.": "Unter Personen: anlegen, Mannschaften zuordnen, persönliche Links verschicken. Ein zweiter Admin hilft, wenn du nicht da bist.",
+  "Without teams there is nothing to coach yet; you can assign coaches later under administration → teams.": "Ohne Mannschaften gibt es noch nichts zu trainieren; Trainer ordnest du später unter Verwaltung → Mannschaften zu.",
+  "First people": "Erste Personen",
+  "Coach of {teamNames}": "Trainer von {teamNames}",
+  "New person": "Neue Person",
+  "Optional here. Admins need one for signing in; otherwise they enter it when they open their link.": "Hier optional. Admins brauchen eine für die Anmeldung; sonst geben sie sie beim Öffnen ihres Links ein.",
+  "Manages the club in the app, like you.": "Verwaltet den Verein in der App, so wie du.",
+  "Skip for now": "Erst einmal überspringen",
+  "Coach of": "Trainer von",
+  "Create person": "Person anlegen",
+  "More coaches and admins": "Weitere Trainer und Admins",
+  "Who starts with you? Create your coaches and further admins and send each a personal link to sign in. Players and parents come later through the coaches' invitation links.": "Wer startet mit dir? Lege deine Trainer und weitere Admins an und schicke allen einen persönlichen Link zur Anmeldung. Spieler und Eltern kommen später über die Einladungslinks der Trainer dazu.",
+  "{name} is created. Now send the personal link.": "{name} ist angelegt. Jetzt den persönlichen Link verschicken."
+}

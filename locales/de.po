@@ -146,6 +146,7 @@ msgid "{actorName} withdrew the cancellation: {label} on {date} is going ahead a
 msgstr "{actorName} hat die Absage zurückgenommen: {label} am {date} findet doch statt."
 
 #: src/pages/admin.tsx
+#: src/pages/setup-wizard.tsx
 msgid "Valid until {validUntil}, can only be used once."
 msgstr "Gültig bis {validUntil}, nur einmal verwendbar."
 
@@ -712,6 +713,7 @@ msgstr "Für ein Profilbild brauchst du die Zustimmung deiner Eltern. Mit deinem
 #: src/pages/admin.tsx
 #: src/pages/join.tsx
 #: src/pages/profile.tsx
+#: src/pages/setup-wizard.tsx
 #: src/pages/team.tsx
 #: src/pages/team.tsx
 #: src/pages/team.tsx
@@ -1188,11 +1190,6 @@ msgstr "Änderungen an Trainingszeiten gelten sofort. Rückmeldungen bleiben erh
 msgid "Notification"
 msgstr "Benachrichtigung"
 
-# ai
-#: src/pages/setup-wizard.tsx
-msgid "A second admin helps when you are away."
-msgstr "Ein zweiter Admin hilft, wenn du mal nicht da bist."
-
 #: modules/duties/app/helpers.tsx
 msgid "{created, plural, one {# time slot applied.} other {# time slots applied.}}"
 msgstr "{created, plural, one {# Zeitblock übernommen.} other {# Zeitblöcke übernommen.}}"
@@ -1312,7 +1309,6 @@ msgid "E-mail"
 msgstr "E-Mail"
 
 #: src/pages/season.tsx
-#: src/pages/setup-wizard.tsx
 msgid "Assign coaches"
 msgstr "Trainer zuordnen"
 
@@ -1632,6 +1628,11 @@ msgid "{name}, {from} to {to}: no training for {teams}."
 msgstr "{name}, {from} bis {to}: kein Training für {teams}."
 
 # ai
+#: src/pages/setup-wizard.tsx
+msgid "Under people: create them, assign teams, hand out personal links. A second admin helps when you are away."
+msgstr "Unter Personen: anlegen, Mannschaften zuordnen, persönliche Links verschicken. Ein zweiter Admin hilft, wenn du nicht da bist."
+
+# ai
 #: src/pages/mail-settings.tsx
 msgid "This installation has no e-mail binding."
 msgstr "Diese Installation hat keine E-Mail-Anbindung."
@@ -1925,6 +1926,11 @@ msgstr "Dienstarten"
 msgid "Remove {firstName} as a stand-in"
 msgstr "{firstName} als Aushilfe entfernen"
 
+# ai
+#: src/pages/setup-wizard.tsx
+msgid "Without teams there is nothing to coach yet; you can assign coaches later under administration → teams."
+msgstr "Ohne Mannschaften gibt es noch nichts zu trainieren; Trainer ordnest du später unter Verwaltung → Mannschaften zu."
+
 #: src/pages/event.tsx
 #: src/pages/special.tsx
 msgid "Info (optional)"
@@ -2093,6 +2099,12 @@ msgstr "Sie ist gleich wieder da. Die Seite lädt automatisch neu, sobald die Wa
 #: src/pages/admin.tsx
 msgid "Has no access yet."
 msgstr "Hat noch keinen Zugang."
+
+# ai
+#: src/pages/setup-wizard.tsx
+#: src/pages/setup-wizard.tsx
+msgid "First people"
+msgstr "Erste Personen"
 
 # ai
 #: src/pages/setup-wizard.tsx
@@ -2487,6 +2499,11 @@ msgstr "die Zuordnung zu {teamNames}"
 #: worker/domain/calendar.ts
 msgid "Meeting point: {point}"
 msgstr "Treffpunkt: {point}"
+
+# ai
+#: src/pages/setup-wizard.tsx
+msgid "New person"
+msgstr "Neue Person"
 
 # ai
 #: modules/sms/worker/routes.ts
@@ -3186,6 +3203,11 @@ msgstr "Du kannst mitlesen. Schreiben haben deine Eltern noch nicht freigegeben.
 msgid "Training and other events"
 msgstr "Training und weitere Termine"
 
+# ai
+#: src/pages/setup-wizard.tsx
+msgid "Coach of {teamNames}"
+msgstr "Trainer von {teamNames}"
+
 #: src/pages/team.tsx
 msgid "Hi everyone! {teamName} uses the {club} app for events, responses and the team chat."
 msgstr "Hallo zusammen! Die {teamName} nutzt die App {club} für Termine, Zu- und Absagen und den Mannschaftschat."
@@ -3450,6 +3472,11 @@ msgstr "Sie dürfen bei diesem Training mitmachen, wenn sie wollen. Niemand gilt
 msgid "Replaces the rows above with the age groups of the club's sport for this season. Nothing is saved until you tap Save."
 msgstr "Ersetzt die Zeilen oben durch die Altersklassen der Sportart des Vereins für diese Saison. Gespeichert wird erst mit „Speichern“."
 
+# ai
+#: src/pages/setup-wizard.tsx
+msgid "Optional here. Admins need one for signing in; otherwise they enter it when they open their link."
+msgstr "Hier optional. Admins brauchen eine für die Anmeldung; sonst geben sie sie beim Öffnen ihres Links ein."
+
 #: src/pages/profile.tsx
 msgid "After that you can only sign in with your passkey."
 msgstr "Danach kannst du dich nur noch mit deinem Passkey anmelden."
@@ -3629,6 +3656,11 @@ msgstr "Wird in einem Plan verwendet"
 msgid "A period may be at most {days} days long."
 msgstr "Ein Zeitraum darf höchstens {days} Tage lang sein."
 
+# ai
+#: src/pages/setup-wizard.tsx
+msgid "Manages the club in the app, like you."
+msgstr "Verwaltet den Verein in der App, so wie du."
+
 #: modules/duties/app/admin.tsx
 #: src/duty-blocks.tsx
 msgid "One slot more"
@@ -3800,11 +3832,6 @@ msgstr "{from} bis {to}: noch kein Ferienplan, der reguläre Plan läuft weiter.
 msgid "Details saved."
 msgstr "Angaben gespeichert."
 
-# ai
-#: src/pages/setup-wizard.tsx
-msgid "Under teams → coaches. Each coach gets a personal link to sign in."
-msgstr "Unter Mannschaften → Trainer. Jeder Trainer bekommt einen persönlichen Link zur Anmeldung."
-
 #: src/pages/admin.tsx
 #: src/pages/event.tsx
 #: src/pages/plans.tsx
@@ -3841,11 +3868,6 @@ msgstr "Keine eigenen Termine"
 #: src/pages/help.tsx
 msgid "The image could not be converted."
 msgstr "Das Bild konnte nicht umgewandelt werden."
-
-# ai
-#: src/pages/setup-wizard.tsx
-msgid "Add more admins"
-msgstr "Weitere Admins ernennen"
 
 # ai
 #: modules/youth-referees/module.ts
@@ -4538,6 +4560,7 @@ msgstr "Hilfe und Feedback"
 #: modules/youth-referees/app/referees.tsx
 #: src/pages/admin.tsx
 #: src/pages/profile.tsx
+#: src/pages/setup-wizard.tsx
 #: src/pages/team.tsx
 #: src/pages/team.tsx
 msgid "Copy"
@@ -4632,6 +4655,11 @@ msgstr "Weitere Begleitperson"
 #: modules/duties/app/helpers.tsx
 msgid "Remove {label}"
 msgstr "{label} entfernen"
+
+# ai
+#: src/pages/setup-wizard.tsx
+msgid "Skip for now"
+msgstr "Erst einmal überspringen"
 
 #: src/pages/plans.tsx
 msgid "Remove {teamName}"
@@ -4815,6 +4843,7 @@ msgid "Move event"
 msgstr "Termin verschieben"
 
 #: src/pages/admin.tsx
+#: src/pages/setup-wizard.tsx
 msgid "Has access."
 msgstr "Hat einen Zugang."
 
@@ -8256,6 +8285,12 @@ msgstr "Zum Beispiel neue Trainerinnen und Trainer. Spieler legt der Trainer im 
 msgid "These details are kept even when the fixture list is synced again."
 msgstr "Diese Angaben bleiben auch erhalten, wenn der Spielplan neu abgeglichen wird."
 
+# ai
+#: src/pages/setup-wizard.tsx
+#: src/pages/setup-wizard.tsx
+msgid "Coach of"
+msgstr "Trainer von"
+
 #: worker/routes/events.ts
 msgid "{label} on {when}: are you coming?"
 msgstr "{label} am {when}: Bist du dabei?"
@@ -8437,6 +8472,11 @@ msgstr "Passkey entfernen?"
 #: src/pages/event.tsx
 msgid "taking part"
 msgstr "nehmen teil"
+
+# ai
+#: src/pages/setup-wizard.tsx
+msgid "Create person"
+msgstr "Person anlegen"
 
 #: src/pages/privacy.tsx
 msgid "Also technically necessary are: passkeys (only a public key, never biometric data), sign-ins on devices and push subscriptions for notifications. So that the app also works without network, it stores the last loaded content on your device. It is deleted when you sign out."
@@ -8863,6 +8903,8 @@ msgstr "Mitfahrt abgesagt"
 #: src/pages/admin.tsx
 #: src/pages/admin.tsx
 #: src/pages/profile.tsx
+#: src/pages/setup-wizard.tsx
+#: src/pages/setup-wizard.tsx
 #: worker/routes/feedback.ts
 msgid "Admin"
 msgstr "Admin"
@@ -8880,6 +8922,7 @@ msgid "new<0> (unread messages)</0>"
 msgstr "neu<0> (ungelesene Nachrichten)</0>"
 
 #: src/pages/admin.tsx
+#: src/pages/setup-wizard.tsx
 #: src/pages/team.tsx
 #: src/pages/team.tsx
 msgid "Your personal access to the {club} app"
@@ -9199,10 +9242,16 @@ msgstr "Passkeys"
 msgid "At most {max} players can be nominated."
 msgstr "Höchstens {max} Spieler können nominiert werden."
 
+# ai
+#: src/pages/setup-wizard.tsx
+msgid "More coaches and admins"
+msgstr "Weitere Trainer und Admins"
+
 #: src/pages/admin.tsx
 #: src/pages/admin.tsx
 #: src/pages/join.tsx
 #: src/pages/profile.tsx
+#: src/pages/setup-wizard.tsx
 #: src/pages/team.tsx
 #: src/pages/team.tsx
 #: src/pages/team.tsx
@@ -9358,6 +9407,11 @@ msgstr "Danke, deine Nachricht ist angekommen. Für eine Antwort per E-Mail fehl
 #: modules/duties/app/helpers.tsx
 msgid "Own teams"
 msgstr "Meine Teams"
+
+# ai
+#: src/pages/setup-wizard.tsx
+msgid "Who starts with you? Create your coaches and further admins and send each a personal link to sign in. Players and parents come later through the coaches' invitation links."
+msgstr "Wer startet mit dir? Lege deine Trainer und weitere Admins an und schicke allen einen persönlichen Link zur Anmeldung. Spieler und Eltern kommen später über die Einladungslinks der Trainer dazu."
 
 # ai
 #: src/howto.tsx
@@ -10046,6 +10100,7 @@ msgstr "Nur Personen mit KiHaSL/JuHaSL-Rolle."
 #: src/pages/join.tsx
 #: src/pages/season.tsx
 #: src/pages/setup-wizard.tsx
+#: src/pages/setup-wizard.tsx
 msgid "Continue"
 msgstr "Weiter"
 
@@ -10085,6 +10140,7 @@ msgstr "Wie letztes Spiel"
 #: src/pages/join.tsx
 #: src/pages/login.tsx
 #: src/pages/profile.tsx
+#: src/pages/setup-wizard.tsx
 msgid "E-mail address"
 msgstr "E-Mail-Adresse"
 
@@ -10300,6 +10356,11 @@ msgid "You are in the chat as a parent of {parentOf}. If you leave, you will no 
 msgstr "Du bist als Elternteil von {parentOf} im Chat. Wenn du dich abmeldest, bekommst du keine Nachrichten und keine Chat-Benachrichtigungen mehr. Anmelden kannst du dich jederzeit wieder."
 
 # ai
+#: src/pages/setup-wizard.tsx
+msgid "{name} is created. Now send the personal link."
+msgstr "{name} ist angelegt. Jetzt den persönlichen Link verschicken."
+
+# ai
 #: src/news.tsx
 #: src/pages/club-settings.tsx
 msgid "Beta"
@@ -10495,6 +10556,7 @@ msgid "{actorName} asks whether {playerName} can help out {teamName} on {when}."
 msgstr "{actorName} fragt, ob {playerName} am {when} bei der {teamName} aushelfen kann."
 
 #: src/pages/admin.tsx
+#: src/pages/setup-wizard.tsx
 msgid "Create personal link"
 msgstr "Persönlichen Link erzeugen"
 
@@ -10638,6 +10700,7 @@ msgstr "Ohne Mannschaft"
 #: modules/youth-referees/app/referees.tsx
 #: src/pages/admin.tsx
 #: src/pages/profile.tsx
+#: src/pages/setup-wizard.tsx
 #: src/pages/team.tsx
 #: src/pages/team.tsx
 msgid "Share"

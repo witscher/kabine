@@ -7,17 +7,18 @@ import { useLocation } from "preact-iso";
 import { useEffect, useState } from "preact/hooks";
 import { seasonAround, SPORTS, type SportId, type TeamGender } from "../../shared/sports";
 import { api, errorMessage } from "../api";
-import { loadClub, useClub } from "../club";
-import { fullDate, todayLocal } from "../format";
+import { clubName, loadClub, useClub } from "../club";
+import { fullDate, isoToLocalDate, personName, todayLocal } from "../format";
 import { currentLocale } from "../i18n";
 import { LanguageSwitch } from "../language-switch";
 import { Icon } from "../icons";
 import { useSession } from "../session";
 import { invalidate, useQuery } from "../store";
-import { Button, ErrorBox, Field, Notice, Spinner, TextField, toast, TopBar, useDocumentTitle } from "../ui";
+import { Button, copyText, ErrorBox, Field, Notice, shareLink, Spinner, SwitchRow, TextField, toast, TopBar, useDocumentTitle } from "../ui";
 import { AdminOnly } from "./admin";
 import { ClubProfileForm } from "./club-settings";
 import { MailSettingsForm } from "./mail-settings";
+import { QrLink } from "./team";
 
 /** Remembers for this browser session that the admin postponed the wizard. */
 export const SETUP_LATER_KEY = "kabine.setup.later";
@@ -32,8 +33,8 @@ interface SetupStatus {
   mailMode: "cloudflare" | "smtp" | "off";
 }
 
-type StepId = "language" | "club" | "sport" | "modules" | "mail" | "teams" | "privacy" | "done";
-const STEPS: StepId[] = ["language", "club", "sport", "modules", "mail", "teams", "privacy", "done"];
+type StepId = "language" | "club" | "sport" | "modules" | "mail" | "teams" | "people" | "privacy" | "done";
+const STEPS: StepId[] = ["language", "club", "sport", "modules", "mail", "teams", "people", "privacy", "done"];
 
 function stepTitle(step: StepId): string {
   switch (step) {
@@ -49,6 +50,8 @@ function stepTitle(step: StepId): string {
       return t`E-mail`;
     case "teams":
       return t`First teams`;
+    case "people":
+      return t`First people`;
     case "privacy":
       return t`Privacy`;
     case "done":
@@ -105,6 +108,7 @@ export function SetupWizardPage() {
           ) : null}
           {step === "mail" ? <MailStep onNext={next} /> : null}
           {step === "teams" ? <TeamsStep onNext={next} /> : null}
+          {step === "people" ? <PeopleStep onNext={next} /> : null}
           {step === "privacy" ? <PrivacyStep onNext={next} /> : null}
           {step === "done" ? <DoneStep /> : null}
           {step !== "done" ? (
@@ -345,6 +349,170 @@ function TeamsStep({ onNext }: { onNext: () => void }) {
   );
 }
 
+interface PersonRow {
+  person: { id: number; firstName: string; lastName: string | null };
+  isAdmin: boolean;
+  hasAccount: boolean;
+  teams: { name: string; role: string; isGroup: boolean }[];
+}
+
+/**
+ * The first coaches and admins: create them, assign coaches to the teams of the step before, and hand each one a
+ * personal link. Players and parents come later through the coaches' invitation links.
+ */
+function PeopleStep({ onNext }: { onNext: () => void }) {
+  const { me } = useSession();
+  const persons = useQuery<{ persons: PersonRow[] }>("/admin/persons");
+  const teams = useQuery<{ teams: TeamRow[] }>("/teams");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [teamIds, setTeamIds] = useState<number[]>([]);
+  const [admin, setAdmin] = useState(false);
+  const [email, setEmail] = useState("");
+  const [problem, setProblem] = useState<string | null>(null);
+  const teamList = (teams.data?.teams ?? []).filter((x) => x.kind === "team");
+  // Everyone with a role here except oneself
+  const people = (persons.data?.persons ?? []).filter(
+    (p) => p.person.id !== me?.person.id && (p.isAdmin || p.teams.some((m) => m.role === "coach")),
+  );
+
+  const add = async () => {
+    setProblem(null);
+    try {
+      const { id } = await api.post<{ id: number }>("/admin/persons", { firstName: firstName.trim(), lastName: lastName.trim() || null });
+      for (const teamId of teamIds) await api.post(`/teams/${teamId}/members`, { personId: id, role: "coach" });
+      if (admin) await api.patch(`/admin/persons/${id}`, { isAdmin: true, adminEmail: email.trim() || null });
+      const name = firstName.trim();
+      toast(t`${name} is created. Now send the personal link.`);
+      setFirstName("");
+      setLastName("");
+      setTeamIds([]);
+      setAdmin(false);
+      setEmail("");
+      invalidate("/admin/persons", "/teams");
+    } catch (err) {
+      setProblem(errorMessage(err));
+      invalidate("/admin/persons");
+    }
+  };
+
+  return (
+    <>
+      <p class="muted">
+        <Trans>
+          Who starts with you? Create your coaches and further admins and send each a personal link to sign in. Players and parents come later through the
+          coaches' invitation links.
+        </Trans>
+      </p>
+      {persons.error ? <ErrorBox error={persons.error} onRetry={persons.reload} /> : null}
+      {people.length ? (
+        <ul class="list" aria-label={t`First people`}>
+          {people.map((p) => (
+            <PersonLinkRow key={p.person.id} p={p} />
+          ))}
+        </ul>
+      ) : null}
+      <section class="card card-pad stack" aria-label={t`New person`}>
+        <TextField label={t`First name`} value={firstName} onInput={setFirstName} maxLength={60} autoComplete="off" />
+        <TextField label={t`Last name`} value={lastName} onInput={setLastName} maxLength={60} autoComplete="off" />
+        {teamList.length ? (
+          <div class="field" role="group" aria-label={t`Coach of`}>
+            <span class="field-label">
+              <Trans>Coach of</Trans>
+            </span>
+            <div class="chips">
+              {teamList.map((team) => (
+                <button
+                  type="button"
+                  class={`chip ${teamIds.includes(team.id) ? "selected" : ""}`}
+                  aria-pressed={teamIds.includes(team.id) ? "true" : "false"}
+                  onClick={() => setTeamIds(teamIds.includes(team.id) ? teamIds.filter((x) => x !== team.id) : [...teamIds, team.id])}
+                >
+                  {team.name}
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <p class="small muted">
+            <Trans>Without teams there is nothing to coach yet; you can assign coaches later under administration → teams.</Trans>
+          </p>
+        )}
+        <SwitchRow label={t`Admin`} sub={t`Manages the club in the app, like you.`} checked={admin} onChange={setAdmin} />
+        {admin ? (
+          <TextField
+            label={t`E-mail address`}
+            type="email"
+            inputMode="email"
+            value={email}
+            onInput={setEmail}
+            autoComplete="off"
+            hint={t`Optional here. Admins need one for signing in; otherwise they enter it when they open their link.`}
+          />
+        ) : null}
+        {problem ? <Notice kind="warn">{problem}</Notice> : null}
+        <Button icon="plus" disabled={!firstName.trim() || (admin && !!email.trim() && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email.trim()))} onClick={add}>
+          <Trans>Create person</Trans>
+        </Button>
+      </section>
+      <Button variant="primary" block onClick={onNext}>
+        {people.length ? <Trans>Continue</Trans> : <Trans>Skip for now</Trans>}
+      </Button>
+    </>
+  );
+}
+
+/** A person of the step with roles and their personal link. */
+function PersonLinkRow({ p }: { p: PersonRow }) {
+  const [link, setLink] = useState<{ url: string; expiresAt: string } | null>(null);
+  const teamNames = p.teams
+    .filter((m) => m.role === "coach")
+    .map((m) => m.name)
+    .join(", ");
+  const roles = [p.isAdmin ? t`Admin` : null, teamNames ? t`Coach of ${teamNames}` : null].filter(Boolean).join(" · ");
+  const validUntil = link ? fullDate(isoToLocalDate(link.expiresAt)) : "";
+  return (
+    <li class="card card-pad stack-sm">
+      <div>
+        <strong>{personName(p.person)}</strong>
+        <div class="small muted">{roles}</div>
+      </div>
+      {p.hasAccount ? (
+        <p class="small muted">
+          <Trans>Has access.</Trans>
+        </p>
+      ) : !link ? (
+        <Button icon="link" onClick={async () => setLink(await api.post<{ url: string; expiresAt: string }>(`/persons/${p.person.id}/personal-link`, {}))}>
+          <Trans>Create personal link</Trans>
+        </Button>
+      ) : (
+        <div class="stack-sm">
+          <QrLink url={link.url} />
+          <div class="url-box">{link.url}</div>
+          <div class="btn-row">
+            <Button
+              variant="primary"
+              icon="share"
+              onClick={() => {
+                const club = clubName();
+                shareLink(club, t`Your personal access to the ${club} app`, link.url);
+              }}
+            >
+              <Trans>Share</Trans>
+            </Button>
+            <Button icon="copy" onClick={() => copyText(link.url)}>
+              <Trans>Copy</Trans>
+            </Button>
+          </div>
+          <p class="small muted">
+            <Trans>Valid until {validUntil}, can only be used once.</Trans>
+          </p>
+        </div>
+      )}
+    </li>
+  );
+}
+
 function PrivacyStep({ onNext }: { onNext: () => void }) {
   return (
     <>
@@ -373,10 +541,9 @@ function DoneStep() {
       .catch((err) => setProblem(errorMessage(err)));
   }, []);
   const steps: { href: string; title: string; sub: string }[] = [
-    { href: "/verwaltung/mannschaften", title: t`Assign coaches`, sub: t`Under teams → coaches. Each coach gets a personal link to sign in.` },
     { href: "/team", title: t`Add players and training plans`, sub: t`Coaches do this in their team: import players from a list, enter training times, send invitations.` },
+    { href: "/verwaltung/personen", title: t`More coaches and admins`, sub: t`Under people: create them, assign teams, hand out personal links. A second admin helps when you are away.` },
     { href: "/verwaltung/ferien", title: t`Check holidays`, sub: t`School holidays and public holidays of your region are already there.` },
-    { href: "/verwaltung/personen", title: t`Add more admins`, sub: t`A second admin helps when you are away.` },
   ];
   return (
     <>

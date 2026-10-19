@@ -94,7 +94,7 @@ test("Admin richtet den Zugang über den Einrichtungslink ein", async ({ browser
   await expect(page.getByText("Geschafft!")).toBeVisible();
   await page.getByRole("button", { name: "Zur App" }).click();
   // Bis die Einrichtung abgeschlossen ist, öffnet sich für Admins der Assistent
-  await expect(page.getByText("Einrichtung · Schritt 1 von 8")).toBeVisible();
+  await expect(page.getByText("Einrichtung · Schritt 1 von 9")).toBeVisible();
   await page.getByRole("button", { name: "Später weitermachen" }).click();
   await expect(page.getByText("Einrichtung nicht abgeschlossen")).toBeVisible();
   await page.goto("/");
@@ -1233,7 +1233,7 @@ test("Spielplan aus einer Tabelle: Vorschau und Anlegen", async () => {
 test("Einrichtungsassistent: Admin geht alle Schritte durch", async () => {
   const { page } = admin;
   await page.goto("/verwaltung/einrichtung");
-  await expect(page.getByText("Einrichtung · Schritt 1 von 8")).toBeVisible();
+  await expect(page.getByText("Einrichtung · Schritt 1 von 9")).toBeVisible();
   await page.getByRole("button", { name: "Speichern und weiter" }).click();
   await expect(page.getByRole("heading", { name: "Dein Verein" })).toBeVisible();
   await page.getByRole("button", { name: "Speichern und weiter" }).click();
@@ -1259,6 +1259,17 @@ test("Einrichtungsassistent: Admin geht alle Schritte durch", async () => {
   await page.getByRole("button", { name: "Mannschaft anlegen" }).click();
   await expect(page.getByText("Mannschaft angelegt")).toBeVisible();
   await expect(page.locator(".team-badge", { hasText: "wE2" })).toBeVisible();
+  await page.getByRole("button", { name: "Weiter", exact: true }).click();
+  // First people: a coach for the new team, with a personal link
+  await expect(page.getByRole("heading", { name: "Erste Personen" })).toBeVisible();
+  await page.getByLabel("Vorname").fill("Paula");
+  await page.getByLabel("Nachname").fill("Pfiff");
+  await page.getByRole("group", { name: "Trainer von" }).getByRole("button", { name: "wE2" }).click();
+  await page.getByRole("button", { name: "Person anlegen" }).click();
+  const paula = page.getByRole("list", { name: "Erste Personen" }).getByRole("listitem").filter({ hasText: "Paula Pfiff" });
+  await expect(paula).toContainText("Trainer von wE2");
+  await paula.getByRole("button", { name: "Persönlichen Link erzeugen" }).click();
+  await expect(paula.locator(".url-box")).toContainText("/einladung#");
   await page.getByRole("button", { name: "Weiter", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Datenschutz" })).toBeVisible();
   await page.getByRole("button", { name: "Speichern und weiter" }).click();
