@@ -28,6 +28,7 @@ Kabine wird vor allem von Kindern, Jugendlichen und ihren Eltern genutzt. Die Ap
 | Eltern-Kind-Verbindung, Freigaben mit Protokoll | Eltern, Minderjährige | Eltern handeln für ihre Kinder | Das Elternteil, Trainer, Admins | Beim Austritt |
 | Rückmeldungen (zu/ab, später) | Spieler | Planung von Training und Spiel | Trainer, Admins; Betreuer und, wenn die Mannschaft es einschaltet, die Mannschaft (ohne Gründe) | Zum Saisonwechsel |
 | Absagegründe | Spieler | Planung | Trainer, Admins | 60 Tage nach dem Termin |
+| „Ich bin nicht da“ von Trainern, Leitungen, Betreuern und Organisatoren, mit optionaler Notiz | Verantwortliche des Termins | Planung, Vertretung | Dass jemand fehlt: alle, die den Termin sehen. Die Notiz: Trainer und Admins des Termins | Notiz 60 Tage nach dem Termin, der Eintrag mit dem Termin zum Saisonwechsel |
 | Fehlt unentschuldigt, Anwesenheitsstatistik | Spieler | Überblick für Trainer | Trainer, Admins; der Spieler sieht seine eigenen | Termindaten zum Saisonwechsel; Saisonsummen bleiben bis zum Austritt |
 | Kadernominierungen | Spieler | Spiele | Mannschaft | Zum Saisonwechsel |
 | Helferdienste | Eltern, Spieler | Dienste bei Spielen und Veranstaltungen | Helfer der Mannschaft („Vorname N.“), Trainer | Zum Saisonwechsel |

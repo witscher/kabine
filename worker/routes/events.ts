@@ -21,6 +21,7 @@ import { attendanceStatus, attendanceUpdate } from "../domain/attendance";
 import { dutyManagers, loadDutyTypes, loadHelpersNeeded, loadMyDuties, mayManageDuties, SHORT_NAME_SQL } from "../domain/duties";
 import { notifyDutyChange } from "../duties/hub";
 import { loadEventPage } from "../domain/event-page";
+import { absenceChangeable, leaderAccounts, leaderEntries, loadLeaders } from "../domain/leaders";
 import { ensureGenerated } from "../domain/generate";
 import { eventLabel, notifyCoaches, notifyPersons, recipientsForPersons, enqueuePush, shortDate, shortTime, staffOf } from "../domain/notify";
 import { all, first, list, run, stmt } from "../lib/db";
@@ -105,12 +106,13 @@ eventRoutes.get("/events/:id", async (c) => {
   ]);
   const now = Date.now();
   const detail = withDuties(toDetail(event, ctx, actor, now), duties, needed);
-  const [info, modules] = await Promise.all([
+  const [info, modules, leaders] = await Promise.all([
     organizerInfo(c.env.DB, actor, event.id, event.kind, detail.teams.map((t) => t.id)),
     moduleEventDetail(c.env.DB, actor, event, ctx, now),
+    loadLeaders(c.env.DB, event, detail.teams.map((t) => t.id)),
   ]);
   const organizing = !!info.organizers && (info.organizers.creator?.id === actor.personId || info.organizers.people.some((p) => p.id === actor.personId));
-  return c.json({ ...detail, ...info, organizing, modules });
+  return c.json({ ...detail, ...info, organizing, modules, leaders: leaderEntries(leaders, event, ctx, actor, detail.canManage, now) });
 });
 
 /** Creator and organisers of a special event; they manage the helper duties. */
@@ -183,6 +185,104 @@ eventRoutes.delete("/events/:id/organizers/:personId", async (c) => {
   const event = await organizerEvent(c.env.DB, actor, intParam(c, "id"));
   await run(c.env.DB, "DELETE FROM event_organizers WHERE event_id = ? AND person_id = ?", event.id, intParam(c, "personId"));
   for (const t of event.teamIds) c.executionCtx.waitUntil(notifyDutyChange(c.env, t));
+  return c.json({ ok: true });
+});
+
+// Leaders: "I'm not there" -----------------------------------------------------------
+
+const absenceSchema = z.object({
+  note: z.string().trim().max(200, { error: () => t`The note is too long (at most 200 characters).` }).optional(),
+  /** Also tell participants and their parents (without the note) */
+  informTeam: z.boolean().optional(),
+});
+
+/** The event, its context and leaders, if the actor leads it and may still change their entry. */
+async function ownLeaderEvent(db: D1Database, actor: Actor, eventId: number) {
+  const event = await visibleEventOr404(db, actor, eventId);
+  const ctx = await loadEventContext(db, [event]);
+  const teamIds = ctx.eventTeams.get(event.id) ?? [];
+  const leaders = await loadLeaders(db, event, teamIds);
+  const me = leaders.find((l) => l.personId === actor.personId);
+  if (!me) throw forbidden(t`Only coaches, leads, staff and organisers of this event can say they are not there.`, "not_leader");
+  if (event.cancelled_at) throw conflict(t`The event has been cancelled.`);
+  if (!absenceChangeable(event, actor, Date.now())) throw conflict(t`The event has already started.`);
+  return { event, ctx, teamIds, leaders, me };
+}
+
+/** Pushes about a leader's absence: other leaders always (with note), the team only if it is told. */
+async function notifyAbsence(
+  env: Env,
+  actor: Actor,
+  { event, ctx, teamIds, leaders, me }: Awaited<ReturnType<typeof ownLeaderEvent>>,
+  change: { leaders: boolean; team: boolean; back: boolean; note: string | null },
+) {
+  const teams = eventTeams(event, ctx);
+  const name = me.name;
+  const texts = () => ({ what: eventLabel(event.kind, eventTitle(event, teams)), when: `${shortDate(event.starts_at)}, ${shortTime(event.starts_at)}` });
+  const url = `/termine/${event.id}`;
+  const others = await leaderAccounts(env.DB, leaders.filter((l) => l.personId !== me.personId).map((l) => l.personId));
+  if (change.leaders) {
+    const note = change.note;
+    await enqueuePush(
+      env,
+      others,
+      () => {
+        const { what, when } = texts();
+        if (change.back) return { title: t`${name} is there after all`, body: t`${what} on ${when}.`, url };
+        return { title: t`${name} is not there`, body: note ? t`${what} on ${when}: “${note}”` : t`${what} on ${when}.`, url };
+      },
+      { exclude: [actor.accountId] },
+    );
+  }
+  if (change.team) {
+    // Participants and their parents in charge, without the note; leaders already have theirs
+    const leaderIds = new Set(leaders.map((l) => l.personId));
+    const persons = (await affectedPersons(env.DB, event, ctx)).filter((id) => !leaderIds.has(id));
+    await notifyPersons(
+      env,
+      persons,
+      "events",
+      () => {
+        const { what, when } = texts();
+        return change.back
+          ? { title: t`${name} is there after all`, body: t`${name} is there for ${what} on ${when} after all.`, url }
+          : { title: t`${name} is not there`, body: t`${name} is not there for ${what} on ${when}. It takes place as planned.`, url };
+      },
+      { teamIds, exclude: [actor.accountId, ...others] },
+    );
+  }
+}
+
+eventRoutes.put("/events/:id/absence", async (c) => {
+  const actor = requireActor(c);
+  const input = parse(absenceSchema, await readJson(c.req.raw));
+  const target = await ownLeaderEvent(c.env.DB, actor, intParam(c, "id"));
+  const before = target.ctx.leaderAbsences.get(`${target.event.id}:${actor.personId}`);
+  const note = input.note || null;
+  // Once told, the team stays told (a push cannot be taken back)
+  const teamInformed = !!before?.teamInformed || !!input.informTeam;
+  await run(
+    c.env.DB,
+    `INSERT INTO leader_absences (event_id, person_id, note, team_informed) VALUES (?, ?, ?, ?)
+     ON CONFLICT(event_id, person_id) DO UPDATE SET note = excluded.note, team_informed = excluded.team_informed`,
+    target.event.id,
+    actor.personId,
+    note,
+    teamInformed ? 1 : 0,
+  );
+  // Editing the note sends nothing; telling the team later reaches only the team
+  c.executionCtx.waitUntil(notifyAbsence(c.env, actor, target, { leaders: !before, team: teamInformed && !before?.teamInformed, back: false, note }));
+  return c.json({ ok: true });
+});
+
+eventRoutes.delete("/events/:id/absence", async (c) => {
+  const actor = requireActor(c);
+  const target = await ownLeaderEvent(c.env.DB, actor, intParam(c, "id"));
+  const before = target.ctx.leaderAbsences.get(`${target.event.id}:${actor.personId}`);
+  if (!before) return c.json({ ok: true });
+  await run(c.env.DB, "DELETE FROM leader_absences WHERE event_id = ? AND person_id = ?", target.event.id, actor.personId);
+  // "There after all" to the same people as the absence
+  c.executionCtx.waitUntil(notifyAbsence(c.env, actor, target, { leaders: true, team: before.teamInformed, back: true, note: null }));
   return c.json({ ok: true });
 });
 

@@ -28,6 +28,7 @@ Kabine is used mostly by children and teenagers and their parents. It is built t
 | Parent–child link, child permissions with log | Parents, minors | Parents act for their children | The parent, coaches and admins | When leaving |
 | Responses (yes/no, late) | Players | Planning trainings and games | Coaches, admins; team staff and, if the team switches it on, the team (without reasons) | At the season change |
 | Decline reasons | Players | Planning | Coaches, admins | 60 days after the event |
+| "I'm not there" of coaches, leads, staff and organisers, with an optional note | Leaders of the event | Planning, stand-ins | That someone is not there: everyone who sees the event. The note: coaches and admins of the event | Note 60 days after the event, the entry with the event at the season change |
 | Absent without excuse, attendance statistics | Players | Overview for coaches | Coaches, admins; the player sees their own | Event data at the season change; season totals stay with the person until they leave |
 | Squad nominations | Players | Games | Team | At the season change |
 | Helper duties | Parents, players | Duties at games and events | Helpers of the team ("First name L."), coaches | At the season change |

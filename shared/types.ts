@@ -205,6 +205,26 @@ export interface EventSummary {
   helpersNeeded: number;
   /** "Absent without excuse" at this event, only for coaches and admins (otherwise 0). */
   unexcusedCount: number;
+  /** I lead this event (coach, lead, staff, organiser) and said "I'm not there". */
+  leaderAbsent: boolean;
+}
+
+/** How someone leads an event: coach of a team, lead of a group, team staff, organiser of a special event. */
+export type LeaderRole = "coach" | "lead" | "staff" | "organizer";
+
+export interface LeaderEntry {
+  personId: number;
+  /** "First name L." */
+  name: string;
+  role: LeaderRole;
+  /** Said "I'm not there" (no entry: present) */
+  absent: boolean;
+  /** For coaches and admins of the event, and one's own; otherwise null */
+  note: string | null;
+  /** Participants and parents were told (coaches, admins and one's own entry; otherwise false) */
+  teamInformed: boolean;
+  /** One's own entry, before the start of an event that is not cancelled */
+  canChange: boolean;
 }
 
 export interface MyDuty {
@@ -268,6 +288,11 @@ export interface EventDetail extends EventSummary {
   dutyManage: boolean;
   /** Special events only: creator and organisers ("First name L."). */
   organizers: { creator: { id: number; name: string } | null; people: { id: number; name: string }[]; editable: boolean } | null;
+  /**
+   * Who leads the event. Coaches and admins see everyone with their note; everyone else only absent
+   * leaders (and themselves), without the note, also when responses are visible to all.
+   */
+  leaders: LeaderEntry[];
 }
 
 export interface RosterEntry {

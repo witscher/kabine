@@ -1,7 +1,7 @@
 import { plural, select, t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { useState } from "preact/hooks";
-import type { EventDetail, LocationRef, MyParticipation, ParticipantDetail, RosterEntry } from "../../shared/types";
+import type { EventDetail, LeaderRole, LocationRef, MyParticipation, ParticipantDetail, RosterEntry } from "../../shared/types";
 import { api, errorMessage } from "../api";
 import { dutyLines, neededText } from "../duties";
 import { BlockSheet } from "../duty-blocks";
@@ -72,6 +72,7 @@ export function EventPage({ id }: { id: string }) {
   const me = useMe();
   const { data: event, error, loading, reload } = useQuery<EventDetail>(`/events/${id}`, { refreshMs: 10_000 });
   const [declineFor, setDeclineFor] = useState<MyParticipation | null>(null);
+  const [absenceOpen, setAbsenceOpen] = useState(false);
   const modules = useActiveModules();
   useDocumentTitle(event ? `${kindLabel(event.kind)} ${longDate(event.startsAt)}` : t`Event`);
 
@@ -194,6 +195,8 @@ export function EventPage({ id }: { id: string }) {
           </section>
         ) : null}
 
+        <Leaders event={event} onAbsence={() => setAbsenceOpen(true)} onChanged={reload} />
+
         {modules.map((m) => {
           const Section = m.eventSection;
           const data = event.modules[m.manifest.id];
@@ -223,10 +226,11 @@ export function EventPage({ id }: { id: string }) {
           </section>
         ) : null}
 
-        {event.canManage ? <CoachView event={event} onChanged={reload} /> : null}
+        {event.canManage ? <CoachView event={event} onChanged={reload} onAbsence={() => setAbsenceOpen(true)} /> : null}
       {event.roster ? <RosterList roster={event.roster} /> : null}
       </div>
       {declineFor ? <DeclineSheet event={event} person={declineFor} onClose={() => setDeclineFor(null)} /> : null}
+      {absenceOpen ? <AbsenceSheet event={event} onClose={() => setAbsenceOpen(false)} onDone={reload} /> : null}
     </main>
   );
 }
@@ -306,7 +310,7 @@ function GameInfo({ event }: { event: EventDetail }) {
 
 // Coaches ------------------------------------------------------------------------
 
-function CoachView({ event, onChanged }: { event: EventDetail; onChanged: () => void }) {
+function CoachView({ event, onChanged, onAbsence }: { event: EventDetail; onChanged: () => void; onAbsence: () => void }) {
   const parts = event.participants ?? [];
   const [moveOpen, setMoveOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
@@ -588,24 +592,44 @@ function CoachView({ event, onChanged }: { event: EventDetail; onChanged: () => 
 
       {moveOpen ? <MoveSheet event={event} onClose={() => setMoveOpen(false)} onDone={refresh} /> : null}
       {editOpen ? <EditSheet event={event} onClose={() => setEditOpen(false)} onDone={refresh} /> : null}
-      {cancelOpen ? <CancelSheet event={event} onClose={() => setCancelOpen(false)} onDone={refresh} /> : null}
+      {cancelOpen ? (
+        <CancelSheet
+          event={event}
+          onClose={() => setCancelOpen(false)}
+          onDone={refresh}
+          onAbsence={() => {
+            setCancelOpen(false);
+            onAbsence();
+          }}
+        />
+      ) : null}
       {infoOpen ? <GameInfoSheet event={event} onClose={() => setInfoOpen(false)} onDone={refresh} /> : null}
       {person ? <ParticipantSheet event={event} p={person} onClose={() => setPerson(null)} onDone={refresh} /> : null}
     </>
   );
 }
 
-function CancelSheet({ event, onClose, onDone }: { event: EventDetail; onClose: () => void; onDone: () => void }) {
+function CancelSheet({ event, onClose, onDone, onAbsence }: { event: EventDetail; onClose: () => void; onDone: () => void; onAbsence: () => void }) {
   const venue = useVenue();
+  const me = useMe();
   const [reason, setReason] = useState("");
   const date = longDate(event.startsAt);
   const clock = time(event.startsAt);
   const title = event.kind === "training" ? t`Cancel training` : event.kind === "game" ? t`Cancel game` : t`Cancel event`;
+  const own = event.leaders.find((l) => l.personId === me.person.id);
   return (
     <Sheet open onClose={onClose} title={title}>
       <p class="muted">
         <Trans>{date}, {clock}. Everyone involved will be notified, and a note appears in the team chat.</Trans>
       </p>
+      {own?.canChange && !own.absent ? (
+        <Notice kind="yellow">
+          <Trans>Only you cannot make it? Say “I'm not there” instead: the event takes place and the others in charge are told.</Trans>{" "}
+          <button type="button" class="link-btn" onClick={onAbsence}>
+            <Trans>I'm not there</Trans>
+          </button>
+        </Notice>
+      ) : null}
       <div class="chips">
         {[select(venue, { hall: "Hall unavailable", pitch: "Pitch unavailable", other: "Venue unavailable" }), t`Coach unavailable`, t`School holidays`, t`Too few acceptances`].map((r) => (
           <button type="button" class={`chip ${reason === r ? "selected" : ""}`} onClick={() => setReason(r)}>
@@ -626,8 +650,8 @@ function CancelSheet({ event, onClose, onDone }: { event: EventDetail; onClose: 
             !(await confirmDialog({
               title: training ? t`Cancel this training session for everyone?` : t`Cancel this event for everyone?`,
               message: training
-                ? t`The training session is off for everyone and everyone involved will be notified. If only you cannot make it, do not cancel.`
-                : t`The event is off for everyone and everyone involved will be notified. If only you cannot make it, do not cancel.`,
+                ? t`The training session is off for everyone and everyone involved will be notified. If only you cannot make it, use “I'm not there” instead.`
+                : t`The event is off for everyone and everyone involved will be notified. If only you cannot make it, use “I'm not there” instead.`,
               confirmLabel: t`Cancel for everyone`,
               danger: true,
             }))
@@ -1006,6 +1030,122 @@ function ParticipantSheet({ event, p, onClose, onDone }: { event: EventDetail; p
 }
 
 /** Team with "responses visible to everyone": who is coming, who is not (without reasons). */
+const leaderRole = (role: LeaderRole) =>
+  ({ coach: t`Coach`, lead: t`Lead`, staff: t({ message: "Staff", context: "team role" }), organizer: t`Organiser` })[role];
+
+/**
+ * Who leads the event, and one's own "I'm not there". Coaches and admins see everyone with their notes;
+ * players and parents only the leaders who are not there.
+ */
+function Leaders({ event, onAbsence, onChanged }: { event: EventDetail; onAbsence: () => void; onChanged: () => void }) {
+  const me = useMe();
+  const leaders = event.leaders;
+  if (!leaders.length) return null;
+  const own = leaders.find((l) => l.personId === me.person.id);
+  const heads = leaders.filter((l) => l.role === "coach" || l.role === "lead");
+  const nobodyLeft = event.canManage && !event.isPast && !event.cancelled && heads.length > 0 && heads.every((l) => l.absent);
+  return (
+    <section class="card card-body stack-sm" aria-label={t`In charge`}>
+      <h2 class="section-title" style={{ margin: 0 }}>
+        <Trans>In charge</Trans>
+      </h2>
+      {nobodyLeft ? (
+        <Notice kind="warn">
+          {heads.every((l) => l.role === "lead")
+            ? t`No lead is there. Cancel the event for everyone, or sort out a stand-in in the chat.`
+            : t`No coach is there. Cancel the event for everyone, or sort out a stand-in in the team chat.`}
+        </Notice>
+      ) : null}
+      {leaders.map((l) => {
+        const note = l.note;
+        return (
+          <div key={l.personId}>
+            <div class="row-gap" style={{ gap: "8px" }}>
+              <strong>{l.personId === me.person.id ? t`You` : l.name}</strong>
+              <span class="small muted">{leaderRole(l.role)}</span>
+              {l.absent ? (
+                <span class="badge warn">
+                  <Trans>Not there</Trans>
+                </span>
+              ) : null}
+            </div>
+            {note ? <p class="small muted" style={{ margin: "2px 0 0" }}>{quoted(note)}</p> : null}
+          </div>
+        );
+      })}
+      {own?.canChange ? (
+        own.absent ? (
+          <div class="row-gap">
+            <Button size="sm" onClick={onAbsence}>
+              <Trans>Change note</Trans>
+            </Button>
+            <Button
+              size="sm"
+              onClick={async () => {
+                await api.del(`/events/${event.id}/absence`);
+                invalidate("/events");
+                toast(t`Noted: you are there after all.`);
+                onChanged();
+              }}
+            >
+              <Trans>I'm there after all</Trans>
+            </Button>
+          </div>
+        ) : (
+          <Button onClick={onAbsence}>
+            <Trans>I'm not there</Trans>
+          </Button>
+        )
+      ) : null}
+    </section>
+  );
+}
+
+/** "I'm not there" for one's own entry: the event takes place, the others in charge are told. */
+function AbsenceSheet({ event, onClose, onDone }: { event: EventDetail; onClose: () => void; onDone: () => void }) {
+  const me = useMe();
+  const own = event.leaders.find((l) => l.personId === me.person.id);
+  const editing = !!own?.absent;
+  const [note, setNote] = useState(own?.note ?? "");
+  const [informTeam, setInformTeam] = useState(false);
+  const date = longDate(event.startsAt);
+  const clock = time(event.startsAt);
+  return (
+    <Sheet open onClose={onClose} title={editing ? t`Your absence` : t`I'm not there`}>
+      <p class="muted">
+        <Trans>{date}, {clock}. The event takes place, it is not cancelled. The others in charge get a push with your note.</Trans>
+      </p>
+      <TextField label={t`Note for the others in charge (optional)`} value={note} onInput={setNote} maxLength={200} placeholder={t`e.g. Sam runs the training`} />
+      {own?.teamInformed ? (
+        <p class="small muted">
+          <Trans>The team has been told that you are not there.</Trans>
+        </p>
+      ) : (
+        <SwitchRow
+          label={t`Also tell the team`}
+          sub={t`Players and their parents get a push that you are not there, without your note.`}
+          checked={informTeam}
+          onChange={setInformTeam}
+        />
+      )}
+      <Button
+        variant="primary"
+        size="lg"
+        block
+        onClick={async () => {
+          await api.put(`/events/${event.id}/absence`, { note: note.trim() || undefined, informTeam });
+          invalidate("/events");
+          toast(editing ? t`Saved.` : t`Noted: you are not there.`);
+          onClose();
+          onDone();
+        }}
+      >
+        {editing ? <Trans>Save</Trans> : <Trans>I'm not there</Trans>}
+      </Button>
+    </Sheet>
+  );
+}
+
 function RosterList({ roster }: { roster: RosterEntry[] }) {
   const groups: { title: string; items: RosterEntry[] }[] = [
     { title: t`Accepted`, items: roster.filter((r) => r.status === "yes") },

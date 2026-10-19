@@ -206,7 +206,7 @@ test("Training absagen fragt nach, ob es für alle ausfällt", async () => {
   await sheet.getByRole("button", { name: "Trainer verhindert" }).click();
   await sheet.getByRole("button", { name: "Absagen und informieren" }).click();
   const confirm = page.getByRole("dialog", { name: "Trainingstermin komplett für alle absagen?" });
-  await expect(confirm.getByText("Wenn nur du verhindert bist, nicht absagen.")).toBeVisible();
+  await expect(confirm.getByText("Wenn nur du verhindert bist, nimm stattdessen „Ich bin nicht da“.", { exact: false })).toBeVisible();
   await confirm.getByRole("button", { name: "Abbrechen" }).click();
   await expect(confirm).toHaveCount(0);
   await expect(page.getByText("Abgesagt. Alle wurden informiert.")).toHaveCount(0);
@@ -446,6 +446,39 @@ test("Admin schaltet unter Updates und Wartung den Wartungsmodus ein und wieder 
   await expect(page.getByRole("switch", { name: /Wartungsmodus/ })).toHaveAttribute("aria-checked", "false");
   await player.page.goto("/");
   await expect(player.page.getByRole("heading", { name: /^Hallo/ })).toBeVisible();
+});
+
+test("Trainer meldet sich für ein Training ab: der Termin bleibt, die Spielerin sieht es ohne Notiz", async () => {
+  const { events } = (await (await coach.page.request.get("/api/events?kind=training&teamId=1")).json()) as { events: { id: number; cancelled: unknown }[] };
+  const next = events.find((e) => !e.cancelled)!;
+  const { page } = coach;
+  await page.goto(`/termine/${next.id}`);
+  const inCharge = page.getByRole("region", { name: "Verantwortlich" });
+  await inCharge.getByRole("button", { name: "Ich bin nicht da" }).click();
+  const sheet = page.getByRole("dialog", { name: "Ich bin nicht da" });
+  await sheet.getByLabel("Notiz für die anderen Verantwortlichen (optional)").fill("Sam leitet das Training");
+  await sheet.getByRole("button", { name: "Ich bin nicht da" }).click();
+  await expect(page.getByText("Eingetragen: Du bist nicht da.")).toBeVisible();
+  await expect(inCharge).toContainText("Nicht da");
+  await expect(inCharge).toContainText("Sam leitet das Training");
+  await expect(page.getByText("Kein Trainer ist da.", { exact: false })).toBeVisible();
+  // Absagen verweist auf „Ich bin nicht da“
+  await page.getByRole("button", { name: "Absagen" }).click();
+  await expect(page.getByRole("dialog", { name: "Training absagen" })).toHaveCount(1);
+  await page.keyboard.press("Escape");
+
+  await player.page.goto(`/termine/${next.id}`);
+  const forPlayer = player.page.getByRole("region", { name: "Verantwortlich" });
+  await expect(forPlayer).toContainText("Nicht da");
+  await expect(forPlayer).not.toContainText("Sam");
+
+  await page.goto("/");
+  await expect(page.getByText("Du bist nicht da").first()).toBeVisible();
+  await page.goto(`/termine/${next.id}`);
+  await inCharge.getByRole("button", { name: "Ich bin doch da" }).click();
+  await expect(page.getByText("Eingetragen: Du bist doch da.")).toBeVisible();
+  await player.page.reload();
+  await expect(player.page.getByRole("heading", { name: "Verantwortlich" })).toHaveCount(0);
 });
 
 test("Helferplan: einschalten, Spiel unter Team anlegen, Dienst übernehmen, live beim Admin", async () => {

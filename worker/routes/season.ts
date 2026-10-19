@@ -446,6 +446,7 @@ const CORE_EXPORT_TABLES = [
   "chat_reads",
   "chat_mentions",
   "event_organizers",
+  "leader_absences",
   "club_members",
 ];
 

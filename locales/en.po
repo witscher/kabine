@@ -403,6 +403,10 @@ msgstr "You opened the app at Cloudflare's test address <0>{host}</0>. Passkeys 
 msgid "{actorName} cancelled {label} on {date}."
 msgstr "{actorName} cancelled {label} on {date}."
 
+#: src/pages/event.tsx
+msgid "Note for the others in charge (optional)"
+msgstr "Note for the others in charge (optional)"
+
 #: src/avatar.tsx
 msgid "The picture of {name} will be deleted."
 msgstr "The picture of {name} will be deleted."
@@ -857,6 +861,10 @@ msgstr "I am {playerName} – set up passkey"
 msgid "Revoke admin rights?"
 msgstr "Revoke admin rights?"
 
+#: src/pages/event.tsx
+msgid "{date}, {clock}. The event takes place, it is not cancelled. The others in charge get a push with your note."
+msgstr "{date}, {clock}. The event takes place, it is not cancelled. The others in charge get a push with your note."
+
 #: src/pages/season.tsx
 msgid "Step {step}"
 msgstr "Step {step}"
@@ -1118,6 +1126,10 @@ msgstr "Send broadcast?"
 #: src/pages/club-settings.tsx
 msgid "Name of the club"
 msgstr "Name of the club"
+
+#: src/pages/event.tsx
+msgid "Your absence"
+msgstr "Your absence"
 
 #: src/pages/admin.tsx
 msgid "The parent"
@@ -1431,6 +1443,10 @@ msgstr "In the team chat you can <0>Leave the chat</0> via the menu and rejoin l
 #: worker/routes/squad.ts
 msgid "No response for the training"
 msgstr "No response for the training"
+
+#: worker/routes/events.ts
+msgid "The note is too long (at most 200 characters)."
+msgstr "The note is too long (at most 200 characters)."
 
 #: src/pages/admin.tsx
 msgid "Assign child"
@@ -2076,6 +2092,7 @@ msgstr "The live ticker opens in a new window on handball4all."
 
 #: worker/domain/events.ts
 #: worker/routes/events.ts
+#: worker/routes/events.ts
 msgid "The event has already started."
 msgstr "The event has already started."
 
@@ -2474,6 +2491,10 @@ msgstr "{venue, select, hall {Club halls} pitch {Club pitches} other {Club venue
 msgid "Absent without excuse"
 msgstr "Absent without excuse"
 
+#: src/pages/event.tsx
+msgid "Not there"
+msgstr "Not there"
+
 #: src/pages/admin.tsx
 msgid "No role ({noRoleCount})"
 msgstr "No role ({noRoleCount})"
@@ -2677,6 +2698,11 @@ msgstr "Add address"
 msgid "This person does not belong to this team."
 msgstr "This person does not belong to this team."
 
+#: src/pages/event.tsx
+#: src/pages/event.tsx
+msgid "In charge"
+msgstr "In charge"
+
 #: worker/routes/admin.ts
 #: worker/routes/admin.ts
 msgid "This holiday period does not exist."
@@ -2719,6 +2745,10 @@ msgstr "{venue, select, hall {Opponents' halls (from the fixture list)} pitch {O
 #: src/pages/admin.tsx
 msgid "{firstName} is a full club member."
 msgstr "{firstName} is a full club member."
+
+#: src/pages/event.tsx
+msgid "e.g. Sam runs the training"
+msgstr "e.g. Sam runs the training"
 
 #: src/pages/admin.tsx
 msgid "May be assigned as referee at all youth home games from F to C."
@@ -2789,6 +2819,10 @@ msgstr "At most 11 letters and digits, e.g. the club's short name."
 #: src/pages/help.tsx
 msgid "Help"
 msgstr "Help"
+
+#: src/pages/event.tsx
+msgid "The team has been told that you are not there."
+msgstr "The team has been told that you are not there."
 
 #: src/pages/team.tsx
 msgid "Already in the app, e.g. for a sibling in another team or as a coach? Then open the link on the phone where the app is installed and sign in first. Otherwise a second access is created."
@@ -3095,6 +3129,10 @@ msgstr "allowed"
 msgid "Open the team in the portal and paste the link from the address bar. It contains ogId, lId and tId."
 msgstr "Open the team in the portal and paste the link from the address bar. It contains ogId, lId and tId."
 
+#: src/pages/event.tsx
+msgid "The event is off for everyone and everyone involved will be notified. If only you cannot make it, use “I'm not there” instead."
+msgstr "The event is off for everyone and everyone involved will be notified. If only you cannot make it, use “I'm not there” instead."
+
 #: src/pages/join.tsx
 msgid "Set up Kabine"
 msgstr "Set up Kabine"
@@ -3289,6 +3327,10 @@ msgstr "Edit training time"
 #: src/pages/admin.tsx
 msgid "All data as a JSON file, for backup"
 msgstr "All data as a JSON file, for backup"
+
+#: worker/routes/events.ts
+msgid "{what} on {when}: “{note}”"
+msgstr "{what} on {when}: “{note}”"
 
 #: modules/youth-referees/app/referees.tsx
 #: modules/youth-referees/app/referees.tsx
@@ -3544,6 +3586,10 @@ msgstr "{code} is your code for access to {app}"
 #: src/pages/admin.tsx
 msgid "Holiday period deleted."
 msgstr "Holiday period deleted."
+
+#: src/pages/event.tsx
+msgid "Only you cannot make it? Say “I'm not there” instead: the event takes place and the others in charge are told."
+msgstr "Only you cannot make it? Say “I'm not there” instead: the event takes place and the others in charge are told."
 
 #: modules/carpools/worker/routes.ts
 msgid "Lift booked"
@@ -3883,10 +3929,6 @@ msgstr "notify everyone in the chat"
 msgid "The access of {firstName} will be deleted, e.g. after a wrong selection with the player link. The person stays in the squad and can register again."
 msgstr "The access of {firstName} will be deleted, e.g. after a wrong selection with the player link. The person stays in the squad and can register again."
 
-#: src/pages/event.tsx
-msgid "The training session is off for everyone and everyone involved will be notified. If only you cannot make it, do not cancel."
-msgstr "The training session is off for everyone and everyone involved will be notified. If only you cannot make it, do not cancel."
-
 #: src/pages/home.tsx
 msgid "Game · {date}, {at}"
 msgstr "Game · {date}, {at}"
@@ -4132,6 +4174,7 @@ msgstr "A team with this name already exists."
 msgid "Revoke link?"
 msgstr "Revoke link?"
 
+#: src/pages/event.tsx
 #: src/pages/group.tsx
 msgid "Coach"
 msgstr "Coach"
@@ -4140,6 +4183,10 @@ msgstr "Coach"
 #: src/respond.tsx
 msgid "Accept"
 msgstr "Accept"
+
+#: src/pages/event.tsx
+msgid "The training session is off for everyone and everyone involved will be notified. If only you cannot make it, use “I'm not there” instead."
+msgstr "The training session is off for everyone and everyone involved will be notified. If only you cannot make it, use “I'm not there” instead."
 
 #: src/pages/season.tsx
 msgid "Taken over from the previous season and shifted by one year. Please check against the association's implementing regulations."
@@ -4609,6 +4656,13 @@ msgstr "Main navigation"
 msgid "The window was blocked. Please allow pop-ups for the app."
 msgstr "The window was blocked. Please allow pop-ups for the app."
 
+#: src/pages/event.tsx
+#: src/pages/event.tsx
+#: src/pages/event.tsx
+#: src/pages/event.tsx
+msgid "I'm not there"
+msgstr "I'm not there"
+
 #: worker/routes/persons.ts
 msgid "A person cannot be their own parent."
 msgstr "A person cannot be their own parent."
@@ -4770,6 +4824,7 @@ msgstr "Reset filters"
 #: worker/domain/events.ts
 #: worker/routes/events.ts
 #: worker/routes/events.ts
+#: worker/routes/events.ts
 msgid "The event has been cancelled."
 msgstr "The event has been cancelled."
 
@@ -4863,6 +4918,7 @@ msgstr "Kabine is installed. Enter the setup password you chose when deploying (
 msgid "No automatic assignment without year of birth. Suggestion: previous team."
 msgstr "No automatic assignment without year of birth. Suggestion: previous team."
 
+#: src/pages/event.tsx
 #: src/pages/group.tsx
 msgid "Lead"
 msgstr "Lead"
@@ -5085,6 +5141,11 @@ msgctxt "date"
 msgid "Start"
 msgstr "Start"
 
+#: worker/routes/events.ts
+#: worker/routes/events.ts
+msgid "{name} is there after all"
+msgstr "{name} is there after all"
+
 #: src/respond.tsx
 #: src/respond.tsx
 msgid "Decline"
@@ -5146,6 +5207,10 @@ msgstr "Group · {members} · {leads}"
 #: modules/carpools/worker/routes.ts
 msgid "New passenger"
 msgstr "New passenger"
+
+#: worker/routes/events.ts
+msgid "Only coaches, leads, staff and organisers of this event can say they are not there."
+msgstr "Only coaches, leads, staff and organisers of this event can say they are not there."
 
 #: worker/domain/email-login.ts
 msgid "here is your code to sign in:"
@@ -5651,6 +5716,7 @@ msgid "Switch on under Administration → Club"
 msgstr "Switch on under Administration → Club"
 
 #: modules/carpools/app/card.tsx
+#: src/pages/event.tsx
 #: src/respond.tsx
 msgid "You"
 msgstr "You"
@@ -5875,6 +5941,10 @@ msgstr "First day"
 msgid "Short, shown like a team name, e.g. JT"
 msgstr "Short, shown like a team name, e.g. JT"
 
+#: worker/routes/events.ts
+msgid "{name} is there for {what} on {when} after all."
+msgstr "{name} is there for {what} on {when} after all."
+
 #: worker/app.ts
 msgid "Something went wrong. Please try again later."
 msgstr "Something went wrong. Please try again later."
@@ -5892,6 +5962,10 @@ msgstr "This child is not linked to your access."
 #: src/pages/login.tsx
 msgid "Sign in with passkey"
 msgstr "Sign in with passkey"
+
+#: src/pages/event.tsx
+msgid "Noted: you are not there."
+msgstr "Noted: you are not there."
 
 #: src/pages/admin.tsx
 msgid "Youngest year of birth"
@@ -5921,6 +5995,11 @@ msgstr "Add to squad"
 #: modules/carpools/app/card.tsx
 msgid "Riding along. Deselect anyone you can no longer take; the family will be notified and will look again."
 msgstr "Riding along. Deselect anyone you can no longer take; the family will be notified and will look again."
+
+#: worker/routes/events.ts
+#: worker/routes/events.ts
+msgid "{name} is not there"
+msgstr "{name} is not there"
 
 #: worker/routes/chat.ts
 msgid "You cannot mute yourself."
@@ -5988,6 +6067,10 @@ msgstr "Helper plan for this team"
 msgid "Please enter your e-mail address. We will send the code there."
 msgstr "Please enter your e-mail address. We will send the code there."
 
+#: src/faq.tsx
+msgid "I can't make it to a training myself, but it should take place."
+msgstr "I can't make it to a training myself, but it should take place."
+
 #: modules/duties/app/helpers.tsx
 msgid "Parents then don't see the game, e.g. for a game without catering."
 msgstr "Parents then don't see the game, e.g. for a game without catering."
@@ -6003,6 +6086,10 @@ msgstr "as parent of {children}"
 #: modules/youth-referees/module.ts
 msgid "The youth referees and the admins; at the game as a helper duty."
 msgstr "The youth referees and the admins; at the game as a helper duty."
+
+#: src/pages/event.tsx
+msgid "I'm there after all"
+msgstr "I'm there after all"
 
 #: src/pages/admin.tsx
 msgid "{shown} of {total} people"
@@ -6273,6 +6360,7 @@ msgstr "The helpers of the team see who takes on which duty as “First name L.�
 #: src/pages/admin.tsx
 #: src/pages/admin.tsx
 #: src/pages/event.tsx
+#: src/pages/event.tsx
 #: src/pages/group.tsx
 #: src/pages/profile.tsx
 #: src/pages/season.tsx
@@ -6288,10 +6376,6 @@ msgstr "Unmuted."
 #: modules/duties/app/helpers.tsx
 msgid "Delete game"
 msgstr "Delete game"
-
-#: src/pages/event.tsx
-msgid "The event is off for everyone and everyone involved will be notified. If only you cannot make it, do not cancel."
-msgstr "The event is off for everyone and everyone involved will be notified. If only you cannot make it, do not cancel."
 
 #: src/pages/team.tsx
 msgid "Stand-in from {homeTeam}. Their coach maintains the personal data."
@@ -6322,6 +6406,7 @@ msgstr "Use core squad"
 msgid "Event deleted."
 msgstr "Event deleted."
 
+#: src/pages/event.tsx
 #: src/pages/group.tsx
 #: src/pages/team.tsx
 msgctxt "team role"
@@ -6417,6 +6502,10 @@ msgstr "The app is set up"
 #: worker/routes/setup.ts
 msgid "Home game"
 msgstr "Home game"
+
+#: src/pages/event.tsx
+msgid "No coach is there. Cancel the event for everyone, or sort out a stand-in in the team chat."
+msgstr "No coach is there. Cancel the event for everyone, or sort out a stand-in in the team chat."
 
 #: src/pages/team.tsx
 msgid "Create a new link?"
@@ -6827,6 +6916,10 @@ msgstr "Remove logo"
 msgid "Only coaches enter offers for others."
 msgstr "Only coaches enter offers for others."
 
+#: src/pages/event.tsx
+msgid "Also tell the team"
+msgstr "Also tell the team"
+
 #: modules/carpools/app/card.tsx
 #: modules/carpools/app/card.tsx
 msgid "Ride along"
@@ -7002,6 +7095,10 @@ msgstr "No access"
 #: modules/duties/app/helpers.tsx
 msgid "My duties"
 msgstr "My duties"
+
+#: src/pages/event.tsx
+msgid "Change note"
+msgstr "Change note"
 
 #: modules/carpools/worker/routes.ts
 msgid "{driver} is not driving: {game}. The search for a lift for {rider} continues."
@@ -7774,6 +7871,10 @@ msgstr "Link child"
 msgid "I don't get any notifications."
 msgstr "I don't get any notifications."
 
+#: src/pages/event.tsx
+msgid "Noted: you are there after all."
+msgstr "Noted: you are there after all."
+
 #: src/pages/privacy.tsx
 msgid "For each access the app stores the day of last use, without time. Only admins see it, so they can spot unused accesses."
 msgstr "For each access the app stores the day of last use, without time. Only admins see it, so they can spot unused accesses."
@@ -8474,6 +8575,7 @@ msgstr "SMS"
 #: src/pages/club-settings.tsx
 #: src/pages/event.tsx
 #: src/pages/event.tsx
+#: src/pages/event.tsx
 #: src/pages/group.tsx
 #: src/pages/mail-settings.tsx
 #: src/pages/plans.tsx
@@ -8559,6 +8661,10 @@ msgstr "To everyone in chat {teamName}"
 #: src/pages/home.tsx
 msgid "Create a training plan in the Team section, then the events will appear here."
 msgstr "Create a training plan in the Team section, then the events will appear here."
+
+#: src/pages/home.tsx
+msgid "You're not there"
+msgstr "You're not there"
 
 #: modules/sms/worker/routes.ts
 msgid "Test message from Kabine: SMS works."
@@ -8894,6 +9000,10 @@ msgstr "The game schedule is in the app. Please check when you can play."
 #: src/pages/setup-wizard.tsx
 msgid "Save and continue"
 msgstr "Save and continue"
+
+#: src/pages/event.tsx
+msgid "Organiser"
+msgstr "Organiser"
 
 #: src/pages/event.tsx
 msgid "There are no participants for this event."
@@ -9453,6 +9563,10 @@ msgstr "Send"
 msgid "Games"
 msgstr "Games"
 
+#: src/faq.tsx
+msgid "Do not cancel. In the event, tap <0>I'm not there</0> under <1>In charge</1>. The other coaches get a push with your note, for example who runs the training instead. If you switch it on, players and parents learn that you are missing, without the note. If you can make it after all, tap <2>I'm there after all</2>."
+msgstr "Do not cancel. In the event, tap <0>I'm not there</0> under <1>In charge</1>. The other coaches get a push with your note, for example who runs the training instead. If you switch it on, players and parents learn that you are missing, without the note. If you can make it after all, tap <2>I'm there after all</2>."
+
 #: src/pages/admin.tsx
 msgid "Only visible to admins. Full club members can help organise special events and take on duties with “Who helps: members”."
 msgstr "Only visible to admins. Full club members can help organise special events and take on duties with “Who helps: members”."
@@ -9584,6 +9698,11 @@ msgstr "The app sends e-mails for sign-in codes, access links and helper plan re
 msgid "Opponent or tournament"
 msgstr "Opponent or tournament"
 
+#: worker/routes/events.ts
+#: worker/routes/events.ts
+msgid "{what} on {when}."
+msgstr "{what} on {when}."
+
 #: modules/youth-referees/app/referees.tsx
 msgid "Activation"
 msgstr "Activation"
@@ -9712,6 +9831,10 @@ msgstr "Leaving recorded."
 #: src/pages/profile.tsx
 msgid "Mails go to the address you sign in with."
 msgstr "Mails go to the address you sign in with."
+
+#: src/pages/event.tsx
+msgid "No lead is there. Cancel the event for everyone, or sort out a stand-in in the chat."
+msgstr "No lead is there. Cancel the event for everyone, or sort out a stand-in in the chat."
 
 #: src/pages/games.tsx
 msgid "Synced {when}"
@@ -10314,6 +10437,10 @@ msgstr "School holidays"
 msgid "automatically all KiHaSL/JuHaSL"
 msgstr "automatically all KiHaSL/JuHaSL"
 
+#: src/pages/event.tsx
+msgid "Players and their parents get a push that you are not there, without your note."
+msgstr "Players and their parents get a push that you are not there, without your note."
+
 #: modules/duties/app/helpers.tsx
 msgid "No upcoming events"
 msgstr "No upcoming events"
@@ -10609,6 +10736,10 @@ msgstr "What is new"
 #: src/pages/join.tsx
 msgid "Access for"
 msgstr "Access for"
+
+#: worker/routes/events.ts
+msgid "{name} is not there for {what} on {when}. It takes place as planned."
+msgstr "{name} is not there for {what} on {when}. It takes place as planned."
 
 #: src/faq.tsx
 msgid "The app belongs to our club only and runs on its own address. If it were in the App Store, the whole world would have access to the app. That is unnecessary and we do not want it either."

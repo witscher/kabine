@@ -289,6 +289,18 @@ const coaches = (): Faq[] => [
     ),
   },
   {
+    q: t`I can't make it to a training myself, but it should take place.`,
+    a: (
+      <p>
+        <Trans>
+          Do not cancel. In the event, tap <em>I'm not there</em> under <em>In charge</em>. The other coaches get a push with your note, for example who
+          runs the training instead. If you switch it on, players and parents learn that you are missing, without the note. If you can make it after
+          all, tap <em>I'm there after all</em>.
+        </Trans>
+      </p>
+    ),
+  },
+  {
     q: t`How do I update the game schedule?`,
     a: (
       <p>

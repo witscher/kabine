@@ -162,6 +162,13 @@ export interface EventContext {
   unexcused: Set<string>;
   /** Teams joining optionally: `${eventId}:${teamId}` */
   optional: Set<string>;
+  /** Leaders who said "I'm not there": `${eventId}:${personId}` (worker/domain/leaders.ts) */
+  leaderAbsences: Map<string, LeaderAbsence>;
+}
+
+export interface LeaderAbsence {
+  note: string | null;
+  teamInformed: boolean;
 }
 
 function push<K, V>(map: Map<K, V[]>, key: K, value: V) {
@@ -193,7 +200,7 @@ export async function loadEventContext(db: D1Database, events: EventRow[]): Prom
   const ruleIds = [...new Set(events.map((e) => e.rule_id).filter((r): r is number => r != null))];
   const hasClubWide = events.some((e) => e.club_wide === 1);
 
-  const [teamRows, responses, nominations, helps, unexcusedRows] = await db.batch([
+  const [teamRows, responses, nominations, helps, unexcusedRows, absenceRows] = await db.batch([
     db
       .prepare(
         `SELECT et.event_id, et.optional AS et_optional, t.id, t.name, t.age_class_code, COALESCE(ac.game_minutes, 120) AS game_minutes, t.decline_hours_training,
@@ -225,7 +232,12 @@ export async function loadEventContext(db: D1Database, events: EventRow[]): Prom
       )
       .bind(list(ids)),
     db.prepare("SELECT event_id, person_id FROM unexcused_absences WHERE event_id IN (SELECT value FROM json_each(?))").bind(list(ids)),
+    db.prepare("SELECT event_id, person_id, note, team_informed FROM leader_absences WHERE event_id IN (SELECT value FROM json_each(?))").bind(list(ids)),
   ]);
+  const leaderAbsences = new Map<string, LeaderAbsence>();
+  for (const a of absenceRows!.results as { event_id: number; person_id: number; note: string | null; team_informed: number }[]) {
+    leaderAbsences.set(`${a.event_id}:${a.person_id}`, { note: a.note, teamInformed: a.team_informed === 1 });
+  }
   const unexcused = new Set((unexcusedRows!.results as { event_id: number; person_id: number }[]).map((u) => `${u.event_id}:${u.person_id}`));
 
   const teams = new Map<number, TeamInfo>();
@@ -367,6 +379,7 @@ export async function loadEventContext(db: D1Database, events: EventRow[]): Prom
     guardianOf: new Set(guardianRows.map((g) => `${g.guardian_id}:${g.child_id}`)),
     unexcused,
     optional,
+    leaderAbsences,
   };
 }
 
@@ -550,6 +563,7 @@ export function toSummary(e: EventRow, ctx: EventContext, actor: Actor, now: num
     mine: myParticipations(e, ctx, actor, now),
     canManage,
     unexcusedCount: canManage ? parts.filter((p) => ctx.unexcused.has(`${e.id}:${p.person.id}`)).length : 0,
+    leaderAbsent: ctx.leaderAbsences.has(`${e.id}:${actor.personId}`),
     game:
       e.kind === "game"
         ? {
@@ -622,7 +636,7 @@ export function toDetail(e: EventRow, ctx: EventContext, actor: Actor, now: numb
         }))
         .sort((a, b) => a.name.localeCompare(b.name, "de"))
     : null;
-  return { ...summary, participants, roster, dutyManage: false, organizers: null };
+  return { ...summary, participants, roster, dutyManage: false, organizers: null, leaders: [] };
 }
 
 /** SQL: the person (expression) takes part in event e, is nominated, requested or referees there as KiHaSL/JuHaSL. */
@@ -768,6 +782,7 @@ export function mergeContexts(a: EventContext, b: EventContext): EventContext {
     guardianOf: new Set([...a.guardianOf, ...b.guardianOf]),
     unexcused: new Set([...a.unexcused, ...b.unexcused]),
     optional: new Set([...a.optional, ...b.optional]),
+    leaderAbsences: new Map([...a.leaderAbsences, ...b.leaderAbsences]),
   };
 }
 

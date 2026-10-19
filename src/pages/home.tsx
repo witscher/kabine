@@ -108,6 +108,7 @@ function NextCard({ event, onDecline, later = false }: { event: EventSummary; on
           ) : null}
         </div>
         <MeetingLine event={event} />
+        <LeaderAbsentBadge event={event} />
         <DutyChips event={event} />
         <ModuleCardLines event={event} />
         {counts ? (
@@ -213,6 +214,7 @@ function CoachNextCard({ event, later = false }: { event: EventSummary; later?: 
           ) : null}
         </div>
         <MeetingLine event={event} />
+        <LeaderAbsentBadge event={event} />
         <div class="stat-tiles">
           <div class="stat-tile yellow">
             <div class="n">{c.yes}</div>
@@ -296,6 +298,7 @@ function EventRow({ event }: { event: EventSummary }) {
           </div>
         )}
         {!cancelled ? <DutyChips event={event} /> : null}
+        {!cancelled ? <LeaderAbsentBadge event={event} /> : null}
         {event.isPast && !cancelled ? <UnexcusedChips event={event} /> : null}
         {others.length ? (
           <div class="who">
@@ -330,6 +333,18 @@ function EventRow({ event }: { event: EventSummary }) {
       ) : null}
       {event.kind === "game" && !cancelled ? <Ball class="event-ball" /> : null}
     </a>
+  );
+}
+
+/** A coach, lead, staff member or organiser said "I'm not there" for this event. */
+function LeaderAbsentBadge({ event }: { event: EventSummary }) {
+  if (!event.leaderAbsent || event.cancelled) return null;
+  return (
+    <div class="row-gap" style={{ gap: "6px", marginTop: "4px" }}>
+      <span class="badge warn">
+        <Trans>You're not there</Trans>
+      </span>
+    </div>
   );
 }
 
