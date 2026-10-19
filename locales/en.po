@@ -1815,6 +1815,10 @@ msgstr "Reply: {reply}"
 msgid "Mandatory for admins. With it you can also get into the app by code without a passkey."
 msgstr "Mandatory for admins. With it you can also get into the app by code without a passkey."
 
+#: src/candidates.tsx
+msgid "Suggestions"
+msgstr "Suggestions"
+
 #: src/pages/setup-wizard.tsx
 msgid "Coaches and players come next. These are the usual steps."
 msgstr "Coaches and players come next. These are the usual steps."
@@ -2181,6 +2185,10 @@ msgstr "Coaches add stand-ins in their own team."
 msgid "Calendar"
 msgstr "Calendar"
 
+#: src/candidates.tsx
+msgid "{name} (core squad)"
+msgstr "{name} (core squad)"
+
 #: worker/routes/squad.ts
 msgid "another game"
 msgstr "another game"
@@ -2530,6 +2538,7 @@ msgstr "Section"
 msgid "Declined at short notice"
 msgstr "Declined at short notice"
 
+#: src/candidates.tsx
 #: src/pages/home.tsx
 msgid "Filter by team"
 msgstr "Filter by team"
@@ -2705,10 +2714,6 @@ msgstr "I'm in after all"
 #: worker/routes/squad.ts
 msgid "This person has already been requested."
 msgstr "This person has already been requested."
-
-#: src/pages/squad.tsx
-msgid "Suggestions from the second team of the same age class and the next younger youth team. The request goes to the person or their parents, and the coaches of their home team are informed."
-msgstr "Suggestions from the second team of the same age class and the next younger youth team. The request goes to the person or their parents, and the coaches of their home team are informed."
 
 #: src/pages/team.tsx
 msgid "No one found"
@@ -3887,6 +3892,10 @@ msgstr "Without e-mail there is no sign-in by code and no e-mail reminders. Pass
 msgid "Active"
 msgstr "Active"
 
+#: worker/routes/teams.ts
+msgid "Stand-ins come from a lower-ranked team of the same age class or the next younger youth team."
+msgstr "Stand-ins come from a lower-ranked team of the same age class or the next younger youth team."
+
 #: worker/routes/avatars.ts
 msgid "{name} would like to use a new profile picture. Take a look and approve it."
 msgstr "{name} would like to use a new profile picture. Take a look and approve it."
@@ -4885,6 +4894,10 @@ msgid "{name} is no longer riding with {driver}. The driver will be notified."
 msgstr "{name} is no longer riding with {driver}. The driver will be notified."
 
 #: src/pages/team.tsx
+msgid "From lower-ranked teams of the same age class and the next younger youth team, here: {sources}."
+msgstr "From lower-ranked teams of the same age class and the next younger youth team, here: {sources}."
+
+#: src/pages/team.tsx
 msgid "The previous link will then stop working."
 msgstr "The previous link will then stop working."
 
@@ -5664,6 +5677,10 @@ msgstr "{coaches, plural, one {# coach} other {# coaches}}"
 msgid "Please choose two colours."
 msgstr "Please choose two colours."
 
+#: src/pages/squad.tsx
+msgid "Suggestions from lower-ranked teams of the same age class and the next younger youth team. The request goes to the person or their parents, and the coaches of their home team are informed."
+msgstr "Suggestions from lower-ranked teams of the same age class and the next younger youth team. The request goes to the person or their parents, and the coaches of their home team are informed."
+
 #: src/pages/plans.tsx
 msgid "{occurrences} events will be created for the next {weeks} weeks."
 msgstr "{occurrences} events will be created for the next {weeks} weeks."
@@ -6366,6 +6383,7 @@ msgstr "Year of birth missing"
 
 #: modules/duties/app/admin.tsx
 #: modules/duties/app/admin.tsx
+#: src/candidates.tsx
 #: src/pages/admin.tsx
 #: src/pages/admin.tsx
 #: src/pages/admin.tsx
@@ -6705,6 +6723,10 @@ msgstr "Continue the setup wizard"
 #: src/pages/home.tsx
 msgid "Past events"
 msgstr "Past events"
+
+#: src/pages/squad.tsx
+msgid "Suggestions from lower-ranked teams of the same age class and the next younger youth team, here: {sources}. The request goes to the person or their parents, and the coaches of their home team are informed."
+msgstr "Suggestions from lower-ranked teams of the same age class and the next younger youth team, here: {sources}. The request goes to the person or their parents, and the coaches of their home team are informed."
 
 #: worker/routes/events.ts
 msgid "New info on {label} on {date} at {meetAt}."
@@ -7670,10 +7692,6 @@ msgstr "{label} by SMS"
 msgid "created the event"
 msgstr "created the event"
 
-#: src/pages/team.tsx
-msgid "Permanent stand-ins from the younger youth team or the second team see your games and can accept and decline."
-msgstr "Permanent stand-ins from the younger youth team or the second team see your games and can accept and decline."
-
 #: src/pages/admin.tsx
 msgid "Choose teams"
 msgstr "Choose teams"
@@ -7760,6 +7778,10 @@ msgstr "Download as file"
 #: src/pages/special.tsx
 msgid "All players of all teams"
 msgstr "All players of all teams"
+
+#: src/pages/team.tsx
+msgid "Permanent stand-ins from the next younger youth team or a lower-ranked team of the same age class see your games and can accept and decline."
+msgstr "Permanent stand-ins from the next younger youth team or a lower-ranked team of the same age class see your games and can accept and decline."
 
 #: src/pages/privacy.tsx
 #: src/pages/setup-wizard.tsx
@@ -8320,6 +8342,10 @@ msgstr "{name}, {from} to {to}: holiday training times for {teams}."
 #: src/pages/admin.tsx
 msgid "Notify everyone immediately"
 msgstr "Notify everyone immediately"
+
+#: src/pages/team.tsx
+msgid "From lower-ranked teams of the same age class and the next younger youth team."
+msgstr "From lower-ranked teams of the same age class and the next younger youth team."
 
 #: src/pages/admin.tsx
 msgid "Oldest year of birth"
@@ -9037,6 +9063,7 @@ msgstr "Default for home games"
 msgid "Permanently absent ({weekdays})"
 msgstr "Permanently absent ({weekdays})"
 
+#: src/candidates.tsx
 #: src/pages/team.tsx
 #: src/pages/team.tsx
 #: src/pages/team.tsx
@@ -9756,10 +9783,6 @@ msgstr "Functions"
 msgid "Start time"
 msgstr "Start time"
 
-#: worker/routes/teams.ts
-msgid "Stand-ins come from the 2nd team of the same age class or the next younger youth."
-msgstr "Stand-ins come from the 2nd team of the same age class or the next younger youth."
-
 #: modules/carpools/app/card.tsx
 msgid "Nobody is offering seats yet"
 msgstr "Nobody is offering seats yet"
@@ -9808,10 +9831,6 @@ msgstr "Regular"
 #: src/respond.tsx
 msgid "Help request from {team}: turned down"
 msgstr "Help request from {team}: turned down"
-
-#: src/pages/team.tsx
-msgid "From the second team of the same age class or the next younger youth team."
-msgstr "From the second team of the same age class or the next younger youth team."
 
 #: src/pages/team.tsx
 msgid "Same names in the squad: <0>{names}</0>. Please add the last names before you share the player link, otherwise the selection is ambiguous."

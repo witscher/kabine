@@ -41,9 +41,13 @@ describe("Spieler aus einer anderen Mannschaft aufnehmen", () => {
     const res = await api(`/teams/${wc1}/player-candidates`, { cookie: coachCookie });
     expect(res.status).toBe(200);
     expect(res.body.candidates.map((c: any) => [c.person.id, c.teams])).toEqual([
-      [lina, "wC2"],
-      [nora, "wD"],
+      [lina, [{ id: wc2, name: "wC2", core: false }]],
+      [nora, [{ id: wd, name: "wD", core: false }]],
     ]);
+    // The core squad of the other team is marked
+    await exec("INSERT INTO core_squad (team_id, person_id) VALUES (?, ?)", wc2, lina);
+    const again = await api(`/teams/${wc1}/player-candidates`, { cookie: coachCookie });
+    expect(again.body.candidates[0].teams).toEqual([{ id: wc2, name: "wC2", core: true }]);
     // Fremde Trainer dürfen nicht
     expect((await api(`/teams/${wc1}/player-candidates`, { cookie: await loginAs(coach2) })).status).toBe(403);
   });
@@ -79,6 +83,10 @@ describe("Spieler aus einer anderen Mannschaft aufnehmen", () => {
     const linaRows = res.body.candidates.filter((c: any) => c.person.id === lina);
     expect(linaRows).toHaveLength(1);
     expect(linaRows[0].team.name).toBe("wC1 · wC2");
+    expect(linaRows[0].teams).toEqual([
+      { id: wc1, name: "wC1", core: false },
+      { id: wc2, name: "wC2", core: false },
+    ]);
   });
 });
 

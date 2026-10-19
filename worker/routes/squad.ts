@@ -309,11 +309,21 @@ export interface TeamCandidate {
   /** All matching teams of the person (e.g. wC1 and wC2) */
   team_ids: number[];
   team_name: string;
+  /** The same teams with core squad membership, for the picker in the app */
+  teams: CandidateTeam[];
+}
+
+export interface CandidateTeam {
+  id: number;
+  name: string;
+  /** In the core squad of this team */
+  core: boolean;
 }
 
 /**
  * Candidates from other teams, one row per person.
- * - help: 2nd team of the same age class or the next lower age class, without everyone already in the team.
+ * - help: lower-ranked team of the same age class (higher level, e.g. wC3 for the wC2) or the next lower age class,
+ *   without everyone already in the team.
  * - player: any other team of the same age class or the next lower one, without those who already play here
  *   (so a helper can become a player).
  */
@@ -325,9 +335,10 @@ export async function teamCandidates(db: D1Database, teamId: number, mode: "help
   );
   if (!team) return [];
   const ac = await ageClassFor(db, team.age_class_code);
-  const rows = await all<{ person_id: number; first_name: string; last_name: string | null; is_active: number; team_id: number; team_name: string }>(
+  const rows = await all<{ person_id: number; first_name: string; last_name: string | null; is_active: number; team_id: number; team_name: string; is_core: number }>(
     db,
-    `SELECT DISTINCT p.id AS person_id, p.first_name, p.last_name, p.is_active, t.id AS team_id, t.name AS team_name
+    `SELECT DISTINCT p.id AS person_id, p.first_name, p.last_name, p.is_active, t.id AS team_id, t.name AS team_name,
+            EXISTS (SELECT 1 FROM core_squad cs WHERE cs.team_id = t.id AND cs.person_id = p.id) AS is_core
        FROM teams t
        JOIN team_memberships tm ON tm.team_id = t.id AND tm.role = 'player'
        JOIN persons p ON p.id = tm.person_id AND p.is_former = 0
@@ -348,17 +359,27 @@ export async function teamCandidates(db: D1Database, teamId: number, mode: "help
   const byPerson = new Map<number, TeamCandidate>();
   for (const r of rows) {
     const c = byPerson.get(r.person_id);
+    const team = { id: r.team_id, name: r.team_name, core: r.is_core === 1 };
     if (c) {
       c.team_ids.push(r.team_id);
       c.team_name += ` · ${r.team_name}`;
+      c.teams.push(team);
     } else {
-      byPerson.set(r.person_id, { person_id: r.person_id, first_name: r.first_name, last_name: r.last_name, is_active: r.is_active, team_ids: [r.team_id], team_name: r.team_name });
+      byPerson.set(r.person_id, {
+        person_id: r.person_id,
+        first_name: r.first_name,
+        last_name: r.last_name,
+        is_active: r.is_active,
+        team_ids: [r.team_id],
+        team_name: r.team_name,
+        teams: [team],
+      });
     }
   }
   return [...byPerson.values()];
 }
 
-/** Players from the 2nd team of the same age class or the next lower age class. */
+/** Players from lower-ranked teams of the same age class or the next lower age class. */
 export function helpCandidates(db: D1Database, teamId: number) {
   return teamCandidates(db, teamId, "help");
 }
@@ -379,6 +400,7 @@ squadRoutes.get("/events/:id/help-candidates", async (c) => {
       .map((r) => ({
         person: { id: r.person_id, firstName: r.first_name, lastName: r.last_name },
         team: { id: r.team_ids[0]!, name: r.team_name },
+        teams: r.teams,
         conflict: conflicts.get(r.person_id) ?? null,
         requested: requested.has(r.person_id),
       })),

@@ -1861,6 +1861,11 @@ msgid "Mandatory for admins. With it you can also get into the app by code witho
 msgstr "Für Admins Pflicht. Damit kommst du auch ohne Passkey per Code in die App."
 
 # ai
+#: src/candidates.tsx
+msgid "Suggestions"
+msgstr "Vorschläge"
+
+# ai
 #: src/pages/setup-wizard.tsx
 msgid "Coaches and players come next. These are the usual steps."
 msgstr "Als Nächstes kommen Trainer und Spieler dazu. Das sind die üblichen Schritte."
@@ -2244,6 +2249,11 @@ msgstr "Aushilfen tragen die Trainer in ihrer Mannschaft ein."
 msgid "Calendar"
 msgstr "Kalender"
 
+# ai
+#: src/candidates.tsx
+msgid "{name} (core squad)"
+msgstr "{name} (Stammkader)"
+
 #: worker/routes/squad.ts
 msgid "another game"
 msgstr "ein anderes Spiel"
@@ -2605,6 +2615,7 @@ msgstr "Bereich"
 msgid "Declined at short notice"
 msgstr "Kurzfristig abgesagt"
 
+#: src/candidates.tsx
 #: src/pages/home.tsx
 msgid "Filter by team"
 msgstr "Nach Mannschaft filtern"
@@ -2784,10 +2795,6 @@ msgstr "Bin doch dabei"
 #: worker/routes/squad.ts
 msgid "This person has already been requested."
 msgstr "Diese Person wurde bereits angefragt."
-
-#: src/pages/squad.tsx
-msgid "Suggestions from the second team of the same age class and the next younger youth team. The request goes to the person or their parents, and the coaches of their home team are informed."
-msgstr "Vorschläge aus der 2. Mannschaft derselben Altersklasse und der nächstjüngeren Jugend. Die Anfrage geht an die Person bzw. ihre Eltern, die Trainer der Stammmannschaft werden informiert."
 
 #: src/pages/team.tsx
 msgid "No one found"
@@ -4009,6 +4016,11 @@ msgstr "Ohne E-Mail gibt es keine Anmeldung per Code und keine Erinnerungen per 
 msgid "Active"
 msgstr "Aktiv"
 
+# ai
+#: worker/routes/teams.ts
+msgid "Stand-ins come from a lower-ranked team of the same age class or the next younger youth team."
+msgstr "Aushilfen kommen aus einer nachrangigen Mannschaft derselben Altersklasse oder der nächstjüngeren Jugend."
+
 #: worker/routes/avatars.ts
 msgid "{name} would like to use a new profile picture. Take a look and approve it."
 msgstr "{name} möchte ein neues Profilbild verwenden. Schau es dir an und gib es frei."
@@ -5032,6 +5044,11 @@ msgstr "API-Schlüssel"
 msgid "{name} is no longer riding with {driver}. The driver will be notified."
 msgstr "{name} fährt nicht mehr bei {driver} mit. Der Fahrer wird benachrichtigt."
 
+# ai
+#: src/pages/team.tsx
+msgid "From lower-ranked teams of the same age class and the next younger youth team, here: {sources}."
+msgstr "Aus nachrangigen Mannschaften derselben Altersklasse und der nächstjüngeren Jugend, hier: {sources}."
+
 #: src/pages/team.tsx
 msgid "The previous link will then stop working."
 msgstr "Der bisherige Link funktioniert dann nicht mehr."
@@ -5837,6 +5854,11 @@ msgstr "{coaches, plural, one {# Trainer} other {# Trainer}}"
 msgid "Please choose two colours."
 msgstr "Bitte wähle zwei Farben."
 
+# ai
+#: src/pages/squad.tsx
+msgid "Suggestions from lower-ranked teams of the same age class and the next younger youth team. The request goes to the person or their parents, and the coaches of their home team are informed."
+msgstr "Vorschläge aus nachrangigen Mannschaften derselben Altersklasse und der nächstjüngeren Jugend. Die Anfrage geht an die Person bzw. ihre Eltern, die Trainer der Stammmannschaft werden informiert."
+
 #: src/pages/plans.tsx
 msgid "{occurrences} events will be created for the next {weeks} weeks."
 msgstr "Für die nächsten {weeks} Wochen werden {occurrences} Termine erzeugt."
@@ -6559,6 +6581,7 @@ msgstr "Jahrgang fehlt"
 
 #: modules/duties/app/admin.tsx
 #: modules/duties/app/admin.tsx
+#: src/candidates.tsx
 #: src/pages/admin.tsx
 #: src/pages/admin.tsx
 #: src/pages/admin.tsx
@@ -6905,6 +6928,11 @@ msgstr "Einrichtungsassistent fortsetzen"
 #: src/pages/home.tsx
 msgid "Past events"
 msgstr "Vergangene Termine"
+
+# ai
+#: src/pages/squad.tsx
+msgid "Suggestions from lower-ranked teams of the same age class and the next younger youth team, here: {sources}. The request goes to the person or their parents, and the coaches of their home team are informed."
+msgstr "Vorschläge aus nachrangigen Mannschaften derselben Altersklasse und der nächstjüngeren Jugend, hier: {sources}. Die Anfrage geht an die Person bzw. ihre Eltern, die Trainer der Stammmannschaft werden informiert."
 
 #: worker/routes/events.ts
 msgid "New info on {label} on {date} at {meetAt}."
@@ -7898,10 +7926,6 @@ msgstr "{label} per SMS"
 msgid "created the event"
 msgstr "hat den Termin angelegt"
 
-#: src/pages/team.tsx
-msgid "Permanent stand-ins from the younger youth team or the second team see your games and can accept and decline."
-msgstr "Dauerhafte Aushilfen aus der jüngeren Jugend oder der 2. Mannschaft sehen eure Spiele und können zu- und absagen."
-
 #: src/pages/admin.tsx
 msgid "Choose teams"
 msgstr "Mannschaften wählen"
@@ -7988,6 +8012,11 @@ msgstr "Als Datei laden"
 #: src/pages/special.tsx
 msgid "All players of all teams"
 msgstr "Alle Spielerinnen und Spieler aller Mannschaften"
+
+# ai
+#: src/pages/team.tsx
+msgid "Permanent stand-ins from the next younger youth team or a lower-ranked team of the same age class see your games and can accept and decline."
+msgstr "Dauerhafte Aushilfen aus der nächstjüngeren Jugend oder einer nachrangigen Mannschaft derselben Altersklasse sehen eure Spiele und können zu- und absagen."
 
 #: src/pages/privacy.tsx
 #: src/pages/setup-wizard.tsx
@@ -8562,6 +8591,11 @@ msgstr "{name}, {from} bis {to}: Ferien-Trainingszeiten für {teams}."
 #: src/pages/admin.tsx
 msgid "Notify everyone immediately"
 msgstr "Alle sofort benachrichtigen"
+
+# ai
+#: src/pages/team.tsx
+msgid "From lower-ranked teams of the same age class and the next younger youth team."
+msgstr "Aus nachrangigen Mannschaften derselben Altersklasse und der nächstjüngeren Jugend."
 
 #: src/pages/admin.tsx
 msgid "Oldest year of birth"
@@ -9302,6 +9336,7 @@ msgstr "Standard für Heimspiele"
 msgid "Permanently absent ({weekdays})"
 msgstr "Dauerhaft abwesend ({weekdays})"
 
+#: src/candidates.tsx
 #: src/pages/team.tsx
 #: src/pages/team.tsx
 #: src/pages/team.tsx
@@ -10039,10 +10074,6 @@ msgstr "Funktionen"
 msgid "Start time"
 msgstr "Beginn"
 
-#: worker/routes/teams.ts
-msgid "Stand-ins come from the 2nd team of the same age class or the next younger youth."
-msgstr "Aushilfen kommen aus der 2. Mannschaft derselben Altersklasse oder der nächstjüngeren Jugend."
-
 #: modules/carpools/app/card.tsx
 msgid "Nobody is offering seats yet"
 msgstr "Noch niemand bietet Plätze an"
@@ -10094,10 +10125,6 @@ msgstr "Regulär"
 #: src/respond.tsx
 msgid "Help request from {team}: turned down"
 msgstr "Aushilfe-Anfrage der {team}: abgelehnt"
-
-#: src/pages/team.tsx
-msgid "From the second team of the same age class or the next younger youth team."
-msgstr "Aus der 2. Mannschaft derselben Altersklasse oder der nächstjüngeren Jugend."
 
 #: src/pages/team.tsx
 msgid "Same names in the squad: <0>{names}</0>. Please add the last names before you share the player link, otherwise the selection is ambiguous."

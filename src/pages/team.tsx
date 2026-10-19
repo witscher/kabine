@@ -7,7 +7,8 @@ import { renderSVG } from "uqr";
 import type { PersonRef } from "../../shared/types";
 import { api, errorMessage } from "../api";
 import type { DutyTypeInfo, TemplateInfo } from "../duty-blocks";
-import { fullDate, isoToLocalDate, personName } from "../format";
+import { CandidateList, type CandidateTeam, candidateTeams } from "../candidates";
+import { fullDate, isoToLocalDate, joinNames, personName } from "../format";
 import { PersonAvatar } from "../avatar";
 import { ScheduleSection } from "./games";
 import { Icon } from "../icons";
@@ -418,7 +419,9 @@ function RosterTab({ team, onChanged }: { team: TeamDetail; onChanged: () => voi
           </ul>
         ) : (
           <p class="small muted">
-            <Trans>Permanent stand-ins from the younger youth team or the second team see your games and can accept and decline.</Trans>
+            <Trans>
+              Permanent stand-ins from the next younger youth team or a lower-ranked team of the same age class see your games and can accept and decline.
+            </Trans>
           </p>
         )}
       </section>
@@ -640,7 +643,7 @@ function AddPlayerSheet({ team, onClose, onDone }: { team: TeamDetail; onClose: 
 
 /** Players of another team of the same or the next younger age class, who then play in both. */
 function ExistingPlayerPicker({ team, onDone }: { team: TeamDetail; onDone: () => void }) {
-  const { data, error, reload } = useQuery<{ candidates: { person: PersonRef; teams: string; isActive: boolean }[] }>(`/teams/${team.id}/player-candidates`);
+  const { data, error, reload } = useQuery<{ candidates: { person: PersonRef; teams: CandidateTeam[]; isActive: boolean }[] }>(`/teams/${team.id}/player-candidates`);
   if (error) return <ErrorBox error={error} onRetry={reload} />;
   if (!data) return <Spinner />;
   const teamName = team.name;
@@ -654,31 +657,24 @@ function ExistingPlayerPicker({ team, onDone }: { team: TeamDetail; onDone: () =
           <Trans>There is no one in the matching teams who does not already play here.</Trans>
         </Empty>
       ) : null}
-      <ul class="list">
-        {data.candidates.map((c) => (
-          <li class="list-row">
-            <span class="main">
-              <span class="title">{personName(c.person)}</span>
-              <span class="sub">
-                {c.teams}
-                {c.isActive ? "" : " · " + t`inactive`}
-              </span>
-            </span>
-            <Button
-              size="sm"
-              onClick={async () => {
-                await api.post(`/teams/${team.id}/players/existing`, { personId: c.person.id });
-                const name = c.person.firstName;
-                toast(t`${name} now also plays for ${teamName}.`);
-                void reload();
-                onDone();
-              }}
-            >
-              <Trans>Add to squad</Trans>
-            </Button>
-          </li>
-        ))}
-      </ul>
+      <CandidateList
+        candidates={data.candidates}
+        note={(c) => (c.isActive ? null : <span class="small muted">{t`inactive`}</span>)}
+        action={(c) => (
+          <Button
+            size="sm"
+            onClick={async () => {
+              await api.post(`/teams/${team.id}/players/existing`, { personId: c.person.id });
+              const name = c.person.firstName;
+              toast(t`${name} now also plays for ${teamName}.`);
+              void reload();
+              onDone();
+            }}
+          >
+            <Trans>Add to squad</Trans>
+          </Button>
+        )}
+      />
     </div>
   );
 }
@@ -731,11 +727,16 @@ function CoreSheet({ team, onClose, onDone }: { team: TeamDetail; onClose: () =>
 }
 
 function HelperSheet({ team, onClose, onDone }: { team: TeamDetail; onClose: () => void; onDone: () => void }) {
-  const { data, error } = useQuery<{ candidates: { person: PersonRef; team: { id: number; name: string }; isActive: boolean }[] }>(`/teams/${team.id}/helper-candidates`);
+  const { data, error } = useQuery<{ candidates: { person: PersonRef; teams: CandidateTeam[]; isActive: boolean }[] }>(`/teams/${team.id}/helper-candidates`);
+  const sources = joinNames(candidateTeams(data?.candidates ?? []));
   return (
     <Sheet open onClose={onClose} title={t`Permanent stand-in`}>
       <p class="muted">
-        <Trans>From the second team of the same age class or the next younger youth team.</Trans>
+        {sources ? (
+          <Trans>From lower-ranked teams of the same age class and the next younger youth team, here: {sources}.</Trans>
+        ) : (
+          <Trans>From lower-ranked teams of the same age class and the next younger youth team.</Trans>
+        )}
       </p>
       {error ? <ErrorBox error={error} /> : null}
       {!data ? <Spinner /> : null}
@@ -744,14 +745,11 @@ function HelperSheet({ team, onClose, onDone }: { team: TeamDetail; onClose: () 
           <Trans>No matching players found.</Trans>
         </Notice>
       ) : null}
-      <ul class="list">
-        {(data?.candidates ?? []).map((c) => (
-          <li class="list-row">
-            <span class="main">
-              <span class="title">{personName(c.person)}</span>
-              <span class="sub">{c.team.name}</span>
-            </span>
-            {team.helpers.some((h) => h.person.id === c.person.id) ? (
+      {data?.candidates.length ? (
+        <CandidateList
+          candidates={data.candidates}
+          action={(c) =>
+            team.helpers.some((h) => h.person.id === c.person.id) ? (
               <span class="pill pill-muted">
                 <Trans>Stand-in</Trans>
               </span>
@@ -767,10 +765,10 @@ function HelperSheet({ team, onClose, onDone }: { team: TeamDetail; onClose: () 
               >
                 <Trans>Add</Trans>
               </Button>
-            )}
-          </li>
-        ))}
-      </ul>
+            )
+          }
+        />
+      ) : null}
     </Sheet>
   );
 }

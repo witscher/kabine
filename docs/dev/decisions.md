@@ -2,6 +2,10 @@
 
 Decisions not covered by `docs/dev/roadmap.md`, with reasons. Newest first.
 
+## Picking players from other teams (October 2026)
+
+When a coach adds a player from another team, picks a permanent stand-in or requests a stand-in for a game, the list can be filtered by the team the people come from (chips only when there is more than one). Whoever is in the core squad of their own team is marked and listed first, since that is usually what the coach wants to know. The hint names the actual source teams instead of "the second team": stand-ins come from lower-ranked teams of the same age class (higher level, e.g. wC3 for the wC2) and the next younger youth team, and players can be added from any other team of the same age class or the next younger one. `teamCandidates` (`worker/routes/squad.ts`) returns `teams: { id, name, core }[]` per person; the list is `src/candidates.tsx`.
+
 ## Modules in their own folders, for contributions with coding agents (October 2026)
 
 Before going public, the repository is shaped so that someone with an idea and a coding agent can add a module, a game schedule source or a provider without knowing the core. Every module is a folder `modules/<name>/` with a manifest (`module.ts`: id, kind, status, default, dependency, sports, API paths, texts, privacy), an optional worker part and an optional app part. The core calls hooks (`worker/module-api.ts`, `src/module-api.ts`) instead of knowing the modules: routes, cron, data on event cards and the event page, cleanup when participants drop out or people leave, export tables, tabs, admin entries, game links. Worker and app parts are found by the build (`import.meta.glob`), the manifests are listed in `modules/index.ts` so the module ids stay typed. Contract tests (`test/modules-contract.test.ts`, `test/fixtures-contract.test.ts`) run for every module, and `npm run new` creates a module or connector that passes them. New modules start as beta, switched off. `AGENTS.md` is the entry point every coding agent reads; `CLAUDE.md` imports it and adds the maintainer's notes.

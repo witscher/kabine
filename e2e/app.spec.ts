@@ -701,14 +701,18 @@ test("Kader: Spielerin aus der 2. Mannschaft zusätzlich aufnehmen", async () =>
   const { id: second } = await (await page.request.post("/api/teams", { data: { name: "wT2", ageClassCode: "wD", level: 2 } })).json();
   const { id: nele } = await (await page.request.post("/api/admin/persons", { data: { firstName: "Nele", lastName: "Zwei", birthYear: 2015 } })).json();
   expect((await page.request.post(`/api/teams/${second}/members`, { data: { personId: nele, role: "player" } })).ok()).toBe(true);
+  expect((await page.request.put(`/api/teams/${second}/core-squad`, { data: { personIds: [nele] } })).ok()).toBe(true);
 
   await page.goto("/team/1");
   const roster = page.getByRole("region", { name: "Spielerinnen und Spieler" });
   await roster.getByRole("button", { name: "Hinzufügen" }).click();
   const sheet = page.getByRole("dialog", { name: "Spieler hinzufügen" });
   await sheet.getByRole("button", { name: "Aus anderer Mannschaft" }).click();
+  // Core squad of the other team is marked, filter by team
+  const filter = sheet.getByRole("group", { name: "Nach Mannschaft filtern" });
+  if (await filter.count()) await filter.getByRole("button", { name: "wT2" }).click();
   const row = sheet.locator(".list-row", { hasText: "Nele Zwei" });
-  await expect(row).toContainText("wT2");
+  await expect(row).toContainText("wT2 (Stammkader)");
   await row.getByRole("button", { name: "Aufnehmen" }).click();
   await expect(page.getByText("Nele spielt jetzt auch in der wT.")).toBeVisible();
   await sheet.getByRole("button", { name: /Schließen|Zurück/ }).first().click().catch(() => page.keyboard.press("Escape"));

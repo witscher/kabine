@@ -3,7 +3,8 @@ import { Trans } from "@lingui/react/macro";
 import { useEffect, useMemo, useState } from "preact/hooks";
 import type { EventSummary, ParticipationStatus, PersonRef } from "../../shared/types";
 import { api } from "../api";
-import { personName, shortDate, shortName, time } from "../format";
+import { CandidateList, type CandidateTeam, candidateTeams } from "../candidates";
+import { joinNames, personName, shortDate, shortName, time } from "../format";
 import { Icon } from "../icons";
 import { invalidate, useQuery } from "../store";
 import { Button, confirmDialog, ErrorBox, Notice, Sheet, Spinner, toast, useDocumentTitle } from "../ui";
@@ -281,16 +282,24 @@ export function SquadPage({ id }: { id: string }) {
 }
 
 function HelpSheet({ eventId, teamName, onClose, onDone }: { eventId: string; teamName: string; onClose: () => void; onDone: () => void }) {
-  const { data, error, reload } = useQuery<{ candidates: { person: PersonRef; team: { id: number; name: string }; conflict: string | null; requested: boolean }[] }>(
+  const { data, error, reload } = useQuery<{ candidates: { person: PersonRef; teams: CandidateTeam[]; conflict: string | null; requested: boolean }[] }>(
     `/events/${eventId}/help-candidates`,
   );
+  const sources = joinNames(candidateTeams(data?.candidates ?? []));
   return (
     <Sheet open onClose={onClose} title={t`Request a stand-in`}>
       <p class="muted">
-        <Trans>
-          Suggestions from the second team of the same age class and the next younger youth team. The request goes to the person or their parents, and the
-          coaches of their home team are informed.
-        </Trans>
+        {sources ? (
+          <Trans>
+            Suggestions from lower-ranked teams of the same age class and the next younger youth team, here: {sources}. The request goes to the person or
+            their parents, and the coaches of their home team are informed.
+          </Trans>
+        ) : (
+          <Trans>
+            Suggestions from lower-ranked teams of the same age class and the next younger youth team. The request goes to the person or their parents, and
+            the coaches of their home team are informed.
+          </Trans>
+        )}
       </p>
       {error ? <ErrorBox error={error} /> : null}
       {!data ? <Spinner /> : null}
@@ -299,15 +308,12 @@ function HelpSheet({ eventId, teamName, onClose, onDone }: { eventId: string; te
           <Trans>There are no suitable stand-ins for {teamName}.</Trans>
         </Notice>
       ) : null}
-      <ul class="list">
-        {(data?.candidates ?? []).map((c) => (
-          <li class="list-row">
-            <span class="main">
-              <span class="title">{personName(c.person)}</span>
-              <span class="sub">{c.team.name}</span>
-              {c.conflict ? <span class="small warn-text">{c.conflict}</span> : null}
-            </span>
-            {c.requested ? (
+      {data?.candidates.length ? (
+        <CandidateList
+          candidates={data.candidates}
+          note={(c) => (c.conflict ? <span class="small warn-text">{c.conflict}</span> : null)}
+          action={(c) =>
+            c.requested ? (
               <span class="pill pill-muted">
                 <Trans>Requested</Trans>
               </span>
@@ -325,10 +331,10 @@ function HelpSheet({ eventId, teamName, onClose, onDone }: { eventId: string; te
               >
                 <Trans>Send request</Trans>
               </Button>
-            )}
-          </li>
-        ))}
-      </ul>
+            )
+          }
+        />
+      ) : null}
     </Sheet>
   );
 }

@@ -572,6 +572,7 @@ teamRoutes.get("/teams/:id/helper-candidates", async (c) => {
     candidates: rows.map((r) => ({
       person: { id: r.person_id, firstName: r.first_name, lastName: r.last_name },
       team: { id: r.team_ids[0]!, name: r.team_name },
+      teams: r.teams,
       isActive: r.is_active === 1,
     })),
   });
@@ -587,7 +588,7 @@ teamRoutes.get("/teams/:id/player-candidates", async (c) => {
   return c.json({
     candidates: rows.map((r) => ({
       person: { id: r.person_id, firstName: r.first_name, lastName: r.last_name },
-      teams: r.team_name,
+      teams: r.teams,
       isActive: r.is_active === 1,
     })),
   });
@@ -638,7 +639,7 @@ teamRoutes.post("/teams/:id/helpers", async (c) => {
   await requireTeam(c.env.DB, teamId);
   const input = parse(helperSchema, await readJson(c.req.raw));
   const ok = (await helpCandidates(c.env.DB, teamId)).some((r) => r.person_id === input.personId);
-  if (!ok) throw badRequest(t`Stand-ins come from the 2nd team of the same age class or the next younger youth.`);
+  if (!ok) throw badRequest(t`Stand-ins come from a lower-ranked team of the same age class or the next younger youth team.`);
   await run(
     c.env.DB,
     `INSERT INTO team_memberships (person_id, team_id, role, helper_trainings) VALUES (?, ?, 'helper', ?)
