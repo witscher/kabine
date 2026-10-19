@@ -34,7 +34,13 @@ function tokenFromHash(): string {
   return decodeURIComponent(location.hash.replace(/^#/, "")).trim();
 }
 
-function Done(props: { title: string; text: string }) {
+/** Invitation links are for setting up only: people kept opening the team link instead of the app. */
+function onceText(): string {
+  const host = location.host;
+  return t`You only need this link once. From then on, open the app from the icon on the home screen or at ${host}.`;
+}
+
+function Done(props: { title: string; text: string; note?: string }) {
   const { route } = useLocation();
   return (
     <main class="page no-tabs">
@@ -50,6 +56,7 @@ function Done(props: { title: string; text: string }) {
             </h2>
           </div>
           <p>{props.text}</p>
+          {props.note ? <p class="small muted">{props.note}</p> : null}
         </div>
         <InstallHint />
         <Button variant="primary" size="lg" block onClick={() => route("/", true)}>
@@ -96,7 +103,7 @@ export function JoinPage() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
-  const [done, setDone] = useState<string | null>(null);
+  const [done, setDone] = useState<{ text: string; note?: string } | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
   // Parent link: the first name the parent confirmed although a child of the team has it too
   const [confirmedName, setConfirmedName] = useState<string | null>(null);
@@ -150,7 +157,7 @@ export function JoinPage() {
     return () => window.clearTimeout(timer);
   }, [info, me, selected, email, firstName, lastName]);
 
-  if (done) return <Done title={t`Welcome`} text={done} />;
+  if (done) return <Done title={t`Welcome`} text={done.text} note={done.note} />;
 
   if (error) {
     return (
@@ -167,10 +174,10 @@ export function JoinPage() {
   }
   if (!info) return <Spinner label={t`Checking invitation`} />;
 
-  const finish = async (text: string) => {
+  const finish = async (text: string, note?: string) => {
     clearCache();
     await refresh();
-    setDone(text);
+    setDone({ text, note });
   };
 
   if (!passkeysSupported()) {
@@ -262,6 +269,9 @@ export function JoinPage() {
   const clashName = clashChild?.name.split(" ")[0] ?? "";
   const nameClash = !!clashChild && confirmedName?.toLowerCase() !== typedFirst.toLowerCase();
   const ownNameProblem = () => (nameClash ? t`Please enter your own first name, not your child's.` : null);
+  // Opened the link again although already set up: straight to the app instead
+  const linkedChildren = isParent && me ? info.persons.filter((p) => p.linkedToMe) : [];
+  const alreadyIn = linkedChildren.length > 0 || (!isParent && !!me && info.persons.some((p) => p.id === me.person.id));
 
   const submit = async () => {
     setFormError(null);
@@ -269,7 +279,7 @@ export function JoinPage() {
       await api.post("/join/link-children", { token, childIds: selected });
       const names = joinNames(chosen.map((c) => c.name));
       const count = chosen.length;
-      await finish(plural(count, { one: `${names} is now linked to your access.`, other: `${names} are now linked to your access.` }));
+      await finish(plural(count, { one: `${names} is now linked to your access.`, other: `${names} are now linked to your access.` }), onceText());
       return;
     }
     if (isParent && (!firstName.trim() || !lastName.trim())) {
@@ -306,6 +316,7 @@ export function JoinPage() {
       isParent
         ? t`You are now linked to ${names} and see all events of the ${teamName}.`
         : t`Hello ${playerName}! You now see your events and can accept or decline.`,
+      onceText(),
     );
   };
 
@@ -327,12 +338,13 @@ export function JoinPage() {
       </header>
       <div class="content">
         <SafariHint />
-        {isParent && me ? (
+        {alreadyIn ? <AlreadyInApp name={loggedInAs ?? ""} linked={linkedChildren.map((p) => p.name.split(" ")[0]!)} /> : null}
+        {isParent && me && !alreadyIn ? (
           <Notice kind="yellow">
             <Trans>You are signed in as {loggedInAs}. Select the child you want to link in addition.</Trans>
           </Notice>
         ) : null}
-        {!isParent && me ? (
+        {!isParent && me && !alreadyIn ? (
           <Notice kind="yellow">
             <Trans>
               {loggedInAs} is currently signed in on this device. If you continue, an access will be created for the selected person and they will be signed in.
@@ -383,7 +395,7 @@ export function JoinPage() {
           </div>
         ) : null}
         <div class="stack-sm">
-          <h2 class="section-title">{isParent ? t`Your child (one or more)` : t`Who are you?`}</h2>
+          <h2 class="section-title">{isParent ? (alreadyIn ? t`Link another child, e.g. a sibling` : t`Your child (one or more)`) : t`Who are you?`}</h2>
           <ul class="list" role={isParent ? "group" : "radiogroup"} aria-label={isParent ? t`Children` : t({ message: "Players", context: "player list" })}>
             {info.persons.map((p) => (
               <PersonChoice
@@ -418,7 +430,7 @@ export function JoinPage() {
             <div>{formError}</div>
           </div>
         ) : null}
-        <Button variant="primary" size="lg" block icon={isParent && me ? "link" : "key"} onClick={submit}>
+        <Button variant={alreadyIn ? "secondary" : "primary"} size="lg" block icon={isParent && me ? "link" : "key"} onClick={submit}>
           {isParent && me
             ? t`Link child`
             : !isParent && chosen[0]
@@ -433,8 +445,30 @@ export function JoinPage() {
           </p>
         ) : null}
         {needsEmail && emailCodes ? <JoinByEmail body={joinBody} email={email.trim()} onDone={finishTeamJoin} check={ownNameProblem} /> : null}
+        {!me ? <p class="small muted">{onceText()}</p> : null}
       </div>
     </main>
+  );
+}
+
+/** Signed in and the link opened again: the app is the way in, the link was only for setting up. */
+function AlreadyInApp({ name, linked }: { name: string; linked: string[] }) {
+  const { route } = useLocation();
+  const names = joinNames(linked);
+  const count = linked.length;
+  return (
+    <section class="card card-pad stack-sm" aria-label={t`Already in the app`}>
+      <p>
+        <strong>
+          <Trans>You are signed in as {name} and already in the app.</Trans>
+        </strong>{" "}
+        {count ? plural(count, { one: `${names} is already linked to you.`, other: `${names} are already linked to you.` }) : null}
+      </p>
+      <p class="small muted">{onceText()}</p>
+      <Button variant="primary" size="lg" block onClick={() => route("/", true)}>
+        <Trans>Straight to the app</Trans>
+      </Button>
+    </section>
   );
 }
 

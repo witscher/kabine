@@ -1170,6 +1170,40 @@ test("Parent link: warning when the first name is a child's of the team", async 
   await guest.context.close();
 });
 
+test("Elternlink: einmal einrichten, beim erneuten Öffnen direkt zur App", async ({ browser }) => {
+  const res = await coach.page.request.post("/api/teams/1/invites", { data: { kind: "parent" } });
+  const { url } = (await res.json()) as { url: string };
+  const parent = await newUser(browser);
+  const { page } = parent;
+  await page.goto(url);
+  await expect(page.getByText("Diesen Link brauchst du nur einmal.", { exact: false })).toBeVisible();
+  await page.getByLabel("Dein Vorname").fill("Karla");
+  await page.getByLabel("Dein Nachname").fill("Probe");
+  await page.getByRole("checkbox", { name: /Kim P\./ }).click();
+  await page.getByRole("button", { name: /Passkey einrichten/ }).click();
+  await expect(page.getByText("Geschafft!")).toBeVisible();
+  await expect(page.getByText("Diesen Link brauchst du nur einmal.", { exact: false })).toBeVisible();
+
+  // Erneut geöffnet: Hinweis und direkt zur App statt nochmal einrichten
+  await page.goto("/");
+  await page.goto(url);
+  const box = page.getByRole("region", { name: "Schon in der App" });
+  await expect(box).toContainText("Du bist als Karla Probe angemeldet und schon in der App.");
+  await expect(box).toContainText("Kim ist schon mit dir verknüpft.");
+  await expect(page.getByRole("heading", { name: "Weiteres Kind verknüpfen, z. B. ein Geschwisterkind" })).toBeVisible();
+  await box.getByRole("button", { name: "Direkt zur App" }).click();
+  await expect(page).toHaveURL(/\/$/);
+  await expect(page.getByRole("heading", { name: "Hallo Karla" })).toBeVisible();
+  await parent.context.close();
+
+  // Der Begleittext zum Elternlink sagt es auch
+  await coach.page.goto("/team/1");
+  await coach.page.getByRole("group", { name: "Bereich" }).getByRole("button", { name: "Einladungen" }).click();
+  const card = coach.page.getByRole("region", { name: "Elternlink" });
+  await card.getByText("Begleittext ansehen").click();
+  await expect(card).toContainText("Den Link braucht es nur einmal zum Einrichten.");
+});
+
 test("Einladungen: Begleittext zum Spielerlink mit Hinweis auf einmalige Nutzung", async () => {
   const { page } = coach;
   await page.goto("/team/1");

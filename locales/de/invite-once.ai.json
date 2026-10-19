@@ -1,0 +1,9 @@
+{
+  "{count, plural, one {{names} is already linked to you.} other {{names} are already linked to you.}}": "{count, plural, one {{names} ist schon mit dir verknüpft.} other {{names} sind schon mit dir verknüpft.}}",
+  "You only need this link once. From then on, open the app from the icon on the home screen or at {host}.": "Diesen Link brauchst du nur einmal. Danach öffnest du die App über das Symbol auf dem Startbildschirm oder unter {host}.",
+  "You are signed in as {name} and already in the app.": "Du bist als {name} angemeldet und schon in der App.",
+  "Already in the app": "Schon in der App",
+  "Straight to the app": "Direkt zur App",
+  "Link another child, e.g. a sibling": "Weiteres Kind verknüpfen, z. B. ein Geschwisterkind",
+  "You only need the link once to set up. From then on, open the app from the icon on the home screen.": "Den Link braucht es nur einmal zum Einrichten. Danach die App über das Symbol auf dem Startbildschirm öffnen."
+}

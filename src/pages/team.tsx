@@ -781,6 +781,7 @@ export function QrLink({ url }: { url: string }) {
 export function inviteMessage(kind: "player" | "parent", teamName: string, url: string, expires: string): string {
   const club = clubName();
   const install = t`Then get the app onto your phone: on iPhone in Safari via "Share" → "Add to Home Screen", on Android via "Install app" in the browser menu.`;
+  const once = t`You only need the link once to set up. From then on, open the app from the icon on the home screen.`;
   if (kind === "player") {
     return [
       t`Hi everyone! ${teamName} uses the ${club} app for events, responses and the team chat.`,
@@ -788,6 +789,7 @@ export function inviteMessage(kind: "player" | "parent", teamName: string, url: 
       t`Important: everyone uses the link only once, for themselves. Please select only your own name.`,
       t`Your name is greyed out? Then you already have access. Just open the app and sign in.`,
       install,
+      once,
       t`The link is valid until ${expires}:`,
       url,
     ].join("\n\n");
@@ -798,6 +800,7 @@ export function inviteMessage(kind: "player" | "parent", teamName: string, url: 
     t`Important: each parent uses the link only once, for themselves. This is not a link for players!`,
     t`Already in the app, e.g. for a sibling in another team or as a coach? Then open the link on the phone where the app is installed and sign in first. Otherwise a second access is created.`,
     install,
+    once,
     t`The link is valid until ${expires}:`,
     url,
   ].join("\n\n");

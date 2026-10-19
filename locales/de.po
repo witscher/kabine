@@ -211,6 +211,11 @@ msgstr "Elternteil von {children}"
 msgid "Nobody found."
 msgstr "Niemand gefunden."
 
+# ai
+#: src/pages/join.tsx
+msgid "{count, plural, one {{names} is already linked to you.} other {{names} are already linked to you.}}"
+msgstr "{count, plural, one {{names} ist schon mit dir verknüpft.} other {{names} sind schon mit dir verknüpft.}}"
+
 #: modules/duties/worker/notify.ts
 msgid "Open helper places · {team}"
 msgstr "Noch offene Helferplätze · {team}"
@@ -394,6 +399,11 @@ msgstr "Alle Mitfahrer werden benachrichtigt und suchen wieder."
 #: src/pages/team.tsx
 msgid "Stand-in from the other team. Their coach maintains the personal data."
 msgstr "Aushilfe aus der anderen Mannschaft. Stammdaten pflegt deren Trainer."
+
+# ai
+#: src/pages/join.tsx
+msgid "You only need this link once. From then on, open the app from the icon on the home screen or at {host}."
+msgstr "Diesen Link brauchst du nur einmal. Danach öffnest du die App über das Symbol auf dem Startbildschirm oder unter {host}."
 
 # ai
 #: modules/sms/worker/routes.ts
@@ -2809,6 +2819,11 @@ msgstr "Verantwortlich"
 #: worker/routes/admin.ts
 msgid "This holiday period does not exist."
 msgstr "Diesen Ferienzeitraum gibt es nicht."
+
+# ai
+#: src/pages/join.tsx
+msgid "You are signed in as {name} and already in the app."
+msgstr "Du bist als {name} angemeldet und schon in der App."
 
 #: src/pages/chat.tsx
 #: worker/chat/room.ts
@@ -6773,6 +6788,11 @@ msgid "Home game"
 msgstr "Heimspiel"
 
 # ai
+#: src/pages/join.tsx
+msgid "Already in the app"
+msgstr "Schon in der App"
+
+# ai
 #: src/pages/event.tsx
 msgid "No coach is there. Cancel the event for everyone, or sort out a stand-in in the team chat."
 msgstr "Kein Trainer ist da. Sag den Termin für alle ab oder kläre im Mannschaftschat eine Vertretung."
@@ -6925,6 +6945,11 @@ msgstr "Inaktiv z. B. bei Verletzung, Krankheit oder Schüleraustausch. Einen Gr
 #: src/pages/plans.tsx
 msgid "For example a school gym or a sports ground. The location is then available to all coaches."
 msgstr "Zum Beispiel eine Schulturnhalle oder ein Sportplatz. Der Ort steht danach allen Trainern zur Verfügung."
+
+# ai
+#: src/pages/join.tsx
+msgid "Straight to the app"
+msgstr "Direkt zur App"
 
 #: src/pages/admin.tsx
 msgid "Please enter a year such as 2015."
@@ -8481,6 +8506,11 @@ msgstr "Abgesagt."
 msgid "New team"
 msgstr "Neue Mannschaft"
 
+# ai
+#: src/pages/join.tsx
+msgid "Link another child, e.g. a sibling"
+msgstr "Weiteres Kind verknüpfen, z. B. ein Geschwisterkind"
+
 #: src/pages/games.tsx
 msgid "Last synced on {importedDate}."
 msgstr "Zuletzt abgeglichen am {importedDate}."
@@ -8819,6 +8849,11 @@ msgstr "Chat-Einstellungen"
 #: src/pages/profile.tsx
 msgid "On: administration and all teams. Off: only your teams, like a coach."
 msgstr "An: Verwaltung und alle Mannschaften. Aus: nur deine Mannschaften, wie ein Trainer."
+
+# ai
+#: src/pages/team.tsx
+msgid "You only need the link once to set up. From then on, open the app from the icon on the home screen."
+msgstr "Den Link braucht es nur einmal zum Einrichten. Danach die App über das Symbol auf dem Startbildschirm öffnen."
 
 #: src/pages/season.tsx
 msgid "Born {year}"

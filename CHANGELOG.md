@@ -10,6 +10,7 @@ Changes that are merged but not released yet go under *Unreleased*, one line eac
 - *Administration → Updates and maintenance*: installed version, last update with its restore point and the command to go back, maintenance switch.
 - "I'm not there" for coaches, group leads, staff and organisers: the event takes place, the others in charge get a push with an optional note, the team only if asked (without the note). If no coach is left, the event page suggests cancelling or a stand-in. Database change: new table `leader_absences`.
 - Attendance after an event replaces the "absent without excuse" switch: coaches record present, excused or unexcused per participant until the end of the following day (admins the whole season); without an entry the response counts, who did not respond is listed first. Players and parents see their own entry where it differs from their response. Database change: new table `attendance_marks`, existing marks are copied.
+- Invitation links are for setting up only: the share texts and the join page say so, and whoever opens a team link again while signed in gets a "Straight to the app" button instead of the setup form.
 
 ## v0.1.0
 
