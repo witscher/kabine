@@ -24,7 +24,19 @@ const wrangler = (args, inherit = false) =>
     stdio: inherit ? "inherit" : ["ignore", "pipe", "pipe"],
     env: { ...process.env, CI: process.env.CI ?? "1" },
   });
-const sql = (command) => wrangler(["d1", "execute", "DB", "--remote", "--yes", ...envArgs, "--command", command]);
+/** The Cloudflare API fails now and then for a moment: repeat steps that are safe to repeat. */
+const retry = (step, attempts = 3) => {
+  for (let i = 1; ; i++) {
+    try {
+      return step();
+    } catch (err) {
+      if (i >= attempts) throw err;
+      console.warn(`Cloudflare API failed, trying again (${i}/${attempts - 1}): ${String(err?.stderr || err?.message || err).split("\n").find((l) => l.trim()) ?? ""}`);
+      Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 5000 * i);
+    }
+  }
+};
+const sql = (command) => retry(() => wrangler(["d1", "execute", "DB", "--remote", "--yes", ...envArgs, "--command", command]));
 const quote = (value) => `'${JSON.stringify(value).replace(/'/g, "''")}'`;
 const setMeta = (key, value) =>
   sql(`INSERT INTO app_meta (key, value) VALUES ('${key}', ${quote(value)}) ON CONFLICT(key) DO UPDATE SET value = excluded.value`);
@@ -33,7 +45,7 @@ const setMeta = (key, value) =>
 execFileSync("npx", ["vite", "build"], { stdio: "inherit", env: { ...process.env, ...(env ? { CLOUDFLARE_ENV: env } : {}) } });
 
 // 2. Which migrations are pending?
-const listing = wrangler(["d1", "migrations", "list", "DB", "--remote", ...envArgs]);
+const listing = retry(() => wrangler(["d1", "migrations", "list", "DB", "--remote", ...envArgs]));
 const pending = [...new Set(listing.match(/[\w.-]+\.sql/g) ?? [])].sort();
 const fresh = pending.includes("0001_init.sql");
 console.log(pending.length ? `Pending migrations: ${pending.join(", ")}` : "No pending migrations.");
@@ -45,7 +57,7 @@ try {
   if (pending.length && !fresh) {
     // Restore point before anything changes
     try {
-      const info = wrangler(["d1", "time-travel", "info", "DB", "--json", ...envArgs]);
+      const info = retry(() => wrangler(["d1", "time-travel", "info", "DB", "--json", ...envArgs]));
       bookmark = JSON.parse(info.slice(info.indexOf("{"))).bookmark ?? null;
       console.log(`Restore point (D1 Time Travel bookmark): ${bookmark}`);
     } catch (err) {
