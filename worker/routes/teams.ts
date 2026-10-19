@@ -207,9 +207,10 @@ teamRoutes.get("/teams/:id", async (c) => {
     // Unexcused absences at this team's events; events exist only from the current season
     all<{ person_id: number; n: number }>(
       db,
-      `SELECT ua.person_id, count(*) AS n FROM unexcused_absences ua
-         JOIN event_teams et ON et.event_id = ua.event_id AND et.team_id = ?
-        GROUP BY ua.person_id`,
+      `SELECT am.person_id, count(*) AS n FROM attendance_marks am
+         JOIN event_teams et ON et.event_id = am.event_id AND et.team_id = ?
+        WHERE am.status = 'unexcused'
+        GROUP BY am.person_id`,
       teamId,
     ),
   ]);

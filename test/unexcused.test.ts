@@ -1,4 +1,4 @@
-// „Fehlt unentschuldigt“: Trainer markieren nach Terminbeginn. Namen erfunden.
+// „Fehlt unentschuldigt“ über die alte Route, die für zwischengespeicherte App-Versionen bleibt (jetzt attendance_marks). Namen erfunden.
 import { beforeEach, describe, expect, it } from "vitest";
 import { api, eventIn, exec, freshDb, guardian, loginAs, member, person, rows, season, team } from "./helpers";
 
@@ -28,7 +28,8 @@ beforeEach(async () => {
   await member(mia, wd);
   await member(ella, wd);
   await guardian(parent, mia);
-  past = await eventIn(wd, -2);
+  // Trainer tragen bis zum Ende des Folgetags ein
+  past = await eventIn(wd, -1);
   coachCookie = await loginAs(coach);
 });
 
@@ -40,12 +41,12 @@ describe("fehlt unentschuldigt", () => {
     expect((await mark(past, mia, true, coachCookie)).status).toBe(200);
     // Doppelt markieren schadet nicht
     expect((await mark(past, mia, true, coachCookie)).status).toBe(200);
-    expect(await rows("SELECT person_id, marked_by FROM unexcused_absences")).toEqual([{ person_id: mia, marked_by: coach }]);
+    expect(await rows("SELECT person_id, status, marked_by FROM attendance_marks")).toEqual([{ person_id: mia, status: "unexcused", marked_by: coach }]);
     const detail = (await api(`/events/${past}`, { cookie: coachCookie })).body;
     expect(detail.participants.find((p: any) => p.person.id === mia).unexcused).toBe(true);
     expect(detail.participants.find((p: any) => p.person.id === ella).unexcused).toBe(false);
     expect((await mark(past, mia, false, coachCookie)).status).toBe(200);
-    expect(await rows("SELECT * FROM unexcused_absences")).toEqual([]);
+    expect(await rows("SELECT * FROM attendance_marks")).toEqual([]);
   });
 
   it("nur Trainer der Mannschaft und Admins", async () => {
@@ -64,7 +65,7 @@ describe("fehlt unentschuldigt", () => {
     expect((await mark(past, ella, true, coachCookie)).status).toBe(409);
     const stranger = await person("Zoe");
     expect((await mark(past, stranger, true, coachCookie)).status).toBe(404);
-    const cancelled = await eventIn(wd, -1);
+    const cancelled = await eventIn(wd, -1, { time: "10:00" });
     await exec("UPDATE events SET cancelled_at = '2026-01-01T00:00:00Z' WHERE id = ?", cancelled);
     expect((await mark(cancelled, mia, true, coachCookie)).status).toBe(409);
   });
@@ -85,8 +86,11 @@ describe("fehlt unentschuldigt", () => {
     await eventIn(wd, 3);
     await eventIn(we, -1);
     await mark(past, mia, true, coachCookie);
-    await mark(older, mia, true, coachCookie);
-    await mark(older, ella, true, coachCookie);
+    // Älter als der Folgetag: nur noch Admins
+    expect((await mark(older, mia, true, coachCookie)).body.error.code).toBe("attendance_closed");
+    const adminCookie = await loginAs(await person("Anna", { admin: true }));
+    await mark(older, mia, true, adminCookie);
+    await mark(older, ella, true, adminCookie);
     const res = await api("/events?past=1", { cookie: coachCookie });
     expect(res.status).toBe(200);
     // Neueste zuerst, nur Vergangenes, Zahl der Markierungen nur für Trainer
@@ -114,6 +118,6 @@ describe("fehlt unentschuldigt", () => {
   it("verschwindet mit dem Termin", async () => {
     await mark(past, mia, true, coachCookie);
     await exec("DELETE FROM events WHERE id = ?", past);
-    expect(await rows("SELECT * FROM unexcused_absences")).toEqual([]);
+    expect(await rows("SELECT * FROM attendance_marks")).toEqual([]);
   });
 });

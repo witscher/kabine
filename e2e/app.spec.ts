@@ -855,17 +855,20 @@ test("Anleitungen: Hinweis zum Installieren im Browser, Anleitungen unter Hilfe"
   await expect(guides.getByText(/Auf diesem Gerät aktivieren/)).toBeVisible();
 });
 
-test("Fehlt unentschuldigt: Trainer markiert im vergangenen Termin, die Spielerin sieht es", async () => {
+test("Anwesenheit: Trainer trägt im vergangenen Termin ein, die Spielerin sieht ihren Eintrag", async () => {
   const { page } = coach;
   await page.goto("/");
   await page.getByRole("group", { name: "Zeitraum" }).getByRole("button", { name: "Vergangen" }).click();
   await page.getByRole("link", { name: /Vergangenes Turnier/ }).click();
   await expect(page).toHaveURL(/\/termine\/9001$/);
-  await page.getByRole("button", { name: /Ida P\./ }).first().click();
-  const sheet = page.getByRole("dialog", { name: "Ida Probe" });
-  await sheet.getByRole("switch", { name: /Fehlt unentschuldigt/ }).click();
-  await expect(page.getByText("Ida: fehlt unentschuldigt.")).toBeVisible();
-  await expect(page.getByRole("region", { name: "Fehlt unentschuldigt" })).toContainText("Ida P.");
+  const tiles = page.getByRole("group", { name: "Anwesenheit", exact: true });
+  await expect(tiles).toContainText("anwesend");
+  await expect(page.getByText("Ohne Eintrag zählt die Rückmeldung.", { exact: false })).toBeVisible();
+  const ida = page.getByRole("group", { name: "Anwesenheit von Ida P." });
+  // Ohne Eintrag zählt die (automatische) Zusage
+  await expect(ida.getByRole("button", { name: "Anwesend" })).toHaveAttribute("aria-pressed", "true");
+  await ida.getByRole("button", { name: "Unentschuldigt" }).click();
+  await expect(ida.getByRole("button", { name: "Unentschuldigt" })).toHaveAttribute("aria-pressed", "true");
 
   await page.goto("/?zeit=vergangen");
   await expect(page.locator(".event-row", { hasText: "Vergangenes Turnier" })).toContainText("1× unentschuldigt");

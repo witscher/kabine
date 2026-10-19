@@ -151,7 +151,10 @@ const players = (): Faq[] => [
     q: t`What does “absent without excuse” mean?`,
     a: (
       <p>
-        <Trans>You did not decline and still were not there. The coach enters this after the event. Only you, your parents and the coaches can see it.</Trans>
+        <Trans>
+          You did not decline and still were not there. After the event the coach records who was there. At the event you see your own entry where it differs
+          from your response, for example “Was there” although you declined. Only you, your parents and the coaches can see it.
+        </Trans>
       </p>
     ),
   },
@@ -312,12 +315,13 @@ const coaches = (): Faq[] => [
     ),
   },
   {
-    q: t`Decline for a player or record “absent without excuse”.`,
+    q: t`Decline for a player or record who was there.`,
     a: (
       <p>
         <Trans>
-          Tap the name in the event. Before the event you can decline or accept again for them there. After the start the switch{" "}
-          <em>Absent without excuse</em> appears. You find past events under <em>Events → Past</em>.
+          Tap the name in the event. Before the event you can decline or accept again for them there. After the start the event lists everyone with{" "}
+          <em>Present</em>, <em>Excused</em> or <em>Unexcused</em>; without an entry the response counts, and who did not respond comes first. Coaches
+          record until the end of the following day, admins the whole season. You find past events under <em>Events → Past</em>.
         </Trans>
       </p>
     ),

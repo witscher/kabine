@@ -2,6 +2,7 @@ import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { useState } from "preact/hooks";
 import { clockTimeIn } from "../shared/dates";
+import type { AttendanceMark } from "../shared/attendance";
 import type { EventSummary, MyParticipation } from "../shared/types";
 import { api } from "./api";
 import { longDate, nowLocal, personName, stamp, time } from "./format";
@@ -275,11 +276,7 @@ export function PersonResponseRow(props: { event: EventSummary; p: MyParticipati
         <strong>{me?.person.id === p.person.id ? t`You` : personName(p.person)}</strong>
         <StatusPill status={p.status} late={p.isLate} nominated={p.nominated} game={event.kind === "game"} optional={p.optional} />
       </div>
-      {p.unexcused ? (
-        <span class="badge warn" style={{ alignSelf: "flex-start" }}>
-          <Trans>Missed without excuse</Trans>
-        </span>
-      ) : null}
+      <AttendanceBadge mark={p.attendance} />
       {p.helpRequest ? <HelpRequestCard event={event} p={p} /> : null}
       {event.kind === "game" && !p.participant && !p.helpRequest ? (
         <p class="small muted">
@@ -299,5 +296,15 @@ export function PersonResponseRow(props: { event: EventSummary; p: MyParticipati
         </p>
       ) : null}
     </div>
+  );
+}
+
+/** The coach's attendance entry after the event, where it differs from the response. */
+export function AttendanceBadge({ mark }: { mark: AttendanceMark | null }) {
+  if (!mark) return null;
+  return (
+    <span class={`badge ${mark === "unexcused" ? "warn" : "muted"}`} style={{ alignSelf: "flex-start" }}>
+      {mark === "present" ? t`Was there` : mark === "excused" ? t`Excused` : t`Missed without excuse`}
+    </span>
   );
 }

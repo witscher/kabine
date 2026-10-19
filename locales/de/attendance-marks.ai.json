@@ -1,0 +1,20 @@
+{
+  "Excused": "Entschuldigt",
+  "Attendance can no longer be changed here. Admins can still change it.": "Die Anwesenheit lässt sich hier nicht mehr ändern. Admins können sie noch ändern.",
+  "Still to record": "Noch einzutragen",
+  "Record who was there. Without an entry the response counts.": "Trag ein, wer da war. Ohne Eintrag zählt die Rückmeldung.",
+  "Record who was there, until the end of {until}. Without an entry the response counts.": "Trag bis zum Ende von {until} ein, wer da war. Ohne Eintrag zählt die Rückmeldung.",
+  "You did not decline and still were not there. After the event the coach records who was there. At the event you see your own entry where it differs from your response, for example “Was there” although you declined. Only you, your parents and the coaches can see it.": "Du hast nicht abgesagt und warst trotzdem nicht da. Nach dem Termin trägt der Trainer ein, wer da war. Beim Termin siehst du deinen eigenen Eintrag, wenn er von deiner Rückmeldung abweicht, zum Beispiel „War da“, obwohl du abgesagt hattest. Das sehen nur du, deine Eltern und die Trainer.",
+  "Present": "Anwesend",
+  "Attendance": "Anwesenheit",
+  "unexcused": "unentschuldigt",
+  "Decline for a player or record who was there.": "Für einen Spieler absagen oder eintragen, wer da war.",
+  "open": "offen",
+  "excused": "entschuldigt",
+  "Tap the name in the event. Before the event you can decline or accept again for them there. After the start the event lists everyone with <0>Present</0>, <1>Excused</1> or <2>Unexcused</2>; without an entry the response counts, and who did not respond comes first. Coaches record until the end of the following day, admins the whole season. You find past events under <3>Events → Past</3>.": "Tippe im Termin auf den Namen. Vor dem Termin kannst du dort für ihn absagen oder wieder zusagen. Nach Beginn listet der Termin alle mit <0>Anwesend</0>, <1>Entschuldigt</1> oder <2>Unentschuldigt</2>; ohne Eintrag zählt die Rückmeldung, wer nicht geantwortet hat, steht oben. Trainer tragen bis zum Ende des Folgetags ein, Admins die ganze Saison. Vergangene Termine findest du unter <3>Termine → Vergangen</3>.",
+  "present": "anwesend",
+  "Unexcused": "Unentschuldigt",
+  "Attendance of {name}": "Anwesenheit von {name}",
+  "Was there": "War da",
+  "Attendance can be recorded until the end of the day after the event. Admins can still change it.": "Die Anwesenheit lässt sich bis zum Ende des Tages nach dem Termin eintragen. Admins können sie noch ändern."
+}

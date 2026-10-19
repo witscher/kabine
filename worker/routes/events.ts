@@ -6,6 +6,7 @@ import { type AppEnv, intParam, requireActor } from "../app";
 import { type Actor, isCoachOfAny, PARENTS_HANDLE_IT, requireActFor, requireAdmin } from "../auth/actor";
 import { postSystemMessage } from "../domain/chat";
 import {
+  attendanceEditable,
   deadlineInstant,
   type EventRow,
   eventTeams,
@@ -17,7 +18,8 @@ import {
   toDetail,
   toSummary,
 } from "../domain/events";
-import { attendanceStatus, attendanceUpdate } from "../domain/attendance";
+import { ATTENDANCE_MARKS, type AttendanceMark, defaultMark, unexcusedAllowed } from "../../shared/attendance";
+import { attendanceSync } from "../domain/attendance";
 import { dutyManagers, loadDutyTypes, loadHelpersNeeded, loadMyDuties, mayManageDuties, SHORT_NAME_SQL } from "../domain/duties";
 import { notifyDutyChange } from "../duties/hub";
 import { loadEventPage } from "../domain/event-page";
@@ -461,27 +463,54 @@ eventRoutes.put("/events/:id/teams/:teamId/optional", async (c) => {
   return c.json(toDetail(fresh, await loadEventContext(c.env.DB, [fresh]), actor, Date.now()));
 });
 
-/** After the start: coaches mark who was absent without excuse despite accepting. */
-eventRoutes.put("/events/:id/unexcused/:personId", async (c) => {
-  const actor = requireActor(c);
-  const personId = intParam(c, "personId");
-  const { unexcused } = parse(z.object({ unexcused: z.boolean() }), await readJson(c.req.raw));
-  const { event, ctx } = await managedEvent(c.env.DB, actor, intParam(c, "id"));
+/**
+ * After the start: coaches record attendance (shared/attendance.ts). Coaches until the end of the day after the
+ * event, admins the whole season. The player's response stays; an entry equal to its default is not stored.
+ */
+async function setAttendance(db: D1Database, actor: Actor, eventId: number, personId: number, mark: AttendanceMark | null) {
+  const { event, ctx } = await managedEvent(db, actor, eventId);
   if (event.cancelled_at) throw conflict(t`The event has been cancelled.`);
   if (localToInstant(event.starts_at) > Date.now()) throw conflict(t`This is only possible once the event has started.`);
+  if (!attendanceEditable(event, actor, Date.now())) {
+    throw conflict(t`Attendance can be recorded until the end of the day after the event. Admins can still change it.`, "attendance_closed");
+  }
   const part = (ctx.participants.get(event.id) ?? []).find((p) => p.person.id === personId);
   if (!part) throw notFound(t`This person does not take part in the event.`);
-  if (unexcused && part.optional) throw conflict(t`The training was optional for this person.`, "optional");
-  if (unexcused && part.status !== "yes" && part.status !== "open") {
+  if (mark === "unexcused" && part.optional) throw conflict(t`The training was optional for this person.`, "optional");
+  if (mark === "unexcused" && !unexcusedAllowed(part.status, part.optional)) {
     throw conflict(t`Anyone who declined, is permanently absent or inactive is excused.`);
   }
-  // If the event is already in the attendance record, it is updated as well
-  await c.env.DB.batch([
-    unexcused
-      ? stmt(c.env.DB, "INSERT OR IGNORE INTO unexcused_absences (event_id, person_id, marked_by) VALUES (?, ?, ?)", event.id, personId, actor.personId)
-      : stmt(c.env.DB, "DELETE FROM unexcused_absences WHERE event_id = ? AND person_id = ?", event.id, personId),
-    attendanceUpdate(c.env.DB, event.id, personId, attendanceStatus(part.status, unexcused)),
+  const stored = mark === defaultMark(part.status, part.optional) ? null : mark;
+  await db.batch([
+    stored
+      ? stmt(
+          db,
+          `INSERT INTO attendance_marks (event_id, person_id, status, marked_by, marked_at) VALUES (?, ?, ?, ?, ?)
+           ON CONFLICT(event_id, person_id) DO UPDATE SET status = excluded.status, marked_by = excluded.marked_by, marked_at = excluded.marked_at`,
+          event.id,
+          personId,
+          stored,
+          actor.personId,
+          utcIso(),
+        )
+      : stmt(db, "DELETE FROM attendance_marks WHERE event_id = ? AND person_id = ?", event.id, personId),
+    // If the event is already in the attendance record, it follows
+    ...attendanceSync(db, event, part, stored),
   ]);
+  return { ok: true, attendance: stored };
+}
+
+eventRoutes.put("/events/:id/attendance/:personId", async (c) => {
+  const actor = requireActor(c);
+  const { mark } = parse(z.object({ mark: z.enum(ATTENDANCE_MARKS).nullable() }), await readJson(c.req.raw));
+  return c.json(await setAttendance(c.env.DB, actor, intParam(c, "id"), intParam(c, "personId"), mark));
+});
+
+/** Before attendance: only "absent without excuse". Stays for app versions still cached on devices. */
+eventRoutes.put("/events/:id/unexcused/:personId", async (c) => {
+  const actor = requireActor(c);
+  const { unexcused } = parse(z.object({ unexcused: z.boolean() }), await readJson(c.req.raw));
+  await setAttendance(c.env.DB, actor, intParam(c, "id"), intParam(c, "personId"), unexcused ? "unexcused" : null);
   return c.json({ ok: true });
 });
 

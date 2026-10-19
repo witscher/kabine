@@ -19,7 +19,7 @@ INSERT INTO training_rules (id, plan_id, weekday, starts_at, ends_at, location_i
   (4, 1, 4, '23:30', '23:55', 1), (5, 1, 5, '23:30', '23:55', 1), (6, 1, 6, '23:30', '23:55', 1),
   (7, 1, 7, '23:30', '23:55', 1);
 INSERT INTO rule_teams (rule_id, team_id) VALUES (1, 1), (2, 1), (3, 1), (4, 1), (5, 1), (6, 1), (7, 1);
--- Ein vergangener Termin für „fehlt unentschuldigt“
+-- Ein vergangener Termin für die Anwesenheit, wenige Stunden zurück (Trainer tragen bis zum Ende des Folgetags ein)
 INSERT INTO events (id, kind, title, starts_at, ends_at, location_id) VALUES
-  (9001, 'special', 'Vergangenes Turnier', strftime('%Y-%m-%dT10:00', 'now', '-3 days'), strftime('%Y-%m-%dT12:00', 'now', '-3 days'), 1);
+  (9001, 'special', 'Vergangenes Turnier', strftime('%Y-%m-%dT%H:%M', 'now', '-4 hours'), strftime('%Y-%m-%dT%H:%M', 'now', '-3 hours'), 1);
 INSERT INTO event_teams (event_id, team_id) VALUES (9001, 1);

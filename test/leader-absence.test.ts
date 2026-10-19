@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { PushJob } from "../worker/domain/notify";
 import { EXPORT_TABLES } from "../worker/routes/season";
 import { cleanup } from "../worker/cron";
+import { addDays, localToInstant, todayLocal } from "../worker/lib/time";
 import { api, eventIn, exec, freshDb, guardian, loginAs, member, migrateRest, one, person, rows, season, team, upgradeFrom } from "./helpers";
 
 let wd: number;
@@ -170,9 +171,10 @@ describe("leader absence", () => {
 
   it("the note is deleted 60 days after the event, like a decline reason", async () => {
     await api(`/events/${training}/absence`, { method: "PUT", cookie: taraCookie, body: { note: "Sam runs the training" } });
-    await cleanup(env.DB, Date.now() + 61 * 86_400_000);
+    // Local noon, so a change of daylight saving time in between does not shift the day
+    await cleanup(env.DB, localToInstant(`${addDays(todayLocal(), 61)}T12:00`));
     expect(await one("SELECT note FROM leader_absences WHERE event_id = ?", training)).toEqual({ note: "Sam runs the training" });
-    await cleanup(env.DB, Date.now() + 63 * 86_400_000);
+    await cleanup(env.DB, localToInstant(`${addDays(todayLocal(), 63)}T12:00`));
     expect(await one("SELECT note FROM leader_absences WHERE event_id = ?", training)).toEqual({ note: null });
   });
 

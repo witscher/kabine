@@ -855,6 +855,9 @@ button.chip {
   font-size: 13px;
   font-weight: 600;
   color: var(--text-2);
+  /* Long German words ("unentschuldigt") on a phone */
+  hyphens: auto;
+  overflow-wrap: break-word;
 }
 
 .stat-tile.yellow {
@@ -1048,6 +1051,10 @@ button.chip {
   color: var(--text-3);
   font-weight: 600;
   font-size: 15px;
+  padding: 4px 4px;
+  line-height: 1.15;
+  hyphens: auto;
+  overflow-wrap: break-word;
 }
 
 .segmented button[aria-pressed="true"] {

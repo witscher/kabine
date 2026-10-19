@@ -34,6 +34,6 @@ expect(await one("SELECT seat_note FROM carpools …")).toEqual(…);
 
 Clean-ups that wait for a later release (contract step):
 
-- none yet
+- `DROP TABLE unexcused_absences;` once a release with `202610192200_core_attendance-marks.sql` is out (the marks live in `attendance_marks`). Remove it from `EXPORT_TABLES` in `worker/routes/season.ts` then.
 
 Wrangler only reads `.sql` files, so this README is ignored when migrating.

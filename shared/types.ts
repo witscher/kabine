@@ -1,5 +1,6 @@
 // Shared types for API responses (worker and frontend).
 import { t } from "@lingui/core/macro";
+import type { AttendanceMark } from "./attendance";
 import { MODULES, type ModuleNotificationTopic } from "./modules";
 
 /** staff: team staff such as physio or manager, sees everything of the team but does not take part. */
@@ -122,8 +123,10 @@ export interface MyParticipation {
   respondedAt: string | null;
   respondedBy: RespondedBy | null;
   respondedByName: string | null;
-  /** Marked by the coach after the event as "absent without excuse" */
+  /** Marked by the coach after the event as "absent without excuse" (attendance "unexcused") */
   unexcused: boolean;
+  /** The coach's attendance entry after the event, if it differs from the response; otherwise null */
+  attendance: AttendanceMark | null;
   /** Action allowed for this account (parental permissions, inactivity, event over). */
   canAccept: boolean;
   canDecline: boolean;
@@ -277,6 +280,8 @@ export interface ParticipantDetail {
   hasStandingAbsence: boolean;
   /** "Absent without excuse" (marked by the coach after the start) */
   unexcused: boolean;
+  /** The coach's attendance entry; null: the response decides (shared/attendance.ts, defaultMark) */
+  attendance: AttendanceMark | null;
 }
 
 export interface EventDetail extends EventSummary {
@@ -288,6 +293,10 @@ export interface EventDetail extends EventSummary {
   dutyManage: boolean;
   /** Special events only: creator and organisers ("First name L."). */
   organizers: { creator: { id: number; name: string } | null; people: { id: number; name: string }[]; editable: boolean } | null;
+  /** Coaches record attendance until then (local time; null: admins, the whole season) */
+  attendanceUntil: string | null;
+  /** Attendance can be recorded now (coaches and admins, after the start, not cancelled) */
+  attendanceEditable: boolean;
   /**
    * Who leads the event. Coaches and admins see everyone with their note; everyone else only absent
    * leaders (and themselves), without the note, also when responses are visible to all.

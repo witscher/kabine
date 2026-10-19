@@ -244,15 +244,17 @@ For everyone else these actions on the owner are blocked: removing admin rights 
 
 What the owner does to themselves stays allowed. Other admins can still change name, teams and similar details, which do not touch the access.
 
-## Absent without excuse
+## Attendance after an event
 
-Marks are stored in their own table `unexcused_absences` (event, person, who marked) instead of a new status in `responses`. The response stays unchanged and the mark can be taken back without side effects. There is no reason and no free text.
+After the start coaches record per participant *present*, *excused* or *unexcused* (`PUT /events/:id/attendance/:personId`). The entries live in their own table `attendance_marks` (event, person, status, who, when) instead of a new status in `responses`: the player's yes/no stays as it was, the coach's entry wins. There is no reason and no free text.
 
-A mark is possible only from the start of the event, because nobody can be missing before. It applies only to people who accepted or did not respond; whoever declined, is away long-term or inactive is excused.
+Without an entry the response counts (`defaultMark` in `shared/attendance.ts`): accepted is present; declined, away long-term and inactive are excused; who did not respond stays open and is listed first as "Still to record". An entry equal to that default is not stored, so the table holds only the differences, for example "declined but came anyway". *Unexcused* is possible only for someone who did not decline; optional participants are only *present* or *not there*.
 
-Coaches and admins see the marks in the participant list, the person and their parents at their own response. Other players do not get the participant list anyway. There is no push.
+Coaches record until the end of the day after the event (local time), admins (not in coach mode) the whole season. The attendance record (`attendance`) follows a later entry: present stays present, excused becomes declined, unexcused stays unexcused; an optional participant gets a row only if present, and a short-notice decline is not late if the person came.
 
-Marks belong to the events and are deleted with them at the season change. The admin export contains the table.
+Coaches and admins see all entries; the person and their parents see their own entry at their response where it differs from it ("Was there", "Excused", "Missed without excuse"). Other players do not get the participant list anyway. There is no push.
+
+Entries belong to the events and are deleted with them at the season change. The admin export contains the table. The former table `unexcused_absences` was copied into it and is dropped in a later release (`migrations/README.md`); the old route `PUT /events/:id/unexcused/:personId` stays for app versions still cached on devices.
 
 The event overview has a switch "Upcoming / Past" for everyone. Past events are those visible up to now, newest first; events older than the current season are gone after the season change. Only coaches and admins get the number of marks.
 

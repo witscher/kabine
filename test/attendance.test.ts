@@ -49,7 +49,7 @@ describe("Anwesenheitsprotokoll", () => {
   });
 
   it("„fehlt unentschuldigt“ zieht das Protokoll nach, auch zurück", async () => {
-    const past = await eventIn(wd, -3);
+    const past = await eventIn(wd, -1);
     await recordAttendance(env.DB);
     const cookie = await loginAs(coach);
     expect((await api(`/events/${past}/unexcused/${mia}`, { method: "PUT", cookie, body: { unexcused: true } })).status).toBe(200);
@@ -94,7 +94,7 @@ describe("Saisonstatistik", () => {
     const t2 = await eventIn(wd, -3);
     const game = await eventIn(wd, -1, { kind: "game" });
     await exec("INSERT INTO nominations (event_id, person_id) VALUES (?, ?), (?, ?)", game, mia, game, ella);
-    await exec("INSERT INTO unexcused_absences (event_id, person_id) VALUES (?, ?)", t2, mia);
+    await exec("INSERT INTO attendance_marks (event_id, person_id, status) VALUES (?, ?, 'unexcused')", t2, mia);
     const parent = await person("Paula");
     const b1 = await one<{ id: number }>("INSERT INTO event_duties (event_id, duty_type_id, starts_at, ends_at) SELECT id, 1, starts_at, starts_at FROM events WHERE id = ? RETURNING id", game);
     const b2 = await one<{ id: number }>("INSERT INTO event_duties (event_id, duty_type_id, starts_at, ends_at) SELECT id, 4, starts_at, starts_at FROM events WHERE id = ? RETURNING id", game);

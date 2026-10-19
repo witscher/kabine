@@ -1018,10 +1018,6 @@ msgstr "Mit diesem Link wirst du (oder dein Kind) als KiHaSL/JuHaSL freigeschalt
 msgid "Response: accepted"
 msgstr "Rückmeldung: zugesagt"
 
-#: src/pages/event.tsx
-msgid "Anyone who accepted or did not respond and still missed it: tap the name and choose “Absent without excuse”."
-msgstr "Wer zugesagt oder sich nicht gemeldet hat und trotzdem gefehlt hat: Namen antippen und „Fehlt unentschuldigt“ wählen."
-
 # ai
 #: src/email.tsx
 msgid "Code from the text message"
@@ -1149,6 +1145,12 @@ msgstr "Plan speichern"
 msgid "Nominations, reminders before games and stand-in requests"
 msgstr "Nominierungen, Erinnerungen vor Spielen und Aushilfe-Anfragen"
 
+# ai
+#: src/pages/event.tsx
+#: src/respond.tsx
+msgid "Excused"
+msgstr "Entschuldigt"
+
 #: src/pages/chat.tsx
 msgid "Rejoin"
 msgstr "Wieder anmelden"
@@ -1177,10 +1179,6 @@ msgstr "Für dieses Spiel braucht es keinen KiHaSL/JuHaSL."
 #: src/calendar.tsx
 msgid "With a personal link your events appear in the calendar app on your phone and stay up to date. Do not share the link: anyone who has it can see your events."
 msgstr "Mit einem persönlichen Link erscheinen deine Termine in der Kalender-App deines Handys und bleiben aktuell. Den Link nicht weitergeben: Wer ihn hat, sieht deine Termine."
-
-#: src/faq.tsx
-msgid "You did not decline and still were not there. The coach enters this after the event. Only you, your parents and the coaches can see it."
-msgstr "Du hast nicht abgesagt und warst trotzdem nicht da. Das trägt der Trainer nach dem Termin ein. Sehen können es nur du, deine Eltern und die Trainer."
 
 #: src/avatar.tsx
 #: src/avatar.tsx
@@ -1264,6 +1262,11 @@ msgstr "Zuletzt aktiv: {date} ({ago})"
 #: src/pages/team.tsx
 msgid "{missing}. Tap a person to add it."
 msgstr "{missing}. Tippe auf eine Person, um es zu ergänzen."
+
+# ai
+#: src/pages/event.tsx
+msgid "Attendance can no longer be changed here. Admins can still change it."
+msgstr "Die Anwesenheit lässt sich hier nicht mehr ändern. Admins können sie noch ändern."
 
 #: src/pages/games.tsx
 msgid "Linked. Use \"Sync now\" to fetch the game schedule."
@@ -1524,6 +1527,12 @@ msgstr "Keine vergangenen Termine"
 #: src/export.tsx
 msgid "Notice"
 msgstr "Hinweis"
+
+# ai
+#: src/pages/event.tsx
+#: src/pages/event.tsx
+msgid "Still to record"
+msgstr "Noch einzutragen"
 
 #: worker/routes/auth.ts
 msgid "Invalid response."
@@ -2152,6 +2161,11 @@ msgstr "Ferien prüfen"
 msgid "The source {pausedName} is switched off for the club. The games stay, but they are not synced."
 msgstr "Die Quelle {pausedName} ist für den Verein ausgeschaltet. Die Spiele bleiben, werden aber nicht abgeglichen."
 
+# ai
+#: src/pages/event.tsx
+msgid "Record who was there. Without an entry the response counts."
+msgstr "Trag ein, wer da war. Ohne Eintrag zählt die Rückmeldung."
+
 #: modules/handball4all/app/index.tsx
 msgid "The live ticker opens in a new window on handball4all."
 msgstr "Der Liveticker öffnet sich in einem neuen Fenster bei handball4all."
@@ -2568,12 +2582,11 @@ msgstr "{venue, select, hall {Vereinshallen} pitch {Vereinsplätze} other {Eigen
 
 #: src/pages/event.tsx
 #: src/pages/event.tsx
-#: src/pages/event.tsx
-#: src/pages/event.tsx
 msgid "Absent without excuse"
 msgstr "Fehlt unentschuldigt"
 
 # ai
+#: src/pages/event.tsx
 #: src/pages/event.tsx
 msgid "Not there"
 msgstr "Nicht da"
@@ -3161,6 +3174,11 @@ msgstr "Weitere Mannschaft entfernen"
 msgid "Time slot {label} added."
 msgstr "Zeitblock {label} hinzugefügt."
 
+# ai
+#: src/pages/event.tsx
+msgid "Record who was there, until the end of {until}. Without an entry the response counts."
+msgstr "Trag bis zum Ende von {until} ein, wer da war. Ohne Eintrag zählt die Rückmeldung."
+
 #: src/pages/plans.tsx
 msgid "During the {holiday} ({from} to {to})"
 msgstr "In den {holiday} ({from} bis {to})"
@@ -3278,6 +3296,11 @@ msgstr "Du kannst mitlesen. Schreiben haben deine Eltern noch nicht freigegeben.
 #: src/calendar.tsx
 msgid "Training and other events"
 msgstr "Training und weitere Termine"
+
+# ai
+#: src/faq.tsx
+msgid "You did not decline and still were not there. After the event the coach records who was there. At the event you see your own entry where it differs from your response, for example “Was there” although you declined. Only you, your parents and the coaches can see it."
+msgstr "Du hast nicht abgesagt und warst trotzdem nicht da. Nach dem Termin trägt der Trainer ein, wer da war. Beim Termin siehst du deinen eigenen Eintrag, wenn er von deiner Rückmeldung abweicht, zum Beispiel „War da“, obwohl du abgesagt hattest. Das sehen nur du, deine Eltern und die Trainer."
 
 # ai
 #: src/pages/setup-wizard.tsx
@@ -3820,10 +3843,6 @@ msgstr "{name} wurde gelöscht."
 msgid "Entries"
 msgstr "Einträge"
 
-#: src/faq.tsx
-msgid "Decline for a player or record “absent without excuse”."
-msgstr "Für einen Spieler absagen oder „fehlt unentschuldigt“ eintragen."
-
 #: src/duty-blocks.tsx
 msgid "New special duty …"
 msgstr "Neuer Sonderdienst …"
@@ -4025,6 +4044,11 @@ msgid "Save changes · {count}"
 msgstr "Änderungen speichern · {count}"
 
 # ai
+#: src/pages/event.tsx
+msgid "Present"
+msgstr "Anwesend"
+
+# ai
 #: src/pages/club-settings.tsx
 msgid "Each team takes its games from one of the switched-on sources (Team → Settings). Teams without one enter games by hand or from a table."
 msgstr "Jede Mannschaft übernimmt ihre Spiele aus einer der eingeschalteten Quellen (Team → Einstellungen). Mannschaften ohne Quelle tragen Spiele von Hand oder aus einer Tabelle ein."
@@ -4080,6 +4104,7 @@ msgstr "Freischalten kannst du nur dich selbst oder eines deiner Kinder."
 msgid "The passkey was not created because the dialog was cancelled. Please tap again."
 msgstr "Der Passkey wurde nicht angelegt, weil der Dialog abgebrochen wurde. Bitte tippe noch einmal."
 
+#: src/pages/event.tsx
 #: src/pages/event.tsx
 #: src/pages/event.tsx
 #: src/pages/group.tsx
@@ -4167,6 +4192,13 @@ msgstr "Bitte einen Ort wählen."
 #: worker/routes/events.ts
 msgid "{actorName} withdrew the cancellation: training on {date} is going ahead after all."
 msgstr "{actorName} hat die Absage zurückgenommen: Das Training am {date} findet doch statt."
+
+# ai
+#: src/pages/event.tsx
+#: src/pages/event.tsx
+#: src/pages/event.tsx
+msgid "Attendance"
+msgstr "Anwesenheit"
 
 #: src/pages/profile.tsx
 msgid "Passkey"
@@ -4439,6 +4471,11 @@ msgstr "Z. B. Treffen oder Fortbildung. Alle Mitglieder der Gruppe sind eingelad
 #: src/pages/plans.tsx
 msgid "Plan saved."
 msgstr "Plan gespeichert."
+
+# ai
+#: src/pages/event.tsx
+msgid "unexcused"
+msgstr "unentschuldigt"
 
 #: src/pages/team.tsx
 msgid "Leaving the club"
@@ -5113,10 +5150,6 @@ msgstr "Von Spielerinnen, Spielern und Eltern nur Vorname, Nachname und (bei Spi
 msgid "If subscribing does not work, copy the link and paste it in the calendar app under “Add subscribed calendar” or “Add by URL”."
 msgstr "Klappt das Abonnieren nicht, den Link kopieren und in der Kalender-App unter „Kalender abonnieren“ bzw. „Per URL hinzufügen“ einfügen."
 
-#: src/pages/event.tsx
-msgid "Mark removed."
-msgstr "Markierung entfernt."
-
 #: worker/chat/room.ts
 msgctxt "chat author"
 msgid "In charge"
@@ -5173,10 +5206,6 @@ msgstr "Der bisherige Link funktioniert dann nicht mehr."
 msgid "{days} days ago"
 msgstr "vor {days} Tagen"
 
-#: src/faq.tsx
-msgid "Tap the name in the event. Before the event you can decline or accept again for them there. After the start the switch <0>Absent without excuse</0> appears. You find past events under <1>Events → Past</1>."
-msgstr "Im Termin auf den Namen tippen. Vor dem Termin kannst du dort für ihn absagen oder wieder zusagen. Nach Beginn erscheint der Schalter <0>Fehlt unentschuldigt</0>. Vergangene Termine findest du unter <1>Termine → Vergangen</1>."
-
 #: src/pages/season.tsx
 msgid "5 · Backup"
 msgstr "5 · Sicherung"
@@ -5192,10 +5221,6 @@ msgstr "Danach die App aufs Handy holen: iPhone in Safari über „Teilen“ →
 #: src/pages/event.tsx
 msgid "Manage helper duties in the Helpers tab"
 msgstr "Helferdienste im Reiter Helfer verwalten"
-
-#: src/pages/event.tsx
-msgid "Did not decline and still did not come. Only coaches, the person themselves and their parents see this."
-msgstr "Nicht abgesagt und trotzdem nicht da. Sehen nur Trainer, die Person selbst und ihre Eltern."
 
 #: src/pages/profile.tsx
 msgid "Turn on for this device"
@@ -5608,6 +5633,11 @@ msgstr "Gruppe löschen"
 msgid "{firstName} would like to use this picture. Others only see it after you approve it."
 msgstr "{firstName} möchte dieses Bild verwenden. Erst nach deiner Freigabe sehen es andere."
 
+# ai
+#: src/faq.tsx
+msgid "Decline for a player or record who was there."
+msgstr "Für einen Spieler absagen oder eintragen, wer da war."
+
 #: src/pages/group.tsx
 msgid "New group"
 msgstr "Neue Gruppe"
@@ -5949,6 +5979,11 @@ msgstr "Kabine auf {version} aktualisiert"
 #: worker/routes/mail.ts
 msgid "Please enter the SMTP server."
 msgstr "Bitte gib den SMTP-Server ein."
+
+# ai
+#: src/pages/event.tsx
+msgid "open"
+msgstr "offen"
 
 #: worker/domain/email-login.ts
 msgid "{code}: Please confirm your e-mail address"
@@ -6573,6 +6608,11 @@ msgstr "Adresse kopiert."
 msgid "Personal access"
 msgstr "Persönlicher Zugang"
 
+# ai
+#: src/pages/event.tsx
+msgid "excused"
+msgstr "entschuldigt"
+
 #: src/pages/special.tsx
 msgid "No location"
 msgstr "Kein Ort"
@@ -6783,6 +6823,11 @@ msgstr "Heimspieltag {own}"
 #: src/pages/group.tsx
 msgid "For special events, all members see who accepted or declined. Only the leads see the reasons."
 msgstr "Bei Sonderterminen sehen alle Mitglieder, wer zu- oder abgesagt hat. Gründe sehen nur die Verantwortlichen."
+
+# ai
+#: src/faq.tsx
+msgid "Tap the name in the event. Before the event you can decline or accept again for them there. After the start the event lists everyone with <0>Present</0>, <1>Excused</1> or <2>Unexcused</2>; without an entry the response counts, and who did not respond comes first. Coaches record until the end of the following day, admins the whole season. You find past events under <3>Events → Past</3>."
+msgstr "Tippe im Termin auf den Namen. Vor dem Termin kannst du dort für ihn absagen oder wieder zusagen. Nach Beginn listet der Termin alle mit <0>Anwesend</0>, <1>Entschuldigt</1> oder <2>Unentschuldigt</2>; ohne Eintrag zählt die Rückmeldung, wer nicht geantwortet hat, steht oben. Trainer tragen bis zum Ende des Folgetags ein, Admins die ganze Saison. Vergangene Termine findest du unter <3>Termine → Vergangen</3>."
 
 #: src/pages/help.tsx
 msgid "Something does not work, is unclear or you have an idea? Write your feedback on the app to us here. A screenshot often helps to understand a problem quickly."
@@ -7745,6 +7790,11 @@ msgstr "Verschlüsselung"
 msgid "Crop picture"
 msgstr "Bild zuschneiden"
 
+# ai
+#: src/pages/event.tsx
+msgid "present"
+msgstr "anwesend"
+
 #: modules/duties/app/admin.tsx
 #: modules/duties/app/admin.tsx
 #: src/pages/special.tsx
@@ -7778,6 +7828,11 @@ msgstr "Ende"
 #: src/pages/join.tsx
 msgid "You are signed in as {loggedInAs}. Select the child you want to link in addition."
 msgstr "Du bist als {loggedInAs} angemeldet. Wähle das Kind aus, das du zusätzlich verknüpfen möchtest."
+
+# ai
+#: src/pages/event.tsx
+msgid "Unexcused"
+msgstr "Unentschuldigt"
 
 #: src/pages/squad.tsx
 msgid "More than {max} in the squad. Please deselect players or increase the squad size under Team → Settings."
@@ -8438,6 +8493,11 @@ msgstr "Offen"
 #: src/pages/admin.tsx
 msgid "A personal one-time link sets up a new passkey and signs out the previous devices."
 msgstr "Ein persönlicher Einmal-Link richtet einen neuen Passkey ein und meldet dabei die bisherigen Geräte ab."
+
+# ai
+#: src/pages/event.tsx
+msgid "Attendance of {name}"
+msgstr "Anwesenheit von {name}"
 
 #: src/pages/admin.tsx
 msgid "{plans, plural, one {# holiday plan} other {# holiday plans}}"
@@ -9170,10 +9230,6 @@ msgstr "Mitfahrt abgesagt"
 msgid "Admin"
 msgstr "Admin"
 
-#: src/pages/event.tsx
-msgid "{name}: absent without excuse."
-msgstr "{name}: fehlt unentschuldigt."
-
 #: src/pages/join.tsx
 msgid "has access already"
 msgstr "hat schon einen Zugang"
@@ -9517,6 +9573,11 @@ msgstr "Höchstens {max} Spieler können nominiert werden."
 #: src/pages/setup-wizard.tsx
 msgid "More coaches and admins"
 msgstr "Weitere Trainer und Admins"
+
+# ai
+#: src/respond.tsx
+msgid "Was there"
+msgstr "War da"
 
 #: src/pages/admin.tsx
 #: src/pages/admin.tsx
@@ -10539,6 +10600,11 @@ msgstr "Bestätige zuerst im Profil eine E-Mail-Adresse; dorthin geht die Testma
 msgid "In Safari, tap <0>Share</0> at the bottom, then <1>Add to Home Screen</1> and <2>Add</2>. After that you start {club} from the icon on the home screen. Only then do notifications work on the iPhone."
 msgstr "In Safari unten auf <0>Teilen</0> tippen, dann <1>Zum Home-Bildschirm</1> und <2>Hinzufügen</2>. Danach startest du {club} über das Symbol auf dem Home-Bildschirm. Nur so funktionieren auf dem iPhone auch Benachrichtigungen."
 
+# ai
+#: worker/routes/events.ts
+msgid "Attendance can be recorded until the end of the day after the event. Admins can still change it."
+msgstr "Die Anwesenheit lässt sich bis zum Ende des Tages nach dem Termin eintragen. Admins können sie noch ändern."
+
 #: modules/carpools/app/card.tsx
 msgid "STILL LOOKING"
 msgstr "SUCHEN NOCH"
@@ -10692,7 +10758,6 @@ msgstr "Noch kein Chat"
 msgid "Group chat {teamName}"
 msgstr "Gruppenchat {teamName}"
 
-#: src/pages/event.tsx
 #: src/pages/home.tsx
 #: src/respond.tsx
 msgid "Missed without excuse"

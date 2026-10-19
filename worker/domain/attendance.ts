@@ -1,23 +1,49 @@
 // Attendance record: every event is fixed once after it starts, so that statistics
 // do not depend on the current state (team, active, standing absences).
 // At the season change the record is condensed into season_stats (see seasonStatsStatements).
+import type { AttendanceMark } from "../../shared/attendance";
 import { all, stmt } from "../lib/db";
 import { nowLocal, utcIso } from "../lib/time";
 import { EVENT_SELECT, type EventRow, loadEventContext, type Participant } from "./events";
 
 export type AttendanceStatus = "present" | "open" | "declined" | "standing" | "inactive" | "unexcused";
 
-/** Status in the record; "unexcused" takes precedence over everything. */
-export function attendanceStatus(status: Participant["status"], unexcused: boolean): AttendanceStatus {
-  if (unexcused) return "unexcused";
-  switch (status) {
+/**
+ * Status in the record. The coach's entry wins over the response: present -> present, excused -> declined
+ * (away long-term and inactive stay so), unexcused -> unexcused. Optional participants are in the record
+ * only if they were there (null: no row), so missing an optional training never counts as absence.
+ */
+export function attendanceStatus(p: Pick<Participant, "status" | "optional">, mark: AttendanceMark | null): AttendanceStatus | null {
+  if (p.optional) return (mark ? mark === "present" : p.status === "yes") ? "present" : null;
+  if (mark === "present" || mark === "unexcused") return mark;
+  switch (p.status) {
     case "yes":
-      return "present";
+    case "open":
+      return mark === "excused" ? "declined" : p.status === "yes" ? "present" : "open";
     case "no":
       return "declined";
     default:
-      return status;
+      return p.status;
   }
+}
+
+/** The record row of a participant, or none. A short-notice decline is not late if the person came after all. */
+function recordStatement(db: D1Database, e: Pick<EventRow, "id" | "kind">, p: Participant, mark: AttendanceMark | null, at: string): D1PreparedStatement | null {
+  const status = attendanceStatus(p, mark);
+  if (!status) return null;
+  return stmt(
+    db,
+    `INSERT OR REPLACE INTO attendance (event_id, person_id, team_id, kind, status, is_helper, is_late, recorded_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+    e.id,
+    p.person.id,
+    p.teamId || null,
+    e.kind,
+    status,
+    p.isHelper ? 1 : 0,
+    status === "declined" && p.status === "no" && p.response?.is_late === 1 ? 1 : 0,
+    at,
+  );
 }
 
 /** At most this many events per run; the rest follows in the next hour. */
@@ -37,24 +63,8 @@ export async function recordAttendance(db: D1Database, now = Date.now()): Promis
   const statements: D1PreparedStatement[] = [];
   for (const e of rows) {
     for (const p of ctx.participants.get(e.id) ?? []) {
-      // Optional training: only who accepted is in the record (so missing it never counts as absence)
-      if (p.optional && p.status !== "yes") continue;
-      statements.push(
-        stmt(
-          db,
-          `INSERT OR REPLACE INTO attendance (event_id, person_id, team_id, kind, status, is_helper, is_late, recorded_at)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-          e.id,
-          p.person.id,
-          p.teamId || null,
-          e.kind,
-          attendanceStatus(p.status, ctx.unexcused.has(`${e.id}:${p.person.id}`)),
-          p.isHelper ? 1 : 0,
-          // Short-notice decline: given after the deadline
-          p.status === "no" && p.response?.is_late === 1 ? 1 : 0,
-          at,
-        ),
-      );
+      const row = recordStatement(db, e, p, ctx.marks.get(`${e.id}:${p.person.id}`) ?? null, at);
+      if (row) statements.push(row);
     }
     statements.push(stmt(db, "UPDATE events SET attendance_recorded_at = ? WHERE id = ?", at, e.id));
   }
@@ -62,9 +72,19 @@ export async function recordAttendance(db: D1Database, now = Date.now()): Promis
   return rows.length;
 }
 
-/** Applies a later "unexcused absence" mark to the record if the event has already been recorded. */
-export function attendanceUpdate(db: D1Database, eventId: number, personId: number, status: AttendanceStatus): D1PreparedStatement {
-  return stmt(db, "UPDATE attendance SET status = ?, recorded_at = ? WHERE event_id = ? AND person_id = ?", status, utcIso(), eventId, personId);
+/**
+ * Applies a later attendance entry to the record if the event has already been recorded (attendance_recorded_at);
+ * otherwise the hourly run records it with the entry.
+ */
+export function attendanceSync(
+  db: D1Database,
+  e: Pick<EventRow, "id" | "kind" | "attendance_recorded_at">,
+  p: Participant,
+  mark: AttendanceMark | null,
+): D1PreparedStatement[] {
+  if (!e.attendance_recorded_at) return [];
+  const row = recordStatement(db, e, p, mark, utcIso());
+  return [row ?? stmt(db, "DELETE FROM attendance WHERE event_id = ? AND person_id = ?", e.id, p.person.id)];
 }
 
 /**

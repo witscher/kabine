@@ -1,6 +1,7 @@
 import { plural, select, t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { useState } from "preact/hooks";
+import { type AttendanceMark, defaultMark, unexcusedAllowed } from "../../shared/attendance";
 import type { EventDetail, LeaderRole, LocationRef, MyParticipation, ParticipantDetail, RosterEntry } from "../../shared/types";
 import { api, errorMessage } from "../api";
 import { dutyLines, neededText } from "../duties";
@@ -8,7 +9,7 @@ import { BlockSheet } from "../duty-blocks";
 import { longDate, personName, shortName, stamp, time, timeRange, weekdayPlural } from "../format";
 import { Icon } from "../icons";
 import { GameLinks, isLiveWindow, isReportWindow } from "../live";
-import { byGuardianText, DeclineSheet, deadlineText, PersonResponseRow, quickReasons, ResponseButtons, respondedByText, sendResponse } from "../respond";
+import { AttendanceBadge, byGuardianText, DeclineSheet, deadlineText, PersonResponseRow, quickReasons, ResponseButtons, respondedByText, sendResponse } from "../respond";
 import { useActiveModules } from "../modules";
 import { useMe, useSession } from "../session";
 import { invalidate, useQuery } from "../store";
@@ -161,11 +162,7 @@ export function EventPage({ id }: { id: string }) {
               <>
                 <div class="row-gap">
                   <StatusPill status={single.status} late={single.isLate} nominated={single.nominated} game={event.kind === "game"} optional={single.optional} />
-                  {single.unexcused ? (
-                    <span class="badge warn">
-                      <Trans>Missed without excuse</Trans>
-                    </span>
-                  ) : null}
+                  <AttendanceBadge mark={single.attendance} />
                   {single.respondedAt && respondedByText(single, me.person.id) ? (
                     <span class="small muted">
                       {respondedByText(single, me.person.id)}, {stamp(single.respondedAt)}
@@ -326,6 +323,8 @@ function CoachView({ event, onChanged, onAbsence }: { event: EventDetail; onChan
   const optionalOut = parts.filter((p) => p.optional && (p.status === "open" || p.status === "no"));
   const grouped = event.teams.length > 1;
   const editable = !event.isPast;
+  // After the start: attendance instead of responses
+  const recording = event.isPast && !event.cancelled && parts.length > 0;
   const deadline = deadlineText(event);
   const hours = event.deadlineHours;
 
@@ -350,32 +349,36 @@ function CoachView({ event, onChanged, onAbsence }: { event: EventDetail; onChan
 
   return (
     <>
-      <div class="stat-tiles" role="group" aria-label={t`Overview`}>
-        <div class="stat-tile yellow">
-          <div class="n">{yes.length}</div>
-          <div class="l">
-            <Trans>taking part</Trans>
+      {recording ? (
+        <AttendanceList event={event} onChanged={refresh} onPerson={setPerson} />
+      ) : (
+        <div class="stat-tiles" role="group" aria-label={t`Overview`}>
+          <div class="stat-tile yellow">
+            <div class="n">{yes.length}</div>
+            <div class="l">
+              <Trans>taking part</Trans>
+            </div>
+          </div>
+          <div class="stat-tile">
+            <div class="n">{no.length}</div>
+            <div class="l">
+              <Trans>declined</Trans>
+            </div>
+          </div>
+          <div class="stat-tile">
+            <div class="n">{parts.filter((p) => p.status === "standing").length}</div>
+            <div class="l">
+              <Trans>absent</Trans>
+            </div>
+          </div>
+          <div class="stat-tile dark">
+            <div class="n">{parts.filter((p) => p.status === "inactive").length}</div>
+            <div class="l">
+              <Trans>inactive</Trans>
+            </div>
           </div>
         </div>
-        <div class="stat-tile">
-          <div class="n">{no.length}</div>
-          <div class="l">
-            <Trans>declined</Trans>
-          </div>
-        </div>
-        <div class="stat-tile">
-          <div class="n">{parts.filter((p) => p.status === "standing").length}</div>
-          <div class="l">
-            <Trans>absent</Trans>
-          </div>
-        </div>
-        <div class="stat-tile dark">
-          <div class="n">{parts.filter((p) => p.status === "inactive").length}</div>
-          <div class="l">
-            <Trans>inactive</Trans>
-          </div>
-        </div>
-      </div>
+      )}
 
       {editable && !event.cancelled ? (
         <div class="grid-2" style={{ gridTemplateColumns: event.kind === "game" ? "repeat(2, minmax(0, 1fr))" : "repeat(3, minmax(0, 1fr))" }}>
@@ -426,142 +429,140 @@ function CoachView({ event, onChanged, onAbsence }: { event: EventDetail; onChan
         </Button>
       ) : null}
 
-      {event.isPast && !event.cancelled && parts.length ? (
-        <p class="small muted">
-          <Trans>Anyone who accepted or did not respond and still missed it: tap the name and choose “Absent without excuse”.</Trans>
-        </p>
-      ) : null}
-
-      {missed.length ? (
-        <section class="card card-body" aria-label={t`Absent without excuse`}>
-          <h2 class="section-title" style={{ margin: 0 }}>
-            <Trans>Absent without excuse</Trans> · {missed.length}
-          </h2>
-          <div class="chips">
-            {missed.map((p) => (
-              <button type="button" class="chip" onClick={() => setPerson(p)}>
-                {nameFor(p)}
-              </button>
-            ))}
-          </div>
-        </section>
-      ) : null}
-
-      {yes.length ? (
-        <section class="card card-body" aria-label={t`Accepted`}>
-          <h2 class="section-title" style={{ margin: 0 }}>
-            <Trans>Accepted</Trans> · {yes.length}
-          </h2>
-          <div class="chips">
-            {yes.map((p) => (
-              <button type="button" class="chip" onClick={() => setPerson(p)}>
-                {nameFor(p)}
-              </button>
-            ))}
-          </div>
-        </section>
-      ) : null}
-
-      {no.length ? (
-        <section class="card card-body" aria-label={t`Declined`}>
-          <h2 class="section-title" style={{ margin: 0 }}>
-            <Trans>Declined</Trans> · {no.length}
-          </h2>
-          {no.map((p, i) => (
-            <button
-              type="button"
-              class="stack-sm"
-              style={{ border: 0, background: "none", textAlign: "left", padding: i ? "12px 0 0" : 0, borderTop: i ? "1px solid var(--line)" : 0 }}
-              onClick={() => setPerson(p)}
-            >
-              <div class="row-gap" style={{ justifyContent: "space-between", width: "100%" }}>
-                <strong style={{ fontSize: "17px" }}>{nameFor(p)}</strong>
-                {p.isLate ? (
-                  <span class="badge warn">
-                    <Trans>Short notice</Trans>
-                  </span>
-                ) : null}
+      {!recording ? (
+        <>
+          {missed.length ? (
+            <section class="card card-body" aria-label={t`Absent without excuse`}>
+              <h2 class="section-title" style={{ margin: 0 }}>
+                <Trans>Absent without excuse</Trans> · {missed.length}
+              </h2>
+              <div class="chips">
+                {missed.map((p) => (
+                  <button type="button" class="chip" onClick={() => setPerson(p)}>
+                    {nameFor(p)}
+                  </button>
+                ))}
               </div>
-              {p.reason ? <div style={{ fontSize: "16px" }}>{quoted(p.reason)}</div> : null}
-              {p.respondedAt ? (
-                <div class="small muted">
-                  {stamp(p.respondedAt)} · {p.respondedBy === "guardian" ? byGuardianText(p.respondedByName) : p.respondedBy === "self" ? t`themselves` : (p.respondedByName ?? "")}
-                </div>
-              ) : null}
-            </button>
-          ))}
-        </section>
-      ) : null}
+            </section>
+          ) : null}
 
-      {away.length ? (
-        <section class="card card-body" aria-label={t`Absent`}>
-          <h2 class="section-title" style={{ margin: 0 }}>
-            <Trans>Absent</Trans> · {away.length}
-          </h2>
-          {away.map((p) => (
-            <div class="row-gap" style={{ justifyContent: "space-between" }}>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <strong style={{ color: p.status === "inactive" ? "var(--text-3)" : undefined }}>{nameFor(p)}</strong>
-                <div class="small muted">{p.status === "inactive" ? t`Inactive` : permanentlyAbsent(weekdayPlural(weekdayOf(event.startsAt)))}</div>
+          {yes.length ? (
+            <section class="card card-body" aria-label={t`Accepted`}>
+              <h2 class="section-title" style={{ margin: 0 }}>
+                <Trans>Accepted</Trans> · {yes.length}
+              </h2>
+              <div class="chips">
+                {yes.map((p) => (
+                  <button type="button" class="chip" onClick={() => setPerson(p)}>
+                    {nameFor(p)}
+                  </button>
+                ))}
               </div>
-              {p.status === "inactive" ? (
-                <Button
-                  size="sm"
-                  onClick={async () => {
-                    await api.post(`/persons/${p.person.id}/active`, { active: true });
-                    const name = p.person.firstName;
-                    toast(t`${name} is active again.`);
-                    refresh();
-                  }}
+            </section>
+          ) : null}
+
+          {no.length ? (
+            <section class="card card-body" aria-label={t`Declined`}>
+              <h2 class="section-title" style={{ margin: 0 }}>
+                <Trans>Declined</Trans> · {no.length}
+              </h2>
+              {no.map((p, i) => (
+                <button
+                  type="button"
+                  class="stack-sm"
+                  style={{ border: 0, background: "none", textAlign: "left", padding: i ? "12px 0 0" : 0, borderTop: i ? "1px solid var(--line)" : 0 }}
+                  onClick={() => setPerson(p)}
                 >
-                  <Trans>Activate</Trans>
-                </Button>
-              ) : (
-                <Button size="sm" onClick={() => setPerson(p)}>
-                  <Trans>Change</Trans>
-                </Button>
-              )}
-            </div>
-          ))}
-        </section>
-      ) : null}
+                  <div class="row-gap" style={{ justifyContent: "space-between", width: "100%" }}>
+                    <strong style={{ fontSize: "17px" }}>{nameFor(p)}</strong>
+                    {p.isLate ? (
+                      <span class="badge warn">
+                        <Trans>Short notice</Trans>
+                      </span>
+                    ) : null}
+                  </div>
+                  {p.reason ? <div style={{ fontSize: "16px" }}>{quoted(p.reason)}</div> : null}
+                  {p.respondedAt ? (
+                    <div class="small muted">
+                      {stamp(p.respondedAt)} · {p.respondedBy === "guardian" ? byGuardianText(p.respondedByName) : p.respondedBy === "self" ? t`themselves` : (p.respondedByName ?? "")}
+                    </div>
+                  ) : null}
+                </button>
+              ))}
+            </section>
+          ) : null}
 
-      {open.length ? (
-        <section class="card dark card-body" aria-label={t`No response`}>
-          <h2 class="section-title" style={{ margin: 0, color: "var(--yellow)" }}>
-            <Trans>No response</Trans> · {open.length}
-          </h2>
-          {open.map((p) => (
-            <div class="row-gap" style={{ justifyContent: "space-between" }}>
-              <button type="button" style={{ border: 0, background: "none", color: "#fff", fontWeight: 700, fontSize: "17px", padding: "6px 0", textAlign: "left" }} onClick={() => setPerson(p)}>
-                {nameFor(p)}
-              </button>
-              {editable && !event.cancelled ? (
-                <Button variant="accent" size="sm" onClick={() => remind([p.person.id])}>
-                  <Trans>Remind</Trans>
-                </Button>
-              ) : null}
-            </div>
-          ))}
-        </section>
-      ) : null}
+          {away.length ? (
+            <section class="card card-body" aria-label={t`Absent`}>
+              <h2 class="section-title" style={{ margin: 0 }}>
+                <Trans>Absent</Trans> · {away.length}
+              </h2>
+              {away.map((p) => (
+                <div class="row-gap" style={{ justifyContent: "space-between" }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <strong style={{ color: p.status === "inactive" ? "var(--text-3)" : undefined }}>{nameFor(p)}</strong>
+                    <div class="small muted">{p.status === "inactive" ? t`Inactive` : permanentlyAbsent(weekdayPlural(weekdayOf(event.startsAt)))}</div>
+                  </div>
+                  {p.status === "inactive" ? (
+                    <Button
+                      size="sm"
+                      onClick={async () => {
+                        await api.post(`/persons/${p.person.id}/active`, { active: true });
+                        const name = p.person.firstName;
+                        toast(t`${name} is active again.`);
+                        refresh();
+                      }}
+                    >
+                      <Trans>Activate</Trans>
+                    </Button>
+                  ) : (
+                    <Button size="sm" onClick={() => setPerson(p)}>
+                      <Trans>Change</Trans>
+                    </Button>
+                  )}
+                </div>
+              ))}
+            </section>
+          ) : null}
 
-      {optionalOut.length ? (
-        <section class="card card-body" aria-label={t`Optional, not joining`}>
-          <h2 class="section-title" style={{ margin: 0 }}>
-            <Trans>Optional, not joining</Trans> · {optionalOut.length}
-          </h2>
-          <p class="small muted">
-            <Trans>They may join this training if they want to. Nobody counts as missing.</Trans>
-          </p>
-          <div class="chips">
-            {optionalOut.map((p) => (
-              <button type="button" class="chip" onClick={() => setPerson(p)}>
-                {nameFor(p)}
-              </button>
-            ))}
-          </div>
-        </section>
+          {open.length ? (
+            <section class="card dark card-body" aria-label={t`No response`}>
+              <h2 class="section-title" style={{ margin: 0, color: "var(--yellow)" }}>
+                <Trans>No response</Trans> · {open.length}
+              </h2>
+              {open.map((p) => (
+                <div class="row-gap" style={{ justifyContent: "space-between" }}>
+                  <button type="button" style={{ border: 0, background: "none", color: "#fff", fontWeight: 700, fontSize: "17px", padding: "6px 0", textAlign: "left" }} onClick={() => setPerson(p)}>
+                    {nameFor(p)}
+                  </button>
+                  {editable && !event.cancelled ? (
+                    <Button variant="accent" size="sm" onClick={() => remind([p.person.id])}>
+                      <Trans>Remind</Trans>
+                    </Button>
+                  ) : null}
+                </div>
+              ))}
+            </section>
+          ) : null}
+
+          {optionalOut.length ? (
+            <section class="card card-body" aria-label={t`Optional, not joining`}>
+              <h2 class="section-title" style={{ margin: 0 }}>
+                <Trans>Optional, not joining</Trans> · {optionalOut.length}
+              </h2>
+              <p class="small muted">
+                <Trans>They may join this training if they want to. Nobody counts as missing.</Trans>
+              </p>
+              <div class="chips">
+                {optionalOut.map((p) => (
+                  <button type="button" class="chip" onClick={() => setPerson(p)}>
+                    {nameFor(p)}
+                  </button>
+                ))}
+              </div>
+            </section>
+          ) : null}
+        </>
       ) : null}
 
       {event.kind === "training" && grouped && editable && !event.cancelled ? <JoiningTeams event={event} onChanged={refresh} /> : null}
@@ -605,6 +606,127 @@ function CoachView({ event, onChanged, onAbsence }: { event: EventDetail; onChan
       ) : null}
       {infoOpen ? <GameInfoSheet event={event} onClose={() => setInfoOpen(false)} onDone={refresh} /> : null}
       {person ? <ParticipantSheet event={event} p={person} onClose={() => setPerson(null)} onDone={refresh} /> : null}
+    </>
+  );
+}
+
+const markLabel = (mark: AttendanceMark, optional: boolean) =>
+  mark === "present" ? t`Present` : mark === "excused" ? (optional ? t`Not there` : t`Excused`) : t`Unexcused`;
+
+/**
+ * After the start: coaches record who was there. Without an entry the response counts (accepted: present,
+ * declined, away or inactive: excused); who did not respond is listed first. The player's response stays.
+ */
+function AttendanceList({ event, onChanged, onPerson }: { event: EventDetail; onChanged: () => void; onPerson: (p: ParticipantDetail) => void }) {
+  const parts = event.participants ?? [];
+  const grouped = event.teams.length > 1;
+  const effective = (p: ParticipantDetail) => p.attendance ?? defaultMark(p.status, p.optional);
+  // Optional participants appear once they accepted or were recorded as there
+  const listed = parts.filter((p) => !p.optional || p.status === "yes" || p.attendance === "present");
+  const open = listed.filter((p) => effective(p) === null);
+  const done = listed.filter((p) => effective(p) !== null);
+  const count = (mark: AttendanceMark) => listed.filter((p) => effective(p) === mark).length;
+  const until = event.attendanceUntil ? longDate(event.attendanceUntil) : null;
+  const teamName = (teamId: number) => event.teams.find((t) => t.id === teamId)?.name ?? "";
+
+  const save = async (p: ParticipantDetail, mark: AttendanceMark) => {
+    try {
+      await api.put(`/events/${event.id}/attendance/${p.person.id}`, { mark });
+      invalidate("/events");
+      onChanged();
+    } catch (err) {
+      toast(errorMessage(err), "error");
+    }
+  };
+
+  const row = (p: ParticipantDetail, i: number) => {
+    const mark = effective(p);
+    const name = shortName(p.person);
+    const options: { value: AttendanceMark; label: string }[] = [
+      { value: "present", label: markLabel("present", p.optional) },
+      { value: "excused", label: markLabel("excused", p.optional) },
+      ...(unexcusedAllowed(p.status, p.optional) ? [{ value: "unexcused" as const, label: markLabel("unexcused", false) }] : []),
+    ];
+    return (
+      <div class="stack-sm" style={{ padding: i ? "12px 0 0" : 0, borderTop: i ? "1px solid var(--line)" : 0 }}>
+        <div class="row-gap" style={{ justifyContent: "space-between" }}>
+          <button type="button" style={{ border: 0, background: "none", padding: 0, fontWeight: 700, fontSize: "17px", textAlign: "left" }} onClick={() => onPerson(p)}>
+            {name}
+            {grouped ? ` (${(p.teamIds.length ? p.teamIds : [p.teamId]).map(teamName).join(" · ")})` : ""}
+            {p.isHelper ? ` · ${t`Stand-in`}` : ""}
+          </button>
+          <StatusPill status={p.status} late={p.isLate} optional={p.optional} />
+        </div>
+        {p.reason ? <div class="small muted">{quoted(p.reason)}</div> : null}
+        {event.attendanceEditable ? (
+          <Segmented<AttendanceMark | "">
+            label={t`Attendance of ${name}`}
+            value={mark ?? ""}
+            options={options}
+            onChange={(v) => {
+              if (v && v !== mark) void save(p, v);
+            }}
+          />
+        ) : mark ? (
+          <span class={`badge ${mark === "unexcused" ? "warn" : "muted"}`} style={{ alignSelf: "flex-start" }}>
+            {markLabel(mark, p.optional)}
+          </span>
+        ) : null}
+      </div>
+    );
+  };
+
+  return (
+    <>
+      <div class="stat-tiles" role="group" aria-label={t`Attendance`}>
+        <div class="stat-tile yellow">
+          <div class="n">{count("present")}</div>
+          <div class="l">
+            <Trans>present</Trans>
+          </div>
+        </div>
+        <div class="stat-tile">
+          <div class="n">{count("excused")}</div>
+          <div class="l">
+            <Trans>excused</Trans>
+          </div>
+        </div>
+        <div class="stat-tile">
+          <div class="n">{count("unexcused")}</div>
+          <div class="l">
+            <Trans>unexcused</Trans>
+          </div>
+        </div>
+        <div class="stat-tile dark">
+          <div class="n">{open.length}</div>
+          <div class="l">
+            <Trans>open</Trans>
+          </div>
+        </div>
+      </div>
+      <p class="small muted">
+        {event.attendanceEditable
+          ? until
+            ? t`Record who was there, until the end of ${until}. Without an entry the response counts.`
+            : t`Record who was there. Without an entry the response counts.`
+          : t`Attendance can no longer be changed here. Admins can still change it.`}
+      </p>
+      {open.length ? (
+        <section class="card card-body stack-sm" aria-label={t`Still to record`}>
+          <h2 class="section-title" style={{ margin: 0 }}>
+            <Trans>Still to record</Trans> · {open.length}
+          </h2>
+          {open.map(row)}
+        </section>
+      ) : null}
+      {done.length ? (
+        <section class="card card-body stack-sm" aria-label={t`Attendance`}>
+          <h2 class="section-title" style={{ margin: 0 }}>
+            <Trans>Attendance</Trans> · {done.length}
+          </h2>
+          {done.map(row)}
+        </section>
+      ) : null}
     </>
   );
 }
@@ -952,28 +1074,9 @@ function ParticipantSheet({ event, p, onClose, onDone }: { event: EventDetail; p
       <div class="row-gap">
         <StatusPill status={p.status} late={p.isLate} optional={p.optional} />
         {p.isHelper ? <span class="badge muted">{t`Stand-in`}</span> : null}
-        {p.unexcused ? (
-          <span class="badge warn">
-            <Trans>Absent without excuse</Trans>
-          </span>
-        ) : null}
+        <AttendanceBadge mark={p.attendance} />
       </div>
       {p.reason ? <p>{quoted(p.reason)}</p> : null}
-      {event.isPast && !event.cancelled && !p.optional && (p.unexcused || p.status === "yes" || p.status === "open") ? (
-        <div class="list">
-          <SwitchRow
-            label={t`Absent without excuse`}
-            sub={t`Did not decline and still did not come. Only coaches, the person themselves and their parents see this.`}
-            checked={p.unexcused}
-            onChange={async (unexcused) => {
-              await api.put(`/events/${event.id}/unexcused/${p.person.id}`, { unexcused });
-              toast(unexcused ? t`${name}: absent without excuse.` : t`Mark removed.`);
-              onClose();
-              onDone();
-            }}
-          />
-        </div>
-      ) : null}
       <CoachResponse
         event={event}
         p={p}
@@ -1029,7 +1132,6 @@ function ParticipantSheet({ event, p, onClose, onDone }: { event: EventDetail; p
   );
 }
 
-/** Team with "responses visible to everyone": who is coming, who is not (without reasons). */
 const leaderRole = (role: LeaderRole) =>
   ({ coach: t`Coach`, lead: t`Lead`, staff: t({ message: "Staff", context: "team role" }), organizer: t`Organiser` })[role];
 
@@ -1040,7 +1142,8 @@ const leaderRole = (role: LeaderRole) =>
 function Leaders({ event, onAbsence, onChanged }: { event: EventDetail; onAbsence: () => void; onChanged: () => void }) {
   const me = useMe();
   const leaders = event.leaders;
-  if (!leaders.length) return null;
+  // Afterwards only of interest if someone was not there
+  if (!leaders.length || (event.isPast && !leaders.some((l) => l.absent))) return null;
   const own = leaders.find((l) => l.personId === me.person.id);
   const heads = leaders.filter((l) => l.role === "coach" || l.role === "lead");
   const nobodyLeft = event.canManage && !event.isPast && !event.cancelled && heads.length > 0 && heads.every((l) => l.absent);
@@ -1146,6 +1249,7 @@ function AbsenceSheet({ event, onClose, onDone }: { event: EventDetail; onClose:
   );
 }
 
+/** Team with "responses visible to everyone": who is coming, who is not (without reasons). */
 function RosterList({ roster }: { roster: RosterEntry[] }) {
   const groups: { title: string; items: RosterEntry[] }[] = [
     { title: t`Accepted`, items: roster.filter((r) => r.status === "yes") },

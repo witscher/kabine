@@ -436,6 +436,7 @@ const CORE_EXPORT_TABLES = [
   "help_requests",
   "standing_absences",
   "unexcused_absences",
+  "attendance_marks",
   "attendance",
   "season_stats",
   "notification_settings",
