@@ -12,6 +12,10 @@ The helper duties stay partly in the core: one's duties on event cards, in the c
 
 The developer documents stay in `docs/` next to the club documents for now; the READMEs link them by these paths.
 
+## No variables in the club's configuration (October 2026)
+
+`wrangler.jsonc` has no `vars` for a club installation. The "Deploy to Cloudflare" button shows every variable as a field, and `RP_ID`, `ORIGIN` and `MAIL_FROM` had no explanation there although the app does not need them: it takes its address from the request (and remembers it for push and mail), and the mail sender from the setup wizard. They stay available as optional Worker variables (`docs/operation.md`, Optional variables). The demo environment sets them, because it runs on one fixed domain.
+
 ## Public demo and project website (October 2026)
 
 `handball.kabine.dev` is the environment `demo` of `wrangler.jsonc` (Worker `kabine-demo`, own D1, KV, queue, Durable Objects; `APP_ENV=demo`). Visitors sign in by link per role (`/api/demo/login/<player|parent|coach|admin>?lang=de|en`), without passkeys. Four shared accounts, so everything that could lock others out or leave the demo (passkeys, e-mail, SMS, owner handover, invitations, feedback) is blocked (`worker/demo/routes.ts`). At 3:00 Berlin time the cron wipes database, KV and chats and fills them again from `seed/demo.sql` plus scenes made through the app's own API (`worker/demo/reset.ts`), so games and responses are always dated relative to today and the season moves on by itself. The cron runs hourly and checks the Berlin hour, which covers summer and winter time. Secret `DEMO_RESET_TOKEN` allows a manual reset (`npm run demo:reset`). The demo is deployed from `main` by `.github/workflows/deploy-demo.yml` (needs the repository secrets `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, `DEMO_RESET_TOKEN`), so it always runs the latest version.

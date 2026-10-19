@@ -121,7 +121,7 @@ async function deliver(env: Env, accountIds: number[], topic: DutyTopic, msg: ()
 
 function appLink(env: Env, path: string): string {
   // ORIGIN is filled with the remembered app address at the start of the cron run (worker/cron.ts)
-  return `${env.ORIGIN}${path}`;
+  return `${env.ORIGIN ?? ""}${path}`;
 }
 
 /** Mail text from paragraphs: greeting, content, footer. */

@@ -45,6 +45,16 @@ For a release with database migrations, maintenance mode during the merge avoids
 
 Without `APP_SECRET` and the VAPID keys set as secrets, the app uses keys it generated on first start (table `instance_secrets`). Secrets set with `npx wrangler secret put` take precedence; switching from generated to own keys has the effects in the table.
 
+## Optional variables
+
+The "Deploy to Cloudflare" button asks for none of these; the app works without them. Set them only if you need them, as plain-text variables of the Worker (*Workers & Pages → kabine → Settings → Variables and Secrets*), or in `wrangler.jsonc` under `vars`.
+
+| Variable | Without it | Set it when |
+| --- | --- | --- |
+| `ORIGIN` | The app uses the address it was opened at (e.g. `https://app.your-club.org`) and remembers it for links in push messages and e-mails. | The app can be reached at more than one address and links should always point to one of them. |
+| `RP_ID` | Passkeys are bound to the host name the app was opened at. | Same case as `ORIGIN`: set it to the host name of that address (`app.your-club.org`), never to a `workers.dev` address you will stop using. |
+| `MAIL_FROM` | The sender address comes from the setup wizard (*Administration → E-mail*). | You want a default sender before the wizard has run. |
+
 ## Owner and admins
 
 The first admin is the **owner**. Other admins cannot take away the owner's admin role or access. Keep at least two admins, so the club does not depend on one person. An admin who lost their device gets a personal link from another admin, or signs in with a code by e-mail when e-mail is set up.

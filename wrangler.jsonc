@@ -13,14 +13,9 @@
     "run_worker_first": ["/api/*"]
   },
   "observability": { "enabled": true },
-  "vars": {
-    // Empty: relying party ID and origin come from the requested address. Passkeys are bound to
-    // that domain, so set up the club's own domain before inviting people (see docs/install.md).
-    "RP_ID": "",
-    "ORIGIN": "",
-    "APP_ENV": "production",
-    "MAIL_FROM": ""
-  },
+  // No "vars": the app takes its address from the request and the mail sender from the setup wizard,
+  // so the "Deploy to Cloudflare" button asks nothing beyond the setup password. Optional variables
+  // (RP_ID, ORIGIN, MAIL_FROM) are described in docs/operation.md.
   // Cloudflare Email Sending (optional). Alternatively the club enters an SMTP server in the setup wizard.
   "send_email": [{ "name": "EMAIL" }],
   "workers_dev": true,
