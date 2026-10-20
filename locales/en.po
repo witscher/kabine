@@ -2482,6 +2482,10 @@ msgstr "{venue, select, hall {Without a connection to the association: paste a t
 msgid "Google Calendar: on a computer, go to calendar.google.com → Other calendars → From URL and paste the link. It then also appears in the app. Google only updates every few hours."
 msgstr "Google Calendar: on a computer, go to calendar.google.com → Other calendars → From URL and paste the link. It then also appears in the app. Google only updates every few hours."
 
+#: shared/changelog.ts
+msgid "KiHaSL/JuHaSL is now called “Jugendschiedsrichter” (youth referees)."
+msgstr "KiHaSL/JuHaSL is now called “Jugendschiedsrichter” (youth referees)."
+
 #: src/pages/home.tsx
 msgid "Events for {childNames}"
 msgstr "Events for {childNames}"
@@ -2755,6 +2759,10 @@ msgstr "This person does not belong to this team."
 #: src/pages/event.tsx
 msgid "In charge"
 msgstr "In charge"
+
+#: shared/changelog.ts
+msgid "The dot for news like this one is now on the Events tab."
+msgstr "The dot for news like this one is now on the Events tab."
 
 #: worker/routes/admin.ts
 #: worker/routes/admin.ts
@@ -7515,6 +7523,10 @@ msgstr "{yes} of {total} accepted"
 #: src/pages/admin.tsx
 msgid "Kind of venue"
 msgstr "Kind of venue"
+
+#: shared/changelog.ts
+msgid "Training venues: add your club's halls or pitches and other venues under Administration → Training venues."
+msgstr "Training venues: add your club's halls or pitches and other venues under Administration → Training venues."
 
 #: modules/duties/app/helpers.tsx
 msgid "Only with free slots"

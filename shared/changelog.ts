@@ -15,6 +15,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: readonly ChangelogEntry[] = [
   {
+    version: "0.2.3",
+    date: "2026-10-20",
+    items: () => [
+      t`Training venues: add your club's halls or pitches and other venues under Administration → Training venues.`,
+      t`KiHaSL/JuHaSL is now called “Jugendschiedsrichter” (youth referees).`,
+      t`The dot for news like this one is now on the Events tab.`,
+    ],
+  },
+  {
     version: "0.2.2",
     date: "2026-10-20",
     items: () => [

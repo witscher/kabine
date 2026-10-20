@@ -2579,6 +2579,11 @@ msgstr "{venue, select, hall {Ohne Anbindung an den Verband: Füge eine Tabelle 
 msgid "Google Calendar: on a computer, go to calendar.google.com → Other calendars → From URL and paste the link. It then also appears in the app. Google only updates every few hours."
 msgstr "Google Kalender: am Computer unter calendar.google.com → Weitere Kalender → Per URL den Link einfügen. Danach erscheint er auch in der App. Google aktualisiert nur alle paar Stunden."
 
+# ai
+#: shared/changelog.ts
+msgid "KiHaSL/JuHaSL is now called “Jugendschiedsrichter” (youth referees)."
+msgstr "KiHaSL/JuHaSL heißen jetzt „Jugendschiedsrichter“."
+
 #: src/pages/home.tsx
 msgid "Events for {childNames}"
 msgstr "Termine von {childNames}"
@@ -2864,6 +2869,11 @@ msgstr "Diese Person gehört nicht zu dieser Mannschaft."
 #: src/pages/event.tsx
 msgid "In charge"
 msgstr "Verantwortlich"
+
+# ai
+#: shared/changelog.ts
+msgid "The dot for news like this one is now on the Events tab."
+msgstr "Der Punkt für Neuigkeiten wie diese sitzt jetzt am Reiter Termine."
 
 #: worker/routes/admin.ts
 #: worker/routes/admin.ts
@@ -7834,6 +7844,11 @@ msgstr "{yes} von {total} zugesagt"
 #: src/pages/admin.tsx
 msgid "Kind of venue"
 msgstr "Art des Orts"
+
+# ai
+#: shared/changelog.ts
+msgid "Training venues: add your club's halls or pitches and other venues under Administration → Training venues."
+msgstr "Trainingsorte: Lege unter Verwaltung → Trainingsorte die Hallen oder Plätze des Vereins und weitere Orte an."
 
 #: modules/duties/app/helpers.tsx
 msgid "Only with free slots"
