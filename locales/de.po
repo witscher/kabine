@@ -9933,6 +9933,11 @@ msgstr "Abruf fehlgeschlagen: {error}"
 msgid "Share with text"
 msgstr "Mit Text teilen"
 
+# ai
+#: shared/changelog.ts
+msgid "Update pull requests on GitHub now open reliably. If your copy is on 0.2.0, replace the update workflow once, as the pull request says."
+msgstr "Update-Pull-Requests auf GitHub öffnen sich jetzt zuverlässig. Ist deine Kopie auf 0.2.0, ersetze einmal den Update-Workflow, wie es im Pull Request steht."
+
 #: src/pages/season.tsx
 msgid "The upcoming season {upcomingName} and its age classes will be deleted. Nothing changes in the current season, teams, persons and events."
 msgstr "Die kommende Saison {upcomingName} und ihre Altersklassen werden gelöscht. An der laufenden Saison, an Mannschaften, Personen und Terminen ändert sich nichts."

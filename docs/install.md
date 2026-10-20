@@ -16,6 +16,8 @@ The button creates a copy of the repository in your GitHub account and the Cloud
 
 It asks for one secret, `ADMIN_BOOTSTRAP_TOKEN`. Choose a password of at least 16 characters and keep it until the first admin has signed in. Everything else the app creates itself on first start: the key for signed links and the key pair for push notifications. They are stored in the database and never leave it with the data export. If you prefer to manage them yourself, set `APP_SECRET`, `VAPID_PUBLIC_KEY` and `VAPID_PRIVATE_KEY` as secrets of the Worker (`npm run secrets:generate` creates a set).
 
+The copy does not include the update workflow; step 6 adds it.
+
 In the Worker's settings under *Build*, check that the deploy command is `npm run deploy`. It applies the database migrations before uploading the new version. With a plain `npx wrangler deploy` the database stays on the old schema.
 
 **Data in Europe:** the button does not let you choose where the database is stored. If your privacy policy promises the EU, create the database by hand first (`npx wrangler d1 create kabine --jurisdiction eu`, see "Installing by hand") and use that database for the Worker. The team chat already lives in the EU jurisdiction.
@@ -63,9 +65,15 @@ Push notifications work on Android and desktop browsers right away. On an iPhone
 
 ## 6. Updates
 
-Your copy contains the workflow `.github/workflows/update.yml`. Once a week it looks for a new Kabine release and opens a pull request. Merging it deploys the new version. If the release changes the database, the app shows "being updated" for about a minute and the deploy notes a restore point first (`docs/operation.md`, Updates). Make sure GitHub Actions are enabled in your copy (*Settings → Actions*); *Actions → Kabine updates → Run workflow* looks for a release right away. A copy from before October 2026 needs a few steps once: `docs/operation.md`, Updating an older copy.
+New Kabine versions arrive as a pull request in your copy on GitHub; you decide when to install them. The deploy button does not copy the update workflow (GitHub does not let it create workflow files), so add it once, right after the installation:
 
-If a release changes the Cloudflare configuration (for example a new binding), the pull request says so. Compare `wrangler.jsonc` before merging.
+1. In your copy on GitHub: *Add file → Create new file*, name it `.github/workflows/update.yml`, paste the content of [the update workflow](https://github.com/witscher/kabine/blob/main/.github/workflows/update.yml) and commit it.
+2. *Settings → Actions → General*: under *Workflow permissions* tick **Allow GitHub Actions to create and approve pull requests** and save.
+3. *Actions → Kabine updates → Run workflow*: it looks for a release right away. If your copy is already on the latest release, it does nothing.
+
+From then on the workflow looks for a new release every Monday and opens a pull request "Update Kabine to vX.Y.Z". It says whether the release changes the database or the Cloudflare configuration (`wrangler.jsonc`). Merging it deploys the new version; if the release changes the database, the app shows "being updated" for about a minute and the deploy notes a restore point first (`docs/operation.md`, Updates). If GitHub still does not let the workflow open the pull request, it opens an issue with a link to open it yourself.
+
+A copy from before October 2026 needs a few steps once: `docs/operation.md`, Updating an older copy.
 
 ## Installing by hand
 

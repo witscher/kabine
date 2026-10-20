@@ -9571,6 +9571,10 @@ msgstr "Fetch failed: {error}"
 msgid "Share with text"
 msgstr "Share with text"
 
+#: shared/changelog.ts
+msgid "Update pull requests on GitHub now open reliably. If your copy is on 0.2.0, replace the update workflow once, as the pull request says."
+msgstr "Update pull requests on GitHub now open reliably. If your copy is on 0.2.0, replace the update workflow once, as the pull request says."
+
 #: src/pages/season.tsx
 msgid "The upcoming season {upcomingName} and its age classes will be deleted. Nothing changes in the current season, teams, persons and events."
 msgstr "The upcoming season {upcomingName} and its age classes will be deleted. Nothing changes in the current season, teams, persons and events."

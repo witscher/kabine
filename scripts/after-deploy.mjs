@@ -14,6 +14,9 @@ New installation? Two steps, in this order:
   2. Open that address. The app asks for the setup password you chose when deploying
      (ADMIN_BOOTSTRAP_TOKEN) and sets up the first admin, then the setup wizard starts.
 
+Later, for updates: add the update workflow to your copy on GitHub once
+(docs/install.md, step 6 "Updates").
+
 Guide: https://github.com/witscher/kabine/blob/main/docs/install.md
 ${line}
 `);

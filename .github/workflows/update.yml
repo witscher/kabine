@@ -14,6 +14,7 @@ on:
 permissions:
   contents: write
   pull-requests: write
+  issues: write
 
 env:
   UPSTREAM: https://github.com/witscher/kabine.git
@@ -29,6 +30,8 @@ jobs:
           fetch-depth: 0
       - name: Find the latest release
         id: release
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           git remote add upstream "$UPSTREAM"
           git fetch --quiet upstream 'refs/tags/v*:refs/tags/upstream/v*' --no-tags
@@ -36,7 +39,8 @@ jobs:
           if [ -z "$latest" ]; then echo "No release yet"; exit 0; fi
           version=${latest#upstream/}
           echo "version=$version" >> "$GITHUB_OUTPUT"
-          if git ls-remote --exit-code --heads origin "kabine-update-$version" >/dev/null; then
+          # Done when a pull request for this version exists (open, merged or closed) or the copy is on it
+          if [ "$(gh pr list --head "kabine-update-$version" --state all --json number --jq length)" != "0" ]; then
             echo "exists=true" >> "$GITHUB_OUTPUT"
           elif [ -f .kabine-version ] && [ "$(cat .kabine-version)" = "$version" ]; then
             echo "exists=true" >> "$GITHUB_OUTPUT"
@@ -58,7 +62,8 @@ jobs:
           git show "upstream/$VERSION:wrangler.jsonc" > /tmp/wrangler.release.jsonc
           # GitHub does not let this workflow change workflow files (GITHUB_TOKEN has no "workflows" permission),
           # so the copy keeps its own; the pull request lists the ones the release changes
-          git diff --name-only HEAD "upstream/$VERSION" -- .github/workflows > /tmp/changed-workflows.txt
+          # (only the ones the copy has: the release's own CI and demo workflows do not belong in a club's copy)
+          git diff --name-only --diff-filter=M HEAD "upstream/$VERSION" -- .github/workflows > /tmp/changed-workflows.txt
           rm -rf .github/workflows
           if git cat-file -e HEAD:.github/workflows 2>/dev/null; then git checkout HEAD -- .github/workflows; fi
           echo "$VERSION" > .kabine-version
@@ -66,7 +71,8 @@ jobs:
           # New migrations change the database: the deploy then puts the app into maintenance for about a minute
           git diff --cached --name-only --diff-filter=A -- migrations/ | grep '\.sql$' > /tmp/new-migrations.txt || true
           git commit --quiet -m "Kabine $VERSION" || true
-          git push --quiet origin "kabine-update-$VERSION"
+          # A branch from an earlier run without a pull request is replaced
+          git push --quiet --force origin "kabine-update-$VERSION"
       - name: Open the pull request
         if: steps.release.outputs.version && !steps.release.outputs.exists
         env:
@@ -91,5 +97,19 @@ jobs:
             echo
             echo "$notes"
           } > /tmp/pr-body.md
-          gh pr create --base "${{ github.event.repository.default_branch }}" --head "kabine-update-$VERSION" \
-            --title "Update Kabine to $VERSION" --body-file /tmp/pr-body.md
+          gh api "repos/${{ github.repository }}/pulls" -f base="${{ github.event.repository.default_branch }}" \
+            -f head="kabine-update-$VERSION" -f title="Update Kabine to $VERSION" -F body=@/tmp/pr-body.md --jq .html_url && exit 0
+          # REST rather than `gh pr create`: in fresh copies GitHub refused the GraphQL mutation to the workflow's token.
+          # If it is refused anyway (see docs/install.md, step 6):
+          # an issue with a one-click link to open it by hand instead
+          compare="${{ github.server_url }}/${{ github.repository }}/compare/${{ github.event.repository.default_branch }}...kabine-update-$VERSION?expand=1"
+          {
+            echo "**[Open the pull request for Kabine $VERSION]($compare)**, check it and merge it."
+            echo
+            echo "GitHub did not let the update workflow open it itself. To let it do so next time: *Settings → Actions → General → Workflow permissions →* tick *Allow GitHub Actions to create and approve pull requests* and save."
+            echo
+            cat /tmp/pr-body.md
+          } > /tmp/issue-body.md
+          gh api "repos/${{ github.repository }}/issues" -f title="Kabine $VERSION is ready to install" -F body=@/tmp/issue-body.md --jq .html_url && exit 0
+          echo "::error::Open the pull request by hand: $compare"
+          exit 1

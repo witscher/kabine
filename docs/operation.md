@@ -50,7 +50,7 @@ If you would rather check a release on your own first, switch maintenance mode o
 
 Copies created before the first release (v0.2.0, October 2026) need three things once. After that, updates arrive as described above.
 
-1. **Replace the update workflow.** The workflow in older copies cannot finish an update. In your copy on GitHub open `.github/workflows/update.yml`, edit it and replace its content with the [current version](https://github.com/witscher/kabine/blob/main/.github/workflows/update.yml). If your copy has no such file, create it. Then run it once: *Actions → Kabine updates → Run workflow*. A pull request "Update Kabine to v…" appears within a minute.
+1. **Add or replace the update workflow.** Copies made with the deploy button have none, and older ones cannot finish an update. In your copy on GitHub create or edit `.github/workflows/update.yml` with the content of the [current version](https://github.com/witscher/kabine/blob/main/.github/workflows/update.yml), and under *Settings → Actions → General → Workflow permissions* tick *Allow GitHub Actions to create and approve pull requests*. Then run it once: *Actions → Kabine updates → Run workflow*. A pull request "Update Kabine to v…" (or an issue with a link to it) appears within a minute.
 2. **Check the deploy command.** In the Cloudflare dashboard: *Workers & Pages → your Worker → Settings → Build*, the deploy command must be `npm run deploy`.
 3. **Switch maintenance mode on by hand for this one update.** The running old version does not know the automatic pause yet. In a checkout of your copy (with `npm ci` done and `npx wrangler login`):
 
