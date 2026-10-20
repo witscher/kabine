@@ -1,6 +1,6 @@
 // What is new for admins (worker/domain/news.ts): release notes after an update and modules the club can
 // switch on. A card on the start page until the admin marks it as read; meanwhile a dot on the
-// Administration tab and on Administration → Club.
+// Events tab (where the card is) and, for new modules, on Administration → Club.
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { useState } from "preact/hooks";

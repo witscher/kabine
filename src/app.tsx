@@ -62,7 +62,8 @@ function TabBar() {
   if (!me) return null;
   const unread = rooms.data?.rooms.some((r) => r.unread) ?? false;
   const tabs: { href: string; label: string; icon: IconName; match: (p: string) => boolean; dot?: boolean }[] = [
-    { href: "/", label: t`Events`, icon: "calendar", match: (p) => p === "/" || p.startsWith("/termine") },
+    // Release notes or modules the admin has not seen yet: the card is on the start page (src/news.tsx)
+    { href: "/", label: t`Events`, icon: "calendar", match: (p) => p === "/" || p.startsWith("/termine"), dot: !!me.news },
     { href: "/chat", label: t`Chat`, icon: "chat", match: (p) => p.startsWith("/chat"), dot: unread },
   ];
   // Tabs of the switched-on modules (modules/<id>/app, tab), e.g. the helper plan
@@ -76,8 +77,6 @@ function TabBar() {
       label: t({ message: "Admin", context: "navigation" }),
       icon: "settings",
       match: (p) => p.startsWith("/verwaltung") || p.startsWith("/team"),
-      // Release notes or modules the admin has not seen yet (src/news.tsx)
-      dot: !!me.news,
     });
   else if (me.manageableTeams.length) tabs.push({ href: "/team", label: t`Team`, icon: "users", match: (p) => p.startsWith("/team") });
   // Players and parents need no administration: help and feedback go there
