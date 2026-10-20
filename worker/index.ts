@@ -81,8 +81,25 @@ async function runScheduled(env: Env, ctx: ExecutionContext, scheduledTime: numb
   await handleScheduled(env, scheduledTime);
 }
 
+/** Local development and tests run on plain http. */
+const LOCAL = /^(localhost|127\.0\.0\.1|\[::1\])$|\.localhost$/;
+
+/**
+ * Every request over https: a plain http:// request is redirected (the club's Cloudflare zone may not
+ * force it). Pages and static files come from the assets, the API from the app.
+ */
+export async function handleFetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+  const url = new URL(request.url);
+  if (url.protocol === "http:" && !LOCAL.test(url.hostname)) {
+    url.protocol = "https:";
+    return Response.redirect(url.toString(), 301);
+  }
+  if (!url.pathname.startsWith("/api/")) return env.ASSETS.fetch(request);
+  return app.fetch(request, env, ctx);
+}
+
 export default {
-  fetch: app.fetch,
+  fetch: handleFetch,
   scheduled: (controller, env, ctx) => ctx.waitUntil(runScheduled(env, ctx, controller.scheduledTime)),
   queue: (batch, env) => handleQueue(batch, env),
 } satisfies ExportedHandler<Env, PushJob>;

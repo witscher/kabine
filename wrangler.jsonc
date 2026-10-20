@@ -10,7 +10,8 @@
   "assets": {
     "binding": "ASSETS",
     "not_found_handling": "single-page-application",
-    "run_worker_first": ["/api/*"]
+    // Pages too (not the hashed build files), so a plain http:// request is redirected to https://
+    "run_worker_first": ["/*", "!/assets/*"]
   },
   "observability": { "enabled": true },
   // No "vars": the app takes its address from the request and the mail sender from the setup wizard,

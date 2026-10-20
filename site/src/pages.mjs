@@ -3,7 +3,8 @@
 // style.css). Only statements about Kabine itself, no comparisons with other apps by name.
 import { GITHUB, ORIGIN } from "./layout.mjs";
 
-const section = (cls, kicker, h2, sub, inner = "") => `<section${cls ? ` class="${cls}"` : ""}>
+const anchor = (text) => text.toLowerCase().normalize("NFD").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+const section = (cls, kicker, h2, sub, inner = "") => `<section${kicker ? ` id="${anchor(kicker)}"` : ""}${cls ? ` class="${cls}"` : ""}>
   <div class="wrap">
     ${kicker ? `<p class="kicker">${kicker}</p>` : ""}
     <h2>${h2}</h2>
@@ -492,7 +493,7 @@ ${section(
       description: "Datensparsam, ohne Tracking, Daten im eigenen Konto des Vereins: was Vorstand und Datenschutzbeauftragte über Kabine wissen müssen, mit Datenverzeichnis.",
       kicker: "Für Vorstand und Datenschutz",
       h1: "Eine Vereins-App, die der Datenschutz <mark>mitträgt</mark>.",
-      lead: "Die meisten Nutzer sind Kinder. Kabine speichert deshalb so wenig wie möglich, läuft im eigenen Konto des Vereins und kommt mit einer vollständigen Liste der gespeicherten Daten und einer Vorlage für die Datenschutzerklärung.",
+      lead: "Die meisten Nutzer sind Kinder. Kabine speichert deshalb so wenig wie möglich, verschlüsselt jede Verbindung, läuft im eigenen Konto des Vereins und kommt mit einer vollständigen Liste der gespeicherten Daten und einer Vorlage für die Datenschutzerklärung.",
       body: `${section(
         "",
         "Datensparsamkeit",
@@ -515,6 +516,58 @@ ${section(
     ["Datenbank in der EU:", "bei der Installation ausdrücklich in der EU angelegt, der Mannschaftschat liegt in der EU-Jurisdiktion."],
     ["Keine Selbstregistrierung:", "nur eingeladene Personen kommen in die App, angemeldet wird mit Passkey ohne Passwort."],
     ["Datenexport", "auf Knopfdruck, mit Hinweis auf den sicheren Umgang mit der Datei."],
+  ]),
+)}
+${section(
+  "",
+  "Verschlüsselung",
+  "Verschlüsselt übertragen, verschlüsselt gespeichert.",
+  "Ja, das ist heute Standard. Bei Kinderdaten gehört es trotzdem ausdrücklich dazu.",
+  ticks([
+    ["HTTPS mit TLS auf jeder Verbindung:", "Die Adresse des Vereins bekommt automatisch ein Zertifikat, unverschlüsselte Aufrufe gibt es nicht, und der Browser merkt sich das (HSTS)."],
+    ["Datenbank verschlüsselt gespeichert:", "Cloudflare D1 verschlüsselt alle Daten im Ruhezustand und bei der Übertragung, ohne dass der Verein etwas einstellen muss."],
+    ["Sitzungen geschützt:", "Das Anmelde-Cookie ist für Skripte unlesbar (HttpOnly) und wird nur verschlüsselt gesendet (Secure)."],
+    ["Keine Passwörter, keine fremden Skripte:", "Anmeldung mit Passkey; eine strenge Sicherheitsrichtlinie (CSP) lässt nur Code von der eigenen Adresse zu."],
+  ]) + links([["https://developers.cloudflare.com/ssl/edge-certificates/universal-ssl/", "Cloudflare: Zertifikate (Universal SSL)"], ["https://developers.cloudflare.com/d1/reference/data-security/", "Cloudflare D1: Datensicherheit"]]),
+)}
+${section(
+  "alt",
+  "Warum Cloudflare?",
+  "Sicherheit, die ein Verein allein nicht betreiben könnte.",
+  "Ein eigener Server muss eingerichtet, aktualisiert, gesichert und überwacht werden, im Verein meist ehrenamtlich. Kabine läuft stattdessen auf der Plattform von Cloudflare, einem der größten Netzwerke für Sicherheit und Auslieferung im Internet.",
+  cards("g3", [
+    ["Schutz vor Überlastungsangriffen", "DDoS-Schutz ist in allen Tarifen enthalten, auch im kostenlosen, und wird nicht nach Menge berechnet. Angriffe werden automatisch erkannt und abgewehrt; laut Cloudflare hat das Netzwerk über 500 Tbit/s Kapazität."],
+    ["Kein Server zum Pflegen", "Betriebssystem, Webserver und Sicherheitsupdates betreut die Plattform. Es gibt keinen offenen Port, keinen vergessenen Patch und kein Admin-Passwort für einen Server."],
+    ["Weitgehend kostenlos", "Für einen üblichen Verein mit einigen hundert Mitgliedern reicht der kostenlose Tarif. Wer mehr Spielraum will, zahlt zurzeit 5 US-Dollar im Monat."],
+    ["Geprüft und zertifiziert", "Cloudflare ist unter anderem nach ISO 27001 und SOC 2 zertifiziert; die Nachweise stehen im Trust Hub."],
+    ["Wiederherstellung eingebaut", "Die Datenbank hat eine Historie (Time Travel), mit der sich ein Fehler auf einen früheren Stand zurückdrehen lässt."],
+    ["Daten in der EU", "Datenbank und Mannschaftschat liegen in der EU-Jurisdiktion. Anfragen bearbeitet Cloudflare an Standorten in der Nähe der Nutzer."],
+  ]) + links([["https://developers.cloudflare.com/ddos-protection/", "Cloudflare: DDoS-Schutz"], ["https://developers.cloudflare.com/workers/platform/pricing/", "Cloudflare: Preise der Plattform"], ["https://www.cloudflare.com/trust-hub/compliance-resources/", "Cloudflare: Zertifizierungen"]]),
+)}
+${section(
+  "",
+  "Ausblick",
+  "Kabine auf eigenen Servern?",
+  "Heute läuft Kabine nur bei Cloudflare. Das könnte sich ändern, ohne die App neu zu schreiben.",
+  ticks([
+    ["Die Laufzeit ist schon Open Source:", "workerd, der Kern von Cloudflare Workers, steht unter der Apache-2.0-Lizenz und lässt sich auf eigenen Servern betreiben."],
+    ["Selbstbetrieb wird offiziell:", "Im Oktober 2026 ist das Team von Deno zu Cloudflare gewechselt, um Workers und Durable Objects auf eigener Infrastruktur zu einer offiziell unterstützten Möglichkeit zu machen, mit Ideen aus Denos celld."],
+    ["Was für Kabine noch fehlt:", "Für die Datenbank (D1), den Schlüsselspeicher (KV), Warteschlangen und Zeitpläne gibt es noch keinen offiziellen Weg zum Selbstbetrieb. Erst wenn das steht, kann Kabine auch im eigenen Rechenzentrum oder bei einem deutschen Hoster laufen."],
+    ["Gute Ausgangslage:", "Kabine baut vollständig auf dem Workers-Programmiermodell auf. Wird es außerhalb von Cloudflare verfügbar, wäre ein Umzug eine Anpassung, keine Neuentwicklung. Das Projekt verfolgt die Entwicklung."],
+  ]) + links([["https://blog.cloudflare.com/deno-joins-cloudflare/", "Cloudflare: Deno is joining Cloudflare"], ["https://deno.com/blog/cloudflare", "Deno: Ankündigung"], ["https://github.com/cloudflare/workerd", "workerd auf GitHub"]]),
+)}
+${section(
+  "alt",
+  "Zum Nachlesen",
+  "Offizielle Unterlagen von Cloudflare.",
+  "Für die Prüfung durch Vorstand und Datenschutzbeauftragte, direkt beim Anbieter:",
+  ticks([
+    ["DSGVO bei Cloudflare:", `<a href="https://www.cloudflare.com/de-de/trust-hub/gdpr/">Trust Hub: DSGVO</a>`],
+    ["Auftragsverarbeitungsvertrag (DPA)", `mit EU-Standardvertragsklauseln: <a href="https://www.cloudflare.com/cloudflare-customer-dpa/">Cloudflare Customer DPA</a>`],
+    ["Datenstandort der Datenbank (EU-Jurisdiktion):", `<a href="https://developers.cloudflare.com/d1/configuration/data-location/">D1: Data location</a>`],
+    ["Datenstandort des Chats:", `<a href="https://developers.cloudflare.com/durable-objects/reference/data-location/">Durable Objects: Data location</a>`],
+    ["Zertifizierungen (ISO 27001, SOC 2 u. a.):", `<a href="https://www.cloudflare.com/trust-hub/compliance-resources/">Compliance resources</a>`],
+    ["EU-US Data Privacy Framework:", `<a href="https://www.dataprivacyframework.gov/list">Liste der zertifizierten Unternehmen</a> (nach „Cloudflare“ suchen)`],
   ]),
 )}
 ${section(
@@ -547,7 +600,7 @@ ${section(
       description: "Data-minimal, no tracking, data in the club's own account: what club boards and data protection officers need to know about Kabine, with data inventory.",
       kicker: "For the board and privacy",
       h1: "A club app your data protection officer can <mark>back</mark>.",
-      lead: "Most users are children. So Kabine stores as little as possible, runs in the club's own account and comes with a complete list of the stored data and a template for the privacy policy.",
+      lead: "Most users are children. So Kabine stores as little as possible, encrypts every connection, runs in the club's own account and comes with a complete list of the stored data and a template for the privacy policy.",
       body: `${section(
         "",
         "Data minimisation",
@@ -570,6 +623,58 @@ ${section(
     ["Database in the EU:", "created explicitly in the EU at installation, the team chat is in the EU jurisdiction."],
     ["No self sign-up:", "only invited people get in, sign-in is by passkey without a password."],
     ["Data export", "at the push of a button, with a reminder to keep the file safe."],
+  ]),
+)}
+${section(
+  "",
+  "Encryption",
+  "Encrypted in transit, encrypted at rest.",
+  "Yes, this is standard today. With children's data it still belongs on the list.",
+  ticks([
+    ["HTTPS with TLS on every connection:", "the club's address gets a certificate automatically, there are no unencrypted requests, and the browser remembers that (HSTS)."],
+    ["Database encrypted at rest:", "Cloudflare D1 encrypts all data at rest and in transit, without any setting by the club."],
+    ["Sessions protected:", "the sign-in cookie cannot be read by scripts (HttpOnly) and is only sent encrypted (Secure)."],
+    ["No passwords, no third-party scripts:", "sign-in with passkeys; a strict security policy (CSP) only allows code from the club's own address."],
+  ]) + links([["https://developers.cloudflare.com/ssl/edge-certificates/universal-ssl/", "Cloudflare: certificates (Universal SSL)"], ["https://developers.cloudflare.com/d1/reference/data-security/", "Cloudflare D1: data security"]]),
+)}
+${section(
+  "alt",
+  "Why Cloudflare?",
+  "Security a club could not run on its own.",
+  "A server of your own has to be set up, updated, backed up and monitored, in a club usually by a volunteer. Kabine runs on the Cloudflare platform instead, one of the largest security and delivery networks on the internet.",
+  cards("g3", [
+    ["Protection against overload attacks", "DDoS protection is included in every plan, the free one too, and is not billed by volume. Attacks are detected and mitigated automatically; according to Cloudflare the network has more than 500 Tbps of capacity."],
+    ["No server to maintain", "Operating system, web server and security updates are the platform's job. No open port, no forgotten patch, no admin password for a server."],
+    ["Largely free", "The free plan is enough for a typical club with a few hundred members. More headroom currently costs 5 US dollars a month."],
+    ["Audited and certified", "Cloudflare is certified under ISO 27001 and SOC 2, among others; the reports are in its Trust Hub."],
+    ["Recovery built in", "The database keeps a history (Time Travel) to roll a mistake back to an earlier state."],
+    ["Data in the EU", "Database and team chat are in the EU jurisdiction. Cloudflare handles requests at locations near the users."],
+  ]) + links([["https://developers.cloudflare.com/ddos-protection/", "Cloudflare: DDoS protection"], ["https://developers.cloudflare.com/workers/platform/pricing/", "Cloudflare: platform pricing"], ["https://www.cloudflare.com/trust-hub/compliance-resources/", "Cloudflare: certifications"]]),
+)}
+${section(
+  "",
+  "Outlook",
+  "Kabine on your own servers?",
+  "Today Kabine runs on Cloudflare only. That may change without rewriting the app.",
+  ticks([
+    ["The runtime is already open source:", "workerd, the core of Cloudflare Workers, is licensed under Apache-2.0 and can run on your own servers."],
+    ["Self-hosting is becoming official:", "In October 2026 the Deno team joined Cloudflare to make Workers and Durable Objects on your own infrastructure a first-class supported option, with ideas from Deno's celld."],
+    ["What Kabine still needs:", "For the database (D1), the key-value store (KV), queues and schedules there is no official way to self-host yet. Only then can Kabine run in your own data centre or at a local hosting provider."],
+    ["A good starting point:", "Kabine is built entirely on the Workers programming model. Once that is available outside Cloudflare, moving would be an adaptation, not a rewrite. The project follows the development."],
+  ]) + links([["https://blog.cloudflare.com/deno-joins-cloudflare/", "Cloudflare: Deno is joining Cloudflare"], ["https://deno.com/blog/cloudflare", "Deno: announcement"], ["https://github.com/cloudflare/workerd", "workerd on GitHub"]]),
+)}
+${section(
+  "alt",
+  "Further reading",
+  "Official documents from Cloudflare.",
+  "For review by the board and the data protection officer, straight from the provider:",
+  ticks([
+    ["GDPR at Cloudflare:", `<a href="https://www.cloudflare.com/trust-hub/gdpr/">Trust Hub: GDPR</a>`],
+    ["Data processing agreement (DPA)", `with EU standard contractual clauses: <a href="https://www.cloudflare.com/cloudflare-customer-dpa/">Cloudflare Customer DPA</a>`],
+    ["Database location (EU jurisdiction):", `<a href="https://developers.cloudflare.com/d1/configuration/data-location/">D1: Data location</a>`],
+    ["Chat location:", `<a href="https://developers.cloudflare.com/durable-objects/reference/data-location/">Durable Objects: Data location</a>`],
+    ["Certifications (ISO 27001, SOC 2 and more):", `<a href="https://www.cloudflare.com/trust-hub/compliance-resources/">Compliance resources</a>`],
+    ["EU-US Data Privacy Framework:", `<a href="https://www.dataprivacyframework.gov/list">list of certified companies</a> (search for “Cloudflare”)`],
   ]),
 )}
 ${section(

@@ -13,3 +13,14 @@ describe("Gerüst", () => {
     expect(row?.n).toBe(1);
   });
 });
+
+describe("https only", () => {
+  it("redirects plain http to https, also for the API", async () => {
+    const res = await exports.default.fetch("http://app.example.org/api/health?x=1", { redirect: "manual" });
+    expect(res.status).toBe(301);
+    expect(res.headers.get("location")).toBe("https://app.example.org/api/health?x=1");
+    expect((await exports.default.fetch("https://app.example.org/api/health")).status).toBe(200);
+    // Local development stays on http
+    expect((await exports.default.fetch("http://localhost:5173/api/health")).status).toBe(200);
+  });
+});
