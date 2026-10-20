@@ -1,0 +1,11 @@
+{
+  "Venue added.": "Ort hinzugefügt.",
+  "No training venues yet": "Noch keine Trainingsorte",
+  "{venue, select, hall {Club hall} pitch {Club pitch} other {Club venue}}": "{venue, select, hall {Vereinshalle} pitch {Vereinsplatz} other {Vereinsort}}",
+  "Add venue": "Ort hinzufügen",
+  "Other venue": "Anderer Ort",
+  "{venue, select, hall {Add the club's halls first, with address, so everyone finds them.} pitch {Add the club's pitches first, with address, so everyone finds them.} other {Add the club's venues first, with address, so everyone finds them.}}": "{venue, select, hall {Lege zuerst die Hallen des Vereins an, mit Adresse, damit alle sie finden.} pitch {Lege zuerst die Plätze des Vereins an, mit Adresse, damit alle sie finden.} other {Lege zuerst die Orte des Vereins an, mit Adresse, damit alle sie finden.}}",
+  "Kind of venue": "Art des Orts",
+  "{venue, select, hall {The club's halls and other places where teams train. Coaches choose them in their training plans.} pitch {The club's pitches and other places where teams train. Coaches choose them in their training plans.} other {The club's venues and other places where teams train. Coaches choose them in their training plans.}}": "{venue, select, hall {Die Hallen des Vereins und andere Orte, an denen Mannschaften trainieren. Trainer wählen sie in ihren Trainingsplänen aus.} pitch {Die Plätze des Vereins und andere Orte, an denen Mannschaften trainieren. Trainer wählen sie in ihren Trainingsplänen aus.} other {Die Orte des Vereins und andere Orte, an denen Mannschaften trainieren. Trainer wählen sie in ihren Trainingsplänen aus.}}",
+  "{venue, select, hall {e.g. Sports hall at the school centre} pitch {e.g. Main pitch} other {e.g. Club grounds}}": "{venue, select, hall {z. B. Sporthalle Schulzentrum} pitch {z. B. Hauptplatz} other {z. B. Vereinsgelände}}"
+}

@@ -6,6 +6,7 @@ Changes that are merged but not released yet go under *Unreleased*, one line eac
 
 ## Unreleased
 
+- *Administration → Training venues* can add venues: the club's own halls or pitches and other places, with address. A new installation started with an empty page and venues could only be added inside a training plan.
 ## v0.2.2
 
 - School holidays and public holidays of the region now also come for the current season: when the setup creates the first season, when the region is changed in the club settings, and with "Load holidays of the region" under *Administration → Holidays*. Until now they only came with the season change, so a new installation had none.

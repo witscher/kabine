@@ -50,13 +50,16 @@ const locationSchema = z.object({
 adminRoutes.post("/locations", async (c) => {
   const actor = requireActor(c);
   if (!actor.isAdmin && !actor.coachTeamIds.length) throw forbidden(t`Training locations are created by coaches and admins.`);
-  const input = parse(locationSchema, await readJson(c.req.raw));
+  // The club's own halls or pitches are added by admins (Administration → Training venues); coaches add other venues
+  const input = parse(locationSchema.extend({ kind: z.enum(["hall", "custom"]).default("custom") }), await readJson(c.req.raw));
+  if (input.kind === "hall") requireAdmin(actor);
   const row = await first<{ id: number }>(
     c.env.DB,
-    "INSERT INTO locations (name, address, map_url, kind) VALUES (?, ?, ?, 'custom') RETURNING id",
+    "INSERT INTO locations (name, address, map_url, kind) VALUES (?, ?, ?, ?) RETURNING id",
     input.name,
     input.address ?? null,
     input.mapUrl ?? null,
+    input.kind,
   );
   return c.json({ id: row!.id }, 201);
 });

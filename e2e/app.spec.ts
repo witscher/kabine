@@ -450,6 +450,18 @@ test("Admin schickt eine Rundnachricht, sie erscheint als Ankündigung im Chat",
   await player.page.screenshot({ path: process.env.E2E_SHOT ?? "test-results/announcement.png" });
 });
 
+test("Trainingsorte: Admin legt eine Vereinshalle an", async () => {
+  const { page } = admin;
+  await page.goto("/verwaltung/orte");
+  await page.getByRole("button", { name: "Ort hinzufügen" }).click();
+  const sheet = page.getByRole("dialog", { name: "Ort hinzufügen" });
+  await sheet.getByLabel("Name").fill("Sporthalle Nord");
+  await sheet.getByLabel("Adresse").fill("Nordweg 2, 12345 Musterstadt");
+  await sheet.getByRole("button", { name: "Ort hinzufügen" }).click();
+  await expect(page.getByText("Ort hinzugefügt.")).toBeVisible();
+  await expect(page.getByRole("region", { name: "Vereinshallen" })).toContainText("Sporthalle Nord");
+});
+
 test("Ferien: Ferien der Region lassen sich für die laufende Saison laden", async () => {
   const { page } = admin;
   await page.goto("/verwaltung/ferien");

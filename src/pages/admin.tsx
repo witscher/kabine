@@ -1716,6 +1716,7 @@ export function AdminLocationsPage() {
   useDocumentTitle(t`Training venues`);
   const { data, error, reload } = useQuery<{ locations: (LocationRef & { inUse: boolean })[] }>("/locations?all=1");
   const [edit, setEdit] = useState<(LocationRef & { inUse: boolean }) | null>(null);
+  const [adding, setAdding] = useState(false);
   const venue = useVenue();
   const groups: { kind: LocationRef["kind"]; title: string }[] = [
     { kind: "hall", title: select(venue, { hall: "Club halls", pitch: "Club pitches", other: "Club venues" }) },
@@ -1728,7 +1729,26 @@ export function AdminLocationsPage() {
         <TopBar title={t`Training venues`} kicker={t`Administration`} back="/verwaltung" />
         <div class="content">
           {error ? <ErrorBox error={error} onRetry={reload} /> : null}
-          {!data ? <Spinner /> : null}
+          {!data && !error ? <Spinner /> : null}
+          <p class="muted">
+            {select(venue, {
+              hall: "The club's halls and other places where teams train. Coaches choose them in their training plans.",
+              pitch: "The club's pitches and other places where teams train. Coaches choose them in their training plans.",
+              other: "The club's venues and other places where teams train. Coaches choose them in their training plans.",
+            })}
+          </p>
+          <Button icon="plus" onClick={() => setAdding(true)}>
+            <Trans>Add venue</Trans>
+          </Button>
+          {data && !data.locations.length ? (
+            <Empty title={t`No training venues yet`}>
+              {select(venue, {
+                hall: "Add the club's halls first, with address, so everyone finds them.",
+                pitch: "Add the club's pitches first, with address, so everyone finds them.",
+                other: "Add the club's venues first, with address, so everyone finds them.",
+              })}
+            </Empty>
+          ) : null}
           {groups.map((g) => {
             const items = (data?.locations ?? []).filter((l) => l.kind === g.kind);
             if (!items.length) return null;
@@ -1754,8 +1774,49 @@ export function AdminLocationsPage() {
           })}
         </div>
         {edit ? <LocationSheet loc={edit} onClose={() => setEdit(null)} onDone={reload} /> : null}
+        {adding ? <NewLocationSheet onClose={() => setAdding(false)} onDone={reload} /> : null}
       </main>
     </AdminOnly>
+  );
+}
+
+/** A new venue: the club's own hall or pitch, or another place (outdoor pitch, school gym of another club). */
+function NewLocationSheet({ onClose, onDone }: { onClose: () => void; onDone: () => void }) {
+  const venue = useVenue();
+  const [kind, setKind] = useState<"hall" | "custom">("hall");
+  const [name, setName] = useState("");
+  const [address, setAddress] = useState("");
+  const [mapUrl, setMapUrl] = useState("");
+  return (
+    <Sheet open onClose={onClose} title={t`Add venue`}>
+      <Segmented
+        label={t`Kind of venue`}
+        value={kind}
+        options={[
+          { value: "hall", label: select(venue, { hall: "Club hall", pitch: "Club pitch", other: "Club venue" }) },
+          { value: "custom", label: t`Other venue` },
+        ]}
+        onChange={setKind}
+      />
+      <TextField label={t`Name`} value={name} onInput={setName} maxLength={80} placeholder={select(venue, { hall: "e.g. Sports hall at the school centre", pitch: "e.g. Main pitch", other: "e.g. Club grounds" })} />
+      <TextField label={t`Address`} value={address} onInput={setAddress} maxLength={200} />
+      <TextField label={t`Map link (optional)`} value={mapUrl} onInput={setMapUrl} type="url" hint={t`https link, e.g. to OpenStreetMap`} />
+      <Button
+        variant="primary"
+        size="lg"
+        block
+        disabled={!name.trim()}
+        onClick={async () => {
+          await api.post("/locations", { kind, name: name.trim(), address: address.trim() || null, mapUrl: mapUrl.trim() || null });
+          invalidate("/locations");
+          toast(t`Venue added.`);
+          onClose();
+          onDone();
+        }}
+      >
+        <Trans>Add venue</Trans>
+      </Button>
+    </Sheet>
   );
 }
 

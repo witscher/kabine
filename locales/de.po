@@ -1606,6 +1606,7 @@ msgstr "Neuer Termin: {title}"
 #: src/pages/admin.tsx
 #: src/pages/admin.tsx
 #: src/pages/admin.tsx
+#: src/pages/admin.tsx
 #: src/pages/club-settings.tsx
 #: src/pages/group.tsx
 #: src/pages/group.tsx
@@ -1707,6 +1708,7 @@ msgstr "Diese Anfrage gibt es nicht."
 msgid "Continue without parents?"
 msgstr "Ohne Eltern weiterführen?"
 
+#: src/pages/admin.tsx
 #: src/pages/admin.tsx
 msgid "Map link (optional)"
 msgstr "Kartenlink (optional)"
@@ -1877,6 +1879,11 @@ msgstr "{names} ist eine Gruppe. Gruppen haben nur Chat und Sondertermine."
 #: src/calendar.tsx
 msgid "Remove calendar link?"
 msgstr "Kalender-Link entfernen?"
+
+# ai
+#: src/pages/admin.tsx
+msgid "Venue added."
+msgstr "Ort hinzugefügt."
 
 #: src/pages/season.tsx
 msgid "Carry out permanently"
@@ -2441,6 +2448,11 @@ msgstr "Deine E-Mail-Adresse ist bestätigt. Du kannst dich jetzt auch per E-Mai
 msgid "Helpers are still needed for {game}. Still free: {open}."
 msgstr "für {game} werden noch Helfer gesucht. Noch frei: {open}."
 
+# ai
+#: src/pages/admin.tsx
+msgid "No training venues yet"
+msgstr "Noch keine Trainingsorte"
+
 #: modules/carpools/app/card.tsx
 msgid "Not riding after all?"
 msgstr "Doch nicht mitfahren?"
@@ -3002,6 +3014,11 @@ msgstr "Der Spielbericht ist noch nicht veröffentlicht. handball4all stellt ihn
 #: src/pages/profile.tsx
 msgid "Change name"
 msgstr "Name ändern"
+
+# ai
+#: src/pages/admin.tsx
+msgid "{venue, select, hall {Club hall} pitch {Club pitch} other {Club venue}}"
+msgstr "{venue, select, hall {Vereinshalle} pitch {Vereinsplatz} other {Vereinsort}}"
 
 #: worker/routes/events.ts
 msgid "Events for several teams are created by admins or the coaches of all those teams."
@@ -3645,6 +3662,7 @@ msgid "As soon as your coach creates events, you will see them here."
 msgstr "Sobald dein Trainer Termine anlegt, siehst du sie hier."
 
 #: src/pages/admin.tsx
+#: src/pages/admin.tsx
 msgid "Address"
 msgstr "Adresse"
 
@@ -3871,6 +3889,13 @@ msgstr "Zeitblock hinzufügen"
 #: src/pages/updates.tsx
 msgid "Version"
 msgstr "Version"
+
+# ai
+#: src/pages/admin.tsx
+#: src/pages/admin.tsx
+#: src/pages/admin.tsx
+msgid "Add venue"
+msgstr "Ort hinzufügen"
 
 #: src/pages/admin.tsx
 msgid "Age groups saved."
@@ -6325,6 +6350,11 @@ msgstr "{name} ist nicht da"
 msgid "You cannot mute yourself."
 msgstr "Du kannst dich nicht selbst stummschalten."
 
+# ai
+#: src/pages/admin.tsx
+msgid "Other venue"
+msgstr "Anderer Ort"
+
 #: worker/auth/webauthn.ts
 #: worker/routes/auth.ts
 #: worker/routes/feedback.ts
@@ -6659,6 +6689,7 @@ msgstr "Schalte ein, was dein Verein braucht. Ändern kannst du das jederzeit un
 msgid "A link already exists the other way round: the child is registered as a parent of this person."
 msgstr "Umgekehrt besteht schon eine Verknüpfung: Das Kind ist als Elternteil dieser Person eingetragen."
 
+#: src/pages/admin.tsx
 #: src/pages/admin.tsx
 msgid "https link, e.g. to OpenStreetMap"
 msgstr "https-Link, z. B. zu OpenStreetMap"
@@ -7109,6 +7140,11 @@ msgstr "Es gibt noch keine laufende Saison."
 #: modules/duties/worker/notify.ts
 msgid "KiHaSL/JuHaSL wanted · {team}"
 msgstr "KiHaSL/JuHaSL gesucht · {team}"
+
+# ai
+#: src/pages/admin.tsx
+msgid "{venue, select, hall {Add the club's halls first, with address, so everyone finds them.} pitch {Add the club's pitches first, with address, so everyone finds them.} other {Add the club's venues first, with address, so everyone finds them.}}"
+msgstr "{venue, select, hall {Lege zuerst die Hallen des Vereins an, mit Adresse, damit alle sie finden.} pitch {Lege zuerst die Plätze des Vereins an, mit Adresse, damit alle sie finden.} other {Lege zuerst die Orte des Vereins an, mit Adresse, damit alle sie finden.}}"
 
 #: modules/carpools/worker/domain.ts
 msgid "{rider} is not riding with you: {game}."
@@ -7780,6 +7816,11 @@ msgstr "Training {day} zugesagt"
 #: src/pages/home.tsx
 msgid "{yes} of {total} accepted"
 msgstr "{yes} von {total} zugesagt"
+
+# ai
+#: src/pages/admin.tsx
+msgid "Kind of venue"
+msgstr "Art des Orts"
 
 #: modules/duties/app/helpers.tsx
 msgid "Only with free slots"
@@ -8681,6 +8722,11 @@ msgstr "Die nominierten Spieler und ihre Eltern (Namen als „Vorname N.“) sow
 msgid "Accepted. Thanks for helping out!"
 msgstr "Zugesagt. Danke fürs Aushelfen!"
 
+# ai
+#: src/pages/admin.tsx
+msgid "{venue, select, hall {The club's halls and other places where teams train. Coaches choose them in their training plans.} pitch {The club's pitches and other places where teams train. Coaches choose them in their training plans.} other {The club's venues and other places where teams train. Coaches choose them in their training plans.}}"
+msgstr "{venue, select, hall {Die Hallen des Vereins und andere Orte, an denen Mannschaften trainieren. Trainer wählen sie in ihren Trainingsplänen aus.} pitch {Die Plätze des Vereins und andere Orte, an denen Mannschaften trainieren. Trainer wählen sie in ihren Trainingsplänen aus.} other {Die Orte des Vereins und andere Orte, an denen Mannschaften trainieren. Trainer wählen sie in ihren Trainingsplänen aus.}}"
+
 #: worker/routes/admin.ts
 msgid "The location is still used in a training plan."
 msgstr "Der Ort wird noch in einem Trainingsplan verwendet."
@@ -9083,6 +9129,11 @@ msgstr "Du wurdest in diesem Chat stummgeschaltet."
 #: modules/duties/worker/routes.ts
 msgid "This duty has no note."
 msgstr "Bei diesem Dienst gibt es keine Notiz."
+
+# ai
+#: src/pages/admin.tsx
+msgid "{venue, select, hall {e.g. Sports hall at the school centre} pitch {e.g. Main pitch} other {e.g. Club grounds}}"
+msgstr "{venue, select, hall {z. B. Sporthalle Schulzentrum} pitch {z. B. Hauptplatz} other {z. B. Vereinsgelände}}"
 
 #: src/pages/chat.tsx
 msgid "You have rejoined the chat."
