@@ -80,7 +80,9 @@ jobs:
           VERSION: ${{ steps.release.outputs.version }}
         run: |
           notes=$(git show "upstream/$VERSION:CHANGELOG.md" 2>/dev/null | awk "/^## $VERSION/{f=1;next}/^## /{f=0}f" | head -n 80)
-          if ! diff -q <(sed 's/"database_id": *"[^"]*"//;s/"id": *"[^"]*"//' /tmp/wrangler.release.jsonc) <(sed 's/"database_id": *"[^"]*"//;s/"id": *"[^"]*"//' wrangler.jsonc) >/dev/null; then
+          # Compare without what every club names differently: resource IDs and names, the Worker's name
+          norm() { sed -E 's/, *"(database_id|id)": *"[^"]*"//g; s/"(database_id|id)": *"[^"]*", *//g; s/"(name|database_name|queue)": *"[^"]*"/"\1": ""/g' "$1"; }
+          if ! diff -q <(norm /tmp/wrangler.release.jsonc) <(norm wrangler.jsonc) >/dev/null; then
             wrangler_note=$'\n\n**Check wrangler.jsonc:** the release changes the Cloudflare configuration (for example a new binding). Compare your wrangler.jsonc with the one of the release and add new entries before merging.'
           fi
           if [ -s /tmp/new-migrations.txt ]; then

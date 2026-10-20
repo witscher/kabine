@@ -6,6 +6,8 @@ Changes that are merged but not released yet go under *Unreleased*, one line eac
 
 ## Unreleased
 
+- The update pull request warns about `wrangler.jsonc` only when the release really changes the configuration; resource IDs and the club's own names no longer count.
+
 ## v0.2.1
 
 - A player invitation link opened on a signed-in device (player, parent, coach, admin) only offers "Straight to the app": a child could pick a teammate's free name and set up that teammate's access on the wrong device. The server refuses it too. Expired or invalid links show signed-in people the same way back into the app.
