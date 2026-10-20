@@ -34,7 +34,7 @@ A pull request "Update Kabine to vX.Y.Z" appears in the club's copy when a relea
 
 *Administration → Updates and maintenance* shows the installed version and the last update: when, which database changes, and the restore point with the command to go back. Merge releases with database changes at a quiet time, not right before a game.
 
-**Going back.** Migrations keep the previous release working (`migrations/README.md`), so rolling back only the Worker is usually enough: *Workers & Pages → this Worker → Deployments → Rollback*. Only if the data itself is wrong, restore the database to the restore point as well:
+**Going back.** Migrations keep the previous release working (`migrations/README.md`), so rolling back only the Worker is usually enough: *Workers & Pages → this Worker → Deployments → Rollback*. That holds for one release back. After an update that skipped releases, an older Worker may no longer fit the database (a later release can remove what it still uses): roll back the Worker and restore the database to the restore point together. Also restore the database if the data itself is wrong:
 
 ```sh
 npx wrangler d1 time-travel restore DB --bookmark=<restore point>
@@ -43,6 +43,8 @@ npx wrangler d1 time-travel restore DB --bookmark=<restore point>
 Restoring discards everything written after the restore point. Switch maintenance mode on before, and off when you have checked the app.
 
 If you would rather check a release on your own first, switch maintenance mode on, merge, check the app as an admin and switch it off again.
+
+**Skipping releases.** A copy can go from any release straight to the newest one. The pull request always brings the newest release, lists the database changes and shows the release notes of every version since the installed one; the deploy applies all pending migrations in order, with one pause and one restore point. An older update pull request that is still open is closed with a link to the new one, so nobody installs an older version by mistake.
 
 **Workflow files.** GitHub does not let the automatic update change files in `.github/workflows`. If a release changes them, the pull request lists them with links: open each link, copy the content, edit the same file in your copy on GitHub and paste it. Do this before merging the update.
 

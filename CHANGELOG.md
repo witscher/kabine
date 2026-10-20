@@ -6,6 +6,7 @@ Changes that are merged but not released yet go under *Unreleased*, one line eac
 
 ## Unreleased
 
+- The update pull request shows the release notes of every version since the installed one, so a copy that skipped releases sees all changes, and it closes older update pull requests that are still open.
 ## v0.2.3
 
 - "KiHaSL/JuHaSL" is now called "Jugendschiedsrichter" (youth referees) everywhere in the app; the English texts say "youth referee". The duty and the automatic group are renamed where the club kept the old name. Database change: renames only.

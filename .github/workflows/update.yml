@@ -52,6 +52,9 @@ jobs:
         run: |
           git config user.name "kabine-update"
           git config user.email "kabine-update@users.noreply.github.com"
+          # The version the copy is on, for the release notes of every version since (also skipped ones)
+          git show HEAD:.kabine-version 2>/dev/null > /tmp/installed-version.txt \
+            || git show HEAD:package.json | node -e 'process.stdout.write("v" + JSON.parse(require("fs").readFileSync(0, "utf8")).version)' > /tmp/installed-version.txt
           git checkout -b "kabine-update-$VERSION"
           # The copy has its own history. One commit on top of it with the release's files: files the release
           # removed are removed, the club's wrangler.jsonc stays. No merge, so none of Kabine's history is pushed.
@@ -79,7 +82,8 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           VERSION: ${{ steps.release.outputs.version }}
         run: |
-          notes=$(git show "upstream/$VERSION:CHANGELOG.md" 2>/dev/null | awk "/^## $VERSION/{f=1;next}/^## /{f=0}f" | head -n 80)
+          # Notes of every release since the installed one, so a copy that skipped releases sees all changes
+          notes=$(node scripts/update-notes.mjs CHANGELOG.md "$(cat /tmp/installed-version.txt)")
           # Compare without what every club names differently: resource IDs and names, the Worker's name
           norm() { sed -E 's/, *"(database_id|id)": *"[^"]*"//g; s/"(database_id|id)": *"[^"]*", *//g; s/"(name|database_name|queue)": *"[^"]*"/"\1": ""/g' "$1"; }
           if ! diff -q <(norm /tmp/wrangler.release.jsonc) <(norm wrangler.jsonc) >/dev/null; then
@@ -99,8 +103,17 @@ jobs:
             echo
             echo "$notes"
           } > /tmp/pr-body.md
-          gh api "repos/${{ github.repository }}/pulls" -f base="${{ github.event.repository.default_branch }}" \
-            -f head="kabine-update-$VERSION" -f title="Update Kabine to $VERSION" -F body=@/tmp/pr-body.md --jq .html_url && exit 0
+          if pr=$(gh api "repos/${{ github.repository }}/pulls" -f base="${{ github.event.repository.default_branch }}" \
+            -f head="kabine-update-$VERSION" -f title="Update Kabine to $VERSION" -F body=@/tmp/pr-body.md --jq .number); then
+            echo "Opened pull request #$pr"
+            # Older update pull requests left open are superseded: merging one would install an older version
+            for n in $(gh api "repos/${{ github.repository }}/pulls?state=open&per_page=100" \
+              --jq ".[] | select(.head.ref | startswith(\"kabine-update-\")) | select(.head.ref != \"kabine-update-$VERSION\") | .number"); do
+              gh api "repos/${{ github.repository }}/issues/$n/comments" -f body="Superseded by #$pr (Kabine $VERSION), which contains these changes too." >/dev/null || true
+              gh api -X PATCH "repos/${{ github.repository }}/pulls/$n" -f state=closed >/dev/null && echo "Closed superseded pull request #$n" || true
+            done
+            exit 0
+          fi
           # REST rather than `gh pr create`: in fresh copies GitHub refused the GraphQL mutation to the workflow's token.
           # If it is refused anyway (see docs/install.md, step 6):
           # an issue with a one-click link to open it by hand instead
