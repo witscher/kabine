@@ -1,4 +1,4 @@
-// Gruppen: nur Chat und Sondertermine, KiHaSL/JuHaSL-Gruppe folgt der Rolle. Namen erfunden.
+// Gruppen: nur Chat und Sondertermine, Jugendschiedsrichter-Gruppe folgt der Rolle. Namen erfunden.
 import { addDays, todayLocal } from "../worker/lib/time";
 import { beforeEach, describe, expect, it } from "vitest";
 import { api, freshDb, loginAs, member, one, person, rows, season, team } from "./helpers";
@@ -98,9 +98,9 @@ describe("Gruppen", () => {
     expect((await api(`/teams/${wd}`, { method: "DELETE", cookie: adminCookie })).status).toBe(409);
   });
 
-  it("KiHaSL/JuHaSL-Gruppe folgt der Rolle, Admins sind Verantwortliche", async () => {
+  it("Jugendschiedsrichter-Gruppe folgt der Rolle, Admins sind Verantwortliche", async () => {
     await api(`/admin/referees/${kira}`, { method: "PUT", cookie: adminCookie });
-    const g = await createGroup("KiHaSL/JuHaSL", "referees");
+    const g = await createGroup("Jugendschiedsrichter", "referees");
     const members = async () =>
       (await rows<{ person_id: number; role: string }>("SELECT person_id, role FROM team_memberships WHERE team_id = ? ORDER BY role, person_id", g)).map(
         (r) => `${r.role}:${r.person_id}`,

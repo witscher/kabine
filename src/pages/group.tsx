@@ -1,4 +1,4 @@
-// Groups: only chat and special events (e.g. coaching team, KiHaSL/JuHaSL). Internally a team with
+// Groups: only chat and special events (e.g. coaching team, youth referees). Internally a team with
 // kind = 'group', see docs/dev/design.md, Groups.
 import { plural, t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
@@ -24,7 +24,7 @@ export function GroupExplainer({ compact = false }: { compact?: boolean }) {
   return (
     <Notice>
       <Trans>
-        <strong>Group or team?</strong> A group only has a chat and special events with responses, for example for the coaching team or the KiHaSL/JuHaSL. Training, games, squad,
+        <strong>Group or team?</strong> A group only has a chat and special events with responses, for example for the coaching team or the youth referees. Training, games, squad,
         helper plan, parents and age group only exist for teams.
       </Trans>
       {compact ? null : ` ${t`At the season change the members of a group are kept.`}`}
@@ -98,7 +98,7 @@ export function AdminGroupsPage() {
                       <Trans>
                         Group · {members} · {leads}
                       </Trans>
-                      {g.autoMembers === "referees" ? ` · ${t`automatically all KiHaSL/JuHaSL`}` : ""}
+                      {g.autoMembers === "referees" ? ` · ${t`automatically all youth referees`}` : ""}
                     </span>
                   </span>
                   <Icon name="chevron" size={18} />
@@ -121,22 +121,22 @@ export function AdminGroupsPage() {
               setCreate({
                 ...create,
                 auto: v,
-                name: v === "referees" && !create.name ? "KiHaSL/JuHaSL" : create.name,
+                name: v === "referees" && !create.name ? t`Youth referees` : create.name,
               })
             }
             options={[
               { value: "manual", label: t`Manually` },
-              { value: "referees", label: t`All KiHaSL/JuHaSL` },
+              { value: "referees", label: t`All youth referees` },
             ]}
           />
           <p class="small muted">
             {create.auto === "referees"
-              ? t`Members are automatically all people with the KiHaSL/JuHaSL role, leads all admins. If someone joins or loses the role, the group adjusts.`
+              ? t`Members are automatically all people with the youth referee role, leads all admins. If someone joins or loses the role, the group adjusts.`
               : t`You assign members and leads in the group afterwards.`}
           </p>
           {create.auto === "referees" && hasRefereeGroup ? (
             <Notice kind="warn">
-              <Trans>There is already a group for all KiHaSL/JuHaSL.</Trans>
+              <Trans>There is already a group for all youth referees.</Trans>
             </Notice>
           ) : null}
           <Button
@@ -247,7 +247,7 @@ export function GroupPage({ team, onChanged }: { team: TeamDetail; onChanged: ()
 
         {auto ? (
           <Notice>
-            <Trans>Members are automatically all people with the KiHaSL/JuHaSL role, leads all admins. You give the role under Admin → KiHaSL/JuHaSL.</Trans>
+            <Trans>Members are automatically all people with the youth referee role, leads all admins. You give the role under Admin → Youth referees.</Trans>
           </Notice>
         ) : null}
 

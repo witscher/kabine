@@ -34,7 +34,7 @@ export interface Actor {
   viewAs?: ViewMode;
   /** Nothing may be changed in this view (another person). */
   readOnly?: boolean;
-  /** Admin view "referee": counts as KiHaSL/JuHaSL without an entry in referees. */
+  /** Admin view "referee": counts as youth referee without an entry in referees. */
   refereeOverride?: boolean;
   /** Admin works as a coach (accounts.coach_mode): admin rights are suspended, switch in the profile. */
   adminSuspended?: boolean;

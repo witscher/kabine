@@ -45,7 +45,7 @@ export async function handleScheduled(baseEnv: Env, scheduledTime: number): Prom
   for (const m of activeWorkerModules()) if (m.cron) tasks.push([m.manifest.id, () => m.cron!(env, scheduledTime)]);
   const hour = Number(toLocal(scheduledTime).slice(11, 13));
   if (hour === 3) tasks.push(["Cleanup", () => cleanup(env.DB, scheduledTime)]);
-  // Safety net: the KiHaSL/JuHaSL group follows role and admins (otherwise synced on every change)
+  // Safety net: the youth referee group follows role and admins (otherwise synced on every change)
   if (hour === 3) tasks.push(["Groups", () => syncAutoGroups(env.DB)]);
   for (const [name, task] of tasks) {
     try {

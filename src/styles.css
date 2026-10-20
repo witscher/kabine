@@ -2254,6 +2254,9 @@ button.announcement-head {
   width: 112px;
   flex-shrink: 0;
   font-weight: 600;
+  /* Long duty names ("Jugendschiedsrichter") break instead of running into the next column */
+  hyphens: auto;
+  overflow-wrap: break-word;
 }
 
 .duty-who {

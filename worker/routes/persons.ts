@@ -291,7 +291,7 @@ personRoutes.patch("/admin/persons/:id", async (c) => {
       throw err;
     }
   }
-  // Admins are in charge of the KiHaSL/JuHaSL group
+  // Admins are in charge of the youth referee group
   await syncAutoGroups(c.env.DB);
   return c.json({ ok: true });
 });

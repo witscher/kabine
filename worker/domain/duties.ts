@@ -1,5 +1,5 @@
 // Helper plan: duty types, templates and time blocks per event. A duty type defines
-// who helps (parents, players, coaches, KiHaSL/JuHaSL role) and whether it is an on-site
+// who helps (parents, players, coaches, youth referee role) and whether it is an on-site
 // duty or a task. Games get their blocks from the team's template, special events by hand.
 // See docs/dev/design.md, Helper duties.
 import { t } from "@lingui/core/macro";
@@ -12,7 +12,7 @@ import { addMinutesLocal, localToInstant } from "../lib/time";
 import { CURRENT_AGE_CLASS_JOIN } from "./events";
 import { isModuleOn } from "./club";
 
-/** Code of the KiHaSL/JuHaSL duty type (initial data of migration 0018). */
+/** Code of the youth referee duty type (initial data of migration 0018). */
 export const REFEREE_CODE = "referee";
 
 export interface DutyType {
@@ -84,14 +84,14 @@ export async function loadAllDutyTypes(db: D1Database): Promise<Map<number, Duty
 }
 
 /**
- * A youth referee (handball: KiHaSL/JuHaSL) is needed at every home game of the age classes marked
+ * A youth referee is needed at every home game of the age classes marked
  * so in the sport profile, regardless of the team's helper plan. SQL condition (alias of the team).
  */
 export const REFEREE_TEAM_SQL = (t: string) =>
   `EXISTS (SELECT 1 FROM age_classes rac WHERE rac.code = ${t}.age_class_code AND rac.youth_referee = 1
              AND rac.season_id = (SELECT id FROM seasons WHERE is_current = 1))`;
 
-/** Time span of the KiHaSL/JuHaSL block: from 15 minutes before throw-off until the end of the game. */
+/** Time span of the youth referee block: from 15 minutes before throw-off until the end of the game. */
 const REFEREE_BEFORE_MIN = 15;
 
 /** As whom one can sign up: oneself or as a parent for a child. */
@@ -124,7 +124,7 @@ export interface HelperTeam {
  * - Players: themselves
  * - Coaches: themselves
  * Coaches and admins of the team may always sign up themselves (as before).
- * KiHaSL/JuHaSL goes through refereeRoles.
+ * youth referee goes through refereeRoles.
  */
 export function rolesFor(team: HelperTeam, type: DutyType): HelperRole[] {
   if (type.whoReferees) return [];
@@ -246,7 +246,7 @@ export function publicHelperTeam(t: HelperTeam) {
 }
 
 /**
- * For whom can the actor take KiHaSL/JuHaSL duties? Oneself and/or
+ * For whom can the actor take youth referee duties? Oneself and/or
  * children with the role. In the admin view “referee” oneself always counts.
  */
 export async function refereeRoles(db: D1Database, actor: Actor): Promise<HelperRole[]> {
@@ -326,7 +326,7 @@ function minutesBetween(from: string, to: string): number {
 /**
  * Keep the time blocks of games up to date (lazily, on every read):
  * - games of teams with a helper plan get the blocks of their template once,
- * - youth home games F–C get the KiHaSL/JuHaSL block once,
+ * - youth home games F–C get the youth referee block once,
  * - if the throw-off time changed, all blocks move by the same amount.
  * Without eventIds: all games from today minus 90 days.
  */
@@ -418,7 +418,7 @@ export async function ensureEventDuties(db: D1Database, eventIds: number[] | nul
 
 /**
  * New template of a team: upcoming games without entries get their blocks anew.
- * Blocks with entries and the KiHaSL/JuHaSL block stay.
+ * Blocks with entries and the youth referee block stay.
  */
 export async function resetTeamDuties(db: D1Database, teamId: number, now: string): Promise<void> {
   const games = await all<{ id: number }>(

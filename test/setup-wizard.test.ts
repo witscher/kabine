@@ -41,7 +41,7 @@ describe("Einrichtungsassistent", () => {
       { code: "timekeeper", name: "Zeitnehmer" },
       { code: "scorer", name: "Sekretär" },
       { code: "shirts", name: "Trikots waschen" },
-      { code: "referee", name: "KiHaSL/JuHaSL" },
+      { code: "referee", name: "Jugendschiedsrichter" },
     ]);
     expect(await rows("SELECT name, default_for FROM duty_templates ORDER BY default_for")).toEqual([
       { name: "Auswärtsspiel", default_for: "away" },

@@ -578,7 +578,7 @@ const dutyTopicLabels = (): Record<DutyTopic, string> => ({
   duty_remind_1d: t`Reminder 1 day before`,
   duty_open: t`Helpers needed in my teams`,
   duty_coach_open: t`Open slots (coaches and admins)`,
-  duty_referee_open: t`KiHaSL/JuHaSL needed`,
+  duty_referee_open: t`Youth referee needed`,
 });
 
 interface DutyPrefs {

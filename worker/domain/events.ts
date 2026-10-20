@@ -666,7 +666,7 @@ export function toDetail(e: EventRow, ctx: EventContext, actor: Actor, now: numb
   };
 }
 
-/** SQL: the person (expression) takes part in event e, is nominated, requested or referees there as KiHaSL/JuHaSL. */
+/** SQL: the person (expression) takes part in event e, is nominated, requested or referees there as youth referee. */
 function relatesSql(person: string): string {
   return `(
     EXISTS (

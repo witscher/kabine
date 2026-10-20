@@ -1418,8 +1418,8 @@ function TemplateChoice({ team, onChanged }: { team: TeamDetail; onChanged: () =
       {select("awayTemplateId", t`Template for away games`, "away")}
       <p class="small muted">
         <Trans>
-          Templates define which duties there are at every game, with slots and times. Admins maintain them under Administration → Helper duties. KiHaSL/JuHaSL
-          is always added automatically for youth home games F to C.
+          Templates define which duties there are at every game, with slots and times. Admins maintain them under Administration → Helper duties. The youth
+          referee is always added automatically for youth home games F to C.
         </Trans>
       </p>
     </div>

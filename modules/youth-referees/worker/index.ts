@@ -1,4 +1,4 @@
-// Worker part of the youth referees module (KiHaSL/JuHaSL): the role by link, the list for admins and the
+// Worker part of the youth referees module (youth referees): the role by link, the list for admins and the
 // helper plan view of all games that need a youth referee.
 import { Hono } from "hono";
 import type { AppEnv } from "../../../worker/app";

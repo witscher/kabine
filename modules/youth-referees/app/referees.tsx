@@ -1,4 +1,4 @@
-// KiHaSL/JuHaSL: administration (admins) and redeeming the activation link.
+// Youth referees: administration (admins) and redeeming the activation link.
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { clubName } from "../../../src/club";
@@ -26,9 +26,9 @@ interface Referee {
   teams: string | null;
 }
 
-/** Admin → KiHaSL/JuHaSL: create a link, revoke links, people with the role. */
+/** Admin → Youth referees: create a link, revoke links, people with the role. */
 export function AdminRefereesPage() {
-  useDocumentTitle("KiHaSL/JuHaSL");
+  useDocumentTitle(t`Youth referees`);
   const me = useMe();
   const links = useQuery<{ links: RefereeLink[] }>(me.isAdmin ? "/admin/referee-links" : null);
   const referees = useQuery<{ referees: Referee[] }>(me.isAdmin ? "/admin/referees" : null);
@@ -39,7 +39,7 @@ export function AdminRefereesPage() {
   if (!me.isAdmin) {
     return (
       <main class="page">
-        <TopBar title="KiHaSL/JuHaSL" back="/" />
+        <TopBar title={t`Youth referees`} back="/" />
         <div class="content">
           <Notice kind="warn">
             <Trans>This area is for admins only.</Trans>
@@ -51,11 +51,11 @@ export function AdminRefereesPage() {
   const createdUntil = created ? fullDate(isoToLocalDate(created.expiresAt)) : "";
   return (
     <main class="page">
-      <TopBar title="KiHaSL/JuHaSL" kicker={t`Administration`} back="/verwaltung" />
+      <TopBar title={t`Youth referees`} kicker={t`Administration`} back="/verwaltung" />
       <div class="content">
         <p class="muted">
           <Trans>
-            KiHaSL/JuHaSL referee the youth home games F to C. Whoever has the role sees all these games in the Helpers tab and signs up there. The link only activates people who
+            Youth referees referee the youth home games F to C. Whoever has the role sees all these games in the Helpers tab and signs up there. The link only activates people who
             are already in the app: you open it while signed in and choose yourself or your own child.
           </Trans>
         </p>
@@ -77,7 +77,10 @@ export function AdminRefereesPage() {
               <QrLink url={created.url} />
               <div class="url-box">{created.url}</div>
               <div class="btn-row">
-                <Button variant="primary" icon="share" onClick={() => shareLink(clubName(), t`Activation as KiHaSL/JuHaSL in the Appball app`, created.url)}>
+                <Button variant="primary" icon="share" onClick={() => {
+                    const club = clubName();
+                    void shareLink(club, t`Activation as youth referee in the ${club} app`, created.url);
+                  }}>
                   <Trans>Share</Trans>
                 </Button>
                 <Button icon="copy" onClick={() => copyText(created.url)}>
@@ -156,7 +159,7 @@ export function AdminRefereesPage() {
                     onClick={async () => {
                       await api.del(`/admin/referees/${r.personId}`);
                       const name = r.firstName;
-                      toast(t`${name} is no longer KiHaSL/JuHaSL.`);
+                      toast(t`${name} is no longer a youth referee.`);
                       void referees.reload();
                     }}
                   >
@@ -185,7 +188,7 @@ interface LinkInfo {
 
 /** /kihasl#token: activate while signed in, for oneself or one's own child. */
 export function RefereeJoinPage() {
-  useDocumentTitle("KiHaSL/JuHaSL");
+  useDocumentTitle(t`Youth referees`);
   const { refresh } = useSession();
   const token = location.hash.slice(1);
   const [data, setData] = useState<LinkInfo | null>(null);
@@ -206,7 +209,7 @@ export function RefereeJoinPage() {
   const name = done;
   return (
     <main class="page">
-      <TopBar title="KiHaSL/JuHaSL" kicker={t`Activation`} />
+      <TopBar title={t`Youth referees`} kicker={t`Activation`} />
       <div class="content">
         {!token ? (
           <Notice kind="warn">
@@ -221,7 +224,7 @@ export function RefereeJoinPage() {
               <Trans>Activated</Trans>
             </strong>
             <p>
-              <Trans>{name} is now KiHaSL/JuHaSL. The Helpers tab lists all youth home games that need a referee.</Trans>
+              <Trans>{name} is now a youth referee. The Helpers tab lists all youth home games that need a referee.</Trans>
             </p>
             <a class="btn btn-primary" href="/helfer?kihasl">
               <Trans>Go to the games</Trans>
@@ -230,7 +233,7 @@ export function RefereeJoinPage() {
         ) : data ? (
           <section class="card card-pad stack-sm">
             <p>
-              <Trans>With this link you (or your child) are activated as KiHaSL/JuHaSL and can then sign up for the youth home games F to C.</Trans>
+              <Trans>With this link you (or your child) are activated as youth referee and can then sign up for the youth home games F to C.</Trans>
             </p>
             <div role="radiogroup" aria-label={t`Who referees?`} class="stack-sm">
               {data.candidates.map((c) => {

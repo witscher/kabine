@@ -18,7 +18,7 @@ export interface AgeClassTemplate {
   ageTo: number | null;
   /** How long a game blocks the hall, in minutes (helper duty blocks, "live" window). */
   gameMinutes: number;
-  /** Home games get a youth referee duty block (handball: KiHaSL/JuHaSL). */
+  /** Home games get a youth referee duty block . */
   youthReferee?: boolean;
 }
 

@@ -12,7 +12,7 @@ import { Button, confirmDialog, ErrorBox, Field, Notice, Segmented, Sheet, Spinn
 type TemplateItem = TemplateInfo["items"][number];
 
 function whoLabel(type: DutyTypeInfo): string {
-  if (type.whoReferees) return t`KiHaSL role`;
+  if (type.whoReferees) return t`Youth referee role`;
   if (type.whoParents && type.whoPlayers && type.whoCoaches) return type.whoMembers ? t`All, members` : t`All`;
   return [
     type.whoParents && t`Parents`,
@@ -157,7 +157,7 @@ function DutyTypeSheet({ type, onClose, onDone }: { type: DutyTypeInfo | null; o
       <TextField label={t`Name`} value={name} onInput={setName} maxLength={40} placeholder={t`e.g. barbecue`} />
       {referee ? (
         <p class="small muted">
-          <Trans>Who takes on this duty is set by the KiHaSL/JuHaSL role. Only the name can be changed here.</Trans>
+          <Trans>Who takes on this duty is set by the youth referee role. Only the name can be changed here.</Trans>
         </p>
       ) : (
         <>
@@ -377,7 +377,7 @@ function TemplateSheet({ template, types, onClose, onDone }: { template: Templat
       </p>
       <p class="small muted">
         <Trans>
-          KiHaSL/JuHaSL is not part of any template: for youth home games F to C the duty is always added automatically (1 slot, 15 min before throw-off until the end of the game).
+          The youth referee is not part of any template: for youth home games F to C the duty is always added automatically (1 slot, 15 min before throw-off until the end of the game).
         </Trans>
       </p>
       <Button

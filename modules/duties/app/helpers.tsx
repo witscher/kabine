@@ -59,7 +59,7 @@ interface Game {
   hidden: boolean;
   manual: boolean;
   blocks: Block[];
-  /** Only in the KiHaSL/JuHaSL view (all teams) */
+  /** Only in the youth referee view (all teams) */
   teamName?: string;
   teamId?: number;
   canManage?: boolean;
@@ -106,7 +106,7 @@ function forChild(child: string): string {
   return t`for ${child}`;
 }
 
-/** Virtual "team" of the KiHaSL/JuHaSL view: all youth home games F–C */
+/** Virtual "team" of the youth referee view: all youth home games F–C */
 const REFEREE = 0;
 
 /** Live: reload on every change (debounced), fallback: every 60 seconds. */
@@ -173,8 +173,8 @@ export function HelpersPage() {
   const hasOthers = me.helperTeams.some((ht) => !ht.own);
   const [scope, setScope] = useState<"own" | "all">("own");
   const helperTeams = hasOwn && hasOthers && scope === "own" ? me.helperTeams.filter((ht) => ht.own) : me.helperTeams;
-  // KiHaSL/JuHaSL: first for everyone with the role, last for coaches and admins
-  const refereeChip = { id: REFEREE, name: "KiHaSL/JuHaSL", own: true };
+  // youth referee: first for everyone with the role, last for coaches and admins
+  const refereeChip = { id: REFEREE, name: t`Youth referees`, own: true };
   // Only with the youth referee module (handball); otherwise the tab would only show "switched off"
   const showReferee = useModule("youthReferees") && (me.referee || me.isAdmin || me.manageableTeams.length > 0);
   const teams = !showReferee ? helperTeams : me.referee ? [refereeChip, ...helperTeams] : [...helperTeams, refereeChip];
@@ -202,7 +202,7 @@ export function HelpersPage() {
 
   const data = list.data;
   const team = data?.team;
-  // In the team view the KiHaSL slot does not count (separate list)
+  // In the team view the youth referee slot does not count (separate list)
   const openSlots = (g: Game) => g.blocks.reduce((n, b) => n + (b.referee && !isReferee ? 0 : free(b)), 0);
   const allUpcoming = (data?.games ?? []).filter((g) => !g.isPast);
   const upcoming = onlyOpen ? allUpcoming.filter((g) => !g.cancelled && openSlots(g) > 0) : allUpcoming;
@@ -386,7 +386,7 @@ export function HelpersPage() {
                     {b.referee && !isReferee ? (
                       free(b) > 0 && me.referee ? (
                         <button type="button" class="take" onClick={() => setTeamId(REFEREE)}>
-                          <Trans>KiHaSL list</Trans>
+                          <Trans>Youth referee list</Trans>
                         </button>
                       ) : null
                     ) : free(b) > 0 && !g.cancelled && !already && b.roles.length ? (
@@ -451,7 +451,7 @@ function eventLine(g: Game) {
 
 function SignupSheet({ game, block, onClose, onDone }: { game: Game; block: Block; onClose: () => void; onDone: () => void }) {
   const roles = block.roles;
-  // KiHaSL/JuHaSL: whoever referees is the person in the entry (oneself or the child). Otherwise one is always signed up
+  // youth referee: whoever referees is the person in the entry (oneself or the child). Otherwise one is always signed up
   // oneself; the server links a child of the team automatically so the other parent sees it.
   const [role, setRole] = useState(String(roles.find((r) => r.childId != null)?.childId ?? roles[0]?.childId ?? "self"));
   const linkedChild = block.referee ? null : (roles.find((r) => r.childId != null)?.childName ?? null);
@@ -552,11 +552,11 @@ function OnBehalfPicker({ game, blocks, onDone }: { game: Game; blocks: Block[];
         )}
       </Field>
       <TextField
-        label={referee ? t`Search KiHaSL/JuHaSL` : t`Search name`}
+        label={referee ? t`Search youth referees` : t`Search name`}
         value={search}
         onInput={setSearch}
         maxLength={60}
-        hint={referee ? t`Only people with the KiHaSL/JuHaSL role.` : t`Without input: people of the team. From 2 letters: everyone in the club.`}
+        hint={referee ? t`Only people with the youth referee role.` : t`Without input: people of the team. From 2 letters: everyone in the club.`}
       />
       <ul class="list" aria-label={t`People`}>
         {list.slice(0, 30).map((p) => (

@@ -6,6 +6,7 @@ Changes that are merged but not released yet go under *Unreleased*, one line eac
 
 ## Unreleased
 
+- "KiHaSL/JuHaSL" is now called "Jugendschiedsrichter" (youth referees) everywhere in the app; the English texts say "youth referee". The duty and the automatic group are renamed where the club kept the old name. Database change: renames only.
 - The dot for unread release notes and new modules is on the *Events* tab, where the card with the news is, instead of on *Administration*.
 - *Administration → Training venues* can add venues: the club's own halls or pitches and other places, with address. A new installation started with an empty page and venues could only be added inside a training plan.
 ## v0.2.2

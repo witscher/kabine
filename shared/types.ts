@@ -70,7 +70,7 @@ export interface Me {
   helperTeams: (TeamRef & { own: boolean })[];
   /** Admins only: current view (player, parent, coach), otherwise null. */
   viewAs: { mode: "player" | "parent" | "trainer" | "referee"; readOnly: boolean } | null;
-  /** May take on KiHaSL/JuHaSL duties (personally or for a child). */
+  /** May take on youth referee duties (personally or for a child). */
   referee: boolean;
   /** IDs of all groups (chat and special events only, see docs/dev/design.md, Groups). */
   groupIds: number[];
@@ -232,7 +232,7 @@ export interface LeaderEntry {
 
 export interface MyDuty {
   dutyTypeId: number;
-  /** KiHaSL/JuHaSL duty (own overview in the "Helfer" tab) */
+  /** youth referee duty (own overview in the "Helfer" tab) */
   referee: boolean;
   label: string;
   /** First name of the child if someone else took on the duty for my child */

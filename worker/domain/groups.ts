@@ -30,7 +30,7 @@ export async function requireTeam(db: D1Database, teamIds: number | number[]): P
 }
 
 /**
- * Synchronises groups with automatic members. KiHaSL/JuHaSL: members are all persons with the role,
+ * Synchronises groups with automatic members. youth referee: members are all persons with the role,
  * those in charge are all admins. Repeatable, a second run changes nothing.
  */
 export async function syncAutoGroups(db: D1Database): Promise<void> {

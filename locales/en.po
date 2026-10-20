@@ -255,10 +255,6 @@ msgstr "Add organiser"
 msgid "School holidays and public holidays of your region are already there."
 msgstr "School holidays and public holidays of your region are already there."
 
-#: modules/duties/worker/notify.ts
-msgid "A KiHaSL/JuHaSL is still needed for the game {game}."
-msgstr "A KiHaSL/JuHaSL is still needed for the game {game}."
-
 #: src/pages/admin.tsx
 msgid "active yesterday"
 msgstr "active yesterday"
@@ -462,6 +458,7 @@ msgid "Title and info are saved quietly, without notification."
 msgstr "Title and info are saved quietly, without notification."
 
 #: src/pages/admin.tsx
+#: src/pages/admin.tsx
 msgid "Youth referee"
 msgstr "Youth referee"
 
@@ -567,6 +564,10 @@ msgstr "Join"
 #: worker/routes/email.ts
 msgid "The address has been changed in the meantime. Please confirm the new address."
 msgstr "The address has been changed in the meantime. Please confirm the new address."
+
+#: src/pages/group.tsx
+msgid "Members are automatically all people with the youth referee role, leads all admins. If someone joins or loses the role, the group adjusts."
+msgstr "Members are automatically all people with the youth referee role, leads all admins. If someone joins or loses the role, the group adjusts."
 
 #: modules/carpools/worker/domain.ts
 msgid "{seats, plural, one {{driver} has one free seat: {game}. Book it in the app.} other {{driver} has # free seats: {game}. Book it in the app.}}"
@@ -685,6 +686,10 @@ msgstr "{seats, plural, one {{coach} entered you as a driver with one free seat:
 #: src/avatar.tsx
 msgid "Reject"
 msgstr "Reject"
+
+#: modules/duties/worker/notify.ts
+msgid "A youth referee is still needed for the game {game}."
+msgstr "A youth referee is still needed for the game {game}."
 
 #: src/pages/admin.tsx
 msgid "Open"
@@ -977,6 +982,10 @@ msgstr "We have sent a six-digit code to <0>{email}</0> if an access belongs to 
 msgid "View as {mode}: {name} · read only"
 msgstr "View as {mode}: {name} · read only"
 
+#: modules/duties/worker/notify.ts
+msgid "Youth referee wanted · {team}"
+msgstr "Youth referee wanted · {team}"
+
 #: src/pages/admin.tsx
 msgid "Remove link?"
 msgstr "Remove link?"
@@ -992,10 +1001,6 @@ msgstr "There is no team for the new age class. Please assign or leave without a
 #: modules/duties/worker/notify.ts
 msgid "There are still free places at {game}: {open}."
 msgstr "There are still free places at {game}: {open}."
-
-#: modules/youth-referees/app/referees.tsx
-msgid "With this link you (or your child) are activated as KiHaSL/JuHaSL and can then sign up for the youth home games F to C."
-msgstr "With this link you (or your child) are activated as KiHaSL/JuHaSL and can then sign up for the youth home games F to C."
 
 #: worker/routes/events.ts
 msgid "Response: accepted"
@@ -1147,10 +1152,6 @@ msgstr "Your absence"
 #: src/pages/admin.tsx
 msgid "The parent"
 msgstr "The parent"
-
-#: modules/duties/worker/routes.ts
-msgid "This game does not need a KiHaSL/JuHaSL."
-msgstr "This game does not need a KiHaSL/JuHaSL."
 
 #: src/calendar.tsx
 msgid "With a personal link your events appear in the calendar app on your phone and stay up to date. Do not share the link: anyone who has it can see your events."
@@ -1543,6 +1544,10 @@ msgstr "Skip"
 #: worker/routes/events.ts
 msgid "New event: {title}"
 msgstr "New event: {title}"
+
+#: modules/duties/worker/notify.ts
+msgid "Youth referee wanted: {team} {opponent}"
+msgstr "Youth referee wanted: {team} {opponent}"
 
 #: modules/duties/app/admin.tsx
 #: modules/duties/app/admin.tsx
@@ -2054,10 +2059,6 @@ msgstr "Who are you signing up for?"
 msgid "Only nominated players can respond."
 msgstr "Only nominated players can respond."
 
-#: modules/duties/worker/notify.ts
-msgid "KiHaSL/JuHaSL wanted: {team} {opponent}"
-msgstr "KiHaSL/JuHaSL wanted: {team} {opponent}"
-
 #: worker/routes/chat.ts
 msgid "There are no teams yet."
 msgstr "There are no teams yet."
@@ -2073,10 +2074,6 @@ msgstr "Source code (optional)"
 #: worker/routes/join.ts
 msgid "You are already signed in on this device. Open the app; if someone else wants to set up their access here, sign out in the profile first."
 msgstr "You are already signed in on this device. Open the app; if someone else wants to set up their access here, sign out in the profile first."
-
-#: modules/duties/app/helpers.tsx
-msgid "KiHaSL list"
-msgstr "KiHaSL list"
 
 #: worker/routes/events.ts
 msgid "{label} on {oldDate} is now on {date} at {time}."
@@ -2239,6 +2236,10 @@ msgstr "Chat"
 #: src/avatar.tsx
 msgid "Profile picture removed."
 msgstr "Profile picture removed."
+
+#: modules/youth-referees/app/referees.tsx
+msgid "Youth referees referee the youth home games F to C. Whoever has the role sees all these games in the Helpers tab and signs up there. The link only activates people who are already in the app: you open it while signed in and choose yourself or your own child."
+msgstr "Youth referees referee the youth home games F to C. Whoever has the role sees all these games in the Helpers tab and signs up there. The link only activates people who are already in the app: you open it while signed in and choose yourself or your own child."
 
 #: worker/routes/events.ts
 msgid "Only trainings can be optional."
@@ -2521,6 +2522,10 @@ msgstr "Meeting point: {point}"
 msgid "New person"
 msgstr "New person"
 
+#: src/pages/group.tsx
+msgid "<0>Group or team?</0> A group only has a chat and special events with responses, for example for the coaching team or the youth referees. Training, games, squad, helper plan, parents and age group only exist for teams."
+msgstr "<0>Group or team?</0> A group only has a chat and special events with responses, for example for the coaching team or the youth referees. Training, games, squad, helper plan, parents and age group only exist for teams."
+
 #: modules/sms/worker/routes.ts
 msgid "There is no phone number on your access."
 msgstr "There is no phone number on your access."
@@ -2632,10 +2637,6 @@ msgstr "Declined at short notice"
 #: src/pages/home.tsx
 msgid "Filter by team"
 msgstr "Filter by team"
-
-#: src/pages/profile.tsx
-msgid "KiHaSL/JuHaSL needed"
-msgstr "KiHaSL/JuHaSL needed"
 
 #: modules/youth-referees/app/referees.tsx
 msgid "Active links"
@@ -2936,6 +2937,10 @@ msgstr "Teams"
 msgid "Coach notes (short-notice declines, stand-ins)"
 msgstr "Coach notes (short-notice declines, stand-ins)"
 
+#: modules/youth-referees/app/referees.tsx
+msgid "Activation as youth referee in the {club} app"
+msgstr "Activation as youth referee in the {club} app"
+
 #: modules/duties/worker/routes.ts
 msgid "More people are already signed up. Please remove someone first."
 msgstr "More people are already signed up. Please remove someone first."
@@ -2992,6 +2997,10 @@ msgstr "wanted, but no confirmed e-mail address on the access"
 msgid "There is no one in the matching teams who does not already play here."
 msgstr "There is no one in the matching teams who does not already play here."
 
+#: modules/duties/app/admin.tsx
+msgid "The youth referee is not part of any template: for youth home games F to C the duty is always added automatically (1 slot, 15 min before throw-off until the end of the game)."
+msgstr "The youth referee is not part of any template: for youth home games F to C the duty is always added automatically (1 slot, 15 min before throw-off until the end of the game)."
+
 #: src/pages/home.tsx
 msgid "Stand-in request"
 msgstr "Stand-in request"
@@ -3011,6 +3020,10 @@ msgstr "Remove {label}?"
 #: worker/domain/duties.ts
 msgid "at {opponent}"
 msgstr "at {opponent}"
+
+#: src/pages/group.tsx
+msgid "There is already a group for all youth referees."
+msgstr "There is already a group for all youth referees."
 
 #: src/pages/admin.tsx
 #: src/pages/mail-settings.tsx
@@ -3175,6 +3188,10 @@ msgstr "This browser does not support passkeys. Please use a current smartphone 
 #: src/pages/team.tsx
 msgid "no access yet"
 msgstr "no access yet"
+
+#: src/pages/group.tsx
+msgid "All youth referees"
+msgstr "All youth referees"
 
 #: modules/duties/worker/routes.ts
 msgid "You cannot sign up for this team."
@@ -3445,10 +3462,6 @@ msgstr "{count, plural, one {New game for {teamName}} other {# new games for {te
 msgid "Calendar link removed."
 msgstr "Calendar link removed."
 
-#: modules/duties/worker/routes.ts
-msgid "This person is not enabled as KiHaSL/JuHaSL."
-msgstr "This person is not enabled as KiHaSL/JuHaSL."
-
 #: src/pages/admin.tsx
 msgid "Not specified"
 msgstr "Not specified"
@@ -3530,10 +3543,6 @@ msgstr "Address"
 #: src/pages/join.tsx
 msgid "Your child (one or more)"
 msgstr "Your child (one or more)"
-
-#: modules/youth-referees/app/referees.tsx
-msgid "{name} is no longer KiHaSL/JuHaSL."
-msgstr "{name} is no longer KiHaSL/JuHaSL."
 
 #: worker/routes/teams.ts
 msgid "{playerName} now also plays in the {teamName} (added by {by})."
@@ -3775,6 +3784,10 @@ msgstr "New special duty …"
 msgid "The app is under maintenance and will be back shortly."
 msgstr "The app is under maintenance and will be back shortly."
 
+#: modules/duties/app/helpers.tsx
+msgid "Youth referee list"
+msgstr "Youth referee list"
+
 #: src/pages/join.tsx
 msgid "The passkey is the safest way to sign in: Face ID, fingerprint or screen lock, without a password."
 msgstr "The passkey is the safest way to sign in: Face ID, fingerprint or screen lock, without a password."
@@ -3897,7 +3910,15 @@ msgstr "No events of your own"
 msgid "The image could not be converted."
 msgstr "The image could not be converted."
 
+#: modules/duties/app/helpers.tsx
+#: modules/youth-referees/app/index.tsx
+#: modules/youth-referees/app/referees.tsx
+#: modules/youth-referees/app/referees.tsx
+#: modules/youth-referees/app/referees.tsx
+#: modules/youth-referees/app/referees.tsx
+#: modules/youth-referees/app/referees.tsx
 #: modules/youth-referees/module.ts
+#: src/pages/group.tsx
 msgid "Youth referees"
 msgstr "Youth referees"
 
@@ -3916,6 +3937,10 @@ msgstr "Anyway"
 #: src/pages/plans.tsx
 msgid "Remove training time?"
 msgstr "Remove training time?"
+
+#: src/pages/group.tsx
+msgid "automatically all youth referees"
+msgstr "automatically all youth referees"
 
 #: worker/routes/squad.ts
 msgid "{playerName} will not help out {teamName} on {date}."
@@ -3938,10 +3963,6 @@ msgstr "{venue, select, hall {No hall given} pitch {No pitch given} other {No ve
 msgid "Contact for the app: {contact}"
 msgstr "Contact for the app: {contact}"
 
-#: modules/youth-referees/app/referees.tsx
-msgid "Activation as KiHaSL/JuHaSL in the Appball app"
-msgstr "Activation as KiHaSL/JuHaSL in the Appball app"
-
 #: src/pages/chat.tsx
 msgid "Write a message"
 msgstr "Write a message"
@@ -3949,6 +3970,10 @@ msgstr "Write a message"
 #: worker/auth/webauthn.ts
 msgid "Signing in took too long. Please try again."
 msgstr "Signing in took too long. Please try again."
+
+#: modules/duties/app/helpers.tsx
+msgid "Search youth referees"
+msgstr "Search youth referees"
 
 #: src/pages/join.tsx
 msgid "<0>Already registered in the app? Then open this link on the device where the app is installed!</0> Or sign in here and then link this child to your access. Otherwise a second access will be created for you."
@@ -4228,10 +4253,6 @@ msgstr "Parents are not involved in this team. The parent link is therefore not 
 msgid "Team selection"
 msgstr "Team selection"
 
-#: modules/youth-referees/app/referees.tsx
-msgid "KiHaSL/JuHaSL referee the youth home games F to C. Whoever has the role sees all these games in the Helpers tab and signs up there. The link only activates people who are already in the app: you open it while signed in and choose yourself or your own child."
-msgstr "KiHaSL/JuHaSL referee the youth home games F to C. Whoever has the role sees all these games in the Helpers tab and signs up there. The link only activates people who are already in the app: you open it while signed in and choose yourself or your own child."
-
 #: src/pages/join.tsx
 #: src/pages/login.tsx
 msgid "Code by e-mail"
@@ -4502,10 +4523,6 @@ msgstr "Decline for {firstName}"
 msgid "Why does my profile picture not appear right away?"
 msgstr "Why does my profile picture not appear right away?"
 
-#: src/pages/group.tsx
-msgid "Members are automatically all people with the KiHaSL/JuHaSL role, leads all admins. You give the role under Admin → KiHaSL/JuHaSL."
-msgstr "Members are automatically all people with the KiHaSL/JuHaSL role, leads all admins. You give the role under Admin → KiHaSL/JuHaSL."
-
 #: src/pages/season.tsx
 msgid "previously {teams}"
 msgstr "previously {teams}"
@@ -4660,6 +4677,10 @@ msgstr "Until when can I decline?"
 #: src/email.tsx
 msgid "We have sent a six-digit code by text message to <0>{email}</0> if an access belongs to this number. It is valid for 15 minutes."
 msgstr "We have sent a six-digit code by text message to <0>{email}</0> if an access belongs to this number. It is valid for 15 minutes."
+
+#: src/pages/admin.tsx
+msgid "{firstName} is no longer a youth referee."
+msgstr "{firstName} is no longer a youth referee."
 
 #: src/faq.tsx
 msgid "In the <0>Helpers</0> tab, on the card <1>Manage</1>: change time and slots per duty (0 hides it), add or remove a time block, sign someone up or hide the game. Friendlies, tournaments or match days without handball4all you create under <2>Team → Create event → Game</2>, the team then gets a message."
@@ -5283,10 +5304,6 @@ msgid "Only coaches of this team can do this."
 msgstr "Only coaches of this team can do this."
 
 #: src/pages/group.tsx
-msgid "There is already a group for all KiHaSL/JuHaSL."
-msgstr "There is already a group for all KiHaSL/JuHaSL."
-
-#: src/pages/group.tsx
 msgid "Group · {members} · {leads}"
 msgstr "Group · {members} · {leads}"
 
@@ -5538,10 +5555,6 @@ msgstr "Decline deadline: {hours} hours before the start ({deadline})."
 #: src/pages/event.tsx
 msgid "<0>Meeting point:</0> {point}, {meetTime}"
 msgstr "<0>Meeting point:</0> {point}, {meetTime}"
-
-#: src/pages/admin.tsx
-msgid "{firstName} is now enabled as KiHaSL/JuHaSL."
-msgstr "{firstName} is now enabled as KiHaSL/JuHaSL."
 
 #: src/respond.tsx
 #: src/respond.tsx
@@ -6362,10 +6375,6 @@ msgstr "People have already signed up for this duty. Please remove them first."
 msgid "Personal one-time link, valid until {linkExpires}. Please pass it on directly to {linkFor} only."
 msgstr "Personal one-time link, valid until {linkExpires}. Please pass it on directly to {linkFor} only."
 
-#: modules/duties/worker/routes.ts
-msgid "Only people enabled for it can sign up as KiHaSL/JuHaSL."
-msgstr "Only people enabled for it can sign up as KiHaSL/JuHaSL."
-
 #: src/pages/admin.tsx
 #: src/pages/club-settings.tsx
 #: src/pages/club-settings.tsx
@@ -6702,10 +6711,6 @@ msgstr "Task {label} · {game} · for {child}"
 msgid "Kind of event"
 msgstr "Kind of event"
 
-#: modules/duties/app/admin.tsx
-msgid "Who takes on this duty is set by the KiHaSL/JuHaSL role. Only the name can be changed here."
-msgstr "Who takes on this duty is set by the KiHaSL/JuHaSL role. Only the name can be changed here."
-
 #: worker/routes/manual-games.ts
 msgid "New game: {teamName} at {opponent}"
 msgstr "New game: {teamName} at {opponent}"
@@ -6864,10 +6869,6 @@ msgstr "Inactive"
 msgid "There is no current season yet."
 msgstr "There is no current season yet."
 
-#: modules/duties/worker/notify.ts
-msgid "KiHaSL/JuHaSL wanted · {team}"
-msgstr "KiHaSL/JuHaSL wanted · {team}"
-
 #: src/pages/admin.tsx
 msgid "{venue, select, hall {Add the club's halls first, with address, so everyone finds them.} pitch {Add the club's pitches first, with address, so everyone finds them.} other {Add the club's venues first, with address, so everyone finds them.}}"
 msgstr "{venue, select, hall {Add the club's halls first, with address, so everyone finds them.} pitch {Add the club's pitches first, with address, so everyone finds them.} other {Add the club's venues first, with address, so everyone finds them.}}"
@@ -6981,10 +6982,6 @@ msgstr "archived"
 #: shared/types.ts
 msgid "New, changed and cancelled events"
 msgstr "New, changed and cancelled events"
-
-#: src/pages/group.tsx
-msgid "Members are automatically all people with the KiHaSL/JuHaSL role, leads all admins. If someone joins or loses the role, the group adjusts."
-msgstr "Members are automatically all people with the KiHaSL/JuHaSL role, leads all admins. If someone joins or loses the role, the group adjusts."
 
 #: src/pages/admin.tsx
 msgid "Continue the setup wizard"
@@ -7141,10 +7138,6 @@ msgstr "Frequently asked questions: {title}"
 msgid "Helpers wanted · {team}"
 msgstr "Helpers wanted · {team}"
 
-#: modules/duties/app/admin.tsx
-msgid "KiHaSL role"
-msgstr "KiHaSL role"
-
 #: modules/duties/module.ts
 msgid "Who takes on which duty at which game or event, optional notes (e.g. which cake) and duty preferences."
 msgstr "Who takes on which duty at which game or event, optional notes (e.g. which cake) and duty preferences."
@@ -7259,6 +7252,10 @@ msgstr "{firstName} gets their own access with a passkey. Only give the link to 
 msgid "FAQ, guides, feedback on the app"
 msgstr "FAQ, guides, feedback on the app"
 
+#: modules/duties/app/admin.tsx
+msgid "Who takes on this duty is set by the youth referee role. Only the name can be changed here."
+msgstr "Who takes on this duty is set by the youth referee role. Only the name can be changed here."
+
 #: src/pages/group.tsx
 #: src/pages/profile.tsx
 msgid "Member"
@@ -7314,10 +7311,6 @@ msgstr "Training times"
 msgid "For the code by e-mail we need your e-mail address."
 msgstr "For the code by e-mail we need your e-mail address."
 
-#: src/pages/group.tsx
-msgid "<0>Group or team?</0> A group only has a chat and special events with responses, for example for the coaching team or the KiHaSL/JuHaSL. Training, games, squad, helper plan, parents and age group only exist for teams."
-msgstr "<0>Group or team?</0> A group only has a chat and special events with responses, for example for the coaching team or the KiHaSL/JuHaSL. Training, games, squad, helper plan, parents and age group only exist for teams."
-
 #: worker/routes/push.ts
 msgid "Push works. This is how you hear about new events and cancellations."
 msgstr "Push works. This is how you hear about new events and cancellations."
@@ -7333,6 +7326,10 @@ msgstr "Chat {teamName}"
 #: src/pages/join.tsx
 msgid "Setup password"
 msgstr "Setup password"
+
+#: modules/youth-referees/app/referees.tsx
+msgid "{name} is now a youth referee. The Helpers tab lists all youth home games that need a referee."
+msgstr "{name} is now a youth referee. The Helpers tab lists all youth home games that need a referee."
 
 #: src/pages/event.tsx
 #: src/pages/event.tsx
@@ -7651,6 +7648,10 @@ msgstr "You are signed in as {loggedInAs}. Select the child you want to link in 
 msgid "Unexcused"
 msgstr "Unexcused"
 
+#: src/pages/team.tsx
+msgid "Templates define which duties there are at every game, with slots and times. Admins maintain them under Administration → Helper duties. The youth referee is always added automatically for youth home games F to C."
+msgstr "Templates define which duties there are at every game, with slots and times. Admins maintain them under Administration → Helper duties. The youth referee is always added automatically for youth home games F to C."
+
 #: src/pages/squad.tsx
 msgid "More than {max} in the squad. Please deselect players or increase the squad size under Team → Settings."
 msgstr "More than {max} in the squad. Please deselect players or increase the squad size under Team → Settings."
@@ -7727,10 +7728,6 @@ msgstr "Like a normal chat message: a bundled chat notification for everyone who
 #: src/pages/profile.tsx
 msgid "Test notification is on its way."
 msgstr "Test notification is on its way."
-
-#: modules/duties/app/admin.tsx
-msgid "KiHaSL/JuHaSL is not part of any template: for youth home games F to C the duty is always added automatically (1 slot, 15 min before throw-off until the end of the game)."
-msgstr "KiHaSL/JuHaSL is not part of any template: for youth home games F to C the duty is always added automatically (1 slot, 15 min before throw-off until the end of the game)."
 
 #: src/pages/admin.tsx
 msgid "Load holidays of the region again?"
@@ -8019,6 +8016,11 @@ msgstr "Link child"
 msgid "I don't get any notifications."
 msgstr "I don't get any notifications."
 
+#: src/view-as.tsx
+msgctxt "view as"
+msgid "youth referee"
+msgstr "youth referee"
+
 #: src/pages/event.tsx
 msgid "Noted: you are there after all."
 msgstr "Noted: you are there after all."
@@ -8031,10 +8033,6 @@ msgstr "For each access the app stores the day of last use, without time. Only a
 #: worker/routes/join.ts
 msgid "Please select at least one child."
 msgstr "Please select at least one child."
-
-#: modules/youth-referees/app/referees.tsx
-msgid "{name} is now KiHaSL/JuHaSL. The Helpers tab lists all youth home games that need a referee."
-msgstr "{name} is now KiHaSL/JuHaSL. The Helpers tab lists all youth home games that need a referee."
 
 #: src/pages/join.tsx
 #: src/pages/join.tsx
@@ -8193,6 +8191,10 @@ msgstr "Meeting point and time not entered yet"
 msgid "After that the initial is shown again."
 msgstr "After that the initial is shown again."
 
+#: src/pages/group.tsx
+msgid "Members are automatically all people with the youth referee role, leads all admins. You give the role under Admin → Youth referees."
+msgstr "Members are automatically all people with the youth referee role, leads all admins. You give the role under Admin → Youth referees."
+
 #: src/howto.tsx
 msgid "You can find the guide at any time under help."
 msgstr "You can find the guide at any time under help."
@@ -8205,6 +8207,10 @@ msgstr "You are now linked to {names} and see all events of the {teamName}."
 #: src/pages/admin.tsx
 msgid "yesterday"
 msgstr "yesterday"
+
+#: src/pages/admin.tsx
+msgid "{firstName} is now enabled as youth referee."
+msgstr "{firstName} is now enabled as youth referee."
 
 #: modules/carpools/app/card.tsx
 msgid "Delete ride request for {name}"
@@ -8245,6 +8251,10 @@ msgstr "unknown"
 #: src/respond.tsx
 msgid "Declined. The coach has been informed."
 msgstr "Declined. The coach has been informed."
+
+#: modules/duties/worker/routes.ts
+msgid "This game does not need a youth referee."
+msgstr "This game does not need a youth referee."
 
 #: src/pages/admin.tsx
 msgid "Imported periods are replaced for the current season. Periods you entered and periods with a holiday plan stay."
@@ -8401,6 +8411,10 @@ msgstr "For example new coaches. Coaches add players in the squad."
 msgid "These details are kept even when the fixture list is synced again."
 msgstr "These details are kept even when the fixture list is synced again."
 
+#: modules/duties/worker/routes.ts
+msgid "Only people enabled for it can sign up as youth referee."
+msgstr "Only people enabled for it can sign up as youth referee."
+
 #: src/pages/setup-wizard.tsx
 #: src/pages/setup-wizard.tsx
 msgid "Coach of"
@@ -8477,6 +8491,10 @@ msgstr "Coaches · {coachCount}"
 #: src/pages/profile.tsx
 msgid "Work as admin"
 msgstr "Work as admin"
+
+#: modules/youth-referees/app/referees.tsx
+msgid "{name} is no longer a youth referee."
+msgstr "{name} is no longer a youth referee."
 
 #: src/faq.tsx
 msgid "My name is missing from the invitation link or is already taken."
@@ -8556,10 +8574,6 @@ msgstr "Approved."
 msgid "{firstName} has their own access."
 msgstr "{firstName} has their own access."
 
-#: src/pages/group.tsx
-msgid "All KiHaSL/JuHaSL"
-msgstr "All KiHaSL/JuHaSL"
-
 #: src/pages/home.tsx
 msgid "More events could not be loaded."
 msgstr "More events could not be loaded."
@@ -8638,6 +8652,10 @@ msgstr "You only need the link once to set up. From then on, open the app from t
 #: src/pages/season.tsx
 msgid "Born {year}"
 msgstr "Born {year}"
+
+#: src/pages/profile.tsx
+msgid "Youth referee needed"
+msgstr "Youth referee needed"
 
 #: modules/duties/worker/routes.ts
 msgid "Please choose who can help."
@@ -9175,6 +9193,10 @@ msgstr "Save and continue"
 msgid "Organiser"
 msgstr "Organiser"
 
+#: modules/duties/app/admin.tsx
+msgid "Youth referee role"
+msgstr "Youth referee role"
+
 #: src/pages/event.tsx
 msgid "There are no participants for this event."
 msgstr "There are no participants for this event."
@@ -9214,6 +9236,10 @@ msgstr "Unknown time zone."
 #: shared/types.ts
 msgid "Chat messages"
 msgstr "Chat messages"
+
+#: modules/duties/worker/routes.ts
+msgid "This person is not enabled as youth referee."
+msgstr "This person is not enabled as youth referee."
 
 #: src/pages/event.tsx
 msgid "Applies to all trainings in this training slot. Accepting individual sessions remains possible."
@@ -9304,10 +9330,6 @@ msgstr "Rejected."
 #: src/pages/privacy.tsx
 msgid "School holidays: <0>OpenHolidays API</0>, data under the <1>Open Database License (ODbL)</1>."
 msgstr "School holidays: <0>OpenHolidays API</0>, data under the <1>Open Database License (ODbL)</1>."
-
-#: modules/duties/app/helpers.tsx
-msgid "Search KiHaSL/JuHaSL"
-msgstr "Search KiHaSL/JuHaSL"
 
 #: modules/duties/worker/routes.ts
 msgid "You can take on {duty} once you switch it on in your profile under “I can do this”."
@@ -9718,10 +9740,6 @@ msgstr "Create link"
 #: worker/routes/events.ts
 msgid "An organiser can only be a full member with access to the app."
 msgstr "An organiser can only be a full member with access to the app."
-
-#: src/pages/team.tsx
-msgid "Templates define which duties there are at every game, with slots and times. Admins maintain them under Administration → Helper duties. KiHaSL/JuHaSL is always added automatically for youth home games F to C."
-msgstr "Templates define which duties there are at every game, with slots and times. Admins maintain them under Administration → Helper duties. KiHaSL/JuHaSL is always added automatically for youth home games F to C."
 
 #: modules/duties/app/admin.tsx
 #: src/duty-blocks.tsx
@@ -10239,10 +10257,6 @@ msgstr "Help request from {team}: turned down"
 msgid "Same names in the squad: <0>{names}</0>. Please add the last names before you share the player link, otherwise the selection is ambiguous."
 msgstr "Same names in the squad: <0>{names}</0>. Please add the last names before you share the player link, otherwise the selection is ambiguous."
 
-#: modules/duties/app/helpers.tsx
-msgid "Only people with the KiHaSL/JuHaSL role."
-msgstr "Only people with the KiHaSL/JuHaSL role."
-
 #: src/pages/join.tsx
 #: src/pages/season.tsx
 #: src/pages/setup-wizard.tsx
@@ -10372,6 +10386,10 @@ msgstr "With this link you set up your access. Your login is a passkey: Face ID,
 msgid "Confirm an e-mail address in your profile first; the test mail goes there."
 msgstr "Confirm an e-mail address in your profile first; the test mail goes there."
 
+#: modules/youth-referees/app/referees.tsx
+msgid "With this link you (or your child) are activated as youth referee and can then sign up for the youth home games F to C."
+msgstr "With this link you (or your child) are activated as youth referee and can then sign up for the youth home games F to C."
+
 #: src/howto.tsx
 msgid "In Safari, tap <0>Share</0> at the bottom, then <1>Add to Home Screen</1> and <2>Add</2>. After that you start {club} from the icon on the home screen. Only then do notifications work on the iPhone."
 msgstr "In Safari, tap <0>Share</0> at the bottom, then <1>Add to Home Screen</1> and <2>Add</2>. After that you start {club} from the icon on the home screen. Only then do notifications work on the iPhone."
@@ -10454,10 +10472,6 @@ msgstr "{foreign} games already belong to another team and were skipped."
 #: modules/youth-referees/worker/admin-routes.ts
 msgid "This link has been withdrawn. Please ask for a new link."
 msgstr "This link has been withdrawn. Please ask for a new link."
-
-#: src/pages/admin.tsx
-msgid "{firstName} is no longer KiHaSL/JuHaSL."
-msgstr "{firstName} is no longer KiHaSL/JuHaSL."
 
 #: src/pages/chat.tsx
 msgid "Waving"
@@ -10621,10 +10635,6 @@ msgstr "Squad for games"
 #: src/pages/event.tsx
 msgid "School holidays"
 msgstr "School holidays"
-
-#: src/pages/group.tsx
-msgid "automatically all KiHaSL/JuHaSL"
-msgstr "automatically all KiHaSL/JuHaSL"
 
 #: src/pages/event.tsx
 msgid "Players and their parents get a push that you are not there, without your note."
@@ -10921,6 +10931,10 @@ msgstr "Syncing …"
 #: src/pages/group.tsx
 msgid "At the season change the members of a group are kept."
 msgstr "At the season change the members of a group are kept."
+
+#: modules/duties/app/helpers.tsx
+msgid "Only people with the youth referee role."
+msgstr "Only people with the youth referee role."
 
 #: src/news.tsx
 msgid "What is new"

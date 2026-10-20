@@ -41,7 +41,7 @@ export const dutyRoutes = new Hono<AppEnv>();
 /** Past games stay visible for 90 days (top helpers, review). */
 const PAST_DAYS = 90;
 
-/** Live channel of the KiHaSL/JuHaSL view (team IDs are always > 0). */
+/** Live channel of the youth referee view (team IDs are always > 0). */
 export const REFEREE_HUB = 0;
 
 dutyRoutes.get("/duties/teams", async (c) => {
@@ -310,9 +310,9 @@ async function insertEntry(
   if (!res.meta.changes) throw conflict(t`Sorry, this place has already been taken.`, "slot_taken");
 }
 
-const refereeUnavailable = () => t`This game does not need a KiHaSL/JuHaSL.`;
+const refereeUnavailable = () => t`This game does not need a youth referee.`;
 
-/** Sign up as KiHaSL/JuHaSL: only with the role (oneself or a child), regardless of the team. */
+/** Sign up as youth referee: only with the role (oneself or a child), regardless of the team. */
 async function refereeSignup(c: Context<AppEnv>, actor: Actor, block: NonNullable<Awaited<ReturnType<typeof loadBlock>>>, input: z.infer<typeof signupSchema>) {
   const db = c.env.DB;
   if (block.cancelled_at || block.slots === 0) throw badRequest(refereeUnavailable(), "game_unavailable");
@@ -325,7 +325,7 @@ async function refereeSignup(c: Context<AppEnv>, actor: Actor, block: NonNullabl
     if (input.manualName != null) manualName = input.manualName;
     else {
       const isRef = await first(db, "SELECT 1 AS ok FROM referees WHERE person_id = ?", input.onBehalfPersonId!);
-      if (!isRef) throw badRequest(t`This person is not enabled as KiHaSL/JuHaSL.`, "not_referee");
+      if (!isRef) throw badRequest(t`This person is not enabled as youth referee.`, "not_referee");
       personId = input.onBehalfPersonId!;
     }
   } else {
@@ -334,7 +334,7 @@ async function refereeSignup(c: Context<AppEnv>, actor: Actor, block: NonNullabl
     if (!role) {
       throw roles.length
         ? badRequest(t`Who are you signing up for?`, "child_required")
-        : forbidden(t`Only people enabled for it can sign up as KiHaSL/JuHaSL.`, "not_referee");
+        : forbidden(t`Only people enabled for it can sign up as youth referee.`, "not_referee");
     }
     // The person refereeing is the person in the entry. For a child also child_id, so the parents see it.
     personId = role.childId ?? actor.personId;
@@ -748,7 +748,7 @@ dutyRoutes.patch("/admin/duty-types/:id", async (c) => {
   const type = (await loadDutyTypes(c.env.DB)).get(id);
   if (!type || type.eventId != null) throw notFound(t`This duty type does not exist.`);
   const input = parse(dutyTypeSchema, await readJson(c.req.raw));
-  // KiHaSL/JuHaSL depends on the role: only name and archive can be changed
+  // youth referee depends on the role: only name and archive can be changed
   if (type.whoReferees) {
     await run(c.env.DB, "UPDATE duty_types SET name = ? WHERE id = ?", input.name, id);
     return c.json({ ok: true });

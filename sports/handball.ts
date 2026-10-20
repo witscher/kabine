@@ -1,4 +1,4 @@
-// Handball, as played in German associations (age classes A–E, KiHaSL/JuHaSL youth referees).
+// Handball, as played in German associations (age classes A–E, youth referees).
 import { defineSport, DUTY_KIOSK, DUTY_SHIRTS } from "../shared/sport-api";
 
 export default defineSport({
@@ -21,7 +21,7 @@ export default defineSport({
     { code: "timekeeper", name: { en: "Timekeeper", de: "Zeitnehmer" }, mode: "onsite", whoParents: true, needsSkill: true },
     { code: "scorer", name: { en: "Scorer", de: "Sekretär" }, mode: "onsite", whoParents: true, needsSkill: true },
     DUTY_SHIRTS,
-    { code: "referee", name: { en: "Youth referee", de: "KiHaSL/JuHaSL" }, mode: "onsite", whoParents: false, whoReferees: true },
+    { code: "referee", name: { en: "Youth referee", de: "Jugendschiedsrichter" }, mode: "onsite", whoParents: false, whoReferees: true },
   ],
   homeTemplate: [
     { duty: "kiosk", slots: 2, before: 20, after: 20 },

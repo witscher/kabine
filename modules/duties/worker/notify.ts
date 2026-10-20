@@ -3,7 +3,7 @@
 // - "helpers wanted" 3 days before to everyone in the team who has not signed up yet
 //   and could take a free duty (who helps per duty type)
 // - "open places" 5 and 2 days before to coaches and admins
-// - "KiHaSL/JuHaSL wanted" 3 days before to everyone with this role (or their parents)
+// - "youth referee wanted" 3 days before to everyone with this role (or their parents)
 // Channel (push, mail) per account and topic, see notification_channels.
 // Texts are built per recipient language: pushes once per language, mails per account (withLocale).
 import { plural, t } from "@lingui/core/macro";
@@ -144,7 +144,7 @@ async function gamesOn(db: D1Database, date: string): Promise<GameRow[]> {
   );
 }
 
-/** Events with a KiHaSL/JuHaSL block on a day, regardless of the helper plan. */
+/** Events with a youth referee block on a day, regardless of the helper plan. */
 async function refereeGamesOn(db: D1Database, date: string): Promise<GameRow[]> {
   return all<GameRow>(
     db,
@@ -165,7 +165,7 @@ async function gamesWithDutiesOn(db: D1Database, date: string): Promise<GameRow[
   );
 }
 
-/** Free places per block of an event (without KiHaSL/JuHaSL, those go through refereeWanted). */
+/** Free places per block of an event (without youth referee, those go through refereeWanted). */
 async function freeBlocks(db: D1Database, g: GameRow, types: Map<number, DutyType>): Promise<FreeBlock[]> {
   const rows = await all<{ duty_type_id: number; free: number }>(
     db,
@@ -184,7 +184,7 @@ async function freeBlocks(db: D1Database, g: GameRow, types: Map<number, DutyTyp
   return out;
 }
 
-/** "KiHaSL/JuHaSL wanted" to everyone with the role (or parents of a child with the role) who has not signed up yet. */
+/** "youth referee wanted" to everyone with the role (or parents of a child with the role) who has not signed up yet. */
 async function refereeWanted(env: Env, today: string): Promise<number> {
   const games = await refereeGamesOn(env.DB, addDays(today, 3));
   let sent = 0;
@@ -221,12 +221,12 @@ async function refereeWanted(env: Env, today: string): Promise<number> {
         const game = gameText(g);
         const opponent = opponentOf(g);
         return {
-          title: t`KiHaSL/JuHaSL wanted · ${team}`,
+          title: t`Youth referee wanted · ${team}`,
           body: plural(free, { one: `${game}. # place still free.`, other: `${game}. # places still free.` }),
           url: "/helfer?kihasl",
           tag: `duty-referee-${g.id}`,
-          mailSubject: t`KiHaSL/JuHaSL wanted: ${team} ${opponent}`,
-          mailText: mailText(t`A KiHaSL/JuHaSL is still needed for the game ${game}.`, t`Sign up: ${link}`),
+          mailSubject: t`Youth referee wanted: ${team} ${opponent}`,
+          mailText: mailText(t`A youth referee is still needed for the game ${game}.`, t`Sign up: ${link}`),
         };
       });
     }
@@ -255,7 +255,7 @@ async function remind(env: Env, today: string, days: 3 | 1): Promise<number> {
   for (const g of games) {
     const entries = await all<{ id: number; label: string; child: string | null; account_id: number; via_parent: number }>(
       env.DB,
-      // KiHaSL/JuHaSL children without their own access: reminder to the parents
+      // youth referee children without their own access: reminder to the parents
       `SELECT d.id, dt.name AS label, CASE WHEN d.child_id = d.person_id THEN NULL ELSE ch.first_name END AS child, a.id AS account_id, 0 AS via_parent
          FROM duties d JOIN duty_types dt ON dt.id = d.duty_type_id JOIN accounts a ON a.person_id = d.person_id LEFT JOIN persons ch ON ch.id = d.child_id
         WHERE d.event_id = ?1

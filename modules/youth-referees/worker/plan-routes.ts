@@ -1,4 +1,4 @@
-// Helper plan view of the youth referees (KiHaSL/JuHaSL): all upcoming youth home games of all teams that
+// Helper plan view of the youth referees (youth referees): all upcoming youth home games of all teams that
 // need a referee, with live updates. Builds on the helper plan of the duties module (required).
 import { t } from "@lingui/core/macro";
 import { Hono } from "hono";
@@ -14,7 +14,7 @@ import { blockView, type EventRow, eventView, loadBlocksAndEntries, REFEREE_HUB 
 export const refereePlanRoutes = new Hono<AppEnv>();
 
 /**
- * KiHaSL/JuHaSL: all upcoming youth home games F–C of all teams, with the block.
+ * youth referee: all upcoming youth home games F–C of all teams, with the block.
  * For everyone with the role (oneself or a child), coaches and admins.
  */
 refereePlanRoutes.get("/duties/referee", async (c) => {
@@ -46,7 +46,7 @@ refereePlanRoutes.get("/duties/referee", async (c) => {
   const [{ blocks, entries }, types] = await Promise.all([loadBlocksAndEntries(db, eventIds), loadDutyTypes(db, eventIds)]);
   const now = nowLocal();
   return c.json({
-    team: { teamId: 0, teamName: "KiHaSL/JuHaSL", canManage: actor.isAdmin, roles: refRoles, own: true },
+    team: { teamId: 0, teamName: "youth referee", canManage: actor.isAdmin, roles: refRoles, own: true },
     games: events.map((e) => ({
       ...eventView(e, now),
       teamId: e.team_id,

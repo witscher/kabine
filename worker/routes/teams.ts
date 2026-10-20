@@ -102,7 +102,7 @@ teamRoutes.post("/teams", async (c) => {
 
 const createGroupSchema = z.object({
   name: z.string().trim().min(1).max(30),
-  /** referees: members follow the KiHaSL/JuHaSL role, admins are in charge. */
+  /** referees: members follow the youth referee role, admins are in charge. */
   autoMembers: z.enum(["referees"]).nullable().default(null),
 });
 

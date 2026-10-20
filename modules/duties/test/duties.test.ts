@@ -65,8 +65,8 @@ describe("Helferplan", () => {
 
     const list = await api(`/duties?teamId=${wd}`, { cookie: monaCookie });
     expect(list.body.games.map((g: any) => g.blocks.map((b: any) => `${b.label}:${b.total}`))).toEqual([
-      // wD ist Jugend D: bei Heimspielen zusätzlich KiHaSL/JuHaSL
-      ["Kuchen & Theke:2", "Zeitnehmer:1", "KiHaSL/JuHaSL:1", "Trikots waschen:1"],
+      // wD ist Jugend D: bei Heimspielen zusätzlich Jugendschiedsrichter
+      ["Kuchen & Theke:2", "Zeitnehmer:1", "Jugendschiedsrichter:1", "Trikots waschen:1"],
       ["Sekretär:1", "Trikots waschen:1"],
     ]);
     // Zeiten aus der Vorlage: Anpfiff 14:00, D-Jugend 90 min
@@ -314,9 +314,9 @@ describe("Helferplan", () => {
     expect((await api(`/teams/${wd}`, { method: "PATCH", cookie: coachCookie, body: { homeTemplateId: tpl.body.id } })).status).toBe(200);
     const list = await api(`/duties?teamId=${wd}`, { cookie: coachCookie });
     const labels = (id: number) => list.body.games.find((g: any) => g.id === id).blocks.map((b: any) => `${b.label}:${b.total}`);
-    // Spiel mit Eintrag bleibt, neues Spiel folgt der Vorlage (KiHaSL bleibt)
-    expect(labels(home)).toEqual(["Kuchen & Theke:2", "Zeitnehmer:1", "KiHaSL/JuHaSL:1", "Trikots waschen:1"]);
-    expect(labels(fresh)).toEqual(["Kuchen & Theke:4", "KiHaSL/JuHaSL:1"]);
+    // Spiel mit Eintrag bleibt, neues Spiel folgt der Vorlage (Jugendschiedsrichter bleibt)
+    expect(labels(home)).toEqual(["Kuchen & Theke:2", "Zeitnehmer:1", "Jugendschiedsrichter:1", "Trikots waschen:1"]);
+    expect(labels(fresh)).toEqual(["Kuchen & Theke:4", "Jugendschiedsrichter:1"]);
     // Standardvorlage lässt sich nicht löschen
     const home1 = (await api("/duty-templates", { cookie: coachCookie })).body.templates.find((t: any) => t.defaultFor === "home");
     expect((await api(`/admin/duty-templates/${home1.id}`, { method: "DELETE", cookie: adminCookie })).status).toBe(400);
@@ -326,13 +326,13 @@ describe("Helferplan", () => {
     const items = [{ dutyTypeId: 1, slots: 3, beforeMin: 0, afterMin: 0, taskWhen: "after" }];
     expect((await api(`/admin/duty-templates/${tpl.body.id}`, { method: "PUT", cookie: adminCookie, body: { name: "Nur Theke", items } })).status).toBe(200);
     const edited = await api(`/duties?teamId=${wd}`, { cookie: coachCookie });
-    expect(edited.body.games.find((g: any) => g.id === fresh).blocks.map((b: any) => `${b.label}:${b.total}`)).toEqual(["KiHaSL/JuHaSL:1", "Kuchen & Theke:3"]);
+    expect(edited.body.games.find((g: any) => g.id === fresh).blocks.map((b: any) => `${b.label}:${b.total}`)).toEqual(["Jugendschiedsrichter:1", "Kuchen & Theke:3"]);
 
     // Vorlage löschen: die Mannschaft nutzt wieder den Standard
     expect((await api(`/admin/duty-templates/${tpl.body.id}`, { method: "DELETE", cookie: adminCookie })).status).toBe(200);
     expect(await one("SELECT home_template_id FROM teams WHERE id = ?", wd)).toEqual({ home_template_id: null });
     const back = await api(`/duties?teamId=${wd}`, { cookie: coachCookie });
-    expect(back.body.games.find((g: any) => g.id === fresh).blocks.map((b: any) => b.label)).toEqual(["Kuchen & Theke", "Zeitnehmer", "KiHaSL/JuHaSL", "Trikots waschen"]);
+    expect(back.body.games.find((g: any) => g.id === fresh).blocks.map((b: any) => b.label)).toEqual(["Kuchen & Theke", "Zeitnehmer", "Jugendschiedsrichter", "Trikots waschen"]);
   });
 
   it("Sondertermin mit Zeitblöcken und Sonderdienst", async () => {

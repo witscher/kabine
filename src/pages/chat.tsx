@@ -443,7 +443,7 @@ export function ChatRoomPage({ teamId }: { teamId: string }) {
         style={{ width: "44px", height: "44px", fontSize: room.teamName.length > 3 ? "14px" : "18px", borderRadius: "12px", flexShrink: 0 }}
         aria-hidden="true"
       >
-        {/* Long names (e.g. KiHaSL/JuHaSL) don't fit into the box */}
+        {/* Long names (e.g. Jugendschiedsrichter) don't fit into the box */}
         {room.teamName.length > 5 ? <Icon name="chat" size={22} /> : room.teamName}
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>

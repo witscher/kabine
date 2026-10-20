@@ -1,6 +1,6 @@
 # Youth referees
 
-Home games of the marked age groups (handball: KiHaSL/JuHaSL, children's and youth referees) get a referee duty in the helper plan. Admins grant the role by link; young referees (or their parents) take the games they want to referee. Needs the helper duties module.
+Home games of the marked age groups (handball: children's and youth referees, formerly called KiHaSL/JuHaSL in the app) get a referee duty in the helper plan. Admins grant the role by link; young referees (or their parents) take the games they want to referee. Needs the helper duties module.
 
 - **Stores:** who has the referee role (`referees`), the links that grant it (`referee_links`, hashed), assignments as helper duties.
 - **Who sees it:** the referees and the admins; at the game as a helper duty.

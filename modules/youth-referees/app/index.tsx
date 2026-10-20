@@ -11,5 +11,5 @@ export default defineAppModule({
     { path: "/verwaltung/kihasl", page: lazyPage(() => import("./referees").then((m) => m.AdminRefereesPage)) },
     { path: "/kihasl", page: lazyPage(() => import("./referees").then((m) => m.RefereeJoinPage)) },
   ],
-  adminMenu: () => [{ href: "/verwaltung/kihasl", icon: "whistle", title: "KiHaSL/JuHaSL", sub: t`Grant the referee role by link, list` }],
+  adminMenu: () => [{ href: "/verwaltung/kihasl", icon: "whistle", title: t`Youth referees`, sub: t`Grant the referee role by link, list` }],
 });

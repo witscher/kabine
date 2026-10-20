@@ -304,7 +304,7 @@ interface AgeClass {
   birthYearMax: number | null;
   /** How long a game blocks the hall (helper duty blocks, "in progress" card). */
   gameMinutes: number;
-  /** Home games need a youth referee (handball: KiHaSL/JuHaSL). */
+  /** Home games need a youth referee. */
   youthReferee: boolean;
 }
 
@@ -371,7 +371,7 @@ function activityRank(p: AdminPerson): number {
   return days == null ? Number.MAX_SAFE_INTEGER : days;
 }
 
-/** Neither team nor child nor admin or KiHaSL role: candidates for cleaning up. */
+/** Neither team nor child nor admin or Youth referee role: candidates for cleaning up. */
 function withoutRole(p: AdminPerson): boolean {
   return !p.teams.length && !p.childIds.length && !p.isAdmin && !p.isReferee;
 }
@@ -983,7 +983,7 @@ function TeamsSection({ p, onChanged }: { p: AdminPerson; onChanged: () => void 
   const [busy, setBusy] = useState(false);
   const all = teams.data?.teams ?? [];
   const idOf = new Map(all.map((x) => [x.name, x.id]));
-  // Groups with automatic members (KiHaSL/JuHaSL) cannot be assigned by hand
+  // Groups with automatic members (youth referees) cannot be assigned by hand
   const free = all.filter((x) => !x.autoMembers && !p.teams.some((m) => m.name === x.name && m.role === role));
   const selected = all.find((x) => x.id === Number(teamId || free[0]?.id));
   const selectedIsGroup = selected?.kind === "group";
@@ -1276,13 +1276,13 @@ function PersonAdminSheet({ p, all, selfId, onClose, onChanged }: { p: AdminPers
       </section>
       <AdminAvatar personId={p.person.id} name={personName(p.person)} />
       <SwitchRow
-        label="KiHaSL/JuHaSL"
+        label={t`Youth referee`}
         sub={t`May be assigned as referee at all youth home games from F to C.`}
         checked={p.isReferee}
         onChange={async (on) => {
           if (on) await api.put(`/admin/referees/${p.person.id}`);
           else await api.del(`/admin/referees/${p.person.id}`);
-          toast(on ? t`${firstName} is now enabled as KiHaSL/JuHaSL.` : t`${firstName} is no longer KiHaSL/JuHaSL.`);
+          toast(on ? t`${firstName} is now enabled as youth referee.` : t`${firstName} is no longer a youth referee.`);
           onChanged();
         }}
       />

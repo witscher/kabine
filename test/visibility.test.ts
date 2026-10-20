@@ -161,7 +161,7 @@ describe("Vorauswahl der sichtbaren Termine", () => {
     expect(await sees("nora", "gameA")).toBe(true);
     expect(await sees("hilde", "gameA")).toBe(true);
     expect(await sees("willi", "gameA")).toBe(false);
-    // KiHaSL-Dienst macht ein fremdes Spiel sichtbar, ein anderer Dienst nicht
+    // Jugendschiedsrichter-Dienst macht ein fremdes Spiel sichtbar, ein anderer Dienst nicht
     expect(await sees("kira", "gameC")).toBe(true);
     expect(await sees("kurt", "gameB")).toBe(false);
     // Organisatorin und Ersteller

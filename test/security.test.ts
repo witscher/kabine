@@ -177,7 +177,7 @@ describe("Sicherheitsfunde", () => {
     expect(res.status).toBe(400);
   });
 
-  it("9: KiHaSL-Rolle für Kinder nur, wo Eltern eingebunden sind", async () => {
+  it("9: Jugendschiedsrichter-Rolle für Kinder nur, wo Eltern eingebunden sind", async () => {
     const admin = await loginAs(await person("Ada", { admin: true }));
     const token = String((await api("/admin/referee-links", { cookie: admin, body: {} })).body.url).split("#")[1];
     const kid = await person("Ole", { lastName: "Ort" });

@@ -201,7 +201,7 @@ ${section(
     de: {
       path: "/handball/",
       title: "Handball-App für Vereine – kostenlos und Open Source",
-      description: "Kabine für Handballvereine: Spielpläne aus handball4all, Altersklassen von Bambini bis Aktive, Zeitnehmer, Sekretär, KiHaSL und Helferdienste.",
+      description: "Kabine für Handballvereine: Spielpläne aus handball4all, Altersklassen von Bambini bis Aktive, Zeitnehmer, Sekretär, Jugendschiedsrichter und Helferdienste.",
       kicker: "Für Handballvereine",
       h1: "Die Handball-App für den <mark>ganzen</mark> Verein.",
       lead: "Kabine ist in einem Handballverein entstanden und kennt den Handball-Alltag: Spielpläne aus handball4all, Altersklassen, Hallen, Zeitnehmer und Sekretär, Kinder- und Jugendschiedsrichter.",
@@ -235,7 +235,7 @@ ${section(
   "Die Helferdienste für Heimspiele kommen aus Vorlagen: Zeitnehmer und Sekretär, Kuchen und Theke, Trikots waschen. Eltern tragen sich selbst ein, der Plan aktualisiert sich live.",
   cards("g3", [
     ["Zeitnehmer und Sekretär", "Dienste, für die man eine Einweisung braucht, sind als solche markiert."],
-    ["KiHaSL und JuHaSL", "Das Modul „Jugendschiedsrichter“ legt für Heimspiele der markierten Altersklassen einen Schiedsrichterdienst an, mit eigener Rolle per Link."],
+    ["Jugendschiedsrichter", "Das Modul „Jugendschiedsrichter“ legt für Heimspiele der markierten Altersklassen einen Schiedsrichterdienst an, mit eigener Rolle per Link."],
     ["Fahrgemeinschaften", "Für Auswärtsspiele bieten Eltern Plätze an, Spieler buchen."],
   ]) + links([["/funktionen/helferdienste/", "Mehr zu Helferdiensten"], ["/funktionen/fahrgemeinschaften/", "Mehr zu Fahrgemeinschaften"]]),
 )}

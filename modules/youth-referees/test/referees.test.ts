@@ -1,18 +1,18 @@
-// KiHaSL/JuHaSL: Rolle per Link oder Admin, Dienst bei Jugend-Heimspielen F–C. Namen erfunden.
+// Jugendschiedsrichter: Rolle per Link oder Admin, Dienst bei Jugend-Heimspielen F–C. Namen erfunden.
 import { env } from "cloudflare:workers";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { sendDutyNotifications } from "../../duties/worker/notify";
 import { type MailMessage, mailer } from "../../../worker/domain/email-login";
 import type { PushJob } from "../../../worker/domain/notify";
 import { localToInstant, todayLocal } from "../../../worker/lib/time";
-import { api, eventIn, exec, freshDb, guardian, loginAs, member, one, person, rows, season, team } from "../../../test/helpers";
+import { api, eventIn, exec, freshDb, guardian, loginAs, member, migrateRest, one, person, rows, season, team, upgradeFrom } from "../../../test/helpers";
 
 let wd: number;
 let wb: number;
 let mini: number;
 let admin: number;
-let lena: number; // Spielerin wB, wird KiHaSL
-let kim: number; // Kind der Mutter, wird KiHaSL
+let lena: number; // Spielerin wB, wird Jugendschiedsrichter
+let kim: number; // Kind der Mutter, wird Jugendschiedsrichter
 let mona: number; // Mutter von Kim
 let other: number; // Spieler ohne Rolle
 let adminCookie: string;
@@ -55,7 +55,7 @@ beforeEach(async () => {
   homeD = await game(wd, 4, 1);
 });
 
-describe("KiHaSL/JuHaSL", () => {
+describe("Jugendschiedsrichter", () => {
   it("Link: angemeldet für sich oder ein eigenes Kind, nicht für Fremde", async () => {
     const token = await link();
     const info = await api("/referee/info", { cookie: monaCookie, body: { token } });
@@ -93,14 +93,14 @@ describe("KiHaSL/JuHaSL", () => {
   it("Dienst nur bei Heimspielen F–C, auch ohne Helferplan, und nur mit Rolle", async () => {
     await exec("INSERT INTO referees (person_id) VALUES (?), (?)", lena, kim);
     const awayD = await game(wd, 5, 0);
-    await game(wb, 6, 1); // B-Jugend: kein KiHaSL
-    await game(mini, 7, 1); // Minis: kein KiHaSL
+    await game(wb, 6, 1); // B-Jugend: kein Jugendschiedsrichter
+    await game(mini, 7, 1); // Minis: kein Jugendschiedsrichter
     const list = await api("/duties/referee", { cookie: lenaCookie });
     expect(list.status).toBe(200);
     expect(list.body.games.map((g: any) => g.id)).toEqual([homeD]);
-    expect(list.body.games[0]).toMatchObject({ teamName: "wD", blocks: [{ referee: true, label: "KiHaSL/JuHaSL", total: 1, entries: [] }] });
+    expect(list.body.games[0]).toMatchObject({ teamName: "wD", blocks: [{ referee: true, label: "Jugendschiedsrichter", total: 1, entries: [] }] });
     const blockId = list.body.games[0].blocks[0].id;
-    // Auswärtsspiel hat keinen KiHaSL-Block
+    // Auswärtsspiel hat keinen Jugendschiedsrichter-Block
     expect(await rows("SELECT * FROM event_duties WHERE event_id = ?", awayD)).toEqual([]);
 
     expect((await api("/duties", { cookie: otherCookie, body: { blockId } })).body.error.code).toBe("not_referee");
@@ -116,7 +116,7 @@ describe("KiHaSL/JuHaSL", () => {
     expect(results).toEqual([201, 409]);
   });
 
-  it("Terminübersicht: eigener KiHaSL-Dienst sichtbar, offene Plätze ohne rote Marke, fremde Spiele unsichtbar", async () => {
+  it("Terminübersicht: eigener Jugendschiedsrichter-Dienst sichtbar, offene Plätze ohne rote Marke, fremde Spiele unsichtbar", async () => {
     await exec("INSERT INTO referees (person_id) VALUES (?)", kim);
     const events = async (cookie: string) => (await api("/events", { cookie })).body.events.filter((e: any) => e.kind === "game");
     // Vor dem Eintragen: wD-Spiel gehört nicht zu Monas Mannschaften
@@ -124,11 +124,11 @@ describe("KiHaSL/JuHaSL", () => {
     const blockId = (await api("/duties/referee", { cookie: monaCookie })).body.games[0].blocks[0].id;
     expect((await api("/duties", { cookie: monaCookie, body: { blockId, childId: kim } })).status).toBe(201);
     const game = (await events(monaCookie)).find((e: any) => e.id === homeD);
-    expect(game.myDuties).toEqual([{ dutyTypeId: 5, referee: true, label: "KiHaSL/JuHaSL", child: "Kim", mine: false }]);
+    expect(game.myDuties).toEqual([{ dutyTypeId: 5, referee: true, label: "Jugendschiedsrichter", child: "Kim", mine: false }]);
     expect(game.helpersNeeded).toBe(0);
     const kimCookie = await loginAs(kim);
     const own = (await events(kimCookie)).find((e: any) => e.id === homeD);
-    expect(own.myDuties).toEqual([{ dutyTypeId: 5, referee: true, label: "KiHaSL/JuHaSL", child: null, mine: true }]);
+    expect(own.myDuties).toEqual([{ dutyTypeId: 5, referee: true, label: "Jugendschiedsrichter", child: null, mine: true }]);
     // Details ohne Teilnehmerliste
     expect((await api(`/events/${homeD}`, { cookie: kimCookie })).body.participants).toBeNull();
     // Austragen durch die Mutter
@@ -143,7 +143,7 @@ describe("KiHaSL/JuHaSL", () => {
   });
 });
 
-describe("KiHaSL/JuHaSL gesucht", () => {
+describe("Jugendschiedsrichter gesucht", () => {
   let mails: MailMessage[];
   let pushes: PushJob[];
   const testEnv = () =>
@@ -162,7 +162,7 @@ describe("KiHaSL/JuHaSL gesucht", () => {
     expect(soon).toBeGreaterThan(0);
     const at9 = localToInstant(`${todayLocal()}T09:00`);
     await sendDutyNotifications(testEnv(), at9);
-    const titles = pushes.filter((p) => p.payload.title.startsWith("KiHaSL/JuHaSL gesucht"));
+    const titles = pushes.filter((p) => p.payload.title.startsWith("Jugendschiedsrichter gesucht"));
     const accounts = (await rows<{ id: number; person_id: number }>("SELECT id, person_id FROM accounts")).reduce<Record<number, number>>(
       (m, a) => ({ ...m, [a.id]: a.person_id }),
       {},
@@ -172,6 +172,28 @@ describe("KiHaSL/JuHaSL gesucht", () => {
     expect(new Set(people)).toEqual(new Set([lena, mona]));
     pushes = [];
     await sendDutyNotifications(testEnv(), at9 + 3_600_000);
-    expect(pushes.filter((p) => p.payload.title.startsWith("KiHaSL/JuHaSL gesucht"))).toEqual([]);
+    expect(pushes.filter((p) => p.payload.title.startsWith("Jugendschiedsrichter gesucht"))).toEqual([]);
+  });
+});
+
+describe("migration 202610202300_youth-referees_rename.sql", () => {
+  it("renames the duty type and the automatic group only where the club kept the old name", async () => {
+    await upgradeFrom("202610202300_youth-referees_rename.sql");
+    expect(await one("SELECT name FROM duty_types WHERE code = 'referee'")).toEqual({ name: "KiHaSL/JuHaSL" });
+    await exec("INSERT INTO teams (name, age_class_code, kind, auto_members) VALUES ('KiHaSL/JuHaSL', 'F', 'group', 'referees')");
+    await exec("INSERT INTO teams (name, age_class_code, kind) VALUES ('KiHaSL-Treff', 'F', 'group')");
+    await migrateRest();
+    expect(await one("SELECT name FROM duty_types WHERE code = 'referee'")).toEqual({ name: "Jugendschiedsrichter" });
+    expect((await rows<{ name: string }>("SELECT name FROM teams ORDER BY name")).map((t) => t.name)).toEqual(["Jugendschiedsrichter", "KiHaSL-Treff"]);
+  });
+
+  it("keeps a name the club changed, and does not clash with an existing team of the new name", async () => {
+    await upgradeFrom("202610202300_youth-referees_rename.sql");
+    await exec("UPDATE duty_types SET name = 'Schiri Jugend' WHERE code = 'referee'");
+    await exec("INSERT INTO teams (name, age_class_code, kind) VALUES ('Jugendschiedsrichter', 'F', 'group')");
+    await exec("INSERT INTO teams (name, age_class_code, kind, auto_members) VALUES ('KiHaSL/JuHaSL', 'F', 'group', 'referees')");
+    await migrateRest();
+    expect(await one("SELECT name FROM duty_types WHERE code = 'referee'")).toEqual({ name: "Schiri Jugend" });
+    expect(await rows("SELECT name FROM teams WHERE auto_members = 'referees'")).toEqual([{ name: "KiHaSL/JuHaSL" }]);
   });
 });

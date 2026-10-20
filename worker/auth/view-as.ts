@@ -2,7 +2,7 @@
 // (cookie kabine_view, set via ?playerview=1, ?parentview=1, ?trainerview=1; see docs/dev/design.md, Admin views).
 // - player: first own child
 // - parent: oneself, without admin and coach rights
-// - referee: oneself as KiHaSL/JuHaSL, without admin and coach rights
+// - referee: oneself as youth referee, without admin and coach rights
 // - trainer: first coach of the first own team (coaching, else the first child's)
 // Views of other persons (player, trainer) are read-only; the account stays one's own,
 // so the other person's read markers, push and settings stay untouched.
@@ -37,7 +37,7 @@ export async function viewAsActor(db: D1Database, admin: Actor, mode: ViewMode):
   if (mode === "parent" || mode === "referee") {
     const self = await buildActor(db, admin.session, { account_id: admin.accountId, person_id: admin.personId, first_name: admin.firstName, last_name: admin.lastName, is_admin: 0 });
     const memberships = self.memberships.filter((m) => m.role !== "coach");
-    // referee: oneself as KiHaSL/JuHaSL, without admin and coach rights
+    // referee: oneself as youth referee, without admin and coach rights
     return { ...self, memberships, coachTeamIds: [], viewAs: mode, refereeOverride: mode === "referee", locale: admin.locale };
   }
   let personId: number | null = null;

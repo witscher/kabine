@@ -190,9 +190,9 @@ Whoever creates a special event (`events.created_by`) always manages its helper 
 
 Coaches may create a duty type for a single special event. It disappears with its last block and does not show in the club-wide list, so the admins' list stays clean.
 
-## Youth referees (KiHaSL/JuHaSL)
+## Youth referees
 
-Youth referees are an optional module. In the code the duty is called `referee` throughout (tables `referees` and `referee_links`, topic `duty_referee_open`, view `refereeview`). The German UI calls it "KiHaSL/JuHaSL".
+Youth referees are an optional module. In the code the duty is called `referee` throughout (tables `referees` and `referee_links`, topic `duty_referee_open`, view `refereeview`). The German UI calls it "Jugendschiedsrichter" (until October 2026 "KiHaSL/JuHaSL", the handball terms for children's and youth referees).
 
 Whether home games of an age group need a youth referee is a property of the age group (`age_classes.youth_referee`), set by the sport profile and editable by admins. In handball these are the E, D and C youth.
 
