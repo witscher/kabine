@@ -31,6 +31,7 @@
     "site:dev": "node scripts/site-build.mjs --preview && wrangler dev --config site/wrangler.jsonc --port 8790",
     "site:deploy": "node scripts/site-build.mjs && wrangler deploy --config site/wrangler.jsonc",
     "demo:reset": "node scripts/demo-reset.mjs",
+    "admin:link": "node scripts/admin-link.mjs",
     "maintenance:on": "node scripts/maintenance.mjs on",
     "maintenance:off": "node scripts/maintenance.mjs off",
     "maintenance:status": "node scripts/maintenance.mjs status",

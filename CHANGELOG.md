@@ -6,6 +6,7 @@ Changes that are merged but not released yet go under *Unreleased*, one line eac
 
 ## Unreleased
 
+- `npm run admin:link` creates an admin link from the command line when nobody can get into Administration any more (docs/operation.md, Owner and admins).
 - The update pull request warns about `wrangler.jsonc` only when the release really changes the configuration; resource IDs and the club's own names no longer count.
 
 ## v0.2.1

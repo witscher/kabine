@@ -105,6 +105,16 @@ The "Deploy to Cloudflare" button asks for none of these; the app works without 
 
 The first admin is the **owner**. Other admins cannot take away the owner's admin role or access. Keep at least two admins, so the club does not depend on one person. An admin who lost their device gets a personal link from another admin, or signs in with a code by e-mail when e-mail is set up.
 
+### Nobody can get into Administration
+
+If no admin can sign in any more (devices lost, the only admin left the club), whoever has access to the club's Cloudflare account creates an admin link from a checkout of the club's copy (with `npm ci` done and `npx wrangler login`):
+
+```sh
+npm run admin:link -- --first Alex --last Admin --email alex@your-club.org
+```
+
+It creates the admin, or makes the person with this admin address an admin again (also the owner, or someone who left), withdraws older personal links of that person and prints a link valid for 24 hours. Open it on the device that should get access and set up a passkey; if the person already had an access, its devices are signed out. The command writes to the database with Wrangler and stores only a hash of the link, like every invitation. Options: `--origin https://app.your-club.org` when the app's address is not known yet, `--env <name>` for an environment of `wrangler.jsonc`, `--config <file>` for another Wrangler configuration, `--local` for the local database.
+
 ## Uninstalling
 
 Delete the Worker, the D1 database, the KV namespace and the queue in the Cloudflare dashboard, then the copy on GitHub. Devices keep a cached copy of the last loaded content until the app is removed from them or the browser data is cleared.
