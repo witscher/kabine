@@ -8,6 +8,8 @@ Format per entry: date, title, what changed and why, where in the code (file and
 
 ## Open
 
+- **2026-10-20 Player invitation link while signed in: no name choice, only "Straight to the app".** A signed-in child opening the shared player link again could pick a teammate's free name, which created that teammate's account on the wrong device and signed the child out. Now: anyone signed in (player, parent, coach, admin) who opens a player link sees only the "already in the app" box with "Straight to the app" and a note to sign out in the profile first if someone else wants to set up on this device; no player list. The server enforces it: `buildJoinContext` in `worker/routes/join.ts` takes `signedIn` and rejects player links with 409 `signed_in` (`PLAYER_JOIN_SIGNED_IN`), also in `/join/verify` and for join codes in `/auth/email/verify` (`worker/routes/email.ts`). Expired or invalid links show signed-in people the same box instead of "To sign-in", with a hint that adding another child needs a new parent link. Parent links stay as they are (box plus linking another child). Client: `SignedInBox` in `src/pages/join.tsx`. Tests: `test/email.test.ts` (passkey, e-mail code, coach, late code redemption), e2e re-opening the player link and an invalid link. Kabine: texts through Lingui in both languages.
+
 ## Done
 
 - **2026-10-20 Cancelled events read "Not taking place" and are struck through in the detail view.** Wording in app, push, calendar feed and conflict messages; struck-through hero. Kabine: `a70a3f2`.
