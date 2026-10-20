@@ -24,7 +24,7 @@
 *, *::before, *::after { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; scroll-padding-top: 72px; }
 body { margin: 0; font: 400 17px/1.55 var(--font); color: var(--text); background: var(--bg); -webkit-font-smoothing: antialiased; }
-h1, h2, h3 { font-family: var(--font-cond); font-weight: 800; line-height: 1.02; margin: 0; letter-spacing: 0.005em; }
+h1, h2, h3 { font-family: var(--font-cond); font-weight: 800; line-height: 1.02; margin: 0; letter-spacing: 0.005em; overflow-wrap: break-word; }
 p { margin: 0; }
 a { color: inherit; }
 img { max-width: 100%; height: auto; display: block; }
@@ -45,7 +45,7 @@ img { max-width: 100%; height: auto; display: block; }
 
 /* Hero */
 .hero { background: var(--black); color: #fff; padding: 56px 0 72px; overflow: hidden; }
-.hero .wrap { display: grid; grid-template-columns: 1.1fr 1fr; gap: 40px; align-items: center; }
+.hero .wrap { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 40px; align-items: center; }
 .eyebrow { font: 700 15px/1 var(--font-cond); letter-spacing: 0.14em; text-transform: uppercase; color: var(--yellow); margin-bottom: 16px; }
 .hero h1 { font-size: clamp(40px, 6vw, 64px); }
 .hero h1 mark { background: none; color: var(--yellow); }
@@ -63,7 +63,7 @@ img { max-width: 100%; height: auto; display: block; }
 .hero-shots { display: flex; gap: 14px; justify-content: center; transform: rotate(3deg); }
 .hero-shots img:nth-child(2) { margin-top: 36px; }
 .hero-shots img { width: 46%; border-radius: 22px; box-shadow: 0 18px 40px rgba(0, 0, 0, 0.5); border: 1px solid #333; }
-@media (max-width: 860px) { .hero .wrap { grid-template-columns: 1fr; } .hero-shots { transform: none; } .hero-shots img { width: 44%; } }
+@media (max-width: 860px) { .hero .wrap { grid-template-columns: minmax(0, 1fr); } .hero-shots { transform: none; } .hero-shots img { width: 44%; } }
 
 /* Promise band right under the hero: invitation only, data stays with the club */
 .promise { background: var(--yellow); color: var(--black); padding: 30px 0; }
@@ -137,3 +137,43 @@ footer .push { margin-left: auto; }
 .legal h2 { font-size: 30px; margin: 32px 0 8px; }
 .legal p { margin-top: 10px; }
 .legal .back { margin-top: 32px; }
+
+/* Content pages */
+.page-hero { padding: 40px 0 48px; }
+.page-hero .wrap { display: block; }
+.page-hero h1 { font-size: clamp(38px, 5.5vw, 58px); max-width: 16em; }
+.crumbs { font-size: 14px; color: var(--on-dark); margin-bottom: 18px; }
+.crumbs a { color: var(--on-dark); }
+.more { margin-top: 22px; font-size: 16px; }
+.more a { font-weight: 600; }
+.demo .more a { color: var(--yellow); }
+.more-link { margin-top: auto; font-weight: 700; font-size: 15px; }
+.link-card { text-decoration: none; }
+.link-card:hover { border-color: var(--black); }
+.gallery.small { grid-template-columns: repeat(auto-fill, minmax(180px, 240px)); }
+
+/* Documentation pages */
+.prose { max-width: 820px; }
+.prose h2 { font-size: 34px; margin: 40px 0 10px; }
+.prose h3 { font-size: 24px; margin: 28px 0 8px; }
+.prose p, .prose ul, .prose ol, .prose blockquote { margin: 12px 0 0; }
+.prose ul, .prose ol { padding-left: 22px; }
+.prose li { margin-top: 4px; }
+.prose blockquote { border-left: 4px solid var(--yellow); padding: 4px 0 4px 16px; color: var(--text-2); }
+.prose :not(pre) > code { background: var(--muted); padding: 1px 5px; border-radius: 5px; font-size: 0.88em; }
+.prose .btn { margin-top: 8px; }
+.prose .source { margin-top: 36px; font-size: 14px; color: var(--text-2); }
+.table { overflow-x: auto; margin-top: 16px; }
+.table table { border-collapse: collapse; font-size: 15px; min-width: 560px; }
+.table th, .table td { text-align: left; vertical-align: top; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+.table th { font-weight: 700; background: var(--card); }
+
+/* Footer with page links */
+footer .wrap { flex-direction: column; align-items: stretch; }
+.footer-links { display: flex; flex-wrap: wrap; gap: 8px 22px; padding-bottom: 18px; border-bottom: 1px solid #2a2a2a; }
+.footer-meta { display: flex; flex-wrap: wrap; gap: 12px 28px; align-items: center; }
+
+/* Offer of the other language (lang.js) */
+.lang-hint { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; padding: 10px 20px; background: var(--yellow); color: var(--black); font-size: 15px; }
+.lang-hint a { font-weight: 700; }
+.lang-hint button { margin-left: auto; border: 0; background: none; font-size: 22px; line-height: 1; cursor: pointer; color: var(--black); padding: 2px 6px; }

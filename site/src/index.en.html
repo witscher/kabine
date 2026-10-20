@@ -1,16 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Kabine – the free team app for sports clubs</title>
-<meta name="description" content="Kabine is a free web app for amateur sports clubs: trainings and games with yes/no responses, squads, team chat, helper duties and carpools. Each club runs its own installation. Try it now as a player, parent, coach or admin.">
-<link rel="icon" href="/icon.svg" type="image/svg+xml">
-<link rel="alternate" hreflang="de" href="https://kabine.dev/">
-<link rel="alternate" hreflang="en" href="https://kabine.dev/en/">
-<link rel="alternate" hreflang="x-default" href="https://kabine.dev/">
-<link rel="stylesheet" href="/style.css">
-<script src="/lang.js" defer></script>
+{{HEAD}}
 </head>
 <body>
 <header class="top">
@@ -19,7 +10,7 @@
     <nav aria-label="Main menu">
       <a href="#features">Features</a>
       <a class="keep" href="#demo">Demo</a>
-      <a href="#screens">Screenshots</a>
+      <a href="/en/why-kabine/">Why Kabine</a>
       <a href="#privacy">Privacy</a>
       <a href="#faq">FAQ</a>
       <a href="#contribute">Contribute</a>
@@ -48,8 +39,8 @@
       </ul>
     </div>
     <div class="hero-shots" aria-hidden="true">
-      <img src="/shots/en/01-events.png" alt="" width="390" height="844">
-      <img src="/shots/en/03-coach-responses.png" alt="" width="390" height="844">
+      <img src="/shots/en/01-events.webp" alt="" width="390" height="844" fetchpriority="high">
+      <img src="/shots/en/03-coach-responses.webp" alt="" width="390" height="844">
     </div>
   </div>
 </div>
@@ -97,10 +88,11 @@
       </div>
     </div>
     <div class="grid g3">
-      <div class="card"><h3>Helper duties</h3><p>Cake, cash desk, referees: duties for home games with templates and a live plan; parents sign up themselves.</p></div>
-      <div class="card"><h3>Carpools</h3><p>Parents offer seats, players book one. The group gets the meeting point in time before the game.</p></div>
+      <div class="card"><h3>Helper duties</h3><p>Cake, cash desk, referees: duties for home games with templates and a live plan; parents sign up themselves.</p><a class="more-link" href="/en/features/helper-duties/">More on helper duties</a></div>
+      <div class="card"><h3>Carpools</h3><p>Parents offer seats, players book one. The team chat reminds before the game while someone is still looking.</p><a class="more-link" href="/en/features/carpools/">More on carpools</a></div>
       <div class="card"><h3>Modules for the club</h3><p>Fixtures from handball4all, games from spreadsheets, youth referees, sign-in codes by SMS. All switchable.</p></div>
     </div>
+    <p class="more">More: <a href="/en/handball/">Handball</a> · <a href="/en/football/">Football</a> · <a href="/en/youth-coaches/">For youth coaches</a> · <a href="/en/club-board-privacy/">For the board and privacy</a> · <a href="/en/features/attendance/">Attendance</a> · <a href="/en/why-kabine/">Why Kabine</a></p>
   </div>
 </section>
 
@@ -145,16 +137,16 @@
     <h2>What Kabine looks like.</h2>
     <p class="sub">Pictures of the demo, in the order a week in the club goes by.</p>
     <div class="gallery">
-      <figure class="shot"><img loading="lazy" src="/shots/en/01-events.png" width="390" height="844" alt="Upcoming events of a player with the next training and her response"><figcaption>Upcoming events</figcaption></figure>
-      <figure class="shot"><img loading="lazy" src="/shots/en/02-respond-for-child.png" width="390" height="844" alt="A mother accepts the training for her daughter"><figcaption>Parents respond for their child</figcaption></figure>
-      <figure class="shot"><img loading="lazy" src="/shots/en/03-coach-responses.png" width="390" height="844" alt="A coach sees who accepted and who declined, with reasons"><figcaption>Responses for coaches</figcaption></figure>
-      <figure class="shot"><img loading="lazy" src="/shots/en/04-squad.png" width="390" height="844" alt="Nominating the squad for a game"><figcaption>Nominate the squad</figcaption></figure>
-      <figure class="shot"><img loading="lazy" src="/shots/en/05-chat.png" width="390" height="844" alt="Team chat with coach, parent and player"><figcaption>Team chat</figcaption></figure>
-      <figure class="shot"><img loading="lazy" src="/shots/en/06-carpool.png" width="390" height="844" alt="Carpool to an away game"><figcaption>Carpool</figcaption></figure>
-      <figure class="shot"><img loading="lazy" src="/shots/en/07-helper-duties.png" width="390" height="844" alt="Helper duties for a home game"><figcaption>Helper duties</figcaption></figure>
-      <figure class="shot"><img loading="lazy" src="/shots/en/08-team.png" width="390" height="844" alt="Team page with squad and coaches"><figcaption>Team</figcaption></figure>
-      <figure class="shot"><img loading="lazy" src="/shots/en/09-administration.png" width="390" height="844" alt="Club administration"><figcaption>Administration</figcaption></figure>
-      <figure class="shot"><img loading="lazy" src="/shots/en/10-setup-wizard.png" width="390" height="844" alt="Setup wizard for new clubs"><figcaption>Setup wizard</figcaption></figure>
+      <figure class="shot"><img loading="lazy" src="/shots/en/01-events.webp" width="390" height="844" alt="Upcoming events of a player with the next training and her response"><figcaption>Upcoming events</figcaption></figure>
+      <figure class="shot"><img loading="lazy" src="/shots/en/02-respond-for-child.webp" width="390" height="844" alt="A mother accepts the training for her daughter"><figcaption>Parents respond for their child</figcaption></figure>
+      <figure class="shot"><img loading="lazy" src="/shots/en/03-coach-responses.webp" width="390" height="844" alt="A coach sees who accepted and who declined, with reasons"><figcaption>Responses for coaches</figcaption></figure>
+      <figure class="shot"><img loading="lazy" src="/shots/en/04-squad.webp" width="390" height="844" alt="Nominating the squad for a game"><figcaption>Nominate the squad</figcaption></figure>
+      <figure class="shot"><img loading="lazy" src="/shots/en/05-chat.webp" width="390" height="844" alt="Team chat with coach, parent and player"><figcaption>Team chat</figcaption></figure>
+      <figure class="shot"><img loading="lazy" src="/shots/en/06-carpool.webp" width="390" height="844" alt="Carpool to an away game"><figcaption>Carpool</figcaption></figure>
+      <figure class="shot"><img loading="lazy" src="/shots/en/07-helper-duties.webp" width="390" height="844" alt="Helper duties for a home game"><figcaption>Helper duties</figcaption></figure>
+      <figure class="shot"><img loading="lazy" src="/shots/en/08-team.webp" width="390" height="844" alt="Team page with squad and coaches"><figcaption>Team</figcaption></figure>
+      <figure class="shot"><img loading="lazy" src="/shots/en/09-administration.webp" width="390" height="844" alt="Club administration"><figcaption>Administration</figcaption></figure>
+      <figure class="shot"><img loading="lazy" src="/shots/en/10-setup-wizard.webp" width="390" height="844" alt="Setup wizard for new clubs"><figcaption>Setup wizard</figcaption></figure>
     </div>
   </div>
 </section>
@@ -198,7 +190,7 @@
       <details class="faq"><summary>What does Kabine cost?</summary><p>The software is free (AGPL-3.0): no licence, no subscription, no ads, forever.</p><p>For a typical club with a few hundred members, Cloudflare's free plan is enough to run it. If you want more headroom, the paid plan costs 5 US dollars a month at the time of writing. Costs per message only arise if the club switches on the SMS module. A domain of your own is optional.</p></details>
       <details class="faq"><summary>Why Cloudflare and not a German or local host?</summary><p>Cost and availability. A server of your own at a hosting company costs money every month and has to be set up, updated, backed up and monitored, in a club usually by a volunteer. On Cloudflare, Kabine runs without a server of its own on the free plan. The platform applies security updates itself, copes on Sunday evening when everyone responds at once, and keeps a history of the database that lets you undo a mistake.</p><p>On data protection: the club is the controller, Cloudflare the processor. The club concludes Cloudflare's data processing agreement in its own account; it includes the EU standard contractual clauses, and Cloudflare is certified under the EU-US Data Privacy Framework. The database should be created explicitly in the EU (<code>--jurisdiction eu</code>); the team chat already lives in the EU jurisdiction. Cloudflare handles requests at locations near the users, for users in Germany usually in Europe.</p><p>Kabine does not run on a server of your own: it is built for the Cloudflare platform (Workers, D1, Durable Objects).</p></details>
       <details class="faq"><summary>Who has access to our data?</summary><p>Only the club. Every installation lives in the club's own Cloudflare account. There is no central Kabine server, and the developers of Kabine have no access to any club's data. Inside the app, everyone sees only what their role needs: decline reasons, for example, only coaches and admins.</p></details>
-      <details class="faq"><summary>Is Kabine GDPR compliant?</summary><p>Kabine is built for data minimisation: of players and parents only first name, last name and year of birth, no tracking, deletion periods built in. Whether the processing in the club is lawful remains the club's responsibility. For that there is a complete list of the stored data (who sees what, when it is deleted) and a template for the privacy policy: <a href="https://github.com/witscher/kabine/blob/main/docs/privacy.md">privacy and data inventory</a>.</p></details>
+      <details class="faq"><summary>Is Kabine GDPR compliant?</summary><p>Kabine is built for data minimisation: of players and parents only first name, last name and year of birth, no tracking, deletion periods built in. Whether the processing in the club is lawful remains the club's responsibility. For that there is a complete list of the stored data (who sees what, when it is deleted) and a template for the privacy policy: <a href="/en/docs/privacy/">privacy and data inventory</a>.</p></details>
       <details class="faq"><summary>Do children need their own phone or an e-mail address?</summary><p>No. Parents respond for their children. Children with a device of their own get access by link, without an e-mail address and without a phone number. Parents decide what their child may do in the app and approve profile pictures.</p></details>
       <details class="faq"><summary>How much work is running it?</summary><p>Installing takes about 30 minutes. After that there is no server to look after: updates arrive as pull requests in the club's copy and are taken over with one click, the season change runs once a year with a wizard, and the data export saves everything to a file. Coaches manage their teams themselves.</p></details>
       <details class="faq"><summary>What happens if we stop?</summary><p>The club exports its data and deletes the Worker, database, KV store and queue in its own Cloudflare account. Then the data is gone. There is no provider to cancel or to ask for deletion.</p></details>
@@ -230,7 +222,7 @@
       <p class="sub">You need a Cloudflare account (the free plan is enough for a typical club), a GitHub account and ideally a domain of the club. The button creates your own copy and all resources; you only choose a password for the first admin. Updates arrive as pull requests in your copy.</p>
       <div class="cta">
         <a class="btn primary on-light" href="https://deploy.workers.cloudflare.com/?url=https://github.com/witscher/kabine">Install on Cloudflare</a>
-        <a class="btn ghost on-light" href="https://github.com/witscher/kabine/blob/main/docs/install.md">Installation guide</a>
+        <a class="btn ghost on-light" href="/en/docs/install/">Installation guide</a>
       </div>
     </div>
     <div>
@@ -245,13 +237,6 @@
 </section>
 </main>
 
-<footer>
-  <div class="wrap">
-    <span>Kabine · free software under AGPL-3.0</span>
-    <a href="/en/legal/">Legal notice and privacy</a>
-    <a href="https://github.com/witscher/kabine">GitHub</a>
-    <a class="push" href="/" hreflang="de" data-lang="de">Deutsch</a>
-  </div>
-</footer>
+{{FOOTER}}
 </body>
 </html>

@@ -1,16 +1,7 @@
 <!doctype html>
 <html lang="de">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Kabine – die freie Mannschafts-App für Vereine</title>
-<meta name="description" content="Kabine ist eine freie Web-App für Amateursportvereine: Training und Spiele mit Zu- und Absagen, Kader, Mannschaftschat, Helferdienste und Fahrgemeinschaften. Jeder Verein betreibt seine eigene Installation. Jetzt als Spieler, Elternteil, Trainer oder Admin ausprobieren.">
-<link rel="icon" href="/icon.svg" type="image/svg+xml">
-<link rel="alternate" hreflang="de" href="https://kabine.dev/">
-<link rel="alternate" hreflang="en" href="https://kabine.dev/en/">
-<link rel="alternate" hreflang="x-default" href="https://kabine.dev/">
-<link rel="stylesheet" href="/style.css">
-<script src="/lang.js" defer></script>
+{{HEAD}}
 </head>
 <body>
 <header class="top">
@@ -19,7 +10,7 @@
     <nav aria-label="Hauptmenü">
       <a href="#funktionen">Funktionen</a>
       <a class="keep" href="#demo">Demo</a>
-      <a href="#bilder">Bilder</a>
+      <a href="/warum-kabine/">Warum Kabine</a>
       <a href="#datenschutz">Datenschutz</a>
       <a href="#faq">FAQ</a>
       <a href="#mitmachen">Mitmachen</a>
@@ -34,7 +25,7 @@
   <div class="wrap">
     <div>
       <p class="eyebrow">Frei · Open Source · für jeden Verein</p>
-      <h1>Mannschaftsorganisation <mark>einfach</mark>. Kostenlos und ohne Werbung – für immer.</h1>
+      <h1>Mannschafts&shy;organisation <mark>einfach</mark>. Kostenlos und ohne Werbung – für immer.</h1>
       <p class="lead">Training und Spiele mit Zu- und Absagen, Kader, Mannschaftschat, Helferdienste und Fahrgemeinschaften. Für Spieler, Eltern und Trainer, auf dem Handy installierbar, ohne App Store.</p>
       <div class="cta">
         <a class="btn primary" href="#demo">Demo ausprobieren</a>
@@ -48,8 +39,8 @@
       </ul>
     </div>
     <div class="hero-shots" aria-hidden="true">
-      <img src="/shots/de/01-events.png" alt="" width="390" height="844">
-      <img src="/shots/de/03-coach-responses.png" alt="" width="390" height="844">
+      <img src="/shots/de/01-events.webp" alt="" width="390" height="844" fetchpriority="high">
+      <img src="/shots/de/03-coach-responses.webp" alt="" width="390" height="844">
     </div>
   </div>
 </div>
@@ -97,10 +88,11 @@
       </div>
     </div>
     <div class="grid g3">
-      <div class="card"><h3>Helferdienste</h3><p>Kuchen, Kasse, Schiedsrichter: Dienste für Heimspiele mit Vorlagen und Live-Plan, Eltern tragen sich selbst ein.</p></div>
-      <div class="card"><h3>Fahrgemeinschaften</h3><p>Eltern bieten Plätze an, Spieler buchen. Die Gruppe bekommt rechtzeitig vor dem Spiel den Treffpunkt.</p></div>
+      <div class="card"><h3>Helferdienste</h3><p>Kuchen, Kasse, Schiedsrichter: Dienste für Heimspiele mit Vorlagen und Live-Plan, Eltern tragen sich selbst ein.</p><a class="more-link" href="/funktionen/helferdienste/">Mehr zu Helferdiensten</a></div>
+      <div class="card"><h3>Fahrgemeinschaften</h3><p>Eltern bieten Plätze an, Spieler buchen. Der Mannschaftschat erinnert vor dem Spiel, solange noch jemand sucht.</p><a class="more-link" href="/funktionen/fahrgemeinschaften/">Mehr zu Fahrgemeinschaften</a></div>
       <div class="card"><h3>Module für den Verein</h3><p>Spielpläne aus handball4all, Spiele aus Tabellen, Kinder- und Jugendschiedsrichter, Anmeldecodes per SMS. Alles zuschaltbar.</p></div>
     </div>
+    <p class="more">Mehr: <a href="/handball/">Handball</a> · <a href="/fussball/">Fußball</a> · <a href="/jugendtrainer/">Für Jugendtrainer</a> · <a href="/vorstand-datenschutz/">Für Vorstand und Datenschutz</a> · <a href="/funktionen/anwesenheit/">Anwesenheit</a> · <a href="/warum-kabine/">Warum Kabine</a></p>
   </div>
 </section>
 
@@ -145,16 +137,16 @@
     <h2>So sieht Kabine aus.</h2>
     <p class="sub">Aufnahmen der Demo, in der Reihenfolge, in der eine Woche im Verein abläuft.</p>
     <div class="gallery">
-      <figure class="shot"><img loading="lazy" src="/shots/de/01-events.png" width="390" height="844" alt="Nächste Termine einer Spielerin mit dem nächsten Training und ihrer Zusage"><figcaption>Nächste Termine</figcaption></figure>
-      <figure class="shot"><img loading="lazy" src="/shots/de/02-respond-for-child.png" width="390" height="844" alt="Eine Mutter sagt für ihre Tochter zum Training zu"><figcaption>Eltern sagen für ihr Kind zu</figcaption></figure>
-      <figure class="shot"><img loading="lazy" src="/shots/de/03-coach-responses.png" width="390" height="844" alt="Die Trainerin sieht, wer zu- und wer abgesagt hat, mit Gründen"><figcaption>Rückmeldungen für Trainer</figcaption></figure>
-      <figure class="shot"><img loading="lazy" src="/shots/de/04-squad.png" width="390" height="844" alt="Kader für ein Spiel nominieren"><figcaption>Kader nominieren</figcaption></figure>
-      <figure class="shot"><img loading="lazy" src="/shots/de/05-chat.png" width="390" height="844" alt="Mannschaftschat mit Trainerin, Mutter und Spielerin"><figcaption>Mannschaftschat</figcaption></figure>
-      <figure class="shot"><img loading="lazy" src="/shots/de/06-carpool.png" width="390" height="844" alt="Fahrgemeinschaft zu einem Auswärtsspiel"><figcaption>Fahrgemeinschaft</figcaption></figure>
-      <figure class="shot"><img loading="lazy" src="/shots/de/07-helper-duties.png" width="390" height="844" alt="Helferdienste für ein Heimspiel"><figcaption>Helferdienste</figcaption></figure>
-      <figure class="shot"><img loading="lazy" src="/shots/de/08-team.png" width="390" height="844" alt="Mannschaftsseite mit Kader und Trainern"><figcaption>Mannschaft</figcaption></figure>
-      <figure class="shot"><img loading="lazy" src="/shots/de/09-administration.png" width="390" height="844" alt="Verwaltung des Vereins"><figcaption>Verwaltung</figcaption></figure>
-      <figure class="shot"><img loading="lazy" src="/shots/de/10-setup-wizard.png" width="390" height="844" alt="Einrichtungsassistent für neue Vereine"><figcaption>Einrichtungsassistent</figcaption></figure>
+      <figure class="shot"><img loading="lazy" src="/shots/de/01-events.webp" width="390" height="844" alt="Nächste Termine einer Spielerin mit dem nächsten Training und ihrer Zusage"><figcaption>Nächste Termine</figcaption></figure>
+      <figure class="shot"><img loading="lazy" src="/shots/de/02-respond-for-child.webp" width="390" height="844" alt="Eine Mutter sagt für ihre Tochter zum Training zu"><figcaption>Eltern sagen für ihr Kind zu</figcaption></figure>
+      <figure class="shot"><img loading="lazy" src="/shots/de/03-coach-responses.webp" width="390" height="844" alt="Die Trainerin sieht, wer zu- und wer abgesagt hat, mit Gründen"><figcaption>Rückmeldungen für Trainer</figcaption></figure>
+      <figure class="shot"><img loading="lazy" src="/shots/de/04-squad.webp" width="390" height="844" alt="Kader für ein Spiel nominieren"><figcaption>Kader nominieren</figcaption></figure>
+      <figure class="shot"><img loading="lazy" src="/shots/de/05-chat.webp" width="390" height="844" alt="Mannschaftschat mit Trainerin, Mutter und Spielerin"><figcaption>Mannschaftschat</figcaption></figure>
+      <figure class="shot"><img loading="lazy" src="/shots/de/06-carpool.webp" width="390" height="844" alt="Fahrgemeinschaft zu einem Auswärtsspiel"><figcaption>Fahrgemeinschaft</figcaption></figure>
+      <figure class="shot"><img loading="lazy" src="/shots/de/07-helper-duties.webp" width="390" height="844" alt="Helferdienste für ein Heimspiel"><figcaption>Helferdienste</figcaption></figure>
+      <figure class="shot"><img loading="lazy" src="/shots/de/08-team.webp" width="390" height="844" alt="Mannschaftsseite mit Kader und Trainern"><figcaption>Mannschaft</figcaption></figure>
+      <figure class="shot"><img loading="lazy" src="/shots/de/09-administration.webp" width="390" height="844" alt="Verwaltung des Vereins"><figcaption>Verwaltung</figcaption></figure>
+      <figure class="shot"><img loading="lazy" src="/shots/de/10-setup-wizard.webp" width="390" height="844" alt="Einrichtungsassistent für neue Vereine"><figcaption>Einrichtungsassistent</figcaption></figure>
     </div>
   </div>
 </section>
@@ -198,7 +190,7 @@
       <details class="faq"><summary>Was kostet Kabine?</summary><p>Die Software ist kostenlos und frei (AGPL-3.0): keine Lizenz, kein Abo, keine Werbung, für immer.</p><p>Für den Betrieb reicht bei einem üblichen Verein mit einigen hundert Mitgliedern der kostenlose Tarif von Cloudflare. Wer mehr Spielraum möchte, nimmt den Bezahltarif (zurzeit 5 US-Dollar im Monat). Kosten pro Nachricht entstehen nur, wenn der Verein das SMS-Modul einschaltet. Eine eigene Domain ist optional.</p></details>
       <details class="faq"><summary>Warum Cloudflare und nicht ein deutsches Hosting?</summary><p>Wegen Kosten und Verfügbarkeit. Ein eigener Server bei einem Hoster kostet jeden Monat und muss eingerichtet, aktualisiert, gesichert und überwacht werden, im Verein meist von einer ehrenamtlichen Person. Kabine läuft bei Cloudflare ohne eigenen Server im kostenlosen Tarif. Die Plattform spielt Sicherheitsupdates selbst ein, hält auch am Sonntagabend durch, wenn alle gleichzeitig zusagen, und bewahrt eine Historie der Datenbank auf, mit der sich ein Fehler zurückdrehen lässt.</p><p>Zum Datenschutz: Der Verein ist Verantwortlicher, Cloudflare ist Auftragsverarbeiter. Der Verein schließt im eigenen Konto den Auftragsverarbeitungsvertrag von Cloudflare ab; er enthält die EU-Standardvertragsklauseln, und Cloudflare ist unter dem EU-US Data Privacy Framework zertifiziert. Die Datenbank sollte ausdrücklich in der EU angelegt werden (<code>--jurisdiction eu</code>), der Mannschaftschat liegt bereits in der EU-Jurisdiktion. Anfragen bearbeitet Cloudflare an Standorten in der Nähe der Nutzer, bei Nutzern in Deutschland in der Regel in Europa.</p><p>Auf einem eigenen Server läuft Kabine nicht: Die App ist für die Cloudflare-Plattform gebaut (Workers, D1, Durable Objects).</p></details>
       <details class="faq"><summary>Wer hat Zugriff auf unsere Daten?</summary><p>Nur der Verein. Jede Installation liegt im eigenen Cloudflare-Konto des Vereins. Es gibt keinen zentralen Kabine-Server, und die Entwickler von Kabine haben keinen Zugriff auf die Daten irgendeines Vereins. In der App sieht jede Person nur, was ihre Rolle braucht: Absagegründe zum Beispiel nur Trainer und Admins.</p></details>
-      <details class="faq"><summary>Ist Kabine DSGVO-konform?</summary><p>Kabine ist auf Datensparsamkeit gebaut: Von Spielern und Eltern nur Vorname, Nachname und Jahrgang, kein Tracking, Löschfristen eingebaut. Ob die Verarbeitung im Verein rechtmäßig ist, verantwortet der Verein selbst. Dafür gibt es eine vollständige Liste der gespeicherten Daten (wer sieht was, wann wird es gelöscht) und eine Vorlage für die Datenschutzerklärung: <a href="https://github.com/witscher/kabine/blob/main/docs/privacy.de.md">Datenschutz und Datenverzeichnis</a>.</p></details>
+      <details class="faq"><summary>Ist Kabine DSGVO-konform?</summary><p>Kabine ist auf Datensparsamkeit gebaut: Von Spielern und Eltern nur Vorname, Nachname und Jahrgang, kein Tracking, Löschfristen eingebaut. Ob die Verarbeitung im Verein rechtmäßig ist, verantwortet der Verein selbst. Dafür gibt es eine vollständige Liste der gespeicherten Daten (wer sieht was, wann wird es gelöscht) und eine Vorlage für die Datenschutzerklärung: <a href="/docs/datenschutz/">Datenschutz und Datenverzeichnis</a>.</p></details>
       <details class="faq"><summary>Brauchen Kinder ein eigenes Handy oder eine E-Mail-Adresse?</summary><p>Nein. Eltern sagen für ihre Kinder zu und ab. Kinder mit eigenem Gerät bekommen über einen Link Zugang, ohne E-Mail-Adresse und ohne Telefonnummer. Die Eltern legen fest, was ihr Kind in der App darf, und geben Profilbilder frei.</p></details>
       <details class="faq"><summary>Wie viel Arbeit macht der Betrieb?</summary><p>Die Installation dauert etwa 30 Minuten. Danach gibt es keinen Server zu pflegen: Updates kommen als Pull Request in die Kopie des Vereins und werden mit einem Klick übernommen, der Saisonwechsel läuft einmal im Jahr mit einem Assistenten, und der Datenexport sichert alles in eine Datei. Trainer verwalten ihre Mannschaften selbst.</p></details>
       <details class="faq"><summary>Was passiert, wenn wir aufhören?</summary><p>Der Verein exportiert seine Daten und löscht Worker, Datenbank, KV-Speicher und Warteschlange im eigenen Cloudflare-Konto. Dann sind die Daten weg. Es gibt keinen Anbieter, bei dem man kündigen oder eine Löschung beantragen muss.</p></details>
@@ -230,7 +222,7 @@
       <p class="sub">Nötig sind ein Cloudflare-Konto (der kostenlose Tarif reicht für einen üblichen Verein), ein GitHub-Konto und am besten eine Domain des Vereins. Der Knopf legt die eigene Kopie und alle Ressourcen an, man wählt nur ein Passwort für den ersten Admin. Updates kommen als Pull Request in die eigene Kopie.</p>
       <div class="cta">
         <a class="btn primary on-light" href="https://deploy.workers.cloudflare.com/?url=https://github.com/witscher/kabine">Bei Cloudflare installieren</a>
-        <a class="btn ghost on-light" href="https://github.com/witscher/kabine/blob/main/docs/install.md">Anleitung (Englisch)</a>
+        <a class="btn ghost on-light" href="/en/docs/install/">Anleitung (Englisch)</a>
       </div>
     </div>
     <div>
@@ -245,13 +237,6 @@
 </section>
 </main>
 
-<footer>
-  <div class="wrap">
-    <span>Kabine · freie Software unter AGPL-3.0</span>
-    <a href="/impressum/">Impressum und Datenschutz</a>
-    <a href="https://github.com/witscher/kabine">GitHub</a>
-    <a class="push" href="/en/" hreflang="en" data-lang="en">English</a>
-  </div>
-</footer>
+{{FOOTER}}
 </body>
 </html>

@@ -2,6 +2,10 @@
 
 Decisions not covered by `docs/dev/roadmap.md`, with reasons. Newest first.
 
+## Website kabine.dev for search engines (October 2026)
+
+The website has content pages besides the two start pages (`site/src/pages.mjs`: why Kabine, handball, football, youth coaches, board and privacy, three features), the club documentation and release notes as pages (`site/src/docs.mjs`, rendered from `docs/*.md` and `CHANGELOG.md` at build time), a sitemap with language versions, canonical and share tags, structured data and a share image per language (`npm run site:og`). The pages only make statements about Kabine itself: no comparison with other apps by name, because comparative advertising must stay objective and current (§ 6 UWG) and a private publisher would carry that risk. Visitors are no longer redirected to the English page by their browser language; they get a hint instead, because crawlers with an English browser would otherwise never see the German start page. `robots.txt` allows search and AI answers (`Content-Signal: search=yes, ai-input=yes`) and says nothing about AI training. The build fails on dead internal links.
+
 ## Controlled updates (October 2026)
 
 Clubs update by merging a pull request, so the deploy itself has to be safe without anyone watching. `npm run deploy` (`scripts/deploy.mjs`) replaces the plain chain of build, migrations and upload. With pending migrations it notes a D1 Time Travel bookmark, sets a mark in `app_meta` (`update_in_progress`, expires after 15 minutes), applies the migrations, uploads and removes the mark; it records the last update in `app_meta` (`last_update`) for *Administration → Updates and maintenance*. While the mark is set the API answers 503 `updating` to everyone, admins included, and the cron run pauses, so nobody writes into a half-migrated database. Without migrations nothing pauses.
