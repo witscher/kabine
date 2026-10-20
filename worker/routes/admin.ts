@@ -7,7 +7,7 @@ import { isRelevantEvent } from "../../shared/relevance";
 import { listVisibleEvents, loadEventContext, toSummary } from "../domain/events";
 import { listExtraEvents } from "../domain/extra-events";
 import { generateTrainings } from "../domain/generate";
-import { holidayPeriods, holidaySourceLabel, MAX_HOLIDAY_DAYS } from "../domain/holidays";
+import { holidayPeriods, holidaySourceLabel, importRegionHolidays, MAX_HOLIDAY_DAYS } from "../domain/holidays";
 import { all, first, run, stmt } from "../lib/db";
 import { badRequest, conflict, forbidden, notFound, parse, readJson } from "../lib/http";
 import { eachDay, isDate, nowLocal, todayLocal, utcIso } from "../lib/time";
@@ -128,6 +128,28 @@ adminRoutes.get("/holidays", async (c) => {
     publicHolidays,
     source: holidaySourceLabel(),
   });
+});
+
+/**
+ * School and public holidays of the club's region for the current season. Otherwise they only come with the season
+ * change, so a new installation (or a club that sets its region later) would have none.
+ */
+adminRoutes.post("/holidays/import", async (c) => {
+  requireAdmin(requireActor(c));
+  const db = c.env.DB;
+  const club = await loadClub(db);
+  if (!club.subdivision) throw badRequest(t`Choose the club's state or region first (Administration → Club → Language and region).`, "region_missing");
+  const season = await first<{ starts_on: string; ends_on: string }>(db, "SELECT starts_on, ends_on FROM seasons WHERE is_current = 1");
+  if (!season) throw badRequest(t`There is no current season yet.`, "no_season");
+  let result: { periods: number; publicHolidays: number };
+  try {
+    result = await importRegionHolidays(db, { country: club.country, subdivision: club.subdivision, language: club.defaultLocale }, season.starts_on, season.ends_on);
+  } catch (err) {
+    console.warn("holiday import failed", err);
+    throw conflict(t`The holiday calendar could not be reached. Please try again later.`, "holidays_unavailable");
+  }
+  await generateTrainings(db);
+  return c.json(result);
 });
 
 /** Removes a public holiday, e.g. when the club trains on it after all; trainings are generated again. */

@@ -1,8 +1,9 @@
 // Holiday periods: freely editable list (name, from, to). School holidays and public holidays of the
-// club's country and subdivision (club profile) come from OpenHolidays (ODbL) once per season at the
-// season change. No trainings are generated on public holidays.
+// club's country and subdivision (club profile) come from OpenHolidays (ODbL): for the new season at the
+// season change, for the current one when the region is set or by hand (importRegionHolidays). No trainings
+// are generated on public holidays.
 import { t } from "@lingui/core/macro";
-import { all } from "../lib/db";
+import { all, stmt } from "../lib/db";
 
 export const OPENHOLIDAYS_API = "https://openholidaysapi.org";
 
@@ -158,4 +159,37 @@ export async function fetchRegions(country: string | null, language: string, fet
       .sort((a, b) => a.name.localeCompare(b.name));
   }
   return { countries, subdivisions };
+}
+
+/**
+ * Loads the school and public holidays of the region for a range (the current season): after the setup, when the
+ * region changes, or by hand under Administration → Holidays. Periods entered by hand stay, and so do imported ones
+ * a holiday plan is linked to; the other imported periods are replaced. Throws if the source cannot be reached.
+ */
+export async function importRegionHolidays(db: D1Database, region: HolidayRegion, from: string, to: string): Promise<{ periods: number; publicHolidays: number }> {
+  const [school, publicHolidays] = await Promise.all([holidaySource.school(region, from, to), holidaySource.public(region, from, to)]);
+  const statements: D1PreparedStatement[] = [];
+  if (school.length) {
+    statements.push(
+      stmt(db, "DELETE FROM holiday_periods WHERE imported = 1 AND id NOT IN (SELECT holiday_period_id FROM training_plans WHERE holiday_period_id IS NOT NULL)"),
+      ...school.map((h) =>
+        stmt(
+          db,
+          `INSERT INTO holiday_periods (name, starts_on, ends_on, imported) SELECT ?1, ?2, ?3, 1
+            WHERE NOT EXISTS (SELECT 1 FROM holiday_periods WHERE starts_on = ?2 AND ends_on = ?3)`,
+          h.name,
+          h.startsOn,
+          h.endsOn,
+        ),
+      ),
+    );
+  }
+  if (publicHolidays.length) {
+    statements.push(
+      stmt(db, "DELETE FROM public_holidays WHERE day BETWEEN ? AND ?", from, to),
+      ...publicHolidays.flatMap((h) => holidayDays(h).map((day) => stmt(db, "INSERT OR REPLACE INTO public_holidays (day, name) VALUES (?, ?)", day, h.name))),
+    );
+  }
+  for (let i = 0; i < statements.length; i += 100) await db.batch(statements.slice(i, i + 100));
+  return { periods: school.length, publicHolidays: publicHolidays.length };
 }

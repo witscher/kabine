@@ -2472,6 +2472,11 @@ msgstr "In der neuen Altersklasse gibt es mehrere Mannschaften. Vorschlag: 1. Ma
 msgid "Already {teamRole} everywhere."
 msgstr "Überall schon {teamRole}."
 
+# ai
+#: src/pages/admin.tsx
+msgid "Load"
+msgstr "Laden"
+
 #: shared/types.ts
 msgid "Answer stand-in requests on their own"
 msgstr "Aushilfe-Anfragen selbst beantworten"
@@ -2624,6 +2629,11 @@ msgstr "Ohne Rolle ({noRoleCount})"
 #: worker/routes/season.ts
 msgid "Please select the new season."
 msgstr "Bitte wähle die neue Saison."
+
+# ai
+#: src/holidays.ts
+msgid "Holidays of the region loaded: {periods} holiday periods, {days} public holidays."
+msgstr "Ferien der Region geladen: {periods} Ferienzeiträume, {days} Feiertage."
 
 #: src/pages/special.tsx
 msgid "Game created. The team has been notified."
@@ -3649,6 +3659,11 @@ msgstr "{playerName} spielt jetzt auch in der {teamName} (aufgenommen von {by}).
 msgid "You are not nominated for this game."
 msgstr "Du bist für dieses Spiel nicht nominiert."
 
+# ai
+#: worker/routes/admin.ts
+msgid "The holiday calendar could not be reached. Please try again later."
+msgstr "Der Ferienkalender war nicht erreichbar. Bitte versuch es später noch einmal."
+
 #: src/pages/join.tsx
 msgid "Already have a parent access?"
 msgstr "Schon einen Elternzugang?"
@@ -4083,6 +4098,11 @@ msgstr "Anwesend"
 #: src/pages/club-settings.tsx
 msgid "Each team takes its games from one of the switched-on sources (Team → Settings). Teams without one enter games by hand or from a table."
 msgstr "Jede Mannschaft übernimmt ihre Spiele aus einer der eingeschalteten Quellen (Team → Einstellungen). Mannschaften ohne Quelle tragen Spiele von Hand oder aus einer Tabelle ein."
+
+# ai
+#: src/pages/admin.tsx
+msgid "Load holidays of the region"
+msgstr "Ferien der Region laden"
 
 #: src/pages/privacy.tsx
 msgid "Chat histories are deleted at the season change. After someone leaves the club, all their data is deleted at the next season change at the latest."
@@ -4796,6 +4816,11 @@ msgstr "Wir haben dir einen sechsstelligen Code per SMS an <0>{email}</0> geschi
 #: src/faq.tsx
 msgid "In the <0>Helpers</0> tab, on the card <1>Manage</1>: change time and slots per duty (0 hides it), add or remove a time block, sign someone up or hide the game. Friendlies, tournaments or match days without handball4all you create under <2>Team → Create event → Game</2>, the team then gets a message."
 msgstr "Im Reiter <0>Helfer</0> auf der Karte <1>Verwalten</1>: Uhrzeit und Plätze je Dienst ändern (0 blendet ihn aus), einen Zeitblock hinzufügen oder entfernen, jemanden eintragen oder das Spiel ausblenden. Freundschaftsspiele, Turniere oder Spieltage ohne handball4all legst du unter <2>Team → Termin anlegen → Spiel</2> an, die Mannschaft bekommt dann eine Nachricht."
+
+# ai
+#: src/pages/admin.tsx
+msgid "Named holiday periods. Each one can be changed or deleted. Team holiday plans linked to a period follow its changes. School holidays and public holidays of the club's region are loaded at the season change and when the region is set (source: {source})."
+msgstr "Benannte Ferienzeiträume. Jeder lässt sich ändern oder löschen. Ferienpläne der Mannschaften, die mit einem Zeitraum verknüpft sind, ziehen bei Änderungen mit. Schulferien und Feiertage der Region des Vereins werden beim Saisonwechsel und beim Festlegen der Region geladen (Quelle: {source})."
 
 #: modules/duties/worker/notify.ts
 msgid "{free, plural, one {{game}. # place still free.} other {{game}. # places still free.}}"
@@ -6462,11 +6487,6 @@ msgctxt "view as"
 msgid "parent"
 msgstr "Elternteil"
 
-# ai
-#: src/pages/admin.tsx
-msgid "Named holiday periods. Each one can be changed or deleted. Team holiday plans linked to a period follow its changes. The school holidays of the club's region are imported at the season change (source: {source})."
-msgstr "Benannte Ferienzeiträume. Jeder lässt sich ändern oder löschen. Ferienpläne der Mannschaften, die mit einem Zeitraum verknüpft sind, ziehen bei Änderungen mit. Die Schulferien der Region des Vereins werden beim Saisonwechsel übernommen (Quelle: {source})."
-
 #: src/pages/join.tsx
 msgid "Your passkey is set up. From now on you sign in with it."
 msgstr "Dein Passkey ist eingerichtet. Ab jetzt meldest du dich damit an."
@@ -7075,6 +7095,11 @@ msgstr "{actorName} hat für {name} das Training am {when} zugesagt."
 #: src/ui.tsx
 msgid "Inactive"
 msgstr "Inaktiv"
+
+# ai
+#: worker/routes/admin.ts
+msgid "There is no current season yet."
+msgstr "Es gibt noch keine laufende Saison."
 
 #: modules/duties/worker/notify.ts
 msgid "KiHaSL/JuHaSL wanted · {team}"
@@ -7975,6 +8000,11 @@ msgstr "Test-Benachrichtigung ist unterwegs."
 msgid "KiHaSL/JuHaSL is not part of any template: for youth home games F to C the duty is always added automatically (1 slot, 15 min before throw-off until the end of the game)."
 msgstr "KiHaSL/JuHaSL steht in keiner Vorlage: Bei Heimspielen der Jugend F bis C kommt der Dienst immer automatisch dazu (1 Platz, 15 min vor Anpfiff bis Spielende)."
 
+# ai
+#: src/pages/admin.tsx
+msgid "Load holidays of the region again?"
+msgstr "Ferien der Region neu laden?"
+
 #: src/pages/join.tsx
 msgid "already linked to you"
 msgstr "bereits mit dir verknüpft"
@@ -8124,6 +8154,11 @@ msgstr "{when}, {location}. Bitte gib Bescheid, ob du dabei bist."
 #: src/pages/group.tsx
 msgid "Remove from group {teamName}?"
 msgstr "Aus {teamName} entfernen?"
+
+# ai
+#: src/pages/admin.tsx
+msgid "Load the holidays of the club's region, or add periods yourself."
+msgstr "Lade die Ferien der Region des Vereins oder lege Zeiträume selbst an."
 
 #: worker/routes/feedback.ts
 msgid "Environment: {environment}"
@@ -8495,6 +8530,11 @@ msgstr "unbekannt"
 #: src/respond.tsx
 msgid "Declined. The coach has been informed."
 msgstr "Abgesagt. Der Trainer wurde informiert."
+
+# ai
+#: src/pages/admin.tsx
+msgid "Imported periods are replaced for the current season. Periods you entered and periods with a holiday plan stay."
+msgstr "Importierte Zeiträume der laufenden Saison werden ersetzt. Selbst angelegte Zeiträume und solche mit Ferienplan bleiben."
 
 #: worker/domain/calendar.ts
 msgctxt "calendar"
@@ -9408,10 +9448,6 @@ msgstr "Noch niemand eingetragen."
 msgid "What is a passkey and is it safe?"
 msgstr "Was ist ein Passkey und ist das sicher?"
 
-#: src/pages/admin.tsx
-msgid "Add periods or import them at the next season change."
-msgstr "Lege Zeiträume an oder übernimm sie beim nächsten Saisonwechsel."
-
 #: src/pages/join.tsx
 #: src/pages/join.tsx
 msgid "Set up passkey (recommended)"
@@ -9701,6 +9737,11 @@ msgstr "Ort wählen …"
 #: modules/carpools/worker/routes.ts
 msgid "Please cancel the current lift first."
 msgstr "Bitte die bisherige Mitfahrt zuerst absagen."
+
+# ai
+#: worker/routes/admin.ts
+msgid "Choose the club's state or region first (Administration → Club → Language and region)."
+msgstr "Wähle zuerst das Bundesland bzw. die Region des Vereins (Verwaltung → Verein → Sprache und Region)."
 
 #: modules/duties/app/admin.tsx
 msgid "Default for home games"

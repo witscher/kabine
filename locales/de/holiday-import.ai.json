@@ -1,0 +1,12 @@
+{
+  "Load": "Laden",
+  "Holidays of the region loaded: {periods} holiday periods, {days} public holidays.": "Ferien der Region geladen: {periods} Ferienzeiträume, {days} Feiertage.",
+  "The holiday calendar could not be reached. Please try again later.": "Der Ferienkalender war nicht erreichbar. Bitte versuch es später noch einmal.",
+  "Load holidays of the region": "Ferien der Region laden",
+  "Named holiday periods. Each one can be changed or deleted. Team holiday plans linked to a period follow its changes. School holidays and public holidays of the club's region are loaded at the season change and when the region is set (source: {source}).": "Benannte Ferienzeiträume. Jeder lässt sich ändern oder löschen. Ferienpläne der Mannschaften, die mit einem Zeitraum verknüpft sind, ziehen bei Änderungen mit. Schulferien und Feiertage der Region des Vereins werden beim Saisonwechsel und beim Festlegen der Region geladen (Quelle: {source}).",
+  "There is no current season yet.": "Es gibt noch keine laufende Saison.",
+  "Load holidays of the region again?": "Ferien der Region neu laden?",
+  "Load the holidays of the club's region, or add periods yourself.": "Lade die Ferien der Region des Vereins oder lege Zeiträume selbst an.",
+  "Imported periods are replaced for the current season. Periods you entered and periods with a holiday plan stay.": "Importierte Zeiträume der laufenden Saison werden ersetzt. Selbst angelegte Zeiträume und solche mit Ferienplan bleiben.",
+  "Choose the club's state or region first (Administration → Club → Language and region).": "Wähle zuerst das Bundesland bzw. die Region des Vereins (Verwaltung → Verein → Sprache und Region)."
+}

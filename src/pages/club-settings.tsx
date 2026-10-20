@@ -9,6 +9,7 @@ import { MODULES, type ModuleId, moduleOffered } from "../../shared/modules";
 import { LOCALE_NAMES, LOCALES, type Locale } from "../../shared/i18n";
 import { useQuery } from "../store";
 import { api, errorMessage } from "../api";
+import { loadRegionHolidays } from "../holidays";
 import { ClubMark, loadClub, setClub, useClub } from "../club";
 import { currentLocale } from "../i18n";
 import { useSession } from "../session";
@@ -65,6 +66,10 @@ export function ClubProfileForm({ onSaved, submitLabel, parts = ALL_PARTS }: { o
       // Saving the switches marks new modules as seen (dot and "New" badge)
       void refreshSession();
       toast(t`Saved`);
+      // A new region brings its holidays for the current season (otherwise only at the season change)
+      if (show("region") && saved.subdivision && (saved.subdivision !== club.subdivision || saved.country !== club.country)) {
+        await loadRegionHolidays(true);
+      }
       await onSaved?.();
     } catch (err) {
       setError(errorMessage(err));
@@ -339,3 +344,4 @@ export function ModulesSection({ modules, onChange }: { modules: ClubModules; on
     </section>
   );
 }
+

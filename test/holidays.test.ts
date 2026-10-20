@@ -147,3 +147,47 @@ describe("Ferien im Saisonwechsel", () => {
     expect(await rows("SELECT name FROM holiday_periods")).toEqual([{ name: "Alte Ferien" }]);
   });
 });
+
+describe("Ferien der Region nachladen (laufende Saison)", () => {
+  const school = [
+    { name: "Herbstferien", startsOn: from, endsOn: to },
+    { name: "Weihnachtsferien", startsOn: addDays(today, 60), endsOn: addDays(today, 72) },
+  ];
+
+  it("ohne Bundesland ein Hinweis, mit Bundesland Ferien und Feiertage; eigene und verknüpfte Zeiträume bleiben", async () => {
+    vi.spyOn(holidaySource, "school").mockResolvedValue(school);
+    vi.spyOn(holidaySource, "public").mockResolvedValue([{ name: "Reformationstag", startsOn: addDays(today, 20), endsOn: addDays(today, 20) }]);
+    expect((await api("/holidays/import", { cookie: adminCookie, body: {} })).body.error.code).toBe("region_missing");
+    await saveClub(env.DB, { country: "DE", subdivision: "DE-BW" });
+    expect((await api("/holidays/import", { cookie: coachCookie, body: {} })).status).toBe(403);
+
+    const own = (await api("/holidays", { cookie: adminCookie, body: { name: "Hallensperrung", startsOn: addDays(today, 30), endsOn: addDays(today, 31) } })).body.id;
+    const res = await api("/holidays/import", { cookie: adminCookie, body: {} });
+    expect(res.body).toEqual({ periods: 2, publicHolidays: 1 });
+    const names = async () => (await rows<{ name: string; imported: number }>("SELECT name, imported FROM holiday_periods ORDER BY starts_on")).map((r) => `${r.name}:${r.imported}`);
+    expect(await names()).toEqual(["Herbstferien:1", "Hallensperrung:0", "Weihnachtsferien:1"]);
+    expect(await one("SELECT name FROM public_holidays WHERE day = ?", addDays(today, 20))).toEqual({ name: "Reformationstag" });
+
+    // Another region: imported periods are replaced, the one a holiday plan is linked to stays
+    const autumn = (await one<{ id: number }>("SELECT id FROM holiday_periods WHERE name = 'Herbstferien'")).id;
+    await env.DB.prepare(
+      "INSERT INTO training_plans (team_id, name, kind, valid_from, valid_to, holiday_period_id) VALUES (?, 'Ferienplan', 'holiday', ?, ?, ?)",
+    )
+      .bind(wd, from, to, autumn)
+      .run();
+    vi.spyOn(holidaySource, "school").mockResolvedValue([{ name: "Pfingstferien", startsOn: addDays(today, 100), endsOn: addDays(today, 110) }]);
+    await saveClub(env.DB, { subdivision: "DE-BY" });
+    await api("/holidays/import", { cookie: adminCookie, body: {} });
+    expect(await names()).toEqual(["Herbstferien:1", "Hallensperrung:0", "Pfingstferien:1"]);
+    expect(own).toBeTruthy();
+  });
+
+  it("ohne erreichbare Quelle eine Meldung, nichts geht verloren", async () => {
+    await saveClub(env.DB, { country: "DE", subdivision: "DE-BW" });
+    await api("/holidays", { cookie: adminCookie, body: { name: "Herbstferien", startsOn: from, endsOn: to } });
+    vi.spyOn(holidaySource, "school").mockRejectedValue(new Error("offline"));
+    vi.spyOn(holidaySource, "public").mockResolvedValue([]);
+    expect((await api("/holidays/import", { cookie: adminCookie, body: {} })).body.error.code).toBe("holidays_unavailable");
+    expect(await rows("SELECT name FROM holiday_periods")).toEqual([{ name: "Herbstferien" }]);
+  });
+});

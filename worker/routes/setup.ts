@@ -8,6 +8,7 @@ import { seasonAround, SPORT_IDS, SPORTS, type SportId } from "../../shared/spor
 import { type AppEnv, requireActor } from "../app";
 import { requireAdmin } from "../auth/actor";
 import { loadClub, saveClub } from "../domain/club";
+import { importRegionHolidays } from "../domain/holidays";
 import { loadMailSettings } from "../domain/mail";
 import { all, first, run, stmt } from "../lib/db";
 import { parse, readJson } from "../lib/http";
@@ -67,6 +68,14 @@ setupRoutes.post("/admin/setup/sport", async (c) => {
       s.startsOn,
       s.endsOn,
     );
+    // Holidays otherwise only come with the season change: load them for this first season, if the region is known
+    if (club.subdivision) {
+      try {
+        await importRegionHolidays(db, { country: club.country, subdivision: club.subdivision, language: locale }, s.startsOn, s.endsOn);
+      } catch (err) {
+        console.warn("holiday import at setup failed", err);
+      }
+    }
   }
   const hasClasses = await first(db, "SELECT 1 AS ok FROM age_classes WHERE season_id = ?", season!.id);
   if (!hasClasses) {

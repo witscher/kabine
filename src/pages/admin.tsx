@@ -17,6 +17,7 @@ import { invalidate, useQuery } from "../store";
 import { Button, confirmDialog, copyText, Empty, ErrorBox, Field, Notice, Segmented, Sheet, shareLink, Spinner, SwitchRow, TextField, toast, TopBar, useDocumentTitle } from "../ui";
 import { QrLink } from "./team";
 import { roleLabel } from "./group";
+import { loadRegionHolidays } from "../holidays";
 
 export function AdminOnly({ children }: { children: preact.ComponentChildren }) {
   const me = useMe();
@@ -1535,18 +1536,37 @@ export function AdminHolidaysPage() {
           {error ? <ErrorBox error={error} onRetry={reload} /> : null}
           <p class="muted">
             <Trans>
-              Named holiday periods. Each one can be changed or deleted. Team holiday plans linked to a period follow its changes. The school holidays of
-              the club's region are imported at the season change (source: {source}).
+              Named holiday periods. Each one can be changed or deleted. Team holiday plans linked to a period follow its changes. School holidays and
+              public holidays of the club's region are loaded at the season change and when the region is set (source: {source}).
             </Trans>
           </p>
-          <Button icon="plus" onClick={() => setEditing("new")}>
-            <Trans>Add period</Trans>
-          </Button>
+          <div class="row-gap">
+            <Button icon="plus" onClick={() => setEditing("new")}>
+              <Trans>Add period</Trans>
+            </Button>
+            <Button
+              icon="refresh"
+              onClick={async () => {
+                if (
+                  data?.periods.some((p) => p.imported) &&
+                  !(await confirmDialog({
+                    title: t`Load holidays of the region again?`,
+                    message: t`Imported periods are replaced for the current season. Periods you entered and periods with a holiday plan stay.`,
+                    confirmLabel: t`Load`,
+                  }))
+                )
+                  return;
+                if (await loadRegionHolidays()) await reload();
+              }}
+            >
+              <Trans>Load holidays of the region</Trans>
+            </Button>
+          </div>
           <section class="stack-sm" aria-label={t`Holiday periods`}>
             {!data && !error ? <Spinner /> : null}
             {data && !data.periods.length ? (
               <Empty title={t`No holidays`}>
-                <Trans>Add periods or import them at the next season change.</Trans>
+                <Trans>Load the holidays of the club's region, or add periods yourself.</Trans>
               </Empty>
             ) : null}
             <ul class="list">

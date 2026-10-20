@@ -450,6 +450,13 @@ test("Admin schickt eine Rundnachricht, sie erscheint als Ankündigung im Chat",
   await player.page.screenshot({ path: process.env.E2E_SHOT ?? "test-results/announcement.png" });
 });
 
+test("Ferien: Ferien der Region lassen sich für die laufende Saison laden", async () => {
+  const { page } = admin;
+  await page.goto("/verwaltung/ferien");
+  await expect(page.getByRole("button", { name: "Ferien der Region laden" })).toBeVisible();
+  await expect(page.getByText("beim Festlegen der Region geladen", { exact: false })).toBeVisible();
+});
+
 test("Admin schaltet unter Updates und Wartung den Wartungsmodus ein und wieder aus", async () => {
   const { page } = admin;
   await page.goto("/verwaltung");
