@@ -83,7 +83,7 @@ describe("Persönlicher Kalender", () => {
     await exec("UPDATE events SET cancelled_at = '2026-01-01T00:00:00Z' WHERE id = ?", training);
     const { ics, summaries } = await feed(coach);
     expect(summaries).toEqual([
-      "Abgesagt: Training wD",
+      "Findet nicht statt: Training wD",
       "Treffpunkt wD · Spiel gegen TSV Testdorf",
       "Spiel wD gegen TSV Testdorf",
       "Treffpunkt wD · Spiel bei SG Beispielstadt",

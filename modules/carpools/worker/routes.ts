@@ -51,7 +51,7 @@ async function scope(c: Context<AppEnv>): Promise<Scope> {
   const ctx = await loadEventContext(db, [event]);
   const { offers, requests } = await loadCarpoolRows(db, event.id);
   if (!mayViewCarpool(actor, event, ctx, offers)) throw forbidden(t`Only nominated players, their parents and the coaches see carpools.`);
-  if (!carpoolOpen(event, Date.now())) throw conflict(t`The game has been cancelled or has already started.`);
+  if (!carpoolOpen(event, Date.now())) throw conflict(t`The game is not taking place or has already started.`);
   const teamIds = ctx.eventTeams.get(event.id) ?? [];
   return { actor, db, event, ctx, teamIds, manage: isCoachOfAny(actor, teamIds), offers, requests };
 }

@@ -234,6 +234,10 @@ msgstr "No messages yet"
 msgid "{name} (you)"
 msgstr "{name} (you)"
 
+#: worker/domain/calendar.ts
+msgid "Not taking place: {entry}"
+msgstr "Not taking place: {entry}"
+
 #: modules/duties/worker/routes.ts
 msgid "Others take on this duty."
 msgstr "Others take on this duty."
@@ -1938,6 +1942,11 @@ msgstr "{coach} withdrew your offer as a driver: {game}."
 msgid "{total, plural, one {# person} other {# people}}"
 msgstr "{total, plural, one {# person} other {# people}}"
 
+#: modules/carpools/app/card.tsx
+#: modules/carpools/worker/routes.ts
+msgid "The game is not taking place or has already started."
+msgstr "The game is not taking place or has already started."
+
 #: modules/carpools/module.ts
 msgid "Who offers how many seats for an away game, who is looking for one and who rides with whom."
 msgstr "Who offers how many seats for an away game, who is looking for one and who rides with whom."
@@ -2953,11 +2962,6 @@ msgstr "wanted, but no confirmed e-mail address on the access"
 msgid "There is no one in the matching teams who does not already play here."
 msgstr "There is no one in the matching teams who does not already play here."
 
-#: src/extra-events.tsx
-#: worker/routes/events.ts
-msgid "Cancelled: {label}"
-msgstr "Cancelled: {label}"
-
 #: src/pages/home.tsx
 msgid "Stand-in request"
 msgstr "Stand-in request"
@@ -3382,6 +3386,10 @@ msgstr "Meet at {meetAt}"
 #: src/pages/event.tsx
 msgid "Saved, everyone has been informed."
 msgstr "Saved, everyone has been informed."
+
+#: worker/routes/events.ts
+msgid "{label} on {when} is not taking place. Reason: {reason}"
+msgstr "{label} on {when} is not taking place. Reason: {reason}"
 
 #: src/pages/join.tsx
 msgid "For players"
@@ -3822,11 +3830,6 @@ msgstr "Edit"
 msgid "Organisers are changed by coaches, admins and whoever created the event."
 msgstr "Organisers are changed by coaches, admins and whoever created the event."
 
-#: modules/carpools/app/card.tsx
-#: modules/carpools/worker/routes.ts
-msgid "The game has been cancelled or has already started."
-msgstr "The game has been cancelled or has already started."
-
 #: modules/youth-referees/app/referees.tsx
 #: src/pages/admin.tsx
 #: src/pages/team.tsx
@@ -4036,6 +4039,11 @@ msgstr "Holiday plan"
 msgid "Frequent questions, guides, feedback on the app"
 msgstr "Frequent questions, guides, feedback on the app"
 
+#: modules/duties/app/helpers.tsx
+#: src/pages/home.tsx
+msgid "Not taking place"
+msgstr "Not taking place"
+
 #: src/pages/home.tsx
 msgid "Past"
 msgstr "Past"
@@ -4187,10 +4195,6 @@ msgstr "Two parents are already registered for {names}. Please contact the coach
 #: src/pages/group.tsx
 msgid "Admins only"
 msgstr "Admins only"
-
-#: worker/routes/squad.ts
-msgid "The game has been cancelled."
-msgstr "The game has been cancelled."
 
 #: modules/duties/app/admin.tsx
 msgid "New template"
@@ -4570,6 +4574,10 @@ msgstr "Copy"
 msgid "inactive"
 msgstr "inactive"
 
+#: src/pages/event.tsx
+msgid "Not taking place."
+msgstr "Not taking place."
+
 #: src/pages/plans.tsx
 msgid "Joint trainings from other plans"
 msgstr "Joint trainings from other plans"
@@ -4808,6 +4816,10 @@ msgstr "Home"
 msgid "If the new phone is signed in with the same Apple or Google account, your passkey is usually already there: just <0>Sign in with passkey</0>."
 msgstr "If the new phone is signed in with the same Apple or Google account, your passkey is usually already there: just <0>Sign in with passkey</0>."
 
+#: worker/routes/squad.ts
+msgid "The game is over or not taking place."
+msgstr "The game is over or not taking place."
+
 #: src/pages/event.tsx
 msgid "Venue (optional)"
 msgstr "Venue (optional)"
@@ -4860,13 +4872,6 @@ msgstr "{name}: The oldest birth year must come before the youngest."
 #: src/pages/admin.tsx
 msgid "Reset filters"
 msgstr "Reset filters"
-
-#: worker/domain/events.ts
-#: worker/routes/events.ts
-#: worker/routes/events.ts
-#: worker/routes/events.ts
-msgid "The event has been cancelled."
-msgstr "The event has been cancelled."
 
 #: src/pages/home.tsx
 msgid "Upcoming"
@@ -5017,6 +5022,10 @@ msgstr "Team"
 #: modules/sms/app/settings.tsx
 msgid "API key"
 msgstr "API key"
+
+#: src/pages/event.tsx
+msgid "Not taking place (cancelled by {cancelledBy})."
+msgstr "Not taking place (cancelled by {cancelledBy})."
 
 #: modules/carpools/app/card.tsx
 msgid "{name} is no longer riding with {driver}. The driver will be notified."
@@ -5843,6 +5852,10 @@ msgstr "An update is being installed right now. The app is back in about a minut
 #: src/pages/privacy.tsx
 msgid "A mobile number is only stored if you enter it yourself, for sign-in codes and reminders by text message. Nobody else sees it. You can delete it in your profile at any time. The messages are sent through a text message provider the club has chosen."
 msgstr "A mobile number is only stored if you enter it yourself, for sign-in codes and reminders by text message. Nobody else sees it. You can delete it in your profile at any time. The messages are sent through a text message provider the club has chosen."
+
+#: worker/routes/squad.ts
+msgid "The game is not taking place."
+msgstr "The game is not taking place."
 
 #: src/pages/games.tsx
 msgid "Sync now"
@@ -6842,6 +6855,11 @@ msgstr "Download export"
 msgid "Mobile number"
 msgstr "Mobile number"
 
+#: src/extra-events.tsx
+#: worker/routes/events.ts
+msgid "Not taking place: {label}"
+msgstr "Not taking place: {label}"
+
 #: modules/duties/app/helpers.tsx
 msgid "Add “{name}” as a name without access"
 msgstr "Add “{name}” as a name without access"
@@ -7348,10 +7366,6 @@ msgstr "Delete group {teamName}?"
 msgid "{fresh, plural, one {Add # player} other {Add # players}}"
 msgstr "{fresh, plural, one {Add # player} other {Add # players}}"
 
-#: worker/routes/events.ts
-msgid "{label} on {when} is cancelled. Reason: {reason}"
-msgstr "{label} on {when} is cancelled. Reason: {reason}"
-
 #: src/pages/event.tsx
 msgid "{name} is no longer an organiser."
 msgstr "{name} is no longer an organiser."
@@ -7479,10 +7493,6 @@ msgstr "Admin"
 msgid "until end of event"
 msgstr "until end of event"
 
-#: worker/domain/calendar.ts
-msgid "Cancelled: {entry}"
-msgstr "Cancelled: {entry}"
-
 #: src/pages/event.tsx
 msgid "Applies to this training only. The training plan sets it for all trainings."
 msgstr "Applies to this training only. The training plan sets it for all trainings."
@@ -7509,10 +7519,6 @@ msgstr "Recipients see this address. Replies to it are not read by the app."
 #: src/pages/admin.tsx
 msgid "Go through the setup step by step again"
 msgstr "Go through the setup step by step again"
-
-#: worker/routes/squad.ts
-msgid "The game is over or cancelled."
-msgstr "The game is over or cancelled."
 
 #: modules/handball4all/worker/connector.ts
 msgid "No game lists found"
@@ -8179,10 +8185,6 @@ msgstr "An access has just been created for this person."
 msgid "This person is not (or no longer) part of {teamName}."
 msgstr "This person is not (or no longer) part of {teamName}."
 
-#: src/pages/event.tsx
-msgid "Cancelled by {cancelledBy}."
-msgstr "Cancelled by {cancelledBy}."
-
 #: modules/carpools/worker/routes.ts
 msgid "{name} is no longer riding with {driver}: {game}. The search continues (entered by {coach})."
 msgstr "{name} is no longer riding with {driver}: {game}. The search continues (entered by {coach})."
@@ -8194,10 +8196,6 @@ msgstr "Coaches sync the games of their team from the handball4all portal (Germa
 #: src/pages/team.tsx
 msgid "Stand-in from the other team"
 msgstr "Stand-in from the other team"
-
-#: src/pages/event.tsx
-msgid "Cancelled."
-msgstr "Cancelled."
 
 #: src/pages/admin.tsx
 #: src/pages/setup-wizard.tsx
@@ -8355,11 +8353,6 @@ msgstr "Pull to refresh"
 #: src/pages/event.tsx
 msgid "Go to person"
 msgstr "Go to person"
-
-#: modules/duties/app/helpers.tsx
-#: src/pages/home.tsx
-msgid "Event cancelled"
-msgstr "Event cancelled"
 
 #: src/pages/squad.tsx
 msgid "There are no suitable stand-ins for {teamName}."
@@ -8757,6 +8750,13 @@ msgstr "{title}, {weekday} {day} at {clock}"
 #: src/pages/chat.tsx
 msgid "Reactions: {list}. Who reacted?"
 msgstr "Reactions: {list}. Who reacted?"
+
+#: worker/domain/events.ts
+#: worker/routes/events.ts
+#: worker/routes/events.ts
+#: worker/routes/events.ts
+msgid "The event is not taking place."
+msgstr "The event is not taking place."
 
 #: modules/carpools/app/card.tsx
 msgid "Your offer"

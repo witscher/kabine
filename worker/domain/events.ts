@@ -502,7 +502,7 @@ function myParticipations(e: EventRow, ctx: EventContext, actor: Actor, now: num
           : (actor.children.find((c) => c.id === pid) ?? { id: pid, firstName: "", lastName: null }));
 
     let blockedReason: string | null = null;
-    if (cancelled) blockedReason = t`The event has been cancelled.`;
+    if (cancelled) blockedReason = t`The event is not taking place.`;
     else if (past) blockedReason = t`The event has already started.`;
     else if (!part) blockedReason = e.kind === "game" ? t`Not nominated for this game.` : null;
     else if (!part.isActive) blockedReason = t`Currently marked as inactive. Please talk to your coach.`;

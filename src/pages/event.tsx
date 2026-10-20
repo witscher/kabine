@@ -105,7 +105,7 @@ export function EventPage({ id }: { id: string }) {
 
   return (
     <main class="page">
-      <header class="hero" style={{ paddingTop: "calc(14px + var(--safe-top))" }}>
+      <header class={`hero ${event.cancelled ? "cancelled" : ""}`} style={{ paddingTop: "calc(14px + var(--safe-top))" }}>
         <div class="hero-top">
           <button type="button" class="icon-btn" aria-label={t`Back`} onClick={() => (history.length > 1 ? history.back() : location.assign("/"))} style={{ marginLeft: "-12px" }}>
             <Icon name="back" size={24} stroke={2.2} />
@@ -121,7 +121,7 @@ export function EventPage({ id }: { id: string }) {
         </div>
         <div class="kicker">{event.kind === "special" ? event.title : kindLabel(event.kind)}</div>
         <h1>{longDate(event.startsAt)}</h1>
-        {event.kind === "game" ? <div style={{ fontWeight: 700, fontSize: "18px" }}>{event.title}</div> : null}
+        {event.kind === "game" ? <div class="hero-game" style={{ fontWeight: 700, fontSize: "18px" }}>{event.title}</div> : null}
         <div class="meta-line">
           <span>
             <Icon name="clock" size={18} />
@@ -136,7 +136,7 @@ export function EventPage({ id }: { id: string }) {
           <div class="notice warn" role="status">
             <Icon name="alert" />
             <div>
-              <strong>{cancelledBy ? t`Cancelled by ${cancelledBy}.` : t`Cancelled.`}</strong>
+              <strong>{cancelledBy ? t`Not taking place (cancelled by ${cancelledBy}).` : t`Not taking place.`}</strong>
               {event.cancelled.reason ? ` ${event.cancelled.reason}` : ""}
             </div>
           </div>

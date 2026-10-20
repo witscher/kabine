@@ -370,6 +370,27 @@ test("Abmelden und mit dem Passkey wieder anmelden", async () => {
   expect(optionRequests).toEqual([]);
 });
 
+test("Abgesagter Termin: „Findet nicht statt“ in Übersicht und Detail, Datum durchgestrichen", async () => {
+  const day = new Date(Date.now() + 5 * 86_400_000).toLocaleDateString("sv-SE", { timeZone: "Europe/Berlin" });
+  const res = await coach.page.request.post("/api/events", { data: { title: "Teamabend", startsAt: `${day}T19:00`, teamIds: [1] } });
+  expect(res.ok()).toBe(true);
+  const { id } = (await res.json()) as { id: number };
+  const { page } = coach;
+  await page.goto(`/termine/${id}`);
+  await page.getByRole("button", { name: "Absagen", exact: true }).click();
+  const sheet = page.getByRole("dialog", { name: "Termin absagen" });
+  await sheet.getByLabel("Grund").fill("Raum belegt");
+  await sheet.getByRole("button", { name: "Absagen und informieren" }).click();
+  await page.getByRole("dialog", { name: /für alle absagen/ }).getByRole("button", { name: "Für alle absagen" }).click();
+  await expect(page.getByText("Findet nicht statt (abgesagt durch Theo).")).toBeVisible();
+  await expect(page.locator("header.hero h1")).toHaveCSS("text-decoration-line", "line-through");
+  await page.goto("/");
+  await expect(page.locator(".event-row", { hasText: "Teamabend" })).toContainText("Findet nicht statt");
+  await page.goto(`/termine/${id}`);
+  await page.getByRole("button", { name: "Absage zurücknehmen" }).click();
+  await expect(page.getByText("Findet nicht statt", { exact: false })).toHaveCount(0);
+});
+
 test("Admin ordnet eine Person einer Mannschaft zu und entfernt sie wieder", async () => {
   const { page } = admin;
   const created = await page.request.post("/api/admin/persons", { data: { firstName: "Lea", lastName: "Neu", birthYear: 2015 } });

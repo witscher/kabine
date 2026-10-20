@@ -202,7 +202,7 @@ function eventTitle(e: EventSummary): string {
 }
 
 function cancelledEntry(entry: string): string {
-  return t`Cancelled: ${entry}`;
+  return t`Not taking place: ${entry}`;
 }
 
 function noteText(note: string | null): string | null {

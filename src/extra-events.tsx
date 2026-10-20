@@ -33,7 +33,7 @@ export function ExtraEventList({ path, empty, showTeams = true }: { path: string
             <a class="list-row" href={`/termine/${e.id}`}>
               <Icon name={e.kind === "game" ? "ball" : "calendar"} size={22} />
               <span class="main">
-                <span class="title">{e.cancelled ? t`Cancelled: ${label}` : label}</span>
+                <span class="title">{e.cancelled ? t`Not taking place: ${label}` : label}</span>
                 <span class="sub">
                   {shortDate(e.startsAt)}, {timeRange(e.startsAt, null)}
                   {showTeams ? ` · ${teams}` : ""}

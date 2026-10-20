@@ -216,7 +216,7 @@ export function CarpoolCard({ event, carpool, onChanged }: { event: EventDetail;
 
       {!carpool.open ? (
         <p class="small muted">
-          <Trans>The game has been cancelled or has already started.</Trans>
+          <Trans>The game is not taking place or has already started.</Trans>
         </p>
       ) : null}
 

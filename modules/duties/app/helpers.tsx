@@ -317,7 +317,7 @@ export function HelpersPage() {
                 </div>
                 {g.cancelled ? (
                   <span class="badge badge-cancelled">
-                    <Trans>Event cancelled</Trans>
+                    <Trans>Not taking place</Trans>
                   </span>
                 ) : g.hidden ? (
                   <span class="badge">

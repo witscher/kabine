@@ -217,7 +217,7 @@ squadRoutes.put("/events/:id/squad", async (c) => {
   const personIds = [...new Set(raw)];
   const { event, ctx, team } = await gameForCoach(c.env.DB, actor, intParam(c, "id"));
   const db = c.env.DB;
-  if (event.cancelled_at) throw conflict(t`The game has been cancelled.`);
+  if (event.cancelled_at) throw conflict(t`The game is not taking place.`);
   if (localToInstant(event.starts_at) <= Date.now()) throw conflict(t`The game has already started.`);
   const max = team.max_squad;
   if (personIds.length > max) throw badRequest(t`At most ${max} players can be nominated.`);
@@ -487,7 +487,7 @@ squadRoutes.post("/help-requests/:id/answer", async (c) => {
   requireActFor(actor, help.person_id, "may_answer_help", [help.team_id]);
   if (help.status !== "open") throw conflict(t`This request has already been answered.`);
   const event = (await loadEvent(c.env.DB, help.event_id))!;
-  if (event.cancelled_at || localToInstant(event.starts_at) <= Date.now()) throw conflict(t`The game is over or cancelled.`);
+  if (event.cancelled_at || localToInstant(event.starts_at) <= Date.now()) throw conflict(t`The game is over or not taking place.`);
 
   const now = utcIso();
   const statements = [

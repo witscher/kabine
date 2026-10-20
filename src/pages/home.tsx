@@ -285,7 +285,7 @@ function EventRow({ event }: { event: EventSummary }) {
         {cancelled ? (
           <div class="sub">
             <span class="cancel-tag">
-              <Trans>Event cancelled</Trans>
+              <Trans>Not taking place</Trans>
             </span>
             {byName ? t`by ${byName}` : ""}
             {event.cancelled!.reason ? `${event.cancelled!.byName ? ": " : ""}${event.cancelled!.reason}` : ""}

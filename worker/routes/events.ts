@@ -206,7 +206,7 @@ async function ownLeaderEvent(db: D1Database, actor: Actor, eventId: number) {
   const leaders = await loadLeaders(db, event, teamIds);
   const me = leaders.find((l) => l.personId === actor.personId);
   if (!me) throw forbidden(t`Only coaches, leads, staff and organisers of this event can say they are not there.`, "not_leader");
-  if (event.cancelled_at) throw conflict(t`The event has been cancelled.`);
+  if (event.cancelled_at) throw conflict(t`The event is not taking place.`);
   if (!absenceChangeable(event, actor, Date.now())) throw conflict(t`The event has already started.`);
   return { event, ctx, teamIds, leaders, me };
 }
@@ -319,7 +319,7 @@ export async function respond(
   // e.g. for families without the app. Parental permissions do not apply then.
   const asCoach = personId !== actor.personId && !actor.children.some((ch) => ch.id === personId) && (event.club_wide === 1 ? actor.isAdmin : isCoachOfAny(actor, teamIds));
   if (!asCoach) requireActFor(actor, personId, status === "yes" ? "may_accept" : "may_decline", teamIds);
-  if (event.cancelled_at) throw conflict(t`The event has been cancelled.`);
+  if (event.cancelled_at) throw conflict(t`The event is not taking place.`);
   if (localToInstant(event.starts_at) <= now) throw conflict(t`The event has already started.`);
 
   const participant = (ctx.participants.get(event.id) ?? []).find((p) => p.person.id === personId);
@@ -469,7 +469,7 @@ eventRoutes.put("/events/:id/teams/:teamId/optional", async (c) => {
  */
 async function setAttendance(db: D1Database, actor: Actor, eventId: number, personId: number, mark: AttendanceMark | null) {
   const { event, ctx } = await managedEvent(db, actor, eventId);
-  if (event.cancelled_at) throw conflict(t`The event has been cancelled.`);
+  if (event.cancelled_at) throw conflict(t`The event is not taking place.`);
   if (localToInstant(event.starts_at) > Date.now()) throw conflict(t`This is only possible once the event has started.`);
   if (!attendanceEditable(event, actor, Date.now())) {
     throw conflict(t`Attendance can be recorded until the end of the day after the event. Admins can still change it.`, "attendance_closed");
@@ -539,7 +539,7 @@ eventRoutes.post("/events/:id/cancel", async (c) => {
     () => {
       const label = labelOf();
       const when = `${shortDate(event.starts_at)}, ${shortTime(event.starts_at)}`;
-      return { title: t`Cancelled: ${label}`, body: t`${label} on ${when} is cancelled. Reason: ${reason}`, url: `/termine/${event.id}` };
+      return { title: t`Not taking place: ${label}`, body: t`${label} on ${when} is not taking place. Reason: ${reason}`, url: `/termine/${event.id}` };
     },
     { teamIds: teams.map((tm) => tm.id), exclude: [actor.accountId] },
   );

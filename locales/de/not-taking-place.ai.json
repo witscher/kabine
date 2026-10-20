@@ -1,0 +1,12 @@
+{
+  "Not taking place: {entry}": "Findet nicht statt: {entry}",
+  "The event is not taking place.": "Der Termin findet nicht statt.",
+  "Not taking place: {label}": "Findet nicht statt: {label}",
+  "{label} on {when} is not taking place. Reason: {reason}": "{label} am {when} findet nicht statt. Grund: {reason}",
+  "The game is not taking place.": "Das Spiel findet nicht statt.",
+  "The game is over or not taking place.": "Das Spiel ist vorbei oder findet nicht statt.",
+  "The game is not taking place or has already started.": "Das Spiel findet nicht statt oder hat schon begonnen.",
+  "Not taking place (cancelled by {cancelledBy}).": "Findet nicht statt (abgesagt durch {cancelledBy}).",
+  "Not taking place.": "Findet nicht statt.",
+  "Not taking place": "Findet nicht statt"
+}

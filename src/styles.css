@@ -2744,3 +2744,11 @@ button.announcement-head {
   order: 3;
   flex: 1 1 100%;
 }
+
+/* Event that is not taking place: date, time and game struck through */
+.hero.cancelled h1,
+.hero.cancelled .hero-game,
+.hero.cancelled .meta-line span:first-child {
+  text-decoration: line-through;
+  text-decoration-thickness: 2px;
+}
