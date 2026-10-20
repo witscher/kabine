@@ -17,7 +17,10 @@ export const CHANGELOG: readonly ChangelogEntry[] = [
   {
     version: "0.2.1",
     date: "2026-10-20",
-    items: () => [t`Update pull requests on GitHub now open reliably. If your copy is on 0.2.0, replace the update workflow once, as the pull request says.`],
+    items: () => [
+      t`Player invitation links opened on a signed-in device lead straight to the app; nobody can pick a teammate's name there.`,
+      t`Update pull requests on GitHub now open reliably. If your copy is on 0.2.0, replace the update workflow once, as the pull request says.`,
+    ],
   },
   {
     version: "0.2.0",

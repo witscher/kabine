@@ -1225,6 +1225,26 @@ test("Elternlink: einmal einrichten, beim erneuten Öffnen direkt zur App", asyn
   await expect(card).toContainText("Den Link braucht es nur einmal zum Einrichten.");
 });
 
+test("Spielerlink angemeldet: keine Namensauswahl, nur direkt zur App; ungültiger Link ebenso", async () => {
+  const res = await coach.page.request.post("/api/teams/1/invites", { data: { kind: "player" } });
+  const { url } = (await res.json()) as { url: string };
+  const { page } = player;
+  await page.goto("/");
+  await page.goto(url);
+  const box = page.getByRole("region", { name: "Schon in der App" });
+  await expect(box).toContainText("schon in der App");
+  await expect(box).toContainText("im Profil abmelden");
+  await expect(page.getByRole("radiogroup")).toHaveCount(0);
+  await expect(page.getByRole("button", { name: /Passkey einrichten/ })).toHaveCount(0);
+
+  await page.goto("/");
+  await page.goto("/einladung#gibt-es-nicht");
+  await expect(page.getByRole("region", { name: "Schon in der App" })).toContainText("neuen Elternlink");
+  await expect(page.getByRole("link", { name: "Zur Anmeldung" })).toHaveCount(0);
+  await page.getByRole("button", { name: "Direkt zur App" }).click();
+  await expect(page.getByRole("heading", { name: /^Hallo/ })).toBeVisible();
+});
+
 test("Einladungen: Begleittext zum Spielerlink mit Hinweis auf einmalige Nutzung", async () => {
   const { page } = coach;
   await page.goto("/team/1");

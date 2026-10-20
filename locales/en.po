@@ -2064,6 +2064,10 @@ msgstr "Your club"
 msgid "Source code (optional)"
 msgstr "Source code (optional)"
 
+#: worker/routes/join.ts
+msgid "You are already signed in on this device. Open the app; if someone else wants to set up their access here, sign out in the profile first."
+msgstr "You are already signed in on this device. Open the app; if someone else wants to set up their access here, sign out in the profile first."
+
 #: modules/duties/app/helpers.tsx
 msgid "KiHaSL list"
 msgstr "KiHaSL list"
@@ -5005,10 +5009,6 @@ msgstr "+ Create new location"
 msgid "First add the players."
 msgstr "First add the players."
 
-#: src/pages/join.tsx
-msgid "{loggedInAs} is currently signed in on this device. If you continue, an access will be created for the selected person and they will be signed in."
-msgstr "{loggedInAs} is currently signed in on this device. If you continue, an access will be created for the selected person and they will be signed in."
-
 #: modules/youth-referees/module.ts
 msgid "Home games of the marked age groups get a youth referee duty, with a role granted by link. Needs helper duties."
 msgstr "Home games of the marked age groups get a youth referee duty, with a role granted by link. Needs helper duties."
@@ -7374,6 +7374,10 @@ msgstr "Delete group {teamName}?"
 msgid "{fresh, plural, one {Add # player} other {Add # players}}"
 msgstr "{fresh, plural, one {Add # player} other {Add # players}}"
 
+#: src/pages/join.tsx
+msgid "Someone else wants to set up their access on this device? Sign out in the profile first, then open the link again."
+msgstr "Someone else wants to set up their access on this device? Sign out in the profile first, then open the link again."
+
 #: src/pages/event.tsx
 msgid "{name} is no longer an organiser."
 msgstr "{name} is no longer an organiser."
@@ -8643,6 +8647,10 @@ msgstr "This person does not belong to the teams of this training time."
 #: src/pages/profile.tsx
 msgid "SMS"
 msgstr "SMS"
+
+#: shared/changelog.ts
+msgid "Player invitation links opened on a signed-in device lead straight to the app; nobody can pick a teammate's name there."
+msgstr "Player invitation links opened on a signed-in device lead straight to the app; nobody can pick a teammate's name there."
 
 #: modules/carpools/app/card.tsx
 #: modules/duties/app/admin.tsx
@@ -10616,6 +10624,10 @@ msgstr "Create personal link"
 #: src/calendar.tsx
 msgid "You already have a calendar link. For security reasons the app does not show it again. A new link makes the old one invalid, then you have to subscribe again."
 msgstr "You already have a calendar link. For security reasons the app does not show it again. A new link makes the old one invalid, then you have to subscribe again."
+
+#: src/pages/join.tsx
+msgid "To link another child, e.g. a sibling, ask the coach for a new parent link."
+msgstr "To link another child, e.g. a sibling, ask the coach for a new parent link."
 
 #: src/pages/group.tsx
 msgid "Tap an event to edit, cancel or delete it."

@@ -173,6 +173,28 @@ describe("Zugang über Einladungslink", () => {
     expect(await rows("SELECT * FROM passkeys")).toHaveLength(0);
   });
 
+  it("player link while signed in: no passkey, no code, also not for coaches", async () => {
+    const token = await playerLinkToken();
+    const mia = await person("Mia");
+    await member(mia, wd);
+    const miaCookie = await loginAs(mia);
+    // A signed-in child must not set up a teammate's access on this device
+    for (const cookie of [miaCookie, await loginAs(coach)]) {
+      const options = await api("/join/options", { cookie, body: { token, personId: ida } });
+      expect(options.status).toBe(409);
+      expect(options.body.error.code).toBe("signed_in");
+      expect((await api("/join/email", { cookie, body: { token, personId: ida, email: "ida@example.org" } })).body.error.code).toBe("signed_in");
+    }
+    // Code requested while signed out, redeemed after signing in on the same device
+    const start = await api("/join/email", { body: { token, personId: ida, email: "ida@example.org" } });
+    const late = await api("/auth/email/verify", { cookie: miaCookie, body: { requestId: start.body.requestId, code: codeOf(sent[0]!) } });
+    expect(late.status).toBe(409);
+    expect(late.body.error.code).toBe("signed_in");
+    expect(await rows("SELECT * FROM accounts WHERE person_id = ?", ida)).toHaveLength(0);
+    // Signed out, the same code still works
+    expect((await rawPost("/auth/email/verify", { requestId: start.body.requestId, code: codeOf(sent[0]!) })).status).toBe(200);
+  });
+
   it("Adresse im Profil ändern und bestätigen", async () => {
     const cookie = await loginAs(ida);
     const set = await api("/me/email", { cookie, method: "PUT", body: { email: "neu@example.org" } });

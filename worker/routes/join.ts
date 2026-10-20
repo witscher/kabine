@@ -125,14 +125,26 @@ const emailRequired = () => t`Please enter your e-mail address. We will send the
 const adminEmailRequired = () => t`Please enter your e-mail address. It is required for admins.`;
 
 /**
+ * A player link is for setting up one's own access. Whoever is signed in on this device already has one: picking a
+ * teammate's free name would create that teammate's access here and sign the child out.
+ */
+export const PLAYER_JOIN_SIGNED_IN = () =>
+  t`You are already signed in on this device. Open the app; if someone else wants to set up their access here, sign out in the profile first.`;
+
+/**
  * Checks an invitation link including the selection and describes the access
  * to be created. Shared by passkey and e-mail code.
  */
-async function buildJoinContext(env: Env, input: JoinInput): Promise<{ context: JoinContext; name: string; exclude: { id: string }[] }> {
+async function buildJoinContext(
+  env: Env,
+  input: JoinInput,
+  signedIn: boolean,
+): Promise<{ context: JoinContext; name: string; exclude: { id: string }[] }> {
   const invite = await findValidInvite(env, input.token);
   let email = input.email || null;
 
   if (invite.kind === "player") {
+    if (signedIn) throw conflict(PLAYER_JOIN_SIGNED_IN(), "signed_in");
     if (!input.personId) throw badRequest(t`Please select who you are.`);
     const players = await teamPlayers(env.DB, invite.team_id!);
     const person = players.find((p) => p.id === input.personId);
@@ -197,7 +209,7 @@ async function buildJoinContext(env: Env, input: JoinInput): Promise<{ context: 
 
 joinRoutes.post("/join/options", async (c) => {
   const input = parse(optionsSchema, await readJson(c.req.raw));
-  const { context, name, exclude } = await buildJoinContext(c.env, input);
+  const { context, name, exclude } = await buildJoinContext(c.env, input, !!c.get("actor"));
   return c.json(
     await startRegistration(c.env, c.req.raw, {
       webauthnUserId: context.userId,
@@ -213,7 +225,7 @@ joinRoutes.post("/join/options", async (c) => {
 joinRoutes.post("/join/email", async (c) => {
   const input = parse(optionsSchema, await readJson(c.req.raw));
   if (!input.email) throw badRequest(emailRequired(), "email_required");
-  const { context } = await buildJoinContext(c.env, input);
+  const { context } = await buildJoinContext(c.env, input, !!c.get("actor"));
   const requestId = await issueEmailCode(c.env, {
     purpose: "join",
     email: input.email,
@@ -445,6 +457,8 @@ joinRoutes.post("/join/verify", async (c) => {
     response as unknown as RegistrationResponseJSON,
   );
   if (context.kind === "bootstrap") throw badRequest(t`Invalid request.`);
+  // Signed in meanwhile, e.g. in another tab
+  if (context.kind === "player" && c.get("actor")) throw conflict(PLAYER_JOIN_SIGNED_IN(), "signed_in");
   const accountId = await finishJoin(c.env, c.req.raw, context, credential);
   c.executionCtx.waitUntil(requestEmailConfirmation(c.env, c.req.raw, accountId));
   const session = await createSession(c.env.DB, accountId, c.req.header("user-agent") ?? null);

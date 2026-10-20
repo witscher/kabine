@@ -7,7 +7,7 @@ import { useLocation } from "preact-iso";
 import { useEffect, useState } from "preact/hooks";
 import { api, errorMessage } from "../api";
 import { EmailCodeForm, isEmail, startEmailLogin } from "../email";
-import { fullDate, isoToLocalDate, joinNames } from "../format";
+import { fullDate, isoToLocalDate, joinNames, personName } from "../format";
 import { Icon } from "../icons";
 import { isIosOtherBrowser, loginWithPasskey, passkeyErrorMessage, passkeysSupported, prepareLogin, prepareRegistration, registerPasskey, useSession } from "../session";
 import { clearCache } from "../store";
@@ -165,9 +165,16 @@ export function JoinPage() {
         <TopBar title={t`Invitation`} kicker={clubName()} />
         <div class="content">
           <ErrorBox error={error} />
-          <a class="btn" href="/">
-            <Trans>Go to sign-in</Trans>
-          </a>
+          {me ? (
+            <SignedInBox
+              name={personName(me.person)}
+              note={t`To link another child, e.g. a sibling, ask the coach for a new parent link.`}
+            />
+          ) : (
+            <a class="btn" href="/">
+              <Trans>Go to sign-in</Trans>
+            </a>
+          )}
         </div>
       </main>
     );
@@ -271,7 +278,7 @@ export function JoinPage() {
   const ownNameProblem = () => (nameClash ? t`Please enter your own first name, not your child's.` : null);
   // Opened the link again although already set up: straight to the app instead
   const linkedChildren = isParent && me ? info.persons.filter((p) => p.linkedToMe) : [];
-  const alreadyIn = linkedChildren.length > 0 || (!isParent && !!me && info.persons.some((p) => p.id === me.person.id));
+  const alreadyIn = linkedChildren.length > 0;
 
   const submit = async () => {
     setFormError(null);
@@ -320,35 +327,43 @@ export function JoinPage() {
     );
   };
 
+  const hero = (
+    <header class="hero">
+      <div class="hero-top">
+        <div class="kicker">
+          <Trans>Invitation</Trans>
+        </div>
+        <div class="team-badge">{info.team.name}</div>
+      </div>
+      <h1>{isParent ? t`For parents` : t`For players`}</h1>
+      <div class="hero-sub">
+        {isParent ? t`You are setting up a parent access for the ${teamName}.` : t`You are setting up your own access for the ${teamName}.`}
+      </div>
+    </header>
+  );
+
+  // Player link while signed in (player, parent, coach, admin): no name choice. Picking a teammate's free name
+  // would create that teammate's access on this device; the server refuses it too (signed_in).
+  if (!isParent && me) {
+    return (
+      <main class="page no-tabs">
+        {hero}
+        <div class="content">
+          <SignedInBox name={loggedInAs ?? ""} note={t`Someone else wants to set up their access on this device? Sign out in the profile first, then open the link again.`} />
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main class="page no-tabs">
-      <header class="hero">
-        <div class="hero-top">
-          <div class="kicker">
-            <Trans>Invitation</Trans>
-          </div>
-          <div class="team-badge">{info.team.name}</div>
-        </div>
-        <h1>{isParent ? t`For parents` : t`For players`}</h1>
-        <div class="hero-sub">
-          {isParent
-            ? t`You are setting up a parent access for the ${teamName}.`
-            : t`You are setting up your own access for the ${teamName}.`}
-        </div>
-      </header>
+      {hero}
       <div class="content">
         <SafariHint />
-        {alreadyIn ? <AlreadyInApp name={loggedInAs ?? ""} linked={linkedChildren.map((p) => p.name.split(" ")[0]!)} /> : null}
+        {alreadyIn ? <SignedInBox name={loggedInAs ?? ""} linked={linkedChildren.map((p) => p.name.split(" ")[0]!)} /> : null}
         {isParent && me && !alreadyIn ? (
           <Notice kind="yellow">
             <Trans>You are signed in as {loggedInAs}. Select the child you want to link in addition.</Trans>
-          </Notice>
-        ) : null}
-        {!isParent && me && !alreadyIn ? (
-          <Notice kind="yellow">
-            <Trans>
-              {loggedInAs} is currently signed in on this device. If you continue, an access will be created for the selected person and they will be signed in.
-            </Trans>
           </Notice>
         ) : null}
         {isParent && !me ? (
@@ -452,7 +467,7 @@ export function JoinPage() {
 }
 
 /** Signed in and the link opened again: the app is the way in, the link was only for setting up. */
-function AlreadyInApp({ name, linked }: { name: string; linked: string[] }) {
+function SignedInBox({ name, linked = [], note }: { name: string; linked?: string[]; note?: string }) {
   const { route } = useLocation();
   const names = joinNames(linked);
   const count = linked.length;
@@ -465,6 +480,7 @@ function AlreadyInApp({ name, linked }: { name: string; linked: string[] }) {
         {count ? plural(count, { one: `${names} is already linked to you.`, other: `${names} are already linked to you.` }) : null}
       </p>
       <p class="small muted">{onceText()}</p>
+      {note ? <p class="small muted">{note}</p> : null}
       <Button variant="primary" size="lg" block onClick={() => route("/", true)}>
         <Trans>Straight to the app</Trans>
       </Button>

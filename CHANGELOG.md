@@ -8,6 +8,7 @@ Changes that are merged but not released yet go under *Unreleased*, one line eac
 
 ## v0.2.1
 
+- A player invitation link opened on a signed-in device (player, parent, coach, admin) only offers "Straight to the app": a child could pick a teammate's free name and set up that teammate's access on the wrong device. The server refuses it too. Expired or invalid links show signed-in people the same way back into the app.
 - The update workflow opens its pull request reliably in copies made with the deploy button (in a fresh copy GitHub refused the way it did before), and if GitHub still refuses, it opens an issue with a link instead. Copies on v0.2.0 replace `.github/workflows/update.yml` by hand once; the pull request lists it.
 - The deploy button does not copy the update workflow into the club's copy: the installation guide now adds it as a step, with the setting that lets GitHub Actions open pull requests.
 - The update pull request lists only workflow files the copy has.

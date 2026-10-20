@@ -10,7 +10,7 @@ import { randomToken } from "../lib/crypto";
 import { all, first, run } from "../lib/db";
 import { ApiError, badRequest, conflict, gone, parse, readJson } from "../lib/http";
 import { utcIso } from "../lib/time";
-import { finishJoin, type JoinContext } from "./join";
+import { finishJoin, type JoinContext, PLAYER_JOIN_SIGNED_IN } from "./join";
 
 export const emailRoutes = new Hono<AppEnv>();
 
@@ -80,6 +80,8 @@ emailRoutes.post("/auth/email/verify", async (c) => {
 
   if (row.purpose === "join") {
     const context = JSON.parse(row.context!) as JoinContext;
+    // Code requested while signed out, redeemed after signing in: the player link is not for a signed-in device
+    if (context.kind === "player" && c.get("actor")) throw conflict(PLAYER_JOIN_SIGNED_IN(), "signed_in");
     await markEmailCodeUsed(c.env.DB, row.id);
     const accountId = await finishJoin(c.env, c.req.raw, context, null, true);
     await startSession(c, accountId);
