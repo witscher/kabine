@@ -15,6 +15,17 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: readonly ChangelogEntry[] = [
   {
+    version: "0.2.0",
+    date: "2026-10-20",
+    items: () => [
+      t`Updates with database changes pause the app for about a minute and note a restore point. See Administration → Updates and maintenance, with the maintenance switch.`,
+      t`Coaches, leads, staff and organisers can say “I'm not there” without cancelling the event.`,
+      t`After an event coaches record attendance: present, excused or unexcused.`,
+      t`Events cancelled for everyone now read “Not taking place”.`,
+      t`Invitation links are for setting up only; opened again, they lead straight to the app.`,
+    ],
+  },
+  {
     version: "0.1.0",
     date: "2026-10-18",
     items: () => [t`First release of Kabine.`],

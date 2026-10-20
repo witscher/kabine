@@ -2,6 +2,10 @@
 
 Decisions not covered by `docs/dev/roadmap.md`, with reasons. Newest first.
 
+## Update pull requests without merging Kabine's history (October 2026)
+
+The update workflow of a club's copy used to merge the release tag into the copy (`--allow-unrelated-histories`). That pushes Kabine's whole history, including commits that change `.github/workflows`, and GitHub refuses any push that changes workflow files with the workflow's own token. Now the update is one commit on top of the copy: the release's files, the club's `wrangler.jsonc` and the copy's own workflow files; the pull request lists changed workflow files with links to copy by hand. Copies from before v0.2.0 replace `update.yml` once by hand and switch maintenance mode on for that first update, because the running old version does not know the automatic pause (`docs/operation.md`, Updating an older copy). Releases are tags `vX.Y.Z` with a section in `CHANGELOG.md` and an entry in `shared/changelog.ts`; v0.2.0 is the first tag.
+
 ## Website kabine.dev for search engines (October 2026)
 
 The website has content pages besides the two start pages (`site/src/pages.mjs`: why Kabine, handball, football, youth coaches, board and privacy, three features), the club documentation and release notes as pages (`site/src/docs.mjs`, rendered from `docs/*.md` and `CHANGELOG.md` at build time), a sitemap with language versions, canonical and share tags, structured data and a share image per language (`npm run site:og`). The pages only make statements about Kabine itself: no comparison with other apps by name, because comparative advertising must stay objective and current (§ 6 UWG) and a private publisher would carry that risk. Visitors are no longer redirected to the English page by their browser language; they get a hint instead, because crawlers with an English browser would otherwise never see the German start page. `robots.txt` allows search and AI answers (`Content-Signal: search=yes, ai-input=yes`) and says nothing about AI training. The build fails on dead internal links.

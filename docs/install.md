@@ -63,7 +63,7 @@ Push notifications work on Android and desktop browsers right away. On an iPhone
 
 ## 6. Updates
 
-Your copy contains the workflow `.github/workflows/update.yml`. Once a week it looks for a new Kabine release and opens a pull request. Merging it deploys the new version. If the release changes the database, the app shows "being updated" for about a minute and the deploy notes a restore point first (`docs/operation.md`, Updates). Make sure GitHub Actions are enabled in your copy (*Settings → Actions*).
+Your copy contains the workflow `.github/workflows/update.yml`. Once a week it looks for a new Kabine release and opens a pull request. Merging it deploys the new version. If the release changes the database, the app shows "being updated" for about a minute and the deploy notes a restore point first (`docs/operation.md`, Updates). Make sure GitHub Actions are enabled in your copy (*Settings → Actions*); *Actions → Kabine updates → Run workflow* looks for a release right away. A copy from before October 2026 needs a few steps once: `docs/operation.md`, Updating an older copy.
 
 If a release changes the Cloudflare configuration (for example a new binding), the pull request says so. Compare `wrangler.jsonc` before merging.
 

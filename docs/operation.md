@@ -44,6 +44,39 @@ Restoring discards everything written after the restore point. Switch maintenanc
 
 If you would rather check a release on your own first, switch maintenance mode on, merge, check the app as an admin and switch it off again.
 
+**Workflow files.** GitHub does not let the automatic update change files in `.github/workflows`. If a release changes them, the pull request lists them with links: open each link, copy the content, edit the same file in your copy on GitHub and paste it. Do this before merging the update.
+
+### Updating an older copy
+
+Copies created before the first release (v0.2.0, October 2026) need three things once. After that, updates arrive as described above.
+
+1. **Replace the update workflow.** The workflow in older copies cannot finish an update. In your copy on GitHub open `.github/workflows/update.yml`, edit it and replace its content with the [current version](https://github.com/witscher/kabine/blob/main/.github/workflows/update.yml). If your copy has no such file, create it. Then run it once: *Actions → Kabine updates → Run workflow*. A pull request "Update Kabine to v…" appears within a minute.
+2. **Check the deploy command.** In the Cloudflare dashboard: *Workers & Pages → your Worker → Settings → Build*, the deploy command must be `npm run deploy`.
+3. **Switch maintenance mode on by hand for this one update.** The running old version does not know the automatic pause yet. In a checkout of your copy (with `npm ci` done and `npx wrangler login`):
+
+   ```sh
+   npm run maintenance:on
+   ```
+
+   Wait a minute, merge the pull request, wait until the build is done, then switch maintenance mode off under *Administration → Updates and maintenance* (or `npm run maintenance:off`). From then on the app pauses by itself when an update changes the database.
+
+The pull request also says whether `wrangler.jsonc` needs new entries; compare it with the release before merging.
+
+### Installed by hand from a clone
+
+If you cloned `witscher/kabine` and deploy from your machine, keep your `wrangler.jsonc` (resource IDs, domain) and pull the release:
+
+```sh
+git stash            # your wrangler.jsonc changes, if not committed
+git fetch --tags
+git checkout v0.2.0  # the release you want
+git stash pop        # resolve wrangler.jsonc by hand if the release changed it
+npm ci
+npm run deploy       # restore point, pause, migrations, upload
+```
+
+For the first update from a copy older than v0.2.0, switch maintenance mode on before `npm run deploy` (step 3 above).
+
 ## Logs
 
 `npx wrangler tail` shows requests and errors live. With `observability` enabled in `wrangler.jsonc`, the dashboard keeps logs for a few days (*Workers & Pages → kabine → Observability*).

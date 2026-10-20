@@ -3923,6 +3923,11 @@ msgstr "Keine Termine"
 msgid "This is not a parent link."
 msgstr "Das ist kein Elternlink."
 
+# ai
+#: shared/changelog.ts
+msgid "Updates with database changes pause the app for about a minute and note a restore point. See Administration → Updates and maintenance, with the maintenance switch."
+msgstr "Updates mit Datenbankänderungen pausieren die App etwa eine Minute und notieren vorher einen Wiederherstellungspunkt. Siehe Verwaltung → Updates und Wartung, mit dem Wartungsschalter."
+
 #: modules/duties/worker/notify.ts
 msgid "{club} helper plan"
 msgstr "{club} Helferplan"
@@ -6968,6 +6973,11 @@ msgid "For example a school gym or a sports ground. The location is then availab
 msgstr "Zum Beispiel eine Schulturnhalle oder ein Sportplatz. Der Ort steht danach allen Trainern zur Verfügung."
 
 # ai
+#: shared/changelog.ts
+msgid "After an event coaches record attendance: present, excused or unexcused."
+msgstr "Nach dem Termin tragen Trainer die Anwesenheit ein: anwesend, entschuldigt oder unentschuldigt."
+
+# ai
 #: src/pages/join.tsx
 msgid "Straight to the app"
 msgstr "Direkt zur App"
@@ -8193,6 +8203,11 @@ msgstr "Kein Helferplan"
 msgid "Quick selection"
 msgstr "Schnellauswahl"
 
+# ai
+#: shared/changelog.ts
+msgid "Coaches, leads, staff and organisers can say “I'm not there” without cancelling the event."
+msgstr "Trainer, Leitungen, Betreuer und Organisatoren können sich mit „Ich bin nicht da“ abmelden, ohne den Termin abzusagen."
+
 #: src/env-banner.tsx
 msgid "Staging · test system with copied data"
 msgstr "Staging · Testsystem mit kopierten Daten"
@@ -8261,6 +8276,11 @@ msgstr "{name} ist jetzt KiHaSL/JuHaSL. Im Reiter Helfer stehen alle Jugend-Heim
 #: src/pages/setup-wizard.tsx
 msgid "Setup"
 msgstr "Einrichtung"
+
+# ai
+#: shared/changelog.ts
+msgid "Invitation links are for setting up only; opened again, they lead straight to the app."
+msgstr "Einladungslinks sind nur zum Einrichten da; erneut geöffnet führen sie direkt zur App."
 
 #: src/game-import.tsx
 #: src/pages/plans.tsx
@@ -9652,6 +9672,11 @@ msgstr "{count} ohne Geburtsjahr"
 #: src/pages/setup-wizard.tsx
 msgid "Welcome! A few steps and your club can start. Everything can be changed later under administration."
 msgstr "Willkommen! Nach ein paar Schritten kann dein Verein loslegen. Alles lässt sich später in der Verwaltung ändern."
+
+# ai
+#: shared/changelog.ts
+msgid "Events cancelled for everyone now read “Not taking place”."
+msgstr "Für alle abgesagte Termine heißen jetzt „Findet nicht statt“."
 
 #: src/pages/plans.tsx
 msgid "Break {holiday}"

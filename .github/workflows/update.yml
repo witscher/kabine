@@ -49,12 +49,18 @@ jobs:
           git config user.name "kabine-update"
           git config user.email "kabine-update@users.noreply.github.com"
           git checkout -b "kabine-update-$VERSION"
-          cp wrangler.jsonc /tmp/wrangler.club.jsonc
-          # The copy has its own history: take the release's files, keep the club's wrangler settings
-          git merge --allow-unrelated-histories --no-edit -X theirs "upstream/$VERSION" || true
-          git checkout "upstream/$VERSION" -- . ':!wrangler.jsonc' ':!.kabine-version'
-          cp /tmp/wrangler.club.jsonc wrangler.jsonc
+          # The copy has its own history. One commit on top of it with the release's files: files the release
+          # removed are removed, the club's wrangler.jsonc stays. No merge, so none of Kabine's history is pushed.
+          git rm -rq --cached .
+          find . -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
+          git checkout "upstream/$VERSION" -- .
+          git checkout HEAD -- wrangler.jsonc
           git show "upstream/$VERSION:wrangler.jsonc" > /tmp/wrangler.release.jsonc
+          # GitHub does not let this workflow change workflow files (GITHUB_TOKEN has no "workflows" permission),
+          # so the copy keeps its own; the pull request lists the ones the release changes
+          git diff --name-only HEAD "upstream/$VERSION" -- .github/workflows > /tmp/changed-workflows.txt
+          rm -rf .github/workflows
+          if git cat-file -e HEAD:.github/workflows 2>/dev/null; then git checkout HEAD -- .github/workflows; fi
           echo "$VERSION" > .kabine-version
           git add -A
           # New migrations change the database: the deploy then puts the app into maintenance for about a minute
@@ -76,8 +82,12 @@ jobs:
           else
             migration_note=$'\n\nNo database changes: the app keeps running during the deploy.'
           fi
+          if [ -s /tmp/changed-workflows.txt ]; then
+            workflow_note=$'\n\n**Update the workflows by hand:** GitHub does not let this automatic update change files in `.github/workflows`. Replace these files in your copy with the ones of the release (open the link, copy the content, edit the file in your copy on GitHub and paste):'
+            while read -r f; do workflow_note+=$'\n'"- [$f](https://github.com/witscher/kabine/blob/$VERSION/$f)"; done < /tmp/changed-workflows.txt
+          fi
           {
-            echo "Kabine $VERSION is available. Merging this pull request deploys it.${migration_note}${wrangler_note:-}"
+            echo "Kabine $VERSION is available. Merging this pull request deploys it.${migration_note}${wrangler_note:-}${workflow_note:-}"
             echo
             echo "$notes"
           } > /tmp/pr-body.md

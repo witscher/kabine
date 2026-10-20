@@ -1,0 +1,7 @@
+{
+  "Updates with database changes pause the app for about a minute and note a restore point. See Administration → Updates and maintenance, with the maintenance switch.": "Updates mit Datenbankänderungen pausieren die App etwa eine Minute und notieren vorher einen Wiederherstellungspunkt. Siehe Verwaltung → Updates und Wartung, mit dem Wartungsschalter.",
+  "After an event coaches record attendance: present, excused or unexcused.": "Nach dem Termin tragen Trainer die Anwesenheit ein: anwesend, entschuldigt oder unentschuldigt.",
+  "Coaches, leads, staff and organisers can say “I'm not there” without cancelling the event.": "Trainer, Leitungen, Betreuer und Organisatoren können sich mit „Ich bin nicht da“ abmelden, ohne den Termin abzusagen.",
+  "Invitation links are for setting up only; opened again, they lead straight to the app.": "Einladungslinks sind nur zum Einrichten da; erneut geöffnet führen sie direkt zur App.",
+  "Events cancelled for everyone now read “Not taking place”.": "Für alle abgesagte Termine heißen jetzt „Findet nicht statt“."
+}

@@ -3779,6 +3779,10 @@ msgstr "No events"
 msgid "This is not a parent link."
 msgstr "This is not a parent link."
 
+#: shared/changelog.ts
+msgid "Updates with database changes pause the app for about a minute and note a restore point. See Administration → Updates and maintenance, with the maintenance switch."
+msgstr "Updates with database changes pause the app for about a minute and note a restore point. See Administration → Updates and maintenance, with the maintenance switch."
+
 #: modules/duties/worker/notify.ts
 msgid "{club} helper plan"
 msgstr "{club} helper plan"
@@ -6709,6 +6713,10 @@ msgstr "Inactive e.g. in case of injury, illness or a student exchange. The app 
 msgid "For example a school gym or a sports ground. The location is then available to all coaches."
 msgstr "For example a school gym or a sports ground. The location is then available to all coaches."
 
+#: shared/changelog.ts
+msgid "After an event coaches record attendance: present, excused or unexcused."
+msgstr "After an event coaches record attendance: present, excused or unexcused."
+
 #: src/pages/join.tsx
 msgid "Straight to the app"
 msgstr "Straight to the app"
@@ -7893,6 +7901,10 @@ msgstr "No helper plan"
 msgid "Quick selection"
 msgstr "Quick selection"
 
+#: shared/changelog.ts
+msgid "Coaches, leads, staff and organisers can say “I'm not there” without cancelling the event."
+msgstr "Coaches, leads, staff and organisers can say “I'm not there” without cancelling the event."
+
 #: src/env-banner.tsx
 msgid "Staging · test system with copied data"
 msgstr "Staging · test system with copied data"
@@ -7959,6 +7971,10 @@ msgstr "{name} is now KiHaSL/JuHaSL. The Helpers tab lists all youth home games 
 #: src/pages/setup-wizard.tsx
 msgid "Setup"
 msgstr "Setup"
+
+#: shared/changelog.ts
+msgid "Invitation links are for setting up only; opened again, they lead straight to the app."
+msgstr "Invitation links are for setting up only; opened again, they lead straight to the app."
 
 #: src/game-import.tsx
 #: src/pages/plans.tsx
@@ -9302,6 +9318,10 @@ msgstr "{count} without year of birth"
 #: src/pages/setup-wizard.tsx
 msgid "Welcome! A few steps and your club can start. Everything can be changed later under administration."
 msgstr "Welcome! A few steps and your club can start. Everything can be changed later under administration."
+
+#: shared/changelog.ts
+msgid "Events cancelled for everyone now read “Not taking place”."
+msgstr "Events cancelled for everyone now read “Not taking place”."
 
 #: src/pages/plans.tsx
 msgid "Break {holiday}"
