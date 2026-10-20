@@ -15,6 +15,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: readonly ChangelogEntry[] = [
   {
+    version: "0.2.2",
+    date: "2026-10-20",
+    items: () => [
+      t`School holidays and public holidays of your region now also load for the current season: under Administration → Holidays, and when you change the region.`,
+      t`If nobody can get into the administration any more, whoever runs the installation can create an admin link (npm run admin:link).`,
+    ],
+  },
+  {
     version: "0.2.1",
     date: "2026-10-20",
     items: () => [

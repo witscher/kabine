@@ -2100,6 +2100,10 @@ msgstr "It will be back shortly. The page reloads automatically as soon as maint
 msgid "Has no access yet."
 msgstr "Has no access yet."
 
+#: shared/changelog.ts
+msgid "School holidays and public holidays of your region now also load for the current season: under Administration → Holidays, and when you change the region."
+msgstr "School holidays and public holidays of your region now also load for the current season: under Administration → Holidays, and when you change the region."
+
 #: src/pages/setup-wizard.tsx
 #: src/pages/setup-wizard.tsx
 msgid "First people"
@@ -8278,6 +8282,10 @@ msgstr "Attendance of {name}"
 #: src/pages/admin.tsx
 msgid "{plans, plural, one {# holiday plan} other {# holiday plans}}"
 msgstr "{plans, plural, one {# holiday plan} other {# holiday plans}}"
+
+#: shared/changelog.ts
+msgid "If nobody can get into the administration any more, whoever runs the installation can create an admin link (npm run admin:link)."
+msgstr "If nobody can get into the administration any more, whoever runs the installation can create an admin link (npm run admin:link)."
 
 #: worker/routes/squad.ts
 msgid "No team is assigned to this game."

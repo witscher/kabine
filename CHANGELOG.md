@@ -6,8 +6,10 @@ Changes that are merged but not released yet go under *Unreleased*, one line eac
 
 ## Unreleased
 
+## v0.2.2
+
 - School holidays and public holidays of the region now also come for the current season: when the setup creates the first season, when the region is changed in the club settings, and with "Load holidays of the region" under *Administration → Holidays*. Until now they only came with the season change, so a new installation had none.
-- `npm run admin:link` creates an admin link from the command line when nobody can get into Administration any more (docs/operation.md, Owner and admins).
+- `npm run admin:link` creates an admin link from the command line when nobody can get into Administration any more ([Owner and admins](https://kabine.dev/en/docs/operation/#nobody-can-get-into-administration)).
 - The update pull request warns about `wrangler.jsonc` only when the release really changes the configuration; resource IDs and the club's own names no longer count.
 
 ## v0.2.1
