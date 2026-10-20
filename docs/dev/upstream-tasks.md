@@ -8,6 +8,8 @@ Format per entry: date, title, what changed and why, where in the code (file and
 
 ## Open
 
+- **2026-10-20 Cancelled events read "Not taking place" and are struck through in the detail view.** "Cancelled" sounded like one person's response and was mixed up with it. An event cancelled for everyone now reads "Findet nicht statt (abgesagt durch <first name>)" / "Not taking place (cancelled by …)" in the detail notice, "Findet nicht statt" as the red tag in the overview (`EventRow` in `src/pages/home.tsx`), in the duty plan badge (`src/pages/helpers.tsx`), the special events list (`src/extra-events.tsx`), the push title (`POST /events/:id/cancel` in `worker/routes/events.ts`), the calendar feed summary (`worker/domain/calendar.ts`) and the conflict and blocked messages (`worker/domain/events.ts`, `worker/routes/squad.ts`, `worker/routes/carpool.ts`, `src/carpool.tsx`). The detail hero gets class `cancelled`: date, time and game title struck through (`.hero.cancelled` in `src/styles.css`). A player's own response stays "Declined", and so do the coach's "Cancel" button and "Undo cancellation". Kabine: wording goes through Lingui in both languages; adjust `test/calendar.test.ts` and the e2e checks that look for the old texts.
+
 ## Done
 
 - **2026-10-19 Invitation links are for setup only; "Straight to the app" when opened again.** Share texts and join page say the link is needed once; signed-in parents (and players) who open it again get "Straight to the app". Kabine: `f710472`.
