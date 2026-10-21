@@ -6,6 +6,7 @@ import { plural, t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { useEffect, useState } from "preact/hooks";
 import {
+  assistInput,
   cellText,
   IMPORT_FIELDS,
   mergeRows,
@@ -264,9 +265,8 @@ function SheetCard({
   const askAi = async () => {
     setProblem(null);
     try {
-      // Samples only of columns without a header: a header like "Telefon" says enough, its numbers stay here
-      const samples = sheet.rows.slice(0, 3).map((r) => r.map((c, i) => (sheet.header[i]?.trim() ? "" : c)));
-      const suggested = await assist!.columns(sheet.header, samples);
+      const { header, samples } = assistInput(sheet);
+      const suggested = await assist!.columns(header, samples);
       const used = new Set(sheet.mapping.filter((f) => f !== "ignore"));
       const mapping = sheet.mapping.map((f, i) => {
         const s = suggested[i] ?? "ignore";
@@ -364,7 +364,6 @@ function Review(props: {
 }) {
   const { draft, update } = props;
   const [problem, setProblem] = useState<string | null>(null);
-  const assist = useAssist();
   const byKey = new Map(draft.persons.map((p) => [p.key, p]));
   const active = draft.persons.filter((p) => !p.excluded);
   const usedTeams = new Set(active.flatMap((p) => p.memberships.map((m) => m.team)));
@@ -398,28 +397,6 @@ function Review(props: {
     }
   };
 
-  const unclearNames = active.filter((p) => p.rawName && p.doubts.includes("name"));
-  const unclearCount = unclearNames.length;
-  const askAi = async () => {
-    setProblem(null);
-    try {
-      const names = await assist!.names(unclearNames.map((p) => p.rawName!));
-      const found = new Map(unclearNames.map((p, i) => [p.key, names[i] ?? null]));
-      update({
-        persons: draft.persons.map((p) => {
-          const n = found.get(p.key);
-          if (!n) return p;
-          const birthYear = p.birthYear ?? n.birthYear;
-          return { ...p, firstName: n.firstName, lastName: n.lastName, birthYear, birthYears: birthYear ? [birthYear] : p.birthYears, doubts: ["ai"] };
-        }),
-      });
-      const count = names.filter(Boolean).length;
-      toast(plural(count, { one: "# name read by the AI, please check", other: "# names read by the AI, please check" }));
-    } catch (err) {
-      setProblem(errorMessage(err));
-    }
-  };
-
   const personCount = active.filter((p) => p.memberships.length).length;
   const teamCount = teams.length;
   const questionCount = openQuestions.length;
@@ -445,7 +422,7 @@ function Review(props: {
             <Trans>Often a heading or a total line of the list. Enter the first name, or leave the entry out.</Trans>
           </p>
           {noFirstName.map((p) => {
-            const name = p.lastName || p.rawName || "–";
+            const name = p.lastName || "–";
             const source = p.sources.map((s) => `${s.file.startsWith("#") ? t`pasted` : s.file}${s.sheet ? ` · ${s.sheet}` : ""}, ${t`row`} ${s.row}`).join("; ");
             return (
               <div class="stack-sm" style={{ borderTop: "1px solid var(--line)", paddingTop: "8px" }}>
@@ -482,16 +459,6 @@ function Review(props: {
               <Trans>Leave all of them out</Trans>
             </Button>
           ) : null}
-        </section>
-      ) : null}
-
-      {assist && unclearNames.length ? (
-        <section class="card card-pad stack-sm" aria-label={t`Unclear names`}>
-          <p>{plural(unclearCount, { one: "# name could not be split surely into first and last name.", other: "# names could not be split surely into first and last name." })}</p>
-          <Button icon="star" onClick={askAi}>
-            <Trans>Read names with AI</Trans>
-          </Button>
-          <p class="small muted">{assist.notice()}</p>
         </section>
       ) : null}
 
@@ -747,7 +714,7 @@ function TeamPeople({ team, persons, setPerson }: { team: string; persons: Impor
               </select>
             </div>
             <div class="row-gap small">
-              {p.doubts.includes("ai") ? <span class="badge warn">{t`AI, check`}</span> : p.doubts.length ? <span class="badge warn">{t`check`}</span> : null}
+              {p.doubts.length ? <span class="badge warn">{t`check`}</span> : null}
               <span class="muted" style={{ flex: 1 }}>{source}</span>
               <button type="button" class="link-btn" onClick={() => setPerson(p.key, { excluded: true })}>
                 <Trans>Leave out</Trans>

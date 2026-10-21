@@ -1,11 +1,12 @@
-// Help for the list import of the setup wizard: column headers and unclear name cells, sent by the admin's
-// browser one request at a time, read by Clairic and answered right away. Nothing is stored.
+// Help for the list import of the setup wizard: the column headers of a sheet, with masked samples where a
+// column has none (shared/list-import.ts, assistInput), read by Clairic and answered right away. Nothing is
+// stored or logged. Names and birth years never come here: Clairic is a preview, and most players are children.
 import { Hono } from "hono";
 import { z } from "zod";
 import { type AppEnv, requireActor } from "../../../worker/app";
 import { requireAdmin } from "../../../worker/auth/actor";
 import { parse, readJson } from "../../../worker/lib/http";
-import { type ImportField, parseYear } from "../../../shared/list-import";
+import type { ImportField } from "../../../shared/list-import";
 import { clairic, type ClairicAnswer, type ClairicField } from "./clairic";
 
 /** The model call, a parameter so that tests can answer in its place. */
@@ -19,11 +20,11 @@ const sure = (a: ClairicAnswer | undefined) => (a && a.value != null && (a.confi
 
 // Clairic answers with a part of the input, so the kinds are listed in the input and it picks one per column
 const KINDS: [string, ImportField, string][] = [
-  ["full_name", "name", "the name of a person, first and last name together"],
+  ["full_name", "name", "the name of a person, first and last name together, e.g. Xxxxxx, Xxxx"],
   ["first_name", "firstName", "only the first name"],
   ["last_name", "lastName", "only the last name"],
-  ["birth_year", "birthYear", "a year of birth or a full date of birth"],
-  ["team", "team", "the team or age group a person plays in, often codes like wD1, mC, U13, Damen 1"],
+  ["birth_year", "birthYear", "a year of birth or a full date of birth, e.g. 2014 or 03.05.2014"],
+  ["team", "team", "the team or age group a person plays in, often codes like xX1, xX, X13, Xxxxx 1"],
   ["role", "role", "whether a person is a player, coach or helper"],
   ["other", "ignore", "anything else, e.g. numbers, phone, address, remarks"],
 ];
@@ -40,7 +41,7 @@ export async function readColumns(run: Run, header: string[], samples: string[][
     return `Column ${i + 1}: ${h || "(no header)"}${examples.length ? ` (examples: ${examples.join("; ")})` : ""}`;
   });
   const state = [
-    "A sports club's list of players and coaches.",
+    "A sports club's list of players and coaches. In the examples every letter is replaced by X or x; digits and punctuation are kept.",
     "Kinds of columns:",
     ...KINDS.map(([kind, , what]) => `${kind}: ${what}`),
     "",
@@ -57,30 +58,4 @@ routes.post("/ai-import/columns", async (c) => {
   requireAdmin(requireActor(c));
   const { header, samples } = parse(columnsSchema, await readJson(c.req.raw));
   return c.json({ mapping: await readColumns((state, fields) => clairic(c.env, state, fields), header, samples) });
-});
-
-const namesSchema = z.object({ cells: z.array(z.string().trim().min(1).max(120)).min(1).max(100) });
-
-/** First name, last name and birth year of one name cell as written; null if the model is unsure. */
-export async function readName(run: Run, cell: string): Promise<{ firstName: string; lastName: string; birthYear: number | null } | null> {
-  const a = await run(`Name: ${cell}`, {
-    first_name: { type: "text", instructions: "First name(s) of the person (Vorname)" },
-    last_name: { type: "text", instructions: "Last name of the person including particles such as van, von, de (Nachname)" },
-    birth_year: { type: "number", decimals: 0, instructions: "Year of birth if written; a two-digit year like 14 means 2014" },
-  });
-  const firstName = sure(a.first_name);
-  const lastName = sure(a.last_name);
-  if (typeof firstName !== "string" || typeof lastName !== "string") return null;
-  const year = sure(a.birth_year);
-  return { firstName, lastName, birthYear: year == null ? null : parseYear(String(year)) };
-}
-
-routes.post("/ai-import/names", async (c) => {
-  requireAdmin(requireActor(c));
-  const { cells } = parse(namesSchema, await readJson(c.req.raw));
-  const run: Run = (state, fields) => clairic(c.env, state, fields);
-  // A few at a time: one model call per cell keeps every answer tied to its own cell
-  const names: Awaited<ReturnType<typeof readName>>[] = [];
-  for (let i = 0; i < cells.length; i += 6) names.push(...(await Promise.all(cells.slice(i, i + 6).map((cell) => readName(run, cell)))));
-  return c.json({ names });
 });

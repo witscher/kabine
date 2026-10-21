@@ -12,7 +12,7 @@ export default defineModule({
   paths: [/^\/api\/ai-import\//],
   label: () => t`AI list import`,
   description: () =>
-    t`Helps the list import in the setup wizard: an AI model in your Cloudflare account recognises unusual column headers and splits unclear names, only when an admin taps the button.`,
-  // Stores nothing: column headers and unclear name cells are read and answered in the same request
+    t`Helps the list import in the setup wizard: an AI model in your Cloudflare account recognises unusual column headers, only when an admin taps the button. No names are sent.`,
+  // Stores nothing: column headers (and masked samples) are read and answered in the same request
   privacy: () => null,
 });

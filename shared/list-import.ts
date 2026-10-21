@@ -44,8 +44,6 @@ export interface ImportRow {
   source: ImportSource;
   /** Why this row needs a look: the name could not be split surely, the year was guessed, … */
   doubts: string[];
-  /** The name cell as written, when the name had to be split (for a second look, see ImportAssist) */
-  rawName: string | null;
 }
 
 export interface ImportMembership {
@@ -64,19 +62,32 @@ export interface ImportPerson {
   memberships: ImportMembership[];
   sources: ImportSource[];
   doubts: string[];
-  rawName: string | null;
   excluded: boolean;
 }
 
 /**
  * Help a module offers the list import (src/module-api.ts, listImport), such as an AI that reads columns with
- * unusual headers and names the rules could not split. Only what the arguments hold leaves the browser.
+ * unusual headers. Only what the arguments hold leaves the browser: see assistInput, nothing readable of a person.
  */
 export interface ImportAssist {
-  /** A field for each column from the headers (and samples of columns without a header); "ignore" if unsure. */
+  /** A field for each column; "ignore" if unsure. */
   columns(header: string[], samples: string[][]): Promise<ImportField[]>;
-  /** First name, last name and birth year from name cells as written ("Müller, Anna (2014)"); null if unsure. */
-  names(cells: string[]): Promise<({ firstName: string; lastName: string; birthYear: number | null } | null)[]>;
+}
+
+/** Letters become X or x, digits and punctuation stay: "Müller, Anna (2014)" → "Xxxxxx, Xxxx (2014)", "wD1" → "xX1". */
+export function maskCell(text: string): string {
+  return text.replace(/\p{L}/gu, (ch) => (ch === ch.toLowerCase() && ch !== ch.toUpperCase() ? "x" : "X"));
+}
+
+/**
+ * What a helper may see of a sheet: the headers, and masked samples of columns without one. A sheet without a
+ * recognisable header row may have a person in its "header", so then the headers are masked as well.
+ */
+export function assistInput(sheet: ImportSheet): { header: string[]; samples: string[][] } {
+  const headerKnown = sheet.header.filter((h) => guessField(h) !== "ignore").length >= 2;
+  const header = sheet.header.map((h) => (headerKnown ? h : h && maskCell(h)));
+  const samples = sheet.rows.slice(0, 3).map((r) => r.map((c, i) => (headerKnown && sheet.header[i]?.trim() ? "" : maskCell(c))));
+  return { header, samples };
 }
 
 /** Something the admin decides before the import: maybe the same person, or which birth year is right. */
@@ -267,16 +278,12 @@ export function rowsOfSheet(sheet: ImportSheet): ImportRow[] {
     let firstName = first >= 0 ? cells[first]!.trim() : "";
     let lastName = last >= 0 ? cells[last]!.trim() : "";
     let birthYear: number | null = null;
-    let rawName: string | null = null;
     if (name >= 0 && (!firstName || !lastName)) {
       const split = splitName(cells[name]!);
       firstName ||= split.firstName;
       lastName ||= split.lastName;
       birthYear = split.year;
-      if (split.doubt) {
-        doubts.push(split.doubt);
-        rawName = cells[name]!.trim();
-      }
+      if (split.doubt) doubts.push(split.doubt);
     }
     if (!firstName && !lastName) return;
     const yearCell = year >= 0 ? cells[year]! : "";
@@ -294,7 +301,6 @@ export function rowsOfSheet(sheet: ImportSheet): ImportRow[] {
       role: role >= 0 && cells[role]!.trim() ? parseRole(cells[role]!) : sheet.role,
       source: { file: sheet.file, sheet: sheet.sheet, row: sheet.headerRow + i + 1 },
       doubts: [...new Set(doubts)],
-      rawName,
     });
   });
   return out;
@@ -337,7 +343,7 @@ export function mergeRows(rows: ImportRow[]): { persons: ImportPerson[]; questio
     const key = personKey(r.firstName, r.lastName);
     let p = byKey.get(key);
     if (!p) {
-      p = { key, firstName: r.firstName, lastName: r.lastName, birthYear: null, birthYears: [], memberships: [], sources: [], doubts: [], rawName: null, excluded: false };
+      p = { key, firstName: r.firstName, lastName: r.lastName, birthYear: null, birthYears: [], memberships: [], sources: [], doubts: [], excluded: false };
       byKey.set(key, p);
     }
     if (r.birthYear && !p.birthYears.includes(r.birthYear)) p.birthYears.push(r.birthYear);
@@ -345,7 +351,6 @@ export function mergeRows(rows: ImportRow[]): { persons: ImportPerson[]; questio
     // A role without a team (e.g. a list of coaches without teams) still counts once a team is known
     if (!r.team && r.role !== "player") p.doubts.push(`role:${r.role}`);
     p.sources.push(r.source);
-    p.rawName ??= r.rawName;
     for (const d of r.doubts) if (!p.doubts.includes(d)) p.doubts.push(d);
   }
   const persons = [...byKey.values()];

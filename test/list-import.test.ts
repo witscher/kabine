@@ -1,8 +1,10 @@
 // Reading the club's lists in the setup wizard: columns, names, years, roles, one person across lists. Invented names.
 import { describe, expect, it } from "vitest";
 import {
+  assistInput,
   cellText,
   guessMapping,
+  maskCell,
   mergeRows,
   mergeTwo,
   resolveSame,
@@ -48,7 +50,6 @@ describe("Listen lesen", () => {
         role: "player",
         source: { file: "kader.xlsx", sheet: "Tabelle1", row: 3 },
         doubts: ["birthYear"],
-        rawName: null,
       },
     ]);
     const coaches = sheetFromRows("s2", "Trainer.xlsx", "wD1", [["Vorname", "Nachname"], ["Alex", "Probe"]]);
@@ -76,6 +77,23 @@ describe("Listen lesen", () => {
   });
 });
 
+describe("Was eine Hilfe (KI) zu sehen bekommt", () => {
+  it("Überschriften, Beispiele nur maskiert und nur ohne Überschrift", () => {
+    expect(maskCell("Müller, Anna-Lena (2014) wD1")).toBe("Xxxxxx, Xxxx-Xxxx (2014) xX1");
+    const sheet = sheetFromRows("s", "a.xlsx", "S", [
+      ["Name", "Jg.", ""],
+      ["Muster, Kim", "2014", "wD1"],
+    ]);
+    expect(assistInput(sheet)).toEqual({ header: ["Name", "Jg.", ""], samples: [["", "", "xX1"]] });
+    // Without a recognisable header row the first row may be a person: everything masked
+    const headless = sheetFromRows("t", "b.csv", "", [
+      ["Kim Muster", "2014"],
+      ["Alex Probe", "2015"],
+    ]);
+    expect(assistInput(headless)).toEqual({ header: ["Xxx Xxxxxx", "2014"], samples: [["Xxxx Xxxxx", "2015"]] });
+  });
+});
+
 describe("Personen zusammenführen", () => {
   const source = { file: "a.xlsx", sheet: "S", row: 2 };
   const row = (firstName: string, lastName: string, extra: Partial<Parameters<typeof mergeRows>[0][number]> = {}) => ({
@@ -86,7 +104,6 @@ describe("Personen zusammenführen", () => {
     role: "player" as const,
     source,
     doubts: [],
-    rawName: null,
     ...extra,
   });
 
@@ -162,7 +179,6 @@ describe("Mannschaften vorschlagen", () => {
     memberships: [{ team, role: "player" as const }],
     sources: [],
     doubts: [],
-    rawName: null,
     excluded: false,
   });
 

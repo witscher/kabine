@@ -56,7 +56,7 @@ modules/carpools/
 | `eventCardLine` | a line on event cards on the start page |
 | `eventSection` | a section on the event page |
 | `gameLinks` | links of a fixture module for a game (live ticker, game report) on the "In progress" card and the event page |
-| `listImport` | help in the list import of the setup wizard: columns and unclear names (`ImportAssist` in `shared/list-import.ts`), as buttons the admin taps |
+| `listImport` | help in the list import of the setup wizard: recognising columns (`ImportAssist` in `shared/list-import.ts`), as a button the admin taps; it gets only what `assistInput` lets through |
 
 [`modules/carpools/`](../../modules/carpools/) uses all of the event hooks and is the reference module.
 

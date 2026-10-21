@@ -43,7 +43,7 @@ The setup wizard opens right after:
 3. Sport and season: brings age groups, playing times and helper duties of the sport.
 4. Functions: helper duties, youth referees, carpools, handball4all, SMS.
 5. E-mail: Cloudflare Email Sending or the club's SMTP server (see below).
-6. First teams: by hand, or imported from the club's lists. Excel files (.xlsx, also several sheets), CSV or a pasted table; only first name, last name, birth year, team and role are read, in the browser. The same person in several lists becomes one; birth years that disagree and similar names come up as questions. Teams, coaches and players are created only after everything is checked and corrected. With the beta module *AI list import* switched on in step 4, buttons let an AI model in the club's Cloudflare account read unusual column headers and unclear names (see `modules/ai-import/README.md`).
+6. First teams: by hand, or imported from the club's lists. Excel files (.xlsx, also several sheets), CSV or a pasted table; only first name, last name, birth year, team and role are read, in the browser. The same person in several lists becomes one; birth years that disagree and similar names come up as questions. Teams, coaches and players are created only after everything is checked and corrected. With the beta module *AI list import* switched on in step 4, a button lets an AI model in the club's Cloudflare account recognise unusual column headers; no names are sent (see `modules/ai-import/README.md`).
 7. First people: coaches and further admins, each with a personal link.
 8. Privacy: link to the club's privacy policy and legal notice, contact for questions.
 

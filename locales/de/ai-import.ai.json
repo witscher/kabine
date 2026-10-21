@@ -1,14 +1,9 @@
 {
   "AI list import": "KI-Listenimport",
-  "{unclearCount, plural, one {# name could not be split surely into first and last name.} other {# names could not be split surely into first and last name.}}": "{unclearCount, plural, one {# Name ließ sich nicht sicher in Vor- und Nachname zerlegen.} other {# Namen ließen sich nicht sicher in Vor- und Nachname zerlegen.}}",
-  "AI help sends only what the button names to Cloudflare Workers AI in your club's Cloudflare account: column headers, or the unclear name cells. Cloudflare does not use it for training and does not keep it; processing in the EU is not guaranteed.": "Die KI-Hilfe schickt nur, was auf dem Knopf steht, an Cloudflare Workers AI im Cloudflare-Konto deines Vereins: Spaltenüberschriften oder die unklaren Namenszellen. Cloudflare nutzt das nicht zum Training und speichert es nicht; eine Verarbeitung in der EU ist nicht zugesichert.",
-  "AI, check": "KI, prüfen",
-  "Helps the list import in the setup wizard: an AI model in your Cloudflare account recognises unusual column headers and splits unclear names, only when an admin taps the button.": "Hilft beim Listenimport im Einrichtungsassistenten: Ein KI-Modell in eurem Cloudflare-Konto erkennt ungewöhnliche Spaltenüberschriften und zerlegt unklare Namen, nur wenn ein Admin auf den Knopf tippt.",
-  "Read names with AI": "Namen mit KI lesen",
   "{count, plural, one {# column recognised} other {# columns recognised}}": "{count, plural, one {# Spalte erkannt} other {# Spalten erkannt}}",
-  "{count, plural, one {# name read by the AI, please check} other {# names read by the AI, please check}}": "{count, plural, one {# Name von der KI gelesen, bitte prüfen} other {# Namen von der KI gelesen, bitte prüfen}}",
   "No further columns recognised": "Keine weiteren Spalten erkannt",
   "Recognise columns with AI": "Spalten mit KI erkennen",
   "Workers AI is not set up in this installation.": "Workers AI ist in dieser Installation nicht eingerichtet.",
-  "Unclear names": "Unklare Namen"
+  "The button sends the column headers of the list to Cloudflare Workers AI (model Clairic, currently a preview). Other cell contents only go out masked, without readable names. Cloudflare states that it does not store such requests or use them for training; processing only within the EU is not guaranteed.": "Der Knopf sendet die Spaltenüberschriften der Liste an Cloudflare Workers AI (Modell Clairic, derzeit eine Vorschau). Andere Zellinhalte gehen nur maskiert hinaus, also ohne lesbare Namen. Cloudflare gibt an, solche Anfragen nicht zu speichern und nicht zum Training zu nutzen; eine Verarbeitung nur in der EU ist nicht garantiert.",
+  "Helps the list import in the setup wizard: an AI model in your Cloudflare account recognises unusual column headers, only when an admin taps the button. No names are sent.": "Hilft beim Listenimport im Einrichtungsassistenten: Ein KI-Modell in eurem Cloudflare-Konto erkennt ungewöhnliche Spaltenüberschriften, nur wenn ein Admin auf den Knopf tippt. Namen werden nicht gesendet."
 }
