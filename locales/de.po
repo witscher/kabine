@@ -2157,6 +2157,11 @@ msgid "The game is not taking place or has already started."
 msgstr "Das Spiel findet nicht statt oder hat schon begonnen."
 
 # ai
+#: src/list-import.tsx
+msgid "Excel (.xlsx) or CSV. Save older .xls files and LibreOffice files (.ods) as .xlsx first."
+msgstr "Excel (.xlsx) oder CSV. Ältere .xls-Dateien und LibreOffice-Dateien (.ods) vorher als .xlsx speichern."
+
+# ai
 #: modules/carpools/module.ts
 msgid "Who offers how many seats for an away game, who is looking for one and who rides with whom."
 msgstr "Wer für ein Auswärtsspiel wie viele Plätze anbietet, wer einen sucht und wer mit wem fährt."
@@ -6550,11 +6555,6 @@ msgstr "Standard für Auswärtsspiele"
 #: modules/carpools/app/card.tsx
 msgid "Ride request deleted."
 msgstr "Suche gelöscht."
-
-# ai
-#: src/list-import.tsx
-msgid "{name}: please save it as .xlsx or .csv (older .xls files cannot be read)."
-msgstr "{name}: bitte als .xlsx oder .csv speichern (ältere .xls-Dateien können nicht gelesen werden)."
 
 #: worker/routes/teams.ts
 msgid "Players of other teams of the same or the next younger age class can be taken in."
@@ -11726,6 +11726,11 @@ msgstr "Beim Saisonwechsel; künftige Dienste, wenn jemand den Verein verlässt.
 #: src/pages/team.tsx
 msgid "How it works: open the link, enter your own name, select your child (siblings in the same team right away too) and set up a passkey."
 msgstr "So geht's: Link öffnen, euren eigenen Namen eingeben, euer Kind auswählen (Geschwister in derselben Mannschaft gleich mit) und einen Passkey einrichten."
+
+# ai
+#: src/list-import.tsx
+msgid "{name}: please save it as .xlsx or .csv first (.xls and .ods files cannot be read)."
+msgstr "{name}: bitte zuerst als .xlsx oder .csv speichern (.xls- und .ods-Dateien können nicht gelesen werden)."
 
 # ai
 #: worker/chat/room.ts

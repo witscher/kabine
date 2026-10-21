@@ -1621,6 +1621,9 @@ test("Verwaltung → Import: Spieler in eine vorhandene Mannschaft übernehmen",
   await page.getByRole("link", { name: /^Import/ }).click();
   await expect(page.getByRole("heading", { name: "Import" })).toBeVisible();
   await page.getByRole("button", { name: "Listen übernehmen" }).click();
+  // .xls and .ods cannot be read: the admin is asked to save the file as .xlsx
+  await page.getByLabel("Dateien").setInputFiles({ name: "kader.ods", mimeType: "application/vnd.oasis.opendocument.spreadsheet", buffer: Buffer.from("x") });
+  await expect(page.getByText("kader.ods: bitte zuerst als .xlsx oder .csv speichern")).toBeVisible();
   await page.getByLabel("Oder eine Tabelle einfügen").fill("Name\tJahrgang\tMannschaft\nOle Beispiel\t2014\twT");
   await page.getByRole("button", { name: "Eingefügte Tabelle hinzufügen" }).click();
   await page.getByRole("button", { name: "1 Zeile lesen" }).click();

@@ -40,7 +40,6 @@
   "Excel or CSV files, also several with overlapping people. Teams, coaches and players are created after you have checked and corrected them.": "Excel- oder CSV-Dateien, auch mehrere mit denselben Personen. Mannschaften, Trainer und Spieler werden angelegt, nachdem du sie geprüft und korrigiert hast.",
   "Role where the column is empty": "Rolle, wo die Spalte leer ist",
   "Team name": "Name der Mannschaft",
-  "{name}: please save it as .xlsx or .csv (older .xls files cannot be read).": "{name}: bitte als .xlsx oder .csv speichern (ältere .xls-Dateien können nicht gelesen werden).",
   "Choose a team": "Mannschaft wählen",
   "{count, plural, one {# row below the header} other {# rows below the header}}": "{count, plural, one {# Zeile unter der Kopfzeile} other {# Zeilen unter der Kopfzeile}}",
   "Role of {name}": "Rolle von {name}",
@@ -76,5 +75,7 @@
   "{count, plural, one {# list added: check the columns} other {# lists added: check the columns}}": "{count, plural, one {# Liste hinzugefügt: Spalten prüfen} other {# Listen hinzugefügt: Spalten prüfen}}",
   "Teams, coaches and players from Excel or CSV lists": "Mannschaften, Trainer und Spieler aus Excel- oder CSV-Listen",
   "Import": "Import",
-  "The season has no age groups yet. Add them under <0>age groups</0> first.": "Die Saison hat noch keine Altersklassen. Lege sie zuerst unter <0>Altersklassen</0> an."
+  "The season has no age groups yet. Add them under <0>age groups</0> first.": "Die Saison hat noch keine Altersklassen. Lege sie zuerst unter <0>Altersklassen</0> an.",
+  "{name}: please save it as .xlsx or .csv first (.xls and .ods files cannot be read).": "{name}: bitte zuerst als .xlsx oder .csv speichern (.xls- und .ods-Dateien können nicht gelesen werden).",
+  "Excel (.xlsx) or CSV. Save older .xls files and LibreOffice files (.ods) as .xlsx first.": "Excel (.xlsx) oder CSV. Ältere .xls-Dateien und LibreOffice-Dateien (.ods) vorher als .xlsx speichern."
 }

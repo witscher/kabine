@@ -176,7 +176,7 @@ function Sources({
           sheets.push(sheetFromRows(nextId(), file.name, "", parseDelimited(await file.text())));
         } else {
           const name = file.name;
-          setProblem(t`${name}: please save it as .xlsx or .csv (older .xls files cannot be read).`);
+          setProblem(t`${name}: please save it as .xlsx or .csv first (.xls and .ods files cannot be read).`);
         }
       }
       add(sheets);
@@ -206,7 +206,7 @@ function Sources({
         </Trans>
       </Notice>
       <section class="card card-pad stack" aria-label={t`Add lists`}>
-        <Field label={t`Files`}>
+        <Field label={t`Files`} hint={t`Excel (.xlsx) or CSV. Save older .xls files and LibreOffice files (.ods) as .xlsx first.`}>
           {(id) => (
             <input
               id={id}
