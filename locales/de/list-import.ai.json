@@ -67,5 +67,10 @@
   "Enter by hand instead": "Stattdessen von Hand eingeben",
   "Columns": "Spalten",
   "Date of birth or birth year": "Geburtsdatum/Jahrgang",
-  "only the year is kept": "nur der Jahrgang wird übernommen"
+  "only the year is kept": "nur der Jahrgang wird übernommen",
+  "Leave all of them out": "Alle weglassen",
+  "Without first name": "Ohne Vorname",
+  "Often a heading or a total line of the list. Enter the first name, or leave the entry out.": "Oft eine Überschrift oder Summenzeile der Liste. Trag den Vornamen ein oder lass den Eintrag weg.",
+  "Enter the missing first names or leave those entries out.": "Trag die fehlenden Vornamen ein oder lass diese Einträge weg.",
+  "{noFirstCount, plural, one {# entry without first name} other {# entries without first name}}": "{noFirstCount, plural, one {# Eintrag ohne Vornamen} other {# Einträge ohne Vornamen}}"
 }

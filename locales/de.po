@@ -1023,6 +1023,11 @@ msgid "Subscribe in calendar"
 msgstr "Im Kalender abonnieren"
 
 # ai
+#: src/list-import.tsx
+msgid "Leave all of them out"
+msgstr "Alle weglassen"
+
+# ai
 #: src/pages/setup-wizard.tsx
 msgid "Name of the season"
 msgstr "Name der Saison"
@@ -4600,6 +4605,11 @@ msgid "to follow"
 msgstr "folgt"
 
 # ai
+#: src/list-import.tsx
+msgid "Without first name"
+msgstr "Ohne Vorname"
+
+# ai
 #: modules/sms/worker/routes.ts
 msgid "Sender: at most 11 letters and digits, or a phone number."
 msgstr "Absender: höchstens 11 Buchstaben und Ziffern oder eine Telefonnummer."
@@ -7579,6 +7589,11 @@ msgstr "„{name}“ als Name ohne Zugang eintragen"
 msgid "{name} is in the squad."
 msgstr "{name} ist im Kader."
 
+# ai
+#: src/list-import.tsx
+msgid "{noFirstCount, plural, one {# entry without first name} other {# entries without first name}}"
+msgstr "{noFirstCount, plural, one {# Eintrag ohne Vornamen} other {# Einträge ohne Vornamen}}"
+
 #: src/pages/event.tsx
 msgid "Squad: {count} nominated"
 msgstr "Kader: {count} nominiert"
@@ -8344,6 +8359,7 @@ msgid "Who referees?"
 msgstr "Wer pfeift?"
 
 # ai
+#: src/list-import.tsx
 #: src/list-import.tsx
 msgid "row"
 msgstr "Zeile"
@@ -9228,6 +9244,7 @@ msgstr "Stamm"
 
 # ai
 #: src/list-import.tsx
+#: src/list-import.tsx
 msgid "First name of {name}"
 msgstr "Vorname von {name}"
 
@@ -9242,6 +9259,11 @@ msgstr "Für diesen Termin sind keine Dienste eingetragen."
 #: src/pull-refresh.tsx
 msgid "Pull to refresh"
 msgstr "Zum Aktualisieren ziehen"
+
+# ai
+#: src/list-import.tsx
+msgid "Often a heading or a total line of the list. Enter the first name, or leave the entry out."
+msgstr "Oft eine Überschrift oder Summenzeile der Liste. Trag den Vornamen ein oder lass den Eintrag weg."
 
 #: src/pages/event.tsx
 msgid "Go to person"
@@ -9323,6 +9345,11 @@ msgstr "Für diese Person gibt es keine Suche."
 #: src/pages/team.tsx
 msgid "Personal one-time link, valid until {linkExpires}. Please pass it on directly to {name} only."
 msgstr "Persönlicher Einmal-Link, gültig bis {linkExpires}. Bitte nur direkt an {name} weitergeben."
+
+# ai
+#: src/list-import.tsx
+msgid "Enter the missing first names or leave those entries out."
+msgstr "Trag die fehlenden Vornamen ein oder lass diese Einträge weg."
 
 #: src/format.ts
 msgid "{mins} min. ago"
@@ -10231,6 +10258,7 @@ msgstr "Weitere Trainer und Admins"
 msgid "Was there"
 msgstr "War da"
 
+#: src/list-import.tsx
 #: src/list-import.tsx
 #: src/pages/admin.tsx
 #: src/pages/admin.tsx
@@ -11640,6 +11668,7 @@ msgstr "Persönlichen Link erzeugen"
 
 # ai
 #: src/list-import.tsx
+#: src/list-import.tsx
 msgid "pasted"
 msgstr "eingefügt"
 
@@ -11805,6 +11834,7 @@ msgid "Who needs a ride?"
 msgstr "Wer braucht eine Mitfahrgelegenheit?"
 
 # ai
+#: src/list-import.tsx
 #: src/list-import.tsx
 #: src/list-import.tsx
 msgid "Leave out"

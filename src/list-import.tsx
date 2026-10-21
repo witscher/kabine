@@ -423,7 +423,10 @@ function Review(props: {
   const personCount = active.filter((p) => p.memberships.length).length;
   const teamCount = teams.length;
   const questionCount = openQuestions.length;
-  const ready = !questionCount && !missingClass.length && personCount > 0;
+  // Rows with only a last name: often a heading or total line in the list, sometimes a missing first name
+  const noFirstName = active.filter((p) => p.memberships.length && !p.firstName.trim());
+  const noFirstCount = noFirstName.length;
+  const ready = !questionCount && !missingClass.length && !noFirstName.length && personCount > 0;
 
   return (
     <>
@@ -432,6 +435,55 @@ function Review(props: {
           Check what was read. Correct names, birth years and roles where needed; rows marked “check” were not clear. Nothing is saved until you import.
         </Trans>
       </p>
+
+      {noFirstName.length ? (
+        <section class="card card-pad stack-sm" aria-label={t`Without first name`}>
+          <h2 class="section-title" style={{ margin: 0 }}>
+            {plural(noFirstCount, { one: "# entry without first name", other: "# entries without first name" })}
+          </h2>
+          <p class="small muted">
+            <Trans>Often a heading or a total line of the list. Enter the first name, or leave the entry out.</Trans>
+          </p>
+          {noFirstName.map((p) => {
+            const name = p.lastName || p.rawName || "–";
+            const source = p.sources.map((s) => `${s.file.startsWith("#") ? t`pasted` : s.file}${s.sheet ? ` · ${s.sheet}` : ""}, ${t`row`} ${s.row}`).join("; ");
+            return (
+              <div class="stack-sm" style={{ borderTop: "1px solid var(--line)", paddingTop: "8px" }}>
+                <div>
+                  <strong>{name}</strong>
+                  <div class="small muted">{source}</div>
+                </div>
+                <div class="row-gap">
+                  <input
+                    class="input"
+                    style={{ flex: 1, minWidth: "8em" }}
+                    aria-label={t`First name of ${name}`}
+                    maxLength={50}
+                    placeholder={t`First name`}
+                    onChange={(e) => {
+                      const firstName = (e.target as HTMLInputElement).value.trim();
+                      if (firstName) setPerson(p.key, { firstName, doubts: [] });
+                    }}
+                  />
+                  <button type="button" class="link-btn" onClick={() => setPerson(p.key, { excluded: true })}>
+                    <Trans>Leave out</Trans>
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+          {noFirstName.length > 1 ? (
+            <Button
+              onClick={() => {
+                const keys = new Set(noFirstName.map((p) => p.key));
+                update({ persons: draft.persons.map((p) => (keys.has(p.key) ? { ...p, excluded: true } : p)) });
+              }}
+            >
+              <Trans>Leave all of them out</Trans>
+            </Button>
+          ) : null}
+        </section>
+      ) : null}
 
       {assist && unclearNames.length ? (
         <section class="card card-pad stack-sm" aria-label={t`Unclear names`}>
@@ -537,6 +589,11 @@ function Review(props: {
       {missingClass.length ? (
         <Notice kind="warn">
           <Trans>Choose an age group for every new team.</Trans>
+        </Notice>
+      ) : null}
+      {noFirstName.length ? (
+        <Notice kind="warn">
+          <Trans>Enter the missing first names or leave those entries out.</Trans>
         </Notice>
       ) : null}
       {questionCount ? (

@@ -984,6 +984,10 @@ msgstr "last used {lastUsed}"
 msgid "Subscribe in calendar"
 msgstr "Subscribe in calendar"
 
+#: src/list-import.tsx
+msgid "Leave all of them out"
+msgstr "Leave all of them out"
+
 #: src/pages/setup-wizard.tsx
 msgid "Name of the season"
 msgstr "Name of the season"
@@ -4379,6 +4383,10 @@ msgstr "Add lists"
 msgid "to follow"
 msgstr "to follow"
 
+#: src/list-import.tsx
+msgid "Without first name"
+msgstr "Without first name"
+
 #: modules/sms/worker/routes.ts
 msgid "Sender: at most 11 letters and digits, or a phone number."
 msgstr "Sender: at most 11 letters and digits, or a phone number."
@@ -7221,6 +7229,10 @@ msgstr "Add “{name}” as a name without access"
 msgid "{name} is in the squad."
 msgstr "{name} is in the squad."
 
+#: src/list-import.tsx
+msgid "{noFirstCount, plural, one {# entry without first name} other {# entries without first name}}"
+msgstr "{noFirstCount, plural, one {# entry without first name} other {# entries without first name}}"
+
 #: src/pages/event.tsx
 msgid "Squad: {count} nominated"
 msgstr "Squad: {count} nominated"
@@ -7945,6 +7957,7 @@ msgstr "Message from {selAuthor}: “{excerpt}”"
 msgid "Who referees?"
 msgstr "Who referees?"
 
+#: src/list-import.tsx
 #: src/list-import.tsx
 msgid "row"
 msgstr "row"
@@ -8786,6 +8799,7 @@ msgid "Core"
 msgstr "Core"
 
 #: src/list-import.tsx
+#: src/list-import.tsx
 msgid "First name of {name}"
 msgstr "First name of {name}"
 
@@ -8800,6 +8814,10 @@ msgstr "No duties have been set up for this event."
 #: src/pull-refresh.tsx
 msgid "Pull to refresh"
 msgstr "Pull to refresh"
+
+#: src/list-import.tsx
+msgid "Often a heading or a total line of the list. Enter the first name, or leave the entry out."
+msgstr "Often a heading or a total line of the list. Enter the first name, or leave the entry out."
 
 #: src/pages/event.tsx
 msgid "Go to person"
@@ -8879,6 +8897,10 @@ msgstr "There is no search for this person."
 #: src/pages/team.tsx
 msgid "Personal one-time link, valid until {linkExpires}. Please pass it on directly to {name} only."
 msgstr "Personal one-time link, valid until {linkExpires}. Please pass it on directly to {name} only."
+
+#: src/list-import.tsx
+msgid "Enter the missing first names or leave those entries out."
+msgstr "Enter the missing first names or leave those entries out."
 
 #: src/format.ts
 msgid "{mins} min. ago"
@@ -9749,6 +9771,7 @@ msgstr "More coaches and admins"
 msgid "Was there"
 msgstr "Was there"
 
+#: src/list-import.tsx
 #: src/list-import.tsx
 #: src/pages/admin.tsx
 #: src/pages/admin.tsx
@@ -11096,6 +11119,7 @@ msgid "Create personal link"
 msgstr "Create personal link"
 
 #: src/list-import.tsx
+#: src/list-import.tsx
 msgid "pasted"
 msgstr "pasted"
 
@@ -11255,6 +11279,7 @@ msgstr "Share"
 msgid "Who needs a ride?"
 msgstr "Who needs a ride?"
 
+#: src/list-import.tsx
 #: src/list-import.tsx
 #: src/list-import.tsx
 msgid "Leave out"

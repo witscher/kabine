@@ -1557,7 +1557,7 @@ test("Einrichtung: Mannschaften, Trainer und Spielerinnen aus Listen übernehmen
   await page.goto("/verwaltung/einrichtung");
   await page.getByRole("button", { name: "Stattdessen aus Listen übernehmen" }).click();
   const kader = "Kader Saison 2026/27;;;\nMannschaft;Name;Jg.;Telefon\nwC1;Muster, Lea;12;0123 45\nwC1;Lena Beispiel (2013);;\nwT;Probe, Ida;14;\n";
-  const trainer = "Vorname;Nachname;Mannschaft\nTina;Test;wC1\n";
+  const trainer = "Vorname;Nachname;Mannschaft\nTina;Test;wC1\n;Summe;wC1\n";
   await page.getByLabel("Dateien").setInputFiles([
     { name: "kader.csv", mimeType: "text/csv", buffer: Buffer.from(kader) },
     { name: "trainer.csv", mimeType: "text/csv", buffer: Buffer.from(trainer) },
@@ -1574,7 +1574,7 @@ test("Einrichtung: Mannschaften, Trainer und Spielerinnen aus Listen übernehmen
   await expect(page.getByRole("region", { name: "trainer.csv" }).getByLabel("Alle in dieser Liste sind")).toHaveValue("coach");
   await page.getByLabel("Oder eine Tabelle einfügen").fill("Name\tJahrgang\nLea Muster\t2012\nLena Beispel\t2013");
   await page.getByRole("button", { name: "Eingefügte Tabelle hinzufügen" }).click();
-  await page.getByRole("button", { name: "9 Zeilen lesen" }).click();
+  await page.getByRole("button", { name: "10 Zeilen lesen" }).click();
 
   // Ähnlicher Name in der eingefügten Liste: eine Frage, danach ist sie eine Person
   const questions = page.getByRole("region", { name: "Fragen" });
@@ -1584,6 +1584,11 @@ test("Einrichtung: Mannschaften, Trainer und Spielerinnen aus Listen übernehmen
   const teams = page.getByRole("region", { name: "Mannschaften", exact: true });
   for (const select of await teams.getByLabel("Altersklasse").all()) await expect(select).toHaveValue("wC");
   await expect(teams).toContainText("gibt es schon");
+  // Eine Zeile nur mit Nachnamen (Summenzeile) hält die Übernahme auf, bis sie weggelassen ist
+  const noFirst = page.getByRole("region", { name: "Ohne Vorname" });
+  await expect(noFirst).toContainText("Summe");
+  await expect(page.getByRole("button", { name: "8 Personen übernehmen" })).toBeDisabled();
+  await noFirst.getByRole("button", { name: "Weglassen" }).click();
   await page.getByRole("button", { name: "7 Personen übernehmen" }).click();
 
   // Weiter bei den ersten Personen: die Trainerin aus der Liste mit ihrem persönlichen Link
