@@ -1,0 +1,14 @@
+{
+  "AI list import": "KI-Listenimport",
+  "{unclearCount, plural, one {# name could not be split surely into first and last name.} other {# names could not be split surely into first and last name.}}": "{unclearCount, plural, one {# Name ließ sich nicht sicher in Vor- und Nachname zerlegen.} other {# Namen ließen sich nicht sicher in Vor- und Nachname zerlegen.}}",
+  "AI help sends only what the button names to Cloudflare Workers AI in your club's Cloudflare account: column headers, or the unclear name cells. Cloudflare does not use it for training and does not keep it; processing in the EU is not guaranteed.": "Die KI-Hilfe schickt nur, was auf dem Knopf steht, an Cloudflare Workers AI im Cloudflare-Konto deines Vereins: Spaltenüberschriften oder die unklaren Namenszellen. Cloudflare nutzt das nicht zum Training und speichert es nicht; eine Verarbeitung in der EU ist nicht zugesichert.",
+  "AI, check": "KI, prüfen",
+  "Helps the list import in the setup wizard: an AI model in your Cloudflare account recognises unusual column headers and splits unclear names, only when an admin taps the button.": "Hilft beim Listenimport im Einrichtungsassistenten: Ein KI-Modell in eurem Cloudflare-Konto erkennt ungewöhnliche Spaltenüberschriften und zerlegt unklare Namen, nur wenn ein Admin auf den Knopf tippt.",
+  "Read names with AI": "Namen mit KI lesen",
+  "{count, plural, one {# column recognised} other {# columns recognised}}": "{count, plural, one {# Spalte erkannt} other {# Spalten erkannt}}",
+  "{count, plural, one {# name read by the AI, please check} other {# names read by the AI, please check}}": "{count, plural, one {# Name von der KI gelesen, bitte prüfen} other {# Namen von der KI gelesen, bitte prüfen}}",
+  "No further columns recognised": "Keine weiteren Spalten erkannt",
+  "Recognise columns with AI": "Spalten mit KI erkennen",
+  "Workers AI is not set up in this installation.": "Workers AI ist in dieser Installation nicht eingerichtet.",
+  "Unclear names": "Unklare Namen"
+}

@@ -902,6 +902,11 @@ msgstr "Mitglieder ordnet ein Admin zu."
 msgid "Not after all"
 msgstr "Doch nicht"
 
+# ai
+#: modules/ai-import/app/index.tsx
+msgid "AI help sends only what the button names to Cloudflare Workers AI in your club's Cloudflare account: column headers, or the unclear name cells. Cloudflare does not use it for training and does not keep it; processing in the EU is not guaranteed."
+msgstr "Die KI-Hilfe schickt nur, was auf dem Knopf steht, an Cloudflare Workers AI im Cloudflare-Konto deines Vereins: Spaltenüberschriften oder die unklaren Namenszellen. Cloudflare nutzt das nicht zum Training und speichert es nicht; eine Verarbeitung in der EU ist nicht zugesichert."
+
 #: src/maintenance.tsx
 msgid "The app is currently under maintenance"
 msgstr "Die App wird gerade gewartet"
@@ -2430,6 +2435,11 @@ msgid "The core squad is now nominated for all future games."
 msgstr "Der Stammkader ist jetzt für alle künftigen Spiele nominiert."
 
 # ai
+#: src/list-import.tsx
+msgid "AI, check"
+msgstr "KI, prüfen"
+
+# ai
 #: worker/routes/mail.ts
 msgid "Test mail sent to {to}."
 msgstr "Testmail an {to} verschickt."
@@ -3361,6 +3371,11 @@ msgstr "Feiertage (kein Training)"
 #: src/pages/setup-wizard.tsx
 msgid "Progress"
 msgstr "Fortschritt"
+
+# ai
+#: src/list-import.tsx
+msgid "{unclearCount, plural, one {# name could not be split surely into first and last name.} other {# names could not be split surely into first and last name.}}"
+msgstr "{unclearCount, plural, one {# Name ließ sich nicht sicher in Vor- und Nachname zerlegen.} other {# Namen ließen sich nicht sicher in Vor- und Nachname zerlegen.}}"
 
 #: src/pages/help.tsx
 msgid "Reply by e-mail wanted"
@@ -4322,6 +4337,11 @@ msgid "Save changes · {count}"
 msgstr "Änderungen speichern · {count}"
 
 # ai
+#: modules/ai-import/module.ts
+msgid "Helps the list import in the setup wizard: an AI model in your Cloudflare account recognises unusual column headers and splits unclear names, only when an admin taps the button."
+msgstr "Hilft beim Listenimport im Einrichtungsassistenten: Ein KI-Modell in eurem Cloudflare-Konto erkennt ungewöhnliche Spaltenüberschriften und zerlegt unklare Namen, nur wenn ein Admin auf den Knopf tippt."
+
+# ai
 #: src/pages/event.tsx
 msgid "Present"
 msgstr "Anwesend"
@@ -5245,6 +5265,11 @@ msgid "How do I nominate the squad for a game?"
 msgstr "Wie nominiere ich den Kader für ein Spiel?"
 
 # ai
+#: src/list-import.tsx
+msgid "Read names with AI"
+msgstr "Namen mit KI lesen"
+
+# ai
 #: src/game-import.tsx
 msgid "{venue, select, hall {Date;Time;Opponent;Home;Hall} pitch {Date;Time;Opponent;Home;Pitch} other {Date;Time;Opponent;Home;Venue}}"
 msgstr "{venue, select, hall {Datum;Uhrzeit;Gegner;Heim;Halle} pitch {Datum;Uhrzeit;Gegner;Heim;Platz} other {Datum;Uhrzeit;Gegner;Heim;Ort}}"
@@ -5403,6 +5428,11 @@ msgstr "Bitte gib einen Grund an."
 #: src/pages/chat.tsx
 msgid "Close reactions"
 msgstr "Reaktionen schließen"
+
+# ai
+#: src/list-import.tsx
+msgid "{count, plural, one {# column recognised} other {# columns recognised}}"
+msgstr "{count, plural, one {# Spalte erkannt} other {# Spalten erkannt}}"
 
 #: worker/routes/events.ts
 msgid "Going ahead: {label}"
@@ -6198,6 +6228,11 @@ msgstr "Andere Sportart"
 #: src/list-import.tsx
 msgid "Same, named {aName}"
 msgstr "Ja, als {aName}"
+
+# ai
+#: modules/ai-import/module.ts
+msgid "AI list import"
+msgstr "KI-Listenimport"
 
 #: src/pages/squad.tsx
 msgid "Declined: {reason}"
@@ -8242,6 +8277,11 @@ msgstr "Empfänger sehen diese Adresse. Antworten darauf liest die App nicht."
 msgid "Go through the setup step by step again"
 msgstr "Die Einrichtung noch einmal Schritt für Schritt durchgehen"
 
+# ai
+#: src/list-import.tsx
+msgid "{count, plural, one {# name read by the AI, please check} other {# names read by the AI, please check}}"
+msgstr "{count, plural, one {# Name von der KI gelesen, bitte prüfen} other {# Namen von der KI gelesen, bitte prüfen}}"
+
 #: modules/handball4all/worker/connector.ts
 msgid "No game lists found"
 msgstr "Keine Spiellisten gefunden"
@@ -8983,6 +9023,11 @@ msgstr "Nur verknüpfte Eltern können das einstellen."
 msgid "I have children in different teams."
 msgstr "Ich habe Kinder in verschiedenen Mannschaften."
 
+# ai
+#: src/list-import.tsx
+msgid "No further columns recognised"
+msgstr "Keine weiteren Spalten erkannt"
+
 #: worker/routes/join.ts
 msgid "An access has just been created for this person."
 msgstr "Für diese Person wurde gerade schon ein Zugang angelegt."
@@ -9627,6 +9672,11 @@ msgid "Reactions: {list}. Who reacted?"
 msgstr "Reaktionen: {list}. Wer hat reagiert?"
 
 # ai
+#: src/list-import.tsx
+msgid "Recognise columns with AI"
+msgstr "Spalten mit KI erkennen"
+
+# ai
 #: worker/domain/events.ts
 #: worker/routes/events.ts
 #: worker/routes/events.ts
@@ -9898,6 +9948,11 @@ msgstr "Noch keine Eltern verknüpft. Eltern verknüpfen sich selbst über den E
 #: modules/duties/worker/notify.ts
 msgid "{club} {team} {opponent} on {date} at {time}"
 msgstr "{club} {team} {opponent} am {date} um {time}"
+
+# ai
+#: modules/ai-import/worker/clairic.ts
+msgid "Workers AI is not set up in this installation."
+msgstr "Workers AI ist in dieser Installation nicht eingerichtet."
 
 #: src/pages/plans.tsx
 msgid "No training times yet."
@@ -10390,6 +10445,11 @@ msgstr "Bereits ausgetreten und werden gelöscht: {formerList}."
 #: src/faq.tsx
 msgid "The duties of a game come from a template. Under <0>Team → Settings → Helper plan</0> you choose the template for home and away games; admins maintain templates and duty types under <1>Admin → Helper duties</1>. For a special event, switch on <2>Helpers needed</2> and create time blocks, also a separate duty just for this event, for example barbecue. For an existing special event this is done in the event under <3>Helpers: add time block</3>. There, under <4>Organisers</4>, you also add further people who help manage the helper duties."
 msgstr "Die Dienste eines Spiels kommen aus einer Vorlage. Unter <0>Team → Einstellungen → Helferplan</0> wählst du die Vorlage für Heim- und Auswärtsspiele; Vorlagen und Dienstarten pflegen Admins unter <1>Verwaltung → Helferdienste</1>. Beim Sondertermin schaltest du <2>Helfer benötigt</2> ein und legst Zeitblöcke an, auch einen eigenen Dienst nur für diesen Termin, etwa Grill. Bei einem bestehenden Sondertermin geht das im Termin unter <3>Helfer: Zeitblock hinzufügen</3>. Dort fügst du unter <4>Organisatoren</4> auch weitere Personen hinzu, die die Helferdienste mitverwalten."
+
+# ai
+#: src/list-import.tsx
+msgid "Unclear names"
+msgstr "Unklare Namen"
 
 #: src/pages/club-settings.tsx
 msgid "Accent colour"

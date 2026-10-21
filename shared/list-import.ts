@@ -44,6 +44,8 @@ export interface ImportRow {
   source: ImportSource;
   /** Why this row needs a look: the name could not be split surely, the year was guessed, … */
   doubts: string[];
+  /** The name cell as written, when the name had to be split (for a second look, see ImportAssist) */
+  rawName: string | null;
 }
 
 export interface ImportMembership {
@@ -62,7 +64,19 @@ export interface ImportPerson {
   memberships: ImportMembership[];
   sources: ImportSource[];
   doubts: string[];
+  rawName: string | null;
   excluded: boolean;
+}
+
+/**
+ * Help a module offers the list import (src/module-api.ts, listImport), such as an AI that reads columns with
+ * unusual headers and names the rules could not split. Only what the arguments hold leaves the browser.
+ */
+export interface ImportAssist {
+  /** A field for each column from the headers (and samples of columns without a header); "ignore" if unsure. */
+  columns(header: string[], samples: string[][]): Promise<ImportField[]>;
+  /** First name, last name and birth year from name cells as written ("Müller, Anna (2014)"); null if unsure. */
+  names(cells: string[]): Promise<({ firstName: string; lastName: string; birthYear: number | null } | null)[]>;
 }
 
 /** Something the admin decides before the import: maybe the same person, or which birth year is right. */
@@ -122,11 +136,11 @@ export function parseDelimited(text: string): string[][] {
 const FIELD_PATTERNS: [ImportField, RegExp][] = [
   ["firstName", /^(vor ?name|first ?name|given ?name|rufname)$/i],
   ["lastName", /^(nach ?name|familien ?name|last ?name|surname|family ?name)$/i],
-  ["birthDate", /^(geb(urts)?\.? ?(datum|dat\.?)|geboren( am)?|date of birth|birth ?date|dob)$/i],
-  ["birthYear", /^(jg\.?|jahrgang|geb(urts)?\.? ?jahr|year of birth|birth ?year|year)$/i],
+  ["birthDate", /^(geb(urts)?\.? ?(datum|dat\.?)|geb\.?|geboren( am)?|date of birth|birth ?date|dob)$/i],
+  ["birthYear", /^(jg\.?|jhg\.?|jahrgang|geb(urts)?\.? ?jahr|year of birth|birth ?year|year)$/i],
   ["team", /^(mannschaft|team|altersklasse|klasse|gruppe|kader|squad)$/i],
   ["role", /^(funktion|rolle|position|role|function|aufgabe)$/i],
-  ["name", /^(name|spieler(in)?|person|teilnehmer(in)?|mitglied|player|full ?name|trainer ?name)$/i],
+  ["name", /^(name|spieler(in)?|spieler\/in|person|teilnehmer(in)?|teilnehmer\/in|akteur(in)?|akteur\/in|mitglied|player|full ?name|trainer ?name)$/i],
 ];
 
 /** The field a column header suggests ("ignore" if none). */
@@ -254,12 +268,16 @@ export function rowsOfSheet(sheet: ImportSheet): ImportRow[] {
     let firstName = first >= 0 ? cells[first]!.trim() : "";
     let lastName = last >= 0 ? cells[last]!.trim() : "";
     let birthYear: number | null = null;
+    let rawName: string | null = null;
     if (name >= 0 && (!firstName || !lastName)) {
       const split = splitName(cells[name]!);
       firstName ||= split.firstName;
       lastName ||= split.lastName;
       birthYear = split.year;
-      if (split.doubt) doubts.push(split.doubt);
+      if (split.doubt) {
+        doubts.push(split.doubt);
+        rawName = cells[name]!.trim();
+      }
     }
     if (!firstName && !lastName) return;
     const yearCell = year >= 0 ? cells[year]! : date >= 0 ? cells[date]! : "";
@@ -277,6 +295,7 @@ export function rowsOfSheet(sheet: ImportSheet): ImportRow[] {
       role: role >= 0 && cells[role]!.trim() ? parseRole(cells[role]!) : sheet.role,
       source: { file: sheet.file, sheet: sheet.sheet, row: sheet.headerRow + i + 1 },
       doubts: [...new Set(doubts)],
+      rawName,
     });
   });
   return out;
@@ -319,7 +338,7 @@ export function mergeRows(rows: ImportRow[]): { persons: ImportPerson[]; questio
     const key = personKey(r.firstName, r.lastName);
     let p = byKey.get(key);
     if (!p) {
-      p = { key, firstName: r.firstName, lastName: r.lastName, birthYear: null, birthYears: [], memberships: [], sources: [], doubts: [], excluded: false };
+      p = { key, firstName: r.firstName, lastName: r.lastName, birthYear: null, birthYears: [], memberships: [], sources: [], doubts: [], rawName: null, excluded: false };
       byKey.set(key, p);
     }
     if (r.birthYear && !p.birthYears.includes(r.birthYear)) p.birthYears.push(r.birthYear);
@@ -327,6 +346,7 @@ export function mergeRows(rows: ImportRow[]): { persons: ImportPerson[]; questio
     // A role without a team (e.g. a list of coaches without teams) still counts once a team is known
     if (!r.team && r.role !== "player") p.doubts.push(`role:${r.role}`);
     p.sources.push(r.source);
+    p.rawName ??= r.rawName;
     for (const d of r.doubts) if (!p.doubts.includes(d)) p.doubts.push(d);
   }
   const persons = [...byKey.values()];

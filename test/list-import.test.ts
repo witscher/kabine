@@ -48,6 +48,7 @@ describe("Listen lesen", () => {
         role: "player",
         source: { file: "kader.xlsx", sheet: "Tabelle1", row: 3 },
         doubts: ["birthYear"],
+        rawName: null,
       },
     ]);
     const coaches = sheetFromRows("s2", "Trainer.xlsx", "wD1", [["Vorname", "Nachname"], ["Alex", "Probe"]]);
@@ -84,6 +85,7 @@ describe("Personen zusammenführen", () => {
     role: "player" as const,
     source,
     doubts: [],
+    rawName: null,
     ...extra,
   });
 
@@ -159,6 +161,7 @@ describe("Mannschaften vorschlagen", () => {
     memberships: [{ team, role: "player" as const }],
     sources: [],
     doubts: [],
+    rawName: null,
     excluded: false,
   });
 

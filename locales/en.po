@@ -868,6 +868,10 @@ msgstr "An admin assigns members."
 msgid "Not after all"
 msgstr "Not after all"
 
+#: modules/ai-import/app/index.tsx
+msgid "AI help sends only what the button names to Cloudflare Workers AI in your club's Cloudflare account: column headers, or the unclear name cells. Cloudflare does not use it for training and does not keep it; processing in the EU is not guaranteed."
+msgstr "AI help sends only what the button names to Cloudflare Workers AI in your club's Cloudflare account: column headers, or the unclear name cells. Cloudflare does not use it for training and does not keep it; processing in the EU is not guaranteed."
+
 #: src/maintenance.tsx
 msgid "The app is currently under maintenance"
 msgstr "The app is currently under maintenance"
@@ -2326,6 +2330,10 @@ msgstr "Only trainings can be optional."
 msgid "The core squad is now nominated for all future games."
 msgstr "The core squad is now nominated for all future games."
 
+#: src/list-import.tsx
+msgid "AI, check"
+msgstr "AI, check"
+
 #: worker/routes/mail.ts
 msgid "Test mail sent to {to}."
 msgstr "Test mail sent to {to}."
@@ -3209,6 +3217,10 @@ msgstr "Public holidays (no training)"
 #: src/pages/setup-wizard.tsx
 msgid "Progress"
 msgstr "Progress"
+
+#: src/list-import.tsx
+msgid "{unclearCount, plural, one {# name could not be split surely into first and last name.} other {# names could not be split surely into first and last name.}}"
+msgstr "{unclearCount, plural, one {# name could not be split surely into first and last name.} other {# names could not be split surely into first and last name.}}"
 
 #: src/pages/help.tsx
 msgid "Reply by e-mail wanted"
@@ -4120,6 +4132,10 @@ msgstr "Only for codes and reminders you choose. Neither coaches nor admins see 
 msgid "Save changes · {count}"
 msgstr "Save changes · {count}"
 
+#: modules/ai-import/module.ts
+msgid "Helps the list import in the setup wizard: an AI model in your Cloudflare account recognises unusual column headers and splits unclear names, only when an admin taps the button."
+msgstr "Helps the list import in the setup wizard: an AI model in your Cloudflare account recognises unusual column headers and splits unclear names, only when an admin taps the button."
+
 #: src/pages/event.tsx
 msgid "Present"
 msgstr "Present"
@@ -4998,6 +5014,10 @@ msgstr "Mute {selAuthor}"
 msgid "How do I nominate the squad for a game?"
 msgstr "How do I nominate the squad for a game?"
 
+#: src/list-import.tsx
+msgid "Read names with AI"
+msgstr "Read names with AI"
+
 #: src/game-import.tsx
 msgid "{venue, select, hall {Date;Time;Opponent;Home;Hall} pitch {Date;Time;Opponent;Home;Pitch} other {Date;Time;Opponent;Home;Venue}}"
 msgstr "{venue, select, hall {Date;Time;Opponent;Home;Hall} pitch {Date;Time;Opponent;Home;Pitch} other {Date;Time;Opponent;Home;Venue}}"
@@ -5148,6 +5168,10 @@ msgstr "Please give a reason."
 #: src/pages/chat.tsx
 msgid "Close reactions"
 msgstr "Close reactions"
+
+#: src/list-import.tsx
+msgid "{count, plural, one {# column recognised} other {# columns recognised}}"
+msgstr "{count, plural, one {# column recognised} other {# columns recognised}}"
 
 #: worker/routes/events.ts
 msgid "Going ahead: {label}"
@@ -5907,6 +5931,10 @@ msgstr "Other sport"
 #: src/list-import.tsx
 msgid "Same, named {aName}"
 msgstr "Same, named {aName}"
+
+#: modules/ai-import/module.ts
+msgid "AI list import"
+msgstr "AI list import"
 
 #: src/pages/squad.tsx
 msgid "Declined: {reason}"
@@ -7857,6 +7885,10 @@ msgstr "Recipients see this address. Replies to it are not read by the app."
 msgid "Go through the setup step by step again"
 msgstr "Go through the setup step by step again"
 
+#: src/list-import.tsx
+msgid "{count, plural, one {# name read by the AI, please check} other {# names read by the AI, please check}}"
+msgstr "{count, plural, one {# name read by the AI, please check} other {# names read by the AI, please check}}"
+
 #: modules/handball4all/worker/connector.ts
 msgid "No game lists found"
 msgstr "No game lists found"
@@ -8563,6 +8595,10 @@ msgstr "Only linked parents can set this."
 msgid "I have children in different teams."
 msgstr "I have children in different teams."
 
+#: src/list-import.tsx
+msgid "No further columns recognised"
+msgstr "No further columns recognised"
+
 #: worker/routes/join.ts
 msgid "An access has just been created for this person."
 msgstr "An access has just been created for this person."
@@ -9177,6 +9213,10 @@ msgstr "{title}, {weekday} {day} at {clock}"
 msgid "Reactions: {list}. Who reacted?"
 msgstr "Reactions: {list}. Who reacted?"
 
+#: src/list-import.tsx
+msgid "Recognise columns with AI"
+msgstr "Recognise columns with AI"
+
 #: worker/domain/events.ts
 #: worker/routes/events.ts
 #: worker/routes/events.ts
@@ -9441,6 +9481,10 @@ msgstr "No parents linked yet. Parents link themselves via the parent link."
 #: modules/duties/worker/notify.ts
 msgid "{club} {team} {opponent} on {date} at {time}"
 msgstr "{club} {team} {opponent} on {date} at {time}"
+
+#: modules/ai-import/worker/clairic.ts
+msgid "Workers AI is not set up in this installation."
+msgstr "Workers AI is not set up in this installation."
 
 #: src/pages/plans.tsx
 msgid "No training times yet."
@@ -9911,6 +9955,10 @@ msgstr "Already left and will be deleted: {formerList}."
 #: src/faq.tsx
 msgid "The duties of a game come from a template. Under <0>Team → Settings → Helper plan</0> you choose the template for home and away games; admins maintain templates and duty types under <1>Admin → Helper duties</1>. For a special event, switch on <2>Helpers needed</2> and create time blocks, also a separate duty just for this event, for example barbecue. For an existing special event this is done in the event under <3>Helpers: add time block</3>. There, under <4>Organisers</4>, you also add further people who help manage the helper duties."
 msgstr "The duties of a game come from a template. Under <0>Team → Settings → Helper plan</0> you choose the template for home and away games; admins maintain templates and duty types under <1>Admin → Helper duties</1>. For a special event, switch on <2>Helpers needed</2> and create time blocks, also a separate duty just for this event, for example barbecue. For an existing special event this is done in the event under <3>Helpers: add time block</3>. There, under <4>Organisers</4>, you also add further people who help manage the helper duties."
+
+#: src/list-import.tsx
+msgid "Unclear names"
+msgstr "Unclear names"
 
 #: src/pages/club-settings.tsx
 msgid "Accent colour"

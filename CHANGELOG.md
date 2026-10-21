@@ -6,6 +6,8 @@ Changes that are merged but not released yet go under *Unreleased*, one line eac
 
 ## Unreleased
 
+- The setup wizard can import teams, coaches and players from the club's lists: Excel files with one or more sheets, CSV or a pasted table, several lists with the same people combined into one. Only name, birth year, team and role are read, in the browser; everything is checked and corrected before anything is created.
+- New beta module *AI list import* (off by default): in the list import, buttons let Cloudflare's AI model Clairic in the club's account read unusual column headers and unclear names. Configuration change: `wrangler.jsonc` gets the Workers AI binding `AI`; without the module nothing is sent or billed.
 - Only admins change their own name. Players, parents and coaches see "Name wrong? Tell your coach or an admin." in their profile; coaches correct the names of players and now also of parents of their teams.
 - `npm run admin:link` is documented as a break-glass operation and gets `--owner` (the rescued person becomes the owner) and `--revoke-all-admins` (compromised accesses: every other admin loses the role and is signed out, with confirmation). Every use is recorded and shown under *Administration → Updates and maintenance*.
 - The update pull request shows the release notes of every version since the installed one, so a copy that skipped releases sees all changes, and it closes older update pull requests that are still open.

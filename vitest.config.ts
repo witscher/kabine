@@ -11,6 +11,8 @@ export default defineConfig(async () => {
       lingui(),
       cloudflareTest({
         wrangler: { configPath: "./wrangler.jsonc" },
+        // Tests never reach Cloudflare (Workers AI of the AI list import is faked in its tests)
+        remoteBindings: false,
         miniflare: {
           bindings: {
             TEST_MIGRATIONS: migrations,

@@ -23,6 +23,8 @@ import {
   type ImportTeam,
 } from "../shared/list-import";
 import { api, errorMessage } from "./api";
+import type { AppModule } from "./module-api";
+import { useActiveModules } from "./modules";
 import { Button, Field, Notice, toast } from "./ui";
 
 const DRAFT_KEY = "kabine.setup.listImport";
@@ -85,6 +87,10 @@ function roleLabel(r: ImportRole): string {
 
 const fullName = (p: { firstName: string; lastName: string }) => `${p.firstName} ${p.lastName}`.trim();
 
+type Assist = NonNullable<AppModule["listImport"]>;
+/** Help of a module the club switched on (AI list import), if any. */
+const useAssist = (): Assist | null => useActiveModules().find((m) => m.listImport)?.listImport ?? null;
+
 export function ListImport(props: { ageClasses: ImportAgeClass[]; existingTeams: string[]; onDone: () => void; onCancel: () => void }) {
   const [draft, setDraft] = useState<Draft>(() => loadDraft() ?? emptyDraft());
   useEffect(() => saveDraft(draft), [draft]);
@@ -125,6 +131,7 @@ function Sources({ draft, update, onRead, onDiscard }: { draft: Draft; update: (
   const [paste, setPaste] = useState("");
   const [problem, setProblem] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const assist = useAssist();
   const add = (sheets: ImportSheet[]) => update({ sheets: [...draft.sheets, ...sheets.filter((s) => s.rows.length)] });
   const nextId = () => `s${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
 
@@ -216,8 +223,9 @@ function Sources({ draft, update, onRead, onDiscard }: { draft: Draft; update: (
         {problem ? <Notice kind="warn">{problem}</Notice> : null}
       </section>
 
+      {assist && draft.sheets.length ? <p class="small muted">{assist.notice()}</p> : null}
       {draft.sheets.map((s) => (
-        <SheetCard key={s.id} sheet={s} onChange={(patch) => setSheet(s.id, patch)} onRemove={() => update({ sheets: draft.sheets.filter((x) => x.id !== s.id) })} />
+        <SheetCard key={s.id} sheet={s} assist={assist} onChange={(patch) => setSheet(s.id, patch)} onRemove={() => update({ sheets: draft.sheets.filter((x) => x.id !== s.id) })} />
       ))}
 
       <Button variant="primary" block disabled={!rowCount} onClick={onRead}>
@@ -236,8 +244,40 @@ function sheetTitle(s: ImportSheet): string {
   return s.sheet ? `${base} · ${s.sheet}` : base;
 }
 
-function SheetCard({ sheet, onChange, onRemove }: { sheet: ImportSheet; onChange: (p: Partial<ImportSheet>) => void; onRemove: () => void }) {
+function SheetCard({
+  sheet,
+  assist,
+  onChange,
+  onRemove,
+}: {
+  sheet: ImportSheet;
+  assist: Assist | null;
+  onChange: (p: Partial<ImportSheet>) => void;
+  onRemove: () => void;
+}) {
+  const [problem, setProblem] = useState<string | null>(null);
   const hasName = sheet.mapping.some((f) => f === "name" || f === "firstName" || f === "lastName");
+  const unclear = sheet.mapping.some((f, i) => f === "ignore" && sheet.rows.some((r) => r[i]));
+  const askAi = async () => {
+    setProblem(null);
+    try {
+      // Samples only of columns without a header: a header like "Telefon" says enough, its numbers stay here
+      const samples = sheet.rows.slice(0, 3).map((r) => r.map((c, i) => (sheet.header[i]?.trim() ? "" : c)));
+      const suggested = await assist!.columns(sheet.header, samples);
+      const used = new Set(sheet.mapping.filter((f) => f !== "ignore"));
+      const mapping = sheet.mapping.map((f, i) => {
+        const s = suggested[i] ?? "ignore";
+        if (f !== "ignore" || s === "ignore" || used.has(s)) return f;
+        used.add(s);
+        return s;
+      });
+      const count = mapping.filter((f, i) => f !== sheet.mapping[i]).length;
+      onChange({ mapping });
+      toast(count ? plural(count, { one: "# column recognised", other: "# columns recognised" }) : t`No further columns recognised`);
+    } catch (err) {
+      setProblem(errorMessage(err));
+    }
+  };
   const count = sheet.rows.length;
   const preview = sheet.rows.slice(0, 3);
   return (
@@ -275,6 +315,14 @@ function SheetCard({ sheet, onChange, onRemove }: { sheet: ImportSheet; onChange
           );
         })}
       </ul>
+      {assist && (unclear || !hasName) ? (
+        <div class="stack-sm">
+          <Button icon="star" onClick={askAi}>
+            <Trans>Recognise columns with AI</Trans>
+          </Button>
+          {problem ? <Notice kind="warn">{problem}</Notice> : null}
+        </div>
+      ) : null}
       {!hasName ? (
         <Notice kind="warn">
           <Trans>Choose the column with the names, otherwise this list is not read.</Trans>
@@ -310,6 +358,7 @@ function Review(props: {
 }) {
   const { draft, update } = props;
   const [problem, setProblem] = useState<string | null>(null);
+  const assist = useAssist();
   const byKey = new Map(draft.persons.map((p) => [p.key, p]));
   const active = draft.persons.filter((p) => !p.excluded);
   const usedTeams = new Set(active.flatMap((p) => p.memberships.map((m) => m.team)));
@@ -343,6 +392,28 @@ function Review(props: {
     }
   };
 
+  const unclearNames = active.filter((p) => p.rawName && p.doubts.includes("name"));
+  const unclearCount = unclearNames.length;
+  const askAi = async () => {
+    setProblem(null);
+    try {
+      const names = await assist!.names(unclearNames.map((p) => p.rawName!));
+      const found = new Map(unclearNames.map((p, i) => [p.key, names[i] ?? null]));
+      update({
+        persons: draft.persons.map((p) => {
+          const n = found.get(p.key);
+          if (!n) return p;
+          const birthYear = p.birthYear ?? n.birthYear;
+          return { ...p, firstName: n.firstName, lastName: n.lastName, birthYear, birthYears: birthYear ? [birthYear] : p.birthYears, doubts: ["ai"] };
+        }),
+      });
+      const count = names.filter(Boolean).length;
+      toast(plural(count, { one: "# name read by the AI, please check", other: "# names read by the AI, please check" }));
+    } catch (err) {
+      setProblem(errorMessage(err));
+    }
+  };
+
   const personCount = active.filter((p) => p.memberships.length).length;
   const teamCount = teams.length;
   const questionCount = openQuestions.length;
@@ -355,6 +426,16 @@ function Review(props: {
           Check what was read. Correct names, birth years and roles where needed; rows marked “check” were not clear. Nothing is saved until you import.
         </Trans>
       </p>
+
+      {assist && unclearNames.length ? (
+        <section class="card card-pad stack-sm" aria-label={t`Unclear names`}>
+          <p>{plural(unclearCount, { one: "# name could not be split surely into first and last name.", other: "# names could not be split surely into first and last name." })}</p>
+          <Button icon="star" onClick={askAi}>
+            <Trans>Read names with AI</Trans>
+          </Button>
+          <p class="small muted">{assist.notice()}</p>
+        </section>
+      ) : null}
 
       {questionCount ? (
         <section class="card card-pad stack-sm" aria-label={t`Questions`}>
@@ -603,7 +684,7 @@ function TeamPeople({ team, persons, setPerson }: { team: string; persons: Impor
               </select>
             </div>
             <div class="row-gap small">
-              {p.doubts.length ? <span class="badge warn">{t`check`}</span> : null}
+              {p.doubts.includes("ai") ? <span class="badge warn">{t`AI, check`}</span> : p.doubts.length ? <span class="badge warn">{t`check`}</span> : null}
               <span class="muted" style={{ flex: 1 }}>{source}</span>
               <button type="button" class="link-btn" onClick={() => setPerson(p.key, { excluded: true })}>
                 <Trans>Leave out</Trans>
