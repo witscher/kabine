@@ -83,3 +83,9 @@ The videos of the original app were screen recordings with real names and the cl
 ## Demo data instead of a seed (K1, October 2026)
 
 A real installation starts empty: the setup wizard creates season, age classes and teams. `seed/demo.sql` is only for local development and the public demo, with invented names, and is protected by the marker `demo_v1` so a second run changes nothing.
+
+## Import without AI, restore that merges (October 2026)
+
+The list import reads the club's spreadsheets with fixed rules in the browser. An optional module with Cloudflare's model Clairic was tried and removed again: Clairic is a preview, Cloudflare's terms exclude training only for generative AI, Workers AI cannot be limited to the EU, and most players are children. With only column headers and masked samples it added little over the rules.
+
+Restoring an export merges and never deletes: each row gets a new id, references are mapped, rows that exist already (unique value, people by name and birth year, otherwise the same content) are kept. So one code path serves a full restore into a new installation and taking over parts into a running one, and a second run changes nothing. Admin roles come along only with a full restore, so people taken over from another club's export never become admins here. The browser sends the rows in small chunks, which keeps each request within the CPU limit of the Workers free plan; the schema is read with PRAGMA at run time, so exports of older versions fit.

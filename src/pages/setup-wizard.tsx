@@ -12,6 +12,7 @@ import { fullDate, isoToLocalDate, personName, todayLocal } from "../format";
 import { currentLocale } from "../i18n";
 import { LanguageSwitch } from "../language-switch";
 import { hasListImportDraft, ListImport } from "../list-import";
+import { RestoreFromExport } from "../restore";
 import { Icon } from "../icons";
 import { useSession } from "../session";
 import { invalidate, useQuery } from "../store";
@@ -268,7 +269,7 @@ function TeamsStep({ onNext }: { onNext: () => void }) {
   const { refresh } = useSession();
   const teams = useQuery<{ teams: TeamRow[] }>("/teams");
   const ages = useQuery<{ ageClasses: { code: string; name: string; birthYearMin?: number | null; birthYearMax?: number | null }[] }>("/age-classes");
-  const [mode, setMode] = useState<"choose" | "manual" | "import">(() => (hasListImportDraft() ? "import" : "choose"));
+  const [mode, setMode] = useState<"choose" | "manual" | "import" | "restore">(() => (hasListImportDraft() ? "import" : "choose"));
   const [name, setName] = useState("");
   const [ageClassCode, setAgeClassCode] = useState("");
   const [gender, setGender] = useState<TeamGender>("x");
@@ -338,7 +339,32 @@ function TeamsStep({ onNext }: { onNext: () => void }) {
             <Trans>Enter by hand</Trans>
           </Button>
         </section>
+        <section class="card card-pad stack-sm" aria-label={t`From an export of Kabine`}>
+          <h2 class="section-title" style={{ margin: 0 }}>
+            <Trans>From an export of Kabine</Trans>
+          </h2>
+          <p class="small muted">
+            <Trans>Moving from another installation: take over teams, people, events and chats from its export file.</Trans>
+          </p>
+          <Button onClick={() => setMode("restore")}>
+            <Trans>Choose export file</Trans>
+          </Button>
+        </section>
       </>
+    );
+  }
+  if (mode === "restore") {
+    return (
+      <RestoreFromExport
+        cancelLabel={t`Back`}
+        onCancel={() => setMode("choose")}
+        onDone={async () => {
+          invalidate("/teams", "/admin/persons");
+          await refresh();
+          await loadClub();
+          onNext();
+        }}
+      />
     );
   }
 

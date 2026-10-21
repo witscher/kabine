@@ -6,6 +6,7 @@ import { type AppEnv, intParam, requireActor } from "../app";
 import { requireAdmin } from "../auth/actor";
 import { assertNotProtected, assertNotStaffUnlessAdmin } from "../auth/owner";
 import { recordAttendance, seasonStatsStatements } from "../domain/attendance";
+import { KABINE_VERSION } from "../../shared/changelog";
 import { chatStub, clearChats, markFormerInChats } from "../domain/chat";
 import { holidayDays, type HolidayInput, holidaySource, holidaySourceLabel } from "../domain/holidays";
 import { loadClub } from "../domain/club";
@@ -509,7 +510,7 @@ seasonRoutes.get("/admin/export", async (c) => {
   }
   data.chats = chats;
   const stamp = nowLocal().replace(/[:T]/g, "-");
-  return new Response(JSON.stringify({ exportedAt: utcIso(), app: "Kabine", data }, null, 1), {
+  return new Response(JSON.stringify({ exportedAt: utcIso(), app: "Kabine", version: KABINE_VERSION, data }, null, 1), {
     headers: {
       "content-type": "application/json; charset=utf-8",
       "content-disposition": `attachment; filename="kabine-export-${stamp}.json"`,

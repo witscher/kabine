@@ -281,6 +281,11 @@ msgstr "Das Geburtsjahr pflegt dein Trainer."
 msgid "What is the difference between a group and a team?"
 msgstr "Was ist der Unterschied zwischen Gruppe und Mannschaft?"
 
+# ai
+#: src/restore.tsx
+msgid "Take over what is ticked"
+msgstr "Angekreuztes übernehmen"
+
 #: modules/carpools/app/card.tsx
 #: modules/carpools/app/card.tsx
 msgid "Add passenger"
@@ -289,6 +294,11 @@ msgstr "Mitfahrer eintragen"
 #: src/pages/admin.tsx
 msgid "Born from"
 msgstr "Jg. von"
+
+# ai
+#: src/restore.tsx
+msgid "Club settings (name, colours, logo, region, functions)"
+msgstr "Vereinseinstellungen (Name, Farben, Logo, Region, Funktionen)"
 
 #: modules/duties/app/admin.tsx
 msgid "Parents sign up for their child. In teams without parents, the players do this themselves. Members: full members of the club who belong to the team (admins set this under People)."
@@ -526,6 +536,12 @@ msgstr "{name} spielt jetzt auch in der {teamName}."
 #: modules/youth-referees/app/referees.tsx
 msgid "People with the role"
 msgstr "Personen mit Rolle"
+
+# ai
+#: src/pages/list-import.tsx
+#: src/pages/setup-wizard.tsx
+msgid "Choose export file"
+msgstr "Export-Datei wählen"
 
 #: modules/carpools/app/card.tsx
 msgid "FOR COACHES"
@@ -927,6 +943,11 @@ msgstr "Bitte gib das Passwort des Mail-Kontos ein."
 msgid "I am {playerName} – set up passkey"
 msgstr "Ich bin {playerName} – Passkey einrichten"
 
+# ai
+#: src/pages/setup-wizard.tsx
+msgid "Moving from another installation: take over teams, people, events and chats from its export file."
+msgstr "Umzug von einer anderen Installation: Mannschaften, Personen, Termine und Chats aus deren Export-Datei übernehmen."
+
 #: src/pages/admin.tsx
 msgid "Revoke admin rights?"
 msgstr "Admin-Rechte entziehen?"
@@ -1123,6 +1144,11 @@ msgstr "Ansicht als {mode}: {name}"
 msgid "Appears as a highlighted announcement in the chat of every selected team, with your name."
 msgstr "Erscheint als hervorgehobene Ankündigung im Chat jeder gewählten Mannschaft, mit deinem Namen."
 
+# ai
+#: src/restore.tsx
+msgid "Nothing is deleted or overwritten: what exists here already stays and is skipped. Passkeys, sign-ins and invitation links are not part of an export; everyone signs in again afterwards. To be safe, <0>export the current data</0> first."
+msgstr "Nichts wird gelöscht oder überschrieben: Was hier schon da ist, bleibt und wird übersprungen. Passkeys, Anmeldungen und Einladungslinks sind nicht Teil eines Exports; alle melden sich danach neu an. Zur Sicherheit vorher <0>die aktuellen Daten exportieren</0>."
+
 #: src/calendar.tsx
 msgid "Remove link"
 msgstr "Link entfernen"
@@ -1136,6 +1162,7 @@ msgid "End time (optional)"
 msgstr "Ende (optional)"
 
 # ai
+#: src/pages/list-import.tsx
 #: src/pages/setup-wizard.tsx
 msgid "From lists"
 msgstr "Aus Listen"
@@ -1396,6 +1423,11 @@ msgstr "{name} ist dann keine dauerhafte Aushilfe der {teamName} mehr."
 msgid "Nobody has enough free seats right now."
 msgstr "Gerade hat niemand genug Plätze frei."
 
+# ai
+#: src/restore.tsx
+msgid "People, parent links, e-mail addresses, profile pictures"
+msgstr "Personen, Eltern-Verknüpfungen, E-Mail-Adressen, Profilbilder"
+
 #: src/email.tsx
 #: src/email.tsx
 #: src/pages/admin.tsx
@@ -1641,6 +1673,11 @@ msgstr "Rundnachricht"
 #: src/pages/admin.tsx
 msgid "b. {birthYear}"
 msgstr "Jg. {birthYear}"
+
+# ai
+#: src/restore.tsx
+msgid "Exported on {exportedOn}"
+msgstr "Exportiert am {exportedOn}"
 
 #: worker/routes/squad.ts
 msgid "Help declined"
@@ -1915,6 +1952,7 @@ msgstr "Absage eintragen"
 
 #: src/pages/admin.tsx
 #: src/pages/team.tsx
+#: src/restore.tsx
 msgid "Teams and groups"
 msgstr "Mannschaften und Gruppen"
 
@@ -2281,6 +2319,14 @@ msgid "School holidays and public holidays of your region now also load for the 
 msgstr "Schulferien und Feiertage deiner Region lassen sich jetzt auch für die laufende Saison laden: unter Verwaltung → Ferien und wenn du die Region änderst."
 
 # ai
+#: src/pages/list-import.tsx
+#: src/pages/list-import.tsx
+#: src/pages/setup-wizard.tsx
+#: src/pages/setup-wizard.tsx
+msgid "From an export of Kabine"
+msgstr "Aus einem Kabine-Export"
+
+# ai
 #: src/pages/setup-wizard.tsx
 #: src/pages/setup-wizard.tsx
 msgid "First people"
@@ -2643,6 +2689,11 @@ msgid "No game schedule is linked for this team."
 msgstr "Für diese Mannschaft ist kein Spielplan verknüpft."
 
 # ai
+#: src/restore.tsx
+msgid "Team chats"
+msgstr "Mannschafts-Chats"
+
+# ai
 #: src/pages/privacy.tsx
 msgid "Visible to:"
 msgstr "Sichtbar für:"
@@ -2788,6 +2839,11 @@ msgstr "Spiel angelegt. Die Mannschaft wurde benachrichtigt."
 msgid "The test mail could not be sent: {detail}"
 msgstr "Die Testmail konnte nicht verschickt werden: {detail}"
 
+# ai
+#: src/restore.tsx
+msgid "Restore everything"
+msgstr "Alles wiederherstellen"
+
 #: src/pages/team.tsx
 msgid "Add player"
 msgstr "Spieler hinzufügen"
@@ -2873,6 +2929,11 @@ msgstr "Aktive Links"
 #: src/pages/plans.tsx
 msgid "Training plan"
 msgstr "Trainingsplan"
+
+# ai
+#: src/restore.tsx
+msgid "not in the file"
+msgstr "nicht in der Datei"
 
 #: worker/domain/events.ts
 msgid "Matchday at {host}"
@@ -3181,6 +3242,11 @@ msgstr "Termine für mehrere Mannschaften legen Admins oder die Trainer aller Ma
 msgid "Sorry, this place has already been taken."
 msgstr "Der Platz ist leider schon vergeben."
 
+# ai
+#: src/restore.tsx
+msgid "Export file (.json)"
+msgstr "Export-Datei (.json)"
+
 #: modules/duties/app/helpers.tsx
 #: src/list-import.tsx
 #: src/pages/admin.tsx
@@ -3390,6 +3456,7 @@ msgstr "Saisonwechsel abgeschlossen."
 
 #: worker/domain/groups.ts
 #: worker/routes/games.ts
+#: worker/routes/restore.ts
 #: worker/routes/teams.ts
 msgid "This team does not exist."
 msgstr "Diese Mannschaft gibt es nicht."
@@ -3430,6 +3497,12 @@ msgstr "Spiel verlegt ({teamName})"
 #: src/pages/profile.tsx
 msgid "No parents are involved in the teams of {firstName}. {firstName} accepts and declines on their own and is alone in the chat. So there are no permissions or notifications for {firstName}."
 msgstr "In den Mannschaften von {firstName} sind keine Eltern eingebunden. {firstName} sagt selbst zu und ab und ist allein im Chat. Freigaben und Benachrichtigungen für {firstName} gibt es deshalb nicht."
+
+# ai
+#: src/restore.tsx
+#: src/restore.tsx
+msgid "Restore finished"
+msgstr "Wiederherstellung abgeschlossen"
 
 # ai
 #: src/pages/admin.tsx
@@ -3658,6 +3731,11 @@ msgstr "{created, plural, one {# Spiel angelegt.} other {# Spiele angelegt.}}"
 msgid "the link to the children"
 msgstr "die Verknüpfung zu den Kindern"
 
+# ai
+#: src/restore.tsx
+msgid "Admin roles are only taken over when everything is restored."
+msgstr "Admin-Rollen werden nur übernommen, wenn alles wiederhergestellt wird."
+
 #: src/list-import.tsx
 #: src/pages/admin.tsx
 #: src/pages/admin.tsx
@@ -3795,6 +3873,7 @@ msgid "Saves nominating for every game. Changes for individual games remain poss
 msgstr "Spart das Nominieren bei jedem Spiel. Abweichungen bei einzelnen Spielen bleiben möglich. Statt einer Push zur Nominierung kommt drei Tage vor jedem Spiel eine Erinnerung."
 
 #: src/pages/plans.tsx
+#: src/restore.tsx
 msgid "Done"
 msgstr "Fertig"
 
@@ -3919,6 +3998,16 @@ msgstr "Adresse kopieren"
 #: src/pages/chat.tsx
 msgid "Moderation"
 msgstr "Moderation"
+
+# ai
+#: src/restore.tsx
+msgid "Take over data from an export of Kabine (Administration → Export), for example when moving to a new installation. Tick what to take over. Ticking everything on a new installation restores it in full."
+msgstr "Übernimm Daten aus einem Kabine-Export (Verwaltung → Export), etwa beim Umzug auf eine neue Installation. Kreuze an, was übernommen werden soll. Alles angekreuzt auf einer neuen Installation stellt sie vollständig wieder her."
+
+# ai
+#: src/restore.tsx
+msgid "Season, age groups and holidays"
+msgstr "Saison, Altersklassen und Ferien"
 
 #: modules/duties/app/helpers.tsx
 #: modules/duties/app/helpers.tsx
@@ -4313,6 +4402,11 @@ msgstr "Ansprechpartner für die App: {contact}"
 msgid "Write a message"
 msgstr "Nachricht schreiben"
 
+# ai
+#: src/restore.tsx
+msgid "needed by other ticked parts"
+msgstr "wird von anderen angekreuzten Teilen gebraucht"
+
 #: worker/auth/webauthn.ts
 msgid "Signing in took too long. Please try again."
 msgstr "Die Anmeldung hat zu lange gedauert. Bitte versuche es noch einmal."
@@ -4628,6 +4722,11 @@ msgstr "Noch kein Stammkader festgelegt. Das geht unter <0>Team → Kader</0>."
 msgid "This invitation link is no longer valid. Please ask for a new link."
 msgstr "Dieser Einladungslink gilt nicht mehr. Bitte frag nach einem neuen Link."
 
+# ai
+#: src/restore.tsx
+msgid "{added, plural, one {# new} other {# new}}"
+msgstr "{added, plural, one {# neu} other {# neu}}"
+
 #: modules/duties/worker/notify.ts
 msgid "Your helper duty tomorrow"
 msgstr "Dein Helferdienst morgen"
@@ -4840,6 +4939,11 @@ msgstr "{name} organisiert jetzt mit."
 msgid "As soon as there are youth home games F to C, they appear here."
 msgstr "Sobald es Jugend-Heimspiele F bis C gibt, erscheinen sie hier."
 
+# ai
+#: src/restore.tsx
+msgid "{existing, plural, one {# existed already} other {# existed already}}"
+msgstr "{existing, plural, one {# war schon da} other {# waren schon da}}"
+
 #: modules/carpools/app/card.tsx
 msgid "You are riding with {driver}. {driverFirstName} will be notified."
 msgstr "Du fährst bei {driver} mit. {driverFirstName} wird benachrichtigt."
@@ -4962,6 +5066,11 @@ msgstr "2 · Altersklassen {upcomingName}"
 #: src/pages/team.tsx
 msgid "{quietCount, plural, one {# without notifications} other {# without notifications}}"
 msgstr "{quietCount, plural, one {# ohne Benachrichtigungen} other {# ohne Benachrichtigungen}}"
+
+# ai
+#: src/pages/list-import.tsx
+msgid "The JSON file from Administration → Export, for example when moving to a new installation. You choose what to take over."
+msgstr "Die JSON-Datei aus Verwaltung → Export, etwa beim Umzug auf eine neue Installation. Du wählst, was übernommen wird."
 
 #: src/pages/admin.tsx
 msgid "Revoke"
@@ -5488,6 +5597,8 @@ msgstr "Spielerinnen und Spieler"
 
 #: src/pages/event.tsx
 #: src/pages/event.tsx
+#: src/pages/list-import.tsx
+#: src/pages/setup-wizard.tsx
 #: src/pages/squad.tsx
 #: src/ui.tsx
 msgid "Back"
@@ -5585,6 +5696,11 @@ msgstr "API-Schlüssel"
 #: src/pages/event.tsx
 msgid "Not taking place (cancelled by {cancelledBy})."
 msgstr "Findet nicht statt (abgesagt durch {cancelledBy})."
+
+# ai
+#: src/restore.tsx
+msgid "Export file"
+msgstr "Export-Datei"
 
 #: modules/carpools/app/card.tsx
 msgid "{name} is no longer riding with {driver}. The driver will be notified."
@@ -5735,6 +5851,11 @@ msgstr "Deine Rückmeldung"
 msgid "Helpers only exist for events of teams."
 msgstr "Helfer gibt es nur bei Terminen von Mannschaften."
 
+# ai
+#: src/restore.tsx
+msgid "Training venues and training plans"
+msgstr "Trainingsorte und Trainingspläne"
+
 #: src/pages/season.tsx
 msgctxt "date"
 msgid "Start"
@@ -5874,6 +5995,11 @@ msgstr "Senden"
 #: src/pages/admin.tsx
 msgid "Remove public holiday {name}"
 msgstr "Feiertag {name} entfernen"
+
+# ai
+#: src/restore.tsx
+msgid "in the file"
+msgstr "in der Datei"
 
 # ai
 #: src/pages/team.tsx
@@ -6060,6 +6186,11 @@ msgstr "Neue Gruppe"
 #: src/pages/squad.tsx
 msgid "<0>Declined:</0> {declinedNames}."
 msgstr "<0>Absage:</0> {declinedNames}."
+
+# ai
+#: src/restore.tsx
+msgid "{label}: {done} of {total}"
+msgstr "{label}: {done} von {total}"
 
 #: src/pages/chat.tsx
 msgid "Load older messages"
@@ -6993,6 +7124,12 @@ msgstr "Persönlicher Einmal-Link, gültig bis {linkExpires}. Bitte nur direkt a
 msgid "Club"
 msgstr "Verein"
 
+# ai
+#: src/restore.tsx
+#: src/restore.tsx
+msgid "This file is not an export of Kabine."
+msgstr "Diese Datei ist kein Kabine-Export."
+
 #: src/pages/team.tsx
 msgctxt "team"
 msgid "Remove from {teamName}?"
@@ -7278,6 +7415,11 @@ msgstr "Jahrgang fehlt"
 #: src/pages/admin.tsx
 msgid "All"
 msgstr "Alle"
+
+# ai
+#: src/restore.tsx
+msgid "Team chats: {name}"
+msgstr "Mannschafts-Chats: {name}"
 
 #: src/pages/home.tsx
 msgid "Details and reminders"
@@ -8110,6 +8252,11 @@ msgid "Delete group {teamName}?"
 msgstr "Gruppe {teamName} löschen?"
 
 # ai
+#: src/restore.tsx
+msgid "{skipped, plural, one {# could not be restored} other {# could not be restored}}"
+msgstr "{skipped, plural, one {# nicht übernehmbar} other {# nicht übernehmbar}}"
+
+# ai
 #: src/player-import.tsx
 msgid "{fresh, plural, one {Add # player} other {Add # players}}"
 msgstr "{fresh, plural, one {# Spieler anlegen} other {# Spieler anlegen}}"
@@ -8351,6 +8498,7 @@ msgid "row"
 msgstr "Zeile"
 
 # ai
+#: src/pages/list-import.tsx
 #: src/pages/setup-wizard.tsx
 msgid "Import lists"
 msgstr "Listen übernehmen"
@@ -8544,6 +8692,11 @@ msgstr "Keine Rückmeldung"
 #: src/pages/profile.tsx
 msgid "No address on file yet. With a confirmed address you can get back into the app with a code if your passkey is missing."
 msgstr "Noch keine Adresse hinterlegt. Mit einer bestätigten Adresse kommst du per Code wieder in die App, falls dein Passkey fehlt."
+
+# ai
+#: worker/routes/restore.ts
+msgid "The club settings in the export cannot be read."
+msgstr "Die Vereinseinstellungen im Export lassen sich nicht lesen."
 
 #: modules/duties/app/admin.tsx
 #: modules/duties/app/admin.tsx
@@ -8768,6 +8921,11 @@ msgstr "Zu jedem Zugang speichert die App den Tag der letzten Nutzung, ohne Uhrz
 #: worker/routes/join.ts
 msgid "Please select at least one child."
 msgstr "Bitte wähle mindestens ein Kind aus."
+
+# ai
+#: src/restore.tsx
+msgid "Result"
+msgstr "Ergebnis"
 
 #: src/pages/join.tsx
 #: src/pages/join.tsx
@@ -9025,6 +9183,11 @@ msgstr "Melde dich zuerst mit deinem bestehenden Zugang an und öffne dann den E
 #: worker/routes/parents.ts
 msgid "Only linked parents can set this."
 msgstr "Nur verknüpfte Eltern können das einstellen."
+
+# ai
+#: src/restore.tsx
+msgid "{n, plural, one {# entry} other {# entries}}"
+msgstr "{n, plural, one {# Eintrag} other {# Einträge}}"
 
 #: src/faq.tsx
 msgid "I have children in different teams."
@@ -9517,6 +9680,11 @@ msgstr "Mit sich selbst kann man nicht mitfahren."
 #: worker/auth/webauthn.ts
 msgid "The sign-in could not be verified."
 msgstr "Die Anmeldung konnte nicht bestätigt werden."
+
+# ai
+#: src/restore.tsx
+msgid "{n, plural, one {# chat} other {# chats}}"
+msgstr "{n, plural, one {# Chat} other {# Chats}}"
 
 #: modules/duties/app/admin.tsx
 msgid "Archived"
@@ -10262,6 +10430,11 @@ msgid "Welcome! A few steps and your club can start. Everything can be changed l
 msgstr "Willkommen! Nach ein paar Schritten kann dein Verein loslegen. Alles lässt sich später in der Verwaltung ändern."
 
 # ai
+#: src/restore.tsx
+msgid "Events with responses, squads, attendance, helper duties and carpools"
+msgstr "Termine mit Zu- und Absagen, Kader, Anwesenheit, Helferdiensten und Fahrgemeinschaften"
+
+# ai
 #: shared/changelog.ts
 msgid "Events cancelled for everyone now read “Not taking place”."
 msgstr "Für alle abgesagte Termine heißen jetzt „Findet nicht statt“."
@@ -10449,6 +10622,11 @@ msgstr "Dieser Browser unterstützt keine Push-Benachrichtigungen."
 #: src/pages/season.tsx
 msgid "Already left and will be deleted: {formerList}."
 msgstr "Bereits ausgetreten und werden gelöscht: {formerList}."
+
+# ai
+#: src/pages/list-import.tsx
+msgid "Excel (.xlsx) or CSV files, also several with overlapping people, or a pasted table. Teams, coaches and players, checked before anything is created."
+msgstr "Excel- (.xlsx) oder CSV-Dateien, auch mehrere mit denselben Personen, oder eine eingefügte Tabelle. Mannschaften, Trainer und Spieler, geprüft, bevor etwas angelegt wird."
 
 #: src/faq.tsx
 msgid "The duties of a game come from a template. Under <0>Team → Settings → Helper plan</0> you choose the template for home and away games; admins maintain templates and duty types under <1>Admin → Helper duties</1>. For a special event, switch on <2>Helpers needed</2> and create time blocks, also a separate duty just for this event, for example barbecue. For an existing special event this is done in the event under <3>Helpers: add time block</3>. There, under <4>Organisers</4>, you also add further people who help manage the helper duties."
@@ -10646,6 +10824,11 @@ msgstr "Nur die kommende, noch nicht gestartete Saison lässt sich ändern oder 
 msgid "Language"
 msgstr "Sprache"
 
+# ai
+#: worker/routes/restore.ts
+msgid "This part of the export cannot be restored."
+msgstr "Dieser Teil des Exports lässt sich nicht wiederherstellen."
+
 #: modules/carpools/app/card.tsx
 msgid "Offer withdrawn."
 msgstr "Angebot zurückgezogen."
@@ -10827,6 +11010,11 @@ msgstr "Sportart und Saison"
 #: worker/routes/squad.ts
 msgid "{playerName} will help out {teamName} on {date}."
 msgstr "{playerName} hilft am {date} bei der {teamName} aus."
+
+# ai
+#: src/pages/list-import.tsx
+msgid "From the club's lists"
+msgstr "Aus den Listen des Vereins"
 
 #: src/pages/admin.tsx
 msgid "Assign parent"
@@ -11863,6 +12051,11 @@ msgstr "Bis"
 msgid "To the confirmed e-mail address of your access"
 msgstr "An die bestätigte E-Mail-Adresse deines Zugangs"
 
+# ai
+#: src/restore.tsx
+msgid "Team assignments and core squads"
+msgstr "Mannschaftszuordnungen und Stammkader"
+
 #: src/pages/home.tsx
 #: src/pages/team.tsx
 msgid "{count}× unexcused"
@@ -11885,6 +12078,11 @@ msgstr "Nur Personen mit der Jugendschiedsrichter-Rolle."
 #: src/news.tsx
 msgid "What is new"
 msgstr "Neuigkeiten"
+
+# ai
+#: src/restore.tsx
+msgid "Exported on {exportedOn}, Kabine {version}"
+msgstr "Exportiert am {exportedOn}, Kabine {version}"
 
 #: src/pages/join.tsx
 msgid "Access for"
@@ -12077,6 +12275,12 @@ msgstr "Das Ende muss nach dem Beginn liegen."
 msgid "Group created."
 msgstr "Gruppe angelegt."
 
+# ai
+#: src/restore.tsx
+#: src/restore.tsx
+msgid "What to take over"
+msgstr "Was übernommen wird"
+
 #: src/pages/profile.tsx
 msgid "{label} by mail"
 msgstr "{label} per Mail"
@@ -12107,6 +12311,11 @@ msgstr "{fullName} bleibt im Verein, gehört aber nicht mehr zur {teamName}."
 #: worker/domain/duties.ts
 msgid "opponent"
 msgstr "Gegner"
+
+# ai
+#: src/restore.tsx
+msgid "Passkeys and sign-ins are not part of an export. Everyone signs in again: with an e-mail code if their address was restored, otherwise with a personal link from Administration → People."
+msgstr "Passkeys und Anmeldungen sind nicht Teil eines Exports. Alle melden sich neu an: per E-Mail-Code, wenn ihre Adresse übernommen wurde, sonst mit einem persönlichen Link aus Verwaltung → Personen."
 
 #: src/pages/group.tsx
 #: src/pages/team.tsx

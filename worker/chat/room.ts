@@ -268,6 +268,45 @@ export class ChatRoom extends DurableObject<Env> {
           authors: this.sql.exec("SELECT person_id, name, label, is_former FROM authors").toArray(),
           reactions: this.sql.exec("SELECT message_id, person_id, emoji, created_at FROM reactions ORDER BY message_id").toArray(),
         });
+      case "/import": {
+        // Restore from an export (worker/routes/restore.ts): only into an empty room, with the message numbers kept,
+        // since read markers and mentions in D1 refer to them. Persons are mapped to their new ids.
+        if (this.sql.exec("SELECT 1 FROM messages LIMIT 1").toArray().length) return Response.json({ imported: 0, reason: "not_empty" });
+        const chat = body.chat as { messages: Record<string, unknown>[]; authors: Record<string, unknown>[]; reactions: Record<string, unknown>[] };
+        const persons = body.persons as Record<string, number>;
+        const person = (v: unknown) => (v == null ? null : (persons[String(v)] ?? null));
+        let imported = 0;
+        for (const m of chat.messages) {
+          if (typeof m.text !== "string" || typeof m.created_at !== "string") continue;
+          this.sql.exec(
+            "INSERT INTO messages (id, kind, person_id, text, created_at, deleted_at) VALUES (?, ?, ?, ?, ?, ?)",
+            Number(m.id),
+            String(m.kind ?? "user"),
+            person(m.person_id),
+            m.text,
+            m.created_at,
+            (m.deleted_at as string | null) ?? null,
+          );
+          imported++;
+        }
+        for (const a of chat.authors) {
+          const id = person(a.person_id);
+          if (id == null || typeof a.name !== "string") continue;
+          this.sql.exec("INSERT OR IGNORE INTO authors (person_id, name, label, is_former) VALUES (?, ?, ?, ?)", id, a.name, (a.label as string | null) ?? null, Number(a.is_former ?? 0));
+        }
+        for (const r of chat.reactions) {
+          const id = person(r.person_id);
+          if (id == null) continue;
+          this.sql.exec(
+            "INSERT OR IGNORE INTO reactions (message_id, person_id, emoji, created_at) VALUES (?, ?, ?, ?)",
+            Number(r.message_id),
+            id,
+            String(r.emoji),
+            String(r.created_at),
+          );
+        }
+        return Response.json({ imported });
+      }
       case "/clear":
         this.sql.exec("DELETE FROM messages; DELETE FROM authors; DELETE FROM reactions; DELETE FROM meta WHERE key <> 'team_id';");
         if (this.teamId()) await run(this.env.DB, "DELETE FROM chat_mentions WHERE team_id = ?", this.teamId()).catch(() => undefined);

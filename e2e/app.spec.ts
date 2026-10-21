@@ -1563,6 +1563,7 @@ test("Einrichtung: Mannschaften, Trainer und Spielerinnen aus Listen übernehmen
   await page.goto("/");
   await page.evaluate(() => sessionStorage.setItem("kabine.setup.step", "5"));
   await page.goto("/verwaltung/einrichtung");
+  const wtBefore = ((await (await page.request.get("/api/teams")).json()) as { teams: { name: string; players: number }[] }).teams.find((x) => x.name === "wT")!.players;
   await page.getByRole("button", { name: "Stattdessen aus Listen übernehmen" }).click();
   const kader = "Kader Saison 2026/27;;;\nMannschaft;Name;Jg.;Telefon\nwC1;Muster, Lea;12;0123 45\nwC1;Lena Beispiel (2013);;\nwT;Probe, Ida;14;\n";
   const trainer = "Vorname;Nachname;Mannschaft\nTina;Test;wC1\n;Summe;wC1\n";
@@ -1608,7 +1609,8 @@ test("Einrichtung: Mannschaften, Trainer und Spielerinnen aus Listen übernehmen
   const wc1 = list.teams.find((x) => x.name === "wC1")!;
   expect(wc1).toMatchObject({ players: 2, coaches: 1 });
   expect(list.teams.find((x) => x.name === "wC2")).toMatchObject({ players: 2, coaches: 1 });
-  expect(list.teams.find((x) => x.name === "wT")!.players).toBe(3);
+  // Ida Probe was in wT already: found again, not added twice
+  expect(list.teams.find((x) => x.name === "wT")!.players).toBe(wtBefore);
   await expect(page.getByText("Rita Rahmen")).toBeVisible();
   expect(await page.evaluate(() => localStorage.getItem("kabine.listImport"))).toBeNull();
 });
@@ -1618,6 +1620,7 @@ test("Verwaltung → Import: Spieler in eine vorhandene Mannschaft übernehmen",
   await page.goto("/verwaltung");
   await page.getByRole("link", { name: /^Import/ }).click();
   await expect(page.getByRole("heading", { name: "Import" })).toBeVisible();
+  await page.getByRole("button", { name: "Listen übernehmen" }).click();
   await page.getByLabel("Oder eine Tabelle einfügen").fill("Name\tJahrgang\tMannschaft\nOle Beispiel\t2014\twT");
   await page.getByRole("button", { name: "Eingefügte Tabelle hinzufügen" }).click();
   await page.getByRole("button", { name: "1 Zeile lesen" }).click();
@@ -1625,4 +1628,21 @@ test("Verwaltung → Import: Spieler in eine vorhandene Mannschaft übernehmen",
   await page.getByRole("button", { name: "1 Person übernehmen" }).click();
   await expect(page).toHaveURL(/\/verwaltung\/personen$/);
   await expect(page.getByText("Ole Beispiel")).toBeVisible();
+});
+
+test("Verwaltung → Import: eigener Export zurück, alles ist schon da", async () => {
+  const { page } = admin;
+  const exported = await page.request.get("/api/admin/export");
+  expect(exported.ok()).toBe(true);
+  const before = ((await (await page.request.get("/api/teams")).json()) as { teams: unknown[] }).teams.length;
+  await page.goto("/verwaltung/import");
+  await page.getByRole("button", { name: "Export-Datei wählen" }).click();
+  await page.getByLabel("Export-Datei (.json)").setInputFiles({ name: "kabine-export.json", mimeType: "application/json", buffer: await exported.body() });
+  const what = page.getByRole("region", { name: "Was übernommen wird" });
+  await expect(what.getByRole("checkbox")).toHaveCount(8);
+  await page.getByRole("button", { name: "Alles wiederherstellen" }).click();
+  const result = page.getByRole("region", { name: "Ergebnis" });
+  await expect(result).toContainText("Wiederherstellung abgeschlossen");
+  await expect(result).toContainText("0 neu");
+  expect(((await (await page.request.get("/api/teams")).json()) as { teams: unknown[] }).teams.length).toBe(before);
 });

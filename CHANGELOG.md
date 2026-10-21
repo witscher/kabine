@@ -7,6 +7,7 @@ Changes that are merged but not released yet go under *Unreleased*, one line eac
 ## Unreleased
 
 - Import teams, coaches and players from the club's lists, in the setup wizard and under *Administration → Import*: Excel files (.xlsx) with one or more sheets, CSV or a pasted table, several lists with the same people combined into one. Only name, birth year, team and role are read, in the browser; the lists are not uploaded, and everything is checked and corrected before anything is created.
+- *Administration → Import* also takes back an export of Kabine: tick what to take over (club settings, season, teams, people, assignments, training plans, events, chats). Existing data stays and is skipped; everything ticked on a new installation is a full restore, for example when moving. The export now records the Kabine version.
 - The setup wizard starts at step 1 when it is opened again after it was finished, and its last step can start over.
 - Only admins change their own name. Players, parents and coaches see "Name wrong? Tell your coach or an admin." in their profile; coaches correct the names of players and now also of parents of their teams.
 - `npm run admin:link` is documented as a break-glass operation and gets `--owner` (the rescued person becomes the owner) and `--revoke-all-admins` (compromised accesses: every other admin loses the role and is signed out, with confirmation). Every use is recorded and shown under *Administration → Updates and maintenance*.
