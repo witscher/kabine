@@ -107,15 +107,32 @@ The "Deploy to Cloudflare" button asks for none of these; the app works without 
 
 The first admin is the **owner**. Other admins cannot take away the owner's admin role or access. Keep at least two admins, so the club does not depend on one person. An admin who lost their device gets a personal link from another admin, or signs in with a code by e-mail when e-mail is set up.
 
-### Nobody can get into Administration
+### Break-glass: emergency admin access
 
-If no admin can sign in any more (devices lost, the only admin left the club), whoever has access to the club's Cloudflare account creates an admin link from a checkout of the club's copy (with `npm ci` done and `npx wrangler login`):
+Break-glass operations bypass the normal ways into the app (invitations by an admin, the protection of the owner). Use them only in an emergency: they need someone with access to the club's Cloudflare account, run from a checkout of the club's copy (with `npm ci` done and `npx wrangler login`), and the board should know about every use.
 
-```sh
-npm run admin:link -- --first Alex --last Admin --email alex@your-club.org
-```
+| Situation | Command |
+| --- | --- |
+| No admin can sign in any more (devices lost, the only admin left the club) | `npm run admin:link -- --first Alex --last Admin --email alex@your-club.org` |
+| The owner is gone or no longer trusted | the same with `--owner` |
+| Admin accesses are or may be compromised | the same with `--revoke-all-admins` |
 
-It creates the admin, or makes the person with this admin address an admin again (also the owner, or someone who left), withdraws older personal links of that person and prints a link valid for 24 hours. Open it on the device that should get access and set up a passkey; if the person already had an access, its devices are signed out. The command writes to the database with Wrangler and stores only a hash of the link, like every invitation. Options: `--origin https://app.your-club.org` when the app's address is not known yet, `--env <name>` for an environment of `wrangler.jsonc`, `--config <file>` for another Wrangler configuration, `--local` for the local database.
+What each does:
+
+- **Always:** creates the admin, or makes the person with this admin address an admin again (also the owner, or someone who left), withdraws older personal links of that person and prints a link valid for 24 hours. Opening it sets up a passkey; if the person already had an access, its devices are signed out. Only a hash of the link is stored, like for every invitation. The output lists the other admins with the date they were last seen: check that each one still belongs there.
+- **`--owner`:** the person also becomes the owner of the installation. Afterwards they can remove the previous owner's admin role or access in the app, which other admins cannot.
+- **`--revoke-all-admins`:** every other admin loses the admin role and admin address, is signed out on all devices, and their open personal links are withdrawn. They keep their other roles (coach, parent, player). Implies `--owner`. The command asks you to type `REVOKE` first (or pass `--yes`).
+
+Options: `--origin https://app.your-club.org` when the app's address is not known yet, `--env <name>` for an environment of `wrangler.jsonc`, `--config <file>` for another Wrangler configuration, `--local` for the local database.
+
+**Traceable.** Every use is recorded in the database and shown to all admins under *Administration → Updates and maintenance → Emergency admin access* (the last 20: time, address, owner change, whose admin role was taken). It cannot be removed in the app. Cloudflare's audit log of the account shows who changed what there.
+
+**Afterwards:**
+
+1. Open the link right away on the device that should get access.
+2. *Administration → Persons*: check every admin and remove the role of anyone who does not belong. Make sure there are at least two trusted admins again.
+3. After compromised accesses also: check who has access to the Cloudflare account and which API tokens exist, change the secrets (see Secrets below), look at the Worker's recent deployments, and disable the accounts of compromised people in the app.
+4. Tell the board. If personal data may have been seen by unauthorised people, the club as controller has to assess it and, where required, report it to the data protection authority within 72 hours (Art. 33 GDPR).
 
 ## Uninstalling
 

@@ -1390,6 +1390,10 @@ msgstr "The school holidays could not be loaded just now. You can enter them aft
 msgid "Together with others"
 msgstr "Together with others"
 
+#: src/pages/updates.tsx
+msgid "Admin links created with npm run admin:link by someone with access to the club's Cloudflare account. If you do not know why, check the admins and that account."
+msgstr "Admin links created with npm run admin:link by someone with access to the club's Cloudflare account. If you do not know why, check the admins and that account."
+
 #: worker/auth/actor.ts
 #: worker/chat/room.ts
 msgid "Parents are not involved in this team."
@@ -3784,6 +3788,10 @@ msgstr "{name} has been deleted."
 msgid "Entries"
 msgstr "Entries"
 
+#: src/pages/updates.tsx
+msgid "{at}: admin link for {email}"
+msgstr "{at}: admin link for {email}"
+
 #: src/duty-blocks.tsx
 msgid "New special duty …"
 msgstr "New special duty …"
@@ -4145,6 +4153,10 @@ msgstr "Please choose a location."
 #: worker/routes/events.ts
 msgid "{actorName} withdrew the cancellation: training on {date} is going ahead after all."
 msgstr "{actorName} withdrew the cancellation: training on {date} is going ahead after all."
+
+#: src/pages/updates.tsx
+msgid "{count, plural, one {admin role taken from {names}} other {admin role taken from # admins: {names}}}"
+msgstr "{count, plural, one {admin role taken from {names}} other {admin role taken from # admins: {names}}}"
 
 #: src/pages/event.tsx
 #: src/pages/event.tsx
@@ -5395,6 +5407,10 @@ msgstr "This game does not exist."
 #: src/pages/mail-settings.tsx
 msgid "Send test mail"
 msgstr "Send test mail"
+
+#: src/pages/updates.tsx
+msgid "made owner"
+msgstr "made owner"
 
 #: src/email.tsx
 msgid "The link is incomplete. Please open it again in full or enter the code."
@@ -10497,6 +10513,10 @@ msgstr "A holiday plan takes precedence in its period. After that this plan appl
 msgid "Valid until {createdUntil}, can be used several times."
 msgstr "Valid until {createdUntil}, can be used several times."
 
+#: src/pages/updates.tsx
+msgid "no other changes"
+msgstr "no other changes"
+
 #: src/pages/event.tsx
 #: src/pages/home.tsx
 #: worker/cron.ts
@@ -10555,6 +10575,11 @@ msgstr "No chat yet"
 #: src/pages/chat.tsx
 msgid "Group chat {teamName}"
 msgstr "Group chat {teamName}"
+
+#: src/pages/updates.tsx
+#: src/pages/updates.tsx
+msgid "Emergency admin access"
+msgstr "Emergency admin access"
 
 #: src/pages/home.tsx
 #: src/respond.tsx

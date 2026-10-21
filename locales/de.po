@@ -1440,6 +1440,11 @@ msgstr "Die Schulferien ließen sich gerade nicht laden. Du kannst sie nach dem 
 msgid "Together with others"
 msgstr "Gemeinsam mit anderen"
 
+# ai
+#: src/pages/updates.tsx
+msgid "Admin links created with npm run admin:link by someone with access to the club's Cloudflare account. If you do not know why, check the admins and that account."
+msgstr "Admin-Links, die jemand mit Zugriff auf das Cloudflare-Konto des Vereins mit npm run admin:link erzeugt hat. Wenn du nicht weißt, warum, prüfe die Admins und dieses Konto."
+
 #: worker/auth/actor.ts
 #: worker/chat/room.ts
 msgid "Parents are not involved in this team."
@@ -3948,6 +3953,11 @@ msgstr "{name} wurde gelöscht."
 msgid "Entries"
 msgstr "Einträge"
 
+# ai
+#: src/pages/updates.tsx
+msgid "{at}: admin link for {email}"
+msgstr "{at}: Admin-Link für {email}"
+
 #: src/duty-blocks.tsx
 msgid "New special duty …"
 msgstr "Neuer Sonderdienst …"
@@ -4327,6 +4337,11 @@ msgstr "Bitte einen Ort wählen."
 #: worker/routes/events.ts
 msgid "{actorName} withdrew the cancellation: training on {date} is going ahead after all."
 msgstr "{actorName} hat die Absage zurückgenommen: Das Training am {date} findet doch statt."
+
+# ai
+#: src/pages/updates.tsx
+msgid "{count, plural, one {admin role taken from {names}} other {admin role taken from # admins: {names}}}"
+msgstr "{count, plural, one {Admin-Rolle entzogen: {names}} other {Admin-Rolle # Admins entzogen: {names}}}"
 
 # ai
 #: src/pages/event.tsx
@@ -5628,6 +5643,11 @@ msgstr "Dieses Spiel gibt es nicht."
 #: src/pages/mail-settings.tsx
 msgid "Send test mail"
 msgstr "Testmail schicken"
+
+# ai
+#: src/pages/updates.tsx
+msgid "made owner"
+msgstr "zum Eigentümer gemacht"
 
 #: src/email.tsx
 msgid "The link is incomplete. Please open it again in full or enter the code."
@@ -10941,6 +10961,11 @@ msgstr "Ein Ferienplan hat in seinem Zeitraum Vorrang. Danach gilt wieder dieser
 msgid "Valid until {createdUntil}, can be used several times."
 msgstr "Gültig bis {createdUntil}, mehrfach verwendbar."
 
+# ai
+#: src/pages/updates.tsx
+msgid "no other changes"
+msgstr "keine weiteren Änderungen"
+
 #: src/pages/event.tsx
 #: src/pages/home.tsx
 #: worker/cron.ts
@@ -11001,6 +11026,12 @@ msgstr "Noch kein Chat"
 #: src/pages/chat.tsx
 msgid "Group chat {teamName}"
 msgstr "Gruppenchat {teamName}"
+
+# ai
+#: src/pages/updates.tsx
+#: src/pages/updates.tsx
+msgid "Emergency admin access"
+msgstr "Notfallzugang für Admins"
 
 #: src/pages/home.tsx
 #: src/respond.tsx

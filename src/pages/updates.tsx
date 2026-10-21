@@ -7,6 +7,7 @@ import { useClub } from "../club";
 import { currentLocale } from "../i18n";
 import { checkMaintenance } from "../maintenance";
 import { useQuery } from "../store";
+import { Icon } from "../icons";
 import { copyText, ErrorBox, Notice, Spinner, SwitchRow, toast, TopBar, useDocumentTitle } from "../ui";
 import { AdminOnly } from "./admin";
 
@@ -15,6 +16,8 @@ interface UpdatesView {
   lastUpdate: { at: string; version: string; migrations: string[]; bookmark: string | null } | null;
   maintenance: { since: string } | null;
   updating: { since: string } | null;
+  /** Uses of `npm run admin:link`, newest first */
+  breakGlass: { at: string; email: string; owner: boolean; revoked: string[] }[];
 }
 
 export function AdminUpdatesPage() {
@@ -111,6 +114,48 @@ export function AdminUpdatesPage() {
                   }}
                 />
               </section>
+
+              {data.breakGlass.length ? (
+                <section class="card card-pad stack-sm" aria-label={t`Emergency admin access`}>
+                  <h2 class="section-title" style={{ margin: 0 }}>
+                    <Trans>Emergency admin access</Trans>
+                  </h2>
+                  <p class="small muted">
+                    <Trans>
+                      Admin links created with npm run admin:link by someone with access to the club's Cloudflare account. If you do not know why, check the
+                      admins and that account.
+                    </Trans>
+                  </p>
+                  <ul class="list">
+                    {data.breakGlass.map((b) => {
+                      const at = when(b.at);
+                      const email = b.email;
+                      const count = b.revoked.length;
+                      const names = b.revoked.join(", ");
+                      return (
+                        <li class="list-row">
+                          <Icon name="alert" size={20} />
+                          <span class="main">
+                            <span class="title">
+                              <Trans>
+                                {at}: admin link for {email}
+                              </Trans>
+                            </span>
+                            <span class="sub">
+                              {[
+                                b.owner ? t`made owner` : null,
+                                count ? plural(count, { one: `admin role taken from ${names}`, other: `admin role taken from # admins: ${names}` }) : null,
+                              ]
+                                .filter(Boolean)
+                                .join(" · ") || t`no other changes`}
+                            </span>
+                          </span>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </section>
+              ) : null}
             </>
           ) : null}
         </div>

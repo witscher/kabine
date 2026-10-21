@@ -1,0 +1,8 @@
+{
+  "Admin links created with npm run admin:link by someone with access to the club's Cloudflare account. If you do not know why, check the admins and that account.": "Admin-Links, die jemand mit Zugriff auf das Cloudflare-Konto des Vereins mit npm run admin:link erzeugt hat. Wenn du nicht weißt, warum, prüfe die Admins und dieses Konto.",
+  "{at}: admin link for {email}": "{at}: Admin-Link für {email}",
+  "{count, plural, one {admin role taken from {names}} other {admin role taken from # admins: {names}}}": "{count, plural, one {Admin-Rolle entzogen: {names}} other {Admin-Rolle # Admins entzogen: {names}}}",
+  "made owner": "zum Eigentümer gemacht",
+  "no other changes": "keine weiteren Änderungen",
+  "Emergency admin access": "Notfallzugang für Admins"
+}

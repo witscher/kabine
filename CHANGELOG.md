@@ -6,6 +6,7 @@ Changes that are merged but not released yet go under *Unreleased*, one line eac
 
 ## Unreleased
 
+- `npm run admin:link` is documented as a break-glass operation and gets `--owner` (the rescued person becomes the owner) and `--revoke-all-admins` (compromised accesses: every other admin loses the role and is signed out, with confirmation). Every use is recorded and shown under *Administration → Updates and maintenance*.
 - The update pull request shows the release notes of every version since the installed one, so a copy that skipped releases sees all changes, and it closes older update pull requests that are still open.
 ## v0.2.3
 
