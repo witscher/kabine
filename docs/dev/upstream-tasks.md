@@ -12,10 +12,9 @@ Format per entry: date, title, what changed and why, where in the code (file and
 
 Notes on changes in the club app that the maintainer does not want in Kabine yet. Do not port and do not add to the roadmap; the maintainer moves an entry to "Open" when it is wanted.
 
-- **2026-10-20 Only admins change their own name.** In the club app nobody else edits their own name (players, parents, coaches): the server rejects `PATCH /persons/:id` on oneself for non-admins (403 `name_locked`) and the profile hides "Change name". Coaches correct names of players, helpers and parents of their teams, admins everyone; for parents the club app added "Change name" in the parents section of the child's page under Team (`RenameSheet` in `src/pages/team.tsx`). Reason there: players and parents are known in the club, and parents sometimes entered their child's name. For Kabine this may be too strict for other clubs; if ported, likely as a club setting.
-
 ## Done
 
+- **2026-10-20 Only admins change their own name.** Ported as a fixed rule, not a club setting (the maintainer's decision: names are identity in a small, invitation-only club app with many children). Profile hint, coaches rename parents of their teams. Kabine: `4671b55`.
 - **2026-10-20 Player invitation link while signed in: no name choice, only "Straight to the app".** Server refuses with 409 `signed_in` (options, e-mail code, verify, late code redemption); invalid links show signed-in people the box. Kabine: `f7031db`.
 - **2026-10-20 Cancelled events read "Not taking place" and are struck through in the detail view.** Wording in app, push, calendar feed and conflict messages; struck-through hero. Kabine: `a70a3f2`.
 - **2026-10-19 Invitation links are for setup only; "Straight to the app" when opened again.** Share texts and join page say the link is needed once; signed-in parents (and players) who open it again get "Straight to the app". Kabine: `f710472`.
