@@ -3,8 +3,8 @@
 // Pure functions, used by the app; the worker only receives the confirmed result (worker/routes/list-import.ts).
 // Only name, birth year, team and role are read: other columns (phone, address, remarks) are dropped right away.
 
-/** What a column holds. Everything else is "ignore". */
-export const IMPORT_FIELDS = ["ignore", "name", "firstName", "lastName", "birthYear", "birthDate", "team", "role"] as const;
+/** What a column holds. Everything else is "ignore". A date of birth counts as birthYear: only the year is kept. */
+export const IMPORT_FIELDS = ["ignore", "name", "firstName", "lastName", "birthYear", "team", "role"] as const;
 export type ImportField = (typeof IMPORT_FIELDS)[number];
 
 export type ImportRole = "player" | "coach" | "staff";
@@ -136,8 +136,8 @@ export function parseDelimited(text: string): string[][] {
 const FIELD_PATTERNS: [ImportField, RegExp][] = [
   ["firstName", /^(vor ?name|first ?name|given ?name|rufname)$/i],
   ["lastName", /^(nach ?name|familien ?name|last ?name|surname|family ?name)$/i],
-  ["birthDate", /^(geb(urts)?\.? ?(datum|dat\.?)|geb\.?|geboren( am)?|date of birth|birth ?date|dob)$/i],
-  ["birthYear", /^(jg\.?|jhg\.?|jahrgang|geb(urts)?\.? ?jahr|year of birth|birth ?year|year)$/i],
+  // "Geb.-Datum", "Geburtsdatum", "Jg.", "Jahrgang": dates and years alike, only the year is kept
+  ["birthYear", /^(jg\.?|jhg\.?|jahrgang|geb(urts)?[.\s-]*(datum|dat\.?|jahr)|geb\.?|geboren( am)?|date of birth|birth ?(date|year)|year of birth|dob|year)$/i],
   ["team", /^(mannschaft|team|altersklasse|klasse|gruppe|kader|squad)$/i],
   ["role", /^(funktion|rolle|position|role|function|aufgabe)$/i],
   ["name", /^(name|spieler(in)?|spieler\/in|person|teilnehmer(in)?|teilnehmer\/in|akteur(in)?|akteur\/in|mitglied|player|full ?name|trainer ?name)$/i],
@@ -259,7 +259,6 @@ export function rowsOfSheet(sheet: ImportSheet): ImportRow[] {
   const first = col("firstName");
   const last = col("lastName");
   const year = col("birthYear");
-  const date = col("birthDate");
   const team = col("team");
   const role = col("role");
   const out: ImportRow[] = [];
@@ -280,7 +279,7 @@ export function rowsOfSheet(sheet: ImportSheet): ImportRow[] {
       }
     }
     if (!firstName && !lastName) return;
-    const yearCell = year >= 0 ? cells[year]! : date >= 0 ? cells[date]! : "";
+    const yearCell = year >= 0 ? cells[year]! : "";
     if (yearCell) {
       const y = parseYear(yearCell);
       if (y) birthYear = y;

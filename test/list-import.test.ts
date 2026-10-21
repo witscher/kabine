@@ -55,7 +55,8 @@ describe("Listen lesen", () => {
     expect(coaches).toMatchObject({ team: "wD1", role: "coach" });
     expect(rowsOfSheet(coaches)[0]).toMatchObject({ team: "wD1", role: "coach" });
     expect(sheetFromRows("s3", "liste.csv", "Tabelle1", [["Name"], ["Kim"]])).toMatchObject({ team: "", role: "player" });
-    expect(guessMapping(["Vorname", "Nachname", "Name", "Geburtsdatum"])).toEqual(["firstName", "lastName", "ignore", "birthDate"]);
+    expect(guessMapping(["Vorname", "Nachname", "Name", "Geburtsdatum"])).toEqual(["firstName", "lastName", "ignore", "birthYear"]);
+    expect(guessMapping(["", "Nachname", "Vorname", "Geb.-Datum", "Einverständniserklärung", "aktiv seit:"])).toEqual(["ignore", "lastName", "firstName", "birthYear", "ignore", "ignore"]);
   });
 
   it("Namen, Jahrgänge und Rollen", () => {

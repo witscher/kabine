@@ -10,6 +10,7 @@ import {
   IMPORT_FIELDS,
   mergeRows,
   parseDelimited,
+  parseYear,
   resolveSame,
   rowsOfSheet,
   sheetFromRows,
@@ -42,7 +43,11 @@ const emptyDraft = (): Draft => ({ stage: "sources", sheets: [], persons: [], qu
 function loadDraft(): Draft | null {
   try {
     const raw = localStorage.getItem(DRAFT_KEY);
-    return raw ? (JSON.parse(raw) as Draft) : null;
+    if (!raw) return null;
+    const draft = JSON.parse(raw) as Draft;
+    // Drafts from before "birthDate" became part of "birthYear"
+    for (const s of draft.sheets) s.mapping = s.mapping.map((f) => ((f as string) === "birthDate" ? "birthYear" : f));
+    return draft;
   } catch {
     return null;
   }
@@ -71,9 +76,7 @@ function fieldLabel(f: ImportField): string {
     case "lastName":
       return t`Last name`;
     case "birthYear":
-      return t`Birth year`;
-    case "birthDate":
-      return t`Date of birth`;
+      return t`Date of birth or birth year`;
     case "team":
       return t`Team`;
     case "role":
@@ -291,7 +294,10 @@ function SheetCard({
       <p class="small muted">{plural(count, { one: "# row below the header", other: "# rows below the header" })}</p>
       <ul class="list" aria-label={t`Columns`}>
         {sheet.header.map((h, i) => {
-          const samples = preview.map((r) => r[i]).filter(Boolean).join(" · ");
+          // For the birth year the years that are kept, not the dates as written
+          const isYear = sheet.mapping[i] === "birthYear";
+          const values = preview.map((r) => (isYear ? String(parseYear(r[i] ?? "") ?? "") : r[i])).filter(Boolean);
+          const samples = isYear && values.length ? `${values.join(" · ")} (${t`only the year is kept`})` : values.join(" · ");
           const ignored = sheet.mapping[i] === "ignore";
           return (
             <li class="list-row">

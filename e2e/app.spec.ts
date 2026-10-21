@@ -1566,6 +1566,8 @@ test("Einrichtung: Mannschaften, Trainer und Spielerinnen aus Listen übernehmen
   ]);
   await expect(page.getByRole("region", { name: "listen.xlsx · wC2" }).getByLabel("Mannschaft für alle in dieser Liste")).toHaveValue("wC2");
   await expect(page.getByRole("region", { name: "listen.xlsx · wC2" }).getByLabel("Spalte Bemerkung")).toHaveValue("ignore");
+  await expect(page.getByRole("region", { name: "listen.xlsx · wC2" }).getByLabel("Spalte Geburtsdatum")).toHaveValue("birthYear");
+  await expect(page.getByRole("region", { name: "listen.xlsx · wC2" })).toContainText("2014 · 2013 (nur der Jahrgang wird übernommen)");
   const kaderCard = page.getByRole("region", { name: "kader.csv" });
   await expect(kaderCard.getByLabel("Spalte Telefon")).toHaveValue("ignore");
   await expect(kaderCard).not.toContainText("0123 45");

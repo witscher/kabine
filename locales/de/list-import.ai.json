@@ -66,5 +66,6 @@
   "Leave out": "Weglassen",
   "Enter by hand instead": "Stattdessen von Hand eingeben",
   "Columns": "Spalten",
-  "Date of birth": "Geburtsdatum"
+  "Date of birth or birth year": "Geburtsdatum/Jahrgang",
+  "only the year is kept": "nur der Jahrgang wird übernommen"
 }

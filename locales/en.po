@@ -2062,6 +2062,10 @@ msgstr "Correct"
 msgid "A game that is not on handball4all, e.g. a friendly or a tournament. With squad, meeting point and helper duties like every game."
 msgstr "A game that is not on handball4all, e.g. a friendly or a tournament. With squad, meeting point and helper duties like every game."
 
+#: src/list-import.tsx
+msgid "only the year is kept"
+msgstr "only the year is kept"
+
 #: src/pages/mail-settings.tsx
 msgid "Password"
 msgstr "Password"
@@ -3546,10 +3550,6 @@ msgstr "Revoke link"
 msgid "Please paste the link to your team's page at {names}."
 msgstr "Please paste the link to your team's page at {names}."
 
-#: src/list-import.tsx
-msgid "Date of birth"
-msgstr "Date of birth"
-
 #: src/pages/chat.tsx
 #: src/pages/chat.tsx
 msgid "Announcement · {author}"
@@ -4628,6 +4628,10 @@ msgstr "No connection. The message was not sent."
 #: worker/routes/push.ts
 msgid "Invalid key"
 msgstr "Invalid key"
+
+#: src/list-import.tsx
+msgid "Date of birth or birth year"
+msgstr "Date of birth or birth year"
 
 #: src/pages/team.tsx
 msgid "Core squad saved ({count})."
@@ -9116,7 +9120,6 @@ msgstr "Format 2027/28"
 msgid "Functions of this club"
 msgstr "Functions of this club"
 
-#: src/list-import.tsx
 #: src/pages/team.tsx
 #: src/pages/team.tsx
 msgid "Birth year"

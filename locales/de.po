@@ -2150,6 +2150,11 @@ msgid "A game that is not on handball4all, e.g. a friendly or a tournament. With
 msgstr "Ein Spiel, das nicht bei handball4all steht, z. B. Freundschaftsspiel oder Turnier. Mit Kader, Treffpunkt und Helferdiensten wie bei jedem Spiel."
 
 # ai
+#: src/list-import.tsx
+msgid "only the year is kept"
+msgstr "nur der Jahrgang wird übernommen"
+
+# ai
 #: src/pages/mail-settings.tsx
 msgid "Password"
 msgstr "Passwort"
@@ -3717,11 +3722,6 @@ msgstr "Zurückziehen"
 msgid "Please paste the link to your team's page at {names}."
 msgstr "Bitte füge den Link zur Seite deiner Mannschaft bei {names} ein."
 
-# ai
-#: src/list-import.tsx
-msgid "Date of birth"
-msgstr "Geburtsdatum"
-
 #: src/pages/chat.tsx
 #: src/pages/chat.tsx
 msgid "Announcement · {author}"
@@ -4856,6 +4856,11 @@ msgstr "Keine Verbindung. Die Nachricht wurde nicht gesendet."
 #: worker/routes/push.ts
 msgid "Invalid key"
 msgstr "Ungültiger Schlüssel"
+
+# ai
+#: src/list-import.tsx
+msgid "Date of birth or birth year"
+msgstr "Geburtsdatum/Jahrgang"
 
 #: src/pages/team.tsx
 msgid "Core squad saved ({count})."
@@ -9569,7 +9574,6 @@ msgstr "Format 2027/28"
 msgid "Functions of this club"
 msgstr "Funktionen dieses Vereins"
 
-#: src/list-import.tsx
 #: src/pages/team.tsx
 #: src/pages/team.tsx
 msgid "Birth year"
