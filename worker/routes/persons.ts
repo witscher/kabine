@@ -53,6 +53,11 @@ personRoutes.patch("/persons/:id", async (c) => {
   const input = parse(updatePersonSchema, await readJson(c.req.raw));
   const self = personId === actor.personId;
   if (!self) await requireManagePerson(c.env.DB, actor, personId);
+  // Names are how people know each other in the club: only admins change their own, everyone else asks their
+  // coach or an admin (coaches correct players and parents of their teams). Also keeps children from renaming themselves.
+  if (self && !actor.isAdmin && !actor.adminSuspended && (input.firstName !== undefined || input.lastName !== undefined)) {
+    throw forbidden(t`Your coach or an admin corrects your name.`, "name_locked");
+  }
   if (self && input.birthYear !== undefined && !actor.isAdmin && !(await canManagePerson(c.env.DB, actor, personId))) {
     throw forbidden(t`Your coach maintains the birth year.`);
   }

@@ -733,6 +733,7 @@ msgstr "For a profile picture you need your parents' consent. But no parent is l
 #: src/pages/team.tsx
 #: src/pages/team.tsx
 #: src/pages/team.tsx
+#: src/pages/team.tsx
 msgid "Last name"
 msgstr "Last name"
 
@@ -2916,6 +2917,8 @@ msgstr "The game report has not been published yet. handball4all usually puts it
 
 #: src/pages/profile.tsx
 #: src/pages/profile.tsx
+#: src/pages/team.tsx
+#: src/pages/team.tsx
 msgid "Change name"
 msgstr "Change name"
 
@@ -4689,6 +4692,10 @@ msgstr "Changed: {label}"
 #: src/pages/plans.tsx
 msgid "Create training plan"
 msgstr "Create training plan"
+
+#: src/pages/profile.tsx
+msgid "Name wrong? Tell your coach or an admin."
+msgstr "Name wrong? Tell your coach or an admin."
 
 #: src/faq.tsx
 msgid "Until when can I decline?"
@@ -6500,6 +6507,7 @@ msgstr "The helpers of the team see who takes on which duty as â€œFirst name L.â
 #: src/pages/group.tsx
 #: src/pages/profile.tsx
 #: src/pages/season.tsx
+#: src/pages/team.tsx
 #: src/pages/team.tsx
 #: src/pages/team.tsx
 msgid "Saved."
@@ -8796,6 +8804,7 @@ msgstr "Player invitation links opened on a signed-in device lead straight to th
 #: src/pages/season.tsx
 #: src/pages/team.tsx
 #: src/pages/team.tsx
+#: src/pages/team.tsx
 msgid "Save"
 msgstr "Save"
 
@@ -9433,6 +9442,7 @@ msgstr "Was there"
 #: src/pages/join.tsx
 #: src/pages/profile.tsx
 #: src/pages/setup-wizard.tsx
+#: src/pages/team.tsx
 #: src/pages/team.tsx
 #: src/pages/team.tsx
 #: src/pages/team.tsx
@@ -10103,6 +10113,10 @@ msgstr "Notifications in the helper plan"
 #: src/pages/plans.tsx
 msgid "Players accept by hand if they want to join."
 msgstr "Players accept by hand if they want to join."
+
+#: worker/routes/persons.ts
+msgid "Your coach or an admin corrects your name."
+msgstr "Your coach or an admin corrects your name."
 
 #: modules/carpools/app/card.tsx
 msgid "Saved. As soon as someone offers seats, you will get a notification."

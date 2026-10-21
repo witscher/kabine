@@ -23,6 +23,9 @@ Kabine is used mostly by children and teenagers and their parents. It is built t
 | Data | Of whom | Purpose | Visible to | Deleted |
 | --- | --- | --- | --- | --- |
 | First name, last name | Everyone | Identify people in the team | Signed-in members of the same team, shortened where noted above | When leaving, at the next season change at the latest |
+
+Only admins change their own name; players, parents and coaches ask their coach or an admin, who correct it (right to rectification, Art. 16 GDPR). So everyone knows who is who, and children cannot rename themselves.
+
 | Year of birth | Players | Age group and team assignment | Coaches, admins | As above |
 | Team memberships, roles | Everyone | Who sees which events and chats | Team members (coaches and admins in full) | When leaving; at the season change teams are assigned again |
 | Parent–child link, child permissions with log | Parents, minors | Parents act for their children | The parent, coaches and admins | When leaving |

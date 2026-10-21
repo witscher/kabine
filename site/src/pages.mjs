@@ -96,6 +96,7 @@ ${section(
       ["Links laufen ab", "und lassen sich jederzeit erneuern; der alte Link gilt dann nicht mehr."],
       ["Der Link ist nur zum Einrichten da.", "Wer ihn später noch einmal öffnet, kommt mit „Direkt zur App“ in die App."],
       ["Trainer sehen, wer fehlt:", "Die Einladungsübersicht zeigt, wer noch keinen Zugang hat."],
+      ["Jeder weiß, wer wer ist:", "Den eigenen Namen ändert man nicht selbst, das machen Trainer oder Admins."],
     ]),
 )}
 ${section(
@@ -167,6 +168,7 @@ ${section(
       ["Links expire", "and can be renewed at any time; the old link then stops working."],
       ["The link is for setting up only.", "Whoever opens it again later gets into the app with “Straight to the app”."],
       ["Coaches see who is missing:", "the invitations overview shows who has no access yet."],
+      ["Everyone knows who is who:", "people do not change their own name, coaches or admins do."],
     ]),
 )}
 ${section(

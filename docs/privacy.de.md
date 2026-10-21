@@ -23,6 +23,9 @@ Kabine wird vor allem von Kindern, Jugendlichen und ihren Eltern genutzt. Die Ap
 | Daten | Von wem | Zweck | Sichtbar für | Gelöscht |
 | --- | --- | --- | --- | --- |
 | Vorname, Nachname | Alle | Personen in der Mannschaft erkennen | Angemeldete der eigenen Mannschaft, abgekürzt wie oben beschrieben | Beim Austritt, spätestens zum nächsten Saisonwechsel |
+
+Den eigenen Namen ändern nur Admins; Spieler, Eltern und Trainer wenden sich an ihren Trainer oder einen Admin, die ihn korrigieren (Recht auf Berichtigung, Art. 16 DSGVO). So weiß jeder, wer wer ist, und Kinder können sich nicht umbenennen.
+
 | Jahrgang | Spieler | Altersklasse und Mannschaft | Trainer, Admins | Wie oben |
 | Mannschaften, Rollen | Alle | Wer welche Termine und Chats sieht | Mannschaft (Trainer und Admins vollständig) | Beim Austritt; zum Saisonwechsel neu zugeordnet |
 | Eltern-Kind-Verbindung, Freigaben mit Protokoll | Eltern, Minderjährige | Eltern handeln für ihre Kinder | Das Elternteil, Trainer, Admins | Beim Austritt |

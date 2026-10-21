@@ -450,6 +450,13 @@ test("Admin schickt eine Rundnachricht, sie erscheint als Ankündigung im Chat",
   await player.page.screenshot({ path: process.env.E2E_SHOT ?? "test-results/announcement.png" });
 });
 
+test("Eigener Name: Spielerin sieht den Hinweis statt „Namen ändern“", async () => {
+  const { page } = player;
+  await page.goto("/profil");
+  await expect(page.getByText("Name falsch? Sag deinem Trainer oder einem Admin Bescheid.")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Namen ändern" })).toHaveCount(0);
+});
+
 test("Trainingsorte: Admin legt eine Vereinshalle an", async () => {
   const { page } = admin;
   await page.goto("/verwaltung/orte");

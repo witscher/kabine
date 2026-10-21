@@ -1084,6 +1084,7 @@ export function PersonPage({ id, personId }: { id: string; personId: string }) {
   const [last, setLast] = useState("");
   const [year, setYear] = useState("");
   const [link, setLink] = useState<{ url: string; expiresAt: string; for: string } | null>(null);
+  const [renaming, setRenaming] = useState<{ id: number; firstName: string; lastName: string | null } | null>(null);
 
   useEffect(() => {
     if (!player) return;
@@ -1274,6 +1275,9 @@ export function PersonPage({ id, personId }: { id: string; personId: string }) {
                   <span class="small muted">{g.hasAccount ? t`with access` : t`without access`}</span>
                 </div>
                 <div class="btn-row">
+                  <Button size="sm" icon="edit" onClick={() => setRenaming(g)}>
+                    <Trans>Change name</Trans>
+                  </Button>
                   <Button size="sm" icon="link" onClick={() => createLink(g.id, g.firstName)}>
                     <Trans>Link for new passkey</Trans>
                   </Button>
@@ -1368,6 +1372,7 @@ export function PersonPage({ id, personId }: { id: string; personId: string }) {
           </div>
         </Sheet>
       ) : null}
+      {renaming ? <RenameSheet person={renaming} onClose={() => setRenaming(null)} onDone={refresh} /> : null}
     </main>
   );
 }
@@ -1423,5 +1428,31 @@ function TemplateChoice({ team, onChanged }: { team: TeamDetail; onChanged: () =
         </Trans>
       </p>
     </div>
+  );
+}
+
+/** Coaches correct the name of a parent of their team (parents cannot change their own name). */
+function RenameSheet({ person, onClose, onDone }: { person: { id: number; firstName: string; lastName: string | null }; onClose: () => void; onDone: () => void }) {
+  const [first, setFirst] = useState(person.firstName);
+  const [last, setLast] = useState(person.lastName ?? "");
+  return (
+    <Sheet open onClose={onClose} title={t`Change name`}>
+      <TextField label={t`First name`} value={first} onInput={setFirst} maxLength={50} />
+      <TextField label={t`Last name`} value={last} onInput={setLast} maxLength={50} />
+      <Button
+        variant="primary"
+        size="lg"
+        block
+        disabled={!first.trim()}
+        onClick={async () => {
+          await api.patch(`/persons/${person.id}`, { firstName: first.trim(), lastName: last.trim() || null });
+          toast(t`Saved.`);
+          onClose();
+          onDone();
+        }}
+      >
+        <Trans>Save</Trans>
+      </Button>
+    </Sheet>
   );
 }

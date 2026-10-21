@@ -310,14 +310,26 @@ export function ProfilePage() {
             </a>
           </li>
           <li>
-            <button type="button" class="list-row" onClick={() => setNameOpen(true)}>
-              <Icon name="edit" size={22} />
-              <span class="main">
-                <span class="title">
-                  <Trans>Change name</Trans>
+            {me.isAdmin || me.adminSwitch ? (
+              <button type="button" class="list-row" onClick={() => setNameOpen(true)}>
+                <Icon name="edit" size={22} />
+                <span class="main">
+                  <span class="title">
+                    <Trans>Change name</Trans>
+                  </span>
                 </span>
-              </span>
-            </button>
+              </button>
+            ) : (
+              <div class="list-row">
+                <Icon name="edit" size={22} />
+                <span class="main">
+                  <span class="title">{personName(me.person)}</span>
+                  <span class="sub">
+                    <Trans>Name wrong? Tell your coach or an admin.</Trans>
+                  </span>
+                </span>
+              </div>
+            )}
           </li>
           {!me.isAdmin && me.manageableTeams.length ? (
             <li>

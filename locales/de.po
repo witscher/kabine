@@ -762,6 +762,7 @@ msgstr "Für ein Profilbild brauchst du die Zustimmung deiner Eltern. Mit deinem
 #: src/pages/team.tsx
 #: src/pages/team.tsx
 #: src/pages/team.tsx
+#: src/pages/team.tsx
 msgid "Last name"
 msgstr "Nachname"
 
@@ -3034,6 +3035,8 @@ msgstr "Der Spielbericht ist noch nicht veröffentlicht. handball4all stellt ihn
 
 #: src/pages/profile.tsx
 #: src/pages/profile.tsx
+#: src/pages/team.tsx
+#: src/pages/team.tsx
 msgid "Change name"
 msgstr "Name ändern"
 
@@ -4888,6 +4891,11 @@ msgstr "Geändert: {label}"
 #: src/pages/plans.tsx
 msgid "Create training plan"
 msgstr "Trainingsplan anlegen"
+
+# ai
+#: src/pages/profile.tsx
+msgid "Name wrong? Tell your coach or an admin."
+msgstr "Name falsch? Sag deinem Trainer oder einem Admin Bescheid."
 
 #: src/faq.tsx
 msgid "Until when can I decline?"
@@ -6781,6 +6789,7 @@ msgstr "Die Helfer der Mannschaft sehen, wer welchen Dienst übernimmt, als „V
 #: src/pages/group.tsx
 #: src/pages/profile.tsx
 #: src/pages/season.tsx
+#: src/pages/team.tsx
 #: src/pages/team.tsx
 #: src/pages/team.tsx
 msgid "Saved."
@@ -9176,6 +9185,7 @@ msgstr "Spielerlinks, die auf einem angemeldeten Gerät geöffnet werden, führe
 #: src/pages/season.tsx
 #: src/pages/team.tsx
 #: src/pages/team.tsx
+#: src/pages/team.tsx
 msgid "Save"
 msgstr "Speichern"
 
@@ -9840,6 +9850,7 @@ msgstr "War da"
 #: src/pages/join.tsx
 #: src/pages/profile.tsx
 #: src/pages/setup-wizard.tsx
+#: src/pages/team.tsx
 #: src/pages/team.tsx
 #: src/pages/team.tsx
 #: src/pages/team.tsx
@@ -10537,6 +10548,11 @@ msgstr "Benachrichtigungen im Helferplan"
 #: src/pages/plans.tsx
 msgid "Players accept by hand if they want to join."
 msgstr "Wer mitmachen will, sagt selbst zu."
+
+# ai
+#: worker/routes/persons.ts
+msgid "Your coach or an admin corrects your name."
+msgstr "Deinen Namen korrigiert dein Trainer oder ein Admin."
 
 #: modules/carpools/app/card.tsx
 msgid "Saved. As soon as someone offers seats, you will get a notification."
