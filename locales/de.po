@@ -4327,6 +4327,11 @@ msgstr "<0>Bist du schon in der App registriert? Dann öffne diesen Link auf dem
 msgid "Only for codes and reminders you choose. Neither coaches nor admins see the number."
 msgstr "Nur für Codes und Erinnerungen, die du wählst. Weder Trainer noch Admins sehen die Nummer."
 
+# ai
+#: src/list-import.tsx
+msgid "{count, plural, one {# list added: check the columns} other {# lists added: check the columns}}"
+msgstr "{count, plural, one {# Liste hinzugefügt: Spalten prüfen} other {# Listen hinzugefügt: Spalten prüfen}}"
+
 #: src/pages/squad.tsx
 msgid "Save changes · {count}"
 msgstr "Änderungen speichern · {count}"

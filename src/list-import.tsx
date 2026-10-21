@@ -136,7 +136,21 @@ function Sources({ draft, update, onRead, onDiscard }: { draft: Draft; update: (
   const [problem, setProblem] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const assist = useAssist();
-  const add = (sheets: ImportSheet[]) => update({ sheets: [...draft.sheets, ...sheets.filter((s) => s.rows.length)] });
+  // The new lists appear below the form: scroll to the first one, or the admin sees no change
+  const [scrollTo, setScrollTo] = useState<string | null>(null);
+  useEffect(() => {
+    if (!scrollTo) return;
+    document.getElementById(`sheet-${scrollTo}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    setScrollTo(null);
+  }, [scrollTo]);
+  const add = (sheets: ImportSheet[]) => {
+    const added = sheets.filter((s) => s.rows.length);
+    if (!added.length) return;
+    update({ sheets: [...draft.sheets, ...added] });
+    setScrollTo(added[0]!.id);
+    const count = added.length;
+    toast(plural(count, { one: "# list added: check the columns", other: "# lists added: check the columns" }));
+  };
   const nextId = () => `s${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
 
   const readFiles = async (files: FileList) => {
@@ -284,7 +298,7 @@ function SheetCard({
   const count = sheet.rows.length;
   const preview = sheet.rows.slice(0, 3);
   return (
-    <section class="card card-pad stack-sm" aria-label={sheetTitle(sheet)}>
+    <section id={`sheet-${sheet.id}`} class="card card-pad stack-sm" aria-label={sheetTitle(sheet)} style={{ scrollMarginTop: "72px" }}>
       <div class="row-gap" style={{ justifyContent: "space-between" }}>
         <strong>{sheetTitle(sheet)}</strong>
         <button type="button" class="link-btn" onClick={onRemove}>

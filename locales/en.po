@@ -4124,6 +4124,10 @@ msgstr "<0>Already registered in the app? Then open this link on the device wher
 msgid "Only for codes and reminders you choose. Neither coaches nor admins see the number."
 msgstr "Only for codes and reminders you choose. Neither coaches nor admins see the number."
 
+#: src/list-import.tsx
+msgid "{count, plural, one {# list added: check the columns} other {# lists added: check the columns}}"
+msgstr "{count, plural, one {# list added: check the columns} other {# lists added: check the columns}}"
+
 #: src/pages/squad.tsx
 msgid "Save changes · {count}"
 msgstr "Save changes · {count}"

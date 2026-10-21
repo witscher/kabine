@@ -72,5 +72,6 @@
   "Without first name": "Ohne Vorname",
   "Often a heading or a total line of the list. Enter the first name, or leave the entry out.": "Oft eine Überschrift oder Summenzeile der Liste. Trag den Vornamen ein oder lass den Eintrag weg.",
   "Enter the missing first names or leave those entries out.": "Trag die fehlenden Vornamen ein oder lass diese Einträge weg.",
-  "{noFirstCount, plural, one {# entry without first name} other {# entries without first name}}": "{noFirstCount, plural, one {# Eintrag ohne Vornamen} other {# Einträge ohne Vornamen}}"
+  "{noFirstCount, plural, one {# entry without first name} other {# entries without first name}}": "{noFirstCount, plural, one {# Eintrag ohne Vornamen} other {# Einträge ohne Vornamen}}",
+  "{count, plural, one {# list added: check the columns} other {# lists added: check the columns}}": "{count, plural, one {# Liste hinzugefügt: Spalten prüfen} other {# Listen hinzugefügt: Spalten prüfen}}"
 }
