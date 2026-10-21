@@ -65,7 +65,8 @@ export function SetupWizardPage() {
   const { route } = useLocation();
   const [index, setIndex] = useState(() => {
     const saved = Number(sessionStorageGet("kabine.setup.step"));
-    return Number.isInteger(saved) && saved > 0 && saved < STEPS.length ? saved : 0;
+    // Opened again after the last step ("The app is set up"): from the start
+    return Number.isInteger(saved) && saved > 0 && saved < STEPS.length - 1 ? saved : 0;
   });
   const step = STEPS[index]!;
   const go = (i: number) => {
@@ -111,7 +112,7 @@ export function SetupWizardPage() {
           {step === "teams" ? <TeamsStep onNext={next} /> : null}
           {step === "people" ? <PeopleStep onNext={next} /> : null}
           {step === "privacy" ? <PrivacyStep onNext={next} /> : null}
-          {step === "done" ? <DoneStep /> : null}
+          {step === "done" ? <DoneStep onRestart={() => go(0)} /> : null}
           {step !== "done" ? (
             <Button variant="ghost" block onClick={later}>
               <Trans>Continue later</Trans>
@@ -596,7 +597,7 @@ function PrivacyStep({ onNext }: { onNext: () => void }) {
   );
 }
 
-function DoneStep() {
+function DoneStep({ onRestart }: { onRestart: () => void }) {
   const club = useClub();
   const [problem, setProblem] = useState<string | null>(null);
   useEffect(() => {
@@ -643,6 +644,9 @@ function DoneStep() {
       <a class="btn btn-primary btn-block" href="/">
         <Trans>Go to the app</Trans>
       </a>
+      <Button variant="ghost" block onClick={onRestart}>
+        <Trans>Start again from the beginning</Trans>
+      </Button>
     </>
   );
 }

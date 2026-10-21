@@ -1457,8 +1457,16 @@ test("Einrichtungsassistent: Admin geht alle Schritte durch", async () => {
   await page.getByRole("button", { name: "Speichern und weiter" }).click();
   await expect(page.getByRole("heading", { name: "Die App ist eingerichtet" })).toBeVisible();
   await page.goto("/verwaltung");
-  await expect(page.getByRole("link", { name: /Einrichtungsassistent/ })).toBeVisible();
   await expect(page.getByText("Einrichtung nicht abgeschlossen")).toHaveCount(0);
+  // Opened again after the last step: from the start, and the last step offers to start over
+  await page.getByRole("link", { name: /Einrichtungsassistent/ }).click();
+  await expect(page.getByText("Einrichtung · Schritt 1 von 9")).toBeVisible();
+  await page.evaluate(() => sessionStorage.setItem("kabine.setup.step", "7"));
+  await page.reload();
+  await page.getByRole("button", { name: "Speichern und weiter" }).click();
+  await expect(page.getByRole("heading", { name: "Die App ist eingerichtet" })).toBeVisible();
+  await page.getByRole("button", { name: "Noch einmal von vorn" }).click();
+  await expect(page.getByText("Einrichtung · Schritt 1 von 9")).toBeVisible();
 });
 
 test("Spielerliste: Trainer übernimmt Spieler aus einer Tabelle, Einladungen zeigen, wer noch fehlt", async () => {

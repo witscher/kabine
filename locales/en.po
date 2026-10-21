@@ -2407,6 +2407,10 @@ msgstr "Do you use the app from the Home Screen? Then you are not signed in ther
 msgid "Remove stand-in?"
 msgstr "Remove stand-in?"
 
+#: src/pages/setup-wizard.tsx
+msgid "Start again from the beginning"
+msgstr "Start again from the beginning"
+
 #: src/pages/profile.tsx
 msgid "Confirmed. You can sign in with a code by SMS."
 msgstr "Confirmed. You can sign in with a code by SMS."

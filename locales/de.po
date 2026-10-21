@@ -2518,6 +2518,11 @@ msgid "Remove stand-in?"
 msgstr "Aushilfe entfernen?"
 
 # ai
+#: src/pages/setup-wizard.tsx
+msgid "Start again from the beginning"
+msgstr "Noch einmal von vorn"
+
+# ai
 #: src/pages/profile.tsx
 msgid "Confirmed. You can sign in with a code by SMS."
 msgstr "Bestätigt. Du kannst dich mit einem Code per SMS anmelden."

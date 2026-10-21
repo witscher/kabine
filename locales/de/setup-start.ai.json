@@ -8,5 +8,6 @@
   "You become the first admin and the owner of this installation. Your e-mail address is for signing in; besides you, only other admins see it.": "Du wirst der erste Admin und Inhaber dieser Installation. Deine E-Mail-Adresse dient der Anmeldung; außer dir sehen sie nur andere Admins.",
   "First admin": "Erster Admin",
   "Set up your passkey now. The setup works a single time only.": "Richte jetzt deinen Passkey ein. Die Einrichtung funktioniert nur ein einziges Mal.",
-  "This setup password is not correct. If nobody knows it any more, set ADMIN_BOOTSTRAP_TOKEN anew in the Cloudflare dashboard under Workers & Pages → this Worker → Settings → Variables and Secrets.": "Dieses Einrichtungspasswort stimmt nicht. Weiß es niemand mehr, setze ADMIN_BOOTSTRAP_TOKEN im Cloudflare-Dashboard neu: Workers & Pages → dieser Worker → Settings → Variables and Secrets."
+  "This setup password is not correct. If nobody knows it any more, set ADMIN_BOOTSTRAP_TOKEN anew in the Cloudflare dashboard under Workers & Pages → this Worker → Settings → Variables and Secrets.": "Dieses Einrichtungspasswort stimmt nicht. Weiß es niemand mehr, setze ADMIN_BOOTSTRAP_TOKEN im Cloudflare-Dashboard neu: Workers & Pages → dieser Worker → Settings → Variables and Secrets.",
+  "Start again from the beginning": "Noch einmal von vorn"
 }
