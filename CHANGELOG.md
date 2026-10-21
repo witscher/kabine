@@ -6,8 +6,8 @@ Changes that are merged but not released yet go under *Unreleased*, one line eac
 
 ## Unreleased
 
-- The setup wizard can import teams, coaches and players from the club's lists: Excel files with one or more sheets, CSV or a pasted table, several lists with the same people combined into one. Only name, birth year, team and role are read, in the browser; everything is checked and corrected before anything is created.
-- New beta module *AI list import* (off by default): in the list import, a button lets Cloudflare's AI model Clairic in the club's account recognise unusual column headers. Only headers and masked examples are sent, never names or birth years. Configuration change: `wrangler.jsonc` gets the Workers AI binding `AI`; without the module nothing is sent or billed.
+- Import teams, coaches and players from the club's lists, in the setup wizard and under *Administration → Import*: Excel files (.xlsx) with one or more sheets, CSV or a pasted table, several lists with the same people combined into one. Only name, birth year, team and role are read, in the browser; the lists are not uploaded, and everything is checked and corrected before anything is created.
+- The setup wizard starts at step 1 when it is opened again after it was finished, and its last step can start over.
 - Only admins change their own name. Players, parents and coaches see "Name wrong? Tell your coach or an admin." in their profile; coaches correct the names of players and now also of parents of their teams.
 - `npm run admin:link` is documented as a break-glass operation and gets `--owner` (the rescued person becomes the owner) and `--revoke-all-admins` (compromised accesses: every other admin loses the role and is signed out, with confirmation). Every use is recorded and shown under *Administration → Updates and maintenance*.
 - The update pull request shows the release notes of every version since the installed one, so a copy that skipped releases sees all changes, and it closes older update pull requests that are still open.

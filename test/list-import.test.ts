@@ -1,10 +1,8 @@
 // Reading the club's lists in the setup wizard: columns, names, years, roles, one person across lists. Invented names.
 import { describe, expect, it } from "vitest";
 import {
-  assistInput,
   cellText,
   guessMapping,
-  maskCell,
   mergeRows,
   mergeTwo,
   resolveSame,
@@ -74,23 +72,6 @@ describe("Listen lesen", () => {
     expect(parseYear("41760", now)).toBe(2014);
     expect(parseYear("unbekannt", now)).toBeNull();
     expect(["Trainer", "Co-Trainerin", "Betreuer", "Physio", "TW", ""].map(parseRole)).toEqual(["coach", "coach", "staff", "staff", "player", "player"]);
-  });
-});
-
-describe("Was eine Hilfe (KI) zu sehen bekommt", () => {
-  it("Überschriften, Beispiele nur maskiert und nur ohne Überschrift", () => {
-    expect(maskCell("Müller, Anna-Lena (2014) wD1")).toBe("Xxxxxx, Xxxx-Xxxx (2014) xX1");
-    const sheet = sheetFromRows("s", "a.xlsx", "S", [
-      ["Name", "Jg.", ""],
-      ["Muster, Kim", "2014", "wD1"],
-    ]);
-    expect(assistInput(sheet)).toEqual({ header: ["Name", "Jg.", ""], samples: [["", "", "xX1"]] });
-    // Without a recognisable header row the first row may be a person: everything masked
-    const headless = sheetFromRows("t", "b.csv", "", [
-      ["Kim Muster", "2014"],
-      ["Alex Probe", "2015"],
-    ]);
-    expect(assistInput(headless)).toEqual({ header: ["Xxx Xxxxxx", "2014"], samples: [["Xxxx Xxxxx", "2015"]] });
   });
 });
 

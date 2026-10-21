@@ -56,7 +56,6 @@ modules/carpools/
 | `eventCardLine` | a line on event cards on the start page |
 | `eventSection` | a section on the event page |
 | `gameLinks` | links of a fixture module for a game (live ticker, game report) on the "In progress" card and the event page |
-| `listImport` | help in the list import of the setup wizard: recognising columns (`ImportAssist` in `shared/list-import.ts`), as a button the admin taps; it gets only what `assistInput` lets through |
 
 [`modules/carpools/`](../../modules/carpools/) uses all of the event hooks and is the reference module.
 
@@ -71,7 +70,6 @@ modules/carpools/
 | `carpools` | Carpools | on | `modules/carpools/` |
 | `handball4all` | Game schedule from handball4all | on | `modules/handball4all/` (fixture connector, see [connectors.md](connectors.md)) |
 | `sms` | SMS | off | `modules/sms/` (text channel for the core, see its README) |
-| `aiImport` | AI list import | off (beta) | `modules/ai-import/` |
 
 ## Adding a module
 

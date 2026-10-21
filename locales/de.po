@@ -1942,6 +1942,7 @@ msgstr "Zu dieser Adresse gehören mehrere Zugänge. Mit welchem möchtest du di
 #: src/pages/chat.tsx
 #: src/pages/club-settings.tsx
 #: src/pages/group.tsx
+#: src/pages/list-import.tsx
 #: src/pages/mail-settings.tsx
 #: src/pages/season.tsx
 #: src/pages/updates.tsx
@@ -3085,6 +3086,8 @@ msgstr "Niemand gefunden"
 msgid "Accepted"
 msgstr "Zugesagt"
 
+#: src/list-import.tsx
+#: src/list-import.tsx
 #: src/pages/season.tsx
 #: src/pages/season.tsx
 msgid "Discard"
@@ -3655,6 +3658,7 @@ msgstr "{created, plural, one {# Spiel angelegt.} other {# Spiele angelegt.}}"
 msgid "the link to the children"
 msgstr "die Verknüpfung zu den Kindern"
 
+#: src/list-import.tsx
 #: src/pages/admin.tsx
 #: src/pages/admin.tsx
 #: src/pages/event.tsx
@@ -5408,11 +5412,6 @@ msgstr "Termin verschieben"
 msgid "Has access."
 msgstr "Hat einen Zugang."
 
-# ai
-#: modules/ai-import/module.ts
-msgid "Helps the list import in the setup wizard: an AI model in your Cloudflare account recognises unusual column headers, only when an admin taps the button. No names are sent."
-msgstr "Hilft beim Listenimport im Einrichtungsassistenten: Ein KI-Modell in eurem Cloudflare-Konto erkennt ungewöhnliche Spaltenüberschriften, nur wenn ein Admin auf den Knopf tippt. Namen werden nicht gesendet."
-
 #: worker/routes/admin.ts
 msgid "{name}: The oldest birth year must come before the youngest."
 msgstr "{name}: Der älteste Jahrgang muss vor dem jüngsten liegen."
@@ -5433,11 +5432,6 @@ msgstr "Bitte gib einen Grund an."
 #: src/pages/chat.tsx
 msgid "Close reactions"
 msgstr "Reaktionen schließen"
-
-# ai
-#: src/list-import.tsx
-msgid "{count, plural, one {# column recognised} other {# columns recognised}}"
-msgstr "{count, plural, one {# Spalte erkannt} other {# Spalten erkannt}}"
 
 #: worker/routes/events.ts
 msgid "Going ahead: {label}"
@@ -5474,6 +5468,11 @@ msgstr "An seit {since}. Nur Admins können die App nutzen, Erinnerungen und and
 #: worker/routes/list-import.ts
 msgid "Please choose an age class for \"{name}\"."
 msgstr "Bitte wähle eine Altersklasse für „{name}“."
+
+# ai
+#: src/pages/admin.tsx
+msgid "Teams, coaches and players from Excel or CSV lists"
+msgstr "Mannschaften, Trainer und Spieler aus Excel- oder CSV-Listen"
 
 #: src/pages/admin.tsx
 msgid "no access"
@@ -6234,11 +6233,6 @@ msgstr "Andere Sportart"
 msgid "Same, named {aName}"
 msgstr "Ja, als {aName}"
 
-# ai
-#: modules/ai-import/module.ts
-msgid "AI list import"
-msgstr "KI-Listenimport"
-
 #: src/pages/squad.tsx
 msgid "Declined: {reason}"
 msgstr "Abgesagt: {reason}"
@@ -6444,6 +6438,13 @@ msgstr "Bitte gib deinen Vor- und Nachnamen ein."
 msgctxt "view as"
 msgid "player"
 msgstr "Spieler/in"
+
+# ai
+#: src/pages/admin.tsx
+#: src/pages/list-import.tsx
+#: src/pages/list-import.tsx
+msgid "Import"
+msgstr "Import"
 
 #: src/list-import.tsx
 #: src/pages/admin.tsx
@@ -9029,11 +9030,6 @@ msgstr "Nur verknüpfte Eltern können das einstellen."
 msgid "I have children in different teams."
 msgstr "Ich habe Kinder in verschiedenen Mannschaften."
 
-# ai
-#: src/list-import.tsx
-msgid "No further columns recognised"
-msgstr "Keine weiteren Spalten erkannt"
-
 #: worker/routes/join.ts
 msgid "An access has just been created for this person."
 msgstr "Für diese Person wurde gerade schon ein Zugang angelegt."
@@ -9343,11 +9339,6 @@ msgstr "vor {mins} Min."
 #: src/avatar.tsx
 msgid "Because you are not of age yet, your parents approve your picture before others see it."
 msgstr "Weil du noch nicht volljährig bist, geben deine Eltern dein Bild frei, bevor andere es sehen."
-
-# ai
-#: modules/ai-import/app/index.tsx
-msgid "The button sends the column headers of the list to Cloudflare Workers AI (model Clairic, currently a preview). Other cell contents only go out masked, without readable names. Cloudflare states that it does not store such requests or use them for training; processing only within the EU is not guaranteed."
-msgstr "Der Knopf sendet die Spaltenüberschriften der Liste an Cloudflare Workers AI (Modell Clairic, derzeit eine Vorschau). Andere Zellinhalte gehen nur maskiert hinaus, also ohne lesbare Namen. Cloudflare gibt an, solche Anfragen nicht zu speichern und nicht zum Training zu nutzen; eine Verarbeitung nur in der EU ist nicht garantiert."
 
 #: worker/routes/events.ts
 #: worker/routes/plans.ts
@@ -9693,11 +9684,6 @@ msgid "Reactions: {list}. Who reacted?"
 msgstr "Reaktionen: {list}. Wer hat reagiert?"
 
 # ai
-#: src/list-import.tsx
-msgid "Recognise columns with AI"
-msgstr "Spalten mit KI erkennen"
-
-# ai
 #: worker/domain/events.ts
 #: worker/routes/events.ts
 #: worker/routes/events.ts
@@ -9969,11 +9955,6 @@ msgstr "Noch keine Eltern verknüpft. Eltern verknüpfen sich selbst über den E
 #: modules/duties/worker/notify.ts
 msgid "{club} {team} {opponent} on {date} at {time}"
 msgstr "{club} {team} {opponent} am {date} um {time}"
-
-# ai
-#: modules/ai-import/worker/clairic.ts
-msgid "Workers AI is not set up in this installation."
-msgstr "Workers AI ist in dieser Installation nicht eingerichtet."
 
 #: src/pages/plans.tsx
 msgid "No training times yet."
@@ -10428,6 +10409,11 @@ msgstr "Noch keine kommenden Sondertermine."
 #: src/pages/help.tsx
 msgid "Thank you, your message has arrived. For a reply by e-mail, your access lacks a confirmed address (profile)."
 msgstr "Danke, deine Nachricht ist angekommen. Für eine Antwort per E-Mail fehlt an deinem Zugang eine bestätigte Adresse (Profil)."
+
+# ai
+#: src/pages/list-import.tsx
+msgid "The season has no age groups yet. Add them under <0>age groups</0> first."
+msgstr "Die Saison hat noch keine Altersklassen. Lege sie zuerst unter <0>Altersklassen</0> an."
 
 #: modules/duties/app/helpers.tsx
 msgid "Own teams"

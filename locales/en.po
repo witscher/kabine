@@ -1867,6 +1867,7 @@ msgstr "Several accesses belong to this address. Which one do you want to sign i
 #: src/pages/chat.tsx
 #: src/pages/club-settings.tsx
 #: src/pages/group.tsx
+#: src/pages/list-import.tsx
 #: src/pages/mail-settings.tsx
 #: src/pages/season.tsx
 #: src/pages/updates.tsx
@@ -2946,6 +2947,8 @@ msgstr "No one found"
 msgid "Accepted"
 msgstr "Accepted"
 
+#: src/list-import.tsx
+#: src/list-import.tsx
 #: src/pages/season.tsx
 #: src/pages/season.tsx
 msgid "Discard"
@@ -3486,6 +3489,7 @@ msgstr "{created, plural, one {# game created.} other {# games created.}}"
 msgid "the link to the children"
 msgstr "the link to the children"
 
+#: src/list-import.tsx
 #: src/pages/admin.tsx
 #: src/pages/admin.tsx
 #: src/pages/event.tsx
@@ -5148,10 +5152,6 @@ msgstr "Move event"
 msgid "Has access."
 msgstr "Has access."
 
-#: modules/ai-import/module.ts
-msgid "Helps the list import in the setup wizard: an AI model in your Cloudflare account recognises unusual column headers, only when an admin taps the button. No names are sent."
-msgstr "Helps the list import in the setup wizard: an AI model in your Cloudflare account recognises unusual column headers, only when an admin taps the button. No names are sent."
-
 #: worker/routes/admin.ts
 msgid "{name}: The oldest birth year must come before the youngest."
 msgstr "{name}: The oldest birth year must come before the youngest."
@@ -5172,10 +5172,6 @@ msgstr "Please give a reason."
 #: src/pages/chat.tsx
 msgid "Close reactions"
 msgstr "Close reactions"
-
-#: src/list-import.tsx
-msgid "{count, plural, one {# column recognised} other {# columns recognised}}"
-msgstr "{count, plural, one {# column recognised} other {# columns recognised}}"
 
 #: worker/routes/events.ts
 msgid "Going ahead: {label}"
@@ -5210,6 +5206,10 @@ msgstr "On since {since}. Only admins can use the app; reminders and other autom
 #: worker/routes/list-import.ts
 msgid "Please choose an age class for \"{name}\"."
 msgstr "Please choose an age class for \"{name}\"."
+
+#: src/pages/admin.tsx
+msgid "Teams, coaches and players from Excel or CSV lists"
+msgstr "Teams, coaches and players from Excel or CSV lists"
 
 #: src/pages/admin.tsx
 msgid "no access"
@@ -5936,10 +5936,6 @@ msgstr "Other sport"
 msgid "Same, named {aName}"
 msgstr "Same, named {aName}"
 
-#: modules/ai-import/module.ts
-msgid "AI list import"
-msgstr "AI list import"
-
 #: src/pages/squad.tsx
 msgid "Declined: {reason}"
 msgstr "Declined: {reason}"
@@ -6136,6 +6132,12 @@ msgstr "Please enter your first and last name."
 msgctxt "view as"
 msgid "player"
 msgstr "player"
+
+#: src/pages/admin.tsx
+#: src/pages/list-import.tsx
+#: src/pages/list-import.tsx
+msgid "Import"
+msgstr "Import"
 
 #: src/list-import.tsx
 #: src/pages/admin.tsx
@@ -8600,10 +8602,6 @@ msgstr "Only linked parents can set this."
 msgid "I have children in different teams."
 msgstr "I have children in different teams."
 
-#: src/list-import.tsx
-msgid "No further columns recognised"
-msgstr "No further columns recognised"
-
 #: worker/routes/join.ts
 msgid "An access has just been created for this person."
 msgstr "An access has just been created for this person."
@@ -8897,10 +8895,6 @@ msgstr "{mins} min. ago"
 #: src/avatar.tsx
 msgid "Because you are not of age yet, your parents approve your picture before others see it."
 msgstr "Because you are not of age yet, your parents approve your picture before others see it."
-
-#: modules/ai-import/app/index.tsx
-msgid "The button sends the column headers of the list to Cloudflare Workers AI (model Clairic, currently a preview). Other cell contents only go out masked, without readable names. Cloudflare states that it does not store such requests or use them for training; processing only within the EU is not guaranteed."
-msgstr "The button sends the column headers of the list to Cloudflare Workers AI (model Clairic, currently a preview). Other cell contents only go out masked, without readable names. Cloudflare states that it does not store such requests or use them for training; processing only within the EU is not guaranteed."
 
 #: worker/routes/events.ts
 #: worker/routes/plans.ts
@@ -9230,10 +9224,6 @@ msgstr "{title}, {weekday} {day} at {clock}"
 msgid "Reactions: {list}. Who reacted?"
 msgstr "Reactions: {list}. Who reacted?"
 
-#: src/list-import.tsx
-msgid "Recognise columns with AI"
-msgstr "Recognise columns with AI"
-
 #: worker/domain/events.ts
 #: worker/routes/events.ts
 #: worker/routes/events.ts
@@ -9498,10 +9488,6 @@ msgstr "No parents linked yet. Parents link themselves via the parent link."
 #: modules/duties/worker/notify.ts
 msgid "{club} {team} {opponent} on {date} at {time}"
 msgstr "{club} {team} {opponent} on {date} at {time}"
-
-#: modules/ai-import/worker/clairic.ts
-msgid "Workers AI is not set up in this installation."
-msgstr "Workers AI is not set up in this installation."
 
 #: src/pages/plans.tsx
 msgid "No training times yet."
@@ -9936,6 +9922,10 @@ msgstr "No upcoming special events yet."
 #: src/pages/help.tsx
 msgid "Thank you, your message has arrived. For a reply by e-mail, your access lacks a confirmed address (profile)."
 msgstr "Thank you, your message has arrived. For a reply by e-mail, your access lacks a confirmed address (profile)."
+
+#: src/pages/list-import.tsx
+msgid "The season has no age groups yet. Add them under <0>age groups</0> first."
+msgstr "The season has no age groups yet. Add them under <0>age groups</0> first."
 
 #: modules/duties/app/helpers.tsx
 msgid "Own teams"

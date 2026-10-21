@@ -1610,5 +1610,19 @@ test("Einrichtung: Mannschaften, Trainer und Spielerinnen aus Listen übernehmen
   expect(list.teams.find((x) => x.name === "wC2")).toMatchObject({ players: 2, coaches: 1 });
   expect(list.teams.find((x) => x.name === "wT")!.players).toBe(3);
   await expect(page.getByText("Rita Rahmen")).toBeVisible();
-  expect(await page.evaluate(() => localStorage.getItem("kabine.setup.listImport"))).toBeNull();
+  expect(await page.evaluate(() => localStorage.getItem("kabine.listImport"))).toBeNull();
+});
+
+test("Verwaltung → Import: Spieler in eine vorhandene Mannschaft übernehmen", async () => {
+  const { page } = admin;
+  await page.goto("/verwaltung");
+  await page.getByRole("link", { name: /^Import/ }).click();
+  await expect(page.getByRole("heading", { name: "Import" })).toBeVisible();
+  await page.getByLabel("Oder eine Tabelle einfügen").fill("Name\tJahrgang\tMannschaft\nOle Beispiel\t2014\twT");
+  await page.getByRole("button", { name: "Eingefügte Tabelle hinzufügen" }).click();
+  await page.getByRole("button", { name: "1 Zeile lesen" }).click();
+  await expect(page.getByRole("region", { name: "Mannschaften", exact: true })).toContainText("gibt es schon");
+  await page.getByRole("button", { name: "1 Person übernehmen" }).click();
+  await expect(page).toHaveURL(/\/verwaltung\/personen$/);
+  await expect(page.getByText("Ole Beispiel")).toBeVisible();
 });

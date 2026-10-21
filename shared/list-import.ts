@@ -65,31 +65,6 @@ export interface ImportPerson {
   excluded: boolean;
 }
 
-/**
- * Help a module offers the list import (src/module-api.ts, listImport), such as an AI that reads columns with
- * unusual headers. Only what the arguments hold leaves the browser: see assistInput, nothing readable of a person.
- */
-export interface ImportAssist {
-  /** A field for each column; "ignore" if unsure. */
-  columns(header: string[], samples: string[][]): Promise<ImportField[]>;
-}
-
-/** Letters become X or x, digits and punctuation stay: "Müller, Anna (2014)" → "Xxxxxx, Xxxx (2014)", "wD1" → "xX1". */
-export function maskCell(text: string): string {
-  return text.replace(/\p{L}/gu, (ch) => (ch === ch.toLowerCase() && ch !== ch.toUpperCase() ? "x" : "X"));
-}
-
-/**
- * What a helper may see of a sheet: the headers, and masked samples of columns without one. A sheet without a
- * recognisable header row may have a person in its "header", so then the headers are masked as well.
- */
-export function assistInput(sheet: ImportSheet): { header: string[]; samples: string[][] } {
-  const headerKnown = sheet.header.filter((h) => guessField(h) !== "ignore").length >= 2;
-  const header = sheet.header.map((h) => (headerKnown ? h : h && maskCell(h)));
-  const samples = sheet.rows.slice(0, 3).map((r) => r.map((c, i) => (headerKnown && sheet.header[i]?.trim() ? "" : maskCell(c))));
-  return { header, samples };
-}
-
 /** Something the admin decides before the import: maybe the same person, or which birth year is right. */
 export type ImportQuestion =
   | { kind: "maybe-same"; keys: [string, string] }

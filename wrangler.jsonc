@@ -34,9 +34,6 @@
     "producers": [{ "binding": "PUSH_QUEUE", "queue": "kabine-push" }],
     "consumers": [{ "queue": "kabine-push", "max_batch_size": 20, "max_batch_timeout": 5, "max_retries": 3 }]
   },
-  // Workers AI: only used by the optional "AI list import" module, when an admin asks it to (modules/ai-import).
-  // Without that module nothing is sent and nothing is billed.
-  "ai": { "binding": "AI" },
   // One run per hour; worker/cron.ts decides what is due.
   "triggers": { "crons": ["17 * * * *"] },
   // Public demo on handball.kabine.dev: own database, KV, queue and Durable Objects, so it never touches

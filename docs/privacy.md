@@ -56,7 +56,6 @@ Content cached on devices for offline use is deleted when the person signs out.
 - **E-mail:** Cloudflare Email Sending or the club's own mail server.
 - **SMS (optional):** the provider the club chooses (currently seven.io).
 - **OpenHolidays API:** the app fetches school and public holidays for the club's region. No personal data is sent.
-- **Workers AI (optional, module *AI list import*):** only when an admin taps "Recognise columns with AI" in the list import of the setup wizard, the column headers of that list go to Cloudflare's model Clairic (a preview) in the club's account; example entries only masked (every letter replaced, "Xxxxxx, Xxxx"), so no names or birth years leave the browser. Cloudflare states that it does not store such requests or use them for training ([data usage](https://developers.cloudflare.com/workers-ai/platform/data-usage/)); processing in the EU is not guaranteed (sub-processors in the USA and England). The lists themselves are read in the admin's browser and never uploaded.
 - **handball4all (optional):** a coach's or admin's device fetches the game schedule directly from the association's service. No personal data is sent.
 
 ## Template for the club's privacy policy

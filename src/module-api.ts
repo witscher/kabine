@@ -2,7 +2,6 @@
 // it shows something. Guide: docs/dev/modules.md. Nothing of a module shows while it is switched off.
 import type { ComponentType } from "preact";
 import type { IconName } from "./icons";
-import type { ImportAssist } from "../shared/list-import";
 import type { ModuleManifest } from "../shared/module-api";
 import type { EventDetail, EventSummary, Me } from "../shared/types";
 
@@ -23,11 +22,6 @@ export interface AppModule {
   gameLinks?: ComponentType<{ event: EventSummary; phase: "live" | "after" }>;
   /** A section on the event page, from `event.modules[<id>]` (worker hook eventDetail). */
   eventSection?: ComponentType<{ event: EventDetail; data: unknown; reload: () => void }>;
-  /** Help for the list import of the setup wizard (src/list-import.tsx), offered as buttons the admin taps. */
-  listImport?: ImportAssist & {
-    /** What leaves the browser and where to, shown next to the buttons */
-    notice: () => string;
-  };
 }
 
 export function defineAppModule(module: AppModule): AppModule {

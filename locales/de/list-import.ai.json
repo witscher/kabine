@@ -73,5 +73,8 @@
   "Often a heading or a total line of the list. Enter the first name, or leave the entry out.": "Oft eine Überschrift oder Summenzeile der Liste. Trag den Vornamen ein oder lass den Eintrag weg.",
   "Enter the missing first names or leave those entries out.": "Trag die fehlenden Vornamen ein oder lass diese Einträge weg.",
   "{noFirstCount, plural, one {# entry without first name} other {# entries without first name}}": "{noFirstCount, plural, one {# Eintrag ohne Vornamen} other {# Einträge ohne Vornamen}}",
-  "{count, plural, one {# list added: check the columns} other {# lists added: check the columns}}": "{count, plural, one {# Liste hinzugefügt: Spalten prüfen} other {# Listen hinzugefügt: Spalten prüfen}}"
+  "{count, plural, one {# list added: check the columns} other {# lists added: check the columns}}": "{count, plural, one {# Liste hinzugefügt: Spalten prüfen} other {# Listen hinzugefügt: Spalten prüfen}}",
+  "Teams, coaches and players from Excel or CSV lists": "Mannschaften, Trainer und Spieler aus Excel- oder CSV-Listen",
+  "Import": "Import",
+  "The season has no age groups yet. Add them under <0>age groups</0> first.": "Die Saison hat noch keine Altersklassen. Lege sie zuerst unter <0>Altersklassen</0> an."
 }

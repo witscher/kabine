@@ -296,6 +296,7 @@ function TeamsStep({ onNext }: { onNext: () => void }) {
   if (mode === "import" && ages.data && teams.data) {
     return (
       <ListImport
+        inSetup
         ageClasses={classes.map((a) => ({ code: a.code, name: a.name, birthYearMin: a.birthYearMin ?? null, birthYearMax: a.birthYearMax ?? null }))}
         existingTeams={(teams.data.teams ?? []).map((x) => x.name)}
         onCancel={() => setMode("manual")}

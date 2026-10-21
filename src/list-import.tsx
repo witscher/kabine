@@ -6,7 +6,6 @@ import { plural, t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { useEffect, useState } from "preact/hooks";
 import {
-  assistInput,
   cellText,
   IMPORT_FIELDS,
   mergeRows,
@@ -25,11 +24,9 @@ import {
   type ImportTeam,
 } from "../shared/list-import";
 import { api, errorMessage } from "./api";
-import type { AppModule } from "./module-api";
-import { useActiveModules } from "./modules";
 import { Button, Field, Notice, toast } from "./ui";
 
-const DRAFT_KEY = "kabine.setup.listImport";
+const DRAFT_KEY = "kabine.listImport";
 
 interface Draft {
   stage: "sources" | "review";
@@ -91,11 +88,8 @@ function roleLabel(r: ImportRole): string {
 
 const fullName = (p: { firstName: string; lastName: string }) => `${p.firstName} ${p.lastName}`.trim();
 
-type Assist = NonNullable<AppModule["listImport"]>;
-/** Help of a module the club switched on (AI list import), if any. */
-const useAssist = (): Assist | null => useActiveModules().find((m) => m.listImport)?.listImport ?? null;
-
-export function ListImport(props: { ageClasses: ImportAgeClass[]; existingTeams: string[]; onDone: () => void; onCancel: () => void }) {
+/** inSetup: in the setup wizard, where giving up means entering teams by hand instead. */
+export function ListImport(props: { inSetup: boolean; ageClasses: ImportAgeClass[]; existingTeams: string[]; onDone: () => void; onCancel: () => void }) {
   const [draft, setDraft] = useState<Draft>(() => loadDraft() ?? emptyDraft());
   useEffect(() => saveDraft(draft), [draft]);
   const update = (patch: Partial<Draft>) => setDraft((d) => ({ ...d, ...patch }));
@@ -108,6 +102,7 @@ export function ListImport(props: { ageClasses: ImportAgeClass[]; existingTeams:
       draft={draft}
       update={update}
       onDiscard={discard}
+      inSetup={props.inSetup}
       onRead={() => {
         const { persons, questions } = mergeRows(draft.sheets.flatMap(rowsOfSheet));
         update({ stage: "review", persons, questions, teams: suggestTeams(persons, props.ageClasses, props.existingTeams) });
@@ -119,6 +114,7 @@ export function ListImport(props: { ageClasses: ImportAgeClass[]; existingTeams:
       draft={draft}
       update={update}
       ageClasses={props.ageClasses}
+      inSetup={props.inSetup}
       onBack={() => update({ stage: "sources" })}
       onDiscard={discard}
       onDone={() => {
@@ -131,11 +127,22 @@ export function ListImport(props: { ageClasses: ImportAgeClass[]; existingTeams:
 
 // Step 1: the lists ----------------------------------------------------------------------------------------
 
-function Sources({ draft, update, onRead, onDiscard }: { draft: Draft; update: (p: Partial<Draft>) => void; onRead: () => void; onDiscard: () => void }) {
+function Sources({
+  draft,
+  update,
+  inSetup,
+  onRead,
+  onDiscard,
+}: {
+  draft: Draft;
+  update: (p: Partial<Draft>) => void;
+  inSetup: boolean;
+  onRead: () => void;
+  onDiscard: () => void;
+}) {
   const [paste, setPaste] = useState("");
   const [problem, setProblem] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const assist = useAssist();
   // The new lists appear below the form: scroll to the first one, or the admin sees no change
   const [scrollTo, setScrollTo] = useState<string | null>(null);
   useEffect(() => {
@@ -241,16 +248,25 @@ function Sources({ draft, update, onRead, onDiscard }: { draft: Draft; update: (
         {problem ? <Notice kind="warn">{problem}</Notice> : null}
       </section>
 
-      {assist && draft.sheets.length ? <p class="small muted">{assist.notice()}</p> : null}
       {draft.sheets.map((s) => (
-        <SheetCard key={s.id} sheet={s} assist={assist} onChange={(patch) => setSheet(s.id, patch)} onRemove={() => update({ sheets: draft.sheets.filter((x) => x.id !== s.id) })} />
+        <SheetCard key={s.id} sheet={s} onChange={(patch) => setSheet(s.id, patch)} onRemove={() => update({ sheets: draft.sheets.filter((x) => x.id !== s.id) })} />
       ))}
 
       <Button variant="primary" block disabled={!rowCount} onClick={onRead}>
         {plural(rowCount, { one: "Read # row", other: "Read # rows" })}
       </Button>
       <Button variant="ghost" block onClick={onDiscard}>
-        {draft.sheets.length ? <Trans>Discard and enter by hand</Trans> : <Trans>Enter by hand instead</Trans>}
+        {inSetup ? (
+          draft.sheets.length ? (
+            <Trans>Discard and enter by hand</Trans>
+          ) : (
+            <Trans>Enter by hand instead</Trans>
+          )
+        ) : draft.sheets.length ? (
+          <Trans>Discard</Trans>
+        ) : (
+          <Trans>Cancel</Trans>
+        )}
       </Button>
     </>
   );
@@ -264,37 +280,14 @@ function sheetTitle(s: ImportSheet): string {
 
 function SheetCard({
   sheet,
-  assist,
   onChange,
   onRemove,
 }: {
   sheet: ImportSheet;
-  assist: Assist | null;
   onChange: (p: Partial<ImportSheet>) => void;
   onRemove: () => void;
 }) {
-  const [problem, setProblem] = useState<string | null>(null);
   const hasName = sheet.mapping.some((f) => f === "name" || f === "firstName" || f === "lastName");
-  const unclear = sheet.mapping.some((f, i) => f === "ignore" && sheet.rows.some((r) => r[i]));
-  const askAi = async () => {
-    setProblem(null);
-    try {
-      const { header, samples } = assistInput(sheet);
-      const suggested = await assist!.columns(header, samples);
-      const used = new Set(sheet.mapping.filter((f) => f !== "ignore"));
-      const mapping = sheet.mapping.map((f, i) => {
-        const s = suggested[i] ?? "ignore";
-        if (f !== "ignore" || s === "ignore" || used.has(s)) return f;
-        used.add(s);
-        return s;
-      });
-      const count = mapping.filter((f, i) => f !== sheet.mapping[i]).length;
-      onChange({ mapping });
-      toast(count ? plural(count, { one: "# column recognised", other: "# columns recognised" }) : t`No further columns recognised`);
-    } catch (err) {
-      setProblem(errorMessage(err));
-    }
-  };
   const count = sheet.rows.length;
   const preview = sheet.rows.slice(0, 3);
   return (
@@ -335,14 +328,6 @@ function SheetCard({
           );
         })}
       </ul>
-      {assist && (unclear || !hasName) ? (
-        <div class="stack-sm">
-          <Button icon="star" onClick={askAi}>
-            <Trans>Recognise columns with AI</Trans>
-          </Button>
-          {problem ? <Notice kind="warn">{problem}</Notice> : null}
-        </div>
-      ) : null}
       {!hasName ? (
         <Notice kind="warn">
           <Trans>Choose the column with the names, otherwise this list is not read.</Trans>
@@ -374,6 +359,7 @@ function Review(props: {
   ageClasses: ImportAgeClass[];
   onBack: () => void;
   onDiscard: () => void;
+  inSetup: boolean;
   onDone: () => void;
 }) {
   const { draft, update } = props;
@@ -590,7 +576,7 @@ function Review(props: {
         <Trans>Back to the lists</Trans>
       </Button>
       <Button variant="ghost" block onClick={props.onDiscard}>
-        <Trans>Discard and enter by hand</Trans>
+        {props.inSetup ? <Trans>Discard and enter by hand</Trans> : <Trans>Discard</Trans>}
       </Button>
     </>
   );

@@ -10,6 +10,7 @@ Training plans, coaches and staff are set again after the change. Holidays and p
 
 ## Backup
 
+- **Import:** *Administration → Import* takes teams, coaches and players from the club's lists (Excel .xlsx, CSV or a pasted table). The lists are read in the admin's browser and not uploaded; only first name, last name, birth year, team and role are taken, after a review. Existing teams and people are found again, so nothing is created twice.
 - **Export:** *Administration → Export* downloads all club data as a JSON file (people, teams, events, responses, settings). Sessions, passkeys, push subscriptions, invitation links and generated keys are not part of it. Keep the file somewhere safe and access-controlled; it contains names of minors.
 - **D1 Time Travel:** Cloudflare keeps a restorable history of the database (7 days on the free plan, 30 on the paid plan): `npx wrangler d1 time-travel info DB` shows a bookmark, `npx wrangler d1 time-travel restore DB --bookmark=<bookmark>` goes back. Restoring discards everything written afterwards.
 
