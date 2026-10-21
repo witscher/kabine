@@ -1,7 +1,7 @@
 // Ende-zu-Ende-Durchlauf mit echten Passkeys (virtueller Authenticator von
 // Chromium). Alle Namen stammen aus e2e/fixtures.sql und sind erfunden.
 import { type ChildProcess, spawn } from "node:child_process";
-import { cpSync, rmSync } from "node:fs";
+import { cpSync, readFileSync, rmSync } from "node:fs";
 import { type BrowserContext, expect, type Page, test } from "@playwright/test";
 import { activeMotd, MOTD } from "../shared/motd";
 
@@ -1548,4 +1548,49 @@ test("Optionales Mittrainieren: Spielerin macht freiwillig mit, Trainer stellt d
   expect((await coach.page.request.delete(`/api/plans/${planId}`)).ok()).toBe(true);
   await admin.page.request.delete(`/api/teams/${other}/members/${me.person.id}?role=coach`);
   await admin.page.request.delete(`/api/teams/${other}`);
+});
+
+test("Einrichtung: Mannschaften, Trainer und Spielerinnen aus Listen übernehmen", async () => {
+  const { page } = admin;
+  await page.goto("/");
+  await page.evaluate(() => sessionStorage.setItem("kabine.setup.step", "5"));
+  await page.goto("/verwaltung/einrichtung");
+  await page.getByRole("button", { name: "Stattdessen aus Listen übernehmen" }).click();
+  const kader = "Kader Saison 2026/27;;;\nMannschaft;Name;Jg.;Telefon\nwC1;Muster, Lea;12;0123 45\nwC1;Lena Beispiel (2013);;\nwT;Probe, Ida;14;\n";
+  const trainer = "Vorname;Nachname;Mannschaft\nTina;Test;wC1\n";
+  await page.getByLabel("Dateien").setInputFiles([
+    { name: "kader.csv", mimeType: "text/csv", buffer: Buffer.from(kader) },
+    { name: "trainer.csv", mimeType: "text/csv", buffer: Buffer.from(trainer) },
+    // Two sheets: one per team without a team column, one with coaches; dates of birth as Excel dates
+    { name: "listen.xlsx", mimeType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", buffer: readFileSync("e2e/files/listen.xlsx") },
+  ]);
+  await expect(page.getByRole("region", { name: "listen.xlsx · wC2" }).getByLabel("Mannschaft für alle in dieser Liste")).toHaveValue("wC2");
+  await expect(page.getByRole("region", { name: "listen.xlsx · wC2" }).getByLabel("Spalte Bemerkung")).toHaveValue("ignore");
+  const kaderCard = page.getByRole("region", { name: "kader.csv" });
+  await expect(kaderCard.getByLabel("Spalte Telefon")).toHaveValue("ignore");
+  await expect(kaderCard).not.toContainText("0123 45");
+  await expect(page.getByRole("region", { name: "trainer.csv" }).getByLabel("Alle in dieser Liste sind")).toHaveValue("coach");
+  await page.getByLabel("Oder eine Tabelle einfügen").fill("Name\tJahrgang\nLea Muster\t2012\nLena Beispel\t2013");
+  await page.getByRole("button", { name: "Eingefügte Tabelle hinzufügen" }).click();
+  await page.getByRole("button", { name: "9 Zeilen lesen" }).click();
+
+  // Ähnlicher Name in der eingefügten Liste: eine Frage, danach ist sie eine Person
+  const questions = page.getByRole("region", { name: "Fragen" });
+  await expect(questions).toContainText("Dieselbe Person?");
+  await questions.getByRole("button", { name: "Ja, als Lena Beispiel" }).click();
+  await expect(questions).toHaveCount(0);
+  const teams = page.getByRole("region", { name: "Mannschaften", exact: true });
+  for (const select of await teams.getByLabel("Altersklasse").all()) await expect(select).toHaveValue("wC");
+  await expect(teams).toContainText("gibt es schon");
+  await page.getByRole("button", { name: "7 Personen übernehmen" }).click();
+
+  // Weiter bei den ersten Personen: die Trainerin aus der Liste mit ihrem persönlichen Link
+  await expect(page.getByText("Tina Test")).toBeVisible();
+  const list = (await (await page.request.get("/api/teams")).json()) as { teams: { id: number; name: string; players: number; coaches: number }[] };
+  const wc1 = list.teams.find((x) => x.name === "wC1")!;
+  expect(wc1).toMatchObject({ players: 2, coaches: 1 });
+  expect(list.teams.find((x) => x.name === "wC2")).toMatchObject({ players: 2, coaches: 1 });
+  expect(list.teams.find((x) => x.name === "wT")!.players).toBe(3);
+  await expect(page.getByText("Rita Rahmen")).toBeVisible();
+  expect(await page.evaluate(() => localStorage.getItem("kabine.setup.listImport"))).toBeNull();
 });

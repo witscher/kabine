@@ -11,6 +11,7 @@ import { clubName, loadClub, useClub } from "../club";
 import { fullDate, isoToLocalDate, personName, todayLocal } from "../format";
 import { currentLocale } from "../i18n";
 import { LanguageSwitch } from "../language-switch";
+import { hasListImportDraft, ListImport } from "../list-import";
 import { Icon } from "../icons";
 import { useSession } from "../session";
 import { invalidate, useQuery } from "../store";
@@ -258,10 +259,15 @@ interface TeamRow {
   ageClassCode: string;
 }
 
+/**
+ * Teams by hand, or teams, coaches and players from the club's lists in one go (src/list-import.tsx). The choice
+ * comes first, before anyone is created, so that an import does not meet half a set of hand-made entries.
+ */
 function TeamsStep({ onNext }: { onNext: () => void }) {
   const { refresh } = useSession();
   const teams = useQuery<{ teams: TeamRow[] }>("/teams");
-  const ages = useQuery<{ ageClasses: { code: string; name: string }[] }>("/age-classes");
+  const ages = useQuery<{ ageClasses: { code: string; name: string; birthYearMin?: number | null; birthYearMax?: number | null }[] }>("/age-classes");
+  const [mode, setMode] = useState<"choose" | "manual" | "import">(() => (hasListImportDraft() ? "import" : "choose"));
   const [name, setName] = useState("");
   const [ageClassCode, setAgeClassCode] = useState("");
   const [gender, setGender] = useState<TeamGender>("x");
@@ -285,6 +291,54 @@ function TeamsStep({ onNext }: { onNext: () => void }) {
       setProblem(errorMessage(err));
     }
   };
+
+  if (mode === "import" && ages.data && teams.data) {
+    return (
+      <ListImport
+        ageClasses={classes.map((a) => ({ code: a.code, name: a.name, birthYearMin: a.birthYearMin ?? null, birthYearMax: a.birthYearMax ?? null }))}
+        existingTeams={(teams.data.teams ?? []).map((x) => x.name)}
+        onCancel={() => setMode("manual")}
+        onDone={async () => {
+          invalidate("/teams", "/admin/persons");
+          await refresh();
+          onNext();
+        }}
+      />
+    );
+  }
+  if (mode === "choose" && teams.data && !list.length) {
+    return (
+      <>
+        <p class="muted">
+          <Trans>Does your club have lists of its teams, coaches and players, for example in Excel? Then they can be imported in one go.</Trans>
+        </p>
+        <section class="card card-pad stack-sm" aria-label={t`From lists`}>
+          <h2 class="section-title" style={{ margin: 0 }}>
+            <Trans>Import from lists</Trans>
+          </h2>
+          <p class="small muted">
+            <Trans>
+              Excel or CSV files, also several with overlapping people. Teams, coaches and players are created after you have checked and corrected them.
+            </Trans>
+          </p>
+          <Button variant="primary" icon="download" onClick={() => setMode("import")}>
+            <Trans>Import lists</Trans>
+          </Button>
+        </section>
+        <section class="card card-pad stack-sm" aria-label={t`By hand`}>
+          <h2 class="section-title" style={{ margin: 0 }}>
+            <Trans>Enter by hand</Trans>
+          </h2>
+          <p class="small muted">
+            <Trans>Create the teams and coaches here; players come later through the coaches' invitation links or their player lists.</Trans>
+          </p>
+          <Button onClick={() => setMode("manual")}>
+            <Trans>Enter by hand</Trans>
+          </Button>
+        </section>
+      </>
+    );
+  }
 
   return (
     <>
@@ -342,6 +396,9 @@ function TeamsStep({ onNext }: { onNext: () => void }) {
           <Trans>Create team</Trans>
         </Button>
       </section>
+      <Button variant="ghost" block icon="download" onClick={() => setMode("import")}>
+        <Trans>Import from lists instead</Trans>
+      </Button>
       <Button variant="primary" block onClick={onNext}>
         <Trans>Continue</Trans>
       </Button>

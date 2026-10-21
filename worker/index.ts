@@ -22,6 +22,7 @@ import { gameRoutes } from "./routes/games";
 import { mailRoutes } from "./routes/mail";
 import { setupRoutes } from "./routes/setup";
 import { joinRoutes } from "./routes/join";
+import { listImportRoutes } from "./routes/list-import";
 import { parentRoutes } from "./routes/parents";
 import { personRoutes } from "./routes/persons";
 import { planRoutes } from "./routes/plans";
@@ -67,6 +68,7 @@ for (const routes of [
   calendarRoutes,
   feedbackRoutes,
   clubMemberRoutes,
+  listImportRoutes,
 ]) {
   app.route("/api", routes);
 }
