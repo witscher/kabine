@@ -1323,10 +1323,6 @@ msgstr "Sign in"
 msgid "For example for an injury, illness or a school exchange. The app does not store a reason. All events then count as “absent (inactive)” and reminders stop."
 msgstr "For example for an injury, illness or a school exchange. The app does not store a reason. All events then count as “absent (inactive)” and reminders stop."
 
-#: src/pages/mail-settings.tsx
-msgid "Cloudflare Email Sending sends from an address of a domain in your Cloudflare account. Set up the domain under Email in the Cloudflare dashboard."
-msgstr "Cloudflare Email Sending sends from an address of a domain in your Cloudflare account. Set up the domain under Email in the Cloudflare dashboard."
-
 #: worker/routes/events.ts
 msgid "Invalid period."
 msgstr "Invalid period."
@@ -1727,10 +1723,6 @@ msgstr "{name}, {from} to {to}: no training for {teams}."
 msgid "Under people: create them, assign teams, hand out personal links. A second admin helps when you are away."
 msgstr "Under people: create them, assign teams, hand out personal links. A second admin helps when you are away."
 
-#: src/pages/mail-settings.tsx
-msgid "This installation has no e-mail binding."
-msgstr "This installation has no e-mail binding."
-
 #: src/pages/join.tsx
 msgid "Your e-mail address"
 msgstr "Your e-mail address"
@@ -2125,6 +2117,10 @@ msgstr "valid until {until}"
 #: src/pages/admin.tsx
 msgid "Youth referee at home games"
 msgstr "Youth referee at home games"
+
+#: src/pages/mail-settings.tsx
+msgid "Cloudflare Email Sending sends from an address of a domain in your Cloudflare account. It needs the Workers Paid plan; set up the domain under Email in the Cloudflare dashboard."
+msgstr "Cloudflare Email Sending sends from an address of a domain in your Cloudflare account. It needs the Workers Paid plan; set up the domain under Email in the Cloudflare dashboard."
 
 #: worker/routes/persons.ts
 #: worker/routes/persons.ts
@@ -5309,10 +5305,6 @@ msgid "Please choose an age class for \"{name}\"."
 msgstr "Please choose an age class for \"{name}\"."
 
 #: src/pages/admin.tsx
-msgid "Teams, coaches and players from Excel or CSV lists"
-msgstr "Teams, coaches and players from Excel or CSV lists"
-
-#: src/pages/admin.tsx
 msgid "no access"
 msgstr "no access"
 
@@ -5948,6 +5940,10 @@ msgstr "The event and all responses will be deleted."
 msgid "Try again"
 msgstr "Try again"
 
+#: src/pages/admin.tsx
+msgid "Teams, coaches and players from Excel or CSV lists, or a Kabine backup"
+msgstr "Teams, coaches and players from Excel or CSV lists, or a Kabine backup"
+
 #: src/pages/event.tsx
 #: src/pages/event.tsx
 msgid "Meeting point & info"
@@ -6247,12 +6243,6 @@ msgstr "Please enter your first and last name."
 msgctxt "view as"
 msgid "player"
 msgstr "player"
-
-#: src/pages/admin.tsx
-#: src/pages/list-import.tsx
-#: src/pages/list-import.tsx
-msgid "Import"
-msgstr "Import"
 
 #: src/list-import.tsx
 #: src/pages/admin.tsx
@@ -8019,6 +8009,10 @@ msgstr "Create event"
 msgid "Recipients see this address. Replies to it are not read by the app."
 msgstr "Recipients see this address. Replies to it are not read by the app."
 
+#: src/pages/setup-wizard.tsx
+msgid "The app can send e-mails for sign-in codes, access links and helper plan reminders, through your club's mail server or, with the Workers Paid plan, Cloudflare Email Sending. Without e-mail, people sign in with passkeys and links you hand out."
+msgstr "The app can send e-mails for sign-in codes, access links and helper plan reminders, through your club's mail server or, with the Workers Paid plan, Cloudflare Email Sending. Without e-mail, people sign in with passkeys and links you hand out."
+
 #: src/pages/admin.tsx
 msgid "Go through the setup step by step again"
 msgstr "Go through the setup step by step again"
@@ -8612,9 +8606,19 @@ msgstr "Kabine is free software under the AGPL-3.0 licence. <0>Source code</0>"
 msgid "Needed: {needed}"
 msgstr "Needed: {needed}"
 
+#: src/pages/mail-settings.tsx
+msgid "This installation has no e-mail binding. Add <0>{SEND_EMAIL}</0> to wrangler.jsonc in your copy and deploy again, or use your own server."
+msgstr "This installation has no e-mail binding. Add <0>{SEND_EMAIL}</0> to wrangler.jsonc in your copy and deploy again, or use your own server."
+
 #: src/pages/chat.tsx
 msgid "Unmute"
 msgstr "Unmute"
+
+#: src/pages/admin.tsx
+#: src/pages/list-import.tsx
+#: src/pages/list-import.tsx
+msgid "Import / restore"
+msgstr "Import / restore"
 
 #: src/faq.tsx
 msgid "Under <0>Profile → My events</0> you choose training, games and helper duties and tap <1>Subscribe in calendar</1>. The events then appear in your phone's calendar app and stay up to date by themselves. Do not pass the link on."
@@ -10411,10 +10415,6 @@ msgstr "Help request"
 #: worker/routes/events.ts
 msgid "{name} declined training on {when}."
 msgstr "{name} declined training on {when}."
-
-#: src/pages/setup-wizard.tsx
-msgid "The app sends e-mails for sign-in codes, access links and helper plan reminders. Without e-mail, people sign in with passkeys and links you hand out."
-msgstr "The app sends e-mails for sign-in codes, access links and helper plan reminders. Without e-mail, people sign in with passkeys and links you hand out."
 
 #: src/pages/special.tsx
 msgid "Opponent or tournament"

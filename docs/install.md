@@ -42,8 +42,8 @@ The setup wizard opens right after:
 2. Club: name, short name, abbreviation, colours and logo.
 3. Sport and season: brings age groups, playing times and helper duties of the sport.
 4. Functions: helper duties, youth referees, carpools, handball4all, SMS.
-5. E-mail: Cloudflare Email Sending or the club's SMTP server (see below).
-6. First teams: by hand, or imported from the club's lists. Excel files (.xlsx, also several sheets), CSV or a pasted table; only first name, last name, birth year, team and role are read, in the browser. The same person in several lists becomes one; birth years that disagree and similar names come up as questions. Teams, coaches and players are created only after everything is checked and corrected. The same import is under *Administration → Import* later.
+5. E-mail (optional): the club's SMTP server, or Cloudflare Email Sending with the Workers Paid plan (see below). Off by default.
+6. First teams: by hand, or imported from the club's lists. Excel files (.xlsx, also several sheets), CSV or a pasted table; only first name, last name, birth year, team and role are read, in the browser. The same person in several lists becomes one; birth years that disagree and similar names come up as questions. Teams, coaches and players are created only after everything is checked and corrected. The same import is under *Administration → Import / restore* later.
 7. First people: coaches and further admins, each with a personal link.
 8. Privacy: link to the club's privacy policy and legal notice, contact for questions.
 
@@ -53,8 +53,10 @@ Everything can be changed later under *Administration*. "Continue later" leaves 
 
 Kabine sends e-mails for sign-in codes on new devices, access links and helper plan reminders. Without e-mail, people sign in with passkeys and the links coaches hand out; the sign-in page only offers "Code by e-mail" once sending is set up.
 
-- **Cloudflare Email Sending:** the domain must be set up for sending in Cloudflare (*Email → Email Sending*). Enter the sender address in the wizard, for example `no-reply@your-club.org`.
-- **SMTP:** the club's mail server, with TLS on port 465 or STARTTLS on port 587. The password is stored encrypted.
+E-mail is off until the club sets it up.
+
+- **SMTP:** the club's mail server, with TLS on port 465 or STARTTLS on port 587. The password is stored encrypted. Works on the free Cloudflare plan.
+- **Cloudflare Email Sending:** needs the [Workers Paid plan](https://developers.cloudflare.com/email-service/platform/pricing/) (on the free plan it only sends to verified addresses of your own account). Set up the domain for sending in Cloudflare (*Email → Email Sending*), add `"send_email": [{ "name": "EMAIL" }]` to `wrangler.jsonc` in your copy and deploy again. Then choose *Cloudflare* in the wizard and enter the sender address, for example `no-reply@your-club.org`.
 
 The wizard sends a test mail.
 

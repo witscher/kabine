@@ -94,9 +94,6 @@
       },
       "PUSH_QUEUE": {
         "description": "Queue for push notifications."
-      },
-      "EMAIL": {
-        "description": "Optional: Cloudflare Email Sending. Alternatively enter the club's SMTP server in the setup wizard."
       }
     }
   }

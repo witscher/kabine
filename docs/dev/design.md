@@ -26,7 +26,7 @@ The e-mail address is optional on the player, parent and personal links. Whoever
 
 The last passkey may be removed if a confirmed address exists, and the address may be removed only if a passkey exists.
 
-Mail goes through Cloudflare Email Sending or the club's own SMTP server, set up under administration. With the SMS module, the sign-in code can also go by text message to a confirmed mobile number.
+Mail is off until the club sets it up under administration: its own SMTP server, or Cloudflare Email Sending (Workers Paid plan, binding `EMAIL` added to `wrangler.jsonc` by the club). With the SMS module, the sign-in code can also go by text message to a confirmed mobile number.
 
 ## Events and responses
 

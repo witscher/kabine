@@ -10,6 +10,9 @@ import { AdminOnly } from "./admin";
 
 type Mode = "cloudflare" | "smtp" | "off";
 
+/** The binding Cloudflare Email Sending needs in wrangler.jsonc (not there by default: it needs the Workers Paid plan) */
+const SEND_EMAIL = `"send_email": [{ "name": "EMAIL" }]`;
+
 interface MailView {
   mode: Mode;
   from: string;
@@ -31,7 +34,7 @@ export function MailSettingsForm({ onSaved }: { onSaved?: () => void }) {
 
   useEffect(() => {
     if (!data) return;
-    setMode(data.mode === "off" && data.cloudflareAvailable ? "cloudflare" : data.mode);
+    setMode(data.mode);
     setFrom(data.from);
     if (data.smtp) {
       setHost(data.smtp.host);
@@ -87,12 +90,18 @@ export function MailSettingsForm({ onSaved }: { onSaved?: () => void }) {
         {mode === "cloudflare" ? (
           <p class="small muted">
             <Trans>
-              Cloudflare Email Sending sends from an address of a domain in your Cloudflare account. Set up the domain under Email in the Cloudflare
-              dashboard.
+              Cloudflare Email Sending sends from an address of a domain in your Cloudflare account. It needs the Workers Paid plan; set up the domain
+              under Email in the Cloudflare dashboard.
             </Trans>
           </p>
         ) : null}
-        {mode === "cloudflare" && !data.cloudflareAvailable ? <Notice kind="warn">{t`This installation has no e-mail binding.`}</Notice> : null}
+        {mode === "cloudflare" && !data.cloudflareAvailable ? (
+          <Notice kind="warn">
+            <Trans>
+              This installation has no e-mail binding. Add <code>{SEND_EMAIL}</code> to wrangler.jsonc in your copy and deploy again, or use your own server.
+            </Trans>
+          </Notice>
+        ) : null}
         {mode === "off" ? (
           <Notice kind="warn">
             <Trans>Without e-mail there is no sign-in by code and no e-mail reminders. Passkeys and personal links still work.</Trans>

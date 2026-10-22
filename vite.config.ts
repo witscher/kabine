@@ -27,6 +27,10 @@ function versionFile(): Plugin {
 // The build goes to dist-e2e, so it is never deployed.
 const e2e = process.env.KABINE_E2E === "1";
 
+// Cloudflare Email Sending locally (Miniflare keeps the mails), so sign-in by e-mail code can be tried and tested.
+// Not in wrangler.jsonc: for clubs it needs the Workers Paid plan (docs/install.md, E-mail).
+const localMail = { send_email: [{ name: "EMAIL" }] };
+
 export default defineConfig({
   // No splash animation in the E2E tests: every test starts with empty storage and would always see it
   define: { __APP_VERSION__: JSON.stringify(appVersion), __SPLASH__: JSON.stringify(!e2e) },
@@ -41,6 +45,7 @@ export default defineConfig({
             // The offline test starts a second server with a copy (KABINE_E2E_STATE)
             persistState: { path: process.env.KABINE_E2E_STATE ?? ".wrangler/e2e-state" },
             config: {
+              ...localMail,
               // Only the values set here, not the secrets from .dev.vars
               secrets: { required: [] },
               vars: {
@@ -51,7 +56,7 @@ export default defineConfig({
               },
             },
           }
-        : {},
+        : { config: localMail },
     ),
   ],
   build: e2e ? { outDir: "dist-e2e" } : {},

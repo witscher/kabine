@@ -1,3 +1,5 @@
+> **Kabine nützlich?** Gib dem Repo einen ⭐, um die Entwicklung zu unterstützen.
+
 **English:** [README in English](README.en.md)
 
 # Kabine

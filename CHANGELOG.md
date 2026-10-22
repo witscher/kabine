@@ -6,6 +6,8 @@ Changes that are merged but not released yet go under *Unreleased*, one line eac
 
 ## Unreleased
 
+- E-mail is off until a club sets it up, and new installations no longer get the Cloudflare Email Sending binding: it needs the Workers Paid plan. Use the club's SMTP server, or add `"send_email": [{ "name": "EMAIL" }]` to `wrangler.jsonc` on a paid plan (*docs/install.md*, E-mail). Existing installations keep their configuration.
+
 - The update pull request asks to replace changed workflow files only after the update is deployed. Replacing them right before merging could start a deploy of the old version that overlapped with the update, so the update was not installed.
 
 ## v0.3.0

@@ -1,4 +1,4 @@
-// Administration → Import: teams, coaches and players from the club's lists (src/list-import.tsx), or data from an
+// Administration → Import / restore: teams, coaches and players from the club's lists (src/list-import.tsx), or data from an
 // export of Kabine (src/restore.tsx). The setup wizard offers both at its teams step.
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
@@ -20,7 +20,7 @@ interface AgeClassRow {
 }
 
 export function AdminListImportPage() {
-  useDocumentTitle(t`Import`);
+  useDocumentTitle(t`Import / restore`);
   const { route } = useLocation();
   const { refresh } = useSession();
   const teams = useQuery<{ teams: { name: string }[] }>("/teams");
@@ -38,7 +38,7 @@ export function AdminListImportPage() {
   return (
     <AdminOnly>
       <main class="page">
-        <TopBar title={t`Import`} kicker={t`Administration`} back="/verwaltung" />
+        <TopBar title={t`Import / restore`} kicker={t`Administration`} back="/verwaltung" />
         <div class="content">
           {teams.error ? <ErrorBox error={teams.error} onRetry={teams.reload} /> : null}
           {ages.error ? <ErrorBox error={ages.error} onRetry={ages.reload} /> : null}

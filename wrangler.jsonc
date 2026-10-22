@@ -17,8 +17,8 @@
   // No "vars": the app takes its address from the request and the mail sender from the setup wizard,
   // so the "Deploy to Cloudflare" button asks nothing beyond the setup password. Optional variables
   // (RP_ID, ORIGIN, MAIL_FROM) are described in docs/operation.md.
-  // Cloudflare Email Sending (optional). Alternatively the club enters an SMTP server in the setup wizard.
-  "send_email": [{ "name": "EMAIL" }],
+  // E-mail: the club's SMTP server, entered in the setup wizard. Cloudflare Email Sending needs the Workers Paid
+  // plan; then add  "send_email": [{ "name": "EMAIL" }]  here (docs/install.md, E-mail).
   "workers_dev": true,
   "preview_urls": false,
   "d1_databases": [{ "binding": "DB", "database_name": "kabine", "migrations_dir": "migrations" }],

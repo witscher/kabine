@@ -1621,8 +1621,8 @@ test("Verwaltung → Import: Spieler in eine vorhandene Mannschaft übernehmen, 
   await page.goto("/chat");
   await expect(page.getByText("wE9")).toHaveCount(0);
   await page.getByRole("link", { name: "Verwaltung" }).click();
-  await page.getByRole("link", { name: /^Import/ }).click();
-  await expect(page.getByRole("heading", { name: "Import" })).toBeVisible();
+  await page.getByRole("link", { name: /^Import \/ Wiederherstellen/ }).click();
+  await expect(page.getByRole("heading", { name: "Import / Wiederherstellen" })).toBeVisible();
   await page.getByRole("button", { name: "Listen übernehmen" }).click();
   // .xls and .ods cannot be read: the admin is asked to save the file as .xlsx
   await page.getByLabel("Dateien").setInputFiles({ name: "kader.ods", mimeType: "application/vnd.oasis.opendocument.spreadsheet", buffer: Buffer.from("x") });

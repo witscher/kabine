@@ -1385,11 +1385,6 @@ msgstr "Anmelden"
 msgid "For example for an injury, illness or a school exchange. The app does not store a reason. All events then count as “absent (inactive)” and reminders stop."
 msgstr "Zum Beispiel bei Verletzung, Krankheit oder Schüleraustausch. Einen Grund speichert die App nicht. Für alle Termine gilt dann „abwesend (inaktiv)“, Erinnerungen entfallen."
 
-# ai
-#: src/pages/mail-settings.tsx
-msgid "Cloudflare Email Sending sends from an address of a domain in your Cloudflare account. Set up the domain under Email in the Cloudflare dashboard."
-msgstr "Cloudflare Email Sending verschickt von einer Adresse einer Domain in deinem Cloudflare-Konto. Richte die Domain im Cloudflare-Dashboard unter Email ein."
-
 #: worker/routes/events.ts
 msgid "Invalid period."
 msgstr "Ungültiger Zeitraum."
@@ -1808,11 +1803,6 @@ msgstr "{name}, {from} bis {to}: kein Training für {teams}."
 msgid "Under people: create them, assign teams, hand out personal links. A second admin helps when you are away."
 msgstr "Unter Personen: anlegen, Mannschaften zuordnen, persönliche Links verschicken. Ein zweiter Admin hilft, wenn du nicht da bist."
 
-# ai
-#: src/pages/mail-settings.tsx
-msgid "This installation has no e-mail binding."
-msgstr "Diese Installation hat keine E-Mail-Anbindung."
-
 #: src/pages/join.tsx
 msgid "Your e-mail address"
 msgstr "Deine E-Mail-Adresse"
@@ -2224,6 +2214,11 @@ msgstr "gültig bis {until}"
 #: src/pages/admin.tsx
 msgid "Youth referee at home games"
 msgstr "Jugendschiedsrichter bei Heimspielen"
+
+# ai
+#: src/pages/mail-settings.tsx
+msgid "Cloudflare Email Sending sends from an address of a domain in your Cloudflare account. It needs the Workers Paid plan; set up the domain under Email in the Cloudflare dashboard."
+msgstr "Cloudflare Email Sending versendet von einer Adresse einer Domain in eurem Cloudflare-Konto. Es braucht den Workers-Paid-Tarif; richte die Domain im Cloudflare-Dashboard unter Email ein."
 
 #: worker/routes/persons.ts
 #: worker/routes/persons.ts
@@ -5593,11 +5588,6 @@ msgstr "An seit {since}. Nur Admins können die App nutzen, Erinnerungen und and
 msgid "Please choose an age class for \"{name}\"."
 msgstr "Bitte wähle eine Altersklasse für „{name}“."
 
-# ai
-#: src/pages/admin.tsx
-msgid "Teams, coaches and players from Excel or CSV lists"
-msgstr "Mannschaften, Trainer und Spieler aus Excel- oder CSV-Listen"
-
 #: src/pages/admin.tsx
 msgid "no access"
 msgstr "kein Zugang"
@@ -6270,6 +6260,11 @@ msgstr "Der Termin und alle Rückmeldungen werden gelöscht."
 msgid "Try again"
 msgstr "Erneut versuchen"
 
+# ai
+#: src/pages/admin.tsx
+msgid "Teams, coaches and players from Excel or CSV lists, or a Kabine backup"
+msgstr "Mannschaften, Trainer und Spieler aus Excel- oder CSV-Listen, oder eine Kabine-Sicherung"
+
 #: src/pages/event.tsx
 #: src/pages/event.tsx
 msgid "Meeting point & info"
@@ -6579,13 +6574,6 @@ msgstr "Bitte gib deinen Vor- und Nachnamen ein."
 msgctxt "view as"
 msgid "player"
 msgstr "Spieler/in"
-
-# ai
-#: src/pages/admin.tsx
-#: src/pages/list-import.tsx
-#: src/pages/list-import.tsx
-msgid "Import"
-msgstr "Import"
 
 #: src/list-import.tsx
 #: src/pages/admin.tsx
@@ -8441,6 +8429,11 @@ msgid "Recipients see this address. Replies to it are not read by the app."
 msgstr "Empfänger sehen diese Adresse. Antworten darauf liest die App nicht."
 
 # ai
+#: src/pages/setup-wizard.tsx
+msgid "The app can send e-mails for sign-in codes, access links and helper plan reminders, through your club's mail server or, with the Workers Paid plan, Cloudflare Email Sending. Without e-mail, people sign in with passkeys and links you hand out."
+msgstr "Die App kann E-Mails für Anmeldecodes, Zugangslinks und Erinnerungen an Helferdienste verschicken, über den Mailserver eures Vereins oder, mit dem Workers-Paid-Tarif, über Cloudflare Email Sending. Ohne E-Mail melden sich alle mit Passkeys und den Links an, die du verteilst."
+
+# ai
 #: src/pages/admin.tsx
 msgid "Go through the setup step by step again"
 msgstr "Die Einrichtung noch einmal Schritt für Schritt durchgehen"
@@ -9063,9 +9056,21 @@ msgstr "Kabine ist freie Software unter der Lizenz AGPL-3.0. <0>Quellcode</0>"
 msgid "Needed: {needed}"
 msgstr "Gesucht: {needed}"
 
+# ai
+#: src/pages/mail-settings.tsx
+msgid "This installation has no e-mail binding. Add <0>{SEND_EMAIL}</0> to wrangler.jsonc in your copy and deploy again, or use your own server."
+msgstr "Diese Installation hat keine E-Mail-Bindung. Trag <0>{SEND_EMAIL}</0> in die wrangler.jsonc deiner Kopie ein und deploye neu, oder nutze euren eigenen Server."
+
 #: src/pages/chat.tsx
 msgid "Unmute"
 msgstr "Stummschaltung aufheben"
+
+# ai
+#: src/pages/admin.tsx
+#: src/pages/list-import.tsx
+#: src/pages/list-import.tsx
+msgid "Import / restore"
+msgstr "Import / Wiederherstellen"
 
 #: src/faq.tsx
 msgid "Under <0>Profile → My events</0> you choose training, games and helper duties and tap <1>Subscribe in calendar</1>. The events then appear in your phone's calendar app and stay up to date by themselves. Do not pass the link on."
@@ -10948,11 +10953,6 @@ msgstr "Aushilfe-Anfrage"
 #: worker/routes/events.ts
 msgid "{name} declined training on {when}."
 msgstr "{name} hat für das Training am {when} abgesagt."
-
-# ai
-#: src/pages/setup-wizard.tsx
-msgid "The app sends e-mails for sign-in codes, access links and helper plan reminders. Without e-mail, people sign in with passkeys and links you hand out."
-msgstr "Die App verschickt E-Mails für Anmeldecodes, Zugangslinks und Erinnerungen aus dem Helferplan. Ohne E-Mail melden sich alle mit Passkeys und den Links an, die ihr weitergebt."
 
 #: src/pages/special.tsx
 msgid "Opponent or tournament"

@@ -243,7 +243,8 @@ function MailStep({ onNext }: { onNext: () => void }) {
     <>
       <p class="muted">
         <Trans>
-          The app sends e-mails for sign-in codes, access links and helper plan reminders. Without e-mail, people sign in with passkeys and links you hand out.
+          The app can send e-mails for sign-in codes, access links and helper plan reminders, through your club's mail server or, with the Workers
+          Paid plan, Cloudflare Email Sending. Without e-mail, people sign in with passkeys and links you hand out.
         </Trans>
       </p>
       <MailSettingsForm onSaved={onNext} />

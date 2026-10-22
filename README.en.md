@@ -1,3 +1,5 @@
+> **Find Kabine useful?** Consider giving the repo a ⭐ to support development.
+
 **Deutsch:** [README auf Deutsch](README.md)
 
 # Kabine

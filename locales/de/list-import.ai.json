@@ -73,9 +73,10 @@
   "Enter the missing first names or leave those entries out.": "Trag die fehlenden Vornamen ein oder lass diese Einträge weg.",
   "{noFirstCount, plural, one {# entry without first name} other {# entries without first name}}": "{noFirstCount, plural, one {# Eintrag ohne Vornamen} other {# Einträge ohne Vornamen}}",
   "{count, plural, one {# list added: check the columns} other {# lists added: check the columns}}": "{count, plural, one {# Liste hinzugefügt: Spalten prüfen} other {# Listen hinzugefügt: Spalten prüfen}}",
-  "Teams, coaches and players from Excel or CSV lists": "Mannschaften, Trainer und Spieler aus Excel- oder CSV-Listen",
   "Import": "Import",
   "The season has no age groups yet. Add them under <0>age groups</0> first.": "Die Saison hat noch keine Altersklassen. Lege sie zuerst unter <0>Altersklassen</0> an.",
   "{name}: please save it as .xlsx or .csv first (.xls and .ods files cannot be read).": "{name}: bitte zuerst als .xlsx oder .csv speichern (.xls- und .ods-Dateien können nicht gelesen werden).",
-  "Excel (.xlsx) or CSV. Save older .xls files and LibreOffice files (.ods) as .xlsx first.": "Excel (.xlsx) oder CSV. Ältere .xls-Dateien und LibreOffice-Dateien (.ods) vorher als .xlsx speichern."
+  "Excel (.xlsx) or CSV. Save older .xls files and LibreOffice files (.ods) as .xlsx first.": "Excel (.xlsx) oder CSV. Ältere .xls-Dateien und LibreOffice-Dateien (.ods) vorher als .xlsx speichern.",
+  "Import / restore": "Import / Wiederherstellen",
+  "Teams, coaches and players from Excel or CSV lists, or a Kabine backup": "Mannschaften, Trainer und Spieler aus Excel- oder CSV-Listen, oder eine Kabine-Sicherung"
 }
