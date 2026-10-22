@@ -1467,6 +1467,11 @@ msgstr "Keine Verbindung. Bitte prüfe deine Internetverbindung."
 msgid "{name} (\"{reason}\")"
 msgstr "{name} („{reason}“)"
 
+# ai
+#: shared/changelog.ts
+msgid "Administration → Import is now called Import / restore: for the club's lists and Kabine backups."
+msgstr "Verwaltung → Import heißt jetzt Import / Wiederherstellen: für die Listen des Vereins und Kabine-Sicherungen."
+
 #: src/pages/privacy.tsx
 msgid "You can find the club's full privacy policy and legal notice at <0>{host}</0>."
 msgstr "Die vollständige Datenschutzerklärung und das Impressum des Vereins findest du auf <0>{host}</0>."
@@ -6869,6 +6874,11 @@ msgstr "OpenHolidays API (openholidaysapi.org), Lizenz ODbL"
 #: modules/carpools/app/card.tsx
 msgid "are riding with {driver} ({seats})"
 msgstr "fährst bei {driver} mit ({seats})"
+
+# ai
+#: shared/changelog.ts
+msgid "E-mail stays off until you set it up under Administration → E-mail: with your club's mail server, or Cloudflare Email Sending on the Workers Paid plan."
+msgstr "E-Mail bleibt aus, bis du sie unter Verwaltung → E-Mail einrichtest: mit dem Mailserver eures Vereins oder mit Cloudflare Email Sending im Workers-Paid-Tarif."
 
 #: modules/duties/app/helpers.tsx
 msgid "Myself"

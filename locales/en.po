@@ -1401,6 +1401,10 @@ msgstr "No connection. Please check your internet connection."
 msgid "{name} (\"{reason}\")"
 msgstr "{name} (\"{reason}\")"
 
+#: shared/changelog.ts
+msgid "Administration → Import is now called Import / restore: for the club's lists and Kabine backups."
+msgstr "Administration → Import is now called Import / restore: for the club's lists and Kabine backups."
+
 #: src/pages/privacy.tsx
 msgid "You can find the club's full privacy policy and legal notice at <0>{host}</0>."
 msgstr "You can find the club's full privacy policy and legal notice at <0>{host}</0>."
@@ -6521,6 +6525,10 @@ msgstr "OpenHolidays API (openholidaysapi.org), licence ODbL"
 #: modules/carpools/app/card.tsx
 msgid "are riding with {driver} ({seats})"
 msgstr "are riding with {driver} ({seats})"
+
+#: shared/changelog.ts
+msgid "E-mail stays off until you set it up under Administration → E-mail: with your club's mail server, or Cloudflare Email Sending on the Workers Paid plan."
+msgstr "E-mail stays off until you set it up under Administration → E-mail: with your club's mail server, or Cloudflare Email Sending on the Workers Paid plan."
 
 #: modules/duties/app/helpers.tsx
 msgid "Myself"

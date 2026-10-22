@@ -1,0 +1,4 @@
+{
+  "E-mail stays off until you set it up under Administration → E-mail: with your club's mail server, or Cloudflare Email Sending on the Workers Paid plan.": "E-Mail bleibt aus, bis du sie unter Verwaltung → E-Mail einrichtest: mit dem Mailserver eures Vereins oder mit Cloudflare Email Sending im Workers-Paid-Tarif.",
+  "Administration → Import is now called Import / restore: for the club's lists and Kabine backups.": "Verwaltung → Import heißt jetzt Import / Wiederherstellen: für die Listen des Vereins und Kabine-Sicherungen."
+}

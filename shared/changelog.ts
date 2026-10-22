@@ -15,6 +15,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: readonly ChangelogEntry[] = [
   {
+    version: "0.3.1",
+    date: "2026-10-22",
+    items: () => [
+      t`E-mail stays off until you set it up under Administration → E-mail: with your club's mail server, or Cloudflare Email Sending on the Workers Paid plan.`,
+      t`Administration → Import is now called Import / restore: for the club's lists and Kabine backups.`,
+    ],
+  },
+  {
     version: "0.3.0",
     date: "2026-10-22",
     items: () => [
