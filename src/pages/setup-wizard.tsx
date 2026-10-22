@@ -15,7 +15,7 @@ import { hasListImportDraft, ListImport } from "../list-import";
 import { RestoreFromExport } from "../restore";
 import { Icon } from "../icons";
 import { useSession } from "../session";
-import { invalidate, useQuery } from "../store";
+import { invalidate, refreshVisible, useQuery } from "../store";
 import { Button, copyText, ErrorBox, Field, Notice, shareLink, Spinner, SwitchRow, TextField, toast, TopBar, useDocumentTitle } from "../ui";
 import { AdminOnly } from "./admin";
 import { ClubProfileForm } from "./club-settings";
@@ -287,7 +287,8 @@ function TeamsStep({ onNext }: { onNext: () => void }) {
       await api.post("/teams", { name: name.trim(), ageClassCode, gender, level: 1 });
       setName("");
       toast(t`Team created`);
-      invalidate("/teams");
+      // The new team is also a chat room
+      invalidate("/teams", "/chat");
       await refresh();
     } catch (err) {
       setProblem(errorMessage(err));
@@ -302,8 +303,9 @@ function TeamsStep({ onNext }: { onNext: () => void }) {
         existingTeams={(teams.data.teams ?? []).map((x) => x.name)}
         onCancel={() => setMode("manual")}
         onDone={async () => {
-          invalidate("/teams", "/admin/persons");
+          // Many teams and people at once: own memberships, chat rooms, events … everything loaded so far is old
           await refresh();
+          await refreshVisible();
           onNext();
         }}
       />
@@ -359,9 +361,9 @@ function TeamsStep({ onNext }: { onNext: () => void }) {
         cancelLabel={t`Back`}
         onCancel={() => setMode("choose")}
         onDone={async () => {
-          invalidate("/teams", "/admin/persons");
           await refresh();
           await loadClub();
+          await refreshVisible();
           onNext();
         }}
       />
@@ -474,7 +476,7 @@ function PeopleStep({ onNext }: { onNext: () => void }) {
       setTeamIds([]);
       setAdmin(false);
       setEmail("");
-      invalidate("/admin/persons", "/teams");
+      invalidate("/admin/persons", "/teams", "/chat");
     } catch (err) {
       setProblem(errorMessage(err));
       invalidate("/admin/persons");

@@ -1615,22 +1615,27 @@ test("Einrichtung: Mannschaften, Trainer und Spielerinnen aus Listen übernehmen
   expect(await page.evaluate(() => localStorage.getItem("kabine.listImport"))).toBeNull();
 });
 
-test("Verwaltung → Import: Spieler in eine vorhandene Mannschaft übernehmen", async () => {
+test("Verwaltung → Import: Spieler in eine vorhandene Mannschaft übernehmen, die neue Mannschaft ist gleich im Chat", async () => {
   const { page } = admin;
-  await page.goto("/verwaltung");
+  // The chat list is loaded before the import and must not stay as it was (no page reload in between)
+  await page.goto("/chat");
+  await expect(page.getByText("wE9")).toHaveCount(0);
+  await page.getByRole("link", { name: "Verwaltung" }).click();
   await page.getByRole("link", { name: /^Import/ }).click();
   await expect(page.getByRole("heading", { name: "Import" })).toBeVisible();
   await page.getByRole("button", { name: "Listen übernehmen" }).click();
   // .xls and .ods cannot be read: the admin is asked to save the file as .xlsx
   await page.getByLabel("Dateien").setInputFiles({ name: "kader.ods", mimeType: "application/vnd.oasis.opendocument.spreadsheet", buffer: Buffer.from("x") });
   await expect(page.getByText("kader.ods: bitte zuerst als .xlsx oder .csv speichern")).toBeVisible();
-  await page.getByLabel("Oder eine Tabelle einfügen").fill("Name\tJahrgang\tMannschaft\nOle Beispiel\t2014\twT");
+  await page.getByLabel("Oder eine Tabelle einfügen").fill("Name\tJahrgang\tMannschaft\tFunktion\nOle Beispiel\t2014\twT\t\nAda Admin\t\twE9\tTrainerin");
   await page.getByRole("button", { name: "Eingefügte Tabelle hinzufügen" }).click();
-  await page.getByRole("button", { name: "1 Zeile lesen" }).click();
+  await page.getByRole("button", { name: "2 Zeilen lesen" }).click();
   await expect(page.getByRole("region", { name: "Mannschaften", exact: true })).toContainText("gibt es schon");
-  await page.getByRole("button", { name: "1 Person übernehmen" }).click();
+  await page.getByRole("button", { name: "2 Personen übernehmen" }).click();
   await expect(page).toHaveURL(/\/verwaltung\/personen$/);
   await expect(page.getByText("Ole Beispiel")).toBeVisible();
+  await page.getByRole("link", { name: "Chat" }).click();
+  await expect(page.getByText("wE9").first()).toBeVisible();
 });
 
 test("Verwaltung → Import: eigener Export zurück, alles ist schon da", async () => {

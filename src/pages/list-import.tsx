@@ -6,8 +6,9 @@ import { useLocation } from "preact-iso";
 import { useState } from "preact/hooks";
 import { hasListImportDraft, ListImport } from "../list-import";
 import { RestoreFromExport } from "../restore";
+import { loadClub } from "../club";
 import { useSession } from "../session";
-import { invalidate, useQuery } from "../store";
+import { refreshVisible, useQuery } from "../store";
 import { Button, ErrorBox, Notice, Spinner, TopBar, useDocumentTitle } from "../ui";
 import { AdminOnly } from "./admin";
 
@@ -26,9 +27,12 @@ export function AdminListImportPage() {
   const ages = useQuery<{ ageClasses: AgeClassRow[] }>("/age-classes");
   const classes = ages.data?.ageClasses ?? [];
   const [mode, setMode] = useState<"choose" | "lists" | "export">(() => (hasListImportDraft() ? "lists" : "choose"));
+  // Many teams and people at once (and with a restore the club settings): everything loaded so far is old,
+  // own memberships and chat rooms included
   const done = async () => {
-    invalidate("/teams", "/admin/persons");
     await refresh();
+    await loadClub();
+    await refreshVisible();
     route("/verwaltung/personen");
   };
   return (
