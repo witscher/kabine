@@ -77,6 +77,8 @@ test("Assistent: Verein, Fußball, Module, Mannschaft", async () => {
   await page.getByRole("button", { name: "Überspringen" }).click();
   // First teams: the age groups come from the football profile
   await expect(page.getByRole("heading", { name: "Erste Mannschaften" })).toBeVisible();
+  // First the choice: lists, by hand or an export of Kabine
+  await page.getByRole("button", { name: "Von Hand eingeben" }).click();
   await page.getByLabel("Name", { exact: true }).fill("E1");
   await page.getByLabel("Altersklasse").selectOption({ label: "E-Jugend (U11) (U11)" });
   await page.getByRole("button", { name: "Mannschaft anlegen" }).click();
