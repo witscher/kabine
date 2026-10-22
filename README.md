@@ -1,187 +1,100 @@
-> **Kabine nützlich?** Gib dem Repo einen ⭐, um die Entwicklung zu unterstützen.
+> **Find Kabine useful?** Consider giving the repo a ⭐ to support development.
 
-**English:** [README in English](README.en.md)
+**Deutsch:** [README auf Deutsch](README.de.md)
 
 # Kabine
 
-Kabine ist eine freie Mannschafts-App für Amateursportvereine: Training und Spiele mit Zu- und Absagen, Kadernominierung, Mannschaftschat, Push-Benachrichtigungen, Helferdienste und Fahrgemeinschaften, für Spieler, Eltern und Trainer. Sie läuft als installierbare Web-App auf Handy und Computer, und jeder Verein betreibt seine eigene Installation im eigenen Cloudflare-Konto.
+**A self-hosted team app for amateur sports clubs that runs entirely on Cloudflare, with no server to run and nothing to pay on the free plan.**
 
-Entstanden ist sie als App eines Handballvereins, in dem sie mehrere hundert Spieler, Eltern und Trainer jeden Tag nutzen. Kabine ist dieselbe App für jeden Verein, auf Deutsch und Englisch.
+Trainings and games with yes/no responses, squads, team chat, push notifications, helper duties and carpools, for players, parents and coaches. Each club deploys its own copy into its own Cloudflare account with one click.
 
-<table>
-  <tr>
-    <td><img src="docs/screenshots/de/01-events.png" width="230" alt="Nächste Termine einer Spielerin mit dem nächsten Training und ihrer Zusage"></td>
-    <td><img src="docs/screenshots/de/03-coach-responses.png" width="230" alt="Die Trainerin sieht, wer zu- und wer abgesagt hat, mit Gründen"></td>
-    <td><img src="docs/screenshots/de/05-chat.png" width="230" alt="Mannschaftschat mit Trainerin, Mutter und Spielerin"></td>
-  </tr>
-  <tr>
-    <td><img src="docs/screenshots/de/04-squad.png" width="230" alt="Kader für ein Spiel nominieren"></td>
-    <td><img src="docs/screenshots/de/07-helper-duties.png" width="230" alt="Helferdienste für ein Heimspiel"></td>
-    <td><img src="docs/screenshots/de/06-carpool.png" width="230" alt="Fahrgemeinschaft zu einem Auswärtsspiel"></td>
-  </tr>
-</table>
+**Try the demo, no sign-up:** [as a player](https://handball.kabine.dev/api/demo/login/player?lang=en) · [as a parent](https://handball.kabine.dev/api/demo/login/parent?lang=en) · [as a coach](https://handball.kabine.dev/api/demo/login/coach?lang=en) · [as an admin](https://handball.kabine.dev/api/demo/login/admin?lang=en)
 
-Alle Bilder zeigen einen erfundenen Demo-Verein. Weitere in [docs/screenshots](docs/screenshots/de).
-
-## Was die App kann
-
-**Spieler** sehen ihre Trainings, Spiele und Sondertermine, sagen mit einem Tipp zu oder ab und bekommen eine Benachrichtigung, wenn sich etwas ändert. Trainings gelten als zugesagt, bis jemand absagt. Niemand muss jede Woche antworten.
-
-**Eltern** sagen für ihre Kinder zu und ab, lesen im Mannschaftschat mit, übernehmen Helferdienste und bieten Plätze für Auswärtsspiele an. Sie entscheiden, was ihr Kind in der App darf.
-
-**Trainer** legen einmal pro Saison die Trainingszeiten fest. Die App erzeugt die Trainings, lässt Schulferien und Feiertage aus und zeigt, wer kommt. Trainer nominieren den Kader für Spiele, sagen Trainings ab oder verschieben sie mit einer Benachrichtigung an alle, laden Spieler und Eltern per Link ein und sehen, wer noch nicht erreichbar ist.
-
-**Admins** richten den Verein mit einem Assistenten ein: Sprache, Region, Sportart, Mannschaften, Module, E-Mail. Sie verwalten Mannschaften, Trainer und Personen und machen einmal im Jahr den Saisonwechsel.
-
-Zuschaltbare Module: Helferdienste bei Heimspielen und Veranstaltungen, Kinder- und Jugendschiedsrichter, Fahrgemeinschaften, Spielpläne aus handball4all, Anmeldecodes und Erinnerungen per SMS. Spiele lassen sich auch aus einer Tabelle übernehmen.
-
-## Eine interne App für einen Verein
-
-Kabine ist bewusst keine Plattform und nicht in den App Stores.
-
-- **Eine Installation pro Verein.** Die Daten bleiben im eigenen Cloudflare-Konto des Vereins. Es gibt keinen zentralen Server, kein vereinsübergreifendes Konto, und die Entwickler von Kabine haben keinen Zugriff auf die Daten irgendeines Vereins.
-- **Kein App Store.** Man öffnet die Adresse des Vereins und legt die App auf den Startbildschirm. Sie verhält sich wie eine installierte App, mit Benachrichtigungen, auch auf dem iPhone. Ohne Store braucht niemand ein Store-Konto, es gibt keine Altersfreigaben und keine Prüfung zwischen Verein und Mitgliedern, und jedes Update erreicht alle sofort.
-- **Nur mit Einladung.** Es gibt keine öffentliche Registrierung und keine öffentlichen Inhalte. Trainer teilen Einladungslinks in der Gruppe ihrer Mannschaft, Admins vergeben persönliche Links. Angemeldet wird mit Passkey (Face ID, Fingerabdruck, Displaysperre), es gibt also keine Passwörter, die man vergessen oder verlieren kann.
-- **Absichtlich schlank.** Kabine deckt ab, was eine Mannschaft Woche für Woche braucht. Mitgliedsbeiträge, Buchhaltung und die Website des Vereins bleiben, wo sie sind.
-
-## Datenschutz und Jugendschutz
-
-Die meisten Nutzer sind Kinder und Jugendliche. Von Spielern und Eltern speichert Kabine nur Vorname, Nachname und bei Spielern den Jahrgang. Keine Adresse, kein Geburtsdatum, keine Telefonnummer, außer jemand trägt selbst eine für SMS ein.
-
-- E-Mail-Adresse und Telefonnummer sind **rein optional** und nur für die Anmeldung gedacht. Andere Nutzer, auch Trainer, sehen sie nie. Admins sehen nur die E-Mail-Adresse anderer Admins (für Admins Pflicht) und im vollständigen Datenexport die E-Mail-Adressen der Konten, Telefonnummern nie.
-- Absagegründe sehen nur Trainer und Admins. Sie werden 60 Tage nach dem Termin gelöscht.
-- Eltern von Minderjährigen legen fest, was ihr Kind in der App darf (zusagen, absagen, im Chat lesen und schreiben), und geben Profilbilder frei, bevor andere sie sehen.
-- Andere Eltern und Spieler sehen Namen bei Helferdiensten und Fahrgemeinschaften nur abgekürzt („Kim M.“).
-- In jedem Mannschaftschat sind die Trainer dabei. Sie können Mitglieder stummschalten und Nachrichten entfernen. Private Nachrichten gibt es nicht.
-- Kein Tracking, keine Werbung, keine fremden Skripte oder Schriften. Die App lädt nichts von anderen Servern.
-- Wer den Verein verlässt, verliert den Zugang sofort; alle Daten sind spätestens zum nächsten Saisonwechsel gelöscht. Chats, Termine und Rückmeldungen werden jede Saison gelöscht.
-
-**Cloudflare und Standort der Daten:** Die App läuft auf der Infrastruktur von Cloudflare (Auftragsverarbeiter, der Verein schließt den Auftragsverarbeitungsvertrag im eigenen Konto ab). Die D1-Datenbank sollte **ausdrücklich in Europa angelegt** werden (`wrangler d1 create kabine --jurisdiction eu`), der Mannschaftschat liegt bereits in der EU-Jurisdiktion. Der Code der App läuft an Cloudflare-Standorten in der Nähe der Nutzer, gespeichert wird in der EU. Im „Deploy to Cloudflare“-Dialog gibt es keine Garantie dafür: Wer sie braucht, legt die Datenbank vorher von Hand an ([docs/install.md](docs/install.md)).
-
-Die vollständige Liste der gespeicherten Daten, wer sie sieht und wann sie gelöscht werden, dazu eine Vorlage für die Datenschutzerklärung des Vereins: [docs/privacy.de.md](docs/privacy.de.md).
-
-## Häufige Fragen
-
-Für Vereinsverantwortliche und Datenschutzbeauftragte.
-
-<details>
-<summary><b>Was ist Kabine – und was nicht?</b></summary>
-
-Kabine organisiert den Alltag von Mannschaften: Trainings und Spiele mit Zu- und Absagen, Kader, Mannschaftschat, Helferdienste und Fahrgemeinschaften.
-
-Kabine ist **keine Vereinsverwaltung**: keine Mitgliederverwaltung mit Adressen und Eintrittsdaten, keine Beiträge, kein SEPA-Lastschrifteinzug, keine Buchhaltung, keine Vereinswebsite und kein öffentliches Ergebnisportal. Diese Programme bleiben, wo sie sind. Kabine speichert bewusst nur, was eine Mannschaft Woche für Woche braucht.
-
-</details>
-
-<details>
-<summary><b>Was kostet Kabine?</b></summary>
-
-Die Software ist kostenlos und frei (AGPL-3.0): keine Lizenz, kein Abo, keine Werbung, für immer.
-
-Für den Betrieb reicht bei einem üblichen Verein mit einigen hundert Mitgliedern der kostenlose Tarif von Cloudflare. Wer mehr Spielraum möchte, nimmt den Bezahltarif (zurzeit 5 US-Dollar im Monat). Kosten pro Nachricht entstehen nur, wenn der Verein das SMS-Modul einschaltet. Eine eigene Domain ist optional.
-
-</details>
-
-<details>
-<summary><b>Warum Cloudflare und nicht ein deutsches Hosting?</b></summary>
-
-Wegen Kosten und Verfügbarkeit. Ein eigener Server bei einem Hoster kostet jeden Monat und muss eingerichtet, aktualisiert, gesichert und überwacht werden, im Verein meist von einer ehrenamtlichen Person. Kabine läuft bei Cloudflare ohne eigenen Server im kostenlosen Tarif. Die Plattform spielt Sicherheitsupdates selbst ein, hält auch am Sonntagabend durch, wenn alle gleichzeitig zusagen, und bewahrt eine Historie der Datenbank auf, mit der sich ein Fehler zurückdrehen lässt.
-
-Zum Datenschutz: Der Verein ist Verantwortlicher, Cloudflare ist Auftragsverarbeiter. Der Verein schließt im eigenen Konto den Auftragsverarbeitungsvertrag von Cloudflare ab; er enthält die EU-Standardvertragsklauseln, und Cloudflare ist unter dem EU-US Data Privacy Framework zertifiziert. Die Datenbank sollte ausdrücklich in der EU angelegt werden (`--jurisdiction eu`), der Mannschaftschat liegt bereits in der EU-Jurisdiktion. Anfragen bearbeitet Cloudflare an Standorten in der Nähe der Nutzer, bei Nutzern in Deutschland in der Regel in Europa.
-
-Auf einem eigenen Server läuft Kabine nicht: Die App ist für die Cloudflare-Plattform gebaut (Workers, D1, Durable Objects).
-
-</details>
-
-<details>
-<summary><b>Wer hat Zugriff auf unsere Daten?</b></summary>
-
-Nur der Verein. Jede Installation liegt im eigenen Cloudflare-Konto des Vereins. Es gibt keinen zentralen Kabine-Server, und die Entwickler von Kabine haben keinen Zugriff auf die Daten irgendeines Vereins. In der App sieht jede Person nur, was ihre Rolle braucht: Absagegründe zum Beispiel nur Trainer und Admins.
-
-</details>
-
-<details>
-<summary><b>Ist Kabine DSGVO-konform?</b></summary>
-
-Kabine ist auf Datensparsamkeit gebaut: Von Spielern und Eltern nur Vorname, Nachname und Jahrgang, kein Tracking, Löschfristen eingebaut. Ob die Verarbeitung im Verein rechtmäßig ist, verantwortet der Verein selbst. Dafür gibt es eine vollständige Liste der gespeicherten Daten (wer sieht was, wann wird es gelöscht) und eine Vorlage für die Datenschutzerklärung: [Datenschutz und Datenverzeichnis](docs/privacy.de.md).
-
-</details>
-
-<details>
-<summary><b>Brauchen Kinder ein eigenes Handy oder eine E-Mail-Adresse?</b></summary>
-
-Nein. Eltern sagen für ihre Kinder zu und ab. Kinder mit eigenem Gerät bekommen über einen Link Zugang, ohne E-Mail-Adresse und ohne Telefonnummer. Die Eltern legen fest, was ihr Kind in der App darf, und geben Profilbilder frei.
-
-</details>
-
-<details>
-<summary><b>Wie viel Arbeit macht der Betrieb?</b></summary>
-
-Die Installation dauert etwa 30 Minuten. Danach gibt es keinen Server zu pflegen: Updates kommen als Pull Request in die Kopie des Vereins und werden mit einem Klick übernommen, der Saisonwechsel läuft einmal im Jahr mit einem Assistenten, und der Datenexport sichert alles in eine Datei. Trainer verwalten ihre Mannschaften selbst.
-
-</details>
-
-<details>
-<summary><b>Was passiert, wenn wir aufhören?</b></summary>
-
-Der Verein exportiert seine Daten und löscht Worker, Datenbank, KV-Speicher und Warteschlange im eigenen Cloudflare-Konto. Dann sind die Daten weg. Es gibt keinen Anbieter, bei dem man kündigen oder eine Löschung beantragen muss.
-
-</details>
-
-<details>
-<summary><b>Für welche Sportarten eignet sich Kabine?</b></summary>
-
-Kabine ist in einem Handballverein entstanden und bringt für Handball Altersklassen, Spielzeiten, Helferdienste und die Spielpläne aus handball4all mit. Für Fußball und andere Sportarten gibt es Grundeinstellungen. Weitere Sportarten und Spielplan-Systeme können über GitHub beigesteuert werden.
-
-</details>
-
-<details>
-<summary><b>Gibt es Support?</b></summary>
-
-Kabine ist freie Software ohne kommerziellen Support. Fragen, Fehler und Ideen gehören in die Issues auf GitHub. Ausprobieren lässt sich alles vorher in der Demo.
-
-</details>
-
-## Installation
+[![CI](https://github.com/witscher/kabine/actions/workflows/ci.yml/badge.svg)](https://github.com/witscher/kabine/actions/workflows/ci.yml)
+[![Latest version](https://img.shields.io/github/v/tag/witscher/kabine?label=version)](CHANGELOG.md)
+[![Licence: AGPL-3.0](https://img.shields.io/badge/licence-AGPL--3.0-blue)](LICENSE)
+[![GitHub stars](https://img.shields.io/github/stars/witscher/kabine?style=social)](https://github.com/witscher/kabine/stargazers)
 
 [![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/witscher/kabine)
 
-Nötig sind ein Cloudflare-Konto (der kostenlose Tarif reicht für einen üblichen Verein), ein GitHub-Konto und am besten eine Domain des Vereins. Der Knopf legt die eigene Kopie und alle Ressourcen an; man wählt nur ein Passwort für den ersten Admin. Schritt für Schritt, mit E-Mail und Updates: [docs/install.md](docs/install.md) (Englisch). Betrieb (Datensicherung, Saisonwechsel, Wartung, Updates): [docs/operation.md](docs/operation.md).
+<table>
+  <tr>
+    <td><img src="docs/screenshots/en/01-events.png" width="230" alt="Upcoming events of a player with the next training and her response"></td>
+    <td><img src="docs/screenshots/en/03-coach-responses.png" width="230" alt="A coach sees who accepted and who declined, with reasons"></td>
+    <td><img src="docs/screenshots/en/05-chat.png" width="230" alt="Team chat with coach, parent and player"></td>
+  </tr>
+</table>
 
-## Sprachen
+It started as the app of a handball club, where several hundred players, parents and coaches use it every day. The demo and all pictures show an invented club; more in [docs/screenshots](docs/screenshots/en).
 
-Deutsch und Englisch. Die Übersetzungen liegen als gettext-Dateien (`.po`) in `locales/`, jeder kann sie korrigieren. Eine Sprache hinzufügen: [docs/dev/translation.md](docs/dev/translation.md).
-
-## Entwicklung
-
-Node.js 22 oder neuer.
+## Quick start
 
 ```sh
-npm ci
-npm run secrets:generate -- --dev   # lokale Secrets in .dev.vars
-npm run db:reset:local              # lokale Datenbank mit dem erfundenen Demo-Verein
+git clone https://github.com/witscher/kabine && cd kabine
+npm ci                              # Node.js 22 or newer
+npm run secrets:generate -- --dev   # local secrets in .dev.vars
+npm run db:reset:local              # local database with the invented demo club
 npm run dev                         # http://localhost:5173
-npm run check                       # Typprüfung und Tests
-npm run e2e                         # Ende-zu-Ende-Tests (Playwright)
-npm run screenshots                 # die Bilder oben, auf Deutsch und Englisch
 ```
 
-Der erste Admin richtet sich unter `/einrichtung#<ADMIN_BOOTSTRAP_TOKEN>` ein (siehe `.dev.vars`).
+The first admin is set up at `/einrichtung#<ADMIN_BOOTSTRAP_TOKEN>` (see `.dev.vars`). `npm run check` runs the typecheck and all tests, `npm run e2e` the Playwright suite.
 
-Gebaut mit Cloudflare Workers, D1, Durable Objects und Queues, Hono, Preact und Lingui. Code, Kommentare und die technische Dokumentation sind auf Englisch.
+To run it for a club, use the Deploy button above: it creates the copy and all resources, and the free plan is enough for a typical club. Step by step: [docs/install.md](docs/install.md); running it (backups, season change, updates): [docs/operation.md](docs/operation.md).
 
-## Mitmachen
+## Under the hood
 
-Kabine ist für Beiträge mit Coding-Agent gebaut: Wer eine Idee hat, kann mit Claude Code, Codex, Cursor oder einem anderen Agenten ein Modul, eine Spielplan-Anbindung (handball360, nuLiga, SAMS, …) oder eine Sportart beisteuern. Jeder Beitrag ist ein eigener Ordner oder eine Datei, ein Generator legt das Gerüst an, und Vertragstests zeigen sofort, was fehlt:
-
-```sh
-npm run new -- module polls --label "Polls" --label-de "Umfragen"
-npm run new -- connector nuliga --vendor "nuLiga" --domain nuliga.example --sport handball
-npm run new -- sport basketball --name "Basketball"
+```mermaid
+flowchart LR
+  app["PWA (Preact)<br/>installable, offline view"] -- "HTTPS / WebSocket" --> worker["Worker (Hono)<br/>API, passkeys, static assets"]
+  worker --> d1[("D1<br/>club data")]
+  worker --> kv[("KV<br/>logo, switches")]
+  worker --> chat["Durable Objects<br/>team chat, live helper plans"]
+  worker --> queue["Queue"] --> push["Web Push (VAPID)"]
+  cron["Cron, hourly"] --> worker
 ```
 
-Der Einstieg für Menschen und Agenten ist [AGENTS.md](AGENTS.md) (Englisch). Den Pull Request schickt ein Mensch, der ihn lokal ausprobiert hat und für Rückfragen da ist. Ideen und Wünsche gehören in die [Issues](https://github.com/witscher/kabine/issues/new/choose), Sicherheitsprobleme nach [SECURITY.md](SECURITY.md).
+- **Serverless end to end:** Workers with static assets, D1, KV, Durable Objects, Queues and Cron Triggers. No container, no VM, nothing to patch.
+- **Real-time chat** on Durable Objects with hibernating WebSockets; helper plans update live the same way.
+- **Push without a third party:** Web Push with VAPID, sent from a Queue consumer.
+- **No passwords:** sign-in by passkey (WebAuthn); invitations by link; optional e-mail or SMS codes.
+- **Installable PWA** that keeps the last loaded state readable offline, also on iPhones.
+- **Safe updates for every club:** releases arrive as a pull request in each club's copy; migrations run with a D1 Time Travel restore point and follow expand/contract, each with an upgrade test.
+- **Data minimisation by design:** first name, last name and year of birth of players, nothing more by default; no tracking, no third-party scripts or fonts.
+- **Tested:** Vitest in the Workers runtime (including contract tests for every module and connector and a test for every [security rule](docs/dev/security.md)), Playwright end-to-end tests and a journey from an empty database through every role.
+- **i18n with Lingui:** English and German, gettext `.po` files anyone can correct.
 
-## Lizenz
+Built with TypeScript, [Hono](https://hono.dev), [Preact](https://preactjs.com) and [Lingui](https://lingui.dev). Architecture: [docs/dev/architecture.md](docs/dev/architecture.md); design and decisions: [docs/dev/design.md](docs/dev/design.md), [docs/dev/decisions.md](docs/dev/decisions.md).
 
-AGPL-3.0-only, siehe [LICENSE](LICENSE). Kabine darf genutzt, verändert und weitergegeben werden. Wer eine veränderte Fassung für andere betreibt, muss ihnen den Quellcode anbieten.
+## What clubs get
+
+- **Players** see their trainings, games and events, accept or decline with a tap and get notified of changes. Trainings count as accepted until someone declines.
+- **Parents** respond for their children, read along in the team chat, take on helper duties and offer seats for away games. They decide what their child may do in the app.
+- **Coaches** set up training plans once a season (school holidays are skipped), nominate squads, cancel or move trainings with one notification, invite players and parents by link and see who cannot be reached yet.
+- **Admins** set up the club with a wizard, import teams and people from Excel or CSV lists, and run the season change once a year.
+
+Optional modules: helper duties, youth referees, carpools, game schedules from handball4all (German handball), SMS codes and reminders.
+
+## For clubs and data protection officers
+
+One installation per club, in the club's own Cloudflare account: there is no central server, and the authors of Kabine have no access to any club's data. It is invitation-only, not in the app stores, and stores only what a team needs week by week. The full data inventory, deletion periods and a privacy policy template are in [docs/privacy.md](docs/privacy.md); questions about costs, GDPR and why Cloudflare are answered on [kabine.dev](https://kabine.dev/en/).
+
+## Contributing
+
+The repository is built for contributions made with a coding agent (Claude Code, Codex, Cursor, …): every contribution is a folder or a file of its own, a generator creates the skeleton, and contract tests show at once what is missing. Good places to start:
+
+| Add | Command |
+| --- | --- |
+| A sport (age groups, playing times, typical helper duties) | `npm run new -- sport basketball --name "Basketball"` |
+| Game schedules from an association's system (nuLiga, SAMS, …) | `npm run new -- connector nuliga --vendor "nuLiga" --domain nuliga.example --sport handball` |
+| A function clubs can switch on | `npm run new -- module polls --label "Polls" --label-de "Umfragen"` |
+| A language or a better translation | [docs/dev/translation.md](docs/dev/translation.md) |
+
+The entry point for people and agents is [AGENTS.md](AGENTS.md). A person sends the pull request, has tried it locally and answers questions. Ideas and requests: [issues](https://github.com/witscher/kabine/issues/new/choose); security problems: [SECURITY.md](SECURITY.md).
+
+## Licence
+
+AGPL-3.0-only, see [LICENSE](LICENSE). You may run, change and share Kabine. If you run a changed version for others, you must offer them its source code.
+
+---
+
+If Kabine is useful to you or your club, a ⭐ helps others find it.

@@ -48,9 +48,9 @@ Some coaches let their team join another team's training by choice. In a joint t
 
 For players whose teams all join optionally: no automatic acceptance (they accept by hand), withdrawing needs no reason and is never "at short notice", no reminders, no "absent without excuse", and they are told about cancellations and moves only once they accepted. In the attendance record and the season statistics they appear only when they accepted, so not joining never counts as missing. A player who is also in a mandatory team of the same training counts as mandatory. The event shows the mark "Optional"; the big "Up next" card only shows an optional training once it is accepted. Coaches see the optional players without acceptance in their own group "Optional, not joining". If a coach switches a team to mandatory after someone withdrew, that withdrawal counts as a decline.
 
-## README in German first (October 2026)
+## README in English first (October 2026, replaces "README in German first")
 
-`README.md` is German, `README.en.md` English, each linked at the top of the other. Kabine is made for German clubs (holidays per state, handball4all, the name itself), and the people who find it on GitHub are mostly club admins in Germany. Code, comments and the technical documentation stay in English so others can contribute.
+`README.md` is English and written for developers, `README.de.md` German, each linked at the top of the other. Clubs find Kabine through kabine.dev, which is German first and answers their questions (costs, GDPR, why Cloudflare); people who arrive on GitHub are mostly developers, and they read English. So the README leads with what Kabine is, the demo, a quick start and how it is built, and keeps the club topics short with links. Code, comments and the technical documentation stay in English.
 
 ## Holiday plans in the timeline (October 2026)
 
