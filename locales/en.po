@@ -1372,6 +1372,10 @@ msgstr "People, parent links, e-mail addresses, profile pictures"
 msgid "E-mail"
 msgstr "E-mail"
 
+#: shared/changelog.ts
+msgid "Import: teams, coaches and players from your club's Excel or CSV lists, checked before anything is created. Under Administration → Import and in the setup wizard."
+msgstr "Import: teams, coaches and players from your club's Excel or CSV lists, checked before anything is created. Under Administration → Import and in the setup wizard."
+
 #: src/pages/season.tsx
 msgid "Assign coaches"
 msgstr "Assign coaches"
@@ -3313,6 +3317,10 @@ msgstr "Time slot {label} added."
 #: src/pages/event.tsx
 msgid "Record who was there, until the end of {until}. Without an entry the response counts."
 msgstr "Record who was there, until the end of {until}. Without an entry the response counts."
+
+#: shared/changelog.ts
+msgid "The same page takes back an export of Kabine, for example when moving to a new installation. You choose what to take over; nothing is deleted."
+msgstr "The same page takes back an export of Kabine, for example when moving to a new installation. You choose what to take over; nothing is deleted."
 
 #: src/pages/plans.tsx
 msgid "During the {holiday} ({from} to {to})"
@@ -9037,6 +9045,10 @@ msgstr "Only coaches of the teams involved may do this."
 #: src/pages/plans.tsx
 msgid "Location created."
 msgstr "Location created."
+
+#: shared/changelog.ts
+msgid "Only admins change their own name; everyone else asks their coach or an admin."
+msgstr "Only admins change their own name; everyone else asks their coach or an admin."
 
 #: src/faq.tsx
 msgid "Only the team's coaches and the admins. Other players and parents only see how many have accepted or declined. The reason is deleted 60 days after the event."

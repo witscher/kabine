@@ -1437,6 +1437,11 @@ msgstr "Personen, Eltern-Verknüpfungen, E-Mail-Adressen, Profilbilder"
 msgid "E-mail"
 msgstr "E-Mail"
 
+# ai
+#: shared/changelog.ts
+msgid "Import: teams, coaches and players from your club's Excel or CSV lists, checked before anything is created. Under Administration → Import and in the setup wizard."
+msgstr "Import: Mannschaften, Trainer und Spieler aus den Excel- oder CSV-Listen eures Vereins, geprüft, bevor etwas angelegt wird. Unter Verwaltung → Import und im Einrichtungsassistenten."
+
 #: src/pages/season.tsx
 msgid "Assign coaches"
 msgstr "Trainer zuordnen"
@@ -3482,6 +3487,11 @@ msgstr "Zeitblock {label} hinzugefügt."
 #: src/pages/event.tsx
 msgid "Record who was there, until the end of {until}. Without an entry the response counts."
 msgstr "Trag bis zum Ende von {until} ein, wer da war. Ohne Eintrag zählt die Rückmeldung."
+
+# ai
+#: shared/changelog.ts
+msgid "The same page takes back an export of Kabine, for example when moving to a new installation. You choose what to take over; nothing is deleted."
+msgstr "Dieselbe Seite übernimmt auch einen Kabine-Export, etwa beim Umzug auf eine neue Installation. Du wählst, was übernommen wird; gelöscht wird nichts."
 
 #: src/pages/plans.tsx
 msgid "During the {holiday} ({from} to {to})"
@@ -9511,6 +9521,11 @@ msgstr "Das dürfen nur Trainer der beteiligten Mannschaften."
 #: src/pages/plans.tsx
 msgid "Location created."
 msgstr "Ort angelegt."
+
+# ai
+#: shared/changelog.ts
+msgid "Only admins change their own name; everyone else asks their coach or an admin."
+msgstr "Nur Admins ändern ihren eigenen Namen; alle anderen fragen ihren Trainer oder einen Admin."
 
 #: src/faq.tsx
 msgid "Only the team's coaches and the admins. Other players and parents only see how many have accepted or declined. The reason is deleted 60 days after the event."

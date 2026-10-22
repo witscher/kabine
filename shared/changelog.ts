@@ -15,6 +15,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: readonly ChangelogEntry[] = [
   {
+    version: "0.3.0",
+    date: "2026-10-22",
+    items: () => [
+      t`Import: teams, coaches and players from your club's Excel or CSV lists, checked before anything is created. Under Administration → Import and in the setup wizard.`,
+      t`The same page takes back an export of Kabine, for example when moving to a new installation. You choose what to take over; nothing is deleted.`,
+      t`Only admins change their own name; everyone else asks their coach or an admin.`,
+    ],
+  },
+  {
     version: "0.2.3",
     date: "2026-10-20",
     items: () => [

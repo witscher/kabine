@@ -1,0 +1,5 @@
+{
+  "Import: teams, coaches and players from your club's Excel or CSV lists, checked before anything is created. Under Administration → Import and in the setup wizard.": "Import: Mannschaften, Trainer und Spieler aus den Excel- oder CSV-Listen eures Vereins, geprüft, bevor etwas angelegt wird. Unter Verwaltung → Import und im Einrichtungsassistenten.",
+  "The same page takes back an export of Kabine, for example when moving to a new installation. You choose what to take over; nothing is deleted.": "Dieselbe Seite übernimmt auch einen Kabine-Export, etwa beim Umzug auf eine neue Installation. Du wählst, was übernommen wird; gelöscht wird nichts.",
+  "Only admins change their own name; everyone else asks their coach or an admin.": "Nur Admins ändern ihren eigenen Namen; alle anderen fragen ihren Trainer oder einen Admin."
+}
