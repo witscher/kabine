@@ -95,7 +95,7 @@ jobs:
             migration_note=$'\n\nNo database changes: the app keeps running during the deploy.'
           fi
           if [ -s /tmp/changed-workflows.txt ]; then
-            workflow_note=$'\n\n**Update the workflows by hand:** GitHub does not let this automatic update change files in `.github/workflows`. Replace these files in your copy with the ones of the release (open the link, copy the content, edit the file in your copy on GitHub and paste):'
+            workflow_note=$'\n\n**Update the workflows by hand, after the deploy:** GitHub does not let this automatic update change files in `.github/workflows`. First merge this pull request and wait until the deploy has finished (a few minutes; *Administration → Updates and maintenance* shows the new version). Then replace these files in your copy with the ones of the release (open the link, copy the content, edit the file in your copy on GitHub and paste). Editing them before merging starts a deploy of the old version that can overlap with the update, so the update may not be installed.'
             while read -r f; do workflow_note+=$'\n'"- [$f](https://github.com/witscher/kabine/blob/$VERSION/$f)"; done < /tmp/changed-workflows.txt
           fi
           {

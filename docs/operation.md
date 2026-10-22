@@ -48,7 +48,7 @@ If you would rather check a release on your own first, switch maintenance mode o
 
 **Skipping releases.** A copy can go from any release straight to the newest one. The pull request always brings the newest release, lists the database changes and shows the release notes of every version since the installed one; the deploy applies all pending migrations in order, with one pause and one restore point. An older update pull request that is still open is closed with a link to the new one, so nobody installs an older version by mistake.
 
-**Workflow files.** GitHub does not let the automatic update change files in `.github/workflows`. If a release changes them, the pull request lists them with links: open each link, copy the content, edit the same file in your copy on GitHub and paste it. Do this before merging the update.
+**Workflow files.** GitHub does not let the automatic update change files in `.github/workflows`. If a release changes them, the pull request lists them with links: open each link, copy the content, edit the same file in your copy on GitHub and paste it. Do this **after** merging, once the deploy has finished (*Administration → Updates and maintenance* shows the new version). Every commit to the copy starts a deploy; a workflow edit just before merging deploys the old version, and the build of the merge right after it may not deploy at all. If that happened anyway, the installed version is still the old one: commit any small change to the copy (or run the deploy again in the Cloudflare dashboard) to deploy the update.
 
 ### Updating an older copy
 

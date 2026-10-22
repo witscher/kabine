@@ -6,6 +6,8 @@ Changes that are merged but not released yet go under *Unreleased*, one line eac
 
 ## Unreleased
 
+- The update pull request asks to replace changed workflow files only after the update is deployed. Replacing them right before merging could start a deploy of the old version that overlapped with the update, so the update was not installed.
+
 ## v0.3.0
 
 - Import teams, coaches and players from the club's lists, in the setup wizard and under *Administration → Import*: Excel files (.xlsx) with one or more sheets, CSV or a pasted table, several lists with the same people combined into one. Only name, birth year, team and role are read, in the browser; the lists are not uploaded, and everything is checked and corrected before anything is created.
