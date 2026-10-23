@@ -556,7 +556,7 @@ ${section(
     ["Selbstbetrieb wird offiziell:", "Im Oktober 2026 ist das Team von Deno zu Cloudflare gewechselt, um Workers und Durable Objects auf eigener Infrastruktur zu einer offiziell unterstützten Möglichkeit zu machen, mit Ideen aus Denos celld."],
     ["Was für Kabine noch fehlt:", "Für die Datenbank (D1), den Schlüsselspeicher (KV), Warteschlangen und Zeitpläne gibt es noch keinen offiziellen Weg zum Selbstbetrieb. Erst wenn das steht, kann Kabine auch im eigenen Rechenzentrum oder bei einem deutschen Hoster laufen."],
     ["Gute Ausgangslage:", "Kabine baut vollständig auf dem Workers-Programmiermodell auf. Wird es außerhalb von Cloudflare verfügbar, wäre ein Umzug eine Anpassung, keine Neuentwicklung. Das Projekt verfolgt die Entwicklung."],
-    ["Keine Lust zu warten?", "Kabine ist Open Source: Wer möchte, kann eine Anbindung an andere Datenbanken und Schlüsselspeicher selbst beisteuern. Am besten vorher ein Issue anlegen, damit der Weg abgestimmt ist."],
+    ["Mitmachen:", "Kabine ist Open Source. Wer beim Selbstbetrieb auf workerd helfen möchte, legt am besten vorher ein Issue an, damit der Weg abgestimmt ist. Eine eigene Datenbank neben der übrigen Cloudflare-Plattform ist dagegen nicht geplant: Sie brächte Vereinen viel Betriebsaufwand und kaum Unabhängigkeit."],
   ]) + links([["https://blog.cloudflare.com/deno-joins-cloudflare/", "Cloudflare: Deno is joining Cloudflare"], ["https://deno.com/blog/cloudflare", "Deno: Ankündigung"], ["https://github.com/cloudflare/workerd", "workerd auf GitHub"], [`${GITHUB}/issues/new/choose`, "Issue anlegen"]]),
 )}
 ${section(
@@ -664,7 +664,7 @@ ${section(
     ["Self-hosting is becoming official:", "In October 2026 the Deno team joined Cloudflare to make Workers and Durable Objects on your own infrastructure a first-class supported option, with ideas from Deno's celld."],
     ["What Kabine still needs:", "For the database (D1), the key-value store (KV), queues and schedules there is no official way to self-host yet. Only then can Kabine run in your own data centre or at a local hosting provider."],
     ["A good starting point:", "Kabine is built entirely on the Workers programming model. Once that is available outside Cloudflare, moving would be an adaptation, not a rewrite. The project follows the development."],
-    ["Can't wait?", "Kabine is open source: anyone can contribute support for other databases and key-value stores. Best open an issue first, so the approach is agreed."],
+    ["Getting involved:", "Kabine is open source. If you want to help with self-hosting on workerd, best open an issue first, so the approach is agreed. A database of your own alongside the rest of the Cloudflare platform, on the other hand, is not planned: it would bring clubs a lot of operating effort and hardly any independence."],
   ]) + links([["https://blog.cloudflare.com/deno-joins-cloudflare/", "Cloudflare: Deno is joining Cloudflare"], ["https://deno.com/blog/cloudflare", "Deno: announcement"], ["https://github.com/cloudflare/workerd", "workerd on GitHub"], [`${GITHUB}/issues/new/choose`, "Open an issue"]]),
 )}
 ${section(

@@ -2,6 +2,16 @@
 
 Decisions not covered by `docs/dev/roadmap.md`, with reasons. Newest first.
 
+## No database of the club's own (October 2026)
+
+Checked whether an installation could use its own PostgreSQL or MySQL server through Cloudflare Hyperdrive (reached through a Cloudflare Tunnel) instead of D1. Not done, and not planned:
+
+- It cannot be a module. The module hooks take `D1Database` and hand `D1PreparedStatement`s into the core's batches (`worker/module-api.ts`), and the module switches themselves live in the database. It would be a rework of the core: about 450 queries in 65 files written in SQLite's dialect (`json_each` lists, `INSERT OR IGNORE`, `RETURNING`, `strftime` defaults, partial unique indexes, `PRAGMA` in the restore), plus migrations, deploy script, admin link, seed and the test setup, all built on Wrangler and D1.
+- Every migration and query would have to be kept working on two databases, for good. MySQL would add more gaps (`RETURNING`, `||`, partial indexes).
+- Clubs would lose what D1 gives them for free: no server, encryption at rest, and the Time Travel restore point before every update with migrations. They would have to run the server, the tunnel, backups with point-in-time recovery and monitoring themselves. The Worker, KV, queue and chat would still run on Cloudflare, so it buys little independence.
+
+Self-hosting is meant to come through workerd and the official support for Workers on one's own infrastructure. The website says so in the FAQ (“Why not a database on our own server?”) and in the outlook on the board and privacy page.
+
 ## Update pull requests without merging Kabine's history (October 2026)
 
 The update workflow of a club's copy used to merge the release tag into the copy (`--allow-unrelated-histories`). That pushes Kabine's whole history, including commits that change `.github/workflows`, and GitHub refuses any push that changes workflow files with the workflow's own token. Now the update is one commit on top of the copy: the release's files, the club's `wrangler.jsonc` and the copy's own workflow files; the pull request lists changed workflow files with links to copy by hand. Copies from before v0.2.0 replace `update.yml` once by hand and switch maintenance mode on for that first update, because the running old version does not know the automatic pause (`docs/operation.md`, Updating an older copy). Releases are tags `vX.Y.Z` with a section in `CHANGELOG.md` and an entry in `shared/changelog.ts`; v0.2.0 is the first tag. Tried end to end on a test installation made with the deploy button: the button does not copy `.github/workflows` at all, so the installation guide adds the update workflow as a step; GitHub refused `gh pr create` (GraphQL) to the workflow's token in that copy while the REST call works, so the workflow uses REST and falls back to an issue with a link.
