@@ -34,7 +34,7 @@ export function SessionProvider({ children }: { children: ComponentChildren }) {
       const next = res.authenticated ? res.me : null;
       setMe(next);
       // The language chosen on the account (also on another device) wins over this device
-      if (next) adoptAccountLocale(next.locale);
+      if (next) adoptAccountLocale(next.locale, (locale) => void api.put("/me/locale", { locale }).catch(() => undefined));
       if (next) refreshBadge();
       else setBadge(0);
       return next;

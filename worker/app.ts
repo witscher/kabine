@@ -81,7 +81,8 @@ export function createBaseApp(): Hono<AppEnv> {
       const locale = isLocale(actor?.locale) ? actor.locale : currentLocale();
       // Remember the app's language on the account the first time, so pushes, mails and the calendar feed
       // (which arrive without the app) use it too. A choice in the profile overwrites it.
-      if (actor && !isLocale(actor.locale) && isLocale(asked)) {
+      // Not in the demo: its accounts are shared by every visitor, there the browser's language decides
+      if (actor && !isLocale(actor.locale) && isLocale(asked) && c.env.APP_ENV !== "demo") {
         c.executionCtx.waitUntil(
           c.env.DB.prepare("UPDATE accounts SET locale = ? WHERE id = ? AND locale IS NULL").bind(asked, actor.accountId).run().catch(() => undefined),
         );

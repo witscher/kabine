@@ -63,6 +63,16 @@ describe("demo installation", () => {
     expect((await fetchApp(new Request("https://demo.example/api/demo/login/hacker", { redirect: "manual" }))).status).toBe(404);
   });
 
+  it("shared accounts keep no language: the visitor's browser or link decides", async () => {
+    expect(await one<{ n: number }>("SELECT COUNT(*) AS n FROM accounts WHERE locale IS NOT NULL")).toEqual({ n: 0 });
+    const res = await fetchApp(new Request("https://demo.example/api/demo/login/player?lang=en", { redirect: "manual" }));
+    const cookie = res.headers.get("set-cookie")!.split(";")[0]!;
+    await fetchApp(new Request("https://demo.example/api/session", { headers: { cookie, "x-kabine-locale": "en" } }));
+    const put = await fetchApp(new Request("https://demo.example/api/me/locale", { method: "PUT", headers: { cookie, "content-type": "application/json" }, body: JSON.stringify({ locale: "en" }) }));
+    expect(put.status).toBe(403);
+    expect(await one<{ n: number }>("SELECT COUNT(*) AS n FROM accounts WHERE locale IS NOT NULL")).toEqual({ n: 0 });
+  });
+
   it("only exists in the demo environment", async () => {
     const res = await fetchApp(new Request("https://demo.example/api/demo/login/admin", { redirect: "manual" }), { ...env, APP_ENV: "production" } as Env);
     expect(res.status).toBe(404);

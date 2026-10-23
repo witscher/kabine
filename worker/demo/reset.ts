@@ -155,5 +155,7 @@ export async function resetDemo(env: Env, fetchApp: Fetch, now = Date.now()): Pr
   await wipe(env);
   await seed(env, now);
   await scenes(env, fetchApp, now);
+  // Shared accounts: no language of their own, so every visitor gets the browser's (or the link's) language
+  await env.DB.prepare("UPDATE accounts SET locale = NULL").run();
   console.log("Demo reset done");
 }

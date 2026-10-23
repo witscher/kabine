@@ -14,7 +14,8 @@ import { DEMO_ROLES, type DemoRole, demoSession, resetDemo } from "./reset";
 export const isDemo = (env: Env): boolean => env.APP_ENV === "demo";
 
 const BLOCKED: RegExp[] = [
-  /^\/api\/me\/(passkeys|sessions|email|phone)/,
+  // locale: the demo accounts are shared, a visitor's language stays on the visitor's device
+  /^\/api\/me\/(passkeys|sessions|email|phone|locale)/,
   /^\/api\/auth\/(email|sms)\//,
   /^\/api\/admin\/(mail|sms)/,
   /^\/api\/admin\/club\/owner$/,

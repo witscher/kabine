@@ -6,6 +6,8 @@ Changes that are merged but not released yet go under *Unreleased*, one line eac
 
 ## Unreleased
 
+- Links with `?lang=en` or `?lang=de` (the demo links on kabine.dev and in the README) no longer reload the app over and over when the account has the other language: the link's language wins and is saved on the account. In the demo the shared accounts keep no language, so each visitor gets the browser's language.
+
 ## v0.3.1
 
 - E-mail is off until a club sets it up, and new installations no longer get the Cloudflare Email Sending binding: it needs the Workers Paid plan. Use the club's SMTP server, or add `"send_email": [{ "name": "EMAIL" }]` to `wrangler.jsonc` on a paid plan (*docs/install.md*, E-mail). Existing installations keep their configuration.

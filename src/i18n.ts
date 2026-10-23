@@ -11,12 +11,22 @@ const catalogs: Record<Locale, () => Promise<{ messages: Record<string, unknown>
   de: () => import("../locales/de.po"),
 };
 
-/** A link with ?lang=de or ?lang=en (the demo links on the website) sets the language on this device. */
+/** The language of a ?lang= link opened in this visit: it is a choice like the one in the profile. */
+let linkLocale: Locale | null = null;
+
+/**
+ * A link with ?lang=de or ?lang=en (the demo links on the website and in the README) sets the language on this
+ * device. The parameter is removed from the address, so a reload does not apply it again.
+ */
 function fromLink(): Locale | null {
   try {
-    const v = new URLSearchParams(location.search).get("lang");
+    const url = new URL(location.href);
+    const v = url.searchParams.get("lang");
     if (!isLocale(v)) return null;
+    url.searchParams.delete("lang");
+    history.replaceState(history.state, "", url.pathname + url.search + url.hash);
     localStorage.setItem(STORAGE_KEY, v);
+    linkLocale = v;
     return v;
   } catch {
     return null;
@@ -60,8 +70,16 @@ export function switchLocale(locale: Locale): void {
   location.reload();
 }
 
-/** The account's language after login wins over the device, if it differs. */
-export function adoptAccountLocale(locale: Locale | null): void {
+/**
+ * The account's language after login wins over the device, if it differs. Not after a ?lang= link: that is the
+ * newer choice, so it goes to the account instead (saveChoice), and there is nothing to reload into. Before, the
+ * account's language reloaded the app, the link in the address set its own again, and so on without end.
+ */
+export function adoptAccountLocale(locale: Locale | null, saveChoice: (locale: Locale) => void): void {
+  if (linkLocale) {
+    if (locale !== linkLocale) saveChoice(linkLocale);
+    return;
+  }
   if (!locale || locale === stored()) return;
   try {
     localStorage.setItem(STORAGE_KEY, locale);

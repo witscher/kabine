@@ -1400,6 +1400,30 @@ test("Sprache: Spielerin stellt auf Englisch um und wieder zurück", async () =>
   await expect(page.getByRole("link", { name: "Profil" })).toBeVisible();
 });
 
+test("Sprache per Link (?lang=en): einmal laden, kein Hin und Her mit der Sprache des Kontos", async () => {
+  const { page } = player;
+  // The account says German (as the demo accounts do), the link says English
+  expect((await page.request.put("/api/me/locale", { data: { locale: "de" } })).ok()).toBe(true);
+  let loads = 0;
+  const count = (frame: import("@playwright/test").Frame) => {
+    if (frame === page.mainFrame()) loads++;
+  };
+  page.on("framenavigated", count);
+  await page.goto("/?lang=en");
+  await expect(page.getByRole("link", { name: "Profile", exact: true })).toBeVisible();
+  await page.waitForTimeout(3000);
+  page.off("framenavigated", count);
+  // The address no longer carries the parameter (pushState changes count too, so allow one replace)
+  expect(page.url()).not.toContain("lang=");
+  expect(loads).toBeLessThanOrEqual(2);
+  await expect(page.getByRole("link", { name: "Profile", exact: true })).toBeVisible();
+  // The link is the newer choice: it went to the account
+  expect((await (await page.request.get("/api/session")).json()).me.locale).toBe("en");
+  await page.goto("/profil");
+  await page.getByRole("combobox", { name: "Language" }).selectOption("de");
+  await expect(page.getByRole("link", { name: "Profil", exact: true })).toBeVisible();
+});
+
 test("Spielplan aus einer Tabelle: Vorschau und Anlegen", async () => {
   const { page } = coach;
   await page.goto("/team/1");
