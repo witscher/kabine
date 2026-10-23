@@ -16,3 +16,7 @@ Test deployments and the public demo use the maintainer's account with resource 
 | Public demo on handball.kabine.dev (environment `demo`) | `npm run deploy:demo`, reset now: `DEMO_RESET_TOKEN=… npm run demo:reset` |
 | Project website kabine.dev | `npm run site:deploy` (needs `site/legal.json`) |
 | Maintenance mode | `npm run maintenance:on` / `maintenance:off` / `maintenance:status` |
+
+## Releases
+
+Development happens only in this checkout. With every release (tag `vX.Y.Z` pushed to GitHub), deploy the demo from here in the same step, from the tagged commit: `npm run deploy:demo`, then reset it with the token from `.secrets.demo.json` (`DEMO_RESET_TOKEN=… npm run demo:reset`), and check https://handball.kabine.dev once. The workflow "Deploy demo" on GitHub has no Cloudflare secrets on purpose and deploys nothing, even when it shows green.
