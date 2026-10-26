@@ -15,6 +15,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: readonly ChangelogEntry[] = [
   {
+    version: "0.4.0",
+    date: "2026-10-26",
+    items: () => [
+      t`Children in the app: under Administration → Age groups you set per youth class what children may do themselves; coaches can restrict it further for their team.`,
+      t`Groups can include parents, for example a youth group across teams: switch it on in the group's settings.`,
+      t`Demo and language links (?lang=en) no longer reload the app over and over.`,
+    ],
+  },
+  {
     version: "0.3.1",
     date: "2026-10-22",
     items: () => [

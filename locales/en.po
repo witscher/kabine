@@ -1786,6 +1786,10 @@ msgstr "How does my child get their own access?"
 msgid "themselves"
 msgstr "themselves"
 
+#: shared/changelog.ts
+msgid "Demo and language links (?lang=en) no longer reload the app over and over."
+msgstr "Demo and language links (?lang=en) no longer reload the app over and over."
+
 #: src/pages/home.tsx
 msgid "Events of the {team}"
 msgstr "Events of the {team}"
@@ -6224,6 +6228,10 @@ msgstr "no duties"
 msgid "All upcoming special events and games are in your event overview."
 msgstr "All upcoming special events and games are in your event overview."
 
+#: shared/changelog.ts
+msgid "Groups can include parents, for example a youth group across teams: switch it on in the group's settings."
+msgstr "Groups can include parents, for example a youth group across teams: switch it on in the group's settings."
+
 #: src/faq.tsx
 msgid "In the training, tap <0>Cancel</0> or <1>Move</1>, everyone gets a message. For holidays, go to <2>Team → Training plans</2> and choose <3>Training break</3> or a separate <4>Holiday plan</4> for the holidays."
 msgstr "In the training, tap <0>Cancel</0> or <1>Move</1>, everyone gets a message. For holidays, go to <2>Team → Training plans</2> and choose <3>Training break</3> or a separate <4>Holiday plan</4> for the holidays."
@@ -10558,6 +10566,10 @@ msgstr "This person does not (or no longer) belong to this team."
 #: modules/sms/app/settings.tsx
 msgid "SMS go through seven.io (a German provider with servers in the EU). Create an account there, top up credit and copy the API key. Each message costs a few cents, paid by the club."
 msgstr "SMS go through seven.io (a German provider with servers in the EU). Create an account there, top up credit and copy the API key. Each message costs a few cents, paid by the club."
+
+#: shared/changelog.ts
+msgid "Children in the app: under Administration → Age groups you set per youth class what children may do themselves; coaches can restrict it further for their team."
+msgstr "Children in the app: under Administration → Age groups you set per youth class what children may do themselves; coaches can restrict it further for their team."
 
 #: src/pages/plans.tsx
 msgid "Weekday"

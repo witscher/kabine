@@ -1873,6 +1873,11 @@ msgstr "Wie bekommt mein Kind einen eigenen Zugang?"
 msgid "themselves"
 msgstr "selbst"
 
+# ai
+#: shared/changelog.ts
+msgid "Demo and language links (?lang=en) no longer reload the app over and over."
+msgstr "Demo- und Sprachlinks (?lang=en) laden die App nicht mehr endlos neu."
+
 #: src/pages/home.tsx
 msgid "Events of the {team}"
 msgstr "Termine der {team}"
@@ -6572,6 +6577,11 @@ msgstr "keine Dienste"
 msgid "All upcoming special events and games are in your event overview."
 msgstr "Alle kommenden Sondertermine und Spiele stehen in deiner Terminübersicht."
 
+# ai
+#: shared/changelog.ts
+msgid "Groups can include parents, for example a youth group across teams: switch it on in the group's settings."
+msgstr "Gruppen können Eltern einbinden, etwa eine Jugendgruppe über mehrere Mannschaften: einschalten in den Einstellungen der Gruppe."
+
 #: src/faq.tsx
 msgid "In the training, tap <0>Cancel</0> or <1>Move</1>, everyone gets a message. For holidays, go to <2>Team → Training plans</2> and choose <3>Training break</3> or a separate <4>Holiday plan</4> for the holidays."
 msgstr "Im Training auf <0>Absagen</0> oder <1>Verschieben</1> tippen, alle bekommen eine Nachricht. Für Ferien unter <2>Team → Trainingspläne</2> bei den Ferien <3>Trainingspause</3> oder einen eigenen <4>Ferienplan</4> wählen."
@@ -11134,6 +11144,11 @@ msgstr "Diese Person gehört nicht (mehr) zu dieser Mannschaft."
 #: modules/sms/app/settings.tsx
 msgid "SMS go through seven.io (a German provider with servers in the EU). Create an account there, top up credit and copy the API key. Each message costs a few cents, paid by the club."
 msgstr "SMS laufen über seven.io (ein deutscher Anbieter mit Servern in der EU). Lege dort ein Konto an, lade Guthaben auf und kopiere den API-Schlüssel. Jede Nachricht kostet ein paar Cent, die der Verein bezahlt."
+
+# ai
+#: shared/changelog.ts
+msgid "Children in the app: under Administration → Age groups you set per youth class what children may do themselves; coaches can restrict it further for their team."
+msgstr "Kinder in der App: Unter Verwaltung → Altersklassen legst du pro Jugendklasse fest, was Kinder selbst dürfen; Trainer können es für ihre Mannschaft weiter einschränken."
 
 #: src/pages/plans.tsx
 msgid "Weekday"
