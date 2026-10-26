@@ -16,7 +16,7 @@ Notes on changes in the club app that the maintainer does not want in Kabine yet
 
 ## Done
 
-- **2026-10-26 Groups can include parents.** "Include parents" switch in the group settings (admins, off by default, not for the youth referee group); parents see the group's special events for their children, respond and are in the chat; no parent links for groups. Kabine: (this commit).
+- **2026-10-26 Groups can include parents.** "Include parents" switch in the group settings (admins, off by default, not for the youth referee group); parents see the group's special events for their children, respond and are in the chat; no parent links for groups. Kabine: `69fcbf5`.
 - **2026-10-20 Only admins change their own name.** Ported as a fixed rule, not a club setting (the maintainer's decision: names are identity in a small, invitation-only club app with many children). Profile hint, coaches rename parents of their teams. Kabine: `4671b55`.
 - **2026-10-20 Player invitation link while signed in: no name choice, only "Straight to the app".** Server refuses with 409 `signed_in` (options, e-mail code, verify, late code redemption); invalid links show signed-in people the box. Kabine: `f7031db`.
 - **2026-10-20 Cancelled events read "Not taking place" and are struck through in the detail view.** Wording in app, push, calendar feed and conflict messages; struck-through hero. Kabine: `a70a3f2`.
