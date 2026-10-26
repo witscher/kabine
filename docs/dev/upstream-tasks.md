@@ -8,6 +8,8 @@ Format per entry: date, title, what changed and why, where in the code (file and
 
 ## Open
 
+- **2026-10-26 Groups can include parents.** A group (chat and special events only) used to have no parents. A youth group with children (e.g. goalkeeper training across teams) showed its events only to children with their own access. Now groups have the "Include parents" switch like teams (admins, default off). With it on, linked parents see the group's special events for their children, respond for them and are in the group chat; children with their own access then follow their parents' permissions, as in teams. No parent invitation links for groups: parents are linked through the child's team. Server: `PATCH /teams/:id` no longer rejects `parentsEnabled` for groups (`worker/routes/teams.ts`); visibility, chat access and chat push already follow `teams.parents_enabled`. App: switch in the group settings (`src/pages/group.tsx`), group explainer texts no longer say "no parents". Test in `test/groups.test.ts`. Kabine: texts through Lingui, decision entry replacing "groups have no parents".
+
 ## Parked
 
 Notes on changes in the club app that the maintainer does not want in Kabine yet. Do not port and do not add to the roadmap; the maintainer moves an entry to "Open" when it is wanted.
