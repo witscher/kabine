@@ -13,7 +13,7 @@ import { loadMailSettings } from "../domain/mail";
 import { all, first, run, stmt } from "../lib/db";
 import { parse, readJson } from "../lib/http";
 import { todayLocal } from "../lib/time";
-import { ageClassesFromProfile } from "./admin";
+import { ageClassesFromProfile, writeAgeClasses } from "./admin";
 
 export const setupRoutes = new Hono<AppEnv>();
 
@@ -79,24 +79,7 @@ setupRoutes.post("/admin/setup/sport", async (c) => {
   }
   const hasClasses = await first(db, "SELECT 1 AS ok FROM age_classes WHERE season_id = ?", season!.id);
   if (!hasClasses) {
-    await db.batch(
-      ageClassesFromProfile(sport as SportId, season!.starts_on, locale).map((a) =>
-        stmt(
-          db,
-          `INSERT INTO age_classes (season_id, code, name, rank, is_youth, birth_year_min, birth_year_max, game_minutes, youth_referee)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-          season!.id,
-          a.code,
-          a.name,
-          a.rank,
-          a.isYouth ? 1 : 0,
-          a.birthYearMin,
-          a.birthYearMax,
-          a.gameMinutes,
-          a.youthReferee ? 1 : 0,
-        ),
-      ),
-    );
+    await writeAgeClasses(db, season!.id, ageClassesFromProfile(sport as SportId, season!.starts_on, locale));
   }
   const dutiesUsed = await first(db, "SELECT 1 AS used FROM event_duties LIMIT 1");
   if (!dutiesUsed) await applyDutyProfile(db, sport as SportId, locale);

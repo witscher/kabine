@@ -46,6 +46,10 @@ Whether parents are involved is a switch per team ("Include parents"). New youth
 
 For an event, the teams that count are those of the event in which the child is a member. If the child stands in for another team, its own teams count. Where there is no team (permissions, notification settings), one team with parents is enough.
 
+## Children in the app
+
+What players of a youth age class may do themselves has three levels, and each can only restrict further: the age class (admins, *Administration → Age groups*: own access, respond, chat none/read/write, answer stand-in requests), the team (coaches, *Team → Settings*, e.g. a chat with parents only; a value looser than the age class is refused) and the parents' permissions per child within both. Adult classes and groups are never limited; coaches and admins neither. Without an own access a child can do nothing themselves either (no player link, older player links stop working, no personal link unless an admin makes one); the parents respond and are in the chat, chat push and badge skip the child. A child with an access through another team sees this team's events but cannot respond or chat there. For an event the teams of the event in which the player plays count, otherwise the event's teams; one that allows is enough. The team level is only offered with parents in the team; an admin who saves a class without own access gets a hint for teams without parents. The defaults come from the sport profile (youngest classes without own access); existing clubs kept everything allowed. `worker/domain/child-limits.ts`, `childLimitAllows` in `worker/auth/actor.ts`.
+
 Switching parents off withdraws open parent links and disconnects parents who are in the chat at that moment. The links between parents and children stay and apply again when the team is switched back; old invitation links do not come back to life.
 
 ## App updates

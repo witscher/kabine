@@ -18,5 +18,6 @@ Threat model: a club installation has a few hundred people. Most damage would co
 | 10 | Invitation links show short names ("Lina B.", with the birth year only to tell equal names apart). | `worker/routes/join.ts` | 10 |
 | 11 | People outside the coaching staff see other people's children as short names (helper plan). | `modules/duties/worker/routes.ts` | 11 |
 | 12 | A push subscription moves to another account only with the same keys, i.e. from the same browser. | `worker/routes/push.ts` | 12 |
+| 13 | A child never acts beyond the limits of age class and team (respond, chat, stand-in requests, player and personal links); a team can only restrict further than its age class. | `worker/auth/actor.ts` (`childLimitAllows`), `worker/domain/child-limits.ts` | `test/child-access.test.ts` |
 
 General rules, also checked by the existing tests: permissions on the server only; names and decline reasons leave the API only to coaches and admins; the owner's access cannot be taken by other admins (`test/owner-protection.test.ts`); unsafe requests need the app's origin (CSRF).

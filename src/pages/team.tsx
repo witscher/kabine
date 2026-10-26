@@ -4,7 +4,8 @@ import { clubName, useModule } from "../club";
 import { useLocation } from "preact-iso";
 import { useEffect, useState } from "preact/hooks";
 import { renderSVG } from "uqr";
-import type { PersonRef } from "../../shared/types";
+import type { ChildLimits, PersonRef } from "../../shared/types";
+import { ChildLimitControls } from "../child-limits";
 import { api, errorMessage } from "../api";
 import type { DutyTypeInfo, TemplateInfo } from "../duty-blocks";
 import { CandidateList, type CandidateTeam, candidateTeams } from "../candidates";
@@ -74,6 +75,12 @@ export interface TeamDetail {
   }[];
   helpers: { person: PersonRef; homeTeam: string | null; trainings: boolean; isActive: boolean; isCore: boolean; unexcused: number }[];
   invites: { player: InviteView | null; parent: InviteView | null };
+  /** Children in the app: what players of this team may do themselves (age class and team together). */
+  childLimits: ChildLimits;
+  /** The age class's limit; null for adult classes and groups, which are never limited. */
+  ageClassChildLimits: ChildLimits | null;
+  /** The team's own restriction: only the fields it sets. */
+  teamChildLimits: Partial<ChildLimits>;
   duplicateNames: string[];
   missingLastNames: number;
   missingBirthYears: number;
@@ -904,7 +911,13 @@ function InvitesTab({ team, onChanged }: { team: TeamDetail; onChanged: () => vo
         </Notice>
       ) : null}
       <ReachOverview team={team} />
-      <InviteCard team={team} kind="player" invite={team.invites.player} onChanged={onChanged} />
+      {team.childLimits.account ? (
+        <InviteCard team={team} kind="player" invite={team.invites.player} onChanged={onChanged} />
+      ) : (
+        <Notice>
+          <Trans>Children in {teamName} have no own access, so there is no player link. The parents use the parent link, respond for their child and are in the chat.</Trans>
+        </Notice>
+      )}
       {team.parentsEnabled ? (
         <InviteCard team={team} kind="parent" invite={team.invites.parent} onChanged={onChanged} />
       ) : (
@@ -959,6 +972,61 @@ function ReachOverview({ team }: { team: TeamDetail }) {
           Without notifications people only see changes when they open the app. The guide under help shows how to switch them on. Parents count for their child.
         </Trans>
       </p>
+    </section>
+  );
+}
+
+/** Children in the app: the team restricts what its players may do beyond the age class. */
+function ChildLimitsSection({ team, classLimits, onChanged }: { team: TeamDetail; classLimits: ChildLimits; onChanged: () => void }) {
+  const ageClass = team.ageClassName;
+  const own = Object.keys(team.teamChildLimits).length > 0;
+  return (
+    <section class="card card-body stack-sm" aria-label={t`Children in the app`}>
+      <h2 class="section-title" style={{ margin: 0 }}>
+        <Trans>Children in the app</Trans>
+      </h2>
+      <p class="muted small">
+        <Trans>
+          What the players of this team may do themselves. The club sets the limit for the age group {ageClass}; here you can only restrict further, e.g. the chat
+          only for parents. Within this, the parents decide for their child.
+        </Trans>
+      </p>
+      {team.parentsEnabled ? (
+        <ChildLimitControls
+          name={team.name}
+          value={team.childLimits}
+          max={classLimits}
+          onChange={async (l) => {
+            try {
+              await api.patch(`/teams/${team.id}`, {
+                childLimits: { account: l.account ? null : false, respond: l.respond ? null : false, chat: l.chat === "write" ? null : l.chat, help: l.help ? null : false },
+              });
+              invalidate("/events", "/chat");
+              toast(t`Saved.`);
+              onChanged();
+            } catch (err) {
+              toast(errorMessage(err), "error");
+            }
+          }}
+        />
+      ) : (
+        <Notice>
+          <Trans>Parents are not included in this team, so the players always take care of everything themselves.</Trans>
+        </Notice>
+      )}
+      {own ? (
+        <Button
+          variant="ghost"
+          onClick={async () => {
+            await api.patch(`/teams/${team.id}`, { childLimits: null });
+            invalidate("/events", "/chat");
+            toast(t`As set for the age group again.`);
+            onChanged();
+          }}
+        >
+          <Trans>As set for the age group</Trans>
+        </Button>
+      ) : null}
     </section>
   );
 }
@@ -1034,6 +1102,8 @@ function SettingsTab({ team, onChanged }: { team: TeamDetail; onChanged: () => v
           }}
         />
       </section>
+
+      {team.ageClassChildLimits ? <ChildLimitsSection team={team} classLimits={team.ageClassChildLimits} onChanged={onChanged} /> : null}
 
       {dutiesOn ? (
       <section class="card card-body" aria-label={t`Helper plan`}>
@@ -1227,9 +1297,15 @@ export function PersonPage({ id, personId }: { id: string; personId: string }) {
                 <Trans>The link signs out the previous devices, for example after losing a device.</Trans>
               </p>
             ) : null}
-            <Button icon="link" onClick={() => createLink(person.id, person.firstName)}>
-              {player.hasAccount ? t`Link for new passkey` : t`Personal invitation link`}
-            </Button>
+            {!team.childLimits.account && !player.hasAccount ? (
+              <p class="small muted">
+                <Trans>Children in this team have no own access. The parents use the app for {firstName}.</Trans>
+              </p>
+            ) : (
+              <Button icon="link" onClick={() => createLink(person.id, person.firstName)}>
+                {player.hasAccount ? t`Link for new passkey` : t`Personal invitation link`}
+              </Button>
+            )}
             {player.hasAccount ? (
               <Button
                 variant="danger"

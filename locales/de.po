@@ -313,6 +313,11 @@ msgstr "Eigener Server"
 msgid "Decline this event"
 msgstr "Diesen Termin absagen"
 
+# ai
+#: src/child-limits.tsx
+msgid "you take care of {list} there"
+msgstr "dort übernimmst du {list}"
+
 #: src/pages/team.tsx
 #: src/pages/team.tsx
 msgid "Remove from the team"
@@ -650,6 +655,11 @@ msgstr "Eingefügte Tabelle hinzufügen"
 msgid "React to announcement from {author}"
 msgstr "Auf Ankündigung von {author} reagieren"
 
+# ai
+#: src/pages/admin.tsx
+msgid "No own access for children, but parents are not involved in: {teams}. Only coaches can respond there."
+msgstr "Kein eigener Zugang für Kinder, aber keine Eltern eingebunden in: {teams}. Dort können nur Trainer zu- und absagen."
+
 #: src/pages/plans.tsx
 msgid "From the plan “{planName}” of the {ownerTeam}."
 msgstr "Aus dem Plan „{planName}“ der {ownerTeam}."
@@ -771,6 +781,11 @@ msgstr "Als App installieren"
 #: modules/carpools/app/card.tsx
 msgid "Getting a ride"
 msgstr "Mitfahrgelegenheit"
+
+# ai
+#: src/child-limits.tsx
+msgid "No"
+msgstr "Nein"
 
 #: src/pages/event.tsx
 #: src/pages/squad.tsx
@@ -1042,6 +1057,11 @@ msgstr "zuletzt {lastUsed}"
 #: src/calendar.tsx
 msgid "Subscribe in calendar"
 msgstr "Im Kalender abonnieren"
+
+# ai
+#: src/pages/profile.tsx
+msgid "The club and the coaches set this per age group and team; the permissions below apply in addition."
+msgstr "Das legen Verein und Trainer pro Altersklasse und Mannschaft fest; die Freigaben unten gelten zusätzlich."
 
 # ai
 #: src/list-import.tsx
@@ -1700,6 +1720,11 @@ msgstr "In den Mannschaften deiner Kinder sind keine Eltern eingebunden. Deine K
 #: src/pages/admin.tsx
 msgid "{parentNames} (parent without another child)"
 msgstr "{parentNames} (Elternteil ohne weiteres Kind)"
+
+# ai
+#: worker/domain/child-limits.ts
+msgid "Children in this team have no own access. Please use the parent link."
+msgstr "In dieser Mannschaft haben Kinder keinen eigenen Zugang. Bitte den Elternlink verwenden."
 
 #: worker/domain/calendar.ts
 msgctxt "calendar"
@@ -2476,6 +2501,7 @@ msgid "Helper plan: {link}"
 msgstr "Helferplan: {link}"
 
 #: src/app.tsx
+#: src/child-limits.tsx
 #: src/pages/chat.tsx
 #: src/pages/chat.tsx
 #: src/pages/chat.tsx
@@ -2644,6 +2670,11 @@ msgstr "<0>Treffpunkt:</0> {point}"
 msgid "Add another passkey"
 msgstr "Weiteren Passkey hinzufügen"
 
+# ai
+#: worker/routes/chat.ts
+msgid "You can read along. In this team the parents write."
+msgstr "Du kannst mitlesen. Schreiben übernehmen in dieser Mannschaft die Eltern."
+
 #: src/pages/season.tsx
 msgid "{reassigned} players will be reassigned, {deleted} persons deleted. Events, plans, responses and chats will be reset, the holidays remain unchanged."
 msgstr "{reassigned} Spieler werden neu zugeordnet, {deleted} Personen gelöscht. Termine, Pläne, Rückmeldungen und Chats werden zurückgesetzt, die Ferien bleiben unverändert."
@@ -2725,6 +2756,11 @@ msgstr "in {diff} Tagen"
 #: src/pages/event.tsx
 msgid "Permanently absent: {weekdays}"
 msgstr "Dauerhaft abwesend: {weekdays}"
+
+# ai
+#: src/child-limits.tsx
+msgid "writing in the chat"
+msgstr "das Schreiben im Chat"
 
 #: src/pages/team.tsx
 #: src/pages/team.tsx
@@ -3415,6 +3451,11 @@ msgstr "{actorName} hat für {name} das Training am {when} abgesagt."
 msgid "Last day"
 msgstr "Letzter Tag"
 
+# ai
+#: src/child-limits.tsx
+msgid "Own access"
+msgstr "Eigener Zugang"
+
 #: src/pages/group.tsx
 msgid "Create special events, send reminders and moderate the chat (including @alle)."
 msgstr "Legen Sondertermine an, erinnern und moderieren den Chat (auch @alle)."
@@ -3479,6 +3520,11 @@ msgstr "Neuer Ferienzeitraum"
 #: src/pages/season.tsx
 msgid "Remove additional team"
 msgstr "Weitere Mannschaft entfernen"
+
+# ai
+#: src/child-limits.tsx
+msgid "Read"
+msgstr "Lesen"
 
 #: modules/duties/app/helpers.tsx
 msgid "Time slot {label} added."
@@ -4159,6 +4205,11 @@ msgstr "Heute"
 msgid "Test message sent."
 msgstr "Test-SMS verschickt."
 
+# ai
+#: src/child-limits.tsx
+msgid "the chat"
+msgstr "den Chat"
+
 #: modules/duties/app/helpers.tsx
 #: modules/duties/app/helpers.tsx
 #: modules/duties/app/helpers.tsx
@@ -4201,10 +4252,20 @@ msgstr "Mannschaft angelegt"
 msgid "{name} has been deleted."
 msgstr "{name} wurde gelöscht."
 
+# ai
+#: worker/routes/chat.ts
+msgid "Only the parents are in the chat of this team."
+msgstr "In dieser Mannschaft sind im Chat nur die Eltern dabei."
+
 #: modules/duties/app/helpers.tsx
 #: modules/duties/app/helpers.tsx
 msgid "Entries"
 msgstr "Einträge"
+
+# ai
+#: worker/routes/teams.ts
+msgid "Adult teams and groups have no limits for children."
+msgstr "Erwachsenenmannschaften und Gruppen haben keine Grenzen für Kinder."
 
 # ai
 #: src/pages/updates.tsx
@@ -4278,6 +4339,11 @@ msgstr "Updates mit Datenbankänderungen pausieren die App etwa eine Minute und 
 #: modules/duties/worker/notify.ts
 msgid "{club} helper plan"
 msgstr "{club} Helferplan"
+
+# ai
+#: src/child-limits.tsx
+msgid "Own access {name}"
+msgstr "Eigener Zugang {name}"
 
 #: src/faq.tsx
 msgid "In the <0>Helpers</0> tab, tap <1>Sign up</1> on the duty. Every duty has a time; tasks like washing jerseys you do before or after the event. Duties that need prior knowledge, such as timekeeper and secretary, are only offered to you if you switch them on under <2>Profile → I can do this</2>. You can subscribe to your duties in your calendar under <3>Profile → My events</3>."
@@ -4410,6 +4476,11 @@ msgstr "{name} hat für {what} am {when} zugesagt."
 msgid "{venue, select, hall {No hall given} pitch {No pitch given} other {No venue given}}"
 msgstr "{venue, select, hall {Keine Angabe} pitch {Keine Angabe} other {Keine Angabe}}"
 
+# ai
+#: src/child-limits.tsx
+msgid "Read and write"
+msgstr "Lesen und schreiben"
+
 #: src/pages/help.tsx
 msgid "Contact for the app: {contact}"
 msgstr "Ansprechpartner für die App: {contact}"
@@ -4449,6 +4520,11 @@ msgstr "{count, plural, one {# Liste hinzugefügt: Spalten prüfen} other {# Lis
 #: src/pages/squad.tsx
 msgid "Save changes · {count}"
 msgstr "Änderungen speichern · {count}"
+
+# ai
+#: src/pages/team.tsx
+msgid "Children in {teamName} have no own access, so there is no player link. The parents use the parent link, respond for their child and are in the chat."
+msgstr "Kinder in {teamName} haben keinen eigenen Zugang, deshalb gibt es keinen Spielerlink. Die Eltern nutzen den Elternlink, sagen für ihr Kind zu und ab und sind im Chat dabei."
 
 # ai
 #: src/pages/event.tsx
@@ -4530,6 +4606,11 @@ msgstr "Aushilfe"
 #: src/pages/mail-settings.tsx
 msgid "Without e-mail there is no sign-in by code and no e-mail reminders. Passkeys and personal links still work."
 msgstr "Ohne E-Mail gibt es keine Anmeldung per Code und keine Erinnerungen per Mail. Passkeys und persönliche Links funktionieren weiter."
+
+# ai
+#: src/pages/team.tsx
+msgid "What the players of this team may do themselves. The club sets the limit for the age group {ageClass}; here you can only restrict further, e.g. the chat only for parents. Within this, the parents decide for their child."
+msgstr "Was die Spieler dieser Mannschaft selbst dürfen. Die Grenze für die Altersklasse {ageClass} legt der Verein fest; hier kannst du nur weiter einschränken, z. B. den Chat nur für Eltern. Innerhalb davon entscheiden die Eltern für ihr Kind."
 
 #: src/pages/profile.tsx
 #: src/pages/team.tsx
@@ -5067,6 +5148,11 @@ msgstr "Warum erscheint mein Profilbild nicht sofort?"
 msgid "Left out"
 msgstr "Weggelassen"
 
+# ai
+#: src/pages/admin.tsx
+msgid "New class"
+msgstr "Neue Klasse"
+
 #: src/pages/season.tsx
 msgid "previously {teams}"
 msgstr "bisher {teams}"
@@ -5155,6 +5241,11 @@ msgstr "Noch nicht bestätigt."
 msgid "Checking invitation"
 msgstr "Einladung wird geprüft"
 
+# ai
+#: src/child-limits.tsx
+msgid "{firstName} has no own access there; you respond and are in the chat"
+msgstr "{firstName} hat dort keinen eigenen Zugang; du sagst zu und ab und bist im Chat dabei"
+
 #: src/pages/club-settings.tsx
 msgid "For example “SV Musterstadt 1900 Handball”"
 msgstr "Zum Beispiel „SV Musterstadt 1900 Handball“"
@@ -5231,6 +5322,11 @@ msgstr "Geändert: {label}"
 #: src/pages/plans.tsx
 msgid "Create training plan"
 msgstr "Trainingsplan anlegen"
+
+# ai
+#: worker/routes/teams.ts
+msgid "The age class already allows less. A team can only restrict further."
+msgstr "Die Altersklasse erlaubt schon weniger. Eine Mannschaft kann nur weiter einschränken."
 
 # ai
 #: src/list-import.tsx
@@ -5537,6 +5633,11 @@ msgstr "Termin verschieben"
 #: src/pages/setup-wizard.tsx
 msgid "Has access."
 msgstr "Hat einen Zugang."
+
+# ai
+#: src/pages/team.tsx
+msgid "As set for the age group again."
+msgstr "Wieder wie für die Altersklasse eingestellt."
 
 #: worker/routes/admin.ts
 msgid "{name}: The oldest birth year must come before the youngest."
@@ -6345,6 +6446,11 @@ msgstr "Spielerliste"
 msgid "Go to notifications"
 msgstr "Zu den Benachrichtigungen"
 
+# ai
+#: src/child-limits.tsx
+msgid "stand-in requests"
+msgstr "Aushilfe-Anfragen"
+
 #: src/app.tsx
 #: src/list-import.tsx
 #: src/pages/plans.tsx
@@ -7062,6 +7168,7 @@ msgstr "Wechseln"
 msgid "This duty does not exist for this event."
 msgstr "Für diesen Termin gibt es diesen Dienst nicht."
 
+#: src/child-limits.tsx
 #: src/pages/squad.tsx
 msgid "Stand-in requests"
 msgstr "Aushilfe-Anfragen"
@@ -7241,6 +7348,7 @@ msgstr "Die Helfer der Mannschaft sehen, wer welchen Dienst übernimmt, als „V
 #: src/pages/group.tsx
 #: src/pages/profile.tsx
 #: src/pages/season.tsx
+#: src/pages/team.tsx
 #: src/pages/team.tsx
 #: src/pages/team.tsx
 #: src/pages/team.tsx
@@ -7531,6 +7639,11 @@ msgstr "Optional mitmachen können nur Mannschaften dieser Trainingszeit."
 #: src/pages/profile.tsx
 msgid "For {firstName}"
 msgstr "Für {firstName}"
+
+# ai
+#: worker/routes/persons.ts
+msgid "Children in this team have no own access. The parents use the app for their child."
+msgstr "In dieser Mannschaft haben Kinder keinen eigenen Zugang. Die Eltern nutzen die App für ihr Kind."
 
 #: src/pages/season.tsx
 msgid "New season"
@@ -8054,9 +8167,19 @@ msgid "My duties"
 msgstr "Meine Dienste"
 
 # ai
+#: src/pages/admin.tsx
+msgid "Respond: accept and decline themselves. Stand-in requests: answer requests of other teams themselves."
+msgstr "Zu-/Absagen: selbst antworten. Aushilfe-Anfragen: Anfragen anderer Mannschaften selbst beantworten."
+
+# ai
 #: src/pages/event.tsx
 msgid "Change note"
 msgstr "Notiz ändern"
+
+# ai
+#: src/child-limits.tsx
+msgid "responses"
+msgstr "Zu- und Absagen"
 
 #: modules/carpools/worker/routes.ts
 msgid "{driver} is not driving: {game}. The search for a lift for {rider} continues."
@@ -8158,6 +8281,11 @@ msgstr "Push funktioniert. So erfährst du von neuen Terminen und Absagen."
 #: src/pages/team.tsx
 msgid "An admin assigns coaches."
 msgstr "Trainer ordnet ein Admin zu."
+
+# ai
+#: src/pages/team.tsx
+msgid "Children in this team have no own access. The parents use the app for {firstName}."
+msgstr "In dieser Mannschaft haben Kinder keinen eigenen Zugang. Die Eltern nutzen die App für {firstName}."
 
 #: worker/chat/room.ts
 msgid "Chat {teamName}"
@@ -8310,6 +8438,11 @@ msgstr "Diese Vorlage ist leer oder gibt es nicht."
 #: src/pages/team.tsx
 msgid "Responses are now visible to coaches only."
 msgstr "Zu- und Absagen sehen jetzt nur die Trainer."
+
+# ai
+#: src/child-limits.tsx
+msgid "Answer stand-in requests {name}"
+msgstr "Aushilfe-Anfragen beantworten {name}"
 
 # ai
 #: src/pages/setup-wizard.tsx
@@ -8611,6 +8744,11 @@ msgstr "Logo hochladen"
 #: modules/youth-referees/app/referees.tsx
 msgid "already activated"
 msgstr "schon freigeschaltet"
+
+# ai
+#: src/child-limits.tsx
+msgid "Respond themselves {name}"
+msgstr "Selbst zu- und absagen {name}"
 
 #: worker/cron.ts
 msgid "You are in the squad"
@@ -9557,6 +9695,11 @@ msgid "Location created."
 msgstr "Ort angelegt."
 
 # ai
+#: worker/domain/child-limits.ts
+msgid "Your parents take care of this in this team."
+msgstr "In dieser Mannschaft übernehmen das deine Eltern."
+
+# ai
 #: shared/changelog.ts
 msgid "Only admins change their own name; everyone else asks their coach or an admin."
 msgstr "Nur Admins ändern ihren eigenen Namen; alle anderen fragen ihren Trainer oder einen Admin."
@@ -9990,6 +10133,14 @@ msgstr "Spielplan von handball4all"
 msgid "Please choose at least one team."
 msgstr "Bitte wähle mindestens eine Mannschaft."
 
+# ai
+#: src/pages/admin.tsx
+#: src/pages/admin.tsx
+#: src/pages/team.tsx
+#: src/pages/team.tsx
+msgid "Children in the app"
+msgstr "Kinder in der App"
+
 #: src/respond.tsx
 msgid "Please give a short reason."
 msgstr "Bitte gib kurz einen Grund an."
@@ -10136,6 +10287,11 @@ msgstr "Erwarte JSON."
 #: worker/routes/events.ts
 msgid "This event does not exist or you cannot see it."
 msgstr "Diesen Termin gibt es nicht oder du kannst ihn nicht sehen."
+
+# ai
+#: src/child-limits.tsx
+msgid "Chat {name}"
+msgstr "Chat {name}"
 
 #: src/respond.tsx
 msgid "Help request from {team}: accepted"
@@ -10923,6 +11079,11 @@ msgstr "Diese Saison gibt es nicht."
 msgid "Profile picture, permissions and notifications"
 msgstr "Profilbild, Freigaben und Benachrichtigungen"
 
+# ai
+#: worker/routes/teams.ts
+msgid "Parents are not involved in this team, so nobody could respond for the children."
+msgstr "In dieser Mannschaft sind keine Eltern eingebunden, dann könnte niemand für die Kinder antworten."
+
 #: src/pages/team.tsx
 #: src/pages/team.tsx
 msgid "Decline deadlines"
@@ -11227,6 +11388,11 @@ msgstr "Ungültige Herkunft der Anfrage."
 #: src/list-import.tsx
 msgid "Last name of {name}"
 msgstr "Nachname von {name}"
+
+# ai
+#: src/pages/team.tsx
+msgid "As set for the age group"
+msgstr "Wie für die Altersklasse"
 
 #: worker/routes/squad.ts
 msgid "The help request from {teamName} for {date} has been withdrawn."
@@ -11607,6 +11773,11 @@ msgstr "{foreign} Spiele gehören schon einer anderen Mannschaft und wurden übe
 msgid "This link has been withdrawn. Please ask for a new link."
 msgstr "Dieser Link wurde zurückgezogen. Bitte frag nach einem neuen Link."
 
+# ai
+#: src/pages/team.tsx
+msgid "Parents are not included in this team, so the players always take care of everything themselves."
+msgstr "In dieser Mannschaft sind keine Eltern eingebunden, die Spieler kümmern sich also immer selbst um alles."
+
 #: src/pages/chat.tsx
 msgid "Waving"
 msgstr "Winken"
@@ -11678,6 +11849,11 @@ msgstr "{n, plural, one {Helfer benötigt · # Platz frei} other {Helfer benöti
 msgid "My children"
 msgstr "Meine Kinder"
 
+# ai
+#: src/pages/admin.tsx
+msgid "What players of a youth class may do themselves. Without an own access there is no player link; the parents respond and are in the chat. Coaches can restrict this further for their team, and the parents' permissions apply within it. Adult classes are never limited."
+msgstr "Was Spieler einer Jugendklasse selbst dürfen. Ohne eigenen Zugang gibt es keinen Spielerlink; die Eltern sagen zu und ab und sind im Chat dabei. Trainer können das für ihre Mannschaft weiter einschränken, die Freigaben der Eltern gelten innerhalb davon. Erwachsenenklassen sind nie begrenzt."
+
 #: worker/cron.ts
 msgid "Game on {date}, {time}: please enter meeting point and time."
 msgstr "Spiel am {date}, {time} Uhr: Bitte Treffpunkt und Uhrzeit eintragen."
@@ -11704,6 +11880,11 @@ msgstr "Unentschuldigt gefehlt"
 #: worker/routes/manual-games.ts
 msgid "Invalid date."
 msgstr "Ungültiges Datum."
+
+# ai
+#: worker/chat/room.ts
+msgid "Your rights in this chat have changed."
+msgstr "Deine Rechte in diesem Chat haben sich geändert."
 
 #: src/pages/club-settings.tsx
 msgid "Link to privacy policy and legal notice"
@@ -11782,6 +11963,11 @@ msgstr "So geht's: Link öffnen, euren eigenen Namen eingeben, euer Kind auswäh
 #: src/list-import.tsx
 msgid "{name}: please save it as .xlsx or .csv first (.xls and .ods files cannot be read)."
 msgstr "{name}: bitte zuerst als .xlsx oder .csv speichern (.xls- und .ods-Dateien können nicht gelesen werden)."
+
+# ai
+#: src/child-limits.tsx
+msgid "Respond"
+msgstr "Zu-/Absagen"
 
 # ai
 #: worker/chat/room.ts

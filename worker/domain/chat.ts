@@ -62,6 +62,11 @@ export async function closeParentConnections(env: Env, teamId: number): Promise<
   await callRoom(env, teamId, "/parents-off", {});
 }
 
+/** Disconnects these players from a team chat, so they reconnect with the limits of age class and team. */
+export async function closeChildConnections(env: Env, teamId: number, personIds: number[]): Promise<void> {
+  if (personIds.length) await callRoom(env, teamId, "/children-off", { personIds });
+}
+
 export async function clearChats(env: Env, teamIds: number[]): Promise<void> {
   await Promise.all(teamIds.map((teamId) => callRoom(env, teamId, "/clear", {})));
 }

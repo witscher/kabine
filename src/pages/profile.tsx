@@ -4,7 +4,8 @@ import { clubName, useModule } from "../club";
 import { MyCalendar } from "../calendar";
 import { useEffect, useState } from "preact/hooks";
 import { useLocation } from "preact-iso";
-import type { ChildPermission, ChildPermissions, NotificationTopic, PersonRef } from "../../shared/types";
+import type { ChildLimits, ChildPermission, ChildPermissions, NotificationTopic, PersonRef } from "../../shared/types";
+import { describeLimits } from "../child-limits";
 import { childPermissionLabels, notificationTopicLabels } from "../../shared/types";
 import { api, ApiError, errorMessage } from "../api";
 import { personName, stamp, joinNames } from "../format";
@@ -383,6 +384,9 @@ interface PermissionsResponse {
   parentsInCharge: boolean;
   labels: Record<ChildPermission, string>;
   childHasAccount: boolean;
+  /** At least one team of the child allows an own access (children in the app). */
+  childAccountAllowed: boolean;
+  limitedTeams: { name: string; limits: ChildLimits }[];
   guardians: { firstName: string; lastName: string | null; hasAccount: boolean }[];
   log: { permission: ChildPermission; value: boolean; at: string; byName: string }[];
 }
@@ -479,14 +483,25 @@ export function ChildPage({ id }: { id: string }) {
             </Trans>
           </Notice>
         ) : null}
-        {data?.parentsInCharge ? (
+        {data?.parentsInCharge && data.limitedTeams.length ? (
+          <Notice>
+            {data.limitedTeams.map((team, i) => (
+              <span>
+                {i ? " " : ""}
+                <strong>{team.name}:</strong> {describeLimits(team.limits, firstName)}.
+              </span>
+            ))}{" "}
+            <Trans>The club and the coaches set this per age group and team; the permissions below apply in addition.</Trans>
+          </Notice>
+        ) : null}
+        {data?.parentsInCharge && !data.childAccountAllowed && !data.childHasAccount ? null : data?.parentsInCharge ? (
           <>
             <Notice>
               {data.childHasAccount
                 ? t`${firstName} has their own access. Here you decide what ${firstName} may do on their own. You can always accept and decline for ${firstName}.`
                 : t`${firstName} has no access of their own yet. The permissions apply as soon as ${firstName} gets one.`}
             </Notice>
-            <ChildAccessCard child={child} hasAccount={data.childHasAccount} />
+            {data.childAccountAllowed ? <ChildAccessCard child={child} hasAccount={data.childHasAccount} /> : null}
             <ul class="list" aria-label={t`Permissions`}>
               {(Object.keys(permissionLabels) as ChildPermission[]).map((perm) => (
                 <li>

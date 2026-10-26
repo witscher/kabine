@@ -123,6 +123,7 @@ describe("Region und Sportart", () => {
       birthYearMax: 2015,
       gameMinutes: 90,
       youthReferee: true,
+      childLimits: { account: true, respond: true, chat: "write", help: true },
     });
     expect((await api("/age-classes", { method: "PUT", cookie: adminCookie, body: { ageClasses: res.body.ageClasses } })).status).toBe(200);
   });

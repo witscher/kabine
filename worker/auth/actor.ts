@@ -1,5 +1,6 @@
 import { t } from "@lingui/core/macro";
-import type { ChildPermission, ChildPermissions, PersonRef, Role } from "../../shared/types";
+import type { ChildLimits, ChildPermission, ChildPermissions, PersonRef, Role } from "../../shared/types";
+import { CHILD_LIMITED, LIMITED_TEAMS_SQL, type LimitRow, toLimits } from "../domain/child-limits";
 import { forbidden } from "../lib/http";
 import { utcIso } from "../lib/time";
 import type { SessionRow } from "./session";
@@ -29,6 +30,8 @@ export interface Actor {
   memberships: Membership[];
   /** Teams of the linked children. */
   childMemberships: Map<number, Membership[]>;
+  /** Teams whose age class or team settings limit children (worker/domain/child-limits.ts); missing teams allow everything. */
+  teamLimits: Map<number, ChildLimits>;
   coachTeamIds: number[];
   /** Admins only: view the app from another perspective (see worker/auth/view-as.ts). */
   viewAs?: ViewMode;
@@ -86,7 +89,7 @@ export async function loadActor(db: D1Database, session: SessionRow): Promise<Ac
 
 /** Actor for a person; the admin views use this with another person. */
 export async function buildActor(db: D1Database, session: SessionRow, row: ActorRow): Promise<Actor> {
-  const [children, perms, memberships] = await db.batch([
+  const [children, perms, memberships, limits] = await db.batch([
     db
       .prepare(
         `SELECT p.id, p.first_name, p.last_name FROM guardianships g JOIN persons p ON p.id = g.child_id
@@ -109,6 +112,7 @@ export async function buildActor(db: D1Database, session: SessionRow, row: Actor
                                   WHERE g.guardian_id = ?1 AND p.is_former = 0)`,
       )
       .bind(row.person_id),
+    db.prepare(LIMITED_TEAMS_SQL),
   ]);
 
   const p = (perms!.results[0] as PermRow | undefined) ?? null;
@@ -147,6 +151,7 @@ export async function buildActor(db: D1Database, session: SessionRow, row: Actor
     permissions,
     memberships: ms,
     childMemberships,
+    teamLimits: new Map((limits!.results as (LimitRow & { team_id: number })[]).map((r) => [r.team_id, toLimits(r)])),
     coachTeamIds: ms.filter((m) => m.role === "coach").map((m) => m.teamId),
   };
 }
@@ -219,6 +224,21 @@ export const PARENTS_HANDLE_IT = () => t`Your parents take care of this.`;
 
 export const PARENTS_NOT_INVOLVED = () => t`Parents are not involved in this team.`;
 
+/**
+ * Do the limits of age class and team allow this when a player acts for themselves? The context teams the
+ * person plays in count; if they play in none (stand-in), the context teams themselves. One that allows is
+ * enough. Coaches of these teams and admins are not limited.
+ */
+export function childLimitAllows(actor: Actor, kind: "respond" | "help", teamIds?: readonly number[]): boolean {
+  if (!teamIds?.length || !actor.teamLimits.size || actor.isAdmin) return true;
+  if (teamIds.some((t) => actor.coachTeamIds.includes(t))) return true;
+  const own = actor.memberships.filter((m) => m.role !== "coach" && teamIds.includes(m.teamId)).map((m) => m.teamId);
+  return (own.length ? own : teamIds).some((t) => actor.teamLimits.get(t)?.[kind] ?? true);
+}
+
+const limitKind = (permission?: ChildPermission): "respond" | "help" | null =>
+  permission === "may_accept" || permission === "may_decline" ? "respond" : permission === "may_answer_help" ? "help" : null;
+
 /** Do the parents' permissions currently apply to the own person? */
 function restrictedBy(actor: Actor, permission: ChildPermission | undefined, teamIds?: readonly number[]): boolean {
   return !!permission && actor.hasGuardians && !actor.permissions[permission] && parentsInCharge(actor, actor.personId, teamIds);
@@ -226,12 +246,15 @@ function restrictedBy(actor: Actor, permission: ChildPermission | undefined, tea
 
 /**
  * May the account act for this person? Parents only in teams where parents
- * are involved. When a child acts for themselves, the parents' permissions
- * apply there as well.
+ * are involved. When a child acts for themselves, the limits of age class and
+ * team and the parents' permissions apply there as well.
  */
 export function mayActFor(actor: Actor, personId: number, permission?: ChildPermission, teamIds?: readonly number[]): boolean {
   if (!actsFor(actor, personId, teamIds)) return false;
-  return !(personId === actor.personId && restrictedBy(actor, permission, teamIds));
+  if (personId !== actor.personId) return true;
+  const kind = limitKind(permission);
+  if (kind && !childLimitAllows(actor, kind, teamIds)) return false;
+  return !restrictedBy(actor, permission, teamIds);
 }
 
 export function requireActFor(actor: Actor, personId: number, permission?: ChildPermission, teamIds?: readonly number[]): void {
@@ -239,6 +262,8 @@ export function requireActFor(actor: Actor, personId: number, permission?: Child
     throw forbidden(PARENTS_NOT_INVOLVED());
   }
   if (!actsFor(actor, personId, teamIds)) throw forbidden(t`You can only act for yourself or your children.`);
+  const kind = limitKind(permission);
+  if (personId === actor.personId && kind && !childLimitAllows(actor, kind, teamIds)) throw forbidden(CHILD_LIMITED(), "child_limited");
   if (personId === actor.personId && restrictedBy(actor, permission, teamIds)) throw forbidden(PARENTS_HANDLE_IT());
 }
 

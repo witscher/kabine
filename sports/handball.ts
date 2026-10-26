@@ -1,5 +1,5 @@
 // Handball, as played in German associations (age classes A–E, youth referees).
-import { defineSport, DUTY_KIOSK, DUTY_SHIRTS } from "../shared/sport-api";
+import { CHILD_VIA_PARENTS, defineSport, DUTY_KIOSK, DUTY_SHIRTS } from "../shared/sport-api";
 
 export default defineSport({
   id: "handball",
@@ -7,9 +7,9 @@ export default defineSport({
   venue: "hall",
   seasonStart: { month: 7, day: 1 },
   ageClasses: [
-    { code: "Bambini", name: { en: "Bambini", de: "Bambini" }, rank: 0, youth: true, ageFrom: null, ageTo: 5, gameMinutes: 60 },
-    { code: "Minis", name: { en: "Minis", de: "Minis" }, rank: 1, youth: true, ageFrom: 6, ageTo: 8, gameMinutes: 60 },
-    { code: "E", name: { en: "E youth", de: "E-Jugend" }, rank: 2, youth: true, ageFrom: 9, ageTo: 10, gameMinutes: 75, youthReferee: true },
+    { code: "Bambini", name: { en: "Bambini", de: "Bambini" }, rank: 0, youth: true, ageFrom: null, ageTo: 5, gameMinutes: 60, child: CHILD_VIA_PARENTS },
+    { code: "Minis", name: { en: "Minis", de: "Minis" }, rank: 1, youth: true, ageFrom: 6, ageTo: 8, gameMinutes: 60, child: CHILD_VIA_PARENTS },
+    { code: "E", name: { en: "E youth", de: "E-Jugend" }, rank: 2, youth: true, ageFrom: 9, ageTo: 10, gameMinutes: 75, youthReferee: true, child: CHILD_VIA_PARENTS },
     { code: "D", name: { en: "D youth", de: "D-Jugend" }, rank: 3, youth: true, ageFrom: 11, ageTo: 12, gameMinutes: 90, youthReferee: true },
     { code: "C", name: { en: "C youth", de: "C-Jugend" }, rank: 4, youth: true, ageFrom: 13, ageTo: 14, gameMinutes: 90, youthReferee: true },
     { code: "B", name: { en: "B youth", de: "B-Jugend" }, rank: 5, youth: true, ageFrom: 15, ageTo: 16, gameMinutes: 90 },

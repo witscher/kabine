@@ -2,6 +2,15 @@
 
 Decisions not covered by `docs/dev/roadmap.md`, with reasons. Newest first.
 
+## Children in the app: limits per age class and team (October 2026)
+
+Ported from the original club app, where the club restricts F and E youth: what players of a youth class may do themselves (own access, respond, chat none/read/write, answer stand-in requests) is a limit per age class, set by admins, because it depends on age, treats all teams of a class alike and moves along with the season change. Kabine adds a second level per team, set by its coaches: some coaches want a chat with parents only even where the club allows more. Each level only restricts; parents' permissions apply within both. Without an own access a child does nothing themselves either (the club app's "variant A").
+
+- **Columns, not JSON:** `age_classes.child_*` with the club app's names, and the same nullable columns on `teams` (NULL = as the age class). Push recipients and the badge need the values in SQL, where `min()` over columns is simpler and cheaper than `json_extract`.
+- **A team value looser than its age class is refused** (400), so a coach never believes something is allowed that is not. What applies is still the stricter of both, also when the class becomes stricter later. Team values stay over the season change, as the team does.
+- **The team level needs parents in the team:** without parents nobody but the coach could respond. The age class level applies regardless, as in the club app; admins get a hint for such teams.
+- **Defaults:** the migration changes nothing for existing clubs (nobody loses a right by an update). The sport profiles bring defaults for new clubs: handball Bambini, Minis and E, football U7 to U11 without own access; the generic profile allows everything.
+
 ## Groups can include parents (October 2026)
 
 Groups used to have no parents. A youth group with children, such as goalkeeper training across teams, then showed its events only to children with their own access. Groups now have the "Include parents" switch of teams (admins, off by default); with it on, parents take part as in a team. Groups still have no parent invitation links: parents are linked through the child's team, and a group alone is no reason to bring new parents into the app. The youth referee group follows the role and stays without parents.

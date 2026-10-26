@@ -13,7 +13,7 @@ import { loadClub } from "../domain/club";
 import { all, first, list, run, stmt } from "../lib/db";
 import { badRequest, conflict, forbidden, notFound, parse, readJson } from "../lib/http";
 import { isDate, nowLocal, utcIso } from "../lib/time";
-import { ageClassSchema } from "./admin";
+import { type AgeClassDbRow, ageClassJson, ageClassSchema, writeAgeClasses } from "./admin";
 import { canManagePerson } from "./persons";
 import { syncAutoGroups } from "../domain/groups";
 import { MODULE_EXPORT_TABLES, modulePersonLeaves } from "../modules";
@@ -99,8 +99,11 @@ seasonRoutes.post("/seasons", async (c) => {
   if (current) {
     await run(
       c.env.DB,
-      `INSERT INTO age_classes (season_id, code, name, rank, is_youth, birth_year_min, birth_year_max, game_minutes, youth_referee)
-       SELECT ?, code, name, rank, is_youth, birth_year_min + 1, birth_year_max + 1, game_minutes, youth_referee FROM age_classes WHERE season_id = ?`,
+      `INSERT INTO age_classes (season_id, code, name, rank, is_youth, birth_year_min, birth_year_max, game_minutes, youth_referee,
+                                child_account, child_respond, child_chat, child_help)
+       SELECT ?, code, name, rank, is_youth, birth_year_min + 1, birth_year_max + 1, game_minutes, youth_referee,
+              child_account, child_respond, child_chat, child_help
+         FROM age_classes WHERE season_id = ?`,
       season!.id,
       current.id,
     );
@@ -136,19 +139,8 @@ seasonRoutes.delete("/seasons/:id", async (c) => {
 
 seasonRoutes.get("/seasons/:id/age-classes", async (c) => {
   requireAdmin(requireActor(c));
-  const rows = await all<AgeClassRow>(c.env.DB, "SELECT * FROM age_classes WHERE season_id = ? ORDER BY rank, code", intParam(c, "id"));
-  return c.json({
-    ageClasses: rows.map((r) => ({
-      code: r.code,
-      name: r.name,
-      rank: r.rank,
-      isYouth: r.is_youth === 1,
-      birthYearMin: r.birth_year_min,
-      birthYearMax: r.birth_year_max,
-      gameMinutes: r.game_minutes,
-      youthReferee: r.youth_referee === 1,
-    })),
-  });
+  const rows = await all<AgeClassDbRow>(c.env.DB, "SELECT * FROM age_classes WHERE season_id = ? ORDER BY rank, code", intParam(c, "id"));
+  return c.json({ ageClasses: rows.map(ageClassJson) });
 });
 
 seasonRoutes.put("/seasons/:id/age-classes", async (c) => {
@@ -158,24 +150,7 @@ seasonRoutes.put("/seasons/:id/age-classes", async (c) => {
   if (new Set(ageClasses.map((a) => a.code)).size !== ageClasses.length) throw badRequest(t`Each code may appear only once.`);
   const season = await first(c.env.DB, "SELECT 1 AS ok FROM seasons WHERE id = ?", seasonId);
   if (!season) throw notFound();
-  await c.env.DB.batch([
-    stmt(c.env.DB, "DELETE FROM age_classes WHERE season_id = ?", seasonId),
-    ...ageClasses.map((a) =>
-      stmt(
-        c.env.DB,
-        "INSERT INTO age_classes (season_id, code, name, rank, is_youth, birth_year_min, birth_year_max, game_minutes, youth_referee) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-        seasonId,
-        a.code,
-        a.name,
-        a.rank,
-        a.isYouth ? 1 : 0,
-        a.birthYearMin,
-        a.birthYearMax,
-        a.gameMinutes,
-        a.youthReferee ? 1 : 0,
-      ),
-    ),
-  ]);
+  await writeAgeClasses(c.env.DB, seasonId, ageClasses);
   return c.json({ ok: true });
 });
 

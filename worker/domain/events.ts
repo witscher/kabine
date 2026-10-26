@@ -13,7 +13,8 @@ import type {
   RosterEntry,
   TeamRef,
 } from "../../shared/types";
-import { type Actor, isCoachOfAny, isStaffOfAny, mayActFor, PARENTS_HANDLE_IT, parentsInCharge, parentsInChargeSql, scopePersonIds } from "../auth/actor";
+import { CHILD_LIMITED } from "./child-limits";
+import { type Actor, childLimitAllows, isCoachOfAny, isStaffOfAny, mayActFor, PARENTS_HANDLE_IT, parentsInCharge, parentsInChargeSql, scopePersonIds } from "../auth/actor";
 import { all, list } from "../lib/db";
 import { ownClubAbbr } from "./club";
 import { addDays, localToInstant, toLocal } from "../lib/time";
@@ -511,7 +512,8 @@ function myParticipations(e: EventRow, ctx: EventContext, actor: Actor, now: num
     const canAccept = canAcceptBase && mayActFor(actor, pid, "may_accept", teamIds);
     const canDecline = canAcceptBase && mayActFor(actor, pid, "may_decline", teamIds);
     if (canAcceptBase && pid === actor.personId && (!canAccept || !canDecline) && !blockedReason) {
-      if (!canAccept && !canDecline) blockedReason = PARENTS_HANDLE_IT();
+      if (!childLimitAllows(actor, "respond", teamIds)) blockedReason = CHILD_LIMITED();
+      else if (!canAccept && !canDecline) blockedReason = PARENTS_HANDLE_IT();
     }
 
     const response = part?.response ?? null;

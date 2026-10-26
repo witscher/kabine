@@ -3,6 +3,7 @@
 // the parents are in charge of. Deliberately no ordinary chat messages,
 // otherwise a high number would be shown all the time.
 import { first } from "../lib/db";
+import { CHILD_CHAT_OFF_SQL, LIMITED_TEAMS_SQL } from "./child-limits";
 import { nowLocal } from "../lib/time";
 
 export interface BadgeCount {
@@ -33,12 +34,18 @@ export async function badgeCount(db: D1Database, accountId: number, now = Date.n
                     AND EXISTS (SELECT 1 FROM teams t WHERE t.id = m.team_id AND t.parents_enabled = 1)
                     AND EXISTS (SELECT 1 FROM guardianships g WHERE g.child_id = m.person_id)
                     AND EXISTS (SELECT 1 FROM child_permissions cp WHERE cp.child_id = m.person_id AND cp.may_read_chat = 0))
+           -- Likewise where age class or team keep players out of the chat (children in the app)
+           AND NOT (m.person_id = (SELECT person_id FROM accounts WHERE id = ?1) AND ${CHILD_CHAT_OFF_SQL("m.team_id")}
+                    AND NOT EXISTS (SELECT 1 FROM team_memberships cm WHERE cm.team_id = m.team_id AND cm.person_id = m.person_id AND cm.role = 'coach'))
            AND (m.person_id = (SELECT person_id FROM accounts WHERE id = ?1)
                 OR (EXISTS (SELECT 1 FROM teams t WHERE t.id = m.team_id AND t.parents_enabled = 1)
                     AND NOT EXISTS (SELECT 1 FROM chat_optouts o WHERE o.account_id = ?1 AND o.team_id = m.team_id)))
        ) AS mentions,
        (SELECT COUNT(*) FROM help_requests h JOIN events e ON e.id = h.event_id
          WHERE h.status = 'open' AND h.person_id IN (SELECT person_id FROM persons)
+           -- A player whose age class or team does not let them answer requests: the parents answer (children in the app)
+           AND NOT (h.person_id = (SELECT person_id FROM accounts WHERE id = ?1)
+                    AND h.team_id IN (SELECT team_id FROM (${LIMITED_TEAMS_SQL}) WHERE child_account = 0 OR child_help = 0))
            AND e.cancelled_at IS NULL AND e.starts_at > ?2
        ) AS requests`,
     accountId,

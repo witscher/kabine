@@ -7,6 +7,7 @@ import { isRelevantEvent } from "../../shared/relevance";
 import { listVisibleEvents, loadEventContext, toSummary } from "../domain/events";
 import { listExtraEvents } from "../domain/extra-events";
 import { generateTrainings } from "../domain/generate";
+import { completeLimits, FULL_LIMITS, type LimitRow, toLimits } from "../domain/child-limits";
 import { holidayPeriods, holidaySourceLabel, importRegionHolidays, MAX_HOLIDAY_DAYS } from "../domain/holidays";
 import { all, first, run, stmt } from "../lib/db";
 import { badRequest, conflict, forbidden, notFound, parse, readJson } from "../lib/http";
@@ -209,37 +210,37 @@ adminRoutes.get("/age-classes", async (c) => {
     c.env.DB,
     "SELECT id, name, starts_on, ends_on FROM seasons WHERE is_current = 1",
   );
-  const rows = season
-    ? await all<{
-        id: number;
-        code: string;
-        name: string;
-        rank: number;
-        is_youth: number;
-        birth_year_min: number | null;
-        birth_year_max: number | null;
-        game_minutes: number;
-        youth_referee: number;
-      }>(
-        c.env.DB,
-        "SELECT * FROM age_classes WHERE season_id = ? ORDER BY rank, code",
-        season.id,
-      )
-    : [];
+  const rows = season ? await all<AgeClassDbRow>(c.env.DB, "SELECT * FROM age_classes WHERE season_id = ? ORDER BY rank, code", season.id) : [];
   return c.json({
     season: season ? { id: season.id, name: season.name, startsOn: season.starts_on, endsOn: season.ends_on } : null,
-    ageClasses: rows.map((r) => ({
-      code: r.code,
-      name: r.name,
-      rank: r.rank,
-      isYouth: r.is_youth === 1,
-      birthYearMin: r.birth_year_min,
-      birthYearMax: r.birth_year_max,
-      gameMinutes: r.game_minutes,
-      youthReferee: r.youth_referee === 1,
-    })),
+    ageClasses: rows.map(ageClassJson),
   });
 });
+
+export interface AgeClassDbRow extends LimitRow {
+  code: string;
+  name: string;
+  rank: number;
+  is_youth: number;
+  birth_year_min: number | null;
+  birth_year_max: number | null;
+  game_minutes: number;
+  youth_referee: number;
+}
+
+export function ageClassJson(r: AgeClassDbRow) {
+  return {
+    code: r.code,
+    name: r.name,
+    rank: r.rank,
+    isYouth: r.is_youth === 1,
+    birthYearMin: r.birth_year_min,
+    birthYearMax: r.birth_year_max,
+    gameMinutes: r.game_minutes,
+    youthReferee: r.youth_referee === 1,
+    childLimits: toLimits(r),
+  };
+}
 
 export const ageClassSchema = z.object({
   code: z.string().trim().min(1).max(10),
@@ -250,7 +251,44 @@ export const ageClassSchema = z.object({
   birthYearMax: z.number().int().min(1900).max(2100).nullable(),
   gameMinutes: z.number().int().min(15).max(300).default(90),
   youthReferee: z.boolean().default(false),
+  /** What players of this youth class may do themselves (children in the app); no effect on adult classes. */
+  childLimits: z.object({ account: z.boolean(), respond: z.boolean(), chat: z.enum(["none", "read", "write"]), help: z.boolean() }).optional(),
 });
+
+type AgeClassInput = z.infer<typeof ageClassSchema>;
+
+/**
+ * Writes the age classes of a season anew. Without children's limits (an older app version) the previous ones
+ * of the class with the same code stay, otherwise everything is allowed.
+ */
+export async function writeAgeClasses(db: D1Database, seasonId: number, ageClasses: AgeClassInput[]): Promise<void> {
+  const before = new Map((await all<AgeClassDbRow>(db, "SELECT * FROM age_classes WHERE season_id = ?", seasonId)).map((r) => [r.code, toLimits(r)]));
+  await db.batch([
+    stmt(db, "DELETE FROM age_classes WHERE season_id = ?", seasonId),
+    ...ageClasses.map((a) => {
+      const l = a.childLimits ?? before.get(a.code) ?? FULL_LIMITS;
+      return stmt(
+        db,
+        `INSERT INTO age_classes (season_id, code, name, rank, is_youth, birth_year_min, birth_year_max, game_minutes, youth_referee,
+                                  child_account, child_respond, child_chat, child_help)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        seasonId,
+        a.code,
+        a.name,
+        a.rank,
+        a.isYouth ? 1 : 0,
+        a.birthYearMin,
+        a.birthYearMax,
+        a.gameMinutes,
+        a.youthReferee ? 1 : 0,
+        l.account ? 1 : 0,
+        l.account && l.respond ? 1 : 0,
+        l.account ? l.chat : "none",
+        l.account && l.help ? 1 : 0,
+      );
+    }),
+  ]);
+}
 
 adminRoutes.put("/age-classes", async (c) => {
   requireAdmin(requireActor(c));
@@ -265,26 +303,15 @@ adminRoutes.put("/age-classes", async (c) => {
   }
   const season = await first<{ id: number }>(c.env.DB, "SELECT id FROM seasons WHERE is_current = 1");
   if (!season) throw conflict(t`There is no current season.`);
-  await c.env.DB.batch([
-    stmt(c.env.DB, "DELETE FROM age_classes WHERE season_id = ?", season.id),
-    ...ageClasses.map((a) =>
-      stmt(
-        c.env.DB,
-        `INSERT INTO age_classes (season_id, code, name, rank, is_youth, birth_year_min, birth_year_max, game_minutes, youth_referee)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        season.id,
-        a.code,
-        a.name,
-        a.rank,
-        a.isYouth ? 1 : 0,
-        a.birthYearMin,
-        a.birthYearMax,
-        a.gameMinutes,
-        a.youthReferee ? 1 : 0,
-      ),
-    ),
-  ]);
-  return c.json({ ok: true });
+  await writeAgeClasses(c.env.DB, season.id, ageClasses);
+  // Without children's access and without parents only the coach could respond there: a hint for the admin
+  const withoutParents = await all<{ name: string }>(
+    c.env.DB,
+    `SELECT t.name FROM teams t JOIN age_classes ac ON ac.code = t.age_class_code AND ac.season_id = ?
+      WHERE t.kind = 'team' AND ac.is_youth = 1 AND ac.child_account = 0 AND t.parents_enabled = 0 ORDER BY t.name`,
+    season.id,
+  );
+  return c.json({ ok: true, teamsWithoutParents: withoutParents.map((t) => t.name) });
 });
 
 /** Age classes of a season from the club's sport profile (shared/sports.ts), names in the club language. */
@@ -301,6 +328,7 @@ export function ageClassesFromProfile(sport: SportId, startsOn: string, locale: 
       birthYearMax: years.max,
       gameMinutes: a.gameMinutes,
       youthReferee: !!a.youthReferee,
+      childLimits: a.youth ? completeLimits(a.child) : FULL_LIMITS,
     };
   });
 }

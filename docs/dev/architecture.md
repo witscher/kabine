@@ -22,7 +22,7 @@ browser (PWA, Preact)  ──HTTP /api/*──▶  Worker (Hono)  ──▶  D1 
 1. Fill missing keys (`ensureInstanceSecrets`) and load the club profile (`enterClubContext`).
 2. Pick the language: the account's, else the app's header, else the club default (`worker/i18n.ts`). Server texts are rendered in it; texts for others (push, mail) in the recipient's language.
 3. CSRF: write requests and WebSockets must come from the app's own origin.
-4. Session cookie → `Actor` (`worker/auth/actor.ts`): the person, their teams and roles, children, admin flag. Every permission check uses the actor and the helpers next to it (`requireCoach`, `isCoachOf`, `actsFor`, `requireAdmin`).
+4. Session cookie → `Actor` (`worker/auth/actor.ts`): the person, their teams and roles, children, admin flag. Every permission check uses the actor and the helpers next to it (`requireCoach`, `isCoachOf`, `actsFor`, `requireAdmin`). The actor also carries the limits of age class and team for children (`teamLimits`, `worker/domain/child-limits.ts`), which `mayActFor`/`requireActFor` apply before the parents' permissions.
 5. Maintenance mode (only admins get through) and admin views (`worker/auth/view-as.ts`, read-only).
 6. Module gate: a path that belongs to a switched-off module answers 404 (`moduleOfPath`, from the manifests).
 

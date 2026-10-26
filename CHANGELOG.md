@@ -6,6 +6,8 @@ Changes that are merged but not released yet go under *Unreleased*, one line eac
 
 ## Unreleased
 
+- Children in the app: under *Administration → Age groups* admins set per youth class what children may do themselves (own access, respond, chat none/read/write, stand-in requests); coaches can restrict this further for their team under *Team → Settings*, for example a chat with parents only. Without an own access there is no player link and parents respond and chat for their child. Existing age groups keep everything allowed; new clubs get the sport's defaults (youngest classes without own access).
+
 - Groups can include parents: under the group's settings an admin switches on *Include parents*, for example for a youth group across teams. Linked parents then see the group's special events for their children, respond for them and are in the group chat.
 
 - Links with `?lang=en` or `?lang=de` (the demo links on kabine.dev and in the README) no longer reload the app over and over when the account has the other language: the link's language wins and is saved on the account. In the demo the shared accounts keep no language, so each visitor gets the browser's language.

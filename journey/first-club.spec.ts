@@ -79,24 +79,24 @@ test("Assistent: Verein, Fußball, Module, Mannschaft", async () => {
   await expect(page.getByRole("heading", { name: "Erste Mannschaften" })).toBeVisible();
   // First the choice: lists, by hand or an export of Kabine
   await page.getByRole("button", { name: "Von Hand eingeben" }).click();
-  await page.getByLabel("Name", { exact: true }).fill("E1");
-  await page.getByLabel("Altersklasse").selectOption({ label: "E-Jugend (U11) (U11)" });
+  await page.getByLabel("Name", { exact: true }).fill("D1");
+  await page.getByLabel("Altersklasse").selectOption({ label: "D-Jugend (U13) (U13)" });
   await page.getByRole("button", { name: "Mannschaft anlegen" }).click();
-  await expect(page.locator(".team-badge", { hasText: "E1" })).toBeVisible();
+  await expect(page.locator(".team-badge", { hasText: "D1" })).toBeVisible();
   await page.getByRole("button", { name: "Weiter", exact: true }).click();
 });
 
 test("Assistent: erste Personen mit Links, Datenschutz, fertig", async () => {
   const { page } = admin;
   await expect(page.getByRole("heading", { name: "Erste Personen" })).toBeVisible();
-  // A coach for E1
+  // A coach for D1
   await page.getByLabel("Vorname").fill("Theo");
   await page.getByLabel("Nachname").fill("Torwart");
-  await page.getByRole("group", { name: "Trainer von" }).getByRole("button", { name: "E1" }).click();
+  await page.getByRole("group", { name: "Trainer von" }).getByRole("button", { name: "D1" }).click();
   await page.getByRole("button", { name: "Person anlegen" }).click();
   const people = page.getByRole("list", { name: "Erste Personen" });
   const theo = people.getByRole("listitem").filter({ hasText: "Theo Torwart" });
-  await expect(theo).toContainText("Trainer von E1");
+  await expect(theo).toContainText("Trainer von D1");
   await theo.getByRole("button", { name: "Persönlichen Link erzeugen" }).click();
   coachLink = await theo.locator(".url-box").innerText();
   // A second admin
@@ -140,7 +140,7 @@ test("Trainer: Link öffnen, Mannschaft sehen", async ({ browser }) => {
   await page.getByRole("button", { name: "Zur App" }).click();
   await expect(page.getByRole("heading", { name: "Hallo Theo" })).toBeVisible();
   await page.getByRole("link", { name: "Team" }).click();
-  await expect(page.getByRole("heading", { name: "Team E1" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Team D1" })).toBeVisible();
 });
 
 test("Trainer: Trainingsplan mit neuem Ort, Trainings entstehen", async () => {
@@ -170,7 +170,7 @@ test("Trainer: Spieler aus einer Liste, Einladungslinks", async () => {
   await roster.getByRole("button", { name: "Hinzufügen" }).click();
   const sheet = page.getByRole("dialog", { name: "Spieler hinzufügen" });
   await sheet.getByRole("button", { name: "Aus einer Liste" }).click();
-  await sheet.getByLabel("Spielerliste").fill("Vorname\tNachname\tJahrgang\nMila\tMeyer\t2016\nJonas\tJäger\t2016");
+  await sheet.getByLabel("Spielerliste").fill("Vorname\tNachname\tJahrgang\nMila\tMeyer\t2014\nJonas\tJäger\t2014");
   await sheet.getByRole("button", { name: "Vorschau" }).click();
   await sheet.getByRole("button", { name: "2 Spieler anlegen" }).click();
   await expect(page.getByText("2 Spieler angelegt")).toBeVisible();
@@ -276,7 +276,7 @@ test("Chat: Trainer schreibt, Spieler und Mutter lesen", async () => {
   const session = (await (await coach.page.request.get("/api/session")).json()) as { me: { manageableTeams: { id: number }[] } };
   const room = `/chat/${session.me.manageableTeams[0]!.id}`;
   await coach.page.goto(room);
-  await coach.page.getByPlaceholder("Nachricht an E1").fill("Samstag 10 Uhr Treffpunkt am Platz");
+  await coach.page.getByPlaceholder("Nachricht an D1").fill("Samstag 10 Uhr Treffpunkt am Platz");
   await coach.page.getByRole("button", { name: "Senden" }).click();
   for (const reader of [player, parent]) {
     await reader.page.goto(room);

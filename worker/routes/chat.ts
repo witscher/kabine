@@ -70,6 +70,17 @@ export async function chatAccess(db: D1Database, actor: Actor, teamIds?: number[
       if (!canRead) reason = t`Your parents have not allowed the chat for you yet.`;
       else if (!canWriteBase) reason = t`You can read along. Your parents have not allowed writing yet.`;
     }
+    // Age class or team: players are not in this chat, or only read along (children in the app)
+    const limits = onlyAsChild && (membership.role === "player" || membership.role === "helper") ? actor.teamLimits.get(team.id) : undefined;
+    if (limits && limits.chat !== "write") {
+      if (limits.chat === "none") {
+        canRead = false;
+        reason = t`Only the parents are in the chat of this team.`;
+      } else if (canRead) {
+        canWriteBase = false;
+        reason = t`You can read along. In this team the parents write.`;
+      }
+    }
     if (!membership && viaChildren.length && !isMod && optedOut) {
       canRead = false;
       reason = t`You have opted out of this chat.`;

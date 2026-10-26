@@ -10,6 +10,7 @@ import { finishRegistration, newWebauthnUserId, relyingParty, startRegistration 
 import { loadClub, rememberOrigin, saveClub } from "../domain/club";
 import { emailSchema, issueEmailCode, mailer } from "../domain/email-login";
 import { findValidInvite, type InviteRow } from "../domain/invites";
+import { NO_CHILD_ACCOUNT, teamLimits } from "../domain/child-limits";
 import { safeEqual } from "../lib/crypto";
 import { all, first, list, run, stmt } from "../lib/db";
 import { ApiError, badRequest, conflict, forbidden, gone, parse, readJson } from "../lib/http";
@@ -66,6 +67,8 @@ joinRoutes.post("/join/info", async (c) => {
   const loggedInAs = actor ? fullName(actor.firstName, actor.lastName) : null;
 
   if (invite.kind === "player" || invite.kind === "parent") {
+    // Older player links of a team without children's own access no longer work
+    if (invite.kind === "player" && !(await teamLimits(c.env.DB, invite.team_id!)).account) throw conflict(NO_CHILD_ACCOUNT(), "no_child_account");
     const players = await teamPlayers(c.env.DB, invite.team_id!);
     const linked = actor
       ? new Set(
@@ -145,6 +148,7 @@ async function buildJoinContext(
 
   if (invite.kind === "player") {
     if (signedIn) throw conflict(PLAYER_JOIN_SIGNED_IN(), "signed_in");
+    if (!(await teamLimits(env.DB, invite.team_id!)).account) throw conflict(NO_CHILD_ACCOUNT(), "no_child_account");
     if (!input.personId) throw badRequest(t`Please select who you are.`);
     const players = await teamPlayers(env.DB, invite.team_id!);
     const person = players.find((p) => p.id === input.personId);

@@ -3,6 +3,7 @@
 // profile; admins adjust them afterwards. Age classes carry no gender: a team is age class + gender +
 // level. Guide: docs/dev/sports.md.
 import type { Locale } from "./i18n";
+import type { ChildLimits } from "./types";
 
 export interface AgeClassTemplate {
   code: string;
@@ -20,7 +21,15 @@ export interface AgeClassTemplate {
   gameMinutes: number;
   /** Home games get a youth referee duty block . */
   youthReferee?: boolean;
+  /**
+   * What players of this youth class may do in the app themselves (children in the app); missing: everything.
+   * Without an own account they can do nothing themselves, the parents respond and chat.
+   */
+  child?: Partial<ChildLimits>;
 }
+
+/** Youngest classes: no own account, the parents respond and chat for their child. */
+export const CHILD_VIA_PARENTS: Partial<ChildLimits> = { account: false };
 
 export interface DutyTypeTemplate {
   code: string;

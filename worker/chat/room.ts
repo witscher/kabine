@@ -6,6 +6,7 @@ import { ensureInstanceSecrets } from "../lib/instance-secrets";
 import { enqueuePush, notifyPersons } from "../domain/notify";
 import { currentLocale, withLocale } from "../i18n";
 import { all, run } from "../lib/db";
+import { CHILD_CHAT_OFF_SQL } from "../domain/child-limits";
 
 // One chat room per team. The worker checks permissions and passes the
 // identity on in headers; the Durable Object cannot be reached from outside.
@@ -262,6 +263,15 @@ export class ChatRoom extends DurableObject<Env> {
           if (att?.viaChildren) ws.close(4003, inLocale(att, () => t`Parents are not involved in this team.`));
         }
         return Response.json({ ok: true });
+      case "/children-off": {
+        // Age class or team changed what players may do in the chat: they reconnect with the new rights
+        const ids = new Set(body.personIds as number[]);
+        for (const ws of this.ctx.getWebSockets()) {
+          const att = ws.deserializeAttachment() as ChatAttachment | null;
+          if (att && !att.viaChildren && !att.isMod && ids.has(att.personId)) ws.close(4003, inLocale(att, () => t`Your rights in this chat have changed.`));
+        }
+        return Response.json({ ok: true });
+      }
       case "/export":
         return Response.json({
           messages: this.sql.exec("SELECT id, kind, person_id, text, created_at, deleted_at FROM messages ORDER BY id").toArray(),
@@ -718,6 +728,8 @@ export async function chatPushRecipients(db: D1Database, teamId: number, upToId:
            AND NOT (EXISTS (SELECT 1 FROM teams t WHERE t.id = ?1 AND t.parents_enabled = 1)
                     AND EXISTS (SELECT 1 FROM guardianships g WHERE g.child_id = tm.person_id)
                     AND EXISTS (SELECT 1 FROM child_permissions cp WHERE cp.child_id = tm.person_id AND cp.may_read_chat = 0))
+           -- Age class or team without children in the chat (children in the app)
+           AND NOT (tm.role IN ('player', 'helper') AND ${CHILD_CHAT_OFF_SQL("?1")})
       ),
       parents AS (
         SELECT a.id AS account_id, g.child_id AS person_id FROM guardianships g

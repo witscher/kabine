@@ -150,7 +150,7 @@ function NextCard({ event, onDecline, later = false }: { event: EventSummary; on
         ) : (
           mine.map((m) => <PersonResponseRow key={m.person.id} event={event} p={m} onDecline={onDecline} />)
         )}
-        {event.deadline && mine.some((m) => m.participant) ? (
+        {event.deadline && mine.some((m) => m.participant && m.canDecline) ? (
           <p class="small muted">
             <Trans>Please decline in good time by {deadline} so that your coaches can plan better.</Trans>
           </p>

@@ -3,6 +3,7 @@
 import { describe, expect, it } from "vitest";
 import { LOCALES } from "../shared/i18n";
 import { MODULES } from "../shared/modules";
+import type { AgeClassTemplate } from "../shared/sport-api";
 import { SPORT_LIST, SPORTS } from "../shared/sports";
 
 describe.each(SPORT_LIST.map((s) => [s.id, s] as const))("sport %s", (id, sport) => {
@@ -33,6 +34,12 @@ describe.each(SPORT_LIST.map((s) => [s.id, s] as const))("sport %s", (id, sport)
       if (i > 0) expect(a.ageFrom, `${a.code}: ageFrom`).not.toBeNull();
       if (i < classes.length - 1) expect(a.ageTo, `${a.code}: ageTo`).not.toBeNull();
       if (a.ageFrom != null && a.ageTo != null) expect(a.ageTo, `${a.code}: ageTo >= ageFrom`).toBeGreaterThanOrEqual(a.ageFrom);
+      // Children's limits only for youth classes, with valid values
+      const child = (a as AgeClassTemplate).child;
+      if (child) {
+        expect(a.youth, `${a.code}: child limits only for youth classes`).toBe(true);
+        if (child.chat) expect(["none", "read", "write"]).toContain(child.chat);
+      }
       if (i > 0) expect(a.ageFrom, `${a.code}: follows ${classes[i - 1]!.code} without gap or overlap`).toBe(classes[i - 1]!.ageTo! + 1);
     });
     expect(classes.at(-1)!.youth, "the oldest class is for adults").toBe(false);

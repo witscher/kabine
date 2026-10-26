@@ -184,7 +184,7 @@ export function EventPage({ id }: { id: string }) {
             ) : (
               mine.map((m) => <PersonResponseRow key={m.person.id} event={event} p={m} onDecline={setDeclineFor} />)
             )}
-            {event.deadline && !event.isPast && !event.cancelled && mine.some((m) => m.participant) ? (
+            {event.deadline && !event.isPast && !event.cancelled && mine.some((m) => m.participant && m.canDecline) ? (
               <p class="small muted">
                 <Trans>Please decline in good time, by {deadline} ({hours} hrs before), so your coaches can plan better.</Trans>
               </p>

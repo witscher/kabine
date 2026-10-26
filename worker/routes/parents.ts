@@ -6,6 +6,7 @@ import { childPermissionLabels, CORE_NOTIFICATION_TOPICS } from "../../shared/ty
 import { MODULES, moduleTopics } from "../../shared/modules";
 import { type AppEnv, intParam, requireActor } from "../app";
 import { ALL_PERMISSIONS, type Actor, parentsInCharge } from "../auth/actor";
+import { childAccountAllowed, limitedTeamsOf } from "../domain/child-limits";
 import { isModuleOn } from "../domain/club";
 import { enqueuePush } from "../domain/notify";
 import { all, first, stmt } from "../lib/db";
@@ -37,7 +38,7 @@ parentRoutes.get("/children/:id/permissions", async (c) => {
   const actor = requireActor(c);
   const childId = intParam(c, "id");
   requireGuardian(actor, childId);
-  const [permissions, log, info, guardians] = await Promise.all([
+  const [permissions, log, info, guardians, accountAllowed, limitedTeams] = await Promise.all([
     permissionsOf(c.env.DB, childId),
     all<{ permission: ChildPermission; value: number; changed_at: string; first_name: string | null }>(
       c.env.DB,
@@ -53,12 +54,17 @@ parentRoutes.get("/children/:id/permissions", async (c) => {
          FROM guardianships g JOIN persons p ON p.id = g.guardian_id WHERE g.child_id = ? ORDER BY p.first_name`,
       childId,
     ),
+    childAccountAllowed(c.env.DB, childId),
+    // Teams of the child whose age class or team limit what the child may do (children in the app)
+    limitedTeamsOf(c.env.DB, childId),
   ]);
   return c.json({
     permissions,
     parentsInCharge: parentsInCharge(actor, childId),
     labels: childPermissionLabels(),
     childHasAccount: info?.has_account === 1,
+    childAccountAllowed: accountAllowed,
+    limitedTeams,
     guardians: guardians.map((g) => ({ firstName: g.first_name, lastName: g.last_name, hasAccount: g.has_account === 1 })),
     log: log.map((l) => ({ permission: l.permission, value: l.value === 1, at: l.changed_at, byName: l.first_name ?? t`Former parent` })),
   });

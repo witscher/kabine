@@ -2,7 +2,8 @@ import { plural, select, t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { useLocation } from "preact-iso";
 import { useEffect, useMemo, useState } from "preact/hooks";
-import type { LocationRef, PersonRef } from "../../shared/types";
+import type { ChildLimits, LocationRef, PersonRef } from "../../shared/types";
+import { ChildLimitControls, FULL_LIMITS } from "../child-limits";
 import { api } from "../api";
 import { moduleOn } from "../../shared/club";
 import { clubName, useClub, useVenue } from "../club";
@@ -307,6 +308,8 @@ interface AgeClass {
   gameMinutes: number;
   /** Home games need a youth referee. */
   youthReferee: boolean;
+  /** What players of this youth class may do themselves (children in the app). */
+  childLimits: ChildLimits;
 }
 
 type TeamGender = "f" | "m" | "x";
@@ -1468,9 +1471,35 @@ export function AdminAgeClassesPage() {
               </table>
             </div>
           ) : null}
+          {rows?.some((r) => r.isYouth) ? (
+            <section class="card card-body stack-sm" aria-label={t`Children in the app`}>
+              <h2 class="section-title" style={{ margin: 0 }}>
+                <Trans>Children in the app</Trans>
+              </h2>
+              <p class="small muted">
+                <Trans>
+                  What players of a youth class may do themselves. Without an own access there is no player link; the parents respond and are in the chat. Coaches can
+                  restrict this further for their team, and the parents' permissions apply within it. Adult classes are never limited.
+                </Trans>
+              </p>
+              <ul class="list">
+                {rows.map((r, i) =>
+                  r.isYouth ? (
+                    <li class="list-row" style={{ flexWrap: "wrap", gap: "8px 16px" }}>
+                      <strong style={{ minWidth: "100%" }}>{r.name || r.code || t`New class`}</strong>
+                      <ChildLimitControls name={r.name || r.code} value={r.childLimits ?? FULL_LIMITS} onChange={(childLimits) => update(i, { childLimits })} />
+                    </li>
+                  ) : null,
+                )}
+              </ul>
+              <p class="small muted">
+                <Trans>Respond: accept and decline themselves. Stand-in requests: answer requests of other teams themselves.</Trans>
+              </p>
+            </section>
+          ) : null}
           {rows ? (
             <>
-              <Button icon="plus" onClick={() => setRows([...rows, { code: "", name: "", rank: 1, isYouth: true, birthYearMin: null, birthYearMax: null, gameMinutes: 90, youthReferee: false }])}>
+              <Button icon="plus" onClick={() => setRows([...rows, { code: "", name: "", rank: 1, isYouth: true, birthYearMin: null, birthYearMax: null, gameMinutes: 90, youthReferee: false, childLimits: FULL_LIMITS }])}>
                 <Trans>Add row</Trans>
               </Button>
               {!seasonId ? (
@@ -1494,8 +1523,10 @@ export function AdminAgeClassesPage() {
                 variant="primary"
                 size="lg"
                 onClick={async () => {
-                  await api.put(path, { ageClasses: rows.map((r) => ({ ...r, code: r.code.trim(), name: r.name.trim() })) });
+                  const res = await api.put<{ teamsWithoutParents?: string[] }>(path, { ageClasses: rows.map((r) => ({ ...r, code: r.code.trim(), name: r.name.trim() })) });
                   toast(t`Age groups saved.`);
+                  const teams = res?.teamsWithoutParents?.join(", ");
+                  if (teams) toast(t`No own access for children, but parents are not involved in: ${teams}. Only coaches can respond there.`, "error");
                   invalidate(path, "/teams");
                 }}
               >

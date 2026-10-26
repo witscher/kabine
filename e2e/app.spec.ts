@@ -1686,3 +1686,37 @@ test("Verwaltung → Import: eigener Export zurück, alles ist schon da", async 
   await expect(result).toContainText("0 neu");
   expect(((await (await page.request.get("/api/teams")).json()) as { teams: unknown[] }).teams.length).toBe(before);
 });
+
+test("Kinder in der App: Altersklasse ohne eigenen Zugang, Spielerin sieht nur noch, Trainer schränkt den Chat ein", async () => {
+  const ages = admin.page;
+  await ages.goto("/verwaltung/altersklassen");
+  await ages.getByRole("checkbox", { name: "Eigener Zugang weibliche D-Jugend" }).uncheck();
+  await expect(ages.getByRole("combobox", { name: "Chat weibliche D-Jugend" })).toBeDisabled();
+  await ages.getByRole("button", { name: "Speichern" }).click();
+  await expect(ages.getByText("Altersklassen gespeichert.")).toBeVisible();
+
+  await coach.page.goto("/team/1");
+  await coach.page.getByRole("group", { name: "Bereich" }).getByRole("button", { name: "Einladungen" }).click();
+  await expect(coach.page.getByText("Kinder in wT haben keinen eigenen Zugang, deshalb gibt es keinen Spielerlink.", { exact: false })).toBeVisible();
+
+  // Ida hat schon einen Zugang: sie sieht ihre Termine, antwortet aber nicht mehr selbst
+  await player.page.goto("/");
+  await expect(player.page.getByText("In dieser Mannschaft übernehmen das deine Eltern.").first()).toBeVisible();
+
+  // Zurück auf eigenen Zugang, damit nachfolgende Tests unverändert laufen
+  await ages.reload();
+  await ages.getByRole("checkbox", { name: "Eigener Zugang weibliche D-Jugend" }).check();
+  await ages.getByRole("button", { name: "Speichern" }).click();
+  await expect(ages.getByText("Altersklassen gespeichert.")).toBeVisible();
+
+  // Der Trainer lässt die Kinder seiner Mannschaft im Chat nur mitlesen, dann wieder wie die Altersklasse
+  await coach.page.goto("/team/1");
+  await coach.page.getByRole("group", { name: "Bereich" }).getByRole("button", { name: "Einstellungen" }).click();
+  const section = coach.page.getByRole("region", { name: "Kinder in der App" });
+  await section.getByRole("combobox", { name: "Chat wT" }).selectOption("read");
+  await expect(coach.page.getByText("Gespeichert.")).toBeVisible();
+  await player.page.goto("/chat");
+  await expect(player.page.getByText("Schreiben übernehmen in dieser Mannschaft die Eltern.", { exact: false }).first()).toBeVisible();
+  await section.getByRole("button", { name: "Wie für die Altersklasse" }).click();
+  await expect(coach.page.getByText("Wieder wie für die Altersklasse eingestellt.")).toBeVisible();
+});

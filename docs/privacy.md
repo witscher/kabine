@@ -13,6 +13,7 @@ Kabine is used mostly by children and teenagers and their parents. It is built t
 ## Youth protection
 
 - **Parents are in charge of minors.** When a team includes parents, a parent links to the child's profile and decides what the child may do in the app: accept, decline, read the team chat, write in it, answer stand-in requests. Each switch is logged (who changed it, when). Teams of older players or adults can do without parents.
+- **Limits per age group and team.** Admins set per youth age group what children may do in the app at most: their own access, responding, the chat (none, read, write), stand-in requests. Coaches can restrict this further for their team, for example a chat with parents only. Parents decide within these limits. Without an own access there is no player link; the parents respond and are in the chat. This stores no additional personal data.
 - **Profile pictures need parental approval.** A picture a minor uploads is only visible to others once a parent approves it. Pictures are optional, visible only to people signed in, and deleted when the person leaves the club.
 - **Chat with supervision.** Team chats always include the coaches. Coaches can mute a member and delete messages. Parents read along in the chats of their children's teams unless they opt out. There are no private messages between members.
 - **Names are shortened where others see them.** Helper duties and carpools show "First name L." to the other parents and players. Full names are visible to coaches and admins.

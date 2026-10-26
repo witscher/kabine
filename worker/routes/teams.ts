@@ -4,11 +4,13 @@ import { z } from "zod";
 import { type AppEnv, intParam, requireActor } from "../app";
 import { requireAdmin, requireCoach } from "../auth/actor";
 import { syncAutoSquads } from "../domain/auto-squad";
-import { closeParentConnections } from "../domain/chat";
+import { closeChildConnections, closeParentConnections } from "../domain/chat";
 import { listExtraEvents } from "../domain/extra-events";
 import { requireTeam, syncAutoGroups, teamKind } from "../domain/groups";
 import { clubMemberStmt, resetTeamDuties } from "../domain/duties";
 import { createInvite, inviteUrl, tokenForNonce } from "../domain/invites";
+import { FULL_LIMITS, type LimitRow, loosens, NO_CHILD_ACCOUNT, teamLimits, toLimits } from "../domain/child-limits";
+import type { ChildLimits } from "../../shared/types";
 import { helpCandidates, teamCandidates } from "./squad";
 import { notifyCoaches } from "../domain/notify";
 import { ageWarning } from "./squad";
@@ -144,6 +146,33 @@ interface TeamRow {
   auto_squad: number;
   helper_plan: number;
   show_responses: number;
+  child_account: number | null;
+  child_respond: number | null;
+  child_chat: "none" | "read" | "write" | null;
+  child_help: number | null;
+}
+
+/** The team's own restriction (children in the app): only the fields the team sets, the rest follows the age class. */
+function teamChildLimits(team: TeamRow): Partial<ChildLimits> {
+  return {
+    ...(team.child_account === 0 ? { account: false } : {}),
+    ...(team.child_respond === 0 ? { respond: false } : {}),
+    ...(team.child_chat && team.child_chat !== "write" ? { chat: team.child_chat } : {}),
+    ...(team.child_help === 0 ? { help: false } : {}),
+  };
+}
+
+/** Limits of the team's age class in the current season; null for adult classes and groups (never limited). */
+async function ageClassChildLimits(db: D1Database, team: TeamRow): Promise<ChildLimits | null> {
+  if (team.kind !== "team") return null;
+  const ac = await first<LimitRow & { is_youth: number }>(
+    db,
+    `SELECT ac.is_youth, ac.child_account, ac.child_respond, ac.child_chat, ac.child_help FROM age_classes ac
+       JOIN seasons s ON s.id = ac.season_id AND s.is_current = 1 WHERE ac.code = ?`,
+    team.age_class_code,
+  );
+  if (!ac) return FULL_LIMITS;
+  return ac.is_youth === 1 ? toLimits(ac) : null;
 }
 
 teamRoutes.get("/teams/:id", async (c) => {
@@ -216,8 +245,10 @@ teamRoutes.get("/teams/:id", async (c) => {
   ]);
 
   const origin = relyingParty(c.env, c.req.raw).origin;
+  const [limits, classLimits] = await Promise.all([teamLimits(db, teamId), ageClassChildLimits(db, team)]);
   const inviteView = async (kind: "player" | "parent") => {
     if (kind === "parent" && team.parents_enabled !== 1) return null;
+    if (kind === "player" && !limits.account) return null;
     const inv = invites.filter((i) => i.kind === kind).sort((a, b) => b.created_at.localeCompare(a.created_at))[0];
     if (!inv) return null;
     return { id: inv.id, url: inviteUrl(origin, await tokenForNonce(c.env, inv.nonce)), expiresAt: inv.expires_at };
@@ -281,6 +312,10 @@ teamRoutes.get("/teams/:id", async (c) => {
         unexcused: unexcused.get(m.person_id) ?? 0,
       })),
     invites: { player: await inviteView("player"), parent: await inviteView("parent") },
+    // Children in the app: effective limits, the age class's and the team's own restriction (null: never limited)
+    childLimits: limits,
+    ageClassChildLimits: classLimits,
+    teamChildLimits: teamChildLimits(team),
     duplicateNames: [...nameCount.values()].filter((e) => e.n > 1).map((e) => e.label),
     missingLastNames: players.filter((p) => !p.last_name).length,
     missingBirthYears: players.filter((p) => p.birth_year == null).length,
@@ -304,6 +339,19 @@ const updateTeamSchema = z.object({
   /** Helper duty template for home or away games, null = default (coaches and admins). */
   homeTemplateId: z.number().int().positive().nullable().optional(),
   awayTemplateId: z.number().int().positive().nullable().optional(),
+  /**
+   * Children in the app: the team restricts what players may do beyond the age class (coaches and admins).
+   * A field set to null (or the whole object) follows the age class again.
+   */
+  childLimits: z
+    .object({
+      account: z.boolean().nullable().optional(),
+      respond: z.boolean().nullable().optional(),
+      chat: z.enum(["none", "read", "write"]).nullable().optional(),
+      help: z.boolean().nullable().optional(),
+    })
+    .nullable()
+    .optional(),
 });
 
 teamRoutes.patch("/teams/:id", async (c) => {
@@ -320,6 +368,31 @@ teamRoutes.patch("/teams/:id", async (c) => {
   // Groups may include parents (a youth group across teams); the youth referee group follows the role and stays without
   if (team.kind === "group" && team.auto_members && input.parentsEnabled) {
     throw badRequest(t`The members of this group are determined automatically.`, "auto_members");
+  }
+  let child: { account: number | null; respond: number | null; chat: string | null; help: number | null } | null = null;
+  if (input.childLimits !== undefined) {
+    const classLimits = await ageClassChildLimits(c.env.DB, team);
+    if (!classLimits) throw badRequest(t`Adult teams and groups have no limits for children.`, "not_youth");
+    // null: the whole team restriction goes, the age class applies again
+    const wanted = input.childLimits ?? { account: null, respond: null, chat: null, help: null };
+    const current = teamChildLimits(team);
+    // A field left out keeps the team's value; true or "write" means no restriction of its own
+    const next = {
+      account: wanted.account === undefined ? current.account : (wanted.account ?? undefined),
+      respond: wanted.respond === undefined ? current.respond : (wanted.respond ?? undefined),
+      chat: wanted.chat === undefined ? current.chat : (wanted.chat ?? undefined),
+      help: wanted.help === undefined ? current.help : (wanted.help ?? undefined),
+    };
+    const set = Object.fromEntries(Object.entries(next).filter(([, v]) => v !== undefined)) as Partial<ChildLimits>;
+    if (input.childLimits && loosens(set, classLimits)) throw badRequest(t`The age class already allows less. A team can only restrict further.`, "loosens");
+    const restricts = next.account === false || next.respond === false || next.help === false || (next.chat !== undefined && next.chat !== "write");
+    if (restricts && team.parents_enabled !== 1) throw badRequest(t`Parents are not involved in this team, so nobody could respond for the children.`, "no_parents");
+    child = {
+      account: next.account === false ? 0 : null,
+      respond: next.respond === false ? 0 : null,
+      chat: next.chat && next.chat !== "write" ? next.chat : null,
+      help: next.help === false ? 0 : null,
+    };
   }
   for (const tid of [input.homeTemplateId, input.awayTemplateId]) {
     if (tid != null && !(await first(c.env.DB, "SELECT 1 AS ok FROM duty_templates WHERE id = ?", tid))) throw badRequest(t`This template does not exist.`);
@@ -347,6 +420,27 @@ teamRoutes.patch("/teams/:id", async (c) => {
   } catch (err) {
     if (err instanceof Error && /UNIQUE/.test(err.message)) throw conflict(t`A team with this name already exists.`);
     throw err;
+  }
+  if (child) {
+    const before = await teamLimits(c.env.DB, teamId);
+    await run(
+      c.env.DB,
+      "UPDATE teams SET child_account = ?, child_respond = ?, child_chat = ?, child_help = ? WHERE id = ?",
+      child.account,
+      child.respond,
+      child.chat,
+      child.help,
+      teamId,
+    );
+    const after = await teamLimits(c.env.DB, teamId);
+    // Without own access: player links of the team stop working
+    if (before.account && !after.account) {
+      await run(c.env.DB, "UPDATE invites SET revoked_at = ? WHERE kind = 'player' AND team_id = ? AND revoked_at IS NULL", utcIso(), teamId);
+    }
+    if (before.chat !== after.chat) {
+      const players = await all<{ person_id: number }>(c.env.DB, "SELECT person_id FROM team_memberships WHERE team_id = ? AND role IN ('player', 'helper')", teamId);
+      c.executionCtx.waitUntil(closeChildConnections(c.env, teamId, players.map((p) => p.person_id)));
+    }
   }
   if (input.parentsEnabled === false && team.parents_enabled === 1) {
     // From now on without parents: parent links invalid, disconnect open parent connections in the chat
@@ -684,6 +778,7 @@ teamRoutes.post("/teams/:id/invites", async (c) => {
     const team = await first<{ parents_enabled: number }>(c.env.DB, "SELECT parents_enabled FROM teams WHERE id = ?", teamId);
     if (team?.parents_enabled !== 1) throw conflict(t`Parents are not involved in this team. An admin can change that.`);
   }
+  if (kind === "player" && !(await teamLimits(c.env.DB, teamId)).account) throw conflict(NO_CHILD_ACCOUNT(), "no_child_account");
   const invite = await createInvite(c.env, { kind, teamId, createdBy: actor.personId });
   return c.json(
     { id: invite.id, url: inviteUrl(relyingParty(c.env, c.req.raw).origin, invite.token), expiresAt: invite.expiresAt },

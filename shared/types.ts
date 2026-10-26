@@ -21,6 +21,19 @@ export type ChildPermission = "may_accept" | "may_decline" | "may_read_chat" | "
 
 export type ChildPermissions = Record<ChildPermission, boolean>;
 
+export type ChildChat = "none" | "read" | "write";
+
+/**
+ * What players of a youth age class may do in the app themselves (children in the app): the limit of the age
+ * class, made stricter by the team. Parents' permissions apply within it. Without an own account nothing else either.
+ */
+export interface ChildLimits {
+  account: boolean;
+  respond: boolean;
+  chat: ChildChat;
+  help: boolean;
+}
+
 export const childPermissionLabels = (): Record<ChildPermission, string> => ({
   may_accept: t`Withdraw declines on their own`,
   may_decline: t`Decline on their own`,

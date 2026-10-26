@@ -7,6 +7,7 @@ import { assertNotProtected, assertNotStaffUnlessAdmin } from "../auth/owner";
 import { relyingParty } from "../auth/webauthn";
 import { syncAutoSquads } from "../domain/auto-squad";
 import { forgetInChats } from "../domain/chat";
+import { childAccountAllowed } from "../domain/child-limits";
 import { createInvite, inviteUrl } from "../domain/invites";
 import { syncAutoGroups } from "../domain/groups";
 import { all, first, list, run, stmt } from "../lib/db";
@@ -181,6 +182,10 @@ personRoutes.post("/persons/:id/personal-link", async (c) => {
   // Parents set up their child's access themselves if they are involved in the child's team
   const asParent = !target.is_admin && !target.coach && actor.children.some((ch) => ch.id === personId) && parentsInCharge(actor, personId);
   if (!target.is_admin && !target.coach && !asParent) await requireManagePerson(c.env.DB, actor, personId);
+  // No access for children whose teams allow none (children in the app); an admin can still restore one
+  if (!actor.isAdmin && !(await childAccountAllowed(c.env.DB, personId))) {
+    throw conflict(t`Children in this team have no own access. The parents use the app for their child.`, "no_child_account");
+  }
   // On an existing account the link always replaces the previous passkeys and sessions (see routes/join.ts)
   const invite = await createInvite(c.env, { kind: "personal", personId, createdBy: actor.personId });
   return c.json({ url: inviteUrl(relyingParty(c.env, c.req.raw).origin, invite.token), expiresAt: invite.expiresAt }, 201);
