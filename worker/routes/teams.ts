@@ -314,8 +314,12 @@ teamRoutes.patch("/teams/:id", async (c) => {
   if ((input.name || input.ageClassCode || input.gender || input.level || input.parentsEnabled !== undefined) && !actor.isAdmin) requireAdmin(actor);
   const team = await first<TeamRow>(c.env.DB, "SELECT * FROM teams WHERE id = ?", teamId);
   if (!team) throw notFound();
-  if (team.kind === "group" && (input.ageClassCode || input.level || input.parentsEnabled || input.helperPlan || input.autoSquad || input.homeTemplateId || input.awayTemplateId)) {
+  if (team.kind === "group" && (input.ageClassCode || input.level || input.helperPlan || input.autoSquad || input.homeTemplateId || input.awayTemplateId)) {
     throw badRequest(t`Groups only have chat and special events.`, "group_not_supported");
+  }
+  // Groups may include parents (a youth group across teams); the youth referee group follows the role and stays without
+  if (team.kind === "group" && team.auto_members && input.parentsEnabled) {
+    throw badRequest(t`The members of this group are determined automatically.`, "auto_members");
   }
   for (const tid of [input.homeTemplateId, input.awayTemplateId]) {
     if (tid != null && !(await first(c.env.DB, "SELECT 1 AS ok FROM duty_templates WHERE id = ?", tid))) throw badRequest(t`This template does not exist.`);

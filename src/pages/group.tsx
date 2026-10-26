@@ -25,7 +25,7 @@ export function GroupExplainer({ compact = false }: { compact?: boolean }) {
     <Notice>
       <Trans>
         <strong>Group or team?</strong> A group only has a chat and special events with responses, for example for the coaching team or the youth referees. Training, games, squad,
-        helper plan, parents and age group only exist for teams.
+        helper plan and age group only exist for teams.
       </Trans>
       {compact ? null : ` ${t`At the season change the members of a group are kept.`}`}
     </Notice>
@@ -111,7 +111,7 @@ export function AdminGroupsPage() {
       {create ? (
         <Sheet open onClose={() => setCreate(null)} title={t`New group`}>
           <p class="muted">
-            <Trans>Only chat and special events. No training, no games, no squad, no parents.</Trans>
+            <Trans>Only chat and special events. No training, no games, no squad.</Trans>
           </p>
           <TextField label={t`Name`} value={create.name} onInput={(v) => setCreate({ ...create, name: v })} maxLength={30} hint={t`Short, shown like a team name, e.g. JT`} />
           <Segmented<"manual" | "referees">
@@ -310,6 +310,32 @@ export function GroupPage({ team, onChanged }: { team: TeamDetail; onChanged: ()
               onChanged();
             }}
           />
+          {me.isAdmin && !auto ? (
+            <h2 class="section-title">
+              <Trans>Parents</Trans>
+            </h2>
+          ) : null}
+          {me.isAdmin && !auto ? (
+            <SwitchRow
+              label={t`Include parents`}
+              sub={t`For a youth group: linked parents see the group's special events for their child, respond for it and are in the chat. Parents are linked through the child's team; groups have no parent links.`}
+              checked={team.parentsEnabled}
+              onChange={async (value) => {
+                if (!value) {
+                  const ok = await confirmDialog({
+                    title: t`Continue without parents?`,
+                    message: t`Parents will then no longer see this group's special events and chat and can no longer respond for their child. The links between parents and children are kept.`,
+                    confirmLabel: t`Without parents`,
+                  });
+                  if (!ok) return;
+                }
+                await api.patch(`/teams/${team.id}`, { parentsEnabled: value });
+                invalidate("/teams", "/events", "/chat");
+                toast(value ? t`Parents are now included in this group.` : t`This group is now without parents.`);
+                onChanged();
+              }}
+            />
+          ) : null}
         </section>
 
         {me.isAdmin ? (

@@ -6,6 +6,8 @@ Changes that are merged but not released yet go under *Unreleased*, one line eac
 
 ## Unreleased
 
+- Groups can include parents: under the group's settings an admin switches on *Include parents*, for example for a youth group across teams. Linked parents then see the group's special events for their children, respond for them and are in the group chat.
+
 - Links with `?lang=en` or `?lang=de` (the demo links on kabine.dev and in the README) no longer reload the app over and over when the account has the other language: the link's language wins and is saved on the account. In the demo the shared accounts keep no language, so each visitor gets the browser's language.
 
 ## v0.3.1

@@ -1,6 +1,6 @@
 import { t } from "@lingui/core/macro";
 // Groups: teams with kind = 'group'. They only have chat and special events (no training, no games,
-// no squad, no parents, no age class) and remain at the season change.
+// no squad, no age class) and remain at the season change. Parents only if an admin includes them.
 // See docs/dev/design.md, Groups.
 import { all, first, stmt } from "../lib/db";
 import { badRequest, notFound } from "../lib/http";

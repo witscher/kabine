@@ -483,6 +483,11 @@ msgstr "Kürzel"
 msgid "Former (will be deleted)"
 msgstr "Ehemalig (wird gelöscht)"
 
+# ai
+#: src/pages/group.tsx
+msgid "<0>Group or team?</0> A group only has a chat and special events with responses, for example for the coaching team or the youth referees. Training, games, squad, helper plan and age group only exist for teams."
+msgstr "<0>Gruppe oder Mannschaft?</0> Eine Gruppe hat nur einen Chat und Sondertermine mit Zu- und Absage, etwa für das Trainerteam oder die Jugendschiedsrichter. Training, Spiele, Kader, Helferplan und Altersklasse gibt es nur bei Mannschaften."
+
 #: modules/youth-referees/app/referees.tsx
 msgid "No one yet"
 msgstr "Noch niemand"
@@ -1826,6 +1831,7 @@ msgid "This request does not exist."
 msgstr "Diese Anfrage gibt es nicht."
 
 #: src/pages/admin.tsx
+#: src/pages/group.tsx
 msgid "Continue without parents?"
 msgstr "Ohne Eltern weiterführen?"
 
@@ -2796,11 +2802,6 @@ msgstr "Treffpunkt: {point}"
 #: src/pages/setup-wizard.tsx
 msgid "New person"
 msgstr "Neue Person"
-
-# ai
-#: src/pages/group.tsx
-msgid "<0>Group or team?</0> A group only has a chat and special events with responses, for example for the coaching team or the youth referees. Training, games, squad, helper plan, parents and age group only exist for teams."
-msgstr "<0>Gruppe oder Mannschaft?</0> Eine Gruppe hat nur einen Chat und Sondertermine mit Zu- und Absage, etwa für das Trainerteam oder die Jugendschiedsrichter. Training, Spiele, Kader, Helferplan, Eltern und Altersklasse gibt es nur bei Mannschaften."
 
 # ai
 #: modules/sms/worker/routes.ts
@@ -4652,6 +4653,7 @@ msgid "Leads of {teamName}"
 msgstr "Verantwortliche {teamName}"
 
 #: src/pages/admin.tsx
+#: src/pages/group.tsx
 msgid "Include parents"
 msgstr "Eltern einbinden"
 
@@ -5835,10 +5837,6 @@ msgstr "Spieler/in"
 msgid "{list} and {last}"
 msgstr "{list} und {last}"
 
-#: src/pages/group.tsx
-msgid "Only chat and special events. No training, no games, no squad, no parents."
-msgstr "Nur Chat und Sondertermine. Kein Training, keine Spiele, kein Kader, keine Eltern."
-
 # ai
 #: src/pages/club-settings.tsx
 msgid "For everyone who has not chosen a language, and for messages outside the app."
@@ -5920,6 +5918,11 @@ msgstr "Anmeldecodes und Erinnerungen zum Helferplan per SMS, für alle, die ein
 #: src/pages/setup-wizard.tsx
 msgid "Excel or CSV files, also several with overlapping people. Teams, coaches and players are created after you have checked and corrected them."
 msgstr "Excel- oder CSV-Dateien, auch mehrere mit denselben Personen. Mannschaften, Trainer und Spieler werden angelegt, nachdem du sie geprüft und korrigiert hast."
+
+# ai
+#: src/pages/group.tsx
+msgid "Parents will then no longer see this group's special events and chat and can no longer respond for their child. The links between parents and children are kept."
+msgstr "Eltern sehen dann die Sondertermine und den Chat dieser Gruppe nicht mehr und können nicht mehr für ihr Kind antworten. Die Verknüpfungen zwischen Eltern und Kindern bleiben erhalten."
 
 #: src/pages/season.tsx
 msgid "New season started"
@@ -7251,6 +7254,11 @@ msgstr "Stummschaltung aufgehoben."
 #: modules/duties/app/helpers.tsx
 msgid "Delete game"
 msgstr "Spiel löschen"
+
+# ai
+#: src/pages/group.tsx
+msgid "This group is now without parents."
+msgstr "Diese Gruppe ist jetzt ohne Eltern."
 
 #: src/pages/team.tsx
 msgid "Stand-in from {homeTeam}. Their coach maintains the personal data."
@@ -8838,6 +8846,7 @@ msgstr "Deine nächsten Termine"
 #: src/faq.tsx
 #: src/pages/admin.tsx
 #: src/pages/admin.tsx
+#: src/pages/group.tsx
 #: src/pages/team.tsx
 #: src/pages/team.tsx
 msgid "Parents"
@@ -8898,6 +8907,11 @@ msgstr "{label} per SMS"
 #: src/pages/event.tsx
 msgid "created the event"
 msgstr "hat den Termin angelegt"
+
+# ai
+#: src/pages/group.tsx
+msgid "Only chat and special events. No training, no games, no squad."
+msgstr "Nur Chat und Sondertermine. Kein Training, keine Spiele, kein Kader."
 
 #: src/pages/admin.tsx
 msgid "Choose teams"
@@ -9003,6 +9017,11 @@ msgstr "Dafür fehlt dir die Berechtigung."
 #: src/calendar.tsx
 msgid "Download as file"
 msgstr "Als Datei laden"
+
+# ai
+#: src/pages/group.tsx
+msgid "For a youth group: linked parents see the group's special events for their child, respond for it and are in the chat. Parents are linked through the child's team; groups have no parent links."
+msgstr "Für eine Jugendgruppe: Verknüpfte Eltern sehen die Sondertermine der Gruppe für ihr Kind, antworten für es und sind im Chat. Eltern werden über die Mannschaft des Kindes verknüpft; Gruppen haben keine Elternlinks."
 
 #: src/pages/special.tsx
 msgid "All players of all teams"
@@ -10331,6 +10350,7 @@ msgid "New"
 msgstr "Neu"
 
 #: src/pages/admin.tsx
+#: src/pages/group.tsx
 msgid "Without parents"
 msgstr "Ohne Eltern"
 
@@ -10642,6 +10662,7 @@ msgstr "Admin-Zugang"
 
 #: worker/routes/teams.ts
 #: worker/routes/teams.ts
+#: worker/routes/teams.ts
 msgid "The members of this group are determined automatically."
 msgstr "Die Mitglieder dieser Gruppe ergeben sich automatisch."
 
@@ -10782,6 +10803,11 @@ msgstr "{firstName} ist inaktiv."
 #: modules/duties/app/helpers.tsx
 msgid "The games come from the team's fixture list. Special events appear here as soon as helpers are needed for them."
 msgstr "Die Spiele kommen aus dem Spielplan der Mannschaft. Sondertermine erscheinen hier, sobald Helfer dafür gesucht werden."
+
+# ai
+#: src/pages/group.tsx
+msgid "Parents are now included in this group."
+msgstr "Eltern sind jetzt in dieser Gruppe dabei."
 
 #: src/pages/team.tsx
 msgid "Lost device or new passkey: open the person in the squad overview and create a personal one-time link."

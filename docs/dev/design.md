@@ -328,7 +328,7 @@ When it is on, players and involved parents who take part in the event themselve
 
 ## Groups
 
-For circles without training and games (coaching team, youth referees) there are groups: only chat and special events with responses, reminders, push and calendar. No training, no games, no squad, no helper plan, no parents, no age group. In the UI the members are "Members" and "Leads" (internally `player` and `coach`).
+For circles without training and games (coaching team, youth referees) there are groups: only chat and special events with responses, reminders, push and calendar. No training, no games, no squad, no helper plan, no age group. Parents only if an admin includes them ("Include parents", off by default), for example for a youth group across teams: then linked parents see its special events for their children, respond for them and are in the chat, as in teams; there are no parent invitation links for groups, parents are linked through the child's team. The youth referee group always stays without parents. In the UI the members are "Members" and "Leads" (internally `player` and `coach`).
 
 A group is a row in `teams` with `kind = 'group'`. Chat, push, unread counters, `@alle` and special events work unchanged. Team features reject groups with `group_not_supported` (`requireTeam`).
 

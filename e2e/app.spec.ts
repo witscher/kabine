@@ -1299,6 +1299,14 @@ test("Gruppen: Admin legt eine Gruppe an, der Unterschied zur Mannschaft ist erk
   // Keine Mannschafts-Funktionen
   await expect(page.getByRole("link", { name: "Trainingspläne" })).toHaveCount(0);
   await expect(page.getByRole("link", { name: "Sondertermin anlegen" })).toBeVisible();
+  // Eltern sind erst dabei, wenn ein Admin sie einbezieht (z. B. eine Jugendgruppe), und lassen sich wieder ausschließen
+  const parents = page.getByRole("switch", { name: /Eltern einbinden/ });
+  await expect(parents).toHaveAttribute("aria-checked", "false");
+  await parents.click();
+  await expect(page.getByText("Eltern sind jetzt in dieser Gruppe dabei.")).toBeVisible();
+  await parents.click();
+  await page.getByRole("dialog", { name: "Ohne Eltern weiterführen?" }).getByRole("button", { name: "Ohne Eltern" }).click();
+  await expect(page.getByText("Diese Gruppe ist jetzt ohne Eltern.")).toBeVisible();
 
   await page.getByRole("button", { name: "Mitglieder hinzufügen" }).click();
   const add = page.getByRole("dialog", { name: "Mitglieder Trainerteam" });

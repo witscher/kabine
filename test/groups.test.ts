@@ -1,7 +1,7 @@
 // Gruppen: nur Chat und Sondertermine, Jugendschiedsrichter-Gruppe folgt der Rolle. Namen erfunden.
 import { addDays, todayLocal } from "../worker/lib/time";
 import { beforeEach, describe, expect, it } from "vitest";
-import { api, freshDb, loginAs, member, one, person, rows, season, team } from "./helpers";
+import { api, eventIn, freshDb, guardian, loginAs, member, one, person, rows, season, team } from "./helpers";
 
 let wd: number;
 let admin: number;
@@ -146,5 +146,28 @@ describe("Gruppen", () => {
     expect(done.body.ok).toBe(true);
     expect(await one<{ n: number }>("SELECT count(*) AS n FROM team_memberships WHERE team_id = ?", jt)).toEqual({ n: 2 });
     expect(await one<{ n: number }>("SELECT count(*) AS n FROM team_memberships WHERE team_id = ? AND role = 'coach'", wd)).toEqual({ n: 0 });
+  });
+
+  it("Eltern einbeziehen: Admin schaltet es für eine Gruppe ein, Eltern sehen Termine und Chat für ihr Kind", async () => {
+    const tw = await createGroup("TW-Training");
+    await member(alma, tw);
+    const mama = await person("Mama");
+    await guardian(mama, alma);
+    const ev = await eventIn(tw, 3, { kind: "special", title: "Torwarttraining" });
+    const parentCookie = await loginAs(mama);
+    const sees = async () => ((await api("/events?limit=20", { cookie: parentCookie })).body.events as { id: number }[]).some((e) => e.id === ev);
+    const inChat = async () => ((await api("/chat/rooms", { cookie: parentCookie })).body.rooms as { teamId: number; viaChildren: string[] }[]).find((r) => r.teamId === tw);
+
+    expect(await sees()).toBe(false);
+    expect(await inChat()).toBeUndefined();
+    // Only admins switch it, and never for the youth referee group
+    expect((await api(`/teams/${tw}`, { method: "PATCH", cookie: await loginAs(coach), body: { parentsEnabled: true } })).status).toBe(403);
+    expect((await api(`/teams/${tw}`, { method: "PATCH", cookie: adminCookie, body: { parentsEnabled: true } })).status).toBe(200);
+    expect(await sees()).toBe(true);
+    expect(await inChat()).toMatchObject({ viaChildren: ["Alma"] });
+    // Still no parent invitation links for groups
+    expect((await api(`/teams/${tw}/invites`, { cookie: adminCookie, body: { kind: "parent" } })).status).toBe(400);
+    const referees = await createGroup("JSR", "referees");
+    expect((await api(`/teams/${referees}`, { method: "PATCH", cookie: adminCookie, body: { parentsEnabled: true } })).status).toBe(400);
   });
 });

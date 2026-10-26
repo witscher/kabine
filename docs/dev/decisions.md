@@ -2,6 +2,10 @@
 
 Decisions not covered by `docs/dev/roadmap.md`, with reasons. Newest first.
 
+## Groups can include parents (October 2026)
+
+Groups used to have no parents. A youth group with children, such as goalkeeper training across teams, then showed its events only to children with their own access. Groups now have the "Include parents" switch of teams (admins, off by default); with it on, parents take part as in a team. Groups still have no parent invitation links: parents are linked through the child's team, and a group alone is no reason to bring new parents into the app. The youth referee group follows the role and stays without parents.
+
 ## No database of the club's own (October 2026)
 
 Checked whether an installation could use its own PostgreSQL or MySQL server through Cloudflare Hyperdrive (reached through a Cloudflare Tunnel) instead of D1. Not done, and not planned:
