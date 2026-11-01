@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Contact – Kabine</title>
+<meta name="robots" content="noindex">
+<link rel="alternate" hreflang="de" href="https://kabine.dev/kontakt/">
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/style.css">
+<script src="/lang.js" defer></script>
+<!-- Turnstile is loaded on this page only -->
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+</head>
+<body>
+{{HEADER}}
+<main class="wrap legal">
+<h1>Contact</h1>
+<p>Questions about Kabine, the website or the demo. Bugs and ideas for the app are best filed as a <a href="https://github.com/witscher/kabine/issues">GitHub issue</a>, security problems as described in <a href="https://github.com/witscher/kabine/blob/main/SECURITY.md">SECURITY.md</a>. For your club's app, please ask your club.</p>
+
+<p class="form-status" id="form-status" role="alert" hidden></p>
+<form class="contact-form" method="post" action="/api/contact">
+<input type="hidden" name="lang" value="en">
+<label for="name">Name</label>
+<input id="name" name="name" type="text" autocomplete="name" maxlength="100" required>
+<label for="email">Email</label>
+<input id="email" name="email" type="email" autocomplete="email" maxlength="254" required>
+<label for="message">Message</label>
+<textarea id="message" name="message" rows="7" maxlength="5000" required></textarea>
+<div class="cf-turnstile" data-sitekey="{{TURNSTILE_SITE_KEY}}" data-language="en" data-size="flexible"></div>
+<noscript><p class="form-hint">The spam check needs JavaScript. Without it, you can write to {{LEGAL_EMAIL}} instead.</p></noscript>
+<button class="btn primary on-light" type="submit">Send message</button>
+</form>
+<p class="form-hint">How your data is processed is described in the <a href="/en/privacy/">privacy policy</a> (sections 5 and 6).</p>
+</main>
+{{FOOTER}}
+</body>
+</html>

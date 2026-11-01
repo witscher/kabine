@@ -1,12 +1,13 @@
 // Builds the project website (kabine.dev) into site/dist: start pages, content pages (site/src/pages.mjs),
 // the club documentation and release notes as pages (site/src/docs.mjs), sitemap, robots.txt, 404, the demo
 // screenshots as WebP and the self-hosted fonts. The legal notice needs the publisher's details from
-// site/legal.json (not in the repository, see site/legal.example.json); `--preview` builds with placeholders.
+// site/legal.json (not in the repository, see site/legal.example.json); `--preview` builds with placeholders where
+// it is missing.
 import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
 import sharp from "sharp";
 import { docPages, docsHub, newsPage } from "../site/src/docs.mjs";
-import { contentPage, footer, GITHUB, head, ORIGIN } from "../site/src/layout.mjs";
+import { contentPage, footer, GITHUB, head, header, LEGAL_ALTERNATES, ORIGIN } from "../site/src/layout.mjs";
 import { PAGES, softwareApplication } from "../site/src/pages.mjs";
 
 const preview = process.argv.includes("--preview");
@@ -18,25 +19,34 @@ const write = (path, html) => {
   writeFileSync(file, html);
 };
 
+// Turnstile's test key (always passes) for local builds
+const TEST_SITE_KEY = "1x00000000000000000000AA";
 let legal;
 if (existsSync("site/legal.json")) {
   legal = JSON.parse(read("site/legal.json"));
 } else if (preview) {
-  legal = { name: "[name]", street: "[street]", city: "[postcode city]", email: "[e-mail]" };
+  legal = { name: "[name]", address: ["[c/o]", "[street]", "[postcode city]"], email: "[e-mail]", mailbox: "[mail provider, address]" };
 } else {
-  console.error("site/legal.json is missing (name, street, city, email of the publisher). Copy site/legal.example.json, or use --preview.");
+  console.error("site/legal.json is missing (operator, address, e-mail, mail provider, Turnstile site key). Copy site/legal.example.json, or use --preview.");
   process.exit(1);
 }
-for (const key of ["name", "street", "city", "email"]) {
-  if (!legal[key]) throw new Error(`site/legal.json: "${key}" is empty`);
+for (const key of ["name", "address", "email", "mailbox"]) {
+  if (legal[key]?.length) continue;
+  if (!preview) throw new Error(`site/legal.json: "${key}" is empty`);
+  legal[key] = key === "address" ? [`[${key}]`] : `[${key}]`;
 }
-const escape = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-const fill = (html) =>
+if (preview) legal.turnstileSiteKey = TEST_SITE_KEY;
+else if (!legal.turnstileSiteKey) throw new Error('site/legal.json: "turnstileSiteKey" is empty (the Turnstile widget of the contact form)');
+const escape = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+const fill = (html, lang, alternates) =>
   html
-    .replace("{{LEGAL_NAME}}", escape(legal.name))
-    .replace("{{LEGAL_STREET}}", escape(legal.street))
-    .replace("{{LEGAL_CITY}}", escape(legal.city))
-    .replace("{{LEGAL_EMAIL}}", escape(legal.email));
+    .replace("{{HEADER}}", header(lang, alternates))
+    .replace("{{FOOTER}}", footer(lang, alternates))
+    .replaceAll("{{LEGAL_NAME}}", escape(legal.name))
+    .replaceAll("{{LEGAL_ADDRESS}}", legal.address.map(escape).join("<br>"))
+    .replaceAll("{{LEGAL_EMAIL}}", `<a href="mailto:${escape(legal.email)}">${escape(legal.email)}</a>`)
+    .replaceAll("{{LEGAL_MAILBOX}}", escape(legal.mailbox))
+    .replaceAll("{{TURNSTILE_SITE_KEY}}", escape(legal.turnstileSiteKey));
 
 rmSync(out, { recursive: true, force: true });
 mkdirSync(`${out}/fonts`, { recursive: true });
@@ -104,8 +114,28 @@ for (const page of [...docPages(), docsHub("de"), docsHub("en"), newsPage()]) {
 }
 
 // Legal notice (not in the sitemap) and 404 ---------------------------------------------------------------
-write("/impressum/", fill(read("site/src/legal.de.html")));
-write("/en/legal/", fill(read("site/src/legal.en.html")));
+for (const [kind, alternates] of Object.entries(LEGAL_ALTERNATES)) {
+  for (const lang of ["de", "en"]) write(alternates[lang], fill(read(`site/src/${kind}.${lang}.html`), lang, alternates));
+}
+// Contact form (site/worker.mjs answers it) and the page after sending
+const sentAlternates = { de: "/kontakt/gesendet/", en: "/en/contact/sent/" };
+for (const lang of ["de", "en"]) {
+  const de = lang === "de";
+  write(
+    sentAlternates[lang],
+    contentPage({
+      lang,
+      path: sentAlternates[lang],
+      title: de ? "Nachricht gesendet – Kabine" : "Message sent – Kabine",
+      description: de ? "Deine Nachricht ist angekommen." : "Your message has been delivered.",
+      alternates: sentAlternates,
+      kicker: de ? "Kontakt" : "Contact",
+      h1: de ? "Nachricht gesendet" : "Message sent",
+      lead: de ? "Danke, deine Nachricht ist angekommen. Ich antworte dir per E-Mail." : "Thanks, your message has been delivered. I'll get back to you by email.",
+      body: "",
+    }).replace("</head>", '<meta name="robots" content="noindex">\n</head>'),
+  );
+}
 write(
   "/404.html",
   `<!doctype html>
@@ -185,7 +215,7 @@ for (const [pkg, file] of [
 }
 
 // Every internal link points to a built page (a typo would be a dead link for visitors and search engines)
-const pages = new Set(sitemap.map((s) => s.path).concat(["/impressum/", "/en/legal/"]));
+const pages = new Set(sitemap.map((s) => s.path).concat(Object.values(LEGAL_ALTERNATES).flatMap((a) => Object.values(a)), Object.values(sentAlternates)));
 const broken = [];
 const walk = (dir) => {
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
@@ -205,3 +235,10 @@ if (broken.length) {
   process.exit(1);
 }
 console.log(`Website built in ${out}: ${sitemap.length} pages${preview ? " (preview, legal notice has placeholders)" : ""}. Source: ${GITHUB}`);
+
+// Deploy configuration: site/wrangler.jsonc with the recipient of the contact form from legal.json
+if (!preview) {
+  const config = read("site/wrangler.jsonc").replace('"send_email": [{ "name": "EMAIL" }],', `"send_email": [{ "name": "EMAIL", "destination_address": ${JSON.stringify(legal.email)} }],\n  "vars": { "MAIL_TO": ${JSON.stringify(legal.email)} },`);
+  if (!config.includes("destination_address")) throw new Error("site/wrangler.jsonc: the send_email binding was not found");
+  writeFileSync("site/wrangler.deploy.jsonc", `// Generated by scripts/site-build.mjs from wrangler.jsonc, do not edit\n${config}`);
+}

@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kontakt – Kabine</title>
+<meta name="robots" content="noindex">
+<link rel="alternate" hreflang="en" href="https://kabine.dev/en/contact/">
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/style.css">
+<script src="/lang.js" defer></script>
+<!-- Turnstile is loaded on this page only -->
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+</head>
+<body>
+{{HEADER}}
+<main class="wrap legal">
+<h1>Kontakt</h1>
+<p>Fragen zu Kabine, zur Website oder zur Demo. Fehler und Ideen für die App gehören am besten als <a href="https://github.com/witscher/kabine/issues">Issue auf GitHub</a>, Sicherheitsprobleme nach <a href="https://github.com/witscher/kabine/blob/main/SECURITY.md">SECURITY.md</a>. Für die App deines Vereins ist dein Verein zuständig.</p>
+
+<p class="form-status" id="form-status" role="alert" hidden></p>
+<form class="contact-form" method="post" action="/api/contact">
+<input type="hidden" name="lang" value="de">
+<label for="name">Name</label>
+<input id="name" name="name" type="text" autocomplete="name" maxlength="100" required>
+<label for="email">E-Mail</label>
+<input id="email" name="email" type="email" autocomplete="email" maxlength="254" required>
+<label for="message">Nachricht</label>
+<textarea id="message" name="message" rows="7" maxlength="5000" required></textarea>
+<div class="cf-turnstile" data-sitekey="{{TURNSTILE_SITE_KEY}}" data-language="de" data-size="flexible"></div>
+<noscript><p class="form-hint">Die Spam-Prüfung braucht JavaScript. Ohne JavaScript kannst du stattdessen an {{LEGAL_EMAIL}} schreiben.</p></noscript>
+<button class="btn primary on-light" type="submit">Nachricht senden</button>
+</form>
+<p class="form-hint">Wie deine Angaben verarbeitet werden, steht in der <a href="/datenschutz/">Datenschutzerklärung</a> (Abschnitte 5 und 6).</p>
+</main>
+{{FOOTER}}
+</body>
+</html>

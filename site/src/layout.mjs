@@ -4,6 +4,13 @@
 export const ORIGIN = "https://kabine.dev";
 export const GITHUB = "https://github.com/witscher/kabine";
 
+/** Legal notice, privacy policy and contact form of kabine.dev and the demo (handball.kabine.dev links to these paths). */
+export const LEGAL_ALTERNATES = {
+  notice: { de: "/impressum/", en: "/en/legal/" },
+  privacy: { de: "/datenschutz/", en: "/en/privacy/" },
+  contact: { de: "/kontakt/", en: "/en/contact/" },
+};
+
 const escape = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
 /** Pages linked in every footer, per language: [path, label]. */
@@ -106,7 +113,9 @@ export function footer(lang, alternates = {}) {
     </nav>
     <div class="footer-meta">
       <span>Kabine · ${de ? "freie Software unter AGPL-3.0" : "free software under AGPL-3.0"}</span>
-      <a href="${de ? "/impressum/" : "/en/legal/"}">${de ? "Impressum und Datenschutz" : "Legal notice and privacy"}</a>
+      <a href="${LEGAL_ALTERNATES.notice[lang]}">${de ? "Impressum" : "Legal notice"}</a>
+      <a href="${LEGAL_ALTERNATES.privacy[lang]}">${de ? "Datenschutz" : "Privacy"}</a>
+      <a href="${LEGAL_ALTERNATES.contact[lang]}">${de ? "Kontakt" : "Contact"}</a>
       <a href="${GITHUB}">GitHub</a>
       ${other ? `<a class="push" href="${other}" hreflang="${de ? "en" : "de"}" data-lang="${de ? "en" : "de"}">${de ? "English" : "Deutsch"}</a>` : ""}
     </div>

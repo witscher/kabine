@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Privacy policy – Kabine</title>
+<meta name="robots" content="noindex">
+<link rel="alternate" hreflang="de" href="https://kabine.dev/datenschutz/">
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/style.css">
+<script src="/lang.js" defer></script>
+</head>
+<body>
+{{HEADER}}
+<main class="wrap legal">
+<h1>Privacy policy</h1>
+<p>This policy applies to the project website kabine.dev and the public demo on handball.kabine.dev. It does not apply to the clubs' Kabine installations: there, the club is the controller and its own privacy policy applies. This is a translation; the <a href="/datenschutz/">German version</a> is authoritative.</p>
+
+<h2>1. Controller</h2>
+<p>{{LEGAL_NAME}}<br>{{LEGAL_ADDRESS}}<br>Germany<br>Email: {{LEGAL_EMAIL}}</p>
+
+<h2>2. Hosting on Cloudflare</h2>
+<p>Both websites run on Cloudflare, Inc., 101 Townsend St, San Francisco, CA 94107, USA. When you open a page, Cloudflare necessarily processes technical connection data: your IP address, date and time, the requested address, browser and operating system. This is needed to deliver the pages and protect them against attacks and misuse.</p>
+<p>Legal basis: Art. 6(1)(f) GDPR. My legitimate interest is the secure and reliable operation of the websites.</p>
+<p>Cloudflare acts as a processor under a data processing agreement. Data may be transferred to the USA. Cloudflare is certified under the EU-U.S. Data Privacy Framework, which the European Commission has recognised as providing an adequate level of protection (Art. 45 GDPR).</p>
+
+<h2>3. Cloudflare bot protection</h2>
+<p>On both websites Cloudflare sets the cookie <code>__cf_bm</code> to recognise automated access (bots). It holds an identifier that Cloudflare derives from properties of the connection and expires after 30 minutes. If a request looks suspicious, Cloudflare may show a check page instead of the page. A Cloudflare script runs in your browser there and evaluates technical properties of your browser and device; after a passed check Cloudflare sets the cookie <code>cf_clearance</code>, which by default expires after 30 minutes. Cloudflare does not insert a script into the normal pages.</p>
+<p>Legal basis: Art. 6(1)(f) GDPR; my legitimate interest is protecting the websites against misuse. Accessing your device for this is strictly necessary (§ 25(2) no. 2 TDDDG).</p>
+
+<h2>4. kabine.dev</h2>
+<p>Apart from the cookie in section 3, the website sets no cookies, uses no analytics or advertising and loads no fonts, scripts, images or other content from other servers. The only exception is Cloudflare Turnstile on the contact page (section 6).</p>
+<p>If you switch the language or close the hint about the other language version, your browser stores this choice in localStorage (entry <code>kabine-site-lang</code>). It stays on your device until you delete it in your browser settings and is not sent to me. Storing it is strictly necessary for the language choice you asked for (§ 25(2) no. 2 TDDDG).</p>
+<p>Links to other websites (such as GitHub) are plain links. Only when you click one does your browser connect to the other website; it then sends only the address kabine.dev, not the page you came from. From then on the other provider's privacy policy applies.</p>
+
+<h2>5. Contact form</h2>
+<p>If you use the <a href="/en/contact/">contact form</a>, I receive your name, email address and message. I use them only to answer your request. The form is delivered to my mailbox by email (Cloudflare Email Sending) and is not stored in a database; its content is not logged either. My mailbox is hosted by {{LEGAL_MAILBOX}}. I delete the message once your request has been dealt with, unless I am legally required to keep it.</p>
+<p>Legal basis: Art. 6(1)(f) GDPR; my legitimate interest is responding to your request.</p>
+
+<h2>6. Spam protection (Cloudflare Turnstile)</h2>
+<p>The contact page uses Cloudflare Turnstile to protect the form against bots. For this the page loads a Cloudflare script (challenges.cloudflare.com) that evaluates technical information about your browser and device. Turnstile is loaded only on the contact page.</p>
+<p>Legal basis: Art. 6(1)(f) GDPR; my legitimate interest is protecting the form against abuse. Accessing this information on your device is strictly necessary to provide the contact form you are using (§ 25(2) no. 2 TDDDG). Cloudflare processes the data as described in section 2.</p>
+
+<h2>7. Demo on handball.kabine.dev</h2>
+<p>The demo shows the app with an invented club. You use it without signing up, through shared demo access (player, parent, coach, admin) that all visitors use together. Whatever you enter there is seen by other visitors. Please do not enter real personal data. Email, SMS, passkeys, profile pictures, uploading a club logo, feedback and the game schedules from handball4all are switched off in the demo.</p>
+<p><strong>Every night at 3:00 (German time) the demo is reset:</strong> everything visitors entered is deleted on the server and the invented club is created again.</p>
+<p>Legal basis: Art. 6(1)(f) GDPR; my legitimate interest is presenting the software and letting people try it. Accessing your device (section 7.1) is strictly necessary for the demo to work the way you use it (§ 25(2) no. 2 TDDDG).</p>
+
+<h3>7.1 In your browser</h3>
+<table>
+<thead><tr><th>What</th><th>Purpose</th><th>How long</th></tr></thead>
+<tbody>
+<tr><td>Cookie <code>__Host-kabine_session</code></td><td>Keeps you signed in to the chosen demo access (random identifier).</td><td>30 days; invalid on the server from the next reset</td></tr>
+<tr><td>Cookie <code>kabine_view</code></td><td>Admin access only: remembers the view "see as player, parent or coach".</td><td>Until you close the browser</td></tr>
+<tr><td>Cookie <code>__cf_bm</code></td><td>Cloudflare bot protection (section 3).</td><td>30 minutes</td></tr>
+<tr><td>localStorage</td><td>Language (<code>kabine-locale</code>), the demo club’s profile for a fast start, such as name, colours and links, without personal data (<code>kabine-club</code>), day of the last welcome screen (<code>kabine-splash-day</code>), closed hints, in the admin access the draft of a list import.</td><td>Until you delete them in your browser; the import draft until the import is finished or discarded</td></tr>
+<tr><td>sessionStorage</td><td>Selected team and tab, progress of the setup wizard, protection against reloading twice after updates.</td><td>Until you close the tab</td></tr>
+<tr><td>Service worker with cache</td><td>Makes the app installable and shows the last loaded state without network: app files (<code>kabine-shell-v1</code>) and recently loaded content such as events and chats of the demo club (<code>kabine-api</code>).</td><td>App files until the next update; content until you sign out or the session ends after the reset</td></tr>
+<tr><td>Push subscription</td><td>Only if you switch on notifications: your browser creates a subscription with its maker's push service (such as Google, Mozilla, Apple, Microsoft), which delivers the notifications.</td><td>Until you switch notifications off; on the server until the reset</td></tr>
+</tbody>
+</table>
+<p>The demo does not use IndexedDB.</p>
+
+<h3>7.2 On the server</h3>
+<table>
+<thead><tr><th>Where</th><th>What</th><th>How long</th></tr></thead>
+<tbody>
+<tr><td>Database (Cloudflare D1)</td><td>Everything entered in the demo: responses with reasons, events, helper duties, carpools, settings; sign-ins with device type (from the browser identification) and times; push subscriptions (address at the push service and keys).</td><td>Until the next reset</td></tr>
+<tr><td>Durable Objects</td><td>Team chat messages and read markers; devices connected live to chat and helper plans.</td><td>Messages until the next reset; connections while the page is open</td></tr>
+<tr><td>KV storage</td><td>Maintenance switch, a lock against repeated reminders for one event (event number).</td><td>Lock 15 minutes, otherwise until the next reset</td></tr>
+<tr><td>Queues</td><td>Jobs for push notifications (recipients, text of the notification).</td><td>Until delivered, usually seconds</td></tr>
+<tr><td>Workers Logs</td><td>One log entry per request: time, requested address, method, status code, technical properties of the request (including browser identification and country, possibly the IP address) and error messages of the app. The app does not write names, messages or form contents to the log.</td><td>At most 7 days</td></tr>
+</tbody>
+</table>
+
+<h2>8. No sharing, no tracking</h2>
+<p>I do not share data with third parties, except Cloudflare as processor, my email provider for messages from the contact form and, if you switch on notifications in the demo, your browser's push service. There is no tracking, no analytics and no advertising.</p>
+
+<h2>9. Your rights</h2>
+<p>You have the right of access (Art. 15 GDPR), rectification (Art. 16), erasure (Art. 17), restriction of processing (Art. 18), data portability (Art. 20) and to object (Art. 21). To exercise them, write to the email address above. You also have the right to lodge a complaint with a data protection supervisory authority, for example the authority where you live.</p>
+
+<div class="note">
+<h2>Right to object</h2>
+<p>You may object at any time, on grounds relating to your particular situation, to the processing of your data based on Art. 6(1)(f) GDPR (Art. 21(1) GDPR). I will then no longer process it unless I can demonstrate compelling legitimate grounds which override your interests, rights and freedoms, or the processing serves the establishment, exercise or defence of legal claims. An informal objection to the email address above is enough.</p>
+</div>
+
+<p>Last updated: October 2026</p>
+<p><a href="/en/legal/">Legal notice</a></p>
+</main>
+{{FOOTER}}
+</body>
+</html>

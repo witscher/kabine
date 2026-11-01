@@ -29,7 +29,7 @@
     "site:build": "node scripts/site-build.mjs",
     "site:og": "node scripts/site-og.mjs",
     "site:dev": "node scripts/site-build.mjs --preview && wrangler dev --config site/wrangler.jsonc --port 8790",
-    "site:deploy": "node scripts/site-build.mjs && wrangler deploy --config site/wrangler.jsonc",
+    "site:deploy": "node scripts/site-build.mjs && wrangler deploy --config site/wrangler.deploy.jsonc",
     "demo:reset": "node scripts/demo-reset.mjs",
     "admin:link": "node scripts/admin-link.mjs",
     "maintenance:on": "node scripts/maintenance.mjs on",

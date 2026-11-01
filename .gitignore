@@ -11,3 +11,4 @@ playwright-report/
 *.tsbuildinfo
 site/dist/
 site/legal.json
+site/wrangler.deploy.jsonc

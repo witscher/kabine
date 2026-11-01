@@ -1,12 +1,18 @@
 {
   "$schema": "../node_modules/wrangler/config-schema.json",
-  // Project website on kabine.dev: static files only, built by `npm run site:build` into site/dist.
-  // Deploy: npm run site:deploy
+  // Project website on kabine.dev: static files built by `npm run site:build` into site/dist, plus the contact
+  // form in worker.mjs. Deploy: npm run site:deploy, which builds wrangler.deploy.jsonc from this file with the
+  // recipient from legal.json (MAIL_TO and the destination of the e-mail binding).
+  // Secret, once: npx wrangler secret put TURNSTILE_SECRET_KEY --config site/wrangler.jsonc
   "name": "kabine-site",
   "compatibility_date": "2026-08-20",
-  "assets": { "directory": "./dist", "not_found_handling": "404-page" },
+  "main": "./worker.mjs",
+  "assets": { "directory": "./dist", "binding": "ASSETS", "not_found_handling": "404-page", "run_worker_first": ["/api/*"] },
+  // Needs kabine.dev onboarded to Email Sending; the binding sends only to the operator's address
+  "send_email": [{ "name": "EMAIL" }],
   "workers_dev": false,
   "preview_urls": false,
   "routes": [{ "pattern": "kabine.dev", "custom_domain": true }],
-  "observability": { "enabled": true }
+  // No Workers Logs: the contact form is the only code that runs, and nothing about it needs to be kept
+  "observability": { "enabled": false }
 }
