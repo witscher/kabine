@@ -7,7 +7,7 @@ import { dayOfMonth, monthShort, shortDate, time, todayLocal, weekdayShort } fro
 import { Icon } from "../../../src/icons";
 import { useModule } from "../../../src/club";
 import { useMe } from "../../../src/session";
-import { useQuery } from "../../../src/store";
+import { useQuery, useSearch } from "../../../src/store";
 import { BlockEditSheet, BlockSheet, blockTime, type TemplateInfo } from "../../../src/duty-blocks";
 import { Button, confirmDialog, Empty, ErrorBox, Field, Segmented, Sheet, Spinner, SwitchRow, TextField, toast, TopBar, useDocumentTitle } from "../../../src/ui";
 
@@ -520,7 +520,7 @@ function OnBehalfPicker({ game, blocks, onDone }: { game: Game; blocks: Block[];
   }, [search]);
   const referee = !!selected?.referee;
   const team = useQuery<{ people: PersonOption[] }>(referee ? "/duties/referee/people" : `/duties/events/${game.id}/people`);
-  const club = useQuery<{ people: PersonOption[] }>(!referee && q.length >= 2 ? `/duties/events/${game.id}/people?q=${encodeURIComponent(q)}` : null);
+  const club = useSearch<{ people: PersonOption[] }>(`/duties/events/${game.id}/people/search`, !referee && q.length >= 2 ? { q } : null);
   const needle = search.trim().toLowerCase();
   const name = search.trim();
   const list: PersonOption[] =

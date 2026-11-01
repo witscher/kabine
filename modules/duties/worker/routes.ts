@@ -513,27 +513,48 @@ dutyRoutes.post("/duties/events/:id/apply-template", async (c) => {
   return c.json({ ok: true, created: statements.length });
 });
 
+const ACCOUNT_ONLY_SQL =
+  "AND EXISTS (SELECT 1 FROM accounts a WHERE a.person_id = p.id AND a.disabled_at IS NULL) AND EXISTS (SELECT 1 FROM club_members cm WHERE cm.person_id = p.id)";
+// The search text goes in the body, not the URL: request logs record URLs, and the text is part of a name
+const searchSchema = z.object({ q: z.string().max(100), account: z.boolean().optional() });
+
+/** Search in the whole club (coaches and admins only), from 2 characters: short name and teams, no birth year. */
+async function searchPeople(db: D1Database, text: string, accountOnly: boolean) {
+  const q = text.trim().toLowerCase();
+  if (q.length < 2) return [];
+  const like = `%${q.replace(/[\\%_]/g, (m) => `\\${m}`)}%`;
+  const found = await all<{ id: number; name: string; teams: string | null }>(
+    db,
+    `SELECT p.id, ${SHORT_NAME_SQL("p")} AS name,
+            (SELECT group_concat(t.name, ', ') FROM team_memberships tm JOIN teams t ON t.id = tm.team_id AND t.kind = 'team' WHERE tm.person_id = p.id) AS teams
+       FROM persons p
+      WHERE p.is_former = 0 ${accountOnly ? ACCOUNT_ONLY_SQL : ""}
+        AND (lower(p.first_name || ' ' || coalesce(p.last_name, '')) LIKE ?1 ESCAPE '\\' OR lower(coalesce(p.last_name, '')) LIKE ?1 ESCAPE '\\')
+      ORDER BY p.first_name, p.last_name LIMIT 20`,
+    like,
+  );
+  return found.map((p) => ({ personId: p.id, name: p.name, childId: null, childName: null, teams: p.teams }));
+}
+
+dutyRoutes.post("/duties/teams/:id/people/search", async (c) => {
+  const actor = requireActor(c);
+  if (!isCoachOf(actor, intParam(c, "id"))) throw forbidden();
+  const input = parse(searchSchema, await readJson(c.req.raw));
+  return c.json({ people: await searchPeople(c.env.DB, input.q, false) });
+});
+
+dutyRoutes.post("/duties/events/:id/people/search", async (c) => {
+  const actor = requireActor(c);
+  await managedEvent(c.env.DB, actor, intParam(c, "id"));
+  const input = parse(searchSchema, await readJson(c.req.raw));
+  return c.json({ people: await searchPeople(c.env.DB, input.q, !!input.account) });
+});
+
 /** Possible persons for "sign someone up": parents of the players, players, coaches. */
 dutyRoutes.get("/duties/teams/:id/people", async (c) => {
   const actor = requireActor(c);
   const teamId = intParam(c, "id");
   if (!isCoachOf(actor, teamId)) throw forbidden();
-  const q = (c.req.query("q") ?? "").trim().toLowerCase();
-  if (q.length >= 2) {
-    // Search in the whole club (coaches and admins only): short name and teams, no birth year
-    const like = `%${q.replace(/[\\%_]/g, (m) => `\\${m}`)}%`;
-    const found = await all<{ id: number; name: string; teams: string | null }>(
-      c.env.DB,
-      `SELECT p.id, ${SHORT_NAME_SQL("p")} AS name,
-              (SELECT group_concat(t.name, ', ') FROM team_memberships tm JOIN teams t ON t.id = tm.team_id AND t.kind = 'team' WHERE tm.person_id = p.id) AS teams
-         FROM persons p
-        WHERE p.is_former = 0
-          AND (lower(p.first_name || ' ' || coalesce(p.last_name, '')) LIKE ?1 ESCAPE '\\' OR lower(coalesce(p.last_name, '')) LIKE ?1 ESCAPE '\\')
-        ORDER BY p.first_name, p.last_name LIMIT 20`,
-      like,
-    );
-    return c.json({ people: found.map((p) => ({ personId: p.id, name: p.name, childId: null, childName: null, teams: p.teams })) });
-  }
   const people = await all<{ id: number; name: string; child_id: number | null; child_name: string | null }>(
     c.env.DB,
     `SELECT gp.id, ${SHORT_NAME_SQL("gp")} AS name, ch.id AS child_id, ch.first_name AS child_name
@@ -550,33 +571,16 @@ dutyRoutes.get("/duties/teams/:id/people", async (c) => {
 });
 
 /**
- * Persons for “sign someone up” and the organiser choice of an event (managers of the event only).
- * Without q the persons of the teams involved (parents with child, members), with q (from 2 characters) the whole club.
+ * Persons for “sign someone up” and the organiser choice of an event (managers of the event only): the persons
+ * of the teams involved (parents with child, members). Searching the whole club: POST …/people/search.
  * account=1: only full club members with active access (organisers).
  */
 dutyRoutes.get("/duties/events/:id/people", async (c) => {
   const actor = requireActor(c);
   const db = c.env.DB;
   const event = await managedEvent(db, actor, intParam(c, "id"));
-  const q = (c.req.query("q") ?? "").trim().toLowerCase();
   const accountOnly = c.req.query("account") === "1";
-  const accountSql = accountOnly
-    ? "AND EXISTS (SELECT 1 FROM accounts a WHERE a.person_id = p.id AND a.disabled_at IS NULL) AND EXISTS (SELECT 1 FROM club_members cm WHERE cm.person_id = p.id)"
-    : "";
-  if (q.length >= 2) {
-    const like = `%${q.replace(/[\\%_]/g, (m) => `\\${m}`)}%`;
-    const found = await all<{ id: number; name: string; teams: string | null }>(
-      db,
-      `SELECT p.id, ${SHORT_NAME_SQL("p")} AS name,
-              (SELECT group_concat(t.name, ', ') FROM team_memberships tm JOIN teams t ON t.id = tm.team_id AND t.kind = 'team' WHERE tm.person_id = p.id) AS teams
-         FROM persons p
-        WHERE p.is_former = 0 ${accountSql}
-          AND (lower(p.first_name || ' ' || coalesce(p.last_name, '')) LIKE ?1 ESCAPE '\\' OR lower(coalesce(p.last_name, '')) LIKE ?1 ESCAPE '\\')
-        ORDER BY p.first_name, p.last_name LIMIT 20`,
-      like,
-    );
-    return c.json({ people: found.map((p) => ({ personId: p.id, name: p.name, childId: null, childName: null, teams: p.teams })) });
-  }
+  const accountSql = accountOnly ? ACCOUNT_ONLY_SQL : "";
   const ids = JSON.stringify(event.teamIds);
   const people = await all<{ id: number; name: string; child_id: number | null; child_name: string | null }>(
     db,

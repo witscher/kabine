@@ -12,7 +12,7 @@ import { GameLinks, isLiveWindow, isReportWindow } from "../live";
 import { AttendanceBadge, byGuardianText, DeclineSheet, deadlineText, PersonResponseRow, quickReasons, ResponseButtons, respondedByText, sendResponse } from "../respond";
 import { useActiveModules } from "../modules";
 import { useMe, useSession } from "../session";
-import { invalidate, useQuery } from "../store";
+import { invalidate, useQuery, useSearch } from "../store";
 import { Button, confirmDialog, copyText, ErrorBox, Field, Notice, Segmented, Sheet, Spinner, StatusPill, SwitchRow, TextField, toast, useDocumentTitle } from "../ui";
 import { useVenue } from "../club";
 
@@ -1391,9 +1391,10 @@ function SpecialHelpers({ event, onChanged }: { event: EventDetail; onChanged: (
 function OrganizerSheet({ eventId, onClose, onDone }: { eventId: number; onClose: () => void; onDone: () => void }) {
   const [search, setSearch] = useState("");
   const q = search.trim();
-  const people = useQuery<{ people: { personId: number; name: string; teams?: string | null }[] }>(
-    `/duties/events/${eventId}/people?account=1${q.length >= 2 ? `&q=${encodeURIComponent(q)}` : ""}`,
-  );
+  type Option = { personId: number; name: string; teams?: string | null };
+  const team = useQuery<{ people: Option[] }>(`/duties/events/${eventId}/people?account=1`);
+  const club = useSearch<{ people: Option[] }>(`/duties/events/${eventId}/people/search`, q.length >= 2 ? { q, account: true } : null);
+  const people = q.length >= 2 ? club : team;
   const needle = q.toLowerCase();
   const list = (people.data?.people ?? []).filter((p) => q.length >= 2 || !needle || p.name.toLowerCase().includes(needle));
   return (

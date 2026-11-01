@@ -6,6 +6,9 @@ Changes that are merged but not released yet go under *Unreleased*, one line eac
 
 ## Unreleased
 
+- The person search for helper duties and organisers no longer puts the typed name into the address: request logs (Workers Logs) record addresses, so names no longer end up there.
+- Demo: profile pictures, the club logo upload and the game schedules from handball4all are switched off.
+
 ## v0.4.0
 
 - Children in the app: under *Administration → Age groups* admins set per youth class what children may do themselves (own access, respond, chat none/read/write, stand-in requests); coaches can restrict this further for their team under *Team → Settings*, for example a chat with parents only. Without an own access there is no player link and parents respond and chat for their child. Existing age groups keep everything allowed; new clubs get the sport's defaults (youngest classes without own access).

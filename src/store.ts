@@ -1,6 +1,6 @@
 // Small data cache with subscriptions: pages load via useQuery, after
 // changes the affected keys are reloaded via invalidate().
-import { useCallback, useEffect, useReducer, useRef } from "preact/hooks";
+import { useCallback, useEffect, useReducer, useRef, useState } from "preact/hooks";
 import { api, ApiError } from "./api";
 
 interface Entry {
@@ -90,6 +90,27 @@ export function useQuery<T>(path: string | null, opts: { refreshMs?: number } = 
     reload,
     mutate,
   };
+}
+
+/**
+ * A search sent as POST with the search text in the body, so it never ends up in a URL (request logs record
+ * URLs). Not cached; only the answer to the latest body counts. body null: no search.
+ */
+export function useSearch<T>(path: string, body: Record<string, unknown> | null) {
+  const [state, setState] = useState<{ data?: T; error?: ApiError }>({});
+  const key = body ? `${path} ${JSON.stringify(body)}` : null;
+  useEffect(() => {
+    if (!body) return setState({});
+    let current = true;
+    api
+      .post<T>(path, body)
+      .then((data) => current && setState({ data }))
+      .catch((error: ApiError) => current && setState({ error }));
+    return () => {
+      current = false;
+    };
+  }, [key]);
+  return state;
 }
 
 /** Marks all keys with this prefix as stale and reloads the visible ones. */

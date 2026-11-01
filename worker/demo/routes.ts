@@ -22,6 +22,9 @@ const BLOCKED: RegExp[] = [
   /^\/api\/(join|bootstrap)\/(email|verify|options|link-children)/,
   /^\/api\/bootstrap\//,
   /^\/api\/feedback$/,
+  // No photos: visitors would show real faces to everyone until the next reset
+  /^\/api\/persons\/\d+\/avatar/,
+  /^\/api\/admin\/club\/logo$/,
 ];
 
 /** Blocks the routes a visitor must not use in the demo (reading stays possible). */

@@ -91,7 +91,7 @@ describe("Sondertermine: Ersteller und Organisatoren", () => {
     expect(block.status).toBe(201);
     expect((await api("/duties", { cookie: olgaCookie, body: { blockId: block.body.id, onBehalfPersonId: kim } })).status).toBe(201);
     // Personensuche des Termins
-    const found = await api(`/duties/events/${eventId}/people?q=kim`, { cookie: olgaCookie });
+    const found = await api(`/duties/events/${eventId}/people/search`, { cookie: olgaCookie, body: { q: "kim" } });
     expect(found.body.people.map((p: any) => p.name)).toEqual(["Kim K."]);
 
     // Den Termin selbst ändert sie nicht

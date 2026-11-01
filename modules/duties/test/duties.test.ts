@@ -263,10 +263,12 @@ describe("Helferplan", () => {
     await exec("UPDATE persons SET is_former = 1 WHERE id = ?", former);
     expect((await api("/duties", { cookie: coachCookie, body: { blockId: cake, onBehalfPersonId: former } })).body.error.code).toBe("unknown_person");
     // Suche im ganzen Verein nur für Trainer und Admins, ab 2 Zeichen, ohne Ehemalige
-    const found = await api(`/duties/teams/${wd}/people?q=fr`, { cookie: coachCookie });
+    // Der Suchtext steht im Body, nicht in der Adresse (Protokolle speichern Adressen)
+    const found = await api(`/duties/teams/${wd}/people/search`, { cookie: coachCookie, body: { q: "fr" } });
     expect(found.body.people).toEqual([{ personId: stranger, name: "Fritzi F.", childId: null, childName: null, teams: "wB" }]);
-    expect((await api(`/duties/teams/${wd}/people?q=eh`, { cookie: coachCookie })).body.people).toEqual([]);
-    expect((await api(`/duties/teams/${wd}/people?q=fr`, { cookie: monaCookie })).status).toBe(403);
+    expect((await api(`/duties/teams/${wd}/people/search`, { cookie: coachCookie, body: { q: "eh" } })).body.people).toEqual([]);
+    expect((await api(`/duties/teams/${wd}/people/search`, { cookie: monaCookie, body: { q: "fr" } })).status).toBe(403);
+    expect((await api(`/duties/events/${away}/people/search`, { cookie: coachCookie, body: { q: "fr" } })).body.people.map((p: any) => p.personId)).toEqual([stranger]);
     // Block mit Einträgen lässt sich nicht löschen, Plätze nicht unter die Einträge senken
     expect((await api(`/duties/blocks/${awayJerseys}`, { method: "DELETE", cookie: coachCookie })).body.error.code).toBe("block_has_entries");
     expect((await api(`/duties/blocks/${awayJerseys}`, { method: "PATCH", cookie: coachCookie, body: { slots: 0 } })).body.error.code).toBe("slots_below_entries");

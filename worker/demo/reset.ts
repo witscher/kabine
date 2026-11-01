@@ -75,6 +75,10 @@ async function seed(env: Env, now: number): Promise<void> {
   await env.DB.batch([
     env.DB.prepare("INSERT INTO persons (id, first_name, last_name, is_admin) VALUES (?, 'Alex', 'Admin', 1)").bind(ADMIN),
     env.DB.prepare("UPDATE app_meta SET value = json_set(value, '$.ownerPersonId', ?) WHERE key = 'club'").bind(ADMIN),
+    // No game schedules from handball4all: they would make visitors' browsers load data from a third party
+    env.DB.prepare(
+      `UPDATE app_meta SET value = json_set(value, '$.modules', json_patch(coalesce(json_extract(value, '$.modules'), '{}'), '{"handball4all":false}')) WHERE key = 'club'`,
+    ),
     env.DB.prepare("UPDATE teams SET helper_plan = 1 WHERE id IN (1, 2)"),
     ...people.map((id) => env.DB.prepare("INSERT INTO accounts (id, person_id, webauthn_user_id) VALUES (?, ?, ?)").bind(id, id, `demo-${id}`)),
   ]);

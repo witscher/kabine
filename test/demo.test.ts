@@ -73,12 +73,17 @@ describe("demo installation", () => {
     expect(await one<{ n: number }>("SELECT COUNT(*) AS n FROM accounts WHERE locale IS NOT NULL")).toEqual({ n: 0 });
   });
 
+  it("has no game schedules from handball4all, so visitors' browsers load nothing from third parties", async () => {
+    const club = JSON.parse((await one<{ value: string }>("SELECT value FROM app_meta WHERE key = 'club'"))!.value);
+    expect(club.modules.handball4all).toBe(false);
+  });
+
   it("only exists in the demo environment", async () => {
     const res = await fetchApp(new Request("https://demo.example/api/demo/login/admin", { redirect: "manual" }), { ...env, APP_ENV: "production" } as Env);
     expect(res.status).toBe(404);
   });
 
-  it("blocks passkeys, owner handover and mail settings for visitors", async () => {
+  it("blocks passkeys, owner handover, mail settings and photos for visitors", async () => {
     const login = await fetchApp(new Request("https://demo.example/api/demo/login/admin", { redirect: "manual" }));
     const cookie = login.headers.get("set-cookie")!.split(";")[0]!;
     for (const [method, path] of [
@@ -86,6 +91,8 @@ describe("demo installation", () => {
       ["PUT", "/api/admin/club/owner"],
       ["PUT", "/api/admin/mail"],
       ["PUT", "/api/me/email"],
+      ["PUT", "/api/persons/1/avatar"],
+      ["PUT", "/api/admin/club/logo"],
     ] as const) {
       const res = await fetchApp(new Request(`https://demo.example${path}`, { method, headers: { cookie, "content-type": "application/json" }, body: "{}" }));
       expect(res.status, `${method} ${path}`).toBe(403);
