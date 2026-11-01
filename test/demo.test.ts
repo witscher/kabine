@@ -78,6 +78,21 @@ describe("demo installation", () => {
     expect(club.modules.handball4all).toBe(false);
   });
 
+  it("links the legal notice and privacy policy of kabine.dev, which visitors cannot change", async () => {
+    const club = JSON.parse((await one<{ value: string }>("SELECT value FROM app_meta WHERE key = 'club'"))!.value);
+    expect(club).toMatchObject({ legalNoticeUrl: "https://kabine.dev/impressum/", privacyUrl: "https://kabine.dev/datenschutz/" });
+    const login = await fetchApp(new Request("https://demo.example/api/demo/login/admin", { redirect: "manual" }));
+    const cookie = login.headers.get("set-cookie")!.split(";")[0]!;
+    const put = (body: object) =>
+      fetchApp(new Request("https://demo.example/api/admin/club", { method: "PUT", headers: { cookie, "content-type": "application/json" }, body: JSON.stringify(body) }));
+    expect((await put({ legalNoticeUrl: "https://evil.example/" })).status).toBe(403);
+    expect((await put({ privacyUrl: null })).status).toBe(403);
+    expect((await put({ sourceUrl: "https://evil.example/" })).status).toBe(403);
+    expect((await put({ modules: { handball4all: true } })).status).toBe(403);
+    // The settings form sends the unchanged links along with everything else
+    expect((await put({ shortName: club.shortName, legalNoticeUrl: club.legalNoticeUrl, privacyUrl: club.privacyUrl, sourceUrl: null })).status).toBe(200);
+  });
+
   it("only exists in the demo environment", async () => {
     const res = await fetchApp(new Request("https://demo.example/api/demo/login/admin", { redirect: "manual" }), { ...env, APP_ENV: "production" } as Env);
     expect(res.status).toBe(404);

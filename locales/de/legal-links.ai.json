@@ -1,0 +1,14 @@
+{
+  "Legal notice": "Impressum",
+  "Privacy policy": "Datenschutzerklärung",
+  "Legal notice: {notice}": "Impressum: {notice}",
+  "Privacy policy: {privacy}": "Datenschutzerklärung: {privacy}",
+  "Link to the legal notice": "Link zum Impressum",
+  "Link to the privacy policy": "Link zur Datenschutzerklärung",
+  "Your club is the provider of this app and responsible for its data. Link the club's legal notice and privacy policy, for example on the club website. Both appear under every screen and every e-mail of the app.": "Dein Verein ist Anbieter dieser App und für ihre Daten verantwortlich. Verlinke Impressum und Datenschutzerklärung des Vereins, etwa auf der Vereinswebsite. Beide erscheinen unter jeder Seite und jeder E-Mail der App.",
+  "Without both links the app has no legal notice and no privacy policy.": "Ohne beide Links hat die App kein Impressum und keine Datenschutzerklärung.",
+  "It must also cover this app; the Kabine documentation has a template. The notes on the app itself are already in the app under privacy.": "Sie muss auch diese App abdecken; die Kabine-Dokumentation hat eine Vorlage. Die Hinweise zur App selbst stehen schon in der App unter Datenschutz.",
+  "The legal notice or privacy policy of your club is missing. Your club is the provider of this app and must link both: <0>enter the links</0>.": "Impressum oder Datenschutzerklärung deines Vereins fehlen. Dein Verein ist Anbieter dieser App und muss beides verlinken: <0>Links eintragen</0>.",
+  "The club's full <0>privacy policy</0> applies.": "Es gilt die vollständige <0>Datenschutzerklärung</0> des Vereins.",
+  "Provider of the app: see the club's <0>legal notice</0>.": "Anbieter der App: siehe <0>Impressum</0> des Vereins."
+}

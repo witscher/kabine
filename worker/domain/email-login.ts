@@ -31,6 +31,8 @@ export interface MailMessage {
   /** Different display name, e.g. "SVM helper plan" (the address comes from the mail settings). */
   fromName?: string;
   replyTo?: string;
+  /** Language of the recipient for the legal footer; without it, the language of the request. */
+  locale?: string | null;
   attachments?: { content: ArrayBuffer | Uint8Array; filename: string; type: string }[];
 }
 

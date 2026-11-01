@@ -31,6 +31,7 @@ export function ClubProfileForm({ onSaved, submitLabel, parts = ALL_PARTS }: { o
   const [abbr, setAbbr] = useState(club.abbr);
   const [primary, setPrimary] = useState(club.colors.primary);
   const [accent, setAccent] = useState(club.colors.accent);
+  const [legalNoticeUrl, setLegalNoticeUrl] = useState(club.legalNoticeUrl ?? "");
   const [privacyUrl, setPrivacyUrl] = useState(club.privacyUrl ?? "");
   const [privacyText, setPrivacyText] = useState(club.privacyText ?? "");
   const [contact, setContact] = useState(club.contact ?? "");
@@ -52,6 +53,7 @@ export function ClubProfileForm({ onSaved, submitLabel, parts = ALL_PARTS }: { o
         shortName: shortName.trim(),
         abbr: abbr.trim(),
         colors: { primary, accent },
+        legalNoticeUrl: legalNoticeUrl.trim() || null,
         privacyUrl: privacyUrl.trim() || null,
         privacyText: privacyText.trim() || null,
         contact: contact.trim() || null,
@@ -159,14 +161,33 @@ export function ClubProfileForm({ onSaved, submitLabel, parts = ALL_PARTS }: { o
       {show("modules") ? <ModulesSection modules={modules} onChange={setModules} /> : null}
       {show("privacy") ? (
         <section class="card card-pad stack" aria-label={t`Privacy and contact`}>
+          <p class="small muted">
+            <Trans>
+              Your club is the provider of this app and responsible for its data. Link the club's legal notice and privacy policy, for example on the club
+              website. Both appear under every screen and every e-mail of the app.
+            </Trans>
+          </p>
+          {!legalNoticeUrl.trim() || !privacyUrl.trim() ? (
+            <Notice kind="warn">
+              <Trans>Without both links the app has no legal notice and no privacy policy.</Trans>
+            </Notice>
+          ) : null}
           <TextField
-            label={t`Link to privacy policy and legal notice`}
+            label={t`Link to the legal notice`}
+            type="url"
+            inputMode="url"
+            value={legalNoticeUrl}
+            onInput={setLegalNoticeUrl}
+            placeholder="https://"
+          />
+          <TextField
+            label={t`Link to the privacy policy`}
             type="url"
             inputMode="url"
             value={privacyUrl}
             onInput={setPrivacyUrl}
             placeholder="https://"
-            hint={t`Appears under privacy. The notes on the app itself are already there.`}
+            hint={t`It must also cover this app; the Kabine documentation has a template. The notes on the app itself are already in the app under privacy.`}
           />
           <Field label={t`Additional privacy notes (optional)`}>
             {(id) => (

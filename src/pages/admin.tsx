@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from "preact/hooks";
 import type { ChildLimits, LocationRef, PersonRef } from "../../shared/types";
 import { ChildLimitControls, FULL_LIMITS } from "../child-limits";
 import { api } from "../api";
-import { moduleOn } from "../../shared/club";
+import { legalLinksMissing, moduleOn } from "../../shared/club";
 import { clubName, useClub, useVenue } from "../club";
 import { useActiveModules } from "../modules";
 import { daysBetween, fullDate, isoToLocalDate, personName, todayLocal } from "../format";
@@ -131,6 +131,16 @@ export function AdminPage() {
                 </span>
               </span>
             </a>
+          ) : null}
+          {legalLinksMissing(club) ? (
+            <div role="alert">
+              <Notice kind="warn">
+                <Trans>
+                  The legal notice or privacy policy of your club is missing. Your club is the provider of this app and must link both:{" "}
+                  <a href="/verwaltung/verein">enter the links</a>.
+                </Trans>
+              </Notice>
+            </div>
           ) : null}
           {teams.error ? <ErrorBox error={teams.error} /> : null}
           <ul class="list" aria-label={t`Administration`}>

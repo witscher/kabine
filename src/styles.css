@@ -1837,10 +1837,31 @@ button.announcement-head {
 }
 
 .footer-links {
-  text-align: center;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px 16px;
   font-size: 13px;
   color: var(--text-2);
   padding: 8px 16px 0;
+}
+
+.footer-links a {
+  color: inherit;
+}
+
+/* The club's legal notice and privacy policy under every page (LegalLinks in src/club.tsx): the footer
+   takes over the space the page keeps free for the tab bar */
+.app > .page:has(~ .app-legal) {
+  padding-bottom: 16px;
+}
+
+.app-legal {
+  padding: 8px 16px calc(var(--tabbar-h) + var(--safe-bottom) + 16px);
+}
+
+.app-legal.no-tabs {
+  padding-bottom: calc(var(--safe-bottom) + 16px);
 }
 
 .login-wrap {

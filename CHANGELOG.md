@@ -7,7 +7,8 @@ Changes that are merged but not released yet go under *Unreleased*, one line eac
 ## Unreleased
 
 - The person search for helper duties and organisers no longer puts the typed name into the address: request logs (Workers Logs) record addresses, so names no longer end up there.
-- Demo: profile pictures, the club logo upload and the game schedules from handball4all are switched off.
+- Legal notice and privacy policy: the club profile now has a link for each (*Administration → Club*, the old combined link stays as the privacy policy). The app shows both under every screen, in the page itself and under every e-mail; admins see a warning until both are entered. The club is the provider of its installation, see `docs/privacy.md`.
+- Demo: profile pictures, the club logo upload and the game schedules from handball4all are switched off; the demo links the legal notice and privacy policy of kabine.dev, and visitors cannot change these links.
 
 ## v0.4.0
 

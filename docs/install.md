@@ -45,7 +45,9 @@ The setup wizard opens right after:
 5. E-mail (optional): the club's SMTP server, or Cloudflare Email Sending with the Workers Paid plan (see below). Off by default.
 6. First teams: by hand, or imported from the club's lists. Excel files (.xlsx, also several sheets), CSV or a pasted table; only first name, last name, birth year, team and role are read, in the browser. The same person in several lists becomes one; birth years that disagree and similar names come up as questions. Teams, coaches and players are created only after everything is checked and corrected. The same import is under *Administration → Import / restore* later.
 7. First people: coaches and further admins, each with a personal link.
-8. Privacy: link to the club's privacy policy and legal notice, contact for questions.
+8. Privacy: links to the club's legal notice and privacy policy, contact for questions.
+
+The club is the provider of its installation and the controller for its data, not the Kabine project. Enter both links before inviting people: they appear under every screen, in the page itself (without JavaScript too) and under every e-mail. As long as one is missing, admins see a warning under *Administration*. Never link the legal pages of kabine.dev; they cover only the project website and the demo. [privacy.md](privacy.md) has a template for the section about the app.
 
 Everything can be changed later under *Administration*. "Continue later" leaves the wizard; it reopens under *Administration → Setup wizard*.
 

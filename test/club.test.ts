@@ -5,6 +5,7 @@ import { holidaySource } from "../worker/domain/holidays";
 import { DEFAULT_CLUB, clubAbbr } from "../shared/club";
 import { loadClub, saveClub } from "../worker/domain/club";
 import { eventTitle } from "../worker/domain/events";
+import { handleFetch } from "../worker/index";
 import { api, freshDb, loginAs, person, season } from "./helpers";
 
 let adminCookie: string;
@@ -49,6 +50,29 @@ describe("Vereinsprofil", () => {
     // Der Eigentümer bleibt beim Speichern erhalten
     expect((await loadClub(env.DB)).ownerPersonId).not.toBeNull();
     expect((await api("/club")).body.name).toBe("SV Musterstadt 1900");
+  });
+
+  it("Impressum und Datenschutzerklärung: nur https, leer ist erlaubt", async () => {
+    const put = (body: object) => api("/admin/club", { method: "PUT", cookie: adminCookie, body });
+    expect((await put({ legalNoticeUrl: "http://sv-musterstadt.example/impressum" })).status).toBe(400);
+    expect((await put({ legalNoticeUrl: "javascript:alert(1)" })).status).toBe(400);
+    const res = await put({ legalNoticeUrl: "https://sv-musterstadt.example/impressum", privacyUrl: "https://sv-musterstadt.example/datenschutz" });
+    expect(res.body).toMatchObject({ legalNoticeUrl: "https://sv-musterstadt.example/impressum", privacyUrl: "https://sv-musterstadt.example/datenschutz" });
+    expect((await put({ legalNoticeUrl: null })).body.legalNoticeUrl).toBeNull();
+  });
+
+  it("die Seiten der App enthalten beide Links als einfaches HTML, auch ohne JavaScript", async () => {
+    const shell = '<html><body><div id="app"></div><noscript>JS</noscript></body></html>';
+    const assets = { fetch: async () => new Response(shell, { headers: { "content-type": "text/html" } }) };
+    const icon = { fetch: async () => new Response("<svg/>", { headers: { "content-type": "image/svg+xml" } }) };
+    const page = (e: object) => handleFetch(new Request("http://localhost:5173/termine"), { ...env, ...e } as Env, {} as ExecutionContext).then((r) => r.text());
+    // Ohne Links bleibt die Seite unverändert
+    expect(await page({ ASSETS: assets })).toBe(shell);
+    await saveClub(env.DB, { legalNoticeUrl: "https://sv-musterstadt.example/impressum?a=1&b=2", privacyUrl: "https://sv-musterstadt.example/datenschutz" });
+    const html = await page({ ASSETS: assets });
+    expect(html).toContain('<a href="https://sv-musterstadt.example/impressum?a=1&amp;b=2">Impressum</a>');
+    expect(html).toContain('<a href="https://sv-musterstadt.example/datenschutz">Datenschutzerklärung</a>');
+    expect(await page({ ASSETS: icon })).toBe("<svg/>");
   });
 
   it("Logo: Hochladen, Ausliefern mit Version, Entfernen", async () => {

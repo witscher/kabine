@@ -1,5 +1,7 @@
 // Club profile (name, colours, logo) for the whole app. Loaded once at start, cached on the
 // device so the first paint and offline use show the right club.
+import { Trans } from "@lingui/react/macro";
+import type { ComponentChildren } from "preact";
 import { useEffect, useState } from "preact/hooks";
 import { type ClubProfile, clubAbbr, DEFAULT_CLUB, DEFAULT_MODULES, type ModuleId, moduleOn } from "../shared/club";
 import { venueOf, type VenueKind } from "../shared/sports";
@@ -112,4 +114,28 @@ export function useVenue(): VenueKind {
 /** Is a module of the club on? Re-renders when the profile changes. */
 export function useModule(id: ModuleId): boolean {
   return moduleOn(useClub(), id);
+}
+
+/**
+ * The club's legal notice and privacy policy, under every screen (the club is the provider of its installation).
+ * Nothing while an admin has not entered them; administration shows a warning then.
+ */
+export function LegalLinks({ class: cls = "footer-links", children }: { class?: string; children?: ComponentChildren }) {
+  const club = useClub();
+  if (!club.legalNoticeUrl && !club.privacyUrl && !children) return null;
+  return (
+    <footer class={cls}>
+      {club.legalNoticeUrl ? (
+        <a href={club.legalNoticeUrl}>
+          <Trans>Legal notice</Trans>
+        </a>
+      ) : null}
+      {club.privacyUrl ? (
+        <a href={club.privacyUrl}>
+          <Trans>Privacy policy</Trans>
+        </a>
+      ) : null}
+      {children}
+    </footer>
+  );
 }

@@ -114,7 +114,7 @@ SELECT * FROM (VALUES (1, 1), (2, 1), (3, 2), (4, 2), (5, 3), (6, 3)) AS v
 WHERE NOT EXISTS (SELECT 1 FROM app_meta WHERE key = 'demo_v1');
 
 INSERT INTO app_meta (key, value)
-SELECT 'club', '{"name":"SV Musterstadt 1900 Handball","shortName":"SV Musterstadt","abbr":"SVM","defaultLocale":"de","colors":{"primary":"#123a63","accent":"#f2c230"},"logoVersion":null,"privacyUrl":null,"privacyText":null,"contact":null,"setupDone":true,"ownerPersonId":null}'
+SELECT 'club', '{"name":"SV Musterstadt 1900 Handball","shortName":"SV Musterstadt","abbr":"SVM","defaultLocale":"de","colors":{"primary":"#123a63","accent":"#f2c230"},"logoVersion":null,"legalNoticeUrl":"https://sv-musterstadt.example/impressum","privacyUrl":"https://sv-musterstadt.example/datenschutz","privacyText":null,"contact":null,"setupDone":true,"ownerPersonId":null}'
 WHERE NOT EXISTS (SELECT 1 FROM app_meta WHERE key = 'demo_v1');
 
 INSERT OR IGNORE INTO app_meta (key, value) VALUES ('demo_v1', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'));

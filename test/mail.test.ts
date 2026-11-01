@@ -2,7 +2,9 @@
 import { env } from "cloudflare:workers";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { mailer } from "../worker/domain/email-login";
-import { deliver, loadMailSettings, transports } from "../worker/domain/mail";
+import { deliver, legalFooter, loadMailSettings, transports } from "../worker/domain/mail";
+import { saveClub } from "../worker/domain/club";
+import { withLocale } from "../worker/i18n";
 import { api, exec, freshDb, loginAs, person, season } from "./helpers";
 
 let adminCookie: string;
@@ -56,5 +58,18 @@ describe("E-Mail-Versand", () => {
     const failed = await api("/admin/mail/test", { cookie: adminCookie, body: {} });
     expect(failed.body.error.code).toBe("mail_failed");
     expect(failed.body.error.message).toContain("535");
+  });
+
+  it("hängt Impressum und Datenschutzerklärung des Vereins an, in der Sprache des Empfängers", async () => {
+    expect(legalFooter({ legalNoticeUrl: null, privacyUrl: null })).toBe("");
+    await saveClub(env.DB, { legalNoticeUrl: "https://sv-musterstadt.example/impressum", privacyUrl: "https://sv-musterstadt.example/datenschutz" });
+    await api("/admin/mail", { method: "PUT", cookie: adminCookie, body: { mode: "smtp", from: "app@example.org", smtp: { host: "smtp.example.org", port: 587, security: "starttls", user: "u", password: "p" } } });
+    const sent: any[] = [];
+    vi.spyOn(transports, "smtp").mockImplementation(async (_config, msg) => void sent.push(msg));
+    await deliver(env, { to: "mia@example.org", subject: "Hello", text: "Test\n", locale: "en" });
+    await withLocale("en", () => deliver(env, { to: "mia@example.org", subject: "Hallo", text: "Test\n", locale: "de" }));
+    expect(sent[0].text).toBe("Test\n\n-- \nLegal notice: https://sv-musterstadt.example/impressum\nPrivacy policy: https://sv-musterstadt.example/datenschutz\n");
+    expect(sent[1].text).toContain("Impressum: https://sv-musterstadt.example/impressum");
+    expect(sent[1].text).toContain("Datenschutzerklärung: https://sv-musterstadt.example/datenschutz");
   });
 });

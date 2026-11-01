@@ -11,7 +11,6 @@ export function PrivacyPage() {
   const { me } = useSession();
   const club = useClub();
   const clubName = club.name;
-  const host = club.privacyUrl ? new URL(club.privacyUrl).host : "";
   const on = (m: Parameters<typeof moduleOn>[1]) => moduleOn(club, m);
   // Brand names of the switched-on game schedule sources (fixture modules), e.g. "handball4all"
   const scheduleSources = MODULES.flatMap((m) => (m.kind === "fixtures" && "vendor" in m && on(m.id) ? [m.vendor] : [])).join(", ");
@@ -28,7 +27,14 @@ export function PrivacyPage() {
             {club.privacyUrl ? (
               <>
                 <Trans>
-                  You can find the club's full privacy policy and legal notice at <a href={club.privacyUrl}>{host}</a>.
+                  The club's full <a href={club.privacyUrl}>privacy policy</a> applies.
+                </Trans>{" "}
+              </>
+            ) : null}
+            {club.legalNoticeUrl ? (
+              <>
+                <Trans>
+                  Provider of the app: see the club's <a href={club.legalNoticeUrl}>legal notice</a>.
                 </Trans>{" "}
               </>
             ) : null}

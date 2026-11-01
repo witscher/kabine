@@ -1,6 +1,6 @@
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
-import { ClubMark, clubName, useModule } from "../club";
+import { ClubMark, clubName, LegalLinks, useModule } from "../club";
 import { useLocation } from "preact-iso";
 import { useEffect, useState } from "preact/hooks";
 import { api, errorMessage } from "../api";
@@ -200,11 +200,11 @@ export function LoginPage() {
         <InstallHint />
         <LanguageSwitch />
         <div class="spacer" />
-        <p class="footer-links">
+        <LegalLinks>
           <a href="/datenschutz">
             <Trans>Privacy and sources</Trans>
           </a>
-        </p>
+        </LegalLinks>
       </main>
     </div>
   );

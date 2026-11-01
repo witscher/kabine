@@ -1,6 +1,9 @@
 // E-mail settings and sending. The club sends either through Cloudflare Email Sending (binding EMAIL)
 // or through its own SMTP server (TLS only). The SMTP password is stored encrypted (lib/secret-box).
+import { t } from "@lingui/core/macro";
+import type { ClubProfile } from "../../shared/club";
 import { loadClub } from "./club";
+import { withLocale } from "../i18n";
 import { first, run } from "../lib/db";
 import { buildMime } from "../lib/mime";
 import { open, seal } from "../lib/secret-box";
@@ -45,6 +48,8 @@ export interface OutgoingMail {
   text: string;
   fromName?: string;
   replyTo?: string;
+  /** Language of the recipient for the footer; without it, the language of the request. */
+  locale?: string | null;
   attachments?: { content: ArrayBuffer | Uint8Array; filename: string; type: string }[];
 }
 
@@ -59,7 +64,10 @@ export async function deliver(env: Env, msg: OutgoingMail): Promise<void> {
   const settings = await loadMailSettings(env);
   const from = settings.from || env.MAIL_FROM;
   if (settings.mode === "off" || !from) throw new MailNotConfigured("E-mail sending is not set up.");
-  const fromName = msg.fromName ?? (await loadClub(env.DB)).shortName;
+  const club = await loadClub(env.DB);
+  const fromName = msg.fromName ?? club.shortName;
+  const footer = msg.locale === undefined ? legalFooter(club) : withLocale(msg.locale, () => legalFooter(club));
+  msg = { ...msg, text: msg.text + footer };
   if (settings.mode === "smtp") {
     if (!settings.smtp?.passwordSealed) throw new MailNotConfigured("SMTP server incomplete.");
     const config: SmtpConfig = {
@@ -81,6 +89,13 @@ export async function deliver(env: Env, msg: OutgoingMail): Promise<void> {
     ...(msg.replyTo ? { replyTo: msg.replyTo } : {}),
     ...(msg.attachments?.length ? { attachments: msg.attachments.map((a) => ({ ...a, disposition: "attachment" as const })) } : {}),
   });
+}
+
+/** The club's legal notice and privacy policy under every e-mail, after the usual signature separator. */
+export function legalFooter(club: Pick<ClubProfile, "legalNoticeUrl" | "privacyUrl">): string {
+  const { legalNoticeUrl: notice, privacyUrl: privacy } = club;
+  const lines = [notice ? t`Legal notice: ${notice}` : "", privacy ? t`Privacy policy: ${privacy}` : ""].filter(Boolean);
+  return lines.length ? `\n-- \n${lines.join("\n")}\n` : "";
 }
 
 /** The MIME text of a message, for checks and tests. */

@@ -2,11 +2,12 @@
 //   GET  /api/demo/login/:role?lang=de|en  signs in as the demo person of a role and opens the app
 //   POST /api/demo/reset                   wipes and fills the demo again (Bearer DEMO_RESET_TOKEN)
 // Everything that could lock others out or reach outside the demo (passkeys, e-mail, SMS, owner
-// handover, invitations) is blocked by demoGuard.
+// handover, invitations, the links in the club profile) is blocked by demoGuard.
 import { t } from "@lingui/core/macro";
 import { type ExecutionContext as HonoExecutionContext, Hono } from "hono";
 import type { AppEnv } from "../app";
 import { sessionCookie } from "../auth/session";
+import { loadClub } from "../domain/club";
 import { safeEqual } from "../lib/crypto";
 import { ApiError, forbidden } from "../lib/http";
 import { DEMO_ROLES, type DemoRole, demoSession, resetDemo } from "./reset";
@@ -32,8 +33,28 @@ export const demoGuard = async (c: import("hono").Context<AppEnv>, next: () => P
   if (isDemo(c.env) && c.req.method !== "GET" && BLOCKED.some((re) => re.test(c.req.path))) {
     throw forbidden(t`This is not available in the demo.`, "demo_restricted");
   }
+  if (isDemo(c.env) && c.req.method === "PUT" && c.req.path === "/api/admin/club" && (await changesFixedClubSettings(c))) {
+    throw forbidden(t`This is not available in the demo.`, "demo_restricted");
+  }
   await next();
 };
+
+/**
+ * The links in the club profile lead every visitor somewhere (legal notice and privacy policy of the demo,
+ * source code), and handball4all would load data from a third party: visitors cannot change them.
+ */
+async function changesFixedClubSettings(c: import("hono").Context<AppEnv>): Promise<boolean> {
+  let body: Record<string, unknown>;
+  try {
+    body = (await c.req.raw.clone().json()) as Record<string, unknown>;
+  } catch {
+    return false;
+  }
+  const club = await loadClub(c.env.DB);
+  const links = ["legalNoticeUrl", "privacyUrl", "sourceUrl"] as const;
+  if (links.some((k) => k in body && (body[k] || null) !== club[k])) return true;
+  return (body.modules as Record<string, unknown> | undefined)?.handball4all === true;
+}
 
 export function demoRoutes(fetchApp: (request: Request, env: Env, ctx: HonoExecutionContext) => Response | Promise<Response>) {
   const routes = new Hono<AppEnv>();

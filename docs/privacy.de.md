@@ -50,6 +50,10 @@ Den eigenen Namen ändern nur Admins; Spieler, Eltern und Trainer wenden sich an
 
 Für die Nutzung ohne Netz zwischengespeicherte Inhalte auf dem Gerät werden beim Abmelden gelöscht.
 
+## Impressum und Datenschutzerklärung des Vereins
+
+Der Verein ist Anbieter seiner Installation (Impressum nach § 5 DDG) und Verantwortlicher nach der DSGVO. Das Kabine-Projekt ist beides nicht. Die Links zu Impressum und Datenschutzerklärung des Vereins werden unter *Verwaltung → Verein* eingetragen (oder im letzten Schritt des Einrichtungsassistenten). Die App zeigt beide unter jeder Seite, schreibt sie als einfache Links in die Seite (sie funktionieren auch ohne JavaScript) und hängt sie an jede E-Mail an. Admins sehen einen Hinweis, solange einer fehlt. Es gibt keine Vorgabe: Die Rechtstexte von kabine.dev gelten nur für die Projektwebsite und die Demo.
+
 ## Wer für den Verein Daten verarbeitet
 
 - **Cloudflare** betreibt die App und speichert die Datenbank (Workers, D1, KV, Durable Objects, Queues). Der Verein schließt im eigenen Konto den Auftragsverarbeitungsvertrag von Cloudflare ab. Sollen die Daten in der EU bleiben, die Datenbank von Hand mit `npx wrangler d1 create kabine --jurisdiction eu` anlegen (siehe Installation von Hand in [install.md](install.md)).
@@ -61,7 +65,7 @@ Für die Nutzung ohne Netz zwischengespeicherte Inhalte auf dem Gerät werden be
 
 ## Vorlage für die Datenschutzerklärung des Vereins
 
-Der folgende Abschnitt kann in die Datenschutzerklärung des Vereins übernommen und angepasst werden. Die Datenschutzseite in der App (*Profil → Datenschutz*) zeigt allen die Einzelheiten von oben und verlinkt auf die Erklärung des Vereins.
+Der folgende Abschnitt kann in die Datenschutzerklärung des Vereins übernommen und angepasst werden. Die Datenschutzseite in der App (*Profil → Datenschutz*) zeigt allen die Einzelheiten von oben und verlinkt auf die Erklärung des Vereins; die Fußzeile jeder Seite verlinkt Datenschutzerklärung und Impressum direkt.
 
 > **Mannschafts-App „[Name der App]“**
 >

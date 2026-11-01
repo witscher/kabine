@@ -3,7 +3,9 @@ import { handleScheduled } from "./cron";
 import { demoGuard, demoRoutes } from "./demo/routes";
 import { demoLocalHour, resetDemo } from "./demo/reset";
 import type { PushJob } from "./domain/notify";
-import { updateInProgress } from "./domain/club";
+import { t } from "@lingui/core/macro";
+import { loadClub, updateInProgress } from "./domain/club";
+import { withLocale } from "./i18n";
 import { maintenanceState } from "./lib/maintenance";
 import { WORKER_MODULES } from "./modules";
 import { handleQueue } from "./queue";
@@ -98,8 +100,34 @@ export async function handleFetch(request: Request, env: Env, ctx: ExecutionCont
     url.protocol = "https:";
     return Response.redirect(url.toString(), 301);
   }
-  if (!url.pathname.startsWith("/api/")) return env.ASSETS.fetch(request);
+  if (!url.pathname.startsWith("/api/")) return withLegalLinks(await env.ASSETS.fetch(request), env);
   return app.fetch(request, env, ctx);
+}
+
+const escapeAttr = (s: string) => s.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
+
+/**
+ * The club's legal notice and privacy policy as plain links in the page shell, so they are there without
+ * JavaScript too (the app shows them in its footer). Only HTML pages, so icons and files cost no read.
+ */
+async function withLegalLinks(res: Response, env: Env): Promise<Response> {
+  if (!res.headers.get("content-type")?.startsWith("text/html")) return res;
+  let links: string;
+  try {
+    const club = await loadClub(env.DB);
+    links = withLocale(club.defaultLocale, () =>
+      [
+        club.legalNoticeUrl ? `<a href="${escapeAttr(club.legalNoticeUrl)}">${t`Legal notice`}</a>` : "",
+        club.privacyUrl ? `<a href="${escapeAttr(club.privacyUrl)}">${t`Privacy policy`}</a>` : "",
+      ]
+        .filter(Boolean)
+        .join(" · "),
+    );
+  } catch {
+    return res;
+  }
+  if (!links) return res;
+  return new HTMLRewriter().on("noscript", { element: (el) => void el.append(`<p>${links}</p>`, { html: true }) }).transform(res);
 }
 
 export default {

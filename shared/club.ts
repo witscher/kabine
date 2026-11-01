@@ -20,7 +20,11 @@ export interface ClubProfile {
   };
   /** Version of the uploaded logo, null without logo (GET /api/club/logo?v=…). */
   logoVersion: number | null;
-  /** Link to the club's full privacy policy and imprint (optional). */
+  /**
+   * The club's legal notice (Impressum) and privacy policy. The club is the provider and controller of its
+   * installation; both links appear on every screen and in every e-mail. Empty until an admin enters them.
+   */
+  legalNoticeUrl: string | null;
   privacyUrl: string | null;
   /** Additional privacy notes for this installation (optional, plain text). */
   privacyText: string | null;
@@ -54,6 +58,7 @@ export const DEFAULT_CLUB: ClubProfile = {
   abbr: "",
   colors: { primary: "#16202b", accent: "#f5b700" },
   logoVersion: null,
+  legalNoticeUrl: null,
   privacyUrl: null,
   privacyText: null,
   contact: null,
@@ -66,6 +71,9 @@ export const DEFAULT_CLUB: ClubProfile = {
   modules: DEFAULT_MODULES,
   setupDone: false,
 };
+
+/** Are the club's legal notice or privacy policy still missing? (admins see a warning) */
+export const legalLinksMissing = (club: Pick<ClubProfile, "legalNoticeUrl" | "privacyUrl">) => !club.legalNoticeUrl || !club.privacyUrl;
 
 const HEX = /^#[0-9a-f]{6}$/i;
 export const isHexColor = (v: string) => HEX.test(v);

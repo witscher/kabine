@@ -19,7 +19,7 @@ import { PrivacyPage } from "./pages/privacy";
 import { SessionProvider, useSession } from "./session";
 import { Splash } from "./splash";
 import { invalidate, useQuery } from "./store";
-import { clubIsFresh, useClub } from "./club";
+import { clubIsFresh, LegalLinks, useClub } from "./club";
 import { APP_MODULES, useActiveModules } from "./modules";
 import { ConfirmHost, Spinner, Toasts } from "./ui";
 
@@ -178,7 +178,8 @@ function Shell({ children }: { children: ComponentChildren }) {
     );
   }
   if (!me && !isPublic) return <LoginPage />;
-  const hideTabs = isPublic || /^\/chat\/\d+/.test(path);
+  const chatRoom = /^\/chat\/\d+/.test(path);
+  const hideTabs = isPublic || chatRoom;
   return (
     <div class="app">
       <OnlineRefresh />
@@ -190,6 +191,8 @@ function Shell({ children }: { children: ComponentChildren }) {
       <ScrollTop />
       {me ? <SetupRedirect /> : null}
       {children}
+      {/* Not in a chat room: its message field sits at the bottom */}
+      {!chatRoom ? <LegalLinks class={`footer-links app-legal ${hideTabs ? "no-tabs" : ""}`} /> : null}
       {!hideTabs ? <TabBar /> : null}
     </div>
   );

@@ -68,6 +68,9 @@ async function redate(env: Env, now: number): Promise<void> {
   ]);
 }
 
+export const DEMO_LEGAL_NOTICE = "https://kabine.dev/impressum/";
+export const DEMO_PRIVACY = "https://kabine.dev/datenschutz/";
+
 async function seed(env: Env, now: number): Promise<void> {
   await batch(env.DB, splitSql(demoSeed).map((s) => env.DB.prepare(s)));
   await redate(env, now);
@@ -79,6 +82,8 @@ async function seed(env: Env, now: number): Promise<void> {
     env.DB.prepare(
       `UPDATE app_meta SET value = json_set(value, '$.modules', json_patch(coalesce(json_extract(value, '$.modules'), '{}'), '{"handball4all":false}')) WHERE key = 'club'`,
     ),
+    // The demo is run by the Kabine project: its legal notice and privacy policy are on kabine.dev
+    env.DB.prepare("UPDATE app_meta SET value = json_set(value, '$.legalNoticeUrl', ?, '$.privacyUrl', ?) WHERE key = 'club'").bind(DEMO_LEGAL_NOTICE, DEMO_PRIVACY),
     env.DB.prepare("UPDATE teams SET helper_plan = 1 WHERE id IN (1, 2)"),
     ...people.map((id) => env.DB.prepare("INSERT INTO accounts (id, person_id, webauthn_user_id) VALUES (?, ?, ?)").bind(id, id, `demo-${id}`)),
   ]);

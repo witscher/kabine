@@ -317,7 +317,7 @@ async function notifyNewDevice(env: Env, accountId: number): Promise<void> {
     text: `${t`Hello,`}\n\n${t`a new device has just been set up for your access via a personal link. Your previous devices have been signed out.`}\n\n${t`If this was not you, please contact your coach or an admin immediately.`}\n`,
   }));
   try {
-    await mailer.send(env, { to: account.email, subject, text });
+    await mailer.send(env, { to: account.email, subject, text, locale: account.locale });
   } catch (err) {
     console.warn("New device notice not sent", err instanceof Error ? err.message : err);
   }

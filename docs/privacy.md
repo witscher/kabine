@@ -50,6 +50,10 @@ Only admins change their own name; players, parents and coaches ask their coach 
 
 Content cached on devices for offline use is deleted when the person signs out.
 
+## Legal notice and privacy policy of the club
+
+The club is the provider of its installation (legal notice, in Germany § 5 DDG) and the controller under the GDPR. The Kabine project is neither. Enter the links to the club's legal notice and privacy policy under *Administration → Club* (or in the last step of the setup wizard). The app shows both under every screen, puts them into the page as plain links (they work without JavaScript) and adds them under every e-mail. Admins see a warning while one is missing. There is no default: the legal pages of kabine.dev cover only the project website and the demo.
+
 ## Who processes data for the club
 
 - **Cloudflare** runs the app and stores the database (Workers, D1, KV, Durable Objects, Queues). The club concludes Cloudflare's data processing agreement in its account. To keep the data in the EU, create the database by hand with `npx wrangler d1 create kabine --jurisdiction eu` (see the manual installation in `docs/install.md`).
@@ -61,7 +65,7 @@ Content cached on devices for offline use is deleted when the person signs out.
 
 ## Template for the club's privacy policy
 
-The following section can be added to the club's privacy policy and adapted. The app's own privacy page (*Profile → Privacy*) shows the details above to everyone and links to the club's policy.
+The following section can be added to the club's privacy policy and adapted. The app's own privacy page (*Profile → Privacy*) shows the details above to everyone and links to the club's policy; the footer of every screen links the policy and the legal notice directly.
 
 > **Team app "[name of the app]"**
 >

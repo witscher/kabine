@@ -1387,13 +1387,26 @@ test("Verein: Admin ändert Name und Kürzel, Verwaltung und Datenschutz zeigen 
   await page.getByLabel("Name des Vereins").fill("SV Beispielhausen 1920");
   await page.getByLabel("Kurzname").fill("SVB Handball");
   await page.getByLabel("Kürzel").fill("SVB");
-  await page.getByLabel("Link zu Datenschutzerklärung und Impressum").fill("https://example.org/datenschutz");
+  // Without a legal notice admins see a warning
+  await page.getByLabel("Link zum Impressum").fill("");
+  await page.getByRole("button", { name: "Speichern" }).click();
+  await expect(page.getByText("Gespeichert")).toBeVisible();
+  await page.goto("/verwaltung");
+  await expect(page.getByRole("alert").filter({ hasText: "Impressum oder Datenschutzerklärung deines Vereins fehlen" })).toBeVisible();
+  await page.getByRole("link", { name: "Links eintragen" }).click();
+  await page.getByLabel("Link zum Impressum").fill("https://example.org/impressum");
+  await page.getByLabel("Link zur Datenschutzerklärung").fill("https://example.org/datenschutz");
   await page.getByRole("button", { name: "Speichern" }).click();
   await expect(page.getByText("Gespeichert")).toBeVisible();
   await page.goto("/verwaltung");
   await expect(page.getByRole("heading", { name: "SV Beispielhausen 1920" })).toBeVisible();
+  await expect(page.getByText("Impressum oder Datenschutzerklärung deines Vereins fehlen")).toHaveCount(0);
+  // Both links under every screen
+  const footer = page.locator("footer.app-legal");
+  await expect(footer.getByRole("link", { name: "Impressum" })).toHaveAttribute("href", "https://example.org/impressum");
+  await expect(footer.getByRole("link", { name: "Datenschutzerklärung" })).toHaveAttribute("href", "https://example.org/datenschutz");
   await page.goto("/datenschutz");
-  await expect(page.getByRole("link", { name: "example.org" })).toHaveAttribute("href", "https://example.org/datenschutz");
+  await expect(page.locator("main").getByRole("link", { name: "Datenschutzerklärung" })).toHaveAttribute("href", "https://example.org/datenschutz");
 });
 
 test("Sprache: Spielerin stellt auf Englisch um und wieder zurück", async () => {

@@ -1470,6 +1470,11 @@ msgstr "Trainer zuordnen"
 msgid "You have already sent a lot of feedback today. Please try again tomorrow."
 msgstr "Du hast heute schon viele Rückmeldungen geschickt. Bitte versuch es morgen noch einmal."
 
+# ai
+#: src/pages/club-settings.tsx
+msgid "Your club is the provider of this app and responsible for its data. Link the club's legal notice and privacy policy, for example on the club website. Both appear under every screen and every e-mail of the app."
+msgstr "Dein Verein ist Anbieter dieser App und für ihre Daten verantwortlich. Verlinke Impressum und Datenschutzerklärung des Vereins, etwa auf der Vereinswebsite. Beide erscheinen unter jeder Seite und jeder E-Mail der App."
+
 #: src/pages/home.tsx
 msgid "Past events this season"
 msgstr "Vergangene Termine in dieser Saison"
@@ -1496,10 +1501,6 @@ msgstr "{name} („{reason}“)"
 #: shared/changelog.ts
 msgid "Administration → Import is now called Import / restore: for the club's lists and Kabine backups."
 msgstr "Verwaltung → Import heißt jetzt Import / Wiederherstellen: für die Listen des Vereins und Kabine-Sicherungen."
-
-#: src/pages/privacy.tsx
-msgid "You can find the club's full privacy policy and legal notice at <0>{host}</0>."
-msgstr "Die vollständige Datenschutzerklärung und das Impressum des Vereins findest du auf <0>{host}</0>."
 
 #: worker/app.ts
 #: worker/lib/http.ts
@@ -1549,10 +1550,6 @@ msgstr "Ein Platz weniger"
 #: src/list-import.tsx
 msgid "Two people"
 msgstr "Zwei Personen"
-
-#: src/pages/club-settings.tsx
-msgid "Appears under privacy. The notes on the app itself are already there."
-msgstr "Erscheint unter Datenschutz. Die Hinweise zur App selbst stehen dort schon."
 
 # ai
 #: src/respond.tsx
@@ -2425,6 +2422,11 @@ msgstr "Sicherheit"
 #: src/faq.tsx
 msgid "Frequently asked questions"
 msgstr "Häufige Fragen"
+
+# ai
+#: src/pages/privacy.tsx
+msgid "Provider of the app: see the club's <0>legal notice</0>."
+msgstr "Anbieter der App: siehe <0>Impressum</0> des Vereins."
 
 # ai
 #: modules/sms/worker/routes.ts
@@ -4354,6 +4356,12 @@ msgstr "Eigener Zugang {name}"
 msgid "In the <0>Helpers</0> tab, tap <1>Sign up</1> on the duty. Every duty has a time; tasks like washing jerseys you do before or after the event. Duties that need prior knowledge, such as timekeeper and secretary, are only offered to you if you switch them on under <2>Profile → I can do this</2>. You can subscribe to your duties in your calendar under <3>Profile → My events</3>."
 msgstr "Im Reiter <0>Helfer</0> beim Dienst auf <1>Eintragen</1> tippen. Jeder Dienst hat eine Uhrzeit, Aufgaben wie Trikots waschen erledigst du vor oder nach dem Termin. Dienste mit Vorkenntnissen, etwa Zeitnehmer und Sekretär, bietet dir die App nur an, wenn du sie unter <2>Profil → Das kann ich</2> einschaltest. Deine Dienste kannst du unter <3>Profil → Meine Termine</3> im Kalender abonnieren."
 
+# ai
+#: src/club.tsx
+#: worker/index.ts
+msgid "Legal notice"
+msgstr "Impressum"
+
 #: src/pages/team.tsx
 msgid "The players sign up for duties at games themselves (\"Helpers\" tab)."
 msgstr "Die Spielerinnen und Spieler tragen sich bei Spielen selbst für Dienste ein (Reiter „Helfer“)."
@@ -4676,6 +4684,11 @@ msgstr "Häufige Fragen, Anleitungen, Rückmeldung zur App"
 #: src/pages/home.tsx
 msgid "Not taking place"
 msgstr "Findet nicht statt"
+
+# ai
+#: src/pages/club-settings.tsx
+msgid "Link to the legal notice"
+msgstr "Link zum Impressum"
 
 #: src/pages/home.tsx
 msgid "Past"
@@ -5501,6 +5514,11 @@ msgid "How do I nominate the squad for a game?"
 msgstr "Wie nominiere ich den Kader für ein Spiel?"
 
 # ai
+#: src/pages/admin.tsx
+msgid "The legal notice or privacy policy of your club is missing. Your club is the provider of this app and must link both: <0>enter the links</0>."
+msgstr "Impressum oder Datenschutzerklärung deines Vereins fehlen. Dein Verein ist Anbieter dieser App und muss beides verlinken: <0>Links eintragen</0>."
+
+# ai
 #: src/game-import.tsx
 msgid "{venue, select, hall {Date;Time;Opponent;Home;Hall} pitch {Date;Time;Opponent;Home;Pitch} other {Date;Time;Opponent;Home;Venue}}"
 msgstr "{venue, select, hall {Datum;Uhrzeit;Gegner;Heim;Halle} pitch {Datum;Uhrzeit;Gegner;Heim;Platz} other {Datum;Uhrzeit;Gegner;Heim;Ort}}"
@@ -6159,6 +6177,11 @@ msgstr "Der Link ist unvollständig. Bitte öffne ihn noch einmal vollständig o
 #: src/pages/club-settings.tsx
 msgid "Country"
 msgstr "Land"
+
+# ai
+#: src/pages/club-settings.tsx
+msgid "Without both links the app has no legal notice and no privacy policy."
+msgstr "Ohne beide Links hat die App kein Impressum und keine Datenschutzerklärung."
 
 # ai
 #: worker/routes/mail.ts
@@ -8016,6 +8039,7 @@ msgstr "Vor der eigenen Mannschaft in Spieltiteln, z. B. „SVM wD – HSG Gegne
 
 # ai
 #: worker/demo/routes.ts
+#: worker/demo/routes.ts
 msgid "This is not available in the demo."
 msgstr "Das ist in der Demo nicht verfügbar."
 
@@ -8083,6 +8107,11 @@ msgstr "In dieser Ansicht kann nichts geändert werden."
 #: src/faq.tsx
 msgid "Frequently asked questions: {title}"
 msgstr "Häufige Fragen: {title}"
+
+# ai
+#: src/pages/privacy.tsx
+msgid "The club's full <0>privacy policy</0> applies."
+msgstr "Es gilt die vollständige <0>Datenschutzerklärung</0> des Vereins."
 
 #: modules/duties/worker/notify.ts
 msgid "Helpers wanted · {team}"
@@ -8433,6 +8462,11 @@ msgid "Export started ({today}). Please check that the file was saved."
 msgstr "Export gestartet ({today}). Bitte prüfen, ob die Datei gespeichert wurde."
 
 # ai
+#: worker/domain/mail.ts
+msgid "Privacy policy: {privacy}"
+msgstr "Datenschutzerklärung: {privacy}"
+
+# ai
 #: src/maintenance.tsx
 msgid "This takes about a minute. The page reloads automatically as soon as the update is done."
 msgstr "Das dauert etwa eine Minute. Die Seite lädt von selbst neu, sobald das Update fertig ist."
@@ -8721,6 +8755,11 @@ msgstr "Beim Saisonwechsel; künftige Einträge, wenn jemand den Verein oder den
 #: src/howto.tsx
 msgid "News"
 msgstr "Neuigkeit"
+
+# ai
+#: src/pages/club-settings.tsx
+msgid "Link to the privacy policy"
+msgstr "Link zur Datenschutzerklärung"
 
 #: src/pages/chat.tsx
 msgid "Message to {teamName}"
@@ -9506,6 +9545,12 @@ msgid "All, members"
 msgstr "Alle, Mitglieder"
 
 # ai
+#: src/club.tsx
+#: worker/index.ts
+msgid "Privacy policy"
+msgstr "Datenschutzerklärung"
+
+# ai
 #: modules/carpools/module.ts
 msgid "The nominated players and their parents (names as “First name L.”) and the coaches."
 msgstr "Die nominierten Spieler und ihre Eltern (Namen als „Vorname N.“) sowie die Trainer."
@@ -10091,6 +10136,11 @@ msgstr "Kein Passkey auf diesem Gerät?"
 msgid "{game}. Still free: {open}"
 msgstr "{game}. Noch frei: {open}"
 
+# ai
+#: src/pages/club-settings.tsx
+msgid "It must also cover this app; the Kabine documentation has a template. The notes on the app itself are already in the app under privacy."
+msgstr "Sie muss auch diese App abdecken; die Kabine-Dokumentation hat eine Vorlage. Die Hinweise zur App selbst stehen schon in der App unter Datenschutz."
+
 #: worker/routes/events.ts
 msgid "New info on {label} on {date}: meeting point {point}."
 msgstr "Neue Infos zu {label} am {date}: Treffpunkt {point}."
@@ -10663,6 +10713,11 @@ msgstr "Pause {holiday}"
 #: src/pages/plans.tsx
 msgid "Choose a location …"
 msgstr "Ort wählen …"
+
+# ai
+#: worker/domain/mail.ts
+msgid "Legal notice: {notice}"
+msgstr "Impressum: {notice}"
 
 #: modules/carpools/worker/routes.ts
 msgid "Please cancel the current lift first."
@@ -11900,10 +11955,6 @@ msgstr "Ungültiges Datum."
 #: worker/chat/room.ts
 msgid "Your rights in this chat have changed."
 msgstr "Deine Rechte in diesem Chat haben sich geändert."
-
-#: src/pages/club-settings.tsx
-msgid "Link to privacy policy and legal notice"
-msgstr "Link zu Datenschutzerklärung und Impressum"
 
 #: worker/routes/events.ts
 msgid "The event must be in the future."

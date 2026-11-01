@@ -2,6 +2,7 @@
 // admins a red banner. The state comes from /api/health and from 503 responses of the API.
 import { Trans } from "@lingui/react/macro";
 import { useEffect, useState } from "preact/hooks";
+import { LegalLinks } from "./club";
 import { useSession } from "./session";
 
 let active = false;
@@ -99,6 +100,8 @@ export function MaintenancePage() {
           </p>
         </div>
       </div>
+      <div class="spacer" />
+      <LegalLinks />
     </main>
   );
 }
