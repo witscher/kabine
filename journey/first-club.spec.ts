@@ -110,8 +110,11 @@ test("Assistent: erste Personen mit Links, Datenschutz, fertig", async () => {
   await anna.getByRole("button", { name: "Persönlichen Link erzeugen" }).click();
   secondAdminLink = await anna.locator(".url-box").innerText();
   await page.getByRole("button", { name: "Weiter", exact: true }).click();
-  // Privacy, done
+  // Privacy: the club's legal notice and privacy policy (without them, administration warns), done
   await expect(page.getByRole("heading", { name: "Datenschutz" })).toBeVisible();
+  await expect(page.getByText("Ohne beide Links hat die App kein Impressum und keine Datenschutzerklärung.")).toBeVisible();
+  await page.getByLabel("Link zum Impressum").fill("https://sv-beispiel.example/impressum");
+  await page.getByLabel("Link zur Datenschutzerklärung").fill("https://sv-beispiel.example/datenschutz");
   await page.getByRole("button", { name: "Speichern und weiter" }).click();
   await expect(page.getByRole("heading", { name: "Die App ist eingerichtet" })).toBeVisible();
   // "Set up" only shows once the server has it: opening the app right away must not lead back into the wizard
