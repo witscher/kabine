@@ -79,6 +79,7 @@ export function head({ lang, path, title, description, alternates = {}, jsonLd =
     `<link rel="preload" as="font" href="/fonts/barlow-condensed-latin-800-normal.woff2" type="font/woff2" crossorigin>`,
     `<link rel="stylesheet" href="/style.css">`,
     `<script src="/lang.js" defer></script>`,
+    `<script src="/gallery.js" defer></script>`,
     ...jsonLd.map((o) => `<script type="application/ld+json">${JSON.stringify(o).replace(/</g, "\\u003c")}</script>`),
   ].join("\n");
 }

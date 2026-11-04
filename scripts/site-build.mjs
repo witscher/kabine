@@ -195,7 +195,7 @@ Sitemap: ${ORIGIN}/sitemap.xml
 );
 
 // Static files, screenshots as WebP, fonts ----------------------------------------------------------------
-for (const f of ["style.css", "lang.js", "icon.svg", "_headers", "og-de.png", "og-en.png"]) cpSync(`site/src/${f}`, `${out}/${f}`);
+for (const f of ["style.css", "lang.js", "gallery.js", "icon.svg", "_headers", "og-de.png", "og-en.png"]) cpSync(`site/src/${f}`, `${out}/${f}`);
 // Screenshots of the demo club (npm run screenshots writes them to docs/screenshots), a third of the PNG size
 for (const locale of ["de", "en"]) {
   mkdirSync(`${out}/shots/${locale}`, { recursive: true });
