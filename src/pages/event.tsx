@@ -312,7 +312,8 @@ function CoachView({ event, onChanged, onAbsence }: { event: EventDetail; onChan
   const [moveOpen, setMoveOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [cancelOpen, setCancelOpen] = useState(false);
-  const [infoOpen, setInfoOpen] = useState(false);
+  // From the coach hint on the home screen (src/coach-hints.tsx): the meeting point sheet opens right away
+  const [infoOpen, setInfoOpen] = useState(() => event.kind === "game" && new URLSearchParams(location.search).has("treffpunkt"));
   const [person, setPerson] = useState<ParticipantDetail | null>(null);
   const missed = parts.filter((p) => p.unexcused);
   const yes = parts.filter((p) => p.status === "yes" && !p.unexcused);
@@ -940,6 +941,7 @@ function GameInfoSheet({ event, onClose, onDone }: { event: EventDetail; onClose
         block
         onClick={async () => {
           await api.patch(`/events/${event.id}`, { meetingPoint: meetingPoint.trim() || null, meetingTime: meetingTime || null, coachNotes: notes.trim() || null });
+          invalidate("/coach-hints");
           toast(t`Saved. The team has been informed.`);
           onClose();
           onDone();

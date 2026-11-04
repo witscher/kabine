@@ -2348,6 +2348,11 @@ msgstr "Nehmen teil"
 msgid "The deadline for declining has passed. You can still decline, the coach will then be informed immediately."
 msgstr "Die Absagefrist ist abgelaufen. Du kannst trotzdem absagen, der Trainer wird dann sofort informiert."
 
+# ai
+#: src/coach-hints.tsx
+msgid "Enter"
+msgstr "Eintragen"
+
 #: src/maintenance.tsx
 msgid "It will be back shortly. The page reloads automatically as soon as maintenance is over."
 msgstr "Sie ist gleich wieder da. Die Seite lädt automatisch neu, sobald die Wartung vorbei ist."
@@ -2404,6 +2409,11 @@ msgstr "Der Liveticker öffnet sich in einem neuen Fenster bei handball4all."
 #: worker/routes/events.ts
 msgid "The event has already started."
 msgstr "Der Termin hat schon begonnen."
+
+# ai
+#: src/coach-hints.tsx
+msgid "Game schedule synced"
+msgstr "Spielplan abgeglichen"
 
 #: src/pages/admin.tsx
 msgid "Search"
@@ -2917,6 +2927,11 @@ msgstr "Dein Nachname"
 #: src/pages/profile.tsx
 msgid "off"
 msgstr "aus"
+
+# ai
+#: src/coach-hints.tsx
+msgid "Meeting point missing · {team}"
+msgstr "Treffpunkt fehlt · {team}"
 
 #: worker/chat/room.ts
 #: worker/chat/room.ts
@@ -4553,6 +4568,11 @@ msgstr "Jede Mannschaft übernimmt ihre Spiele aus einer der eingeschalteten Que
 #: src/pages/admin.tsx
 msgid "Load holidays of the region"
 msgstr "Ferien der Region laden"
+
+# ai
+#: src/coach-hints.tsx
+msgid "To do for your teams"
+msgstr "Zu tun für deine Mannschaften"
 
 #: src/pages/privacy.tsx
 msgid "Chat histories are deleted at the season change. After someone leaves the club, all their data is deleted at the next season change at the latest."
@@ -6773,6 +6793,7 @@ msgstr "Eine Handynummer wird nur gespeichert, wenn du sie selbst einträgst, f�
 msgid "The game is not taking place."
 msgstr "Das Spiel findet nicht statt."
 
+#: src/coach-hints.tsx
 #: src/pages/games.tsx
 msgid "Sync now"
 msgstr "Jetzt abgleichen"
@@ -7973,6 +7994,11 @@ msgstr "Neue Infos zu {label} am {date} um {meetAt}."
 #: src/pages/profile.tsx
 msgid "Change"
 msgstr "Ändern"
+
+# ai
+#: src/coach-hints.tsx
+msgid "Game on {date}, {at}"
+msgstr "Spiel am {date}, {at}"
 
 #: worker/chat/room.ts
 msgid "Announcement in chat {teamName}"
@@ -9672,6 +9698,11 @@ msgstr "Fahrer können Nominierte, ihre Eltern und die Trainer sein."
 msgid "Coaches · {coachCount}"
 msgstr "Trainer · {coachCount}"
 
+# ai
+#: src/coach-hints.tsx
+msgid "Game against {opponent} on {date}, {at}"
+msgstr "Spiel gegen {opponent} am {date}, {at}"
+
 #: src/pages/profile.tsx
 msgid "Work as admin"
 msgstr "Als Admin arbeiten"
@@ -10722,6 +10753,11 @@ msgstr "Impressum: {notice}"
 #: modules/carpools/worker/routes.ts
 msgid "Please cancel the current lift first."
 msgstr "Bitte die bisherige Mitfahrt zuerst absagen."
+
+# ai
+#: src/coach-hints.tsx
+msgid "Schedule of {team} not synced yet"
+msgstr "Spielplan der {team} noch nicht abgeglichen"
 
 # ai
 #: worker/routes/admin.ts
@@ -12369,6 +12405,7 @@ msgstr "Mannschaftszuordnungen und Stammkader"
 msgid "{count}× unexcused"
 msgstr "{count}× unentschuldigt"
 
+#: src/coach-hints.tsx
 #: src/pages/games.tsx
 msgid "Syncing …"
 msgstr "Wird abgeglichen …"
@@ -12434,6 +12471,11 @@ msgstr "{name} hat für {childName} „{label}“ erlaubt."
 #: src/pages/special.tsx
 msgid "Time slots appear in the Helpers tab, where parents or players sign up."
 msgstr "Zeitblöcke erscheinen im Reiter Helfer, dort tragen sich Eltern bzw. Spieler ein."
+
+# ai
+#: src/coach-hints.tsx
+msgid "{days, plural, one {Schedule of {team} not synced for # day} other {Schedule of {team} not synced for # days}}"
+msgstr "{days, plural, one {Spielplan der {team} seit # Tag nicht abgeglichen} other {Spielplan der {team} seit # Tagen nicht abgeglichen}}"
 
 #: worker/routes/events.ts
 msgid "Please let us know"

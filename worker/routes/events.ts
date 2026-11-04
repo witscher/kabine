@@ -22,6 +22,7 @@ import { ATTENDANCE_MARKS, type AttendanceMark, defaultMark, unexcusedAllowed } 
 import { attendanceSync } from "../domain/attendance";
 import { dutyManagers, loadDutyTypes, loadHelpersNeeded, loadMyDuties, mayManageDuties, SHORT_NAME_SQL } from "../domain/duties";
 import { notifyDutyChange } from "../duties/hub";
+import { loadCoachHints } from "../domain/coach-hints";
 import { loadEventPage } from "../domain/event-page";
 import { absenceChangeable, leaderAccounts, leaderEntries, loadLeaders } from "../domain/leaders";
 import { ensureGenerated } from "../domain/generate";
@@ -96,6 +97,12 @@ async function visibleEventOr404(db: D1Database, actor: Actor, eventId: number):
   if (!event) throw notFound(t`This event does not exist or you cannot see it.`);
   return event;
 }
+
+/** What coaches still have to do in their own teams (hints at the top of the events list). */
+eventRoutes.get("/coach-hints", async (c) => {
+  const actor = requireActor(c);
+  return c.json({ hints: await loadCoachHints(c.env.DB, actor) });
+});
 
 eventRoutes.get("/events/:id", async (c) => {
   const actor = requireActor(c);

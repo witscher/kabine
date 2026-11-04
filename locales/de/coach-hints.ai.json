@@ -1,0 +1,10 @@
+{
+  "To do for your teams": "Zu tun für deine Mannschaften",
+  "Schedule of {team} not synced yet": "Spielplan der {team} noch nicht abgeglichen",
+  "{days, plural, one {Schedule of {team} not synced for # day} other {Schedule of {team} not synced for # days}}": "{days, plural, one {Spielplan der {team} seit # Tag nicht abgeglichen} other {Spielplan der {team} seit # Tagen nicht abgeglichen}}",
+  "Game schedule synced": "Spielplan abgeglichen",
+  "Meeting point missing · {team}": "Treffpunkt fehlt · {team}",
+  "Game against {opponent} on {date}, {at}": "Spiel gegen {opponent} am {date}, {at}",
+  "Game on {date}, {at}": "Spiel am {date}, {at}",
+  "Enter": "Eintragen"
+}

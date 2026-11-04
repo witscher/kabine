@@ -10,6 +10,7 @@ import { FirstStepsCard, InstallBanner, MotdBanner, PushSetupBanner } from "../h
 import { Ball, Icon } from "../icons";
 import { DeclineSheet, deadlineText, HelpRequestCard, PersonResponseRow, ResponseButtons } from "../respond";
 import { useActiveModules } from "../modules";
+import { CoachHints } from "../coach-hints";
 import { NewsCard } from "../news";
 import { useMe } from "../session";
 import { useOffline } from "../offline";
@@ -544,6 +545,7 @@ export function HomePage() {
 
       <div class="content">
         <NewsCard />
+        <CoachHints />
         {!noTeam ? <MotdBanner /> : null}
         <Segmented<When>
           label={t`Period`}

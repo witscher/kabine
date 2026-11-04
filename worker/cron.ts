@@ -1,5 +1,6 @@
 import { t } from "@lingui/core/macro";
 import { appOrigin, enterClubContext, updateInProgress } from "./domain/club";
+import { gameOpponent, MEETING_REMINDER_DAYS } from "./domain/coach-hints";
 import { ensureInstanceSecrets } from "./lib/instance-secrets";
 import { recordAttendance } from "./domain/attendance";
 import { syncAutoSquads } from "./domain/auto-squad";
@@ -169,8 +170,6 @@ export async function cleanup(db: D1Database, now = Date.now()): Promise<void> {
   ]);
 }
 
-/** This many days before a game the app reminds the coaches of meeting point and time. */
-export const MEETING_REMINDER_DAYS = 3;
 const MEETING_REMINDER_HOUR = 8;
 
 /**
@@ -193,7 +192,7 @@ export async function sendMeetingReminders(env: Env, now = Date.now()): Promise<
   for (const g of games) {
     const claimed = await run(env.DB, "INSERT OR IGNORE INTO duty_notifications (kind, ref) VALUES ('meeting', ?)", `${g.id}:${g.team_id}`);
     if (!claimed.meta.changes) continue;
-    const opponent = g.is_home === 1 ? g.guest_team : g.is_home === 0 ? g.home_team : (g.title ?? g.guest_team);
+    const opponent = gameOpponent(g);
     const teamName = g.team_name;
     sent += await notifyCoaches(env, [g.team_id], () => {
       const date = shortDate(g.starts_at);

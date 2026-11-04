@@ -6,6 +6,7 @@ import { beforeAll, describe, expect, it } from "vitest";
 import { type Actor, buildActor } from "../worker/auth/actor";
 import type { SessionRow } from "../worker/auth/session";
 import { ensureEventDuties, helperTeams, loadMyDuties } from "../worker/domain/duties";
+import { loadCoachHints } from "../worker/domain/coach-hints";
 import { loadEventPage, ownCandidates } from "../worker/domain/event-page";
 import { listVisibleEvents } from "../worker/domain/events";
 import { eventIn, exec, freshDb, guardian, member, person, season, team } from "./helpers";
@@ -62,11 +63,13 @@ async function fullScans(seen: Recorded[]): Promise<{ sql: string; plan: string[
 const session: SessionRow = { id: "test", account_id: 0, created_at: "", expires_at: "", extended_at: "" };
 let actor: Actor;
 let eventIds: number[];
+let teamId: number;
 
 beforeAll(async () => {
   await freshDb();
   await season();
   const wd = await team("wD", "wD");
+  teamId = wd;
   await exec("UPDATE teams SET helper_plan = 1 WHERE id = ?", wd);
   const parent = await person("Paula");
   const child = await person("Lina");
@@ -106,6 +109,14 @@ describe("Abfragepläne ohne Durchsuchen aller Termine", () => {
     const { db, seen } = recording(env.DB);
     await loadMyDuties(db, actor, eventIds);
     await ensureEventDuties(db, eventIds, "2000-01-01");
+    expect(await fullScans(seen)).toEqual([]);
+  });
+
+  it("Hinweise für Trainer (Treffpunkt fehlt, Spielplan nicht abgeglichen)", async () => {
+    await exec("UPDATE teams SET fixture_connector = 'handball4all', fixture_source = '{\"x\":1}' WHERE id = ?", teamId);
+    const { db, seen } = recording(env.DB);
+    await loadCoachHints(db, { ...actor, coachTeamIds: [teamId] });
+    expect(seen.length).toBe(3);
     expect(await fullScans(seen)).toEqual([]);
   });
 });

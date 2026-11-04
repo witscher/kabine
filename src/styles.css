@@ -2776,3 +2776,9 @@ button.announcement-head {
   text-decoration: line-through;
   text-decoration-thickness: 2px;
 }
+
+/* What coaches still have to do, at the top of the events list (src/coach-hints.tsx) */
+.coach-hint .main {
+  flex: 1;
+  min-width: 0;
+}

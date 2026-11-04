@@ -11,6 +11,13 @@ export interface TeamRef {
   name: string;
 }
 
+/** Something a coach still has to do in an own team (worker/domain/coach-hints.ts). */
+export type CoachHint =
+  /** The game schedule from a fixture source was not synced for a while; days null: never. */
+  | { kind: "schedule"; teamId: number; team: string; days: number | null; source: string }
+  /** A game in the next days has no meeting time yet. */
+  | { kind: "meeting"; eventId: number; team: string; startsAt: string; opponent: string | null };
+
 export interface PersonRef {
   id: number;
   firstName: string;

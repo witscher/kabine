@@ -2,6 +2,10 @@
 
 Decisions not covered by `docs/dev/roadmap.md`, with reasons. Newest first.
 
+## Coach hints in the core, without a module hook (November 2026)
+
+Coaches see at the top of the events list what is left to do in their own teams: a game schedule not synced for 14 days, a game in the next 3 days without a meeting point (`worker/domain/coach-hints.ts`, `src/coach-hints.tsx`). The club app's note proposed a module hook for the schedule hint, because there the sync belongs to the handball4all code. In Kabine linking and syncing are already the same core code for every connector (`worker/routes/games.ts`, `syncGames`), and every sync is manual, so the hint works for every source from `teams.fixture_synced_at` without a new interface. A hook for home hints can still come when a module has a hint of its own.
+
 ## Children in the app: limits per age class and team (October 2026)
 
 Ported from the original club app, where the club restricts F and E youth: what players of a youth class may do themselves (own access, respond, chat none/read/write, answer stand-in requests) is a limit per age class, set by admins, because it depends on age, treats all teams of a class alike and moves along with the season change. Kabine adds a second level per team, set by its coaches: some coaches want a chat with parents only even where the club allows more. Each level only restricts; parents' permissions apply within both. Without an own access a child does nothing themselves either (the club app's "variant A").

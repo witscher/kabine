@@ -1733,3 +1733,35 @@ test("Kinder in der App: Altersklasse ohne eigenen Zugang, Spielerin sieht nur n
   await section.getByRole("button", { name: "Wie für die Altersklasse" }).click();
   await expect(coach.page.getByText("Wieder wie für die Altersklasse eingestellt.")).toBeVisible();
 });
+
+test("Hinweise für Trainer: Treffpunkt fehlt, Eintragen öffnet das Spiel mit dem Treffpunkt", async () => {
+  const { page } = coach;
+  const date = new Date(Date.now() + 2 * 86_400_000).toLocaleDateString("sv-SE", { timeZone: "Europe/Berlin" });
+  await page.goto("/team/1");
+  await page.getByRole("link", { name: "Termin anlegen" }).click();
+  await page.getByRole("group", { name: "Art des Termins" }).getByRole("button", { name: "Spiel" }).click();
+  await page.getByLabel("Gegner oder Turnier").fill("HSG Hinweisstadt");
+  await page.getByLabel("Datum").fill(date);
+  await page.getByLabel("Spielbeginn").fill("15:00");
+  await page.getByRole("button", { name: "Spiel anlegen" }).click();
+  await expect(page).toHaveURL(/\/termine\/\d+/);
+
+  await page.goto("/");
+  const hints = page.getByRole("region", { name: "Zu tun für deine Mannschaften" });
+  await expect(hints).toContainText("Treffpunkt fehlt");
+  await expect(hints).toContainText("HSG Hinweisstadt");
+  // Spielerinnen bekommen keine Hinweise
+  await player.page.goto("/");
+  await expect(player.page.getByRole("heading", { name: /Hallo/ })).toBeVisible();
+  await expect(player.page.getByRole("region", { name: "Zu tun für deine Mannschaften" })).toHaveCount(0);
+
+  await hints.getByRole("link", { name: "Eintragen" }).click();
+  const sheet = page.getByRole("dialog", { name: "Treffpunkt & Infos" });
+  await sheet.getByLabel("Treffpunkt", { exact: true }).fill("Parkplatz Halle");
+  await sheet.getByLabel("Treffen um").fill("14:00");
+  await sheet.getByRole("button", { name: "Speichern" }).click();
+  await expect(page.getByText(/Gespeichert/)).toBeVisible();
+  await page.goto("/");
+  await expect(page.getByRole("heading", { name: /Hallo/ })).toBeVisible();
+  await expect(page.getByRole("region", { name: "Zu tun für deine Mannschaften" })).toHaveCount(0);
+});
