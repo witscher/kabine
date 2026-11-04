@@ -20,7 +20,7 @@ The copy does not include the update workflow; step 6 adds it.
 
 In the Worker's settings under *Build*, check that the deploy command is `npm run deploy`. It applies the database migrations before uploading the new version. With a plain `npx wrangler deploy` the database stays on the old schema.
 
-**Data in Europe:** the button does not let you choose where the database is stored. If your privacy policy promises the EU, create the database by hand first (`npx wrangler d1 create kabine --jurisdiction eu`, see "Installing by hand") and use that database for the Worker. The team chat already lives in the EU jurisdiction.
+**Data in Europe:** when the button creates the D1 database, choose the EU jurisdiction for it. This can only be set when the database is created, not changed later. If your privacy policy promises the EU, check it under *Storage & Databases → D1 → kabine* after the deploy. The team chat already lives in the EU jurisdiction. (Installing by hand: `npx wrangler d1 create kabine --jurisdiction eu`.)
 
 ## 2. Add your domain
 

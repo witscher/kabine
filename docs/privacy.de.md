@@ -56,7 +56,7 @@ Der Verein ist Anbieter seiner Installation (Impressum nach § 5 DDG) und Verant
 
 ## Wer für den Verein Daten verarbeitet
 
-- **Cloudflare** betreibt die App und speichert die Datenbank (Workers, D1, KV, Durable Objects, Queues). Der Verein schließt im eigenen Konto den Auftragsverarbeitungsvertrag von Cloudflare ab. Sollen die Daten in der EU bleiben, die Datenbank von Hand mit `npx wrangler d1 create kabine --jurisdiction eu` anlegen (siehe Installation von Hand in [install.md](install.md)).
+- **Cloudflare** betreibt die App und speichert die Datenbank (Workers, D1, KV, Durable Objects, Queues). Der Verein schließt im eigenen Konto den Auftragsverarbeitungsvertrag von Cloudflare ab. Sollen die Daten in der EU bleiben, beim Deploy-Button für die D1-Datenbank die EU-Jurisdiktion wählen (von Hand: `npx wrangler d1 create kabine --jurisdiction eu`, siehe [install.md](install.md)).
 - **Push-Dienste** der Gerätehersteller (Apple, Google, Mozilla, Microsoft) stellen Benachrichtigungen zu. Der Inhalt ist Ende-zu-Ende verschlüsselt, der Push-Dienst sieht nur die Geräteadresse.
 - **E-Mail:** Cloudflare Email Sending oder der eigene Mailserver des Vereins.
 - **SMS (optional):** der Anbieter, den der Verein wählt (derzeit seven.io).

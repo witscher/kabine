@@ -56,7 +56,7 @@ The club is the provider of its installation (legal notice, in Germany § 5 DDG)
 
 ## Who processes data for the club
 
-- **Cloudflare** runs the app and stores the database (Workers, D1, KV, Durable Objects, Queues). The club concludes Cloudflare's data processing agreement in its account. To keep the data in the EU, create the database by hand with `npx wrangler d1 create kabine --jurisdiction eu` (see the manual installation in `docs/install.md`).
+- **Cloudflare** runs the app and stores the database (Workers, D1, KV, Durable Objects, Queues). The club concludes Cloudflare's data processing agreement in its account. To keep the data in the EU, choose the EU jurisdiction for the D1 database when deploying with the button (by hand: `npx wrangler d1 create kabine --jurisdiction eu`, see `docs/install.md`).
 - **Push services** of the device makers (Apple, Google, Mozilla, Microsoft) deliver notifications. The content is end-to-end encrypted; the push service sees only the device address.
 - **E-mail:** Cloudflare Email Sending or the club's own mail server.
 - **SMS (optional):** the provider the club chooses (currently seven.io).
