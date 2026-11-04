@@ -78,7 +78,7 @@ ${section(
   ticks([
     ["Die Daten bleiben beim Verein.", "Die Entwickler von Kabine haben auf keine Vereinsdaten Zugriff. Der Verein ist Verantwortlicher, Cloudflare Auftragsverarbeiter im Konto des Vereins."],
     ["Kein Server zu pflegen.", "Die Plattform spielt Sicherheitsupdates selbst ein. Für einen üblichen Verein reicht der kostenlose Tarif."],
-    ["Updates, wann der Verein will.", "Neue Versionen kommen als Pull Request in die Kopie des Vereins. Ändert ein Update die Datenbank, notiert es vorher einen Wiederherstellungspunkt."],
+    ["Updates, wann der Verein will.", "Updates werden bereitgestellt, aber der Verein bestimmt, ob und wann."],
     ["Aufhören ist einfach.", "Daten exportieren, Ressourcen im eigenen Konto löschen, fertig. Niemand muss gekündigt oder um Löschung gebeten werden."],
   ]) + links([["/en/docs/install/", "Installationsanleitung (Englisch)"], ["/vorstand-datenschutz/", "Für Vorstand und Datenschutz"]]),
 )}
@@ -94,9 +94,8 @@ ${section(
   ]) +
     ticks([
       ["Links laufen ab", "und lassen sich jederzeit erneuern; der alte Link gilt dann nicht mehr."],
-      ["Der Link ist nur zum Einrichten da.", "Wer ihn später noch einmal öffnet, kommt mit „Direkt zur App“ in die App."],
       ["Trainer sehen, wer fehlt:", "Die Einladungsübersicht zeigt, wer noch keinen Zugang hat."],
-      ["Jeder weiß, wer wer ist:", "Den eigenen Namen ändert man nicht selbst, das machen Trainer oder Admins."],
+      ["Echte Namen:", "Namen pflegen Trainer und Admins, niemand tritt unter Fantasienamen auf."],
     ]),
 )}
 ${section(
@@ -150,7 +149,7 @@ ${section(
   ticks([
     ["The data stays with the club.", "The developers of Kabine have no access to any club's data. The club is the controller, Cloudflare the processor in the club's account."],
     ["No server to maintain.", "The platform applies security updates itself. The free plan is enough for a typical club."],
-    ["Updates when the club wants.", "New versions arrive as a pull request in the club's copy. If an update changes the database, it notes a restore point first."],
+    ["Updates when the club wants.", "Updates are provided, but the club decides whether and when."],
     ["Leaving is easy.", "Export the data, delete the resources in your own account, done. Nobody to cancel with or to ask for deletion."],
   ]) + links([["/en/docs/install/", "Installation guide"], ["/en/club-board-privacy/", "For the board and privacy"]]),
 )}
@@ -166,9 +165,8 @@ ${section(
   ]) +
     ticks([
       ["Links expire", "and can be renewed at any time; the old link then stops working."],
-      ["The link is for setting up only.", "Whoever opens it again later gets into the app with “Straight to the app”."],
       ["Coaches see who is missing:", "the invitations overview shows who has no access yet."],
-      ["Everyone knows who is who:", "people do not change their own name, coaches or admins do."],
+      ["Real names:", "coaches and admins keep the names, nobody appears under a made-up one."],
     ]),
 )}
 ${section(
@@ -214,7 +212,7 @@ ${section(
         "Mit dem Modul „Spielplan aus handball4all“ verbindet der Trainer seine Mannschaft einmal mit dem Spielplan des Verbands. Danach holt Kabine die Spiele selbst.",
         ticks([
           ["Spiele kommen von selbst:", "neue Spiele, verlegte Anwurfzeiten und Hallen werden übernommen, abgesetzte Spiele abgesagt, Betroffene benachrichtigt."],
-          ["Ergebnisse, Tabelle, Liveticker:", "Tabelle und Spielbericht sind einen Tipp entfernt, abgerufen erst, wenn jemand sie öffnet."],
+          ["Ergebnisse, Tabelle, Liveticker:", "Tabelle und Spielbericht sind einen Tipp entfernt."],
           ["Heim und Auswärts:", "Hallen der Gegner kommen mit Adresse, für die Fahrgemeinschaft und die Karte."],
           ["Ohne handball4all:", "Spiele lassen sich auch aus einer Tabelle übernehmen oder einzeln anlegen."],
         ]),
@@ -267,7 +265,7 @@ ${section(
         "With the module “Game schedule from handball4all” the coach links the team once with the association's schedule (German handball associations). After that Kabine fetches the games itself.",
         ticks([
           ["Games arrive by themselves:", "new games, moved throw-off times and halls are taken over, cancelled games called off, the people affected notified."],
-          ["Results, table, live ticker:", "table and game report are one tap away, fetched only when someone opens them."],
+          ["Results, table, live ticker:", "table and game report are one tap away."],
           ["Home and away:", "opponents' halls come with their address, for carpools and the map."],
           ["Without handball4all:", "games can also be taken from a spreadsheet or created one by one."],
         ]),
@@ -517,7 +515,7 @@ ${section(
     ["Auftragsverarbeitungsvertrag", "schließt der Verein im eigenen Cloudflare-Konto ab; er enthält die EU-Standardvertragsklauseln, Cloudflare ist unter dem EU-US Data Privacy Framework zertifiziert."],
     ["Datenbank in der EU:", "bei der Installation ausdrücklich in der EU angelegt, der Mannschaftschat liegt in der EU-Jurisdiktion."],
     ["Keine Selbstregistrierung:", "nur eingeladene Personen kommen in die App, angemeldet wird mit Passkey ohne Passwort."],
-    ["Datenexport", "auf Knopfdruck, mit Hinweis auf den sicheren Umgang mit der Datei."],
+    ["Datenexport", "auf Knopfdruck."],
   ]),
 )}
 ${section(
@@ -553,10 +551,10 @@ ${section(
   "Heute läuft Kabine nur bei Cloudflare. Das könnte sich ändern, ohne die App neu zu schreiben.",
   ticks([
     ["Die Laufzeit ist schon Open Source:", "workerd, der Kern von Cloudflare Workers, steht unter der Apache-2.0-Lizenz und lässt sich auf eigenen Servern betreiben."],
-    ["Selbstbetrieb wird offiziell:", "Im Oktober 2026 ist das Team von Deno zu Cloudflare gewechselt, um Workers und Durable Objects auf eigener Infrastruktur zu einer offiziell unterstützten Möglichkeit zu machen, mit Ideen aus Denos celld."],
+    ["Selbstbetrieb wird offiziell:", "Im Oktober 2026 ist das Team von Deno zu Cloudflare gewechselt, um Workers und Durable Objects auf eigener Infrastruktur zu einer offiziell unterstützten Möglichkeit zu machen."],
     ["Was für Kabine noch fehlt:", "Für die Datenbank (D1), den Schlüsselspeicher (KV), Warteschlangen und Zeitpläne gibt es noch keinen offiziellen Weg zum Selbstbetrieb. Erst wenn das steht, kann Kabine auch im eigenen Rechenzentrum oder bei einem deutschen Hoster laufen."],
     ["Gute Ausgangslage:", "Kabine baut vollständig auf dem Workers-Programmiermodell auf. Wird es außerhalb von Cloudflare verfügbar, wäre ein Umzug eine Anpassung, keine Neuentwicklung. Das Projekt verfolgt die Entwicklung."],
-    ["Mitmachen:", "Kabine ist Open Source. Wer beim Selbstbetrieb auf workerd helfen möchte, legt am besten vorher ein Issue an, damit der Weg abgestimmt ist. Eine eigene Datenbank neben der übrigen Cloudflare-Plattform ist dagegen nicht geplant: Sie brächte Vereinen viel Betriebsaufwand und kaum Unabhängigkeit."],
+    ["Mitmachen:", "Kabine ist Open Source. Wer beim Selbstbetrieb auf workerd helfen möchte, legt am besten vorher ein Issue an, damit der Weg abgestimmt ist."],
   ]) + links([["https://blog.cloudflare.com/deno-joins-cloudflare/", "Cloudflare: Deno is joining Cloudflare"], ["https://deno.com/blog/cloudflare", "Deno: Ankündigung"], ["https://github.com/cloudflare/workerd", "workerd auf GitHub"], [`${GITHUB}/issues/new/choose`, "Issue anlegen"]]),
 )}
 ${section(
@@ -579,9 +577,9 @@ ${section(
   "Wenig Aufwand, volle Kontrolle.",
   "",
   cards("g3", [
-    ["Kontrollierte Updates", "Updates kommen als Pull Request, der Verein bestimmt den Zeitpunkt. Ändert ein Update die Datenbank, ruht die App eine Minute und es gibt einen Wiederherstellungspunkt."],
-    ["Wartungsmodus", "Ein Schalter unter Verwaltung: Nur Admins kommen in die App, automatische Nachrichten pausieren."],
-    ["Eigentümer geschützt", "Wer die Installation eingerichtet hat, kann von anderen Admins nicht ausgesperrt werden."],
+    ["Kontrollierte Updates", "Updates kommen als Pull Request, der Verein bestimmt den Zeitpunkt."],
+    ["Rückgängig machen", "Die Datenbank hat eine Historie. Vor jedem Update, das sie ändert, merkt sich Kabine einen Wiederherstellungspunkt."],
+    ["Alles in einer Datei", "Der Datenexport sichert die Daten des Vereins auf Knopfdruck."],
   ]),
 )}
 ${section(
@@ -625,7 +623,7 @@ ${section(
     ["Data processing agreement", "is concluded by the club in its own Cloudflare account; it includes the EU standard contractual clauses, and Cloudflare is certified under the EU-US Data Privacy Framework."],
     ["Database in the EU:", "created explicitly in the EU at installation, the team chat is in the EU jurisdiction."],
     ["No self sign-up:", "only invited people get in, sign-in is by passkey without a password."],
-    ["Data export", "at the push of a button, with a reminder to keep the file safe."],
+    ["Data export", "at the push of a button."],
   ]),
 )}
 ${section(
@@ -661,10 +659,10 @@ ${section(
   "Today Kabine runs on Cloudflare only. That may change without rewriting the app.",
   ticks([
     ["The runtime is already open source:", "workerd, the core of Cloudflare Workers, is licensed under Apache-2.0 and can run on your own servers."],
-    ["Self-hosting is becoming official:", "In October 2026 the Deno team joined Cloudflare to make Workers and Durable Objects on your own infrastructure a first-class supported option, with ideas from Deno's celld."],
+    ["Self-hosting is becoming official:", "In October 2026 the Deno team joined Cloudflare to make Workers and Durable Objects on your own infrastructure a first-class supported option."],
     ["What Kabine still needs:", "For the database (D1), the key-value store (KV), queues and schedules there is no official way to self-host yet. Only then can Kabine run in your own data centre or at a local hosting provider."],
     ["A good starting point:", "Kabine is built entirely on the Workers programming model. Once that is available outside Cloudflare, moving would be an adaptation, not a rewrite. The project follows the development."],
-    ["Getting involved:", "Kabine is open source. If you want to help with self-hosting on workerd, best open an issue first, so the approach is agreed. A database of your own alongside the rest of the Cloudflare platform, on the other hand, is not planned: it would bring clubs a lot of operating effort and hardly any independence."],
+    ["Getting involved:", "Kabine is open source. If you want to help with self-hosting on workerd, best open an issue first, so the approach is agreed."],
   ]) + links([["https://blog.cloudflare.com/deno-joins-cloudflare/", "Cloudflare: Deno is joining Cloudflare"], ["https://deno.com/blog/cloudflare", "Deno: announcement"], ["https://github.com/cloudflare/workerd", "workerd on GitHub"], [`${GITHUB}/issues/new/choose`, "Open an issue"]]),
 )}
 ${section(
@@ -687,9 +685,9 @@ ${section(
   "Little effort, full control.",
   "",
   cards("g3", [
-    ["Controlled updates", "Updates arrive as a pull request, the club decides when. If an update changes the database, the app pauses for a minute and there is a restore point."],
-    ["Maintenance mode", "One switch under administration: only admins get in, automatic messages pause."],
-    ["Owner protected", "Whoever set up the installation cannot be locked out by other admins."],
+    ["Controlled updates", "Updates arrive as a pull request, the club decides when."],
+    ["Undo", "The database keeps a history. Before every update that changes it, Kabine notes a restore point."],
+    ["Everything in one file", "The data export saves the club's data at the push of a button."],
   ]),
 )}
 ${section(
@@ -733,7 +731,7 @@ ${section(
   "alt",
   "Auch für Vereinsfeste",
   "Sondertermine mit Zeitblöcken.",
-  "Für Turniere, Feste und Arbeitseinsätze legt der Organisator Zeitblöcke mit Diensten an, auch einmalige wie Grill. Weitere Organisatoren helfen beim Verwalten.",
+  "Für Turniere, Feste und Arbeitseinsätze legt der Organisator Zeitblöcke mit Diensten an, auch einmalige wie Grill.",
   shots("de", [["07-helper-duties", "Helferdienste für ein Heimspiel", "Helferplan eines Heimspiels"]]),
 )}
 ${section(
@@ -767,7 +765,7 @@ ${section(
   "alt",
   "Also for club events",
   "Special events with time blocks.",
-  "For tournaments, parties and work days the organiser creates time blocks with duties, also one-off ones like the barbecue. Further organisers help manage them.",
+  "For tournaments, parties and work days the organiser creates time blocks with duties, also one-off ones like the barbecue.",
   shots("en", [["07-helper-duties", "Helper duties for a home game", "Helper plan of a home game"]]),
 )}
 ${section(
@@ -854,9 +852,6 @@ ${section(
         "Wer zugesagt hat, gilt als anwesend; wer abgesagt hat, ist entschuldigt. Wer nicht geantwortet hat, steht oben unter „Noch einzutragen“.",
         ticks([
           ["Anwesend, entschuldigt, unentschuldigt", "pro Person mit einem Tipp, auch „abgesagt, aber doch gekommen“."],
-          ["Die Rückmeldung bleibt,", "der Eintrag des Trainers gilt."],
-          ["Bis zum Ende des Folgetags", "tragen Trainer ein, Admins die ganze Saison."],
-          ["Spieler und Eltern", "sehen ihren eigenen Eintrag, wenn er von ihrer Rückmeldung abweicht. Ohne Push."],
         ]),
       )}
 ${section(
@@ -881,9 +876,6 @@ ${section(
         "Whoever accepted counts as present; whoever declined is excused. Whoever did not respond is listed first under “Still to record”.",
         ticks([
           ["Present, excused, unexcused", "per person with one tap, also “declined but came anyway”."],
-          ["The response stays,", "the coach's entry counts."],
-          ["Until the end of the following day", "coaches record, admins the whole season."],
-          ["Players and parents", "see their own entry where it differs from their response. No push."],
         ]),
       )}
 ${section(
