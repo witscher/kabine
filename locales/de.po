@@ -1259,6 +1259,11 @@ msgstr "Nur das Jahr. Mehr Daten speichert die App nicht."
 msgid "Save plan"
 msgstr "Plan speichern"
 
+# ai
+#: shared/changelog.ts
+msgid "Coaches see at the top of the events list what is left to do: a game without a meeting point, a game schedule not synced for 14 days."
+msgstr "Trainer sehen oben in der Terminübersicht, was noch zu tun ist: ein Spiel ohne Treffpunkt, einen Spielplan, der seit 14 Tagen nicht abgeglichen wurde."
+
 #: shared/types.ts
 msgid "Nominations, reminders before games and stand-in requests"
 msgstr "Nominierungen, Erinnerungen vor Spielen und Aushilfe-Anfragen"
@@ -8195,6 +8200,11 @@ msgstr "Spieler / Mitglied"
 msgid "Full members with access to the app. From 2 letters: everyone in the club."
 msgstr "Ordentliche Mitglieder mit Zugang zur App. Ab 2 Buchstaben: alle im Verein."
 
+# ai
+#: shared/changelog.ts
+msgid "The person search for helper duties no longer puts names into the address of the request."
+msgstr "Die Personensuche bei den Helferdiensten schreibt keine Namen mehr in die Adresse der Anfrage."
+
 #: src/pages/join.tsx
 msgid "Admin access for"
 msgstr "Admin-Zugang für"
@@ -8623,6 +8633,11 @@ msgstr "Admin"
 #: src/duty-blocks.tsx
 msgid "until end of event"
 msgstr "bis Terminende"
+
+# ai
+#: shared/changelog.ts
+msgid "Legal notice and privacy policy: enter both links of your club under Administration → Club. The app shows them under every screen and every e-mail."
+msgstr "Impressum und Datenschutzerklärung: Trage beide Links deines Vereins unter Verwaltung → Verein ein. Die App zeigt sie unter jeder Seite und jeder E-Mail."
 
 # ai
 #: src/pages/event.tsx

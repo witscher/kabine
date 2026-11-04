@@ -15,6 +15,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: readonly ChangelogEntry[] = [
   {
+    version: "0.5.0",
+    date: "2026-11-04",
+    items: () => [
+      t`Legal notice and privacy policy: enter both links of your club under Administration → Club. The app shows them under every screen and every e-mail.`,
+      t`Coaches see at the top of the events list what is left to do: a game without a meeting point, a game schedule not synced for 14 days.`,
+      t`The person search for helper duties no longer puts names into the address of the request.`,
+    ],
+  },
+  {
     version: "0.4.0",
     date: "2026-10-26",
     items: () => [

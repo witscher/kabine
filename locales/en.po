@@ -1201,6 +1201,10 @@ msgstr "Only the year. The app stores no further data."
 msgid "Save plan"
 msgstr "Save plan"
 
+#: shared/changelog.ts
+msgid "Coaches see at the top of the events list what is left to do: a game without a meeting point, a game schedule not synced for 14 days."
+msgstr "Coaches see at the top of the events list what is left to do: a game without a meeting point, a game schedule not synced for 14 days."
+
 #: shared/types.ts
 msgid "Nominations, reminders before games and stand-in requests"
 msgstr "Nominations, reminders before games and stand-in requests"
@@ -7758,6 +7762,10 @@ msgstr "Player / member"
 msgid "Full members with access to the app. From 2 letters: everyone in the club."
 msgstr "Full members with access to the app. From 2 letters: everyone in the club."
 
+#: shared/changelog.ts
+msgid "The person search for helper duties no longer puts names into the address of the request."
+msgstr "The person search for helper duties no longer puts names into the address of the request."
+
 #: src/pages/join.tsx
 msgid "Admin access for"
 msgstr "Admin access for"
@@ -8161,6 +8169,10 @@ msgstr "Admin"
 #: src/duty-blocks.tsx
 msgid "until end of event"
 msgstr "until end of event"
+
+#: shared/changelog.ts
+msgid "Legal notice and privacy policy: enter both links of your club under Administration → Club. The app shows them under every screen and every e-mail."
+msgstr "Legal notice and privacy policy: enter both links of your club under Administration → Club. The app shows them under every screen and every e-mail."
 
 #: src/pages/event.tsx
 msgid "Applies to this training only. The training plan sets it for all trainings."

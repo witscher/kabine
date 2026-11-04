@@ -6,6 +6,8 @@ Changes that are merged but not released yet go under *Unreleased*, one line eac
 
 ## Unreleased
 
+## v0.5.0
+
 - Hints for coaches at the top of the events list: a game in the next 3 days without a meeting point ("Enter" opens it), and a game schedule not synced for 14 days ("Sync now"). Only for the coach's own teams; a hint goes away once it is done.
 - The person search for helper duties and organisers no longer puts the typed name into the address: request logs (Workers Logs) record addresses, so names no longer end up there.
 - Legal notice and privacy policy: the club profile now has a link for each (*Administration → Club*, the old combined link stays as the privacy policy). The app shows both under every screen, in the page itself and under every e-mail; admins see a warning until both are entered. The club is the provider of its installation, see `docs/privacy.md`.
