@@ -2,6 +2,5 @@
   "name": "Full name of the operator",
   "address": ["c/o line of the address service", "Street and number", "Postcode and city"],
   "email": "contact@example.org",
-  "mailbox": "Mail provider, its postal address",
   "turnstileSiteKey": "Site key of the Turnstile widget for kabine.dev"
 }

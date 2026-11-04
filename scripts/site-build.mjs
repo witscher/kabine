@@ -25,12 +25,12 @@ let legal;
 if (existsSync("site/legal.json")) {
   legal = JSON.parse(read("site/legal.json"));
 } else if (preview) {
-  legal = { name: "[name]", address: ["[c/o]", "[street]", "[postcode city]"], email: "[e-mail]", mailbox: "[mail provider, address]" };
+  legal = { name: "[name]", address: ["[c/o]", "[street]", "[postcode city]"], email: "[e-mail]" };
 } else {
-  console.error("site/legal.json is missing (operator, address, e-mail, mail provider, Turnstile site key). Copy site/legal.example.json, or use --preview.");
+  console.error("site/legal.json is missing (operator, address, e-mail, Turnstile site key). Copy site/legal.example.json, or use --preview.");
   process.exit(1);
 }
-for (const key of ["name", "address", "email", "mailbox"]) {
+for (const key of ["name", "address", "email"]) {
   if (legal[key]?.length) continue;
   if (!preview) throw new Error(`site/legal.json: "${key}" is empty`);
   legal[key] = key === "address" ? [`[${key}]`] : `[${key}]`;
@@ -45,7 +45,6 @@ const fill = (html, lang, alternates) =>
     .replaceAll("{{LEGAL_NAME}}", escape(legal.name))
     .replaceAll("{{LEGAL_ADDRESS}}", legal.address.map(escape).join("<br>"))
     .replaceAll("{{LEGAL_EMAIL}}", `<a href="mailto:${escape(legal.email)}">${escape(legal.email)}</a>`)
-    .replaceAll("{{LEGAL_MAILBOX}}", escape(legal.mailbox))
     .replaceAll("{{TURNSTILE_SITE_KEY}}", escape(legal.turnstileSiteKey));
 
 rmSync(out, { recursive: true, force: true });
