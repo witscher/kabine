@@ -40,7 +40,14 @@ interface ImportSummary {
  * time. Sources that block servers are fetched here in the browser, the others by the server.
  */
 export async function syncGames(teamId: number, name: string): Promise<ImportSummary | null> {
-  const claim = await api.post<{ claimed: boolean; reason?: string; fetchUrl?: string; retryAt?: string; summary?: ImportSummary }>(`/teams/${teamId}/games/claim`, {
+  const claim = await api.post<{
+    claimed: boolean;
+    reason?: string;
+    fetchUrl?: string;
+    fetchFormat?: "json" | "text";
+    retryAt?: string;
+    summary?: ImportSummary;
+  }>(`/teams/${teamId}/games/claim`, {
     manual: true,
   });
   if (!claim.claimed) {
@@ -57,7 +64,7 @@ export async function syncGames(teamId: number, name: string): Promise<ImportSum
     const res = await fetch(claim.fetchUrl!, { credentials: "omit", cache: "no-store", referrerPolicy: "no-referrer" });
     const status = res.status;
     if (!res.ok) throw new Error(t`${name} responded with status ${status}`);
-    data = await res.json();
+    data = claim.fetchFormat === "text" ? await res.text() : await res.json();
   } catch (err) {
     const detail = errorMessage(err);
     const message = t`${name} cannot be reached right now (${detail}).`;
