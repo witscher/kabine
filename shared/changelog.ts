@@ -15,6 +15,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: readonly ChangelogEntry[] = [
   {
+    version: "0.6.0",
+    date: "2026-11-05",
+    items: () => [
+      t`Saving works the same everywhere: switches and choices save at once and show "Saved" right there; text fields have a save button in their own box that appears once you change something.`,
+      t`Administration → Club saves each box on its own, without one button for the whole page.`,
+      t`New page under Administration for the game schedule sync: all teams at a glance, and when coaches are reminded to sync (15, 30 or 60 days, or never).`,
+    ],
+  },
+  {
     version: "0.5.0",
     date: "2026-11-04",
     items: () => [

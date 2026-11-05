@@ -6,6 +6,8 @@ Changes that are merged but not released yet go under *Unreleased*, one line eac
 
 ## Unreleased
 
+## v0.6.0
+
 - Saving works the same everywhere: switches and choices save at once and show "Saved" right at the switch; text fields have a button in their own card that appears once something changed. Administration → Club no longer has one button for the whole page: every card saves on its own. When editing a training plan, name, period and deadline have their own "Save plan" button, as training times already saved at once.
 - New page under Administration for the game schedule sync (named after the source, e.g. "handball4all"): every team with its link, last sync, last error and upcoming games, with "Sync now". Admins choose when coaches are reminded to sync: after 15, 30 or 60 days, or never. The default is now 15 days (before: 14).
 

@@ -4212,6 +4212,10 @@ msgstr "Mitfahrt eingetragen"
 msgid "Invalid time."
 msgstr "Ungültige Uhrzeit."
 
+#: shared/changelog.ts
+msgid "Administration → Club saves each box on its own, without one button for the whole page."
+msgstr ""
+
 #: modules/youth-referees/worker/admin-routes.ts
 msgid "This link is invalid."
 msgstr "Dieser Link ist ungültig."
@@ -6437,6 +6441,10 @@ msgstr "Später weitermachen"
 #: modules/carpools/app/card.tsx
 msgid "Assign"
 msgstr "Eintragen"
+
+#: shared/changelog.ts
+msgid "Saving works the same everywhere: switches and choices save at once and show \"Saved\" right there; text fields have a save button in their own box that appears once you change something."
+msgstr ""
 
 #: modules/duties/worker/routes.ts
 #: modules/duties/worker/routes.ts
@@ -10652,6 +10660,10 @@ msgstr "Ich"
 #: modules/carpools/app/card.tsx
 msgid "Who is driving?"
 msgstr "Wer fährt?"
+
+#: shared/changelog.ts
+msgid "New page under Administration for the game schedule sync: all teams at a glance, and when coaches are reminded to sync (15, 30 or 60 days, or never)."
+msgstr ""
 
 # ai
 #: src/pages/games.tsx
