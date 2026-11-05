@@ -518,6 +518,45 @@ export function PlanEditorPage({ id, planId }: { id: string; planId: string }) {
   const holidays = data.holidays.filter((h) => h.endsOn >= today);
   const teamName = allTeams.find((x) => x.id === ownTeamId)?.name ?? "";
 
+  // Editing an existing plan: training times save on their own, so the plan's own fields get their own button
+  // (docs/dev/design.md, Saving); a new plan is one form with "Save plan"
+  const detailsChanged =
+    !!existing &&
+    (name !== existing.name ||
+      from !== existing.validFrom ||
+      to !== existing.validTo ||
+      periodId !== existing.holidayPeriodId ||
+      declineHours !== (existing.declineHours != null ? String(existing.declineHours) : ""));
+  const savePlan = async () => {
+    const dh = declineHours.trim() ? Number(declineHours) : null;
+    if (dh != null && (!Number.isInteger(dh) || dh < 0 || dh > 168)) {
+      toast(t`Please enter a deadline between 0 and 168 hours.`, "error");
+      return;
+    }
+    if (isNew) {
+      const res = await api.post<{ id: number; created: number }>(`/teams/${id}/plans`, { name: name.trim(), kind, validFrom: from, validTo: to, declineHours: dh, holidayPeriodId: kind === "holiday" ? periodId : null, rules });
+      const created = res.created;
+      toast(t`Plan saved. ${created} events created.`);
+      invalidate("/events", `/teams/${id}/plans`);
+      route(`/team/${id}/plaene`, true);
+      return;
+    }
+    await api.patch(`/plans/${existing!.id}`, { name: name.trim(), validFrom: from, validTo: to, declineHours: dh, holidayPeriodId: kind === "holiday" ? periodId : null });
+    toast(t`Plan saved.`);
+    invalidate("/events", `/teams/${id}/plans`);
+    await reload();
+  };
+  const declineField = shared ? (
+    <TextField
+      label={t`Decline deadline for joint trainings (hrs, optional)`}
+      value={declineHours}
+      onInput={setDeclineHours}
+      inputMode="numeric"
+      maxLength={3}
+      hint={t`Leave empty: the longest deadline of the teams involved applies.`}
+    />
+  ) : null;
+
   const saveRule = async (r: DraftRule) => {
     if (isNew) {
       setRules(editing != null && editing >= 0 ? rules.map((x, i) => (i === editing ? r : x)) : [...rules, r]);
@@ -536,8 +575,8 @@ export function PlanEditorPage({ id, planId }: { id: string; planId: string }) {
   return (
     <main class="page">
       <header class="topbar">
-        <button type="button" class="icon-btn" aria-label={t`Cancel`} onClick={() => history.back()}>
-          <Icon name="x" size={22} stroke={2.2} />
+        <button type="button" class="icon-btn" aria-label={isNew ? t`Cancel` : t`Back`} onClick={() => history.back()}>
+          <Icon name={isNew ? "x" : "back"} size={22} stroke={2.2} />
         </button>
         <div style={{ flex: 1 }}>
           <div class="kicker">
@@ -632,6 +671,12 @@ export function PlanEditorPage({ id, planId }: { id: string; planId: string }) {
             )}
           </Field>
         </div>
+        {!isNew ? declineField : null}
+        {detailsChanged ? (
+          <Button variant="primary" onClick={() => void savePlan()}>
+            <Trans>Save plan</Trans>
+          </Button>
+        ) : null}
 
         <section class="stack" aria-label={t`Training times`}>
           <h2 class="section-title" style={{ fontSize: "20px" }}>
@@ -673,16 +718,7 @@ export function PlanEditorPage({ id, planId }: { id: string; planId: string }) {
           ) : null}
         </section>
 
-        {shared ? (
-          <TextField
-            label={t`Decline deadline for joint trainings (hrs, optional)`}
-            value={declineHours}
-            onInput={setDeclineHours}
-            inputMode="numeric"
-            maxLength={3}
-            hint={t`Leave empty: the longest deadline of the teams involved applies.`}
-          />
-        ) : null}
+        {isNew ? declineField : null}
 
         {preview ? (
           <section class="notice" style={{ flexDirection: "column", gap: "6px" }} aria-live="polite">
@@ -695,35 +731,16 @@ export function PlanEditorPage({ id, planId }: { id: string; planId: string }) {
           </section>
         ) : null}
 
-        <div class="btn-row">
-          <Button size="lg" onClick={() => history.back()}>
-            <Trans>Cancel</Trans>
-          </Button>
-          <Button
-            variant="accent"
-            size="lg"
-            style={{ flex: 2 }}
-            onClick={async () => {
-              const dh = declineHours.trim() ? Number(declineHours) : null;
-              if (dh != null && (!Number.isInteger(dh) || dh < 0 || dh > 168)) {
-                toast(t`Please enter a deadline between 0 and 168 hours.`, "error");
-                return;
-              }
-              if (isNew) {
-                const res = await api.post<{ id: number; created: number }>(`/teams/${id}/plans`, { name: name.trim(), kind, validFrom: from, validTo: to, declineHours: dh, holidayPeriodId: kind === "holiday" ? periodId : null, rules });
-                const created = res.created;
-                toast(t`Plan saved. ${created} events created.`);
-              } else {
-                await api.patch(`/plans/${existing!.id}`, { name: name.trim(), validFrom: from, validTo: to, declineHours: dh, holidayPeriodId: kind === "holiday" ? periodId : null });
-                toast(t`Plan saved.`);
-              }
-              invalidate("/events", `/teams/${id}/plans`);
-              route(`/team/${id}/plaene`, true);
-            }}
-          >
-            <Trans>Save plan</Trans>
-          </Button>
-        </div>
+        {isNew ? (
+          <div class="btn-row">
+            <Button size="lg" onClick={() => history.back()}>
+              <Trans>Cancel</Trans>
+            </Button>
+            <Button variant="accent" size="lg" style={{ flex: 2 }} onClick={() => void savePlan()}>
+              <Trans>Save plan</Trans>
+            </Button>
+          </div>
+        ) : null}
         {!isNew ? (
           <Button
             variant="ghost"
@@ -740,7 +757,7 @@ export function PlanEditorPage({ id, planId }: { id: string; planId: string }) {
         ) : null}
         {!isNew ? (
           <Notice>
-            <Trans>Changes to training times apply immediately. Responses are kept as long as the date stays the same.</Trans>
+            <Trans>Training times are saved as soon as you save or remove them. Responses are kept as long as the date stays the same.</Trans>
           </Notice>
         ) : null}
       </div>

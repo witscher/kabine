@@ -302,46 +302,92 @@ export function TextField(props: {
   );
 }
 
+/**
+ * Feedback for a control that saves at once (docs/dev/design.md, Saving): busy while the call runs, then
+ * "Saved" with a tick for two seconds; on an error a toast, and the control stays as it was. A promise that
+ * resolves to `false` means cancelled.
+ */
+export function useSaving() {
+  const [state, setState] = useState<"idle" | "busy" | "saved">("idle");
+  const timer = useRef<ReturnType<typeof setTimeout>>();
+  useEffect(() => () => clearTimeout(timer.current), []);
+  const run = async (r: unknown): Promise<void> => {
+    if (!(r instanceof Promise)) return;
+    clearTimeout(timer.current);
+    setState("busy");
+    try {
+      // false: the person cancelled (e.g. a confirmation), nothing was saved
+      if ((await r) === false) return setState("idle");
+      setState("saved");
+      timer.current = setTimeout(() => setState("idle"), 2000);
+    } catch (err) {
+      setState("idle");
+      toast(errorMessage(err), "error");
+    }
+  };
+  return { busy: state === "busy", saved: state === "saved", run };
+}
+
+/** The "Saved" tick of useSaving. */
+export function SavedNote({ show }: { show: boolean }) {
+  return (
+    <span class="saved-note" aria-live="polite">
+      {show ? (
+        <>
+          <Icon name="check" size={14} stroke={2.6} />
+          <Trans>Saved</Trans>
+        </>
+      ) : null}
+    </span>
+  );
+}
+
+/** A switch. If onChange returns a promise, it saves at once and shows "Saved" (docs/dev/design.md, Saving). */
 export function SwitchRow(props: { label: ComponentChildren; sub?: ComponentChildren; checked: boolean; onChange: (v: boolean) => unknown; disabled?: boolean }) {
-  const [busy, setBusy] = useState(false);
+  const saving = useSaving();
   return (
     <button
       type="button"
       class="switch-row"
       role="switch"
       aria-checked={props.checked ? "true" : "false"}
-      disabled={props.disabled || busy}
-      onClick={async () => {
-        const r = props.onChange(!props.checked);
-        if (r instanceof Promise) {
-          setBusy(true);
-          try {
-            await r;
-          } catch (err) {
-            toast(errorMessage(err), "error");
-          } finally {
-            setBusy(false);
-          }
-        }
-      }}
+      aria-busy={saving.busy ? "true" : undefined}
+      disabled={props.disabled || saving.busy}
+      onClick={() => void saving.run(props.onChange(!props.checked))}
     >
       <span class="main">
         <span style={{ display: "block", fontWeight: 600 }}>{props.label}</span>
         {props.sub ? <span class="small muted">{props.sub}</span> : null}
       </span>
+      <SavedNote show={saving.saved} />
       <span class="switch" aria-hidden="true" />
     </button>
   );
 }
 
-export function Segmented<T extends string>(props: { value: T; options: { value: T; label: string }[]; onChange: (v: T) => void; label: string }) {
+/**
+ * Choice of a few options. If onChange returns a promise, it saves at once and shows "Saved" below the
+ * options; without one it is a filter, a tab or part of a form.
+ */
+export function Segmented<T extends string>(props: { value: T; options: { value: T; label: string }[]; onChange: (v: T) => unknown; label: string }) {
+  const saving = useSaving();
   return (
-    <div class="segmented" role="group" aria-label={props.label}>
-      {props.options.map((o) => (
-        <button type="button" aria-pressed={props.value === o.value ? "true" : "false"} onClick={() => props.onChange(o.value)}>
-          {o.label}
-        </button>
-      ))}
+    <div class="segmented-wrap">
+      <div class="segmented" role="group" aria-label={props.label} aria-busy={saving.busy ? "true" : undefined}>
+        {props.options.map((o) => (
+          <button
+            type="button"
+            aria-pressed={props.value === o.value ? "true" : "false"}
+            disabled={saving.busy}
+            onClick={() => {
+              if (o.value !== props.value) void saving.run(props.onChange(o.value));
+            }}
+          >
+            {o.label}
+          </button>
+        ))}
+      </div>
+      {saving.saved ? <SavedNote show /> : null}
     </div>
   );
 }

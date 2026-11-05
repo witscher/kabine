@@ -314,6 +314,11 @@ msgid "Decline this event"
 msgstr "Diesen Termin absagen"
 
 # ai
+#: src/pages/special.tsx
+msgid "{count, plural, one {# time slot applied. It is saved with the event.} other {# time slots applied. They are saved with the event.}}"
+msgstr "{count, plural, one {# Zeitblock übernommen. Er wird mit dem Termin gespeichert.} other {# Zeitblöcke übernommen. Sie werden mit dem Termin gespeichert.}}"
+
+# ai
 #: src/child-limits.tsx
 msgid "you take care of {list} there"
 msgstr "dort übernimmst du {list}"
@@ -1261,6 +1266,7 @@ msgid "Only the year. The app stores no further data."
 msgstr "Nur das Jahr. Mehr Daten speichert die App nicht."
 
 #: src/pages/plans.tsx
+#: src/pages/plans.tsx
 msgid "Save plan"
 msgstr "Plan speichern"
 
@@ -1323,10 +1329,6 @@ msgstr "Profilbild"
 #: src/pages/updates.tsx
 msgid "Updates and maintenance"
 msgstr "Updates und Wartung"
-
-#: src/pages/plans.tsx
-msgid "Changes to training times apply immediately. Responses are kept as long as the date stays the same."
-msgstr "Änderungen an Trainingszeiten gelten sofort. Rückmeldungen bleiben erhalten, solange das Datum gleich bleibt."
 
 #: src/pages/profile.tsx
 msgid "Notification"
@@ -1936,6 +1938,11 @@ msgstr "Gilt nur in den gewählten Ferien und ersetzt dort den regulären Plan. 
 msgid "{label}: change time"
 msgstr "{label}: Uhrzeit ändern"
 
+# ai
+#: src/pages/club-settings.tsx
+msgid "Save links and contact"
+msgstr "Links und Kontakt speichern"
+
 #: src/pages/event.tsx
 msgid "Only this one event changes, the training schedule stays the same. Everyone involved will be notified."
 msgstr "Nur dieser eine Termin ändert sich, der Trainingsplan bleibt gleich. Alle Beteiligten werden benachrichtigt."
@@ -1977,10 +1984,6 @@ msgstr "Gerät abgemeldet."
 #: src/pages/chat.tsx
 msgid "All chats"
 msgstr "Alle Chats"
-
-#: src/pages/team.tsx
-msgid "{firstName} is active again."
-msgstr "{firstName} ist wieder aktiv."
 
 #: src/pages/home.tsx
 msgid "There have been no events for the {team} this season yet."
@@ -2286,6 +2289,7 @@ msgstr "Nicht angemeldet"
 
 # ai
 #: src/pages/club-settings.tsx
+#: src/pages/club-settings.tsx
 msgid "{teams, plural, one {# team takes its games from this source. Its games stay, but they are no longer synced.} other {# teams take their games from this source. Their games stay, but they are no longer synced.}}"
 msgstr "{teams, plural, one {# Mannschaft übernimmt ihre Spiele aus dieser Quelle. Ihre Spiele bleiben, werden aber nicht mehr abgeglichen.} other {# Mannschaften übernehmen ihre Spiele aus dieser Quelle. Ihre Spiele bleiben, werden aber nicht mehr abgeglichen.}}"
 
@@ -2500,6 +2504,11 @@ msgstr "{label} austragen"
 #: worker/routes/persons.ts
 msgid "You cannot remove your own admin rights."
 msgstr "Du kannst dir die Admin-Rechte nicht selbst entziehen."
+
+# ai
+#: src/pages/club-settings.tsx
+msgid "Save name"
+msgstr "Namen speichern"
 
 #: src/avatar.tsx
 msgid "Zoom"
@@ -3204,10 +3213,6 @@ msgstr "Spielinfos"
 msgid "{venue, select, hall {Opponents' halls (from the fixture list)} pitch {Opponents' pitches (from the fixture list)} other {Opponents' venues (from the fixture list)}}"
 msgstr "{venue, select, hall {Gegnerische Hallen (aus dem Spielplan)} pitch {Gegnerische Plätze (aus dem Spielplan)} other {Spielstätten der Gegner (aus dem Spielplan)}}"
 
-#: src/pages/admin.tsx
-msgid "{firstName} is a full club member."
-msgstr "{firstName} ist ordentliches Mitglied."
-
 # ai
 #: src/pages/event.tsx
 msgid "e.g. Sam runs the training"
@@ -3606,6 +3611,11 @@ msgstr "Der Einrichtungslink wurde bereits verwendet. Melde dich mit deinem Pass
 #: worker/domain/fixtures.ts
 msgid "Game moved ({teamName})"
 msgstr "Spiel verlegt ({teamName})"
+
+# ai
+#: src/pages/club-settings.tsx
+msgid "Switch off this source?"
+msgstr "Diese Quelle ausschalten?"
 
 #: src/pages/profile.tsx
 msgid "No parents are involved in the teams of {firstName}. {firstName} accepts and declines on their own and is alone in the chat. So there are no permissions or notifications for {firstName}."
@@ -5200,10 +5210,6 @@ msgstr "Ein anderes Gerät gleicht den Spielplan gerade ab."
 msgid "Next event: {kind}"
 msgstr "Nächster Termin: {kind}"
 
-#: src/pages/special.tsx
-msgid "{count, plural, one {# time slot applied.} other {# time slots applied.}}"
-msgstr "{count, plural, one {# Zeitblock übernommen.} other {# Zeitblöcke übernommen.}}"
-
 #: src/email.tsx
 msgid "You are signed in."
 msgstr "Du bist angemeldet."
@@ -5419,11 +5425,6 @@ msgstr "Bis wann kann ich absagen?"
 #: src/email.tsx
 msgid "We have sent a six-digit code by text message to <0>{email}</0> if an access belongs to this number. It is valid for 15 minutes."
 msgstr "Wir haben dir einen sechsstelligen Code per SMS an <0>{email}</0> geschickt, falls zu dieser Nummer ein Zugang gehört. Er gilt 15 Minuten."
-
-# ai
-#: src/pages/admin.tsx
-msgid "{firstName} is no longer a youth referee."
-msgstr "{firstName} ist kein Jugendschiedsrichter mehr."
 
 #: src/faq.tsx
 msgid "In the <0>Helpers</0> tab, on the card <1>Manage</1>: change time and slots per duty (0 hides it), add or remove a time block, sign someone up or hide the game. Friendlies, tournaments or match days without handball4all you create under <2>Team → Create event → Game</2>, the team then gets a message."
@@ -5755,7 +5756,9 @@ msgstr "Trainer erinnern nach"
 
 #: modules/sms/app/settings.tsx
 #: src/pages/club-settings.tsx
+#: src/pages/club-settings.tsx
 #: src/pages/mail-settings.tsx
+#: src/ui.tsx
 msgid "Saved"
 msgstr "Gespeichert"
 
@@ -5794,6 +5797,7 @@ msgstr "Spielerinnen und Spieler"
 #: src/pages/event.tsx
 #: src/pages/event.tsx
 #: src/pages/list-import.tsx
+#: src/pages/plans.tsx
 #: src/pages/setup-wizard.tsx
 #: src/pages/squad.tsx
 #: src/ui.tsx
@@ -5803,10 +5807,6 @@ msgstr "Zurück"
 #: worker/auth/webauthn.ts
 msgid "The passkey could not be verified. Please try again."
 msgstr "Der Passkey konnte nicht bestätigt werden. Bitte versuche es erneut."
-
-#: src/pages/group.tsx
-msgid "Only the leads now see the responses."
-msgstr "Zu- und Absagen sehen jetzt nur die Verantwortlichen."
 
 #: src/respond.tsx
 msgid "by {name} (parent)"
@@ -7462,7 +7462,6 @@ msgstr "Die Helfer der Mannschaft sehen, wer welchen Dienst übernimmt, als „V
 #: src/pages/team.tsx
 #: src/pages/team.tsx
 #: src/pages/team.tsx
-#: src/pages/team.tsx
 msgid "Saved."
 msgstr "Gespeichert."
 
@@ -7473,11 +7472,6 @@ msgstr "Stummschaltung aufgehoben."
 #: modules/duties/app/helpers.tsx
 msgid "Delete game"
 msgstr "Spiel löschen"
-
-# ai
-#: src/pages/group.tsx
-msgid "This group is now without parents."
-msgstr "Diese Gruppe ist jetzt ohne Eltern."
 
 #: src/pages/team.tsx
 msgid "Stand-in from {homeTeam}. Their coach maintains the personal data."
@@ -7847,6 +7841,12 @@ msgstr "Es gibt bereits eine kommende Saison."
 msgid "These duties need prior knowledge. The helper plan only offers them to you if you turn them on here."
 msgstr "Diese Dienste brauchen Vorkenntnisse. Der Helferplan bietet sie dir nur an, wenn du sie hier einschaltest."
 
+# ai
+#: src/pages/admin.tsx
+#: src/pages/admin.tsx
+msgid "Roles in the club"
+msgstr "Rollen im Verein"
+
 #: src/session.tsx
 msgid "This device already has a passkey for this access. Sign in with it."
 msgstr "Auf diesem Gerät gibt es schon einen Passkey für diesen Zugang. Melde dich damit an."
@@ -7961,6 +7961,11 @@ msgstr "„{name}“ als Name ohne Zugang eintragen"
 #: src/pages/team.tsx
 msgid "{name} is in the squad."
 msgstr "{name} ist im Kader."
+
+# ai
+#: src/pages/plans.tsx
+msgid "Training times are saved as soon as you save or remove them. Responses are kept as long as the date stays the same."
+msgstr "Trainingszeiten gelten, sobald du sie speicherst oder entfernst. Rückmeldungen bleiben erhalten, solange das Datum gleich bleibt."
 
 # ai
 #: src/list-import.tsx
@@ -8567,10 +8572,6 @@ msgstr "Dieses Gerät"
 #: modules/duties/worker/routes.ts
 msgid "This template is empty or does not exist."
 msgstr "Diese Vorlage ist leer oder gibt es nicht."
-
-#: src/pages/team.tsx
-msgid "Responses are now visible to coaches only."
-msgstr "Zu- und Absagen sehen jetzt nur die Trainer."
 
 # ai
 #: src/child-limits.tsx
@@ -9386,10 +9387,6 @@ msgstr "Import / Wiederherstellen"
 msgid "Under <0>Profile → My events</0> you choose training, games and helper duties and tap <1>Subscribe in calendar</1>. The events then appear in your phone's calendar app and stay up to date by themselves. Do not pass the link on."
 msgstr "Unter <0>Profil → Meine Termine</0> wählst du Training, Spiele und Helferdienste aus und tippst auf <1>Im Kalender abonnieren</1>. Die Termine erscheinen dann in der Kalender-App deines Handys und bleiben von selbst aktuell. Den Link nicht weitergeben."
 
-#: src/pages/admin.tsx
-msgid "{firstName} is no longer a full club member."
-msgstr "{firstName} ist kein ordentliches Mitglied mehr."
-
 # ai
 #: src/pages/admin.tsx
 msgid "Game duration in minutes"
@@ -9433,11 +9430,6 @@ msgstr "Du bist jetzt mit {names} verknüpft und siehst alle Termine der {teamNa
 #: src/pages/admin.tsx
 msgid "yesterday"
 msgstr "gestern"
-
-# ai
-#: src/pages/admin.tsx
-msgid "{firstName} is now enabled as youth referee."
-msgstr "{firstName} ist als Jugendschiedsrichter freigeschaltet."
 
 #: modules/carpools/app/card.tsx
 msgid "Delete ride request for {name}"
@@ -9758,6 +9750,11 @@ msgstr "Für die {teamName} gibt es keine passenden Aushilfen."
 #: src/pages/profile.tsx
 msgid "Passkeys and devices"
 msgstr "Passkeys und Geräte"
+
+# ai
+#: src/pages/club-settings.tsx
+msgid "Switch off"
+msgstr "Ausschalten"
 
 #: src/pages/admin.tsx
 msgid "Edit team"
@@ -10086,8 +10083,6 @@ msgstr "Spielerlinks, die auf einem angemeldeten Gerät geöffnet werden, führe
 #: src/pages/plans.tsx
 #: src/pages/profile.tsx
 #: src/pages/season.tsx
-#: src/pages/team.tsx
-#: src/pages/team.tsx
 #: src/pages/team.tsx
 msgid "Save"
 msgstr "Speichern"
@@ -10917,11 +10912,6 @@ msgstr "Profil"
 msgid "Note allowed"
 msgstr "Notiz erlaubt"
 
-# ai
-#: src/pages/fixture-sync.tsx
-msgid "Coaches are reminded after {days} days without a sync."
-msgstr "Trainer werden nach {days} Tagen ohne Abgleich erinnert."
-
 #: worker/routes/manual-games.ts
 msgid "{date}, {time}, {place}. The coach will announce the squad."
 msgstr "{date}, {time}, {place}. Den Kader gibt der Trainer bekannt."
@@ -11141,18 +11131,9 @@ msgstr "Mit diesem Link richtest du auf diesem Gerät einen neuen Passkey für d
 msgid "Change the game schedule source?"
 msgstr "Spielplan-Quelle wechseln?"
 
-#: src/pages/team.tsx
-msgid "{firstName} is inactive."
-msgstr "{firstName} ist inaktiv."
-
 #: modules/duties/app/helpers.tsx
 msgid "The games come from the team's fixture list. Special events appear here as soon as helpers are needed for them."
 msgstr "Die Spiele kommen aus dem Spielplan der Mannschaft. Sondertermine erscheinen hier, sobald Helfer dafür gesucht werden."
-
-# ai
-#: src/pages/group.tsx
-msgid "Parents are now included in this group."
-msgstr "Eltern sind jetzt in dieser Gruppe dabei."
 
 #: src/pages/team.tsx
 msgid "Lost device or new passkey: open the person in the squad overview and create a personal one-time link."
@@ -11341,6 +11322,11 @@ msgstr "Wochentag"
 #: src/pages/join.tsx
 msgid "Your e-mail address (optional)"
 msgstr "Deine E-Mail-Adresse (optional)"
+
+# ai
+#: src/pages/team.tsx
+msgid "Save deadlines"
+msgstr "Fristen speichern"
 
 #: worker/routes/squad.ts
 msgid "Help request"
@@ -11842,6 +11828,7 @@ msgid "Only needed if you want to sign in by code without a passkey. Nobody else
 msgstr "Nur nötig, wenn du dich ohne Passkey per Code anmelden möchtest. In der App sieht sie niemand sonst."
 
 #: src/pages/admin.tsx
+#: src/pages/team.tsx
 msgid "Save details"
 msgstr "Angaben speichern"
 
@@ -12126,6 +12113,11 @@ msgstr "Von Hand"
 #: src/pages/team.tsx
 msgid "{playerCount, plural, one {# player} other {# players}}"
 msgstr "{playerCount, plural, one {# Spieler} other {# Spieler}}"
+
+# ai
+#: src/pages/profile.tsx
+msgid "The other parent will be notified."
+msgstr "Der andere Elternteil wird benachrichtigt."
 
 #: src/calendar.tsx
 #: src/calendar.tsx
@@ -12464,10 +12456,6 @@ msgstr "Der Spielplan konnte nicht verarbeitet werden."
 msgid "Your parents take care of declining."
 msgstr "Deine Eltern kümmern sich um Absagen."
 
-#: src/pages/profile.tsx
-msgid "Saved. The other parent will be notified."
-msgstr "Gespeichert. Das andere Elternteil wird informiert."
-
 # ai
 #: src/pages/updates.tsx
 msgid "{lastAt}, version {lastVersion}"
@@ -12755,11 +12743,6 @@ msgstr "{label} per Mail"
 msgid "Games from a game schedule cannot be deleted, only hidden."
 msgstr "Spiele aus einem Spielplan lassen sich nicht löschen, nur ausblenden."
 
-# ai
-#: src/pages/fixture-sync.tsx
-msgid "Reminder switched off."
-msgstr "Erinnerung ausgeschaltet."
-
 #: worker/routes/squad.ts
 msgid "Request withdrawn"
 msgstr "Anfrage zurückgezogen"
@@ -12786,11 +12769,6 @@ msgstr "Gegner"
 #: src/restore.tsx
 msgid "Passkeys and sign-ins are not part of an export. Everyone signs in again: with an e-mail code if their address was restored, otherwise with a personal link from Administration → People."
 msgstr "Passkeys und Anmeldungen sind nicht Teil eines Exports. Alle melden sich neu an: per E-Mail-Code, wenn ihre Adresse übernommen wurde, sonst mit einem persönlichen Link aus Verwaltung → Personen."
-
-#: src/pages/group.tsx
-#: src/pages/team.tsx
-msgid "Responses are now visible to everyone."
-msgstr "Zu- und Absagen sind jetzt für alle sichtbar."
 
 #: src/pages/admin.tsx
 #: src/pages/special.tsx

@@ -997,16 +997,11 @@ function ChildLimitsSection({ team, classLimits, onChanged }: { team: TeamDetail
           value={team.childLimits}
           max={classLimits}
           onChange={async (l) => {
-            try {
-              await api.patch(`/teams/${team.id}`, {
-                childLimits: { account: l.account ? null : false, respond: l.respond ? null : false, chat: l.chat === "write" ? null : l.chat, help: l.help ? null : false },
-              });
-              invalidate("/events", "/chat");
-              toast(t`Saved.`);
-              onChanged();
-            } catch (err) {
-              toast(errorMessage(err), "error");
-            }
+            await api.patch(`/teams/${team.id}`, {
+              childLimits: { account: l.account ? null : false, respond: l.respond ? null : false, chat: l.chat === "write" ? null : l.chat, help: l.help ? null : false },
+            });
+            invalidate("/events", "/chat");
+            onChanged();
           }}
         />
       ) : (
@@ -1036,6 +1031,7 @@ function SettingsTab({ team, onChanged }: { team: TeamDetail; onChanged: () => v
   const [training, setTraining] = useState(String(team.declineHoursTraining));
   const [game, setGame] = useState(String(team.declineHoursGame));
   const [maxSquad, setMaxSquad] = useState(String(team.maxSquad));
+  const deadlinesChanged = training !== String(team.declineHoursTraining) || game !== String(team.declineHoursGame) || maxSquad !== String(team.maxSquad);
   const dutiesOn = useModule("duties");
   return (
     <>
@@ -1051,6 +1047,8 @@ function SettingsTab({ team, onChanged }: { team: TeamDetail; onChanged: () => v
           <TextField label={t`Game (hrs)`} value={game} onInput={setGame} inputMode="numeric" maxLength={3} />
         </div>
         <TextField label={t`Maximum squad size`} value={maxSquad} onInput={setMaxSquad} inputMode="numeric" maxLength={2} />
+        {/* Text fields: a button for this card only, once something changed (docs/dev/design.md, Saving) */}
+        {deadlinesChanged ? (
         <Button
           variant="primary"
           onClick={async () => {
@@ -1065,8 +1063,9 @@ function SettingsTab({ team, onChanged }: { team: TeamDetail; onChanged: () => v
             onChanged();
           }}
         >
-          <Trans>Save</Trans>
+          <Trans>Save deadlines</Trans>
         </Button>
+        ) : null}
       </section>
 
       <section class="card card-body" aria-label={t`Squad`}>
@@ -1097,7 +1096,6 @@ function SettingsTab({ team, onChanged }: { team: TeamDetail; onChanged: () => v
           onChange={async (value) => {
             await api.patch(`/teams/${team.id}`, { showResponses: value });
             invalidate("/events");
-            toast(value ? t`Responses are now visible to everyone.` : t`Responses are now visible to coaches only.`);
             onChanged();
           }}
         />
@@ -1230,6 +1228,8 @@ export function PersonPage({ id, personId }: { id: string; personId: string }) {
                 maxLength={4}
                 hint={player.ageWarning ?? t`The app stores no further data.`}
               />
+              {/* Text fields: the button appears once something changed (docs/dev/design.md, Saving) */}
+              {first !== player.person.firstName || last !== (player.person.lastName ?? "") || year !== (player.birthYear ? String(player.birthYear) : "") ? (
               <Button
                 variant="primary"
                 disabled={!first.trim()}
@@ -1244,8 +1244,9 @@ export function PersonPage({ id, personId }: { id: string; personId: string }) {
                   refresh();
                 }}
               >
-                <Trans>Save</Trans>
+                <Trans>Save details</Trans>
               </Button>
+              ) : null}
             </section>
             <ul class="list">
               <li>
@@ -1255,7 +1256,6 @@ export function PersonPage({ id, personId }: { id: string; personId: string }) {
                   checked={player.isActive}
                   onChange={async (active) => {
                     await api.post(`/persons/${person.id}/active`, { active });
-                    toast(active ? t`${firstName} is active again.` : t`${firstName} is inactive.`);
                     refresh();
                   }}
                 />

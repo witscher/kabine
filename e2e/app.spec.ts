@@ -416,7 +416,8 @@ test("Admin ordnet eine Person einer Mannschaft zu und entfernt sie wieder", asy
   await sheet.getByRole("button", { name: "Angaben speichern" }).click();
   await expect(page.getByText("Angaben gespeichert.")).toBeVisible();
   await expect(page.getByRole("dialog", { name: "Lea Neumann" })).toBeVisible();
-  await expect(sheet.getByRole("button", { name: "Angaben speichern" })).toBeDisabled();
+  // Saved: the button for the details disappears until something changes again
+  await expect(sheet.getByRole("button", { name: "Angaben speichern" })).toHaveCount(0);
 
   // Dauerhaft löschen erst nach Eintippen des Namens
   const neu = page.getByRole("dialog", { name: "Lea Neumann" });
@@ -1302,11 +1303,13 @@ test("Gruppen: Admin legt eine Gruppe an, der Unterschied zur Mannschaft ist erk
   // Eltern sind erst dabei, wenn ein Admin sie einbezieht (z. B. eine Jugendgruppe), und lassen sich wieder ausschließen
   const parents = page.getByRole("switch", { name: /Eltern einbinden/ });
   await expect(parents).toHaveAttribute("aria-checked", "false");
+  // Switches save at once and say so right at the switch
   await parents.click();
-  await expect(page.getByText("Eltern sind jetzt in dieser Gruppe dabei.")).toBeVisible();
+  await expect(parents).toHaveAttribute("aria-checked", "true");
+  await expect(parents.getByText("Gespeichert")).toBeVisible();
   await parents.click();
   await page.getByRole("dialog", { name: "Ohne Eltern weiterführen?" }).getByRole("button", { name: "Ohne Eltern" }).click();
-  await expect(page.getByText("Diese Gruppe ist jetzt ohne Eltern.")).toBeVisible();
+  await expect(parents).toHaveAttribute("aria-checked", "false");
 
   await page.getByRole("button", { name: "Mitglieder hinzufügen" }).click();
   const add = page.getByRole("dialog", { name: "Mitglieder Trainerteam" });
@@ -1388,15 +1391,19 @@ test("Verein: Admin ändert Name und Kürzel, Verwaltung und Datenschutz zeigen 
   await page.getByLabel("Kurzname").fill("SVB Handball");
   await page.getByLabel("Kürzel").fill("SVB");
   // Without a legal notice admins see a warning
-  await page.getByLabel("Link zum Impressum").fill("");
-  await page.getByRole("button", { name: "Speichern" }).click();
+  // Every card saves on its own: the name with its button, the links with theirs
+  await page.getByRole("button", { name: "Namen speichern" }).click();
   await expect(page.getByText("Gespeichert")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Namen speichern" })).toHaveCount(0);
+  await page.getByLabel("Link zum Impressum").fill("");
+  const saveLinks = page.getByRole("button", { name: "Links und Kontakt speichern" });
+  if (await saveLinks.isVisible()) await saveLinks.click();
   await page.goto("/verwaltung");
   await expect(page.getByRole("alert").filter({ hasText: "Impressum oder Datenschutzerklärung deines Vereins fehlen" })).toBeVisible();
   await page.getByRole("link", { name: "Links eintragen" }).click();
   await page.getByLabel("Link zum Impressum").fill("https://example.org/impressum");
   await page.getByLabel("Link zur Datenschutzerklärung").fill("https://example.org/datenschutz");
-  await page.getByRole("button", { name: "Speichern" }).click();
+  await page.getByRole("button", { name: "Links und Kontakt speichern" }).click();
   await expect(page.getByText("Gespeichert")).toBeVisible();
   await page.goto("/verwaltung");
   await expect(page.getByRole("heading", { name: "SV Beispielhausen 1920" })).toBeVisible();
@@ -1727,7 +1734,7 @@ test("Kinder in der App: Altersklasse ohne eigenen Zugang, Spielerin sieht nur n
   await coach.page.getByRole("group", { name: "Bereich" }).getByRole("button", { name: "Einstellungen" }).click();
   const section = coach.page.getByRole("region", { name: "Kinder in der App" });
   await section.getByRole("combobox", { name: "Chat wT" }).selectOption("read");
-  await expect(coach.page.getByText("Gespeichert.")).toBeVisible();
+  await expect(section.getByText("Gespeichert")).toBeVisible();
   await player.page.goto("/chat");
   await expect(player.page.getByText("Schreiben übernehmen in dieser Mannschaft die Eltern.", { exact: false }).first()).toBeVisible();
   await section.getByRole("button", { name: "Wie für die Altersklasse" }).click();
@@ -1777,10 +1784,10 @@ test("Verwaltung → handball4all: Erinnerung einstellen, Stand aller Mannschaft
   const reminder = page.getByRole("group", { name: "Trainer erinnern nach" });
   await expect(reminder.getByRole("button", { name: "15 Tage" })).toHaveAttribute("aria-pressed", "true");
   await reminder.getByRole("button", { name: "Aus" }).click();
-  await expect(page.getByText("Erinnerung ausgeschaltet.")).toBeVisible();
+  await expect(page.getByText("Gespeichert")).toBeVisible();
   await expect(reminder.getByRole("button", { name: "Aus" })).toHaveAttribute("aria-pressed", "true");
   await reminder.getByRole("button", { name: "30 Tage" }).click();
-  await expect(page.getByText("Trainer werden nach 30 Tagen ohne Abgleich erinnert.")).toBeVisible();
+  await expect(reminder.getByRole("button", { name: "30 Tage" })).toHaveAttribute("aria-pressed", "true");
   const teams = page.getByRole("region", { name: "Mannschaften" });
   await expect(teams.getByText(/handball4all · Noch nicht abgeglichen/)).toBeVisible();
   await expect(teams.getByText("Trainer werden erinnert")).toBeVisible();

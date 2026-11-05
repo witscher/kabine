@@ -49,15 +49,10 @@ export function AdminFixtureSyncPage() {
   const [syncing, setSyncing] = useState<number | null>(null);
   const options = SCHEDULE_REMINDER_CHOICES.map((d) => ({ value: String(d), label: d ? plural(d, { one: "# day", other: "# days" }) : t`Off` }));
 
+  // Saves at once; Segmented shows "Saved" or the error
   const setDays = async (value: string) => {
-    const days = Number(value);
-    try {
-      await api.put("/admin/club", { scheduleReminderDays: days });
-      toast(days ? t`Coaches are reminded after ${days} days without a sync.` : t`Reminder switched off.`);
-      invalidate("/admin/fixture-sync", "/coach-hints", "/club");
-    } catch (err) {
-      toast(errorMessage(err), "error");
-    }
+    await api.put("/admin/club", { scheduleReminderDays: Number(value) });
+    invalidate("/admin/fixture-sync", "/coach-hints", "/club");
   };
 
   const sync = async (team: SyncOverview["teams"][number]) => {
@@ -108,7 +103,7 @@ export function AdminFixtureSyncPage() {
                   sync. A coach or admin always syncs by hand.
                 </Trans>
               </p>
-              <Segmented label={t`Remind coaches after`} value={String(data.reminderDays)} options={options} onChange={(v) => void setDays(v)} />
+              <Segmented label={t`Remind coaches after`} value={String(data.reminderDays)} options={options} onChange={setDays} />
             </section>
           ) : null}
           {data ? (

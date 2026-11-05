@@ -24,11 +24,11 @@ export function MyCalendar() {
   const [open, setOpen] = useState(false);
   if (!data) return null;
   const showDuties = me.helperTeams.length > 0 || me.referee;
-  const set = async (key: keyof CalendarPrefs, value: boolean) => {
+  // With a link save immediately (the switch shows "Saved"), without one send it along when creating the link
+  const set = (key: keyof CalendarPrefs, value: boolean) => {
     const next = { ...data, [key]: value };
-    // With a link save immediately, without one send it along when creating the link
-    if (data.hasCalendar) await api.put("/profile/calendar", { training: next.training, games: next.games, duties: next.duties });
-    mutate(next);
+    if (!data.hasCalendar) return void mutate(next);
+    return api.put("/profile/calendar", { training: next.training, games: next.games, duties: next.duties }).then(() => mutate(next));
   };
   return (
     <section class="stack-sm" aria-label={t`My events`}>

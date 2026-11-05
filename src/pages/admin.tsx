@@ -1137,8 +1137,11 @@ function PersonDataSection({ p, onChanged }: { p: AdminPerson; onChanged: () => 
         placeholder={t`e.g. 2015`}
         error={yearInvalid ? t`Please enter a year such as 2015.` : null}
       />
+      {/* Text fields: the button appears once something changed (docs/dev/design.md, Saving) */}
+      {changed ? (
       <Button
-        disabled={busy || !changed || !firstName.trim() || yearInvalid}
+        variant="primary"
+        disabled={busy || !firstName.trim() || yearInvalid}
         onClick={async () => {
           setBusy(true);
           try {
@@ -1152,6 +1155,7 @@ function PersonDataSection({ p, onChanged }: { p: AdminPerson; onChanged: () => 
       >
         <Trans>Save details</Trans>
       </Button>
+      ) : null}
     </section>
   );
 }
@@ -1294,6 +1298,10 @@ function PersonAdminSheet({ p, all, selfId, onClose, onChanged }: { p: AdminPers
         ) : null}
       </section>
       <AdminAvatar personId={p.person.id} name={personName(p.person)} />
+      <section class="stack-sm" aria-label={t`Roles in the club`}>
+      <strong>
+        <Trans>Roles in the club</Trans>
+      </strong>
       <SwitchRow
         label={t`Youth referee`}
         sub={t`May be assigned as referee at all youth home games from F to C.`}
@@ -1301,7 +1309,6 @@ function PersonAdminSheet({ p, all, selfId, onClose, onChanged }: { p: AdminPers
         onChange={async (on) => {
           if (on) await api.put(`/admin/referees/${p.person.id}`);
           else await api.del(`/admin/referees/${p.person.id}`);
-          toast(on ? t`${firstName} is now enabled as youth referee.` : t`${firstName} is no longer a youth referee.`);
           onChanged();
         }}
       />
@@ -1312,10 +1319,10 @@ function PersonAdminSheet({ p, all, selfId, onClose, onChanged }: { p: AdminPers
         onChange={async (on) => {
           if (on) await api.put(`/admin/club-members/${p.person.id}`);
           else await api.del(`/admin/club-members/${p.person.id}`);
-          toast(on ? t`${firstName} is a full club member.` : t`${firstName} is no longer a full club member.`);
           onChanged();
         }}
       />
+      </section>
       <FamilySection p={p} all={all} onChanged={onChanged} />
       <section class="stack-sm">
         <strong>

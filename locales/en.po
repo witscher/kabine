@@ -300,6 +300,10 @@ msgstr "Own server"
 msgid "Decline this event"
 msgstr "Decline this event"
 
+#: src/pages/special.tsx
+msgid "{count, plural, one {# time slot applied. It is saved with the event.} other {# time slots applied. They are saved with the event.}}"
+msgstr "{count, plural, one {# time slot applied. It is saved with the event.} other {# time slots applied. They are saved with the event.}}"
+
 #: src/child-limits.tsx
 msgid "you take care of {list} there"
 msgstr "you take care of {list} there"
@@ -1202,6 +1206,7 @@ msgid "Only the year. The app stores no further data."
 msgstr "Only the year. The app stores no further data."
 
 #: src/pages/plans.tsx
+#: src/pages/plans.tsx
 msgid "Save plan"
 msgstr "Save plan"
 
@@ -1259,10 +1264,6 @@ msgstr "Profile picture"
 #: src/pages/updates.tsx
 msgid "Updates and maintenance"
 msgstr "Updates and maintenance"
-
-#: src/pages/plans.tsx
-msgid "Changes to training times apply immediately. Responses are kept as long as the date stays the same."
-msgstr "Changes to training times apply immediately. Responses are kept as long as the date stays the same."
 
 #: src/pages/profile.tsx
 msgid "Notification"
@@ -1843,6 +1844,10 @@ msgstr "Applies only in the chosen holidays and replaces the regular plan there.
 msgid "{label}: change time"
 msgstr "{label}: change time"
 
+#: src/pages/club-settings.tsx
+msgid "Save links and contact"
+msgstr "Save links and contact"
+
 #: src/pages/event.tsx
 msgid "Only this one event changes, the training schedule stays the same. Everyone involved will be notified."
 msgstr "Only this one event changes, the training schedule stays the same. Everyone involved will be notified."
@@ -1884,10 +1889,6 @@ msgstr "Device signed out."
 #: src/pages/chat.tsx
 msgid "All chats"
 msgstr "All chats"
-
-#: src/pages/team.tsx
-msgid "{firstName} is active again."
-msgstr "{firstName} is active again."
 
 #: src/pages/home.tsx
 msgid "There have been no events for the {team} this season yet."
@@ -2175,6 +2176,7 @@ msgid "Not signed in"
 msgstr "Not signed in"
 
 #: src/pages/club-settings.tsx
+#: src/pages/club-settings.tsx
 msgid "{teams, plural, one {# team takes its games from this source. Its games stay, but they are no longer synced.} other {# teams take their games from this source. Their games stay, but they are no longer synced.}}"
 msgstr "{teams, plural, one {# team takes its games from this source. Its games stay, but they are no longer synced.} other {# teams take their games from this source. Their games stay, but they are no longer synced.}}"
 
@@ -2374,6 +2376,10 @@ msgstr "Withdraw from {label}"
 #: worker/routes/persons.ts
 msgid "You cannot remove your own admin rights."
 msgstr "You cannot remove your own admin rights."
+
+#: src/pages/club-settings.tsx
+msgid "Save name"
+msgstr "Save name"
 
 #: src/avatar.tsx
 msgid "Zoom"
@@ -3036,10 +3042,6 @@ msgstr "Game info"
 msgid "{venue, select, hall {Opponents' halls (from the fixture list)} pitch {Opponents' pitches (from the fixture list)} other {Opponents' venues (from the fixture list)}}"
 msgstr "{venue, select, hall {Opponents' halls (from the fixture list)} pitch {Opponents' pitches (from the fixture list)} other {Opponents' venues (from the fixture list)}}"
 
-#: src/pages/admin.tsx
-msgid "{firstName} is a full club member."
-msgstr "{firstName} is a full club member."
-
 #: src/pages/event.tsx
 msgid "e.g. Sam runs the training"
 msgstr "e.g. Sam runs the training"
@@ -3415,6 +3417,10 @@ msgstr "The setup link has already been used. Sign in with your passkey."
 #: worker/domain/fixtures.ts
 msgid "Game moved ({teamName})"
 msgstr "Game moved ({teamName})"
+
+#: src/pages/club-settings.tsx
+msgid "Switch off this source?"
+msgstr "Switch off this source?"
 
 #: src/pages/profile.tsx
 msgid "No parents are involved in the teams of {firstName}. {firstName} accepts and declines on their own and is alone in the chat. So there are no permissions or notifications for {firstName}."
@@ -4914,10 +4920,6 @@ msgstr "Another device is syncing the game schedule right now."
 msgid "Next event: {kind}"
 msgstr "Next event: {kind}"
 
-#: src/pages/special.tsx
-msgid "{count, plural, one {# time slot applied.} other {# time slots applied.}}"
-msgstr "{count, plural, one {# time slot applied.} other {# time slots applied.}}"
-
 #: src/email.tsx
 msgid "You are signed in."
 msgstr "You are signed in."
@@ -5120,10 +5122,6 @@ msgstr "Until when can I decline?"
 #: src/email.tsx
 msgid "We have sent a six-digit code by text message to <0>{email}</0> if an access belongs to this number. It is valid for 15 minutes."
 msgstr "We have sent a six-digit code by text message to <0>{email}</0> if an access belongs to this number. It is valid for 15 minutes."
-
-#: src/pages/admin.tsx
-msgid "{firstName} is no longer a youth referee."
-msgstr "{firstName} is no longer a youth referee."
 
 #: src/faq.tsx
 msgid "In the <0>Helpers</0> tab, on the card <1>Manage</1>: change time and slots per duty (0 hides it), add or remove a time block, sign someone up or hide the game. Friendlies, tournaments or match days without handball4all you create under <2>Team → Create event → Game</2>, the team then gets a message."
@@ -5435,7 +5433,9 @@ msgstr "Remind coaches after"
 
 #: modules/sms/app/settings.tsx
 #: src/pages/club-settings.tsx
+#: src/pages/club-settings.tsx
 #: src/pages/mail-settings.tsx
+#: src/ui.tsx
 msgid "Saved"
 msgstr "Saved"
 
@@ -5472,6 +5472,7 @@ msgstr "Players"
 #: src/pages/event.tsx
 #: src/pages/event.tsx
 #: src/pages/list-import.tsx
+#: src/pages/plans.tsx
 #: src/pages/setup-wizard.tsx
 #: src/pages/squad.tsx
 #: src/ui.tsx
@@ -5481,10 +5482,6 @@ msgstr "Back"
 #: worker/auth/webauthn.ts
 msgid "The passkey could not be verified. Please try again."
 msgstr "The passkey could not be verified. Please try again."
-
-#: src/pages/group.tsx
-msgid "Only the leads now see the responses."
-msgstr "Only the leads now see the responses."
 
 #: src/respond.tsx
 msgid "by {name} (parent)"
@@ -7052,7 +7049,6 @@ msgstr "The helpers of the team see who takes on which duty as “First name L.�
 #: src/pages/team.tsx
 #: src/pages/team.tsx
 #: src/pages/team.tsx
-#: src/pages/team.tsx
 msgid "Saved."
 msgstr "Saved."
 
@@ -7063,10 +7059,6 @@ msgstr "Unmuted."
 #: modules/duties/app/helpers.tsx
 msgid "Delete game"
 msgstr "Delete game"
-
-#: src/pages/group.tsx
-msgid "This group is now without parents."
-msgstr "This group is now without parents."
 
 #: src/pages/team.tsx
 msgid "Stand-in from {homeTeam}. Their coach maintains the personal data."
@@ -7420,6 +7412,11 @@ msgstr "There is already an upcoming season."
 msgid "These duties need prior knowledge. The helper plan only offers them to you if you turn them on here."
 msgstr "These duties need prior knowledge. The helper plan only offers them to you if you turn them on here."
 
+#: src/pages/admin.tsx
+#: src/pages/admin.tsx
+msgid "Roles in the club"
+msgstr "Roles in the club"
+
 #: src/session.tsx
 msgid "This device already has a passkey for this access. Sign in with it."
 msgstr "This device already has a passkey for this access. Sign in with it."
@@ -7530,6 +7527,10 @@ msgstr "Add “{name}” as a name without access"
 #: src/pages/team.tsx
 msgid "{name} is in the squad."
 msgstr "{name} is in the squad."
+
+#: src/pages/plans.tsx
+msgid "Training times are saved as soon as you save or remove them. Responses are kept as long as the date stays the same."
+msgstr "Training times are saved as soon as you save or remove them. Responses are kept as long as the date stays the same."
 
 #: src/list-import.tsx
 msgid "{noFirstCount, plural, one {# entry without first name} other {# entries without first name}}"
@@ -8098,10 +8099,6 @@ msgstr "This device"
 #: modules/duties/worker/routes.ts
 msgid "This template is empty or does not exist."
 msgstr "This template is empty or does not exist."
-
-#: src/pages/team.tsx
-msgid "Responses are now visible to coaches only."
-msgstr "Responses are now visible to coaches only."
 
 #: src/child-limits.tsx
 msgid "Answer stand-in requests {name}"
@@ -8874,10 +8871,6 @@ msgid "Under <0>Profile → My events</0> you choose training, games and helper 
 msgstr "Under <0>Profile → My events</0> you choose training, games and helper duties and tap <1>Subscribe in calendar</1>. The events then appear in your phone's calendar app and stay up to date by themselves. Do not pass the link on."
 
 #: src/pages/admin.tsx
-msgid "{firstName} is no longer a full club member."
-msgstr "{firstName} is no longer a full club member."
-
-#: src/pages/admin.tsx
 msgid "Game duration in minutes"
 msgstr "Game duration in minutes"
 
@@ -8918,10 +8911,6 @@ msgstr "You are now linked to {names} and see all events of the {teamName}."
 #: src/pages/admin.tsx
 msgid "yesterday"
 msgstr "yesterday"
-
-#: src/pages/admin.tsx
-msgid "{firstName} is now enabled as youth referee."
-msgstr "{firstName} is now enabled as youth referee."
 
 #: modules/carpools/app/card.tsx
 msgid "Delete ride request for {name}"
@@ -9221,6 +9210,10 @@ msgstr "There are no suitable stand-ins for {teamName}."
 #: src/pages/profile.tsx
 msgid "Passkeys and devices"
 msgstr "Passkeys and devices"
+
+#: src/pages/club-settings.tsx
+msgid "Switch off"
+msgstr "Switch off"
 
 #: src/pages/admin.tsx
 msgid "Edit team"
@@ -9533,8 +9526,6 @@ msgstr "Player invitation links opened on a signed-in device lead straight to th
 #: src/pages/plans.tsx
 #: src/pages/profile.tsx
 #: src/pages/season.tsx
-#: src/pages/team.tsx
-#: src/pages/team.tsx
 #: src/pages/team.tsx
 msgid "Save"
 msgstr "Save"
@@ -10322,10 +10313,6 @@ msgstr "Profile"
 msgid "Note allowed"
 msgstr "Note allowed"
 
-#: src/pages/fixture-sync.tsx
-msgid "Coaches are reminded after {days} days without a sync."
-msgstr "Coaches are reminded after {days} days without a sync."
-
 #: worker/routes/manual-games.ts
 msgid "{date}, {time}, {place}. The coach will announce the squad."
 msgstr "{date}, {time}, {place}. The coach will announce the squad."
@@ -10537,17 +10524,9 @@ msgstr "With this link you set up a new passkey on this device for your existing
 msgid "Change the game schedule source?"
 msgstr "Change the game schedule source?"
 
-#: src/pages/team.tsx
-msgid "{firstName} is inactive."
-msgstr "{firstName} is inactive."
-
 #: modules/duties/app/helpers.tsx
 msgid "The games come from the team's fixture list. Special events appear here as soon as helpers are needed for them."
 msgstr "The games come from the team's fixture list. Special events appear here as soon as helpers are needed for them."
-
-#: src/pages/group.tsx
-msgid "Parents are now included in this group."
-msgstr "Parents are now included in this group."
 
 #: src/pages/team.tsx
 msgid "Lost device or new passkey: open the person in the squad overview and create a personal one-time link."
@@ -10726,6 +10705,10 @@ msgstr "Weekday"
 #: src/pages/join.tsx
 msgid "Your e-mail address (optional)"
 msgstr "Your e-mail address (optional)"
+
+#: src/pages/team.tsx
+msgid "Save deadlines"
+msgstr "Save deadlines"
 
 #: worker/routes/squad.ts
 msgid "Help request"
@@ -11204,6 +11187,7 @@ msgid "Only needed if you want to sign in by code without a passkey. Nobody else
 msgstr "Only needed if you want to sign in by code without a passkey. Nobody else in the app sees it."
 
 #: src/pages/admin.tsx
+#: src/pages/team.tsx
 msgid "Save details"
 msgstr "Save details"
 
@@ -11473,6 +11457,10 @@ msgstr "Manually"
 #: src/pages/team.tsx
 msgid "{playerCount, plural, one {# player} other {# players}}"
 msgstr "{playerCount, plural, one {# player} other {# players}}"
+
+#: src/pages/profile.tsx
+msgid "The other parent will be notified."
+msgstr "The other parent will be notified."
 
 #: src/calendar.tsx
 #: src/calendar.tsx
@@ -11792,10 +11780,6 @@ msgstr "The schedule could not be processed."
 msgid "Your parents take care of declining."
 msgstr "Your parents take care of declining."
 
-#: src/pages/profile.tsx
-msgid "Saved. The other parent will be notified."
-msgstr "Saved. The other parent will be notified."
-
 #: src/pages/updates.tsx
 msgid "{lastAt}, version {lastVersion}"
 msgstr "{lastAt}, version {lastVersion}"
@@ -12065,10 +12049,6 @@ msgstr "{label} by mail"
 msgid "Games from a game schedule cannot be deleted, only hidden."
 msgstr "Games from a game schedule cannot be deleted, only hidden."
 
-#: src/pages/fixture-sync.tsx
-msgid "Reminder switched off."
-msgstr "Reminder switched off."
-
 #: worker/routes/squad.ts
 msgid "Request withdrawn"
 msgstr "Request withdrawn"
@@ -12093,11 +12073,6 @@ msgstr "opponent"
 #: src/restore.tsx
 msgid "Passkeys and sign-ins are not part of an export. Everyone signs in again: with an e-mail code if their address was restored, otherwise with a personal link from Administration → People."
 msgstr "Passkeys and sign-ins are not part of an export. Everyone signs in again: with an e-mail code if their address was restored, otherwise with a personal link from Administration → People."
-
-#: src/pages/group.tsx
-#: src/pages/team.tsx
-msgid "Responses are now visible to everyone."
-msgstr "Responses are now visible to everyone."
 
 #: src/pages/admin.tsx
 #: src/pages/special.tsx

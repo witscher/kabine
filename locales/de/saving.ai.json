@@ -1,0 +1,11 @@
+{
+  "{count, plural, one {# time slot applied. It is saved with the event.} other {# time slots applied. They are saved with the event.}}": "{count, plural, one {# Zeitblock übernommen. Er wird mit dem Termin gespeichert.} other {# Zeitblöcke übernommen. Sie werden mit dem Termin gespeichert.}}",
+  "Save links and contact": "Links und Kontakt speichern",
+  "Save name": "Namen speichern",
+  "Switch off this source?": "Diese Quelle ausschalten?",
+  "Roles in the club": "Rollen im Verein",
+  "Training times are saved as soon as you save or remove them. Responses are kept as long as the date stays the same.": "Trainingszeiten gelten, sobald du sie speicherst oder entfernst. Rückmeldungen bleiben erhalten, solange das Datum gleich bleibt.",
+  "Switch off": "Ausschalten",
+  "Save deadlines": "Fristen speichern",
+  "The other parent will be notified.": "Der andere Elternteil wird benachrichtigt."
+}

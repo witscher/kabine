@@ -15,7 +15,7 @@ import { Icon } from "../icons";
 import { LanguageSwitch } from "../language-switch";
 import { isIos, isStandalone, registerPasskey, useMe, useSession } from "../session";
 import { invalidate, useQuery } from "../store";
-import { Button, confirmDialog, copyText, ErrorBox, Notice, shareLink, Sheet, Spinner, SwitchRow, TextField, toast, TopBar, useDocumentTitle } from "../ui";
+import { Button, confirmDialog, copyText, ErrorBox, Notice, SavedNote, shareLink, Sheet, Spinner, SwitchRow, TextField, toast, TopBar, useDocumentTitle, useSaving } from "../ui";
 import { renderSVG } from "uqr";
 import { InstallHint } from "./login";
 
@@ -511,7 +511,7 @@ export function ChildPage({ id }: { id: string }) {
                     onChange={async (value) => {
                       const res = await api.put<{ permissions: ChildPermissions }>(`/children/${id}/permissions`, { permission: perm, value });
                       mutate({ ...data, permissions: res.permissions });
-                      toast(t`Saved. The other parent will be notified.`);
+                      toast(t`The other parent will be notified.`);
                       void reload();
                     }}
                   />
@@ -657,21 +657,23 @@ function SkillSwitches() {
 function HelperPrefs() {
   const me = useMe();
   const { data, mutate } = useQuery<DutyPrefs>("/profile/duty-prefs");
+  const saving = useSaving();
   if (!data) return <Spinner />;
   const showCoach = me.isAdmin || me.manageableTeams.length > 0;
   const labels = dutyTopicLabels();
   const topics = (Object.keys(labels) as DutyTopic[]).filter(
     (topic) => (topic !== "duty_coach_open" || showCoach) && (topic !== "duty_referee_open" || me.referee) && (topic !== "duty_open" || me.helperTeams.length > 0),
   );
-  const setChannel = async (topic: DutyTopic, ch: { push: boolean; mail: boolean; sms: boolean }) => {
-    await api.put("/profile/duty-prefs", { channels: { [topic]: ch } });
-    mutate({ ...data, channels: { ...data.channels, [topic]: ch } });
-  };
+  const setChannel = (topic: DutyTopic, ch: { push: boolean; mail: boolean; sms: boolean }) =>
+    void saving.run(api.put("/profile/duty-prefs", { channels: { [topic]: ch } }).then(() => mutate({ ...data, channels: { ...data.channels, [topic]: ch } })));
   return (
     <section class="stack-sm" aria-label={t`Helper plan`}>
-      <h2 class="section-title">
-        <Trans>Helper plan</Trans>
-      </h2>
+      <div class="row-gap" style={{ justifyContent: "space-between" }}>
+        <h2 class="section-title">
+          <Trans>Helper plan</Trans>
+        </h2>
+        <SavedNote show={saving.saved} />
+      </div>
       <div class="duty-channels" role="table" aria-label={t`Notifications in the helper plan`}>
         <div role="row" class="head">
           <span role="columnheader">
@@ -699,6 +701,7 @@ function HelperPrefs() {
                   type="checkbox"
                   aria-label={t`${label} by push`}
                   checked={data.channels[topic].push}
+                  disabled={saving.busy}
                   onChange={(e) => setChannel(topic, { ...data.channels[topic], push: (e.target as HTMLInputElement).checked })}
                 />
               </span>
@@ -707,6 +710,7 @@ function HelperPrefs() {
                   type="checkbox"
                   aria-label={t`${label} by mail`}
                   checked={data.channels[topic].mail}
+                  disabled={saving.busy}
                   onChange={(e) => setChannel(topic, { ...data.channels[topic], mail: (e.target as HTMLInputElement).checked })}
                 />
               </span>
@@ -716,6 +720,7 @@ function HelperPrefs() {
                     type="checkbox"
                     aria-label={t`${label} by SMS`}
                     checked={data.channels[topic].sms}
+                    disabled={saving.busy}
                     onChange={(e) => setChannel(topic, { ...data.channels[topic], sms: (e.target as HTMLInputElement).checked })}
                   />
                 </span>

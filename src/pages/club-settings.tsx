@@ -1,5 +1,6 @@
-// Club profile: name, abbreviation, colours, logo, privacy notice, contact. The form is also a
-// step of the setup wizard.
+// Club profile: name, abbreviation, colours, logo, privacy notice, contact. Under Administration → Club every card
+// saves on its own: switches, choices and colours at once, text fields with the card's button
+// (docs/dev/design.md, Saving). In the setup wizard the same parts are one form with "Save and continue".
 import { plural, t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { useState } from "preact/hooks";
@@ -13,7 +14,7 @@ import { loadRegionHolidays } from "../holidays";
 import { ClubMark, loadClub, setClub, useClub } from "../club";
 import { currentLocale } from "../i18n";
 import { useSession } from "../session";
-import { Button, Field, Notice, SwitchRow, TextField, toast, TopBar, useDocumentTitle } from "../ui";
+import { Button, confirmDialog, Field, Notice, SavedNote, SwitchRow, TextField, toast, TopBar, useDocumentTitle, useSaving } from "../ui";
 import { AdminOnly } from "./admin";
 
 const LOGO_TYPES = "image/png,image/jpeg,image/webp,image/svg+xml";
@@ -21,8 +22,21 @@ const LOGO_TYPES = "image/png,image/jpeg,image/webp,image/svg+xml";
 export type ClubFormPart = "name" | "look" | "region" | "modules" | "privacy";
 const ALL_PARTS: ClubFormPart[] = ["name", "look", "region", "modules", "privacy"];
 
-/** The whole club profile, or some parts of it (steps of the setup wizard). Saving sends all fields. */
-export function ClubProfileForm({ onSaved, submitLabel, parts = ALL_PARTS }: { onSaved?: () => void | Promise<void>; submitLabel?: string; parts?: ClubFormPart[] }) {
+/**
+ * The whole club profile, or some parts of it. As a form (setup wizard) one button saves all fields; with `cards`
+ * (Administration → Club) each card saves on its own.
+ */
+export function ClubProfileForm({
+  onSaved,
+  submitLabel,
+  parts = ALL_PARTS,
+  cards = false,
+}: {
+  onSaved?: () => void | Promise<void>;
+  submitLabel?: string;
+  parts?: ClubFormPart[];
+  cards?: boolean;
+}) {
   const club = useClub();
   const { refresh: refreshSession } = useSession();
   const show = (p: ClubFormPart) => parts.includes(p);
@@ -78,6 +92,34 @@ export function ClubProfileForm({ onSaved, submitLabel, parts = ALL_PARTS }: { o
     }
   };
 
+  // Cards: saves some fields at once and takes the saved profile
+  const patch = async (fields: Partial<ClubProfile>) => {
+    const saved = await api.put<ClubProfile>("/admin/club", fields);
+    setClub(saved);
+    return saved;
+  };
+  const lookSaving = useSaving();
+  const saveColor = (which: "primary" | "accent", value: string) => {
+    if (!cards || !isHexColor(value)) return;
+    void lookSaving.run(patch({ colors: { primary: which === "primary" ? value : primary, accent: which === "accent" ? value : accent } }));
+  };
+  const nameChanged = name !== club.name || shortName !== club.shortName || abbr !== club.abbr;
+  const privacyChanged =
+    legalNoticeUrl !== (club.legalNoticeUrl ?? "") ||
+    privacyUrl !== (club.privacyUrl ?? "") ||
+    privacyText !== (club.privacyText ?? "") ||
+    contact !== (club.contact ?? "") ||
+    sourceUrl !== (club.sourceUrl ?? "");
+  const saveCard = async (fields: Partial<ClubProfile>) => {
+    setError(null);
+    try {
+      await patch(fields);
+      toast(t`Saved`);
+    } catch (err) {
+      setError(errorMessage(err));
+    }
+  };
+
   const uploadLogo = async (file: File | undefined) => {
     if (!file) return;
     try {
@@ -101,6 +143,11 @@ export function ClubProfileForm({ onSaved, submitLabel, parts = ALL_PARTS }: { o
             maxLength={8}
             hint={t`Before your own team in game titles, e.g. “SVM wD – HSG Gegner”. Empty: initials of the short name.`}
           />
+          {cards && nameChanged ? (
+            <Button variant="primary" disabled={!name.trim() || !shortName.trim()} onClick={() => void saveCard({ name: name.trim(), shortName: shortName.trim(), abbr: abbr.trim() })}>
+              <Trans>Save name</Trans>
+            </Button>
+          ) : null}
         </section>
       ) : null}
       {show("look") ? (
@@ -111,15 +158,36 @@ export function ClubProfileForm({ onSaved, submitLabel, parts = ALL_PARTS }: { o
           </div>
           <div class="club-colors">
             <Field label={t`Main colour`}>
-              {(id) => <input id={id} type="color" class="color-input" value={primary} onInput={(e) => setPrimary((e.target as HTMLInputElement).value)} />}
+              {(id) => (
+                <input
+                  id={id}
+                  type="color"
+                  class="color-input"
+                  value={primary}
+                  onInput={(e) => setPrimary((e.target as HTMLInputElement).value)}
+                  onChange={(e) => saveColor("primary", (e.target as HTMLInputElement).value)}
+                />
+              )}
             </Field>
             <Field label={t`Accent colour`}>
-              {(id) => <input id={id} type="color" class="color-input" value={accent} onInput={(e) => setAccent((e.target as HTMLInputElement).value)} />}
+              {(id) => (
+                <input
+                  id={id}
+                  type="color"
+                  class="color-input"
+                  value={accent}
+                  onInput={(e) => setAccent((e.target as HTMLInputElement).value)}
+                  onChange={(e) => saveColor("accent", (e.target as HTMLInputElement).value)}
+                />
+              )}
             </Field>
           </div>
-          <p class="small muted">
-            <Trans>The main colour should be dark and the accent colour light, so text stays easy to read on both.</Trans>
-          </p>
+          <div class="row-gap" style={{ justifyContent: "space-between" }}>
+            <p class="small muted">
+              <Trans>The main colour should be dark and the accent colour light, so text stays easy to read on both.</Trans>
+            </p>
+            <SavedNote show={lookSaving.saved} />
+          </div>
           <div class="row-gap">
             <label class="btn btn-dashed">
               <Trans>Upload logo</Trans>
@@ -143,7 +211,8 @@ export function ClubProfileForm({ onSaved, submitLabel, parts = ALL_PARTS }: { o
           </p>
         </section>
       ) : null}
-      {show("region") ? (
+      {show("region") && cards ? <RegionCard /> : null}
+      {show("region") && !cards ? (
         <RegionSection
           locale={defaultLocale}
           onLocale={setDefaultLocale}
@@ -158,7 +227,21 @@ export function ClubProfileForm({ onSaved, submitLabel, parts = ALL_PARTS }: { o
           onTimeZone={setTimeZone}
         />
       ) : null}
-      {show("modules") ? <ModulesSection modules={modules} onChange={setModules} /> : null}
+      {show("modules") ? (
+        <ModulesSection
+          modules={cards ? club.modules : modules}
+          onChange={
+            cards
+              ? async (m) => {
+                  await patch({ modules: m });
+                  // Saving the switches marks new modules as seen (dot and "New" badge)
+                  void refreshSession();
+                }
+              : setModules
+          }
+          confirmOff={cards}
+        />
+      ) : null}
       {show("privacy") ? (
         <section class="card card-pad stack" aria-label={t`Privacy and contact`}>
           <p class="small muted">
@@ -210,12 +293,30 @@ export function ClubProfileForm({ onSaved, submitLabel, parts = ALL_PARTS }: { o
             placeholder={KABINE_SOURCE}
             hint={t`Only if your club runs a changed version of Kabine: the link to your copy. The licence (AGPL) asks you to offer its source code.`}
           />
+          {cards && privacyChanged ? (
+            <Button
+              variant="primary"
+              onClick={() =>
+                void saveCard({
+                  legalNoticeUrl: legalNoticeUrl.trim() || null,
+                  privacyUrl: privacyUrl.trim() || null,
+                  privacyText: privacyText.trim() || null,
+                  contact: contact.trim() || null,
+                  sourceUrl: sourceUrl.trim() || null,
+                })
+              }
+            >
+              <Trans>Save links and contact</Trans>
+            </Button>
+          ) : null}
         </section>
       ) : null}
       {error ? <Notice kind="warn">{error}</Notice> : null}
-      <Button variant="primary" block disabled={!name.trim() || !shortName.trim()} onClick={save}>
-        {submitLabel ?? t`Save`}
-      </Button>
+      {cards ? null : (
+        <Button variant="primary" block disabled={!name.trim() || !shortName.trim()} onClick={save}>
+          {submitLabel ?? t`Save`}
+        </Button>
+      )}
     </div>
   );
 }
@@ -227,7 +328,7 @@ export function AdminClubPage() {
       <main class="page">
         <TopBar title={t`Club`} kicker={t`Administration`} back="/verwaltung" />
         <div class="content">
-          <ClubProfileForm />
+          <ClubProfileForm cards />
         </div>
       </main>
     </AdminOnly>
@@ -249,15 +350,23 @@ export function RegionSection(props: {
   onSubdivision: (s: string) => void;
   timeZone: string;
   onTimeZone: (z: string) => void;
+  /** Saving at once (Administration → Club): "Saved" and busy state */
+  saved?: boolean;
+  busy?: boolean;
 }) {
   const regions = useQuery<{ countries: RegionOption[]; subdivisions: RegionOption[] }>(`/admin/regions?country=${props.country}`);
   const countries = regions.data?.countries.length ? regions.data.countries : [{ code: props.country, name: props.country }];
   const zones = typeof Intl.supportedValuesOf === "function" ? Intl.supportedValuesOf("timeZone") : [props.timeZone];
   return (
-    <section class="card card-pad stack" aria-label={t`Language and region`}>
+    <section class="card card-pad stack" aria-label={t`Language and region`} aria-busy={props.busy ? "true" : undefined}>
+      {props.saved !== undefined ? (
+        <div class="row-gap" style={{ justifyContent: "flex-end", minHeight: "18px" }}>
+          <SavedNote show={props.saved} />
+        </div>
+      ) : null}
       <Field label={t`Default language`} hint={t`For everyone who has not chosen a language, and for messages outside the app.`}>
         {(id) => (
-          <select id={id} class="select" value={props.locale} onChange={(e) => props.onLocale((e.target as HTMLSelectElement).value as Locale)}>
+          <select id={id} class="select" disabled={props.busy} value={props.locale} onChange={(e) => props.onLocale((e.target as HTMLSelectElement).value as Locale)}>
             {LOCALES.map((l) => (
               <option value={l}>{LOCALE_NAMES[l]}</option>
             ))}
@@ -266,7 +375,7 @@ export function RegionSection(props: {
       </Field>
       <Field label={t`Country`}>
         {(id) => (
-          <select id={id} class="select" value={props.country} onChange={(e) => props.onCountry((e.target as HTMLSelectElement).value)}>
+          <select id={id} class="select" disabled={props.busy} value={props.country} onChange={(e) => props.onCountry((e.target as HTMLSelectElement).value)}>
             {countries.map((c) => (
               <option value={c.code}>{c.name}</option>
             ))}
@@ -275,7 +384,7 @@ export function RegionSection(props: {
       </Field>
       <Field label={t`State or region`} hint={t`For school holidays and public holidays.`}>
         {(id) => (
-          <select id={id} class="select" value={props.subdivision} onChange={(e) => props.onSubdivision((e.target as HTMLSelectElement).value)}>
+          <select id={id} class="select" disabled={props.busy} value={props.subdivision} onChange={(e) => props.onSubdivision((e.target as HTMLSelectElement).value)}>
             <option value="">{t`Whole country`}</option>
             {(regions.data?.subdivisions ?? []).map((s) => (
               <option value={s.code}>{s.name}</option>
@@ -286,7 +395,7 @@ export function RegionSection(props: {
       </Field>
       <Field label={t`Time zone`}>
         {(id) => (
-          <select id={id} class="select" value={props.timeZone} onChange={(e) => props.onTimeZone((e.target as HTMLSelectElement).value)}>
+          <select id={id} class="select" disabled={props.busy} value={props.timeZone} onChange={(e) => props.onTimeZone((e.target as HTMLSelectElement).value)}>
             {zones.map((z) => (
               <option value={z}>{z.replaceAll("_", " ")}</option>
             ))}
@@ -297,13 +406,42 @@ export function RegionSection(props: {
   );
 }
 
+/** Language and region under Administration → Club: every choice saves at once. */
+function RegionCard() {
+  const club = useClub();
+  const saving = useSaving();
+  const save = (fields: Partial<ClubProfile>) =>
+    void saving.run(
+      (async () => {
+        const saved = await api.put<ClubProfile>("/admin/club", fields);
+        setClub(saved);
+        // A new region brings its holidays for the current season (otherwise only at the season change)
+        if (saved.subdivision && (saved.subdivision !== club.subdivision || saved.country !== club.country)) await loadRegionHolidays(true);
+      })(),
+    );
+  return (
+    <RegionSection
+      locale={club.defaultLocale}
+      onLocale={(defaultLocale) => save({ defaultLocale })}
+      country={club.country}
+      onCountry={(country) => save({ country, subdivision: null })}
+      subdivision={club.subdivision ?? ""}
+      onSubdivision={(s) => save({ subdivision: s || null })}
+      timeZone={club.timeZone}
+      onTimeZone={(timeZone) => save({ timeZone })}
+      saved={saving.saved}
+      busy={saving.busy}
+    />
+  );
+}
+
 /**
  * Functions the club uses; switched-off modules disappear from the app and the API. The switches come from
  * the module manifests (modules/<id>/module.ts); modules made for other sports are not offered. Game
  * schedule sources (kind "fixtures") form their own group: the club may switch on several, each team picks
  * one of them.
  */
-export function ModulesSection({ modules, onChange }: { modules: ClubModules; onChange: (m: ClubModules) => void }) {
+export function ModulesSection({ modules, onChange, confirmOff = false }: { modules: ClubModules; onChange: (m: ClubModules) => unknown; confirmOff?: boolean }) {
   const club = useClub();
   // Modules the admin has not been told about yet (src/news.tsx) get a "New" badge
   const fresh = new Set(useSession().me?.news?.newModules.map((m) => m.id) ?? []);
@@ -330,7 +468,20 @@ export function ModulesSection({ modules, onChange }: { modules: ClubModules; on
           sub={m.description()}
           checked={modules[id]}
           disabled={!!m.requires && !modules[m.requires as ModuleId]}
-          onChange={(v) => onChange({ ...modules, [id]: v })}
+          onChange={(v) => {
+            const next = { ...modules, [id]: v };
+            if (!(confirmOff && !v && m.kind === "fixtures" && teams > 0)) return onChange(next);
+            // Saving at once: ask before a source that teams use is switched off (false: nothing saved)
+            return confirmDialog({
+              title: t`Switch off this source?`,
+              message: plural(teams, {
+                one: "# team takes its games from this source. Its games stay, but they are no longer synced.",
+                other: "# teams take their games from this source. Their games stay, but they are no longer synced.",
+              }),
+              confirmLabel: t`Switch off`,
+              danger: true,
+            }).then((ok) => (ok ? onChange(next) : false));
+          }}
         />
         {losing ? (
           <p class="small warn-text">

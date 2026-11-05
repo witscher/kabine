@@ -386,7 +386,7 @@ function HelperBlocks({ date, start, end, blocks, onChange }: { date: string; st
     onChange([...blocks, ...added]);
     setTemplateId("");
     const count = added.length;
-    toast(plural(count, { one: "# time slot applied.", other: "# time slots applied." }));
+    toast(plural(count, { one: "# time slot applied. It is saved with the event.", other: "# time slots applied. They are saved with the event." }));
   };
 
   return (

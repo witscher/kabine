@@ -52,6 +52,15 @@ What players of a youth age class may do themselves has three levels, and each c
 
 Switching parents off withdraws open parent links and disconnects parents who are in the chat at that moment. The links between parents and children stay and apply again when the team is switched back; old invitation links do not come back to life.
 
+## Saving
+
+One rule for every screen, so nobody has to guess whether something is saved:
+
+- **Switches, choices (`Segmented`), selects and checkboxes on a settings screen save at once.** Their `onChange` returns the promise of the API call; `SwitchRow` and `Segmented` (or `useSaving` with `SavedNote` for other controls, `src/ui.tsx`) then lock the control while it saves, show "Saved" with a tick for two seconds, and on an error show the error and leave the control as it was. No extra "Saved." toast; a toast only when it says something more (who is notified, what happens to existing entries). A promise that resolves to `false` means the person cancelled, e.g. a confirmation.
+- **Text and number fields have a button in the same card**, for that card only. It appears once something changed and names what it saves ("Save deadlines", "Save name"). Text fields are never saved on blur.
+- **Creating or editing something in a sheet or form** (new event, edit event, new team, new training plan, duty type, the setup wizard) saves everything, switches included, with the main button at the end. There `onChange` only sets state, so no "Saved" appears.
+- **Never** both in one card. Filters and tabs are not saving controls.
+
 ## App updates
 
 Every build gets an identifier that is served as `/version.json`. The app asks for it when it returns from the background and every 10 minutes while it is visible.

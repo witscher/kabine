@@ -630,14 +630,11 @@ function AttendanceList({ event, onChanged, onPerson }: { event: EventDetail; on
   const until = event.attendanceUntil ? longDate(event.attendanceUntil) : null;
   const teamName = (teamId: number) => event.teams.find((t) => t.id === teamId)?.name ?? "";
 
+  // Saves at once; Segmented shows "Saved" or the error
   const save = async (p: ParticipantDetail, mark: AttendanceMark) => {
-    try {
-      await api.put(`/events/${event.id}/attendance/${p.person.id}`, { mark });
-      invalidate("/events");
-      onChanged();
-    } catch (err) {
-      toast(errorMessage(err), "error");
-    }
+    await api.put(`/events/${event.id}/attendance/${p.person.id}`, { mark });
+    invalidate("/events");
+    onChanged();
   };
 
   const row = (p: ParticipantDetail, i: number) => {
@@ -664,9 +661,7 @@ function AttendanceList({ event, onChanged, onPerson }: { event: EventDetail; on
             label={t`Attendance of ${name}`}
             value={mark ?? ""}
             options={options}
-            onChange={(v) => {
-              if (v && v !== mark) void save(p, v);
-            }}
+            onChange={(v) => (v && v !== mark ? save(p, v) : undefined)}
           />
         ) : mark ? (
           <span class={`badge ${mark === "unexcused" ? "warn" : "muted"}`} style={{ alignSelf: "flex-start" }}>
@@ -1048,12 +1043,8 @@ function JoiningTeams({ event, onChanged }: { event: EventDetail; onChanged: () 
                 { value: "optional", label: t({ message: "Optional", context: "training" }) },
               ]}
               onChange={async (v) => {
-                try {
-                  await api.put(`/events/${event.id}/teams/${team.id}/optional`, { optional: v === "optional" });
-                  onChanged();
-                } catch (err) {
-                  toast(errorMessage(err), "error");
-                }
+                await api.put(`/events/${event.id}/teams/${team.id}/optional`, { optional: v === "optional" });
+                onChanged();
               }}
             />
           </div>

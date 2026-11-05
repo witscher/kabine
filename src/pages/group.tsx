@@ -306,7 +306,6 @@ export function GroupPage({ team, onChanged }: { team: TeamDetail; onChanged: ()
             onChange={async (value) => {
               await api.patch(`/teams/${team.id}`, { showResponses: value });
               invalidate("/events");
-              toast(value ? t`Responses are now visible to everyone.` : t`Only the leads now see the responses.`);
               onChanged();
             }}
           />
@@ -331,7 +330,6 @@ export function GroupPage({ team, onChanged }: { team: TeamDetail; onChanged: ()
                 }
                 await api.patch(`/teams/${team.id}`, { parentsEnabled: value });
                 invalidate("/teams", "/events", "/chat");
-                toast(value ? t`Parents are now included in this group.` : t`This group is now without parents.`);
                 onChanged();
               }}
             />

@@ -16,6 +16,7 @@
   --yellow-tint: #fff7cc;
   --warn: #9b2c24;
   --warn-tint: #f8e7e5;
+  --ok: #2f6b2a;
   --ok-tint: #e9f2e3;
 
   --font: "Barlow", system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -2781,4 +2782,23 @@ button.announcement-head {
 .coach-hint .main {
   flex: 1;
   min-width: 0;
+}
+
+/* Saved at once (useSaving in ui.tsx) */
+.saved-note {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ok);
+  white-space: nowrap;
+}
+.segmented-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.segmented-wrap > .saved-note {
+  align-self: flex-end;
 }
