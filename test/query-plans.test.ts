@@ -8,6 +8,7 @@ import type { SessionRow } from "../worker/auth/session";
 import { ensureEventDuties, helperTeams, loadMyDuties } from "../worker/domain/duties";
 import { loadCoachHints } from "../worker/domain/coach-hints";
 import { loadEventPage, ownCandidates } from "../worker/domain/event-page";
+import { SYNC_OVERVIEW_SQL } from "../worker/domain/fixtures";
 import { listVisibleEvents } from "../worker/domain/events";
 import { eventIn, exec, freshDb, guardian, member, person, season, team } from "./helpers";
 
@@ -118,5 +119,9 @@ describe("Abfragepläne ohne Durchsuchen aller Termine", () => {
     await loadCoachHints(db, { ...actor, coachTeamIds: [teamId] });
     expect(seen.length).toBe(3);
     expect(await fullScans(seen)).toEqual([]);
+  });
+
+  it("Verwaltung → Spielplan: Spiele je Mannschaft über event_teams", async () => {
+    expect(await fullScans([{ sql: SYNC_OVERVIEW_SQL, params: ["2000-01-01T00:00"] }])).toEqual([]);
   });
 });

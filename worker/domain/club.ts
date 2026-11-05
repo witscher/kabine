@@ -1,7 +1,7 @@
 // Club profile: name, colours, logo, privacy notice and owner. Stored in the database (app_meta)
 // and edited in the setup wizard, never in code. One installation serves exactly one club.
 import type { ClubProfile } from "../../shared/club";
-import { clubAbbr, type ClubModules, DEFAULT_CLUB, DEFAULT_MODULES, type ModuleId, moduleOn } from "../../shared/club";
+import { clubAbbr, type ClubModules, DEFAULT_CLUB, DEFAULT_MODULES, isScheduleReminderDays, type ModuleId, moduleOn, type ScheduleReminderDays } from "../../shared/club";
 import { venueOf, type VenueKind } from "../../shared/sports";
 import { setClubDefaultLocale } from "../i18n";
 import { setTimeZone } from "../lib/time";
@@ -29,6 +29,7 @@ function clubFromStored(value: string | null): ClubSettings {
     ...stored,
     colors: { ...DEFAULT_CLUB.colors, ...stored.colors },
     modules: { ...DEFAULT_MODULES, ...stored.modules },
+    scheduleReminderDays: isScheduleReminderDays(stored.scheduleReminderDays) ? stored.scheduleReminderDays : DEFAULT_CLUB.scheduleReminderDays,
   };
 }
 
@@ -73,6 +74,7 @@ export async function saveClub(db: D1Database, patch: Partial<ClubSettings>): Pr
   ownShortName = next.shortName;
   ownModules = next.modules;
   ownSport = next.sport;
+  ownReminderDays = next.scheduleReminderDays;
   return next;
 }
 
@@ -103,6 +105,7 @@ let ownAbbr = clubAbbr(DEFAULT_CLUB);
 let ownShortName = DEFAULT_CLUB.shortName;
 let ownModules: ClubModules = DEFAULT_MODULES;
 let ownSport: string = DEFAULT_CLUB.sport;
+let ownReminderDays: ScheduleReminderDays = DEFAULT_CLUB.scheduleReminderDays;
 
 /** Is a module of this club on? (set with the club context of the request or cron run) */
 export function isModuleOn(id: ModuleId): boolean {
@@ -123,6 +126,11 @@ export function ownVenue(): VenueKind {
   return venueOf(ownSport);
 }
 
+/** Days without a sync before coaches are reminded of the game schedule; 0 = off (set with the club context). */
+export function ownScheduleReminderDays(): ScheduleReminderDays {
+  return ownReminderDays;
+}
+
 export function ownClubShortName(): string {
   return ownShortName;
 }
@@ -136,6 +144,7 @@ export async function enterClubContext(db: D1Database): Promise<ClubSettings> {
   ownShortName = club.shortName;
   ownModules = club.modules;
   ownSport = club.sport;
+  ownReminderDays = club.scheduleReminderDays;
   setClubDefaultLocale(club.defaultLocale);
   setTimeZone(club.timeZone);
   return club;

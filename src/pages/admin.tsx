@@ -19,6 +19,7 @@ import { Button, confirmDialog, copyText, Empty, ErrorBox, Field, Notice, Segmen
 import { QrLink } from "./team";
 import { roleLabel } from "./group";
 import { loadRegionHolidays } from "../holidays";
+import { fixtureSyncTitle, useFixtureSources } from "./fixture-sync";
 
 export function AdminOnly({ children }: { children: preact.ComponentChildren }) {
   const me = useMe();
@@ -43,6 +44,7 @@ export function AdminPage() {
   const club = useClub();
   const venue = useVenue();
   const modules = useActiveModules();
+  const fixtureSources = useFixtureSources();
   const teamsQuery = useQuery<{ teams: { id: number; name: string; kind: "team" | "group"; players: number; coaches: number }[] }>("/teams");
   const teams = { ...teamsQuery, data: teamsQuery.data && { teams: teamsQuery.data.teams.filter((x) => x.kind === "team") } };
   const groupCount = (teamsQuery.data?.teams ?? []).filter((x) => x.kind === "group").length;
@@ -69,6 +71,9 @@ export function AdminPage() {
     { href: "/verwaltung/altersklassen", icon: "calendar", title: t`Age groups`, sub: t`Birth years of the current season` },
     { href: "/verwaltung/ferien", icon: "sun", title: t`Holidays`, sub: t`Edit periods (e.g. carnival)` },
     { href: "/verwaltung/orte", icon: "pin", title: t`Training venues`, sub: select(venue, { hall: "Club halls and other locations", pitch: "Club pitches and other locations", other: "Club venues and other locations" }) },
+    ...(fixtureSources.length
+      ? [{ href: "/verwaltung/spielplan", icon: "refresh" as IconName, title: fixtureSyncTitle(fixtureSources), sub: t`Game schedule sync and reminder` }]
+      : []),
     { href: "/verwaltung/rundnachricht", icon: "bell", title: t`Broadcast`, sub: t`Announcement in all or selected team chats` },
     // Pages of the switched-on modules (modules/<id>/app, adminMenu)
     ...modules.flatMap((m) => m.adminMenu?.() ?? []),

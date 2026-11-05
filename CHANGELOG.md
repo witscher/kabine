@@ -6,6 +6,8 @@ Changes that are merged but not released yet go under *Unreleased*, one line eac
 
 ## Unreleased
 
+- New page under Administration for the game schedule sync (named after the source, e.g. "handball4all"): every team with its link, last sync, last error and upcoming games, with "Sync now". Admins choose when coaches are reminded to sync: after 15, 30 or 60 days, or never. The default is now 15 days (before: 14).
+
 ## v0.5.0
 
 - Hints for coaches at the top of the events list: a game in the next 3 days without a meeting point ("Enter" opens it), and a game schedule not synced for 14 days ("Sync now"). Only for the coach's own teams; a hint goes away once it is done.

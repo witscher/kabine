@@ -2,7 +2,6 @@
 import { env } from "cloudflare:workers";
 import { beforeEach, describe, expect, it } from "vitest";
 import { saveClub } from "../worker/domain/club";
-import { SCHEDULE_STALE_DAYS } from "../worker/domain/coach-hints";
 import { utcIso } from "../worker/lib/time";
 import { api, eventIn, exec, freshDb, loginAs, member, person, season, team } from "./helpers";
 
@@ -37,17 +36,17 @@ describe("Hinweise für Trainer", () => {
     expect(await hints(coach)).toEqual([]);
   });
 
-  it("Spielplan: ab 14 Tagen nach dem Abgleich, nur mit verlinktem Spielplan, nicht wenn die Saison gespielt ist, nicht bei ausgeschaltetem Modul", async () => {
+  it("Spielplan: ab 15 Tagen nach dem Abgleich (Voreinstellung), nur mit verlinktem Spielplan, nicht wenn die Saison gespielt ist, nicht bei ausgeschaltetem Modul", async () => {
     // Ohne verlinkten Spielplan gibt es nichts abzugleichen
     const upcoming = await eventIn(wd, 10, { kind: "game" });
     expect(await hints(coach)).toEqual([]);
     await exec("DELETE FROM events WHERE id = ?", upcoming);
     await exec("UPDATE teams SET fixture_connector = 'handball4all', fixture_source = '{\"x\":1}', fixture_synced_at = NULL WHERE id = ?", wd);
     expect(await hints(coach)).toEqual([{ kind: "schedule", teamId: wd, team: "wD", days: null, source: "handball4all" }]);
-    await exec("UPDATE teams SET fixture_synced_at = ? WHERE id = ?", daysAgo(SCHEDULE_STALE_DAYS - 1), wd);
+    await exec("UPDATE teams SET fixture_synced_at = ? WHERE id = ?", daysAgo(14), wd);
     expect(await hints(coach)).toEqual([]);
-    await exec("UPDATE teams SET fixture_synced_at = ? WHERE id = ?", daysAgo(SCHEDULE_STALE_DAYS + 3), wd);
-    expect(await hints(coach)).toMatchObject([{ kind: "schedule", days: SCHEDULE_STALE_DAYS + 3 }]);
+    await exec("UPDATE teams SET fixture_synced_at = ? WHERE id = ?", daysAgo(18), wd);
+    expect(await hints(coach)).toMatchObject([{ kind: "schedule", days: 18 }]);
     // Nur noch vergangene Spiele: die Saison ist gespielt
     const past = await eventIn(wd, -7, { kind: "game" });
     await exec("UPDATE events SET meeting_time = '17:00' WHERE id = ?", past);
@@ -57,6 +56,37 @@ describe("Hinweise für Trainer", () => {
     await exec("DELETE FROM events WHERE id = ?", past);
     await saveClub(env.DB, { modules: { handball4all: false } as never });
     expect(await hints(coach)).toEqual([]);
+  });
+
+  it("Spielplan: Schwelle 15, 30, 60 Tage oder aus, eingestellt von Admins", async () => {
+    await exec("UPDATE teams SET fixture_connector = 'handball4all', fixture_source = '{\"x\":1}', fixture_synced_at = ? WHERE id = ?", daysAgo(20), wd);
+    const admin = await loginAs(await person("Ada", { admin: true }));
+    expect(await hints(coach)).toMatchObject([{ kind: "schedule", days: 20 }]);
+    expect((await api("/admin/club", { method: "PUT", cookie: admin, body: { scheduleReminderDays: 30 } })).status).toBe(200);
+    expect(await hints(coach)).toEqual([]);
+    expect((await api("/admin/club", { method: "PUT", cookie: admin, body: { scheduleReminderDays: 20 } })).status).toBe(400);
+    expect((await api("/admin/club", { method: "PUT", cookie: coach, body: { scheduleReminderDays: 0 } })).status).toBe(403);
+    await exec("UPDATE teams SET fixture_synced_at = NULL WHERE id = ?", wd);
+    expect(await hints(coach)).toMatchObject([{ kind: "schedule", days: null }]);
+    expect((await api("/admin/club", { method: "PUT", cookie: admin, body: { scheduleReminderDays: 0 } })).status).toBe(200);
+    expect(await hints(coach)).toEqual([]);
+  });
+
+  it("Übersicht für Admins: Quelle, letzter Abgleich, Fehler, kommende Spiele, ob erinnert wird", async () => {
+    await exec("UPDATE teams SET fixture_connector = 'handball4all', fixture_source = '{\"x\":1}', fixture_synced_at = ?, fixture_error = 'Fetch failed: HTTP 500' WHERE id = ?", daysAgo(16), wd);
+    await eventIn(wd, 4, { kind: "game" });
+    await eventIn(md, -4, { kind: "game" });
+    const admin = await loginAs(await person("Ada", { admin: true }));
+    expect((await api("/admin/fixture-sync", { cookie: coach })).status).toBe(403);
+    const res = await api("/admin/fixture-sync", { cookie: admin });
+    expect(res.body.reminderDays).toBe(15);
+    expect(res.body.teams).toEqual([
+      { id: md, name: "mD", source: null, paused: null, syncedAt: null, error: null, upcomingGames: 0, seasonPlayed: true, reminded: false },
+      { id: wd, name: "wD", source: { id: "handball4all", name: "handball4all" }, paused: null, syncedAt: expect.any(String), error: "Fetch failed: HTTP 500", upcomingGames: 1, seasonPlayed: false, reminded: true },
+    ]);
+    await saveClub(env.DB, { modules: { handball4all: false } as never });
+    const off = await api("/admin/fixture-sync", { cookie: admin });
+    expect(off.body.teams[1]).toMatchObject({ source: null, paused: { id: "handball4all" }, reminded: false });
   });
 
   it("Admins nur für eigene Mannschaften, Spieler bekommen nichts", async () => {

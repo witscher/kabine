@@ -4,7 +4,11 @@ Decisions not covered by `docs/dev/roadmap.md`, with reasons. Newest first.
 
 ## Coach hints in the core, without a module hook (November 2026)
 
-Coaches see at the top of the events list what is left to do in their own teams: a game schedule not synced for 14 days, a game in the next 3 days without a meeting point (`worker/domain/coach-hints.ts`, `src/coach-hints.tsx`). The club app's note proposed a module hook for the schedule hint, because there the sync belongs to the handball4all code. In Kabine linking and syncing are already the same core code for every connector (`worker/routes/games.ts`, `syncGames`), and every sync is manual, so the hint works for every source from `teams.fixture_synced_at` without a new interface. A hook for home hints can still come when a module has a hint of its own.
+Coaches see at the top of the events list what is left to do in their own teams: a game schedule not synced for 15 days (adjustable, see below), a game in the next 3 days without a meeting point (`worker/domain/coach-hints.ts`, `src/coach-hints.tsx`). The club app's note proposed a module hook for the schedule hint, because there the sync belongs to the handball4all code. In Kabine linking and syncing are already the same core code for every connector (`worker/routes/games.ts`, `syncGames`), and every sync is manual, so the hint works for every source from `teams.fixture_synced_at` without a new interface. A hook for home hints can still come when a module has a hint of its own.
+
+## Reminder to sync: in the club profile, one admin page for every source (November 2026)
+
+The club app keeps the threshold in a loose `app_meta` key and the page is about handball4all only. In Kabine the setting `scheduleReminderDays` (15, 30, 60 or 0 for never, default 15) is part of the club profile, saved with `PUT /api/admin/club` like the other club settings, and read per request with the club context, so the coach hints need no extra query. The admin page covers every fixture connector, because syncing is core code; its menu entry and title carry the source's name when only one is switched on ("handball4all"), otherwise "Game schedules". Whether a team's coaches are reminded is computed on the server with the same rule as their hint (`scheduleStale`).
 
 ## Children in the app: limits per age class and team (October 2026)
 

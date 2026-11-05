@@ -6,7 +6,9 @@ import { Hono } from "hono";
 import { z } from "zod";
 import { type AppEnv, intParam, requireActor } from "../app";
 import { isCoachOf, requireAdmin, requireCoach } from "../auth/actor";
-import { activeConnectors, allConnectors, type Connector, connectorById, importGames, TEAM_FIXTURES_SELECT, type TeamFixtures, teamSource } from "../domain/fixtures";
+import { activeConnectors, allConnectors, type Connector, connectorById, importGames, SYNC_OVERVIEW_SQL, TEAM_FIXTURES_SELECT, type TeamFixtures, teamSource } from "../domain/fixtures";
+import { ownScheduleReminderDays } from "../domain/club";
+import { scheduleStale } from "../domain/coach-hints";
 import { requireTeam } from "../domain/groups";
 import { all, first, run } from "../lib/db";
 import { ApiError, badRequest, conflict, notFound, parse, readJson } from "../lib/http";
@@ -120,6 +122,41 @@ gameRoutes.get("/admin/fixture-sources", async (c) => {
     "SELECT fixture_connector, count(*) AS n FROM teams WHERE fixture_connector IS NOT NULL GROUP BY fixture_connector",
   );
   return c.json({ sources: allConnectors().map((x) => ({ id: x.id, name: x.name, teams: rows.find((r) => r.fixture_connector === x.id)?.n ?? 0 })) });
+});
+
+/**
+ * Administration → game schedule: every team with its source, last sync and error, upcoming games, and whether
+ * its coaches are reminded right now (the same rule as the hint on their events list).
+ */
+gameRoutes.get("/admin/fixture-sync", async (c) => {
+  requireAdmin(requireActor(c));
+  const now = Date.now();
+  const teams = await all<TeamFixtures & { upcoming: number; games: number }>(
+    c.env.DB,
+    SYNC_OVERVIEW_SQL,
+    nowLocal(now),
+  );
+  const days = ownScheduleReminderDays();
+  return c.json({
+    reminderDays: days,
+    connectors: activeConnectors().map((x) => ({ id: x.id, name: x.name })),
+    teams: teams.map((team) => {
+      const link = linked(team);
+      const stored = connectorById(team.fixture_connector);
+      const seasonPlayed = team.games > 0 && team.upcoming === 0;
+      return {
+        id: team.id,
+        name: team.name,
+        source: link ? { id: link.connector.id, name: link.connector.name } : null,
+        paused: !link && stored && teamSource(team) ? { id: stored.id, name: stored.name } : null,
+        syncedAt: team.fixture_synced_at,
+        error: team.fixture_error,
+        upcomingGames: team.upcoming,
+        seasonPlayed,
+        reminded: !!link && !seasonPlayed && scheduleStale(team.fixture_synced_at, days, now),
+      };
+    }),
+  });
 });
 
 /**

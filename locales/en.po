@@ -674,6 +674,10 @@ msgstr "New duty type"
 msgid "Important: each parent uses the link only once, for themselves. This is not a link for players!"
 msgstr "Important: each parent uses the link only once, for themselves. This is not a link for players!"
 
+#: src/pages/fixture-sync.tsx
+msgid "When a team's last sync is this long ago, its coaches see a hint with \"Sync now\" at the top of their events list. The hint disappears after the sync. A coach or admin always syncs by hand."
+msgstr "When a team's last sync is this long ago, its coaches see a hint with \"Sync now\" at the top of their events list. The hint disappears after the sync. A coach or admin always syncs by hand."
+
 #: worker/auth/owner.ts
 #: worker/routes/persons.ts
 msgid "Access of coaches and admins is managed by an admin."
@@ -1642,6 +1646,11 @@ msgstr "Parents are not involved in your children's teams. Your children respond
 msgid "{parentNames} (parent without another child)"
 msgstr "{parentNames} (parent without another child)"
 
+#. placeholder {0}: team.upcomingGames
+#: src/pages/fixture-sync.tsx
+msgid "{0, plural, one {# upcoming game} other {# upcoming games}}"
+msgstr "{0, plural, one {# upcoming game} other {# upcoming games}}"
+
 #: worker/domain/child-limits.ts
 msgid "Children in this team have no own access. Please use the parent link."
 msgstr "Children in this team have no own access. Please use the parent link."
@@ -1926,6 +1935,7 @@ msgstr "Several accesses belong to this address. Which one do you want to sign i
 #: src/pages/admin.tsx
 #: src/pages/chat.tsx
 #: src/pages/club-settings.tsx
+#: src/pages/fixture-sync.tsx
 #: src/pages/group.tsx
 #: src/pages/list-import.tsx
 #: src/pages/mail-settings.tsx
@@ -2613,6 +2623,10 @@ msgstr "This child is not in the team."
 msgid "a new device has just been set up for your access via a personal link. Your previous devices have been signed out."
 msgstr "a new device has just been set up for your access via a personal link. Your previous devices have been signed out."
 
+#: src/pages/fixture-sync.tsx
+msgid "Off"
+msgstr "Off"
+
 #: worker/routes/games.ts
 #: worker/routes/games.ts
 msgid "No game schedule is linked for this team."
@@ -2667,6 +2681,10 @@ msgstr "Device: {device}"
 #: src/game-import.tsx
 msgid "{venue, select, hall {Without a connection to the association: paste a table (for example from a spreadsheet) with the columns date, time, opponent, home or away and hall, or choose a CSV file.} pitch {Without a connection to the association: paste a table (for example from a spreadsheet) with the columns date, time, opponent, home or away and pitch, or choose a CSV file.} other {Without a connection to the association: paste a table (for example from a spreadsheet) with the columns date, time, opponent, home or away and venue, or choose a CSV file.}}"
 msgstr "{venue, select, hall {Without a connection to the association: paste a table (for example from a spreadsheet) with the columns date, time, opponent, home or away and hall, or choose a CSV file.} pitch {Without a connection to the association: paste a table (for example from a spreadsheet) with the columns date, time, opponent, home or away and pitch, or choose a CSV file.} other {Without a connection to the association: paste a table (for example from a spreadsheet) with the columns date, time, opponent, home or away and venue, or choose a CSV file.}}"
+
+#: src/pages/fixture-sync.tsx
+msgid "Change link"
+msgstr "Change link"
 
 #: src/calendar.tsx
 msgid "Google Calendar: on a computer, go to calendar.google.com → Other calendars → From URL and paste the link. It then also appears in the app. Google only updates every few hours."
@@ -3158,6 +3176,8 @@ msgstr "Export file (.json)"
 #: src/pages/admin.tsx
 #: src/pages/admin.tsx
 #: src/pages/chat.tsx
+#: src/pages/fixture-sync.tsx
+#: src/pages/fixture-sync.tsx
 #: src/pages/plans.tsx
 #: src/pages/setup-wizard.tsx
 #: src/pages/special.tsx
@@ -4145,6 +4165,11 @@ msgstr "In the <0>Helpers</0> tab, tap <1>Sign up</1> on the duty. Every duty ha
 #: worker/index.ts
 msgid "Legal notice"
 msgstr "Legal notice"
+
+#. placeholder {0}: team.error
+#: src/pages/fixture-sync.tsx
+msgid "Last sync failed: {0}"
+msgstr "Last sync failed: {0}"
 
 #: src/pages/team.tsx
 msgid "The players sign up for duties at games themselves (\"Helpers\" tab)."
@@ -5404,6 +5429,10 @@ msgstr "Going ahead: {label}"
 msgid "The event is in the past."
 msgstr "The event is in the past."
 
+#: src/pages/fixture-sync.tsx
+msgid "Remind coaches after"
+msgstr "Remind coaches after"
+
 #: modules/sms/app/settings.tsx
 #: src/pages/club-settings.tsx
 #: src/pages/mail-settings.tsx
@@ -5715,6 +5744,10 @@ msgstr "More actions"
 #: src/pages/profile.tsx
 msgid "Optional: with a confirmed mobile number you can sign in with a code by SMS and get helper plan reminders by SMS."
 msgstr "Optional: with a confirmed mobile number you can sign in with a code by SMS and get helper plan reminders by SMS."
+
+#: src/pages/fixture-sync.tsx
+msgid "Game schedules"
+msgstr "Game schedules"
 
 #: src/pages/home.tsx
 msgid "Coming up"
@@ -6058,6 +6091,11 @@ msgstr "Team name"
 #: src/pages/admin.tsx
 msgid "For circles without training and games, such as the coaching team, there are <0>groups</0>."
 msgstr "For circles without training and games, such as the coaching team, there are <0>groups</0>."
+
+#: src/pages/fixture-sync.tsx
+#: src/pages/fixture-sync.tsx
+msgid "Reminder to sync"
+msgstr "Reminder to sync"
 
 #: src/pages/event.tsx
 msgid "The event and all responses will be deleted."
@@ -6426,6 +6464,7 @@ msgid "The game is not taking place."
 msgstr "The game is not taking place."
 
 #: src/coach-hints.tsx
+#: src/pages/fixture-sync.tsx
 #: src/pages/games.tsx
 msgid "Sync now"
 msgstr "Sync now"
@@ -6973,6 +7012,10 @@ msgstr "A link already exists the other way round: the child is registered as a 
 #: src/pages/admin.tsx
 msgid "https link, e.g. to OpenStreetMap"
 msgstr "https link, e.g. to OpenStreetMap"
+
+#: src/pages/fixture-sync.tsx
+msgid "season played"
+msgstr "season played"
 
 #: worker/domain/calendar.ts
 msgid "{rest} and {last}"
@@ -7750,6 +7793,7 @@ msgstr "Team {level}"
 msgid "Live ticker"
 msgstr "Live ticker"
 
+#: src/pages/fixture-sync.tsx
 #: src/pages/games.tsx
 msgid "Not synced yet"
 msgstr "Not synced yet"
@@ -9144,6 +9188,10 @@ msgstr "Core"
 msgid "First name of {name}"
 msgstr "First name of {name}"
 
+#: worker/routes/club.ts
+msgid "Please choose 15, 30 or 60 days, or off."
+msgstr "Please choose 15, 30 or 60 days, or off."
+
 #: src/avatar.tsx
 msgid "The picture could not be opened. Please choose a photo in JPEG, PNG, WebP or HEIC format."
 msgstr "The picture could not be opened. Please choose a photo in JPEG, PNG, WebP or HEIC format."
@@ -10190,6 +10238,10 @@ msgstr "Legal notice: {notice}"
 msgid "Please cancel the current lift first."
 msgstr "Please cancel the current lift first."
 
+#: src/pages/admin.tsx
+msgid "Game schedule sync and reminder"
+msgstr "Game schedule sync and reminder"
+
 #: src/coach-hints.tsx
 msgid "Schedule of {team} not synced yet"
 msgstr "Schedule of {team} not synced yet"
@@ -10239,6 +10291,10 @@ msgstr "Privacy and sources"
 msgid "Optional. Your team sees it in the chat and in the squad."
 msgstr "Optional. Your team sees it in the chat and in the squad."
 
+#: src/pages/fixture-sync.tsx
+msgid "No game schedule linked"
+msgstr "No game schedule linked"
+
 #: worker/domain/email-login.ts
 msgid "please confirm your e-mail address for {app} with this code:"
 msgstr "please confirm your e-mail address for {app} with this code:"
@@ -10265,6 +10321,10 @@ msgstr "Profile"
 #: modules/duties/app/admin.tsx
 msgid "Note allowed"
 msgstr "Note allowed"
+
+#: src/pages/fixture-sync.tsx
+msgid "Coaches are reminded after {days} days without a sync."
+msgstr "Coaches are reminded after {days} days without a sync."
 
 #: worker/routes/manual-games.ts
 msgid "{date}, {time}, {place}. The coach will announce the squad."
@@ -10569,6 +10629,10 @@ msgstr "Offer withdrawn."
 msgid "Please open this link in <0>Safari</0>. Passkeys created in another browser often cannot be used by the app on the home screen. Copy the link, open Safari and paste it into the address bar."
 msgstr "Please open this link in <0>Safari</0>. Passkeys created in another browser often cannot be used by the app on the home screen. Copy the link, open Safari and paste it into the address bar."
 
+#: src/pages/fixture-sync.tsx
+msgid "Add link"
+msgstr "Add link"
+
 #: src/pages/admin.tsx
 msgid "Setup not finished"
 msgstr "Setup not finished"
@@ -10704,6 +10768,10 @@ msgstr "New team for {name}"
 msgid "A player or parent can no longer get into the app."
 msgstr "A player or parent can no longer get into the app."
 
+#: src/pages/fixture-sync.tsx
+msgid "Sync paused: {name} is switched off"
+msgstr "Sync paused: {name} is switched off"
+
 #: src/pages/home.tsx
 msgid "Your reason: “{reason}”"
 msgstr "Your reason: “{reason}”"
@@ -10817,6 +10885,7 @@ msgstr "Mails go to the address you sign in with."
 msgid "No lead is there. Cancel the event for everyone, or sort out a stand-in in the chat."
 msgstr "No lead is there. Cancel the event for everyone, or sort out a stand-in in the chat."
 
+#: src/pages/fixture-sync.tsx
 #: src/pages/games.tsx
 msgid "Synced {when}"
 msgstr "Synced {when}"
@@ -10824,6 +10893,10 @@ msgstr "Synced {when}"
 #: worker/domain/email-login.ts
 msgid "If you use the app from the home screen, it is best to enter the code there directly."
 msgstr "If you use the app from the home screen, it is best to enter the code there directly."
+
+#: src/pages/fixture-sync.tsx
+msgid "{d, plural, one {# day} other {# days}}"
+msgstr "{d, plural, one {# day} other {# days}}"
 
 #: src/pages/updates.tsx
 msgid "Maintenance mode on. It takes effect within a minute."
@@ -11763,6 +11836,7 @@ msgid "{count}× unexcused"
 msgstr "{count}× unexcused"
 
 #: src/coach-hints.tsx
+#: src/pages/fixture-sync.tsx
 #: src/pages/games.tsx
 msgid "Syncing …"
 msgstr "Syncing …"
@@ -11887,6 +11961,10 @@ msgstr "Everyone counts as accepted, as in their own training."
 msgid "Who are you?"
 msgstr "Who are you?"
 
+#: src/pages/fixture-sync.tsx
+msgid "Coaches are being reminded"
+msgstr "Coaches are being reminded"
+
 #: shared/types.ts
 msgid "Mentions in the chat (@name)"
 msgstr "Mentions in the chat (@name)"
@@ -11894,6 +11972,10 @@ msgstr "Mentions in the chat (@name)"
 #: src/pages/updates.tsx
 msgid "Installed version"
 msgstr "Installed version"
+
+#: src/pages/fixture-sync.tsx
+msgid "{name}: {created} new, {moved} moved, {cancelled} cancelled."
+msgstr "{name}: {created} new, {moved} moved, {cancelled} cancelled."
 
 #: src/pages/group.tsx
 msgid "Upcoming special events"
@@ -11982,6 +12064,10 @@ msgstr "{label} by mail"
 #: worker/routes/manual-games.ts
 msgid "Games from a game schedule cannot be deleted, only hidden."
 msgstr "Games from a game schedule cannot be deleted, only hidden."
+
+#: src/pages/fixture-sync.tsx
+msgid "Reminder switched off."
+msgstr "Reminder switched off."
 
 #: worker/routes/squad.ts
 msgid "Request withdrawn"

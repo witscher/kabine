@@ -45,9 +45,19 @@ export interface ClubProfile {
   /** Language for people who have not chosen one, and for texts outside a request. */
   defaultLocale: Locale;
   modules: ClubModules;
+  /**
+   * Days without a sync after which coaches see "game schedule not synced" for their team; 0 = never.
+   * Administration → game schedule (named after the source when only one is switched on).
+   */
+  scheduleReminderDays: ScheduleReminderDays;
   /** The installation wizard has been completed. */
   setupDone: boolean;
 }
+
+/** Choices for the reminder to sync the game schedule; 0 = off. */
+export const SCHEDULE_REMINDER_CHOICES = [15, 30, 60, 0] as const;
+export type ScheduleReminderDays = (typeof SCHEDULE_REMINDER_CHOICES)[number];
+export const isScheduleReminderDays = (n: unknown): n is ScheduleReminderDays => (SCHEDULE_REMINDER_CHOICES as readonly unknown[]).includes(n);
 
 /** Upstream repository, the source code link when a club has not set its own. */
 export const KABINE_SOURCE = "https://github.com/witscher/kabine";
@@ -69,6 +79,7 @@ export const DEFAULT_CLUB: ClubProfile = {
   timeZone: "Europe/Berlin",
   defaultLocale: "en",
   modules: DEFAULT_MODULES,
+  scheduleReminderDays: 15,
   setupDone: false,
 };
 

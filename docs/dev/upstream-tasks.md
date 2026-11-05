@@ -8,14 +8,13 @@ Format per entry: date, title, what changed and why, where in the code (file and
 
 ## Open
 
-- **2026-11-05 Fixture sync reminder: threshold setting and overview of all teams.** Follow-up to the coach hints (Kabine `8fe597f`). The "schedule not synced" hint comes after 15, 30 or 60 days, or never (default 15, before fixed at 14), chosen by admins on an admin page for the fixture sync. The same page lists all teams: fixture source linked or not, last sync, last error, upcoming games or "season played", and whether the coaches are being reminded right now, with "Sync now" and a link to the team settings. Club app: `SCHEDULE_REMINDER_CHOICES`, `scheduleReminderDays` in `worker/domain/coach-hints.ts`, `GET/PUT /admin/handball4all` in `worker/routes/games.ts`, setting in `app_meta` key `h4a_reminder_days`, `AdminH4aPage` in `src/pages/admin.tsx`, tests in `test/coach-hints.test.ts`. For Kabine: one page for fixture sync across connectors (sync is core there), setting with the club's other settings instead of a loose `app_meta` key.
-
 ## Parked
 
 Notes on changes in the club app that the maintainer does not want in Kabine yet. Do not port and do not add to the roadmap; the maintainer moves an entry to "Open" when it is wanted.
 
 ## Done
 
+- **2026-11-05 Fixture sync reminder: threshold setting and overview of all teams.** Admin page "handball4all" (or "Game schedules" with several sources) under Administration: reminder after 15, 30 or 60 days or never (default 15), every team with source, last sync, error, upcoming games, whether coaches are reminded, "Sync now" and the link. Setting in the club profile (`scheduleReminderDays`), page for every connector (docs/dev/decisions.md). Kabine: (this commit).
 - **2026-11-04 Coach hints on the home screen: fixture schedule not synced, meeting point missing.** Hints at the top of the events list for the coach's own teams, with the button that does it; meeting point missing for games in the next 3 days ("Enter" opens the meeting sheet), schedule not synced for 14 days ("Sync now"). In the core for every connector instead of a module hook, since syncing is core code in Kabine (docs/dev/decisions.md). Kabine: `8fe597f`.
 - **2026-10-26 Children in the app: limits per age class, plus a coach override per team.** Age class (admins) and team (coaches, Kabine only) limit own access, responding, chat (none/read/write) and stand-in requests; each level only restricts, parents decide within. Same `age_classes.child_*` columns as the club app, nullable `teams.child_*` for the team level, sport profiles bring defaults for new clubs. Club app: regenerate `test/kabine-schema.json` so its export carries the age class columns. Kabine: `393de5e`.
 - **2026-10-26 Groups can include parents.** "Include parents" switch in the group settings (admins, off by default, not for the youth referee group); parents see the group's special events for their children, respond and are in the chat; no parent links for groups. Kabine: `69fcbf5`.

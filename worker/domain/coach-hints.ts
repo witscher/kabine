@@ -2,6 +2,7 @@
 // A hint is a state, not a message: it disappears once the job is done and cannot be dismissed.
 import type { CoachHint } from "../../shared/types";
 import type { Actor } from "../auth/actor";
+import { ownScheduleReminderDays } from "./club";
 import { all, list } from "../lib/db";
 import { addDays, nowLocal, todayLocal } from "../lib/time";
 import { activeConnectors, teamSource } from "./fixtures";
@@ -9,8 +10,10 @@ import { activeConnectors, teamSource } from "./fixtures";
 /** This many days before a game the app reminds the coaches of meeting point and time (hint and push). */
 export const MEETING_REMINDER_DAYS = 3;
 
-/** A synced game schedule counts as stale after this many days. */
-export const SCHEDULE_STALE_DAYS = 14;
+/** Is the team's schedule due for a reminder? `days` from the club profile, 0 = never. */
+export function scheduleStale(syncedAt: string | null, days: number, now: number): boolean {
+  return days > 0 && (!syncedAt || now - Date.parse(syncedAt) >= days * 86_400_000);
+}
 
 /** The opponent of a game for texts: the other team, or the title of a game without home/away. */
 export function gameOpponent(g: { is_home: number | null; home_team: string | null; guest_team: string | null; title: string | null }): string | null {
@@ -27,7 +30,8 @@ export async function loadCoachHints(db: D1Database, actor: Actor, now = Date.no
 
 async function staleSchedules(db: D1Database, teamIds: number[], now: number): Promise<CoachHint[]> {
   const connectors = activeConnectors();
-  if (!connectors.length) return [];
+  const days = ownScheduleReminderDays();
+  if (!connectors.length || !days) return [];
   const teams = (
     await all<{ id: number; name: string; fixture_connector: string; fixture_source: string | null; fixture_synced_at: string | null }>(
       db,
@@ -37,7 +41,7 @@ async function staleSchedules(db: D1Database, teamIds: number[], now: number): P
     )
   ).filter((t) => {
     if (!connectors.some((c) => c.id === t.fixture_connector) || !teamSource(t)) return false;
-    return !t.fixture_synced_at || now - Date.parse(t.fixture_synced_at) >= SCHEDULE_STALE_DAYS * 86_400_000;
+    return scheduleStale(t.fixture_synced_at, days, now);
   });
   if (!teams.length) return [];
   // A team with only past games left has played its season: nothing to sync

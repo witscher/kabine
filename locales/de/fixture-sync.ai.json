@@ -1,0 +1,21 @@
+{
+  "When a team's last sync is this long ago, its coaches see a hint with \"Sync now\" at the top of their events list. The hint disappears after the sync. A coach or admin always syncs by hand.": "Liegt der letzte Abgleich einer Mannschaft so lange zurück, sehen ihre Trainer oben in der Terminübersicht einen Hinweis mit „Jetzt abgleichen“. Der Hinweis verschwindet nach dem Abgleich. Abgleichen muss immer ein Trainer oder Admin von Hand.",
+  "{0, plural, one {# upcoming game} other {# upcoming games}}": "{0, plural, one {# kommendes Spiel} other {# kommende Spiele}}",
+  "Off": "Aus",
+  "Change link": "Link ändern",
+  "Last sync failed: {0}": "Letzter Abgleich fehlgeschlagen: {0}",
+  "Remind coaches after": "Trainer erinnern nach",
+  "Game schedules": "Spielpläne",
+  "Reminder to sync": "Erinnerung an den Abgleich",
+  "season played": "Saison gespielt",
+  "Please choose 15, 30 or 60 days, or off.": "Bitte 15, 30 oder 60 Tage oder „Aus“ wählen.",
+  "Game schedule sync and reminder": "Spielplanabgleich und Erinnerung",
+  "No game schedule linked": "Kein Spielplan verknüpft",
+  "Coaches are reminded after {days} days without a sync.": "Trainer werden nach {days} Tagen ohne Abgleich erinnert.",
+  "Add link": "Link hinterlegen",
+  "Sync paused: {name} is switched off": "Abgleich pausiert: {name} ist ausgeschaltet",
+  "{d, plural, one {# day} other {# days}}": "{d, plural, one {# Tag} other {# Tage}}",
+  "Coaches are being reminded": "Trainer werden erinnert",
+  "{name}: {created} new, {moved} moved, {cancelled} cancelled.": "{name}: {created} neu, {moved} verlegt, {cancelled} entfallen.",
+  "Reminder switched off.": "Erinnerung ausgeschaltet."
+}

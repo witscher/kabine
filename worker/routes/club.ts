@@ -2,7 +2,7 @@ import { t } from "@lingui/core/macro";
 // Club profile: public read (login page, splash, manifest) and admin edit.
 import { Hono } from "hono";
 import { z } from "zod";
-import { type ClubModules, isHexColor, isTimeZone, type ModuleId } from "../../shared/club";
+import { type ClubModules, isHexColor, isScheduleReminderDays, isTimeZone, type ModuleId } from "../../shared/club";
 import { SPORT_IDS } from "../../shared/sports";
 import { MODULES } from "../../shared/modules";
 import { LOCALES } from "../../shared/i18n";
@@ -43,6 +43,7 @@ const clubSchema = z.object({
   subdivision: z.string().regex(/^[A-Z]{2}-[A-Z0-9]{1,4}$/).nullable().optional(),
   timeZone: z.string().max(64).refine(isTimeZone, { error: () => t`Unknown time zone.` }).optional(),
   modules: z.object(Object.fromEntries(MODULES.map((m) => [m.id, z.boolean()])) as Record<ModuleId, z.ZodBoolean>).partial().optional(),
+  scheduleReminderDays: z.number().refine(isScheduleReminderDays, { error: () => t`Please choose 15, 30 or 60 days, or off.` }).optional(),
   setupDone: z.boolean().optional(),
 });
 

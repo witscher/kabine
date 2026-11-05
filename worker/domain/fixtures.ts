@@ -53,6 +53,14 @@ export interface TeamFixtures {
 
 export const TEAM_FIXTURES_SELECT = "SELECT id, name, fixture_connector, fixture_source, fixture_synced_at, fixture_error, fixture_claimed_at FROM teams";
 
+/** All teams with their fixture state and game counts (Administration → game schedule); binds the local now. */
+export const SYNC_OVERVIEW_SQL = `SELECT t.id, t.name, t.fixture_connector, t.fixture_source, t.fixture_synced_at, t.fixture_error, t.fixture_claimed_at,
+    (SELECT count(*) FROM event_teams et JOIN events e ON e.id = et.event_id
+      WHERE et.team_id = t.id AND e.kind = 'game' AND e.cancelled_at IS NULL AND e.starts_at > ?) AS upcoming,
+    (SELECT count(*) FROM event_teams et JOIN events e ON e.id = et.event_id
+      WHERE et.team_id = t.id AND e.kind = 'game' AND e.cancelled_at IS NULL) AS games
+  FROM teams t WHERE t.kind = 'team' ORDER BY t.name`;
+
 export function teamSource(team: Pick<TeamFixtures, "fixture_source">): FixtureSource | null {
   if (!team.fixture_source) return null;
   try {

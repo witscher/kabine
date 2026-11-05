@@ -1765,3 +1765,30 @@ test("Hinweise für Trainer: Treffpunkt fehlt, Eintragen öffnet das Spiel mit d
   await expect(page.getByRole("heading", { name: /Hallo/ })).toBeVisible();
   await expect(page.getByRole("region", { name: "Zu tun für deine Mannschaften" })).toHaveCount(0);
 });
+
+test("Verwaltung → handball4all: Erinnerung einstellen, Stand aller Mannschaften", async () => {
+  const { page } = admin;
+  const link = "https://www.handball4all.de/home/portal/baden-wuerttembergischer-hv#/league?ogId=216&lId=555&tId=999";
+  expect((await page.request.put("/api/teams/1/games/source", { data: { link } })).ok()).toBe(true);
+  await page.goto("/verwaltung");
+  await page.getByRole("link", { name: /handball4all.*Spielplanabgleich und Erinnerung/ }).click();
+  await expect(page).toHaveURL(/\/verwaltung\/spielplan$/);
+  await expect(page.getByRole("heading", { name: "handball4all", level: 1 })).toBeVisible();
+  const reminder = page.getByRole("group", { name: "Trainer erinnern nach" });
+  await expect(reminder.getByRole("button", { name: "15 Tage" })).toHaveAttribute("aria-pressed", "true");
+  await reminder.getByRole("button", { name: "Aus" }).click();
+  await expect(page.getByText("Erinnerung ausgeschaltet.")).toBeVisible();
+  await expect(reminder.getByRole("button", { name: "Aus" })).toHaveAttribute("aria-pressed", "true");
+  await reminder.getByRole("button", { name: "30 Tage" }).click();
+  await expect(page.getByText("Trainer werden nach 30 Tagen ohne Abgleich erinnert.")).toBeVisible();
+  const teams = page.getByRole("region", { name: "Mannschaften" });
+  await expect(teams.getByText(/handball4all · Noch nicht abgeglichen/)).toBeVisible();
+  await expect(teams.getByText("Trainer werden erinnert")).toBeVisible();
+  await expect(teams.getByRole("button", { name: "Jetzt abgleichen" })).toBeVisible();
+  await expect(teams.getByRole("link", { name: "Link ändern" })).toBeVisible();
+  await expect(teams.getByRole("link", { name: "Link hinterlegen" }).first()).toBeVisible();
+  await page.screenshot({ path: "test-results/admin-fixture-sync.png", fullPage: true });
+  await reminder.getByRole("button", { name: "15 Tage" }).click();
+  await expect(reminder.getByRole("button", { name: "15 Tage" })).toHaveAttribute("aria-pressed", "true");
+  expect((await page.request.put("/api/teams/1/games/source", { data: { link: null } })).ok()).toBe(true);
+});
