@@ -51,6 +51,11 @@ msgstr "Deine Nachricht"
 msgid "Create the teams that start now. Coaches, players and training plans follow in each team; more teams can be added later."
 msgstr "Leg die Mannschaften an, die jetzt starten. Trainer, Spieler und Trainingspläne folgen in der jeweiligen Mannschaft, weitere Mannschaften kannst du später ergänzen."
 
+# ai
+#: modules/handballnet/worker/connector.ts
+msgid "The calendar names no team"
+msgstr "Der Kalender nennt keine Mannschaft"
+
 #: worker/routes/squad.ts
 msgid "Inactive players cannot be nominated."
 msgstr "Inaktive Spieler können nicht nominiert werden."
@@ -1741,6 +1746,11 @@ msgstr "{0, plural, one {# kommendes Spiel} other {# kommende Spiele}}"
 msgid "Children in this team have no own access. Please use the parent link."
 msgstr "In dieser Mannschaft haben Kinder keinen eigenen Zugang. Bitte den Elternlink verwenden."
 
+# ai
+#: modules/handballnet/app/index.tsx
+msgid "Game on handball.net"
+msgstr "Spiel auf handball.net"
+
 #: worker/domain/calendar.ts
 msgctxt "calendar"
 msgid "absent"
@@ -2202,6 +2212,12 @@ msgstr "Lege hier Mannschaften und Trainer an; Spielerinnen und Spieler kommen s
 #: src/pages/admin.tsx
 msgid "{total, plural, one {# person} other {# people}}"
 msgstr "{total, plural, one {# Personen} other {# Personen}}"
+
+# ai
+#: modules/handballnet/worker/connector.ts
+#: modules/handballnet/worker/connector.ts
+msgid "Response is not a calendar"
+msgstr "Die Antwort ist kein Kalender"
 
 # ai
 #: modules/carpools/app/card.tsx
@@ -5990,6 +6006,11 @@ msgstr "Elternteil suchen"
 msgid "no team"
 msgstr "ohne Mannschaft"
 
+# ai
+#: modules/handballnet/worker/connector.ts
+msgid "The calendar contains games of another team"
+msgstr "Der Kalender enthält Spiele einer anderen Mannschaft"
+
 #: src/pages/home.tsx
 msgid "Trainings are scheduled until {until}. After that only games and special events follow."
 msgstr "Trainings sind bis {until} eingetragen. Danach folgen nur Spiele und Sondertermine."
@@ -6091,6 +6112,11 @@ msgstr "Spielpläne"
 #: src/pages/home.tsx
 msgid "Coming up"
 msgstr "Demnächst"
+
+# ai
+#: modules/handballnet/worker/connector.ts
+msgid "Team {id}"
+msgstr "Mannschaft {id}"
 
 # ai
 #: src/list-import.tsx
@@ -6322,6 +6348,11 @@ msgstr "Profilbild entfernen?"
 #: src/respond.tsx
 msgid "Send decline"
 msgstr "Absage senden"
+
+# ai
+#: modules/handballnet/worker/connector.ts
+msgid "Link to the team at {vendor}"
+msgstr "Link zur Mannschaft bei {vendor}"
 
 #: modules/youth-referees/app/referees.tsx
 msgid "Link from {date}"
@@ -9535,6 +9566,11 @@ msgstr "{name} fährt nicht mehr bei {driver} mit: {game}. Die Suche läuft weit
 msgid "Coaches sync the games of their team from the handball4all portal (German handball associations)."
 msgstr "Trainer gleichen die Spiele ihrer Mannschaft mit dem handball4all-Portal ab (deutsche Handballverbände)."
 
+# ai
+#: modules/handballnet/module.ts
+msgid "Game schedule from handball.net"
+msgstr "Spielplan aus handball.net"
+
 #: src/pages/team.tsx
 msgid "Stand-in from the other team"
 msgstr "Aushilfe aus der anderen Mannschaft"
@@ -11614,6 +11650,11 @@ msgstr "Erinnerung: {label} morgen"
 msgid "This access is protected and can only be changed by its owner."
 msgstr "Dieser Zugang ist geschützt und kann nur vom Inhaber selbst geändert werden."
 
+# ai
+#: modules/handballnet/worker/connector.ts
+msgid "Open the team at {vendor} and paste the link from the address bar, or the link of \"Subscribe to calendar\"."
+msgstr "Öffne die Mannschaft bei {vendor} und füge den Link aus der Adresszeile ein oder den Link von „Kalender abonnieren“."
+
 #: src/format.ts
 #: src/pages/admin.tsx
 msgid "today"
@@ -12630,6 +12671,11 @@ msgstr "Angebot zurückziehen"
 #: src/pages/join.tsx
 msgid "First give the app the club's address"
 msgstr "Gib der App zuerst die Adresse des Vereins"
+
+# ai
+#: modules/handballnet/module.ts
+msgid "Coaches sync the games of their team from handball.net."
+msgstr "Trainer übernehmen die Spiele ihrer Mannschaft aus handball.net."
 
 #: src/pages/chat.tsx
 msgid "as admin"

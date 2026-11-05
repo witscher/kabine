@@ -1,0 +1,14 @@
+[
+  {
+    "link": "https://www.handball.net/team/99901?season_id=2627&phaseId=55501",
+    "source": { "teamId": "99901" }
+  },
+  {
+    "link": "webcal://www.handball.net/kalender/team/99901.ics?t=1793864891722",
+    "source": { "teamId": "99901" }
+  },
+  {
+    "link": "https://handball.net/mannschaften/99901/spielplan",
+    "source": { "teamId": "99901" }
+  }
+]

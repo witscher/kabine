@@ -49,6 +49,10 @@ msgstr "Your message"
 msgid "Create the teams that start now. Coaches, players and training plans follow in each team; more teams can be added later."
 msgstr "Create the teams that start now. Coaches, players and training plans follow in each team; more teams can be added later."
 
+#: modules/handballnet/worker/connector.ts
+msgid "The calendar names no team"
+msgstr "The calendar names no team"
+
 #: worker/routes/squad.ts
 msgid "Inactive players cannot be nominated."
 msgstr "Inactive players cannot be nominated."
@@ -1656,6 +1660,10 @@ msgstr "{0, plural, one {# upcoming game} other {# upcoming games}}"
 msgid "Children in this team have no own access. Please use the parent link."
 msgstr "Children in this team have no own access. Please use the parent link."
 
+#: modules/handballnet/app/index.tsx
+msgid "Game on handball.net"
+msgstr "Game on handball.net"
+
 #: worker/domain/calendar.ts
 msgctxt "calendar"
 msgid "absent"
@@ -2097,6 +2105,11 @@ msgstr "Create the teams and coaches here; players come later through the coache
 #: src/pages/admin.tsx
 msgid "{total, plural, one {# person} other {# people}}"
 msgstr "{total, plural, one {# person} other {# people}}"
+
+#: modules/handballnet/worker/connector.ts
+#: modules/handballnet/worker/connector.ts
+msgid "Response is not a calendar"
+msgstr "Response is not a calendar"
 
 #: modules/carpools/app/card.tsx
 #: modules/carpools/worker/routes.ts
@@ -5658,6 +5671,10 @@ msgstr "Search parent"
 msgid "no team"
 msgstr "no team"
 
+#: modules/handballnet/worker/connector.ts
+msgid "The calendar contains games of another team"
+msgstr "The calendar contains games of another team"
+
 #: src/pages/home.tsx
 msgid "Trainings are scheduled until {until}. After that only games and special events follow."
 msgstr "Trainings are scheduled until {until}. After that only games and special events follow."
@@ -5753,6 +5770,10 @@ msgstr "Game schedules"
 #: src/pages/home.tsx
 msgid "Coming up"
 msgstr "Coming up"
+
+#: modules/handballnet/worker/connector.ts
+msgid "Team {id}"
+msgstr "Team {id}"
 
 #: src/list-import.tsx
 msgid "Columns"
@@ -5964,6 +5985,10 @@ msgstr "Remove profile picture?"
 #: src/respond.tsx
 msgid "Send decline"
 msgstr "Send decline"
+
+#: modules/handballnet/worker/connector.ts
+msgid "Link to the team at {vendor}"
+msgstr "Link to the team at {vendor}"
 
 #: modules/youth-referees/app/referees.tsx
 msgid "Link from {date}"
@@ -9009,6 +9034,10 @@ msgstr "{name} is no longer riding with {driver}: {game}. The search continues (
 msgid "Coaches sync the games of their team from the handball4all portal (German handball associations)."
 msgstr "Coaches sync the games of their team from the handball4all portal (German handball associations)."
 
+#: modules/handballnet/module.ts
+msgid "Game schedule from handball.net"
+msgstr "Game schedule from handball.net"
+
 #: src/pages/team.tsx
 msgid "Stand-in from the other team"
 msgstr "Stand-in from the other team"
@@ -10983,6 +11012,10 @@ msgstr "Reminder: {label} tomorrow"
 msgid "This access is protected and can only be changed by its owner."
 msgstr "This access is protected and can only be changed by its owner."
 
+#: modules/handballnet/worker/connector.ts
+msgid "Open the team at {vendor} and paste the link from the address bar, or the link of \"Subscribe to calendar\"."
+msgstr "Open the team at {vendor} and paste the link from the address bar, or the link of \"Subscribe to calendar\"."
+
 #: src/format.ts
 #: src/pages/admin.tsx
 msgid "today"
@@ -11944,6 +11977,10 @@ msgstr "Withdraw offer"
 #: src/pages/join.tsx
 msgid "First give the app the club's address"
 msgstr "First give the app the club's address"
+
+#: modules/handballnet/module.ts
+msgid "Coaches sync the games of their team from handball.net."
+msgstr "Coaches sync the games of their team from handball.net."
 
 #: src/pages/chat.tsx
 msgid "as admin"

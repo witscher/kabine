@@ -6,6 +6,7 @@ import duties from "./duties/module";
 import handball4all from "./handball4all/module";
 import sms from "./sms/module";
 import youthReferees from "./youth-referees/module";
+import handballnet from "./handballnet/module";
 
 export const MODULES = [
   youthReferees,
@@ -13,5 +14,6 @@ export const MODULES = [
   carpools,
   handball4all,
   sms,
+  handballnet,
   // new modules: above this line
 ] as const;

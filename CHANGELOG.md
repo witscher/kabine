@@ -6,6 +6,8 @@ Changes that are merged but not released yet go under *Unreleased*, one line eac
 
 ## Unreleased
 
+- New module (beta, off by default): game schedules from handball.net for clubs whose association runs its games in Handball360. It works like handball4all: the coach pastes the team's link from handball.net (or its calendar link) under *Team → Settings* and syncs with "Sync now"; the device fetches the team's public calendar. Games link to their page on handball.net.
+
 ## v0.6.0
 
 - Saving works the same everywhere: switches and choices save at once and show "Saved" right at the switch; text fields have a button in their own card that appears once something changed. Administration → Club no longer has one button for the whole page: every card saves on its own. When editing a training plan, name, period and deadline have their own "Save plan" button, as training times already saved at once.
