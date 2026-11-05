@@ -8,6 +8,8 @@ Format per entry: date, title, what changed and why, where in the code (file and
 
 ## Open
 
+- **2026-11-05 Fixture sync reminder: threshold setting and overview of all teams.** Follow-up to the coach hints (Kabine `8fe597f`). The "schedule not synced" hint comes after 15, 30 or 60 days, or never (default 15, before fixed at 14), chosen by admins on an admin page for the fixture sync. The same page lists all teams: fixture source linked or not, last sync, last error, upcoming games or "season played", and whether the coaches are being reminded right now, with "Sync now" and a link to the team settings. Club app: `SCHEDULE_REMINDER_CHOICES`, `scheduleReminderDays` in `worker/domain/coach-hints.ts`, `GET/PUT /admin/handball4all` in `worker/routes/games.ts`, setting in `app_meta` key `h4a_reminder_days`, `AdminH4aPage` in `src/pages/admin.tsx`, tests in `test/coach-hints.test.ts`. For Kabine: one page for fixture sync across connectors (sync is core there), setting with the club's other settings instead of a loose `app_meta` key.
+
 ## Parked
 
 Notes on changes in the club app that the maintainer does not want in Kabine yet. Do not port and do not add to the roadmap; the maintainer moves an entry to "Open" when it is wanted.
