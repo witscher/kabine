@@ -1,7 +1,8 @@
-// What is new for an admin since they last looked: release notes of newer Kabine versions
-// (shared/changelog.ts) and modules they were not told about yet. Seen per admin account; a new admin
-// starts with everything seen, so only later updates and modules count as news.
-import { CHANGELOG, entriesSince, KABINE_VERSION } from "../../shared/changelog";
+// What is new for an admin or coach since they last looked: release notes of newer Kabine versions
+// (shared/changelog.ts), for admins also the modules they were not told about yet. Coaches see only the
+// coach notes. Seen per account; an account without a mark starts with everything seen, so a new club or a
+// new coach gets no backlog, only later updates count as news.
+import { type ChangelogEntry, entriesSince, KABINE_VERSION } from "../../shared/changelog";
 import type { ModuleManifest } from "../../shared/module-api";
 import { MODULES, moduleOffered } from "../../shared/modules";
 import type { AdminNews } from "../../shared/types";
@@ -10,20 +11,28 @@ import { first, run } from "../lib/db";
 /** Modules offered to a club of this sport (the others are not shown in the settings either). */
 const offered = (sport: string) => (MODULES as readonly ModuleManifest[]).filter((m) => moduleOffered(m, sport));
 
-export async function adminNews(db: D1Database, accountId: number, sport: string): Promise<AdminNews | null> {
+/** Release notes for this reader: admins everything, coaches only versions with coach notes. */
+export function newsEntries(entries: readonly ChangelogEntry[], admin: boolean): AdminNews["entries"] {
+  return entries
+    .map((e) => ({ version: e.version, date: e.date, items: admin ? e.items() : [], coachItems: e.coaches?.() ?? [] }))
+    .filter((e) => e.items.length || e.coachItems.length);
+}
+
+export async function loadNews(db: D1Database, accountId: number, sport: string, admin: boolean): Promise<AdminNews | null> {
   const row = await first<{ changelog_seen: string | null; modules_seen: string | null }>(
     db,
     "SELECT changelog_seen, modules_seen FROM accounts WHERE id = ?",
     accountId,
   );
   if (!row) return null;
-  if (row.changelog_seen == null || row.modules_seen == null) {
+  // No mark yet (new account, or a coach who became admin): start with everything seen
+  if (row.changelog_seen == null || (admin && row.modules_seen == null)) {
     await markNewsSeen(db, accountId);
     return null;
   }
-  const seenModules = new Set(JSON.parse(row.modules_seen) as string[]);
-  const entries = entriesSince(row.changelog_seen).map((e) => ({ version: e.version, date: e.date, items: e.items() }));
-  const newModules = offered(sport)
+  const seenModules = new Set(JSON.parse(row.modules_seen ?? "[]") as string[]);
+  const entries = newsEntries(entriesSince(row.changelog_seen), admin);
+  const newModules = !admin ? [] : offered(sport)
     .filter((m) => !seenModules.has(m.id))
     .map((m) => ({ id: m.id, label: m.label(), description: m.description(), beta: m.status === "beta" }));
   if (!entries.length && !newModules.length) return null;

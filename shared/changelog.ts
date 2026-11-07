@@ -11,6 +11,17 @@ export interface ChangelogEntry {
   date: string;
   /** A few short lines for admins: what changes for the club. */
   items: () => string[];
+  /**
+   * Lines for coaches (and admins) about coach features, shown to them in the news card after an update
+   * (worker/domain/news.ts). Optional; most releases have none.
+   */
+  coaches?: () => CoachNote[];
+}
+
+/** A release note for coaches; `example` shows a sample under the text (src/news.tsx). */
+export interface CoachNote {
+  text: string;
+  example?: "coach-buttons";
 }
 
 export const CHANGELOG: readonly ChangelogEntry[] = [

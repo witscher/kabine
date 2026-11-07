@@ -76,6 +76,10 @@ If the app was in the background for at least 30 seconds, it loads the new versi
 
 After a deployment the lazily loaded pages of the old version no longer exist. In that case the app reloads once (guarded against loops per version) or shows a page with a "Reload" button. The service worker answers such requests with 404 instead of the app page.
 
+## Release notes in the app
+
+After an update a card on the events list says what is new (`src/news.tsx`, `worker/domain/news.ts`), until it is marked as read; each account keeps the last version it saw (`accounts.changelog_seen`). Admins see the release notes of `shared/changelog.ts` and the modules they were not told about. Coaches learn about coach features the same way, not through a banner written by hand: an entry can carry `coaches` notes, optionally with an example (`example: "coach-buttons"` shows a coach button next to an ordinary one). Coaches see only versions with coach notes; admins see both. An account without a mark starts with everything seen, so a new club or a new coach gets no backlog; `202611071900_core_coach-news.sql` gave the accounts that existed before it the mark 0.6.0, so existing coaches see the coach notes of the next release.
+
 ## Offline
 
 The service worker always tries the network first for API data (at most 6 seconds) and remembers the last answer. Without a network it returns that answer with the marker `x-kabine-offline`, and the app shows "You are offline. You are seeing the last loaded state." Sign-in, invitations, e-mail codes, the export and the connection check `/api/health` are never cached.

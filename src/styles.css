@@ -2855,3 +2855,14 @@ button.announcement-head {
   height: 2px;
   background: var(--yellow);
 }
+
+/* Sample under a coach note in the news card (src/news.tsx) */
+.news-example {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px;
+  border-radius: var(--radius-sm);
+  background: #fff;
+  pointer-events: none;
+}

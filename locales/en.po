@@ -1990,6 +1990,7 @@ msgid "The team \"{name}\" is missing in the import."
 msgstr "The team \"{name}\" is missing in the import."
 
 #: modules/carpools/app/card.tsx
+#: src/news.tsx
 msgid "Add driver"
 msgstr "Add driver"
 
@@ -4461,6 +4462,10 @@ msgstr "{venue, select, hall {Club halls and other locations} pitch {Club pitche
 #: src/pages/team.tsx
 msgid "Template for away games"
 msgstr "Template for away games"
+
+#: src/news.tsx
+msgid "For coaches"
+msgstr "For coaches"
 
 #: src/pages/join.tsx
 msgid "{count, plural, one {{names} is now linked to your access.} other {{names} are now linked to your access.}}"
@@ -11925,6 +11930,7 @@ msgstr "{created, plural, one {# player added} other {# players added}}"
 
 #: modules/carpools/app/card.tsx
 #: modules/carpools/app/card.tsx
+#: src/news.tsx
 msgid "I'm driving"
 msgstr "I'm driving"
 

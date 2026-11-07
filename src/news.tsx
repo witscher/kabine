@@ -1,13 +1,15 @@
-// What is new for admins (worker/domain/news.ts): release notes after an update and modules the club can
-// switch on. A card on the start page until the admin marks it as read; meanwhile a dot on the
-// Events tab (where the card is) and, for new modules, on Administration → Club.
+// What is new for admins and coaches (worker/domain/news.ts): release notes after an update (coaches: the
+// coach notes only) and, for admins, modules the club can switch on. A card on the start page until it is
+// marked as read; meanwhile a dot on the Events tab (where the card is) and, for new modules, on
+// Administration → Club.
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { useState } from "preact/hooks";
 import { api, errorMessage } from "./api";
 import { Icon } from "./icons";
 import { useSession } from "./session";
-import { Button, toast } from "./ui";
+import type { CoachNote } from "../shared/changelog";
+import { Button, CoachMark, toast } from "./ui";
 
 export function NewsCard() {
   const { me, refresh } = useSession();
@@ -24,11 +26,31 @@ export function NewsCard() {
         </h2>
       </div>
       {news.entries.map((e) => (
-        <ul class="news-items">
-          {e.items.map((item) => (
-            <li>{item}</li>
-          ))}
-        </ul>
+        <>
+          {e.items.length ? (
+            <ul class="news-items">
+              {e.items.map((item) => (
+                <li>{item}</li>
+              ))}
+            </ul>
+          ) : null}
+          {e.coachItems.length ? (
+            <div class="stack-sm">
+              <p class="coach-head">
+                <CoachMark />
+                <strong>
+                  <Trans>For coaches</Trans>
+                </strong>
+              </p>
+              {e.coachItems.map((item) => (
+                <div class="stack-sm">
+                  <p>{item.text}</p>
+                  {item.example ? <NewsExample kind={item.example} /> : null}
+                </div>
+              ))}
+            </div>
+          ) : null}
+        </>
       ))}
       {news.newModules.length ? (
         <div class="stack-sm">
@@ -69,5 +91,24 @@ export function NewsCard() {
         </Button>
       </div>
     </section>
+  );
+}
+
+/**
+ * A sample under a coach note, not clickable: here a coach button next to an ordinary one, on a white inset so
+ * the coach button stands out on the card.
+ */
+function NewsExample({ kind }: { kind: NonNullable<CoachNote["example"]> }) {
+  if (kind !== "coach-buttons") return null;
+  return (
+    <div class="news-example" aria-hidden="true">
+      <span class="btn btn-sm">
+        <Trans>I'm driving</Trans>
+      </span>
+      <span class="btn btn-sm btn-coach">
+        <CoachMark />
+        <Trans>Add driver</Trans>
+      </span>
+    </div>
   );
 }

@@ -6,6 +6,7 @@ Changes that are merged but not released yet go under *Unreleased*, one line eac
 
 ## Unreleased
 
+- Coaches now see what is new for them after an update too, in the same card as the admins' release notes; admins see both.
 - Coach buttons: whatever only coaches and other leads can do is marked in views that players and parents see too, in the club's main colour with a whistle (event page, carpools, helper plan, events list).
 - Chat list: the number of unread messages instead of "new", rooms with news on top, and "3 new messages · 20 min. ago". In the chat a divider marks the first unread message, and the chat opens there.
 ## v0.6.0
