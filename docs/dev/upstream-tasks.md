@@ -8,6 +8,8 @@ Format per entry: date, title, what changed and why, where in the code (file and
 
 ## Open
 
+- **2026-11-07 News banner (MOTD): several at once, optionally for coaches only, with an example and a closing paragraph.** The banner on the events list could hold one item for everyone. Now `MOTDS` is a list; each item can have `audience: "coaches"` (whoever may manage teams: coaches and admins, i.e. `me.manageableTeams.length > 0`), an `icon`, an `example` rendered below the text (here a coach button next to a normal button, on a white inset so the yellow coach button stands out on the yellow card) and a `closing` paragraph. `activeMotds(list, today, dismissed, isCoach)` filters by audience, expiry and dismissal; each item is dismissed on its own. The club app used it to explain the yellow coach buttons to coaches (see the coach buttons entry). Club app: `shared/motd.ts` (`MOTDS`, `activeMotds`), `MotdBanner` in `src/howto.tsx`, tests in `test/motd.test.ts` and e2e (coach sees it, player does not). For Kabine: port only the mechanism; the texts stay out of code where they would be club-specific (club data belongs in the database). Worth considering instead or in addition: let the update news (`src/news.tsx`, today admins only) carry entries for coaches, so coaches learn about coach features after an update.
+
 ## Parked
 
 Notes on changes in the club app that the maintainer does not want in Kabine yet. Do not port and do not add to the roadmap; the maintainer moves an entry to "Open" when it is wanted.
