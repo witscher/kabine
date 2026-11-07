@@ -1247,6 +1247,10 @@ msgstr "Your absence"
 msgid "The parent"
 msgstr "The parent"
 
+#: src/pages/chat.tsx
+msgid "{n, plural, one {# new message} other {# new messages}}"
+msgstr "{n, plural, one {# new message} other {# new messages}}"
+
 #: src/calendar.tsx
 msgid "With a personal link your events appear in the calendar app on your phone and stay up to date. Do not share the link: anyone who has it can see your events."
 msgstr "With a personal link your events appear in the calendar app on your phone and stay up to date. Do not share the link: anyone who has it can see your events."
@@ -1660,6 +1664,10 @@ msgstr "Children in this team have no own access. Please use the parent link."
 msgctxt "calendar"
 msgid "absent"
 msgstr "absent"
+
+#: src/format.ts
+msgid "{days, plural, one {# day ago} other {# days ago}}"
+msgstr "{days, plural, one {# day ago} other {# days ago}}"
 
 #: src/pages/setup-wizard.tsx
 msgid "Skip"
@@ -5584,7 +5592,6 @@ msgid "The previous link will then stop working."
 msgstr "The previous link will then stop working."
 
 #: src/format.ts
-#: src/format.ts
 #: src/pages/admin.tsx
 msgid "{days} days ago"
 msgstr "{days} days ago"
@@ -7360,6 +7367,11 @@ msgstr "{open} free"
 msgid "Inactive e.g. in case of injury, illness or a student exchange. The app deliberately stores no reason."
 msgstr "Inactive e.g. in case of injury, illness or a student exchange. The app deliberately stores no reason."
 
+#: src/pages/chat.tsx
+#: src/pages/chat.tsx
+msgid "New messages"
+msgstr "New messages"
+
 #: src/pages/plans.tsx
 msgid "For example a school gym or a sports ground. The location is then available to all coaches."
 msgstr "For example a school gym or a sports ground. The location is then available to all coaches."
@@ -8993,6 +9005,10 @@ msgstr "{n, plural, one {# entry} other {# entries}}"
 msgid "I have children in different teams."
 msgstr "I have children in different teams."
 
+#: src/pages/chat.tsx
+msgid "Over 99 new messages"
+msgstr "Over 99 new messages"
+
 #: worker/routes/join.ts
 msgid "An access has just been created for this person."
 msgstr "An access has just been created for this person."
@@ -9845,10 +9861,6 @@ msgstr "Admin"
 #: src/pages/join.tsx
 msgid "has access already"
 msgstr "has access already"
-
-#: src/pages/chat.tsx
-msgid "new<0> (unread messages)</0>"
-msgstr "new<0> (unread messages)</0>"
 
 #: src/pages/admin.tsx
 #: src/pages/setup-wizard.tsx

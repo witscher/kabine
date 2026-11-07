@@ -1158,6 +1158,13 @@ test("Termin anlegen: Trainer wählt Spiel, Admin findet Sondertermine unter Ver
   await page.getByRole("button", { name: "Spiel anlegen" }).click();
   await expect(page).toHaveURL(/\/termine\/\d+/);
   await expect(page.getByRole("link", { name: "Kader nominieren" })).toBeVisible();
+  // Coach buttons: club colour with a whistle (docs/dev/design.md, Coach buttons); the player sees none
+  await expect(page.getByRole("link", { name: "Kader nominieren" })).toHaveClass(/btn-coach/);
+  await expect(page.getByRole("button", { name: "Treffpunkt & Infos" })).toHaveClass(/btn-coach/);
+  if (process.env.E2E_SHOTS) await page.screenshot({ path: `${process.env.E2E_SHOTS}/coach-buttons.png`, fullPage: true });
+  await player.page.goto(page.url());
+  await expect(player.page.getByRole("heading", { level: 1 })).toBeVisible();
+  await expect(player.page.locator(".btn-coach")).toHaveCount(0);
 
   const a = admin.page;
   await a.goto("/verwaltung");
@@ -1798,4 +1805,31 @@ test("Verwaltung → handball4all: Erinnerung einstellen, Stand aller Mannschaft
   await reminder.getByRole("button", { name: "15 Tage" }).click();
   await expect(reminder.getByRole("button", { name: "15 Tage" })).toHaveAttribute("aria-pressed", "true");
   expect((await page.request.put("/api/teams/1/games/source", { data: { link: null } })).ok()).toBe(true);
+});
+
+test("Chat: Anzahl ungelesener Nachrichten und Trennlinie „Neue Nachrichten“", async () => {
+  // Die Spielerin war schon im Chat und ist jetzt woanders
+  await player.page.goto("/chat/1");
+  await expect(player.page.getByPlaceholder("Nachricht an wT")).toBeVisible();
+  await player.page.goto("/");
+  await coach.page.goto("/chat/1");
+  await coach.page.getByPlaceholder("Nachricht an wT").fill("Neu für die Trennlinie");
+  await coach.page.getByRole("button", { name: "Senden" }).click();
+  await expect(coach.page.getByText("Neu für die Trennlinie")).toHaveCount(1);
+  // Über der eigenen Nachricht steht keine Trennlinie (über älteren fremden kann eine stehen)
+  await expect(coach.page.locator(".unread-divider + *")).not.toContainText("Neu für die Trennlinie");
+
+  // Mit nur einem Chat leitet die Liste direkt weiter; die Zahl kommt vom Server
+  const rooms = await (await player.page.request.get("/api/chat/rooms")).json();
+  expect(rooms.rooms.find((r: { teamId: number }) => r.teamId === 1)).toMatchObject({ unread: true, unreadCount: 1 });
+  await player.page.goto("/chat/1");
+  const divider = player.page.getByRole("separator", { name: "Neue Nachrichten" });
+  await expect(divider).toBeVisible();
+  await expect(player.page.locator(".unread-divider + *")).toContainText("Neu für die Trennlinie");
+  if (process.env.E2E_SHOTS) await player.page.screenshot({ path: `${process.env.E2E_SHOTS}/chat-divider.png` });
+  // Gelesen und erneut geöffnet: keine Trennlinie mehr
+  await player.page.goto("/");
+  await player.page.goto("/chat/1");
+  await expect(player.page.getByText("Neu für die Trennlinie")).toBeVisible();
+  await expect(divider).toHaveCount(0);
 });

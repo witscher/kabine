@@ -34,7 +34,8 @@ export function TopBar(props: { title: string; kicker?: ComponentChildren; back?
 // Buttons -------------------------------------------------------------------------
 
 type ButtonProps = Omit<JSX.HTMLAttributes<HTMLButtonElement>, "onClick" | "icon"> & {
-  variant?: "primary" | "secondary" | "accent" | "danger" | "danger-solid" | "ghost" | "dashed";
+  /** coach: only coaches and other leads can do this, in a view players and parents see too (docs/dev/design.md, Coach buttons). */
+  variant?: "primary" | "secondary" | "accent" | "danger" | "danger-solid" | "ghost" | "dashed" | "coach";
   size?: "sm" | "md" | "lg";
   block?: boolean;
   icon?: IconName;
@@ -54,6 +55,7 @@ export function Button({ variant = "secondary", size = "md", block, icon, childr
     variant === "danger-solid" && "btn-danger-solid",
     variant === "ghost" && "btn-ghost",
     variant === "dashed" && "btn-dashed",
+    variant === "coach" && "btn-coach",
     size === "sm" && "btn-sm",
     size === "lg" && "btn-lg",
     block && "btn-block",
@@ -83,7 +85,7 @@ export function Button({ variant = "secondary", size = "md", block, icon, childr
         }
       }}
     >
-      {icon ? <Icon name={icon} size={18} stroke={2.4} /> : null}
+      {variant === "coach" ? <CoachMark /> : icon ? <Icon name={icon} size={18} stroke={2.4} /> : null}
       {busy ? (
         <span>
           <Trans>Please wait …</Trans>
@@ -93,6 +95,11 @@ export function Button({ variant = "secondary", size = "md", block, icon, childr
       )}
     </button>
   );
+}
+
+/** The whistle in front of coach links (`<a class="btn btn-coach">`) and headings such as "For coaches". */
+export function CoachMark() {
+  return <Icon name="whistle" size={16} stroke={2.4} />;
 }
 
 // Toasts --------------------------------------------------------------------------

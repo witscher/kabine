@@ -15,7 +15,7 @@ import { NewsCard } from "../news";
 import { useMe } from "../session";
 import { useOffline } from "../offline";
 import { useQuery } from "../store";
-import { Button, Empty, ErrorBox, Segmented, StatusPill, useDocumentTitle } from "../ui";
+import { Button, CoachMark, Empty, ErrorBox, Segmented, StatusPill, useDocumentTitle } from "../ui";
 import { isLiveWindow, LiveCard } from "../live";
 import { isRelevantEvent } from "../../shared/relevance";
 
@@ -242,7 +242,8 @@ function CoachNextCard({ event, later = false }: { event: EventSummary; later?: 
             </div>
           </div>
         </div>
-        <a class="btn btn-primary" href={`/termine/${event.id}`}>
+        <a class="btn btn-coach" href={`/termine/${event.id}`}>
+          <CoachMark />
           <Trans>Details and reminders</Trans>
         </a>
       </div>

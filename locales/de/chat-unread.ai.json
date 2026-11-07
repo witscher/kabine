@@ -1,0 +1,6 @@
+{
+  "{n, plural, one {# new message} other {# new messages}}": "{n, plural, one {# neue Nachricht} other {# neue Nachrichten}}",
+  "{days, plural, one {# day ago} other {# days ago}}": "{days, plural, one {vor # Tag} other {vor # Tagen}}",
+  "New messages": "Neue Nachrichten",
+  "Over 99 new messages": "Über 99 neue Nachrichten"
+}

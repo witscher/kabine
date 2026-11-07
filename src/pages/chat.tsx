@@ -1,4 +1,4 @@
-import { t } from "@lingui/core/macro";
+import { plural, t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { useLocation } from "preact-iso";
 import { useEffect, useLayoutEffect, useRef, useState } from "preact/hooks";
@@ -28,6 +28,8 @@ interface Room {
   reason: string | null;
   lastMessageAt: string | null;
   unread: boolean;
+  /** Unread messages (numbered per room, so deleted and system messages count too). */
+  unreadCount?: number;
   /** Only visible as admin, appears only under "All chats". */
   adminOnly: boolean;
 }
@@ -121,13 +123,27 @@ function ReactionChips({ reactions, onOpen }: { reactions: Reaction[]; onOpen: (
   );
 }
 
+const countLabel = (n: number) => (n > 99 ? "99+" : String(Math.max(1, n)));
+
+/** "3 new messages · 20 min. ago" */
+function unreadText(r: Room): string {
+  const n = Math.max(1, r.unreadCount ?? 1);
+  const what = n > 99 ? t`Over 99 new messages` : plural(n, { one: "# new message", other: "# new messages" });
+  return r.lastMessageAt ? `${what} · ${ago(r.lastMessageAt)}` : what;
+}
+
 export function ChatListPage() {
   useDocumentTitle(t`Chat`);
   const { route, query } = useLocation();
   // Admins: all team chats via the administration, otherwise only one's own
   const showAll = "alle" in query;
   const { data, error, loading, reload } = useQuery<{ rooms: Room[] }>("/chat/rooms");
-  const rooms = (data?.rooms ?? []).filter((r) => showAll || !r.adminOnly);
+  // Rooms with unread messages first, the newest on top; otherwise the server's order
+  const rooms = (data?.rooms ?? [])
+    .filter((r) => showAll || !r.adminOnly)
+    .map((r, i) => ({ r, i }))
+    .sort((a, b) => Number(b.r.unread) - Number(a.r.unread) || (a.r.unread ? (b.r.lastMessageAt ?? "").localeCompare(a.r.lastMessageAt ?? "") : 0) || a.i - b.i)
+    .map((x) => x.r);
   useEffect(() => {
     if (!showAll && rooms.length === 1 && rooms[0]!.canRead) route(`/chat/${rooms[0]!.teamId}`, true);
   }, [data]);
@@ -155,7 +171,11 @@ export function ChatListPage() {
                     {r.teamName}
                   </span>
                   <span class="main">
-                    <span class="title">{r.isGroup ? t`Group chat ${teamName}` : t`Team chat ${teamName}`}</span>
+                    <span class="title" style={r.unread ? { fontWeight: 800 } : undefined}>
+                      {r.isGroup ? t`Group chat ${teamName}` : t`Team chat ${teamName}`}
+                    </span>
+                    {r.unread ? <span class="sub unread-sub">{unreadText(r)}</span> : null}
+                    {r.unread && !r.reason && !(r.viaChildren.length && !r.isMember) ? null : (
                     <span class="sub">
                       {r.reason ??
                         (r.viaChildren.length && !r.isMember
@@ -168,12 +188,11 @@ export function ChatListPage() {
                               ? t`Last message ${when}`
                               : t`No messages yet`)}
                     </span>
+                    )}
                   </span>
                   {r.unread ? (
-                    <span class="pill pill-nominated">
-                      <Trans>
-                        new<span class="sr-only"> (unread messages)</span>
-                      </Trans>
+                    <span class="unread-count" aria-hidden="true">
+                      {countLabel(r.unreadCount ?? 1)}
                     </span>
                   ) : null}
                   <Icon name="chevron" size={18} />
@@ -260,6 +279,14 @@ export function ChatRoomPage({ teamId }: { teamId: string }) {
   const retry = useRef(0);
   const alive = useRef(true);
   const lastRead = useRef(0);
+  // "New messages" divider: how far this person had read when opening the chat; stays put on reconnects
+  const [unreadFrom, setUnreadFrom] = useState<number | null | undefined>(undefined);
+  const dividerRef = useRef<HTMLDivElement>(null);
+  const scrollToDivider = useRef(false);
+  useEffect(() => {
+    setUnreadFrom(undefined);
+    scrollToDivider.current = false;
+  }, [teamId]);
 
   const send = (data: unknown) => {
     if (ws.current?.readyState === WebSocket.OPEN) ws.current.send(JSON.stringify(data));
@@ -302,6 +329,13 @@ export function ChatRoomPage({ teamId }: { teamId: string }) {
             setReady(true);
             stickToBottom.current = true;
             lastRead.current = 0;
+            setUnreadFrom((prev) => {
+              if (prev !== undefined) return prev;
+              const from: number | null = msg.lastReadId ?? null;
+              // Unread messages from others: open the chat there instead of at the end
+              if (from != null && msg.messages.some((m: Message) => m.id > from && m.authorId !== me.person.id)) scrollToDivider.current = true;
+              return from;
+            });
             setTimeout(() => markRead(msg.messages), 0);
             break;
           case "message":
@@ -408,8 +442,14 @@ export function ChatRoomPage({ teamId }: { teamId: string }) {
 
   useLayoutEffect(() => {
     const el = logRef.current;
+    if (scrollToDivider.current && dividerRef.current) {
+      scrollToDivider.current = false;
+      dividerRef.current.scrollIntoView({ block: "start" });
+      if (el) stickToBottom.current = el.scrollHeight - el.scrollTop - el.clientHeight < 80;
+      return;
+    }
     if (el && stickToBottom.current) el.scrollTop = el.scrollHeight;
-  }, [messages]);
+  }, [messages, unreadFrom]);
 
   if (rooms.loading) return <Spinner />;
   if (!room) {
@@ -539,6 +579,8 @@ export function ChatRoomPage({ teamId }: { teamId: string }) {
   const selAuthor = selected?.authorName ?? "";
   const excerpt = (selected?.text ?? "").slice(0, 120);
   let lastDay = "";
+  // First unread message from others as of opening the chat; none for someone who never opened it
+  const firstUnreadId = unreadFrom == null ? null : (messages.find((m) => m.id > unreadFrom && !m.pending && m.authorId !== me.person.id)?.id ?? null);
   return (
     <main class="chat-page" ref={pageRef}>
       {header}
@@ -565,8 +607,19 @@ export function ChatRoomPage({ teamId }: { teamId: string }) {
         ) : null}
         {messages.map((m) => {
           const day = isoToLocalDate(m.createdAt);
-          const sep = day !== lastDay ? <div class="day-sep">{dayLabel(m.createdAt)}</div> : null;
+          const daySep = day !== lastDay ? <div class="day-sep">{dayLabel(m.createdAt)}</div> : null;
           lastDay = day;
+          const sep =
+            m.id === firstUnreadId ? (
+              <>
+                {daySep}
+                <div class="unread-divider" ref={dividerRef} role="separator" aria-label={t`New messages`}>
+                  <Trans>New messages</Trans>
+                </div>
+              </>
+            ) : (
+              daySep
+            );
           if (m.kind === "system") {
             return (
               <>

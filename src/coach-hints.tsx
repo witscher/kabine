@@ -11,7 +11,7 @@ import { Icon } from "./icons";
 import { syncGames } from "./pages/games";
 import { useSession } from "./session";
 import { invalidate, useQuery } from "./store";
-import { Button, toast } from "./ui";
+import { Button, CoachMark, toast } from "./ui";
 
 export function CoachHints() {
   const { me } = useSession();
@@ -40,6 +40,7 @@ function ScheduleHint({ hint }: { hint: Extract<CoachHint, { kind: "schedule" }>
       </span>
       <Button
         size="sm"
+        variant="coach"
         disabled={busy}
         onClick={async () => {
           setBusy(true);
@@ -76,7 +77,8 @@ function MeetingHint({ hint }: { hint: Extract<CoachHint, { kind: "meeting" }> }
           {opponent ? t`Game against ${opponent} on ${date}, ${at}` : t`Game on ${date}, ${at}`}
         </span>
       </span>
-      <a class="btn btn-sm" href={`/termine/${hint.eventId}?treffpunkt=1`}>
+      <a class="btn btn-sm btn-coach" href={`/termine/${hint.eventId}?treffpunkt=1`}>
+        <CoachMark />
         <Trans>Enter</Trans>
       </a>
     </div>

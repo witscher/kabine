@@ -5,7 +5,7 @@ import { enterClubContext } from "../domain/club";
 import { ensureInstanceSecrets } from "../lib/instance-secrets";
 import { enqueuePush, notifyPersons } from "../domain/notify";
 import { currentLocale, withLocale } from "../i18n";
-import { all, run } from "../lib/db";
+import { all, first, run } from "../lib/db";
 import { CHILD_CHAT_OFF_SQL } from "../domain/child-limits";
 
 // One chat room per team. The worker checks permissions and passes the
@@ -354,8 +354,14 @@ export class ChatRoom extends DurableObject<Env> {
       attachment.label,
     );
     const messages = this.page(null, attachment);
+    // How far this account has read: the app shows the "New messages" divider above the next message
+    const teamId = this.teamId();
+    const read = teamId
+      ? await first<{ last_read_id: number }>(this.env.DB, "SELECT last_read_id FROM chat_reads WHERE account_id = ? AND team_id = ?", attachment.accountId, teamId).catch(() => null)
+      : null;
     this.send(server, {
       type: "hello",
+      lastReadId: read?.last_read_id ?? null,
       me: { personId: attachment.personId, canWrite: attachment.baseCanWrite && !attachment.muted, isMod: attachment.isMod, muted: attachment.muted },
       messages,
       hasMore: messages.length === PAGE,

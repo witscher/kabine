@@ -405,7 +405,7 @@ export function HelpersPage() {
               })}
               {g.canManage ? (
                 <div class="duty-manage">
-                  <Button size="sm" variant="ghost" icon="settings" onClick={() => setManage(g.id)}>
+                  <Button size="sm" variant="coach" onClick={() => setManage(g.id)}>
                     <Trans>Manage</Trans>
                   </Button>
                 </div>

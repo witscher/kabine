@@ -122,6 +122,8 @@ chatRoutes.get("/chat/rooms", async (c) => {
         lastMessageAt: s?.last_message_at ?? null,
         // Other people's chats do not count as unread for admins (dot in the navigation)
         unread: r.canRead && !r.adminOnly && !!s && s.last_message_id > (s.last_read_id ?? 0),
+        // Messages are numbered per room, so no extra query; deleted and system messages count too
+        unreadCount: r.canRead && !r.adminOnly && s ? Math.max(0, s.last_message_id - (s.last_read_id ?? 0)) : 0,
       };
     }),
   });

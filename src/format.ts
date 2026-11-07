@@ -1,6 +1,6 @@
 // Date and time formats in the app's language. Events come as local club time 'YYYY-MM-DDTHH:MM',
 // technical timestamps as UTC ISO.
-import { t } from "@lingui/core/macro";
+import { plural, t } from "@lingui/core/macro";
 import {
   clockTimeIn,
   dateParts,
@@ -180,7 +180,7 @@ export function ago(iso: string | null): string {
   const hours = Math.round(mins / 60);
   if (hours < 24) return t`${hours} hrs ago`;
   const days = Math.round(hours / 24);
-  return t`${days} days ago`;
+  return plural(days, { one: "# day ago", other: "# days ago" });
 }
 
 export function personName(p: { firstName: string; lastName: string | null }): string {

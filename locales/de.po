@@ -1311,6 +1311,11 @@ msgstr "Deine Abmeldung"
 msgid "The parent"
 msgstr "Das Elternteil"
 
+# ai
+#: src/pages/chat.tsx
+msgid "{n, plural, one {# new message} other {# new messages}}"
+msgstr "{n, plural, one {# neue Nachricht} other {# neue Nachrichten}}"
+
 #: src/calendar.tsx
 msgid "With a personal link your events appear in the calendar app on your phone and stay up to date. Do not share the link: anyone who has it can see your events."
 msgstr "Mit einem persönlichen Link erscheinen deine Termine in der Kalender-App deines Handys und bleiben aktuell. Den Link nicht weitergeben: Wer ihn hat, sieht deine Termine."
@@ -1745,6 +1750,11 @@ msgstr "In dieser Mannschaft haben Kinder keinen eigenen Zugang. Bitte den Elter
 msgctxt "calendar"
 msgid "absent"
 msgstr "abwesend"
+
+# ai
+#: src/format.ts
+msgid "{days, plural, one {# day ago} other {# days ago}}"
+msgstr "{days, plural, one {vor # Tag} other {vor # Tagen}}"
 
 # ai
 #: src/pages/setup-wizard.tsx
@@ -4212,9 +4222,10 @@ msgstr "Mitfahrt eingetragen"
 msgid "Invalid time."
 msgstr "Ungültige Uhrzeit."
 
+# ai
 #: shared/changelog.ts
 msgid "Administration → Club saves each box on its own, without one button for the whole page."
-msgstr ""
+msgstr "Verwaltung → Verein speichert jeden Kasten für sich, ohne einen Knopf für die ganze Seite."
 
 #: modules/youth-referees/worker/admin-routes.ts
 msgid "This link is invalid."
@@ -5916,7 +5927,6 @@ msgid "The previous link will then stop working."
 msgstr "Der bisherige Link funktioniert dann nicht mehr."
 
 #: src/format.ts
-#: src/format.ts
 #: src/pages/admin.tsx
 msgid "{days} days ago"
 msgstr "vor {days} Tagen"
@@ -6442,9 +6452,10 @@ msgstr "Später weitermachen"
 msgid "Assign"
 msgstr "Eintragen"
 
+# ai
 #: shared/changelog.ts
 msgid "Saving works the same everywhere: switches and choices save at once and show \"Saved\" right there; text fields have a save button in their own box that appears once you change something."
-msgstr ""
+msgstr "Speichern funktioniert jetzt überall gleich: Schalter und Auswahlen speichern sofort und zeigen direkt daneben „Gespeichert“; Textfelder haben einen Speichern-Knopf in ihrem eigenen Kasten, der erscheint, sobald du etwas änderst."
 
 #: modules/duties/worker/routes.ts
 #: modules/duties/worker/routes.ts
@@ -7786,6 +7797,12 @@ msgstr "{open} frei"
 #: src/pages/team.tsx
 msgid "Inactive e.g. in case of injury, illness or a student exchange. The app deliberately stores no reason."
 msgstr "Inaktiv z. B. bei Verletzung, Krankheit oder Schüleraustausch. Einen Grund speichert die App bewusst nicht."
+
+# ai
+#: src/pages/chat.tsx
+#: src/pages/chat.tsx
+msgid "New messages"
+msgstr "Neue Nachrichten"
 
 #: src/pages/plans.tsx
 msgid "For example a school gym or a sports ground. The location is then available to all coaches."
@@ -9518,6 +9535,11 @@ msgstr "{n, plural, one {# Eintrag} other {# Einträge}}"
 msgid "I have children in different teams."
 msgstr "Ich habe Kinder in verschiedenen Mannschaften."
 
+# ai
+#: src/pages/chat.tsx
+msgid "Over 99 new messages"
+msgstr "Über 99 neue Nachrichten"
+
 #: worker/routes/join.ts
 msgid "An access has just been created for this person."
 msgstr "Für diese Person wurde gerade schon ein Zugang angelegt."
@@ -10417,10 +10439,6 @@ msgstr "Admin"
 msgid "has access already"
 msgstr "hat schon einen Zugang"
 
-#: src/pages/chat.tsx
-msgid "new<0> (unread messages)</0>"
-msgstr "neu<0> (ungelesene Nachrichten)</0>"
-
 #: src/pages/admin.tsx
 #: src/pages/setup-wizard.tsx
 #: src/pages/team.tsx
@@ -10661,9 +10679,10 @@ msgstr "Ich"
 msgid "Who is driving?"
 msgstr "Wer fährt?"
 
+# ai
 #: shared/changelog.ts
 msgid "New page under Administration for the game schedule sync: all teams at a glance, and when coaches are reminded to sync (15, 30 or 60 days, or never)."
-msgstr ""
+msgstr "Neue Seite in der Verwaltung für den Spielplanabgleich: alle Mannschaften auf einen Blick, und wann Trainer an den Abgleich erinnert werden (nach 15, 30 oder 60 Tagen oder nie)."
 
 # ai
 #: src/pages/games.tsx

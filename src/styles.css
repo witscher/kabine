@@ -2802,3 +2802,56 @@ button.announcement-head {
 .segmented-wrap > .saved-note {
   align-self: flex-end;
 }
+
+/* Coach button: only coaches and other leads can do this, in a view players and parents see too
+   (docs/dev/design.md, Coach buttons). In the club's main colour, light tint with a whistle. */
+.btn-coach {
+  background: color-mix(in srgb, var(--black) 10%, #fff);
+  border-color: var(--black);
+  color: var(--black);
+  gap: 6px;
+}
+.coach-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Chat: unread messages in the list and the divider in the conversation */
+.unread-count {
+  min-width: 26px;
+  height: 26px;
+  padding: 0 7px;
+  border-radius: 13px;
+  background: var(--black);
+  color: var(--yellow);
+  font-weight: 800;
+  font-size: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.list-row .sub.unread-sub {
+  color: var(--text);
+  font-weight: 700;
+}
+.unread-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 6px 0;
+  color: var(--text);
+  font-weight: 700;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  scroll-margin-top: 12px;
+}
+.unread-divider::before,
+.unread-divider::after {
+  content: "";
+  flex: 1;
+  height: 2px;
+  background: var(--yellow);
+}

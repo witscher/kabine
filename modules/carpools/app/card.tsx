@@ -9,7 +9,7 @@ import { api } from "../../../src/api";
 import { Icon } from "../../../src/icons";
 import { useMe } from "../../../src/session";
 import { invalidate } from "../../../src/store";
-import { Button, confirmDialog, Sheet, toast } from "../../../src/ui";
+import { Button, CoachMark, confirmDialog, Sheet, toast } from "../../../src/ui";
 
 const MAX_SEATS = 8;
 
@@ -166,7 +166,7 @@ export function CarpoolCard({ event, carpool, onChanged }: { event: EventDetail;
                   </div>
                 </div>
                 {o.canEdit ? (
-                  <Button size="sm" onClick={() => setOfferFor({ personId: o.personId, offer: o })}>
+                  <Button size="sm" variant="coach" onClick={() => setOfferFor({ personId: o.personId, offer: o })}>
                     <Trans>Change</Trans>
                   </Button>
                 ) : null}
@@ -189,7 +189,7 @@ export function CarpoolCard({ event, carpool, onChanged }: { event: EventDetail;
                   <strong>{r.name}</strong> <span class="small muted">{seatsText(r.seats)}</span>
                 </span>
                 {r.canEdit ? (
-                  <Button size="sm" onClick={() => setRideFor({ player: { id: r.playerId, name: r.name }, self: false, request: r, asCoach: true })}>
+                  <Button size="sm" variant="coach" onClick={() => setRideFor({ player: { id: r.playerId, name: r.name }, self: false, request: r, asCoach: true })}>
                     <Trans>Assign</Trans>
                   </Button>
                 ) : null}
@@ -200,14 +200,16 @@ export function CarpoolCard({ event, carpool, onChanged }: { event: EventDetail;
 
       {carpool.coach ? (
         <div class="stack-sm">
-          <div class="small muted" style={{ fontWeight: 700 }}>
+          <div class="small muted coach-head" style={{ fontWeight: 700 }}>
+            <CoachMark />
             <Trans>FOR COACHES</Trans>
           </div>
-          <div class="grid-2">
-            <Button size="sm" onClick={() => setOfferFor({ personId: null, offer: null })}>
+          {/* Stacked: with the whistle both no longer fit side by side on a phone */}
+          <div class="stack-sm">
+            <Button size="sm" variant="coach" onClick={() => setOfferFor({ personId: null, offer: null })}>
               <Trans>Add driver</Trans>
             </Button>
-            <Button size="sm" onClick={() => setRideFor({ player: null, self: false, request: null, asCoach: true })}>
+            <Button size="sm" variant="coach" onClick={() => setRideFor({ player: null, self: false, request: null, asCoach: true })}>
               <Trans>Add passenger</Trans>
             </Button>
           </div>

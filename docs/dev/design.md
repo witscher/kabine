@@ -61,6 +61,13 @@ One rule for every screen, so nobody has to guess whether something is saved:
 - **Creating or editing something in a sheet or form** (new event, edit event, new team, new training plan, duty type, the setup wizard) saves everything, switches included, with the main button at the end. There `onChange` only sets state, so no "Saved" appears.
 - **Never** both in one card. Filters and tabs are not saving controls.
 
+## Coach buttons
+
+Whatever only coaches and other leads (organisers, admins) can do is a coach button, in views that players and parents see too, so a coach sees at a glance what is theirs: a light tint of the club's main colour, a border in that colour and a whistle before the text (`variant="coach"` on `Button`, `<a class="btn btn-coach">` with `CoachMark`, `.btn-coach` in `src/styles.css`). Headings such as "For coaches" get the whistle too (`.coach-head`). The colour follows the club profile, so a club with a yellow main colour gets yellow coach buttons.
+
+- **Where:** the event page (nominate squad, meeting point & info, remind, edit, move, undo cancellation, change/activate on participants, helper time block, add organiser), carpools (change for other drivers, assign people still looking, add driver/passenger, stacked because both no longer fit side by side on a phone), the helper plan ("Manage"), the events list (coach card, coach hints).
+- **Not:** own actions (respond, "I'm driving"), pure coach and admin areas (team, administration) and sheets a coach button opens: there the mark would only be noise. Destructive actions (cancel, delete) stay red.
+
 ## App updates
 
 Every build gets an identifier that is served as `/version.json`. The app asks for it when it returns from the background and every 10 minutes while it is visible.
@@ -149,6 +156,8 @@ By default the chat list of an admin shows only chats in which the admin is a me
 
 Names in the chat are "Kim M.", with "Coach", "Staff", "Stand-in" or "Parent of …". The gender of a person is not stored. People who left appear as "Former player" to everyone except coaches.
 
+
+**Unread messages.** The chat list shows the number of unread messages (dark circle in the club colours, "99+" above 99) and below the title in bold "3 new messages · 20 min. ago"; parents keep "as parent of …" as a second line. Rooms with unread messages come first, the newest on top. The count needs no query of its own: messages are numbered per room, so it is the last message id minus the last read one (`unreadCount` in `GET /api/chat/rooms`); deleted and system messages count too. In the chat a divider "New messages" sits above the first unread message from others as of opening the chat (the room sends `lastReadId` with its greeting), and the chat opens there instead of at the end. Someone who never opened the chat gets no divider. Reason: the yellow "new" pill got lost between the yellow team badges and read like "new chat".
 ## Season and defaults
 
 Age groups come from the sport profile (`sports/<id>.ts`) with ages relative to the start year of the season. They have no gender; a team has an age group, a gender (female, male, mixed) and a level. The playing time and whether home games need a youth referee are properties of the age group. Admins can change the age groups of a season.

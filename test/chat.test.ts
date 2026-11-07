@@ -287,6 +287,36 @@ describe("Reaktionen", () => {
   });
 });
 
+describe("Ungelesene Nachrichten", () => {
+  it("Anzahl in der Chatliste und Lesestand beim Öffnen für die Trennlinie", async () => {
+    const coachCookie = await loginAs(coach);
+    const almaCookie = await loginAs(alma);
+    const c = (await connect(wd, coachCookie)) as any;
+    await c.next("hello");
+    const ids: number[] = [];
+    for (const text of ["Eins", "Zwei", "Drei"]) {
+      c.ws.send(JSON.stringify({ type: "send", text }));
+      ids.push((await c.next("message")).message.id);
+    }
+    const room = async () => (await api("/chat/rooms", { cookie: almaCookie })).body.rooms.find((r: any) => r.teamId === wd);
+    expect(await room()).toMatchObject({ unread: true, unreadCount: 3 });
+
+    // Noch nie geöffnet: kein Lesestand; nach dem Lesen der ersten Nachricht zwei offen
+    const a = (await connect(wd, almaCookie)) as any;
+    expect((await a.next("hello")).lastReadId).toBeNull();
+    a.ws.send(JSON.stringify({ type: "read", id: ids[0] }));
+    await new Promise((r) => setTimeout(r, 50));
+    a.ws.close();
+    expect(await room()).toMatchObject({ unread: true, unreadCount: 2 });
+    const again = (await connect(wd, almaCookie)) as any;
+    expect((await again.next("hello")).lastReadId).toBe(ids[0]);
+    again.ws.send(JSON.stringify({ type: "read", id: ids[2] }));
+    await new Promise((r) => setTimeout(r, 50));
+    expect(await room()).toMatchObject({ unread: false, unreadCount: 0 });
+    for (const s of [c, again]) s.ws.close();
+  });
+});
+
 describe("Chatliste für Admins", () => {
   it("fremde Chats sind nur als adminOnly markiert und zählen nicht als ungelesen", async () => {
     const admin = await person("Ada", { admin: true });

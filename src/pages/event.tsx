@@ -13,7 +13,7 @@ import { AttendanceBadge, byGuardianText, DeclineSheet, deadlineText, PersonResp
 import { useActiveModules } from "../modules";
 import { useMe, useSession } from "../session";
 import { invalidate, useQuery, useSearch } from "../store";
-import { Button, confirmDialog, copyText, ErrorBox, Field, Notice, Segmented, Sheet, Spinner, StatusPill, SwitchRow, TextField, toast, useDocumentTitle } from "../ui";
+import { Button, CoachMark, confirmDialog, copyText, ErrorBox, Field, Notice, Segmented, Sheet, Spinner, StatusPill, SwitchRow, TextField, toast, useDocumentTitle } from "../ui";
 import { useVenue } from "../club";
 
 const kindLabel = (kind: EventDetail["kind"]) => ({ training: t`Training`, game: t`Game`, special: t`Event` })[kind];
@@ -385,24 +385,25 @@ function CoachView({ event, onChanged, onAbsence }: { event: EventDetail; onChan
         <div class="grid-2" style={{ gridTemplateColumns: event.kind === "game" ? "repeat(2, minmax(0, 1fr))" : "repeat(3, minmax(0, 1fr))" }}>
           {event.kind === "game" ? (
             <>
-              <a class="btn btn-primary" href={`/spiele/${event.id}/kader`}>
+              <a class="btn btn-coach" href={`/spiele/${event.id}/kader`}>
+                <CoachMark />
                 <Trans>Nominate squad</Trans>
               </a>
-              <Button onClick={() => setInfoOpen(true)}>
+              <Button variant="coach" onClick={() => setInfoOpen(true)}>
                 <Trans>Meeting point & info</Trans>
               </Button>
             </>
           ) : (
             <>
-              <Button variant="primary" icon="bell" disabled={!open.length} onClick={() => remind()}>
+              <Button variant="coach" disabled={!open.length} onClick={() => remind()}>
                 <Trans>Remind</Trans>
               </Button>
               {event.kind === "special" ? (
-                <Button onClick={() => setEditOpen(true)}>
+                <Button variant="coach" onClick={() => setEditOpen(true)}>
                   <Trans>Edit</Trans>
                 </Button>
               ) : (
-                <Button onClick={() => setMoveOpen(true)}>
+                <Button variant="coach" onClick={() => setMoveOpen(true)}>
                   <Trans>Move</Trans>
                 </Button>
               )}
@@ -415,6 +416,7 @@ function CoachView({ event, onChanged, onAbsence }: { event: EventDetail; onChan
       ) : null}
       {editable && event.cancelled && event.kind !== "game" ? (
         <Button
+          variant="coach"
           onClick={async () => {
             await api.post(`/events/${event.id}/uncancel`);
             toast(t`The event is back on.`);
@@ -425,7 +427,7 @@ function CoachView({ event, onChanged, onAbsence }: { event: EventDetail; onChan
         </Button>
       ) : null}
       {event.kind === "game" && editable && !event.cancelled ? (
-        <Button variant="ghost" size="sm" icon="bell" disabled={!open.length} onClick={() => remind()}>
+        <Button variant="coach" size="sm" disabled={!open.length} onClick={() => remind()}>
           <Trans>Remind missing responses</Trans>
         </Button>
       ) : null}
@@ -507,6 +509,7 @@ function CoachView({ event, onChanged, onAbsence }: { event: EventDetail; onChan
                   {p.status === "inactive" ? (
                     <Button
                       size="sm"
+                      variant="coach"
                       onClick={async () => {
                         await api.post(`/persons/${p.person.id}/active`, { active: true });
                         const name = p.person.firstName;
@@ -517,7 +520,7 @@ function CoachView({ event, onChanged, onAbsence }: { event: EventDetail; onChan
                       <Trans>Activate</Trans>
                     </Button>
                   ) : (
-                    <Button size="sm" onClick={() => setPerson(p)}>
+                    <Button size="sm" variant="coach" onClick={() => setPerson(p)}>
                       <Trans>Change</Trans>
                     </Button>
                   )}
@@ -537,7 +540,7 @@ function CoachView({ event, onChanged, onAbsence }: { event: EventDetail; onChan
                     {nameFor(p)}
                   </button>
                   {editable && !event.cancelled ? (
-                    <Button variant="accent" size="sm" onClick={() => remind([p.person.id])}>
+                    <Button variant="coach" size="sm" onClick={() => remind([p.person.id])}>
                       <Trans>Remind</Trans>
                     </Button>
                   ) : null}
@@ -1297,7 +1300,7 @@ function SpecialHelpers({ event, onChanged }: { event: EventDetail; onChanged: (
               <Trans>Manage helper duties in the Helpers tab</Trans>
             </a>
           ) : null}
-          <Button size="sm" variant="dashed" icon="plus" onClick={() => setAdding(true)}>
+          <Button size="sm" variant="coach" onClick={() => setAdding(true)}>
             <Trans>Helpers: add time block</Trans>
           </Button>
         </>
@@ -1347,7 +1350,7 @@ function SpecialHelpers({ event, onChanged }: { event: EventDetail; onChanged: (
             <Trans>Organisers manage the helper duties of this event.</Trans>
           </p>
           {org.editable ? (
-            <Button size="sm" variant="dashed" icon="plus" onClick={() => setAddOrganizer(true)}>
+            <Button size="sm" variant="coach" onClick={() => setAddOrganizer(true)}>
               <Trans>Add organiser</Trans>
             </Button>
           ) : null}
