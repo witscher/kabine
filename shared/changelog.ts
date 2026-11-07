@@ -26,6 +26,21 @@ export interface CoachNote {
 
 export const CHANGELOG: readonly ChangelogEntry[] = [
   {
+    version: "0.7.0",
+    date: "2026-11-07",
+    items: () => [
+      t`Coach buttons: what only coaches and other leads can do is marked in the club's main colour with a whistle, in views players and parents see too.`,
+      t`Chat: the chat list shows how many messages are unread and puts chats with news on top; a chat opens at the first unread message.`,
+      t`Coaches now also see what is new for them after an update, in this card.`,
+    ],
+    coaches: () => [
+      {
+        text: t`What only you as a coach can do is now marked in the club's colour with a whistle, for example on the event page, in carpools and in the helper plan. Players and parents don't see these buttons.`,
+        example: "coach-buttons",
+      },
+    ],
+  },
+  {
     version: "0.6.0",
     date: "2026-11-05",
     items: () => [

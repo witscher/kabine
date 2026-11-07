@@ -1833,3 +1833,30 @@ test("Chat: Anzahl ungelesener Nachrichten und Trennlinie „Neue Nachrichten“
   await expect(player.page.getByText("Neu für die Trennlinie")).toBeVisible();
   await expect(divider).toHaveCount(0);
 });
+
+test("Neuigkeiten für Trainer: Hinweis mit Beispielknopf, Spielerin sieht nichts", async ({ browser }) => {
+  // Nach einem Update hätte der Server die Trainer-Hinweise der neuen Version geliefert (worker/domain/news.ts);
+  // hier wird nur die Darstellung geprüft. Ohne Service Worker, damit page.route die Sitzung sieht.
+  const context = await browser.newContext({ storageState: await coach.context.storageState(), serviceWorkers: "block" });
+  const page = await context.newPage();
+  await page.route("**/api/session", async (route) => {
+    const res = await route.fetch();
+    const body = await res.json();
+    body.me.news = {
+      version: "0.7.0",
+      entries: [{ version: "0.7.0", date: "2026-11-07", items: [], coachItems: [{ text: "Was nur du als Trainer tun kannst, ist jetzt markiert.", example: "coach-buttons" }] }],
+      newModules: [],
+    };
+    await route.fulfill({ response: res, json: body });
+  });
+  await page.goto("/");
+  const card = page.getByRole("region", { name: "Neuigkeiten" });
+  await expect(card.getByText("Für Trainer")).toBeVisible();
+  await expect(card.getByText("Was nur du als Trainer tun kannst, ist jetzt markiert.")).toBeVisible();
+  await expect(card.locator(".news-example .btn-coach")).toBeVisible();
+  if (process.env.E2E_SHOTS) await card.screenshot({ path: `${process.env.E2E_SHOTS}/coach-news.png` });
+  await context.close();
+  await player.page.goto("/");
+  await expect(player.page.getByRole("heading", { name: /Hallo/ })).toBeVisible();
+  await expect(player.page.getByRole("region", { name: "Neuigkeiten" })).toHaveCount(0);
+});

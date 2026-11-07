@@ -6,9 +6,12 @@ Changes that are merged but not released yet go under *Unreleased*, one line eac
 
 ## Unreleased
 
+## v0.7.0
+
 - Coaches now see what is new for them after an update too, in the same card as the admins' release notes; admins see both.
 - Coach buttons: whatever only coaches and other leads can do is marked in views that players and parents see too, in the club's main colour with a whistle (event page, carpools, helper plan, events list).
 - Chat list: the number of unread messages instead of "new", rooms with news on top, and "3 new messages · 20 min. ago". In the chat a divider marks the first unread message, and the chat opens there.
+
 ## v0.6.0
 
 - Saving works the same everywhere: switches and choices save at once and show "Saved" right at the switch; text fields have a button in their own card that appears once something changed. Administration → Club no longer has one button for the whole page: every card saves on its own. When editing a training plan, name, period and deadline have their own "Save plan" button, as training times already saved at once.

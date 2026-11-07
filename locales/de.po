@@ -520,6 +520,11 @@ msgstr "Nehmen teil"
 msgid "Turned down."
 msgstr "Abgelehnt."
 
+# ai
+#: shared/changelog.ts
+msgid "Coaches now also see what is new for them after an update, in this card."
+msgstr "Auch Trainer sehen jetzt nach einem Update, was für sie neu ist, in dieser Karte."
+
 #: src/pages/season.tsx
 msgid "Adults"
 msgstr "Aktive"
@@ -2545,6 +2550,11 @@ msgstr "Dienstart hinzufügen"
 #: src/pages/season.tsx
 msgid "Outgrown the A youth. Assign to the adults or mark as former."
 msgstr "Aus der A-Jugend herausgewachsen. Den Aktiven zuordnen oder als ehemalig markieren."
+
+# ai
+#: shared/changelog.ts
+msgid "Chat: the chat list shows how many messages are unread and puts chats with news on top; a chat opens at the first unread message."
+msgstr "Chat: Die Chatliste zeigt, wie viele Nachrichten ungelesen sind, und stellt Chats mit Neuigkeiten nach oben; ein Chat öffnet bei der ersten ungelesenen Nachricht."
 
 #: src/respond.tsx
 msgid "In this time"
@@ -4733,9 +4743,10 @@ msgstr "{venue, select, hall {Vereinshallen und weitere Orte} pitch {Vereinsplä
 msgid "Template for away games"
 msgstr "Vorlage für Auswärtsspiele"
 
+# ai
 #: src/news.tsx
 msgid "For coaches"
-msgstr ""
+msgstr "Für Trainer"
 
 #: src/pages/join.tsx
 msgid "{count, plural, one {{names} is now linked to your access.} other {{names} are now linked to your access.}}"
@@ -5034,6 +5045,11 @@ msgstr "Alle Mannschaften"
 #: src/respond.tsx
 msgid "I'll help out"
 msgstr "Ich helfe aus"
+
+# ai
+#: shared/changelog.ts
+msgid "What only you as a coach can do is now marked in the club's colour with a whistle, for example on the event page, in carpools and in the helper plan. Players and parents don't see these buttons."
+msgstr "Was nur du als Trainer tun kannst, ist jetzt in der Vereinsfarbe mit einer Pfeife markiert, zum Beispiel beim Termin, bei Fahrgemeinschaften und im Helferplan. Spieler und Eltern sehen diese Knöpfe nicht."
 
 #: worker/routes/season.ts
 #: worker/routes/season.ts
@@ -11585,6 +11601,11 @@ msgstr "Gespeichert. Sobald jemand Plätze anbietet, gibt es eine Benachrichtigu
 #: src/faq.tsx
 msgid "Coaches"
 msgstr "Trainerinnen und Trainer"
+
+# ai
+#: shared/changelog.ts
+msgid "Coach buttons: what only coaches and other leads can do is marked in the club's main colour with a whistle, in views players and parents see too."
+msgstr "Trainerknöpfe: Was nur Trainer und andere Verantwortliche tun können, ist in der Hauptfarbe des Vereins mit einer Pfeife markiert, auch in Ansichten, die Spieler und Eltern sehen."
 
 #: src/pages/admin.tsx
 msgid "E-mail (admins only)"

@@ -494,6 +494,10 @@ msgstr "Taking part"
 msgid "Turned down."
 msgstr "Turned down."
 
+#: shared/changelog.ts
+msgid "Coaches now also see what is new for them after an update, in this card."
+msgstr "Coaches now also see what is new for them after an update, in this card."
+
 #: src/pages/season.tsx
 msgid "Adults"
 msgstr "Adults"
@@ -2413,6 +2417,10 @@ msgstr "Add duty type"
 #: src/pages/season.tsx
 msgid "Outgrown the A youth. Assign to the adults or mark as former."
 msgstr "Outgrown the A youth. Assign to the adults or mark as former."
+
+#: shared/changelog.ts
+msgid "Chat: the chat list shows how many messages are unread and puts chats with news on top; a chat opens at the first unread message."
+msgstr "Chat: the chat list shows how many messages are unread and puts chats with news on top; a chat opens at the first unread message."
 
 #: src/respond.tsx
 msgid "In this time"
@@ -4751,6 +4759,10 @@ msgstr "All teams"
 #: src/respond.tsx
 msgid "I'll help out"
 msgstr "I'll help out"
+
+#: shared/changelog.ts
+msgid "What only you as a coach can do is now marked in the club's colour with a whistle, for example on the event page, in carpools and in the helper plan. Players and parents don't see these buttons."
+msgstr "What only you as a coach can do is now marked in the club's colour with a whistle, for example on the event page, in carpools and in the helper plan. Players and parents don't see these buttons."
 
 #: worker/routes/season.ts
 #: worker/routes/season.ts
@@ -10949,6 +10961,10 @@ msgstr "Saved. As soon as someone offers seats, you will get a notification."
 #: src/faq.tsx
 msgid "Coaches"
 msgstr "Coaches"
+
+#: shared/changelog.ts
+msgid "Coach buttons: what only coaches and other leads can do is marked in the club's main colour with a whistle, in views players and parents see too."
+msgstr "Coach buttons: what only coaches and other leads can do is marked in the club's main colour with a whistle, in views players and parents see too."
 
 #: src/pages/admin.tsx
 msgid "E-mail (admins only)"
