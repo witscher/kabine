@@ -8,6 +8,8 @@ Format per entry: date, title, what changed and why, where in the code (file and
 
 ## Open
 
+- **2026-11-07 Unread chat messages: count in the chat list, unread rooms first, "New messages" divider in the chat.** The navigation showed a dot for unread chats, but in the chat list the yellow "new" pill got lost between the yellow team badges and read like "new chat". Now: a black count with yellow text instead of the pill ("99+" above 99), below it in bold "3 new messages · 20 min ago" (for parents the "as parent of …" line stays as a second line), rooms with unread messages on top, newest first, title bold. In the chat a yellow divider "New messages" sits above the first unread message from others, as of opening the chat, and the chat opens there instead of at the end; no divider for someone who never opened the chat. The count needs no extra query: messages are numbered per room, so it is the last message id minus the last read id (deleted messages and system messages count too). Club app: `unreadCount` in `GET /chat/rooms` (`worker/routes/chat.ts`), `lastReadId` in the room's `hello` (`worker/chat/room.ts`), `ChatListPage` and `ChatRoomPage` in `src/pages/chat.tsx` (`unreadText`, `.unread-count`, `.unread-divider` with `role="separator"` and `aria-label`), tests in `test/chat.test.ts` and e2e. Side fix: `ago` said "vor 1 Tagen", now "vor 1 Tag" (check the Kabine plural).
+
 ## Parked
 
 Notes on changes in the club app that the maintainer does not want in Kabine yet. Do not port and do not add to the roadmap; the maintainer moves an entry to "Open" when it is wanted.
