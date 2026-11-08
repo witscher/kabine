@@ -8,6 +8,8 @@ Format per entry: date, title, what changed and why, where in the code (file and
 
 ## Open
 
+- **2026-11-08 Fix: the helper plan link on an event opens that team and that event.** The links "Helper plan · …" on the event page (and "Manage helper duties in the Helpers tab") went to the bare helper tab, which always opened the first team, so people did not find the game they came from. Now the link is `/helfer?mannschaft=<teamId>&spiel=<eventId>` (`helperPath` in `src/duties.tsx`: the first team of the event that is in `me.helperTeams`, else the youth referee view `?kihasl&spiel=…` for referees). The helper tab preselects that team (for admins also a team that is not their own, switching the "own/all" filter), scrolls the event into view once the list has loaded and highlights it for 2.5 s (`id="termin-<id>"` on the game article, `.duty-game-target`). Club app: `src/duties.tsx`, `src/pages/event.tsx`, `src/pages/helpers.tsx`, `src/styles.css`; e2e in the helper plan test.
+
 ## Parked
 
 Notes on changes in the club app that the maintainer does not want in Kabine yet. Do not port and do not add to the roadmap; the maintainer moves an entry to "Open" when it is wanted.
