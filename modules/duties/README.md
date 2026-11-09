@@ -10,6 +10,10 @@ Parents (or the players themselves) sign up for duties at home games and special
 
 Without a selection the tab lists the events of all the person's teams together (`GET /api/duties?teamIds=1,2`, an event of several teams only once), each with its team badge; a tap on a team filters, a second tap clears it, as in the events list. The youth referee view is a list of its own. Top helpers only show for a single team. A link from an event (`/helfer?mannschaft=<team>&spiel=<event>`) selects that team and scrolls to the event.
 
+## Deleting a duty type
+
+Admins delete a duty type only when it is used nowhere: in no template and in no time block of any event, past ones included, since those rows and the helpers' entries would go with it (`DELETE /api/admin/duty-types/:id`, 409 `duty_type_in_use` otherwise; the youth referee duty never, `referee_type`). Consents to it go with it. `GET /api/duty-types` tells admins where each type is used (`usage`).
+
 ## Part of the core
 
 The helper plan shows up in many core screens: one's duties on event cards and in the calendar, "helpers needed" on the event page, the duty blocks of special events. These rules and the live channel therefore live in the core and work while the module is on:

@@ -483,3 +483,42 @@ describe("Reiter Helfer: mehrere Mannschaften zusammen", () => {
     expect((await api("/duties?teamIds=", { cookie: monaCookie })).status).toBe(403);
   });
 });
+
+describe("Dienstart löschen", () => {
+  it("nur Admins, nur wenn nirgends verwendet; Jugendschiedsrichter nie", async () => {
+    const adminCookie = await loginAs(await person("Ada", { admin: true }));
+    const body = { name: "Grill", mode: "onsite", whoParents: true, whoPlayers: false, whoCoaches: false, noteAllowed: false, needsSkill: false };
+    const grill = (await api("/admin/duty-types", { cookie: adminCookie, body })).body.id as number;
+    const usage = async () => (await api("/duty-types", { cookie: adminCookie })).body.types.find((t: any) => t.id === grill)?.usage;
+    expect(await usage()).toEqual({ blocks: 0, templates: 0 });
+    // Coaches see no usage and do not delete
+    expect((await api("/duty-types", { cookie: coachCookie })).body.types[0].usage).toBeUndefined();
+    expect((await api(`/admin/duty-types/${grill}`, { method: "DELETE", cookie: coachCookie })).status).toBe(403);
+
+    // Used in a time block: cannot be deleted, with the hint to archive
+    const date = (await one<{ starts_at: string }>("SELECT starts_at FROM events WHERE id = ?", home)).starts_at.slice(0, 10);
+    const block = (await api(`/duties/events/${home}/blocks`, { cookie: coachCookie, body: { dutyTypeId: grill, startsAt: `${date}T10:00`, endsAt: `${date}T11:00`, slots: 1 } })).body.id;
+    expect(await usage()).toEqual({ blocks: 1, templates: 0 });
+    const blocked = await api(`/admin/duty-types/${grill}`, { method: "DELETE", cookie: adminCookie });
+    expect(blocked.status).toBe(409);
+    expect(blocked.body.error).toMatchObject({ code: "duty_type_in_use" });
+    expect(blocked.body.error.message).toContain("Archiviere");
+    await api(`/duties/blocks/${block}`, { method: "DELETE", cookie: coachCookie });
+
+    // Used in a template: the same
+    await exec("INSERT INTO duty_template_items (template_id, duty_type_id, slots, before_min, after_min, sort) SELECT id, ?, 1, 0, 0, 99 FROM duty_templates LIMIT 1", grill);
+    expect(await usage()).toEqual({ blocks: 0, templates: 1 });
+    expect((await api(`/admin/duty-types/${grill}`, { method: "DELETE", cookie: adminCookie })).status).toBe(409);
+    await exec("DELETE FROM duty_template_items WHERE duty_type_id = ?", grill);
+
+    // Unused: gone, with the consents to it
+    await exec("INSERT INTO skill_consents (account_id, duty_type_id) SELECT id, ? FROM accounts WHERE person_id = ?", grill, mona);
+    expect((await api(`/admin/duty-types/${grill}`, { method: "DELETE", cookie: adminCookie })).status).toBe(200);
+    expect(await usage()).toBeUndefined();
+    expect(await one("SELECT count(*) AS n FROM skill_consents WHERE duty_type_id = ?", grill)).toEqual({ n: 0 });
+
+    // The youth referee duty belongs to the role
+    const referee = (await api("/duty-types", { cookie: adminCookie })).body.types.find((t: any) => t.whoReferees);
+    if (referee) expect((await api(`/admin/duty-types/${referee.id}`, { method: "DELETE", cookie: adminCookie })).body.error.code).toBe("referee_type");
+  });
+});

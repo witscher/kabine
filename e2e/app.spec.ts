@@ -1929,3 +1929,25 @@ test("Ganze Mannschaft bei Spielen: alle dabei, „Kader folgt“ und „Nicht n
   await page.request.patch("/api/teams/1", { data: { gameAllPlayers: false } });
   await page.request.delete(`/api/duties/games/${id}`);
 });
+
+test("Dienstart löschen: unbenutzte ja, verwendete nur archivieren", async () => {
+  const a = admin.page;
+  await a.goto("/verwaltung/helferdienste");
+  await a.getByRole("button", { name: "Dienstart hinzufügen" }).click();
+  const sheet = a.getByRole("dialog", { name: "Neue Dienstart" });
+  await sheet.getByLabel("Name").fill("Probedienst");
+  await sheet.getByRole("button", { name: "Speichern" }).click();
+  const types = a.getByRole("region", { name: "Dienstarten" });
+  await types.getByRole("button", { name: /Probedienst/ }).click();
+  const edit = a.getByRole("dialog", { name: "Probedienst" });
+  await edit.getByRole("button", { name: "Dienstart löschen" }).click();
+  await a.getByRole("dialog", { name: "Probedienst löschen?" }).getByRole("button", { name: "Löschen" }).click();
+  await expect(a.getByText("Probedienst gelöscht.")).toBeVisible();
+  await expect(types).not.toContainText("Probedienst");
+
+  // Used in templates: disabled, with the hint
+  await types.getByRole("button", { name: /Kuchen & Theke/ }).click();
+  const cake = a.getByRole("dialog", { name: "Kuchen & Theke" });
+  await expect(cake.getByRole("button", { name: "Dienstart löschen" })).toBeDisabled();
+  await expect(cake).toContainText("Archivieren blendet sie für Neues aus.");
+});

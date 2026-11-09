@@ -21,6 +21,8 @@ export interface DutyTypeInfo {
   noteAllowed: boolean;
   needsSkill: boolean;
   archived: boolean;
+  /** Admins only: where the type is used (it can only be deleted when nowhere) */
+  usage?: { blocks: number; templates: number };
 }
 
 export interface TemplateInfo {

@@ -234,6 +234,11 @@ msgstr "No messages yet"
 msgid "{name} (you)"
 msgstr "{name} (you)"
 
+#. placeholder {0}: used.templates
+#: modules/duties/app/admin.tsx
+msgid "{0, plural, one {# template} other {# templates}}"
+msgstr "{0, plural, one {# template} other {# templates}}"
+
 #: worker/domain/calendar.ts
 msgid "Not taking place: {entry}"
 msgstr "Not taking place: {entry}"
@@ -2116,6 +2121,7 @@ msgid "Only coaches and admins can mute people."
 msgstr "Only coaches and admins can mute people."
 
 #: modules/duties/worker/routes.ts
+#: modules/duties/worker/routes.ts
 msgid "This duty type does not exist."
 msgstr "This duty type does not exist."
 
@@ -2231,6 +2237,10 @@ msgstr "This link does not exist."
 msgid "Not signed in"
 msgstr "Not signed in"
 
+#: modules/duties/app/admin.tsx
+msgid "It cannot be deleted while it is in {places}. Archiving hides it for new things."
+msgstr "It cannot be deleted while it is in {places}. Archiving hides it for new things."
+
 #: src/pages/club-settings.tsx
 #: src/pages/club-settings.tsx
 msgid "{teams, plural, one {# team takes its games from this source. Its games stay, but they are no longer synced.} other {# teams take their games from this source. Their games stay, but they are no longer synced.}}"
@@ -2239,6 +2249,10 @@ msgstr "{teams, plural, one {# team takes its games from this source. Its games 
 #: worker/routes/events.ts
 msgid "Only special events have a title."
 msgstr "Only special events have a title."
+
+#: modules/duties/worker/routes.ts
+msgid "{name} is still in use. Archive the duty type instead."
+msgstr "{name} is still in use. Archive the duty type instead."
 
 #: src/pages/profile.tsx
 msgid "Permissions"
@@ -3103,6 +3117,11 @@ msgstr "Offer seats"
 msgid "Game info"
 msgstr "Game info"
 
+#. placeholder {0}: used.blocks
+#: modules/duties/app/admin.tsx
+msgid "{0, plural, one {# time block at an event} other {# time blocks at events}}"
+msgstr "{0, plural, one {# time block at an event} other {# time blocks at events}}"
+
 #: src/pages/admin.tsx
 msgid "{venue, select, hall {Opponents' halls (from the fixture list)} pitch {Opponents' pitches (from the fixture list)} other {Opponents' venues (from the fixture list)}}"
 msgstr "{venue, select, hall {Opponents' halls (from the fixture list)} pitch {Opponents' pitches (from the fixture list)} other {Opponents' venues (from the fixture list)}}"
@@ -3405,6 +3424,7 @@ msgstr "Own access"
 msgid "Create special events, send reminders and moderate the chat (including @alle)."
 msgstr "Create special events, send reminders and moderate the chat (including @alle)."
 
+#: modules/duties/app/admin.tsx
 #: modules/duties/app/admin.tsx
 #: src/pages/admin.tsx
 #: src/pages/admin.tsx
@@ -4601,6 +4621,10 @@ msgstr "Passkey"
 msgid "INFO"
 msgstr "INFO"
 
+#: modules/duties/app/admin.tsx
+msgid "Delete {name}?"
+msgstr "Delete {name}?"
+
 #: src/list-import.tsx
 msgid "Answer the questions above first."
 msgstr "Answer the questions above first."
@@ -5254,6 +5278,10 @@ msgstr "Remove {name}"
 #: worker/domain/calendar.ts
 msgid "Training {teams}"
 msgstr "Training {teams}"
+
+#: modules/duties/worker/routes.ts
+msgid "The youth referee duty belongs to the role and cannot be deleted."
+msgstr "The youth referee duty belongs to the role and cannot be deleted."
 
 #: src/pages/plans.tsx
 #: src/pages/plans.tsx
@@ -9082,6 +9110,10 @@ msgstr "You respond for them and see their events here."
 msgid "Edit periods (e.g. carnival)"
 msgstr "Edit periods (e.g. carnival)"
 
+#: modules/duties/app/admin.tsx
+msgid " and "
+msgstr " and "
+
 #: worker/routes/feedback.ts
 msgid "unknown"
 msgstr "unknown"
@@ -9551,6 +9583,10 @@ msgstr "Youth referee needed"
 #: modules/duties/worker/routes.ts
 msgid "Please choose who can help."
 msgstr "Please choose who can help."
+
+#: modules/duties/app/admin.tsx
+msgid "Delete duty type"
+msgstr "Delete duty type"
 
 #: src/pages/event.tsx
 #: src/pages/event.tsx
@@ -10765,6 +10801,10 @@ msgstr "Nobody nominated yet."
 msgid "Live ticker on handball4all"
 msgstr "Live ticker on handball4all"
 
+#: modules/duties/app/admin.tsx
+msgid "{name} deleted."
+msgstr "{name} deleted."
+
 #: src/pages/chat.tsx
 msgid "Remove message"
 msgstr "Remove message"
@@ -11535,6 +11575,10 @@ msgstr "{name} is created. Now send the personal link."
 #: src/pages/club-settings.tsx
 msgid "Beta"
 msgstr "Beta"
+
+#: modules/duties/app/admin.tsx
+msgid "The duty type is used nowhere and disappears completely."
+msgstr "The duty type is used nowhere and disappears completely."
 
 #: src/pages/profile.tsx
 msgid "{firstName} has their own access. Here you decide what {firstName} may do on their own. You can always accept and decline for {firstName}."

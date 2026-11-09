@@ -719,11 +719,32 @@ function requireCoachOrAdmin(actor: Actor) {
   if (!actor.isAdmin && !actor.coachTeamIds.length) throw forbidden();
 }
 
+/**
+ * Where duty types are used: time blocks at events (past ones too) and templates. One pass over each table
+ * instead of a count per type; only admins ask for it, and rarely.
+ */
+async function dutyTypeUsage(db: D1Database): Promise<Map<number, { blocks: number; templates: number }>> {
+  const [blocks, templates] = await Promise.all([
+    all<{ id: number; n: number }>(db, "SELECT duty_type_id AS id, count(*) AS n FROM event_duties GROUP BY duty_type_id"),
+    all<{ id: number; n: number }>(db, "SELECT duty_type_id AS id, count(DISTINCT template_id) AS n FROM duty_template_items GROUP BY duty_type_id"),
+  ]);
+  const usage = new Map<number, { blocks: number; templates: number }>();
+  for (const r of blocks) usage.set(r.id, { blocks: r.n, templates: 0 });
+  for (const r of templates) usage.set(r.id, { blocks: usage.get(r.id)?.blocks ?? 0, templates: r.n });
+  return usage;
+}
+
 dutyRoutes.get("/duty-types", async (c) => {
   const actor = requireActor(c);
   requireCoachOrAdmin(actor);
   const types = await loadDutyTypes(c.env.DB);
-  return c.json({ types: [...types.values()].filter((t) => c.req.query("all") === "1" || !t.archived) });
+  // Admins see whether a duty type can be deleted
+  const usage = actor.isAdmin ? await dutyTypeUsage(c.env.DB) : null;
+  return c.json({
+    types: [...types.values()]
+      .filter((dt) => c.req.query("all") === "1" || !dt.archived)
+      .map((dt) => (usage ? { ...dt, usage: usage.get(dt.id) ?? { blocks: 0, templates: 0 } } : dt)),
+  });
 });
 
 const dutyTypeSchema = z.object({
@@ -788,6 +809,28 @@ dutyRoutes.patch("/admin/duty-types/:id", async (c) => {
     input.archived ? 1 : 0,
     id,
   );
+  return c.json({ ok: true });
+});
+
+/**
+ * Delete a duty type: only when it is used nowhere (its time blocks would take the helpers' entries along),
+ * otherwise archive it. Consents to it go with it.
+ */
+dutyRoutes.delete("/admin/duty-types/:id", async (c) => {
+  requireAdmin(requireActor(c));
+  const id = intParam(c, "id");
+  const type = (await loadDutyTypes(c.env.DB)).get(id);
+  if (!type || type.eventId != null) throw notFound(t`This duty type does not exist.`);
+  if (type.whoReferees) throw conflict(t`The youth referee duty belongs to the role and cannot be deleted.`, "referee_type");
+  const [blocks, templates] = await Promise.all([
+    first<{ n: number }>(c.env.DB, "SELECT count(*) AS n FROM event_duties WHERE duty_type_id = ?", id),
+    first<{ n: number }>(c.env.DB, "SELECT count(DISTINCT template_id) AS n FROM duty_template_items WHERE duty_type_id = ?", id),
+  ]);
+  if (blocks?.n || templates?.n) {
+    const name = type.name;
+    throw conflict(t`${name} is still in use. Archive the duty type instead.`, "duty_type_in_use");
+  }
+  await run(c.env.DB, "DELETE FROM duty_types WHERE id = ? AND event_id IS NULL", id);
   return c.json({ ok: true });
 });
 

@@ -134,6 +134,41 @@ export function AdminDutiesPage() {
   );
 }
 
+/** Delete only when the duty type is used nowhere; otherwise the hint to archive it. */
+function DeleteDutyType({ type, onDone, onClose }: { type: DutyTypeInfo; onDone: () => void; onClose: () => void }) {
+  const used = type.usage ?? { blocks: 0, templates: 0 };
+  const where = [
+    used.blocks ? plural(used.blocks, { one: "# time block at an event", other: "# time blocks at events" }) : null,
+    used.templates ? plural(used.templates, { one: "# template", other: "# templates" }) : null,
+  ].filter(Boolean);
+  const places = where.join(t` and `);
+  const name = type.name;
+  return (
+    <div class="stack-sm">
+      <Button
+        variant="ghost"
+        icon="trash"
+        disabled={where.length > 0}
+        onClick={async () => {
+          const ok = await confirmDialog({ title: t`Delete ${name}?`, message: t`The duty type is used nowhere and disappears completely.`, confirmLabel: t`Delete`, danger: true });
+          if (!ok) return;
+          await api.del(`/admin/duty-types/${type.id}`);
+          toast(t`${name} deleted.`);
+          onDone();
+          onClose();
+        }}
+      >
+        <Trans>Delete duty type</Trans>
+      </Button>
+      {where.length ? (
+        <p class="small muted">
+          <Trans>It cannot be deleted while it is in {places}. Archiving hides it for new things.</Trans>
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
 function DutyTypeSheet({ type, onClose, onDone }: { type: DutyTypeInfo | null; onClose: () => void; onDone: () => void }) {
   const [name, setName] = useState(type?.name ?? "");
   const [mode, setMode] = useState<"onsite" | "task">(type?.mode ?? "onsite");
@@ -238,6 +273,7 @@ function DutyTypeSheet({ type, onClose, onDone }: { type: DutyTypeInfo | null; o
       >
         <Trans>Save</Trans>
       </Button>
+      {type && !referee ? <DeleteDutyType type={type} onDone={onDone} onClose={onClose} /> : null}
     </Sheet>
   );
 }

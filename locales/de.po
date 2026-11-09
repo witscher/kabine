@@ -242,6 +242,12 @@ msgid "{name} (you)"
 msgstr "{name} (du)"
 
 # ai
+#. placeholder {0}: used.templates
+#: modules/duties/app/admin.tsx
+msgid "{0, plural, one {# template} other {# templates}}"
+msgstr "{0, plural, one {# Vorlage} other {# Vorlagen}}"
+
+# ai
 #: worker/domain/calendar.ts
 msgid "Not taking place: {entry}"
 msgstr "Findet nicht statt: {entry}"
@@ -2231,6 +2237,7 @@ msgid "Only coaches and admins can mute people."
 msgstr "Stummschalten dürfen Trainer und Admins."
 
 #: modules/duties/worker/routes.ts
+#: modules/duties/worker/routes.ts
 msgid "This duty type does not exist."
 msgstr "Diese Dienstart gibt es nicht."
 
@@ -2357,6 +2364,11 @@ msgid "Not signed in"
 msgstr "Nicht angemeldet"
 
 # ai
+#: modules/duties/app/admin.tsx
+msgid "It cannot be deleted while it is in {places}. Archiving hides it for new things."
+msgstr "Löschen geht nicht, solange sie in {places} vorkommt. Archivieren blendet sie für Neues aus."
+
+# ai
 #: src/pages/club-settings.tsx
 #: src/pages/club-settings.tsx
 msgid "{teams, plural, one {# team takes its games from this source. Its games stay, but they are no longer synced.} other {# teams take their games from this source. Their games stay, but they are no longer synced.}}"
@@ -2365,6 +2377,11 @@ msgstr "{teams, plural, one {# Mannschaft übernimmt ihre Spiele aus dieser Quel
 #: worker/routes/events.ts
 msgid "Only special events have a title."
 msgstr "Nur Sondertermine haben einen Titel."
+
+# ai
+#: modules/duties/worker/routes.ts
+msgid "{name} is still in use. Archive the duty type instead."
+msgstr "{name} wird noch verwendet. Archiviere die Dienstart stattdessen."
 
 #: src/pages/profile.tsx
 msgid "Permissions"
@@ -3291,6 +3308,12 @@ msgid "Game info"
 msgstr "Spielinfos"
 
 # ai
+#. placeholder {0}: used.blocks
+#: modules/duties/app/admin.tsx
+msgid "{0, plural, one {# time block at an event} other {# time blocks at events}}"
+msgstr "{0, plural, one {# Zeitblock an einem Termin} other {# Zeitblöcken an Terminen}}"
+
+# ai
 #: src/pages/admin.tsx
 msgid "{venue, select, hall {Opponents' halls (from the fixture list)} pitch {Opponents' pitches (from the fixture list)} other {Opponents' venues (from the fixture list)}}"
 msgstr "{venue, select, hall {Gegnerische Hallen (aus dem Spielplan)} pitch {Gegnerische Plätze (aus dem Spielplan)} other {Spielstätten der Gegner (aus dem Spielplan)}}"
@@ -3614,6 +3637,7 @@ msgstr "Eigener Zugang"
 msgid "Create special events, send reminders and moderate the chat (including @alle)."
 msgstr "Legen Sondertermine an, erinnern und moderieren den Chat (auch @alle)."
 
+#: modules/duties/app/admin.tsx
 #: modules/duties/app/admin.tsx
 #: src/pages/admin.tsx
 #: src/pages/admin.tsx
@@ -4897,6 +4921,11 @@ msgid "INFO"
 msgstr "INFO"
 
 # ai
+#: modules/duties/app/admin.tsx
+msgid "Delete {name}?"
+msgstr "{name} löschen?"
+
+# ai
 #: src/list-import.tsx
 msgid "Answer the questions above first."
 msgstr "Beantworte zuerst die Fragen oben."
@@ -5588,6 +5617,11 @@ msgstr "{name} entfernen"
 #: worker/domain/calendar.ts
 msgid "Training {teams}"
 msgstr "Training {teams}"
+
+# ai
+#: modules/duties/worker/routes.ts
+msgid "The youth referee duty belongs to the role and cannot be deleted."
+msgstr "Der Jugendschiedsrichter-Dienst hängt an der Rolle und lässt sich nicht löschen."
 
 #: src/pages/plans.tsx
 #: src/pages/plans.tsx
@@ -9645,6 +9679,11 @@ msgstr "Du sagst für sie zu und ab und siehst hier ihre Termine."
 msgid "Edit periods (e.g. carnival)"
 msgstr "Zeiträume bearbeiten (z. B. Fastnacht)"
 
+# ai
+#: modules/duties/app/admin.tsx
+msgid " and "
+msgstr " und "
+
 #: worker/routes/feedback.ts
 msgid "unknown"
 msgstr "unbekannt"
@@ -10144,6 +10183,11 @@ msgstr "Jugendschiedsrichter gesucht"
 #: modules/duties/worker/routes.ts
 msgid "Please choose who can help."
 msgstr "Bitte wähle, wer helfen kann."
+
+# ai
+#: modules/duties/app/admin.tsx
+msgid "Delete duty type"
+msgstr "Dienstart löschen"
 
 #: src/pages/event.tsx
 #: src/pages/event.tsx
@@ -11423,6 +11467,11 @@ msgstr "Noch niemand nominiert."
 msgid "Live ticker on handball4all"
 msgstr "Liveticker bei handball4all"
 
+# ai
+#: modules/duties/app/admin.tsx
+msgid "{name} deleted."
+msgstr "{name} gelöscht."
+
 #: src/pages/chat.tsx
 msgid "Remove message"
 msgstr "Nachricht entfernen"
@@ -12235,6 +12284,11 @@ msgstr "{name} ist angelegt. Jetzt den persönlichen Link verschicken."
 msgid "Beta"
 msgstr "Beta"
 
+# ai
+#: modules/duties/app/admin.tsx
+msgid "The duty type is used nowhere and disappears completely."
+msgstr "Die Dienstart wird nirgends verwendet und verschwindet ganz."
+
 #: src/pages/profile.tsx
 msgid "{firstName} has their own access. Here you decide what {firstName} may do on their own. You can always accept and decline for {firstName}."
 msgstr "{firstName} hat einen eigenen Zugang. Hier legst du fest, was {firstName} selbst darf. Du kannst immer für {firstName} zu- und absagen."
@@ -13038,3 +13092,4 @@ msgstr "Chat schreiben"
 #: worker/routes/events.ts
 msgid "In one time block the end is before the start."
 msgstr "Bei einem Zeitblock liegt das Ende vor dem Beginn."
+

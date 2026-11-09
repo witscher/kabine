@@ -44,5 +44,15 @@
   "Squad follows": "Kader folgt",
   "{nominatedYes} nominated": "{nominatedYes} nominiert",
   "{name}, nominated": "{name}, nominiert",
-  "Dark: nominated. The others take part but do not play.": "Dunkel: nominiert. Die anderen sind dabei, spielen aber nicht."
+  "Dark: nominated. The others take part but do not play.": "Dunkel: nominiert. Die anderen sind dabei, spielen aber nicht.",
+  "The youth referee duty belongs to the role and cannot be deleted.": "Der Jugendschiedsrichter-Dienst hängt an der Rolle und lässt sich nicht löschen.",
+  "{name} is still in use. Archive the duty type instead.": "{name} wird noch verwendet. Archiviere die Dienstart stattdessen.",
+  "{0, plural, one {# time block at an event} other {# time blocks at events}}": "{0, plural, one {# Zeitblock an einem Termin} other {# Zeitblöcken an Terminen}}",
+  "{0, plural, one {# template} other {# templates}}": "{0, plural, one {# Vorlage} other {# Vorlagen}}",
+  " and ": " und ",
+  "Delete {name}?": "{name} löschen?",
+  "The duty type is used nowhere and disappears completely.": "Die Dienstart wird nirgends verwendet und verschwindet ganz.",
+  "{name} deleted.": "{name} gelöscht.",
+  "Delete duty type": "Dienstart löschen",
+  "It cannot be deleted while it is in {places}. Archiving hides it for new things.": "Löschen geht nicht, solange sie in {places} vorkommt. Archivieren blendet sie für Neues aus."
 }
