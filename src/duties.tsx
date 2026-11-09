@@ -1,5 +1,5 @@
 import { plural, t } from "@lingui/core/macro";
-import type { EventSummary, MyDuty } from "../shared/types";
+import type { EventSummary, Me, MyDuty, TeamRef } from "../shared/types";
 import { Icon } from "./icons";
 
 /** "Your duty: Cake & bar" or "Duty for Lina: wash shirts", one line per person. */
@@ -11,6 +11,16 @@ export function dutyLines(duties: MyDuty[]): string[] {
     groups.set(key, [...(groups.get(key) ?? []), d.label]);
   }
   return [...groups].map(([who, labels]) => `${who}: ${labels.join(", ")}`);
+}
+
+/**
+ * Link into the Helpers tab, straight to the team and the event: the event's first team with a helper plan,
+ * else the youth referee view for referees.
+ */
+export function helperPath(event: { id: number; teams: TeamRef[] }, me: Pick<Me, "helperTeams" | "referee">): string {
+  const team = event.teams.find((t) => me.helperTeams.some((h) => h.id === t.id));
+  if (team) return `/helfer?mannschaft=${team.id}&spiel=${event.id}`;
+  return me.referee ? `/helfer?kihasl&spiel=${event.id}` : "/helfer";
 }
 
 /** "Helpers needed · 2 spots free" */

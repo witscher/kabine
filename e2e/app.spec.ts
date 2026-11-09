@@ -544,9 +544,14 @@ test("Helferplan: einschalten, Spiel unter Team anlegen, Dienst übernehmen, liv
   await page.getByLabel("Spielbeginn").fill("10:00");
   await page.getByRole("button", { name: "Spiel anlegen" }).click();
   await expect(page).toHaveURL(/\/termine\/\d+/);
-  await page.getByRole("link", { name: "Helfer", exact: true }).click();
+  const gameId = page.url().split("/").pop();
+  // The helper plan link on the event leads to the team and to exactly this game
+  await page.locator("a.ext-link", { hasText: "Helferplan" }).first().click();
+  await expect(page).toHaveURL(new RegExp(`/helfer\\?mannschaft=1&spiel=${gameId}$`));
   const card = page.getByRole("article", { name: /Turnier Musterstadt/ });
   await expect(card).toContainText("4 frei");
+  await expect(card).toHaveClass(/duty-game-target/);
+  await expect(card).toBeInViewport();
 
   // Admin hat den Helferplan offen und sieht den Eintrag ohne Neuladen
   await admin.page.goto("/helfer");

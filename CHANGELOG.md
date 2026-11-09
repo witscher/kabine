@@ -6,6 +6,7 @@ Changes that are merged but not released yet go under *Unreleased*, one line eac
 
 ## Unreleased
 
+- The helper plan link on an event opens the Helpers tab at that event's team and scrolls to the event, highlighted for a moment. Before, it opened the first team.
 - Youth referee group: admins are no longer added as leads automatically. Admins assign the leads by hand like in any group; whoever is a lead now stays one.
 - An admin in coach mode who no longer coaches any team is an admin again, instead of being stuck without the switch back.
 

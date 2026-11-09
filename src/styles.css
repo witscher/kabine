@@ -2866,3 +2866,12 @@ button.announcement-head {
   background: #fff;
   pointer-events: none;
 }
+
+/* Helper plan: the event a link from the event page jumped to */
+.duty-game {
+  scroll-margin-top: 80px;
+  transition: box-shadow 0.4s ease;
+}
+.duty-game.duty-game-target {
+  box-shadow: 0 0 0 3px var(--yellow);
+}

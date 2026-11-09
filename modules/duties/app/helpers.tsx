@@ -171,14 +171,21 @@ export function HelpersPage() {
   // Admins see all teams; the filter first shows only their own
   const hasOwn = me.helperTeams.some((ht) => ht.own);
   const hasOthers = me.helperTeams.some((ht) => !ht.own);
-  const [scope, setScope] = useState<"own" | "all">("own");
+  // From an event: ?mannschaft=<id>&spiel=<id> selects the team and jumps to the event
+  const [target] = useState(() => {
+    const q = new URLSearchParams(location.search);
+    return { team: Number(q.get("mannschaft")) || null, game: Number(q.get("spiel")) || null, referee: q.has("kihasl") };
+  });
+  const [scope, setScope] = useState<"own" | "all">(() => (target.team && me.helperTeams.some((ht) => ht.id === target.team && !ht.own) ? "all" : "own"));
   const helperTeams = hasOwn && hasOthers && scope === "own" ? me.helperTeams.filter((ht) => ht.own) : me.helperTeams;
   // youth referee: first for everyone with the role, last for coaches and admins
   const refereeChip = { id: REFEREE, name: t`Youth referees`, own: true };
   // Only with the youth referee module (handball); otherwise the tab would only show "switched off"
   const showReferee = useModule("youthReferees") && (me.referee || me.isAdmin || me.manageableTeams.length > 0);
   const teams = !showReferee ? helperTeams : me.referee ? [refereeChip, ...helperTeams] : [...helperTeams, refereeChip];
-  const [teamId, setTeamId] = useState<number | null>(() => (showReferee && new URLSearchParams(location.search).has("kihasl") ? REFEREE : (teams[0]?.id ?? null)));
+  const [teamId, setTeamId] = useState<number | null>(() =>
+    showReferee && target.referee ? REFEREE : teams.some((ht) => ht.id === target.team) ? target.team : (teams[0]?.id ?? null),
+  );
   const isReferee = teamId === REFEREE;
   const list = useQuery<DutyList>(teamId == null ? null : isReferee ? "/duties/referee" : `/duties?teamId=${teamId}`);
   useLiveReload(teamId, () => void list.reload());
@@ -186,6 +193,17 @@ export function HelpersPage() {
   const [manage, setManage] = useState<number | null>(null);
   const [showTop, setShowTop] = useState(false);
   const [onlyOpen, setOnlyOpen] = useState(false);
+  // Scroll to the event from the link once and highlight it briefly
+  const scrolled = useRef(false);
+  useEffect(() => {
+    if (scrolled.current || !target.game || !list.data) return;
+    scrolled.current = true;
+    const el = document.getElementById(`termin-${target.game}`);
+    if (!el) return;
+    el.scrollIntoView({ block: "center" });
+    el.classList.add("duty-game-target");
+    setTimeout(() => el.classList.remove("duty-game-target"), 2500);
+  }, [list.data]);
 
   if (!teams.length) {
     return (
@@ -297,7 +315,7 @@ export function HelpersPage() {
           const day = dayOfMonth(g.startsAt);
           const month = monthShort(g.startsAt);
           return (
-            <article class={`duty-game ${g.cancelled ? "cancelled" : ""}`} aria-label={t`${title}, ${weekday} ${day} ${month}`}>
+            <article id={`termin-${g.id}`} class={`duty-game ${g.cancelled ? "cancelled" : ""}`} aria-label={t`${title}, ${weekday} ${day} ${month}`}>
               <header class="duty-game-head">
                 <div class="date-block">
                   <div class="wd">{weekdayShort(g.startsAt)}</div>

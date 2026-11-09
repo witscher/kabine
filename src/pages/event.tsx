@@ -4,7 +4,7 @@ import { useState } from "preact/hooks";
 import { type AttendanceMark, defaultMark, unexcusedAllowed } from "../../shared/attendance";
 import type { EventDetail, LeaderRole, LocationRef, MyParticipation, ParticipantDetail, RosterEntry } from "../../shared/types";
 import { api, errorMessage } from "../api";
-import { dutyLines, neededText } from "../duties";
+import { dutyLines, helperPath, neededText } from "../duties";
 import { BlockSheet } from "../duty-blocks";
 import { longDate, personName, shortName, stamp, time, timeRange, weekdayPlural } from "../format";
 import { Icon } from "../icons";
@@ -267,7 +267,7 @@ function GameInfo({ event }: { event: EventDetail }) {
         </p>
       ) : null}
       {helperPlan && !event.isPast ? (
-        <a class="ext-link" href="/helfer">
+        <a class="ext-link" href={helperPath(event, me)}>
           <Icon name="helping" size={16} />
           {text ? t`Helper plan · ${text}` : t`Helper plan: duties for this game`}
         </a>
@@ -1287,7 +1287,7 @@ function SpecialHelpers({ event, onChanged }: { event: EventDetail; onChanged: (
   return (
     <section class="card card-pad stack-sm" aria-label={t`Helpers`}>
       {text ? (
-        <a class="ext-link" href="/helfer">
+        <a class="ext-link" href={helperPath(event, me)}>
           <Icon name="helping" size={16} />
           <Trans>Helper plan · {text}</Trans>
         </a>
@@ -1295,7 +1295,7 @@ function SpecialHelpers({ event, onChanged }: { event: EventDetail; onChanged: (
       {event.dutyManage ? (
         <>
           {inHelperTab && !text ? (
-            <a class="ext-link" href="/helfer">
+            <a class="ext-link" href={helperPath(event, me)}>
               <Icon name="helping" size={16} />
               <Trans>Manage helper duties in the Helpers tab</Trans>
             </a>
