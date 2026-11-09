@@ -6,6 +6,8 @@ Changes that are merged but not released yet go under *Unreleased*, one line eac
 
 ## Unreleased
 
+- An admin in coach mode who no longer coaches any team is an admin again, instead of being stuck without the switch back.
+
 ## v0.7.0
 
 - Coaches now see what is new for them after an update too, in the same card as the admins' release notes; admins see both.

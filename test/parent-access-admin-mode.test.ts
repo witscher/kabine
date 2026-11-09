@@ -57,6 +57,17 @@ describe("Admin/Trainer-Umschalter", () => {
     expect((await api("/session", { cookie })).body.me.isAdmin).toBe(true);
   });
 
+  it("wer im Trainer-Modus die letzte Trainerrolle verliert, ist wieder Admin statt ausgesperrt", async () => {
+    const ada = await person("Ada", { admin: true });
+    await member(ada, wd, "coach");
+    const cookie = await loginAs(ada);
+    await api("/profile/admin-mode", { method: "PUT", cookie, body: { coachMode: true } });
+    expect((await api("/session", { cookie })).body.me.isAdmin).toBe(false);
+    await exec("DELETE FROM team_memberships WHERE person_id = ? AND role = 'coach'", ada);
+    const me = (await api("/session", { cookie })).body.me;
+    expect(me).toMatchObject({ isAdmin: true, adminSwitch: null });
+  });
+
   it("nur für Admins mit Trainerrolle", async () => {
     expect((await api("/profile/admin-mode", { method: "PUT", cookie: await loginAs(coach), body: { coachMode: true } })).status).toBe(403);
     const ada = await person("Ada", { admin: true });

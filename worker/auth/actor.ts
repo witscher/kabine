@@ -75,7 +75,9 @@ interface PermRow {
 export async function loadActor(db: D1Database, session: SessionRow): Promise<Actor | null> {
   const row = await db
     .prepare(
-      `SELECT a.id AS account_id, p.id AS person_id, p.first_name, p.last_name, p.is_admin, a.coach_mode, a.locale
+      `SELECT a.id AS account_id, p.id AS person_id, p.first_name, p.last_name, p.is_admin, a.locale,
+              -- coach mode only while the person coaches somewhere: otherwise the switch back is missing
+              a.coach_mode AND EXISTS (SELECT 1 FROM team_memberships tm WHERE tm.person_id = p.id AND tm.role = 'coach') AS coach_mode
          FROM accounts a JOIN persons p ON p.id = a.person_id
         WHERE a.id = ? AND a.disabled_at IS NULL AND p.is_former = 0`,
     )
