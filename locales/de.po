@@ -3470,6 +3470,11 @@ msgid "There is no one in the matching teams who does not already play here."
 msgstr "In den passenden Mannschaften gibt es niemanden, der nicht schon hier spielt."
 
 # ai
+#: src/pages/home.tsx
+msgid "{present} of {total} were there"
+msgstr "{present} von {total} waren da"
+
+# ai
 #: modules/duties/app/admin.tsx
 msgid "The youth referee is not part of any template: for youth home games F to C the duty is always added automatically (1 slot, 15 min before throw-off until the end of the game)."
 msgstr "Jugendschiedsrichter steht in keiner Vorlage: Bei Heimspielen der Jugend F bis C kommt der Dienst immer automatisch dazu (1 Platz, 15 min vor Anpfiff bis Spielende)."
@@ -5159,6 +5164,11 @@ msgstr "Helferplan ausgeschaltet. Einträge bleiben erhalten."
 #: modules/carpools/app/card.tsx
 msgid "Save change"
 msgstr "Änderung speichern"
+
+# ai
+#: src/pages/event.tsx
+msgid "Were there"
+msgstr "Waren da"
 
 # ai
 #: src/pages/home.tsx

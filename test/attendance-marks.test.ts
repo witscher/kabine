@@ -137,6 +137,20 @@ describe("migration 202610192200_core_attendance-marks.sql", () => {
   });
 });
 
+describe("Echte Teilnehmerzahl bei vergangenen Terminen", () => {
+  it("zählt Zusagen und nachgetragenes „da“, ohne entschuldigt und unentschuldigt; kommende Termine ohne", async () => {
+    const counts = async (event: number) => (await api(`/events/${event}`, { cookie: coachCookie })).body.counts;
+    await decline(yesterday, ella);
+    const before = await counts(yesterday);
+    expect(before.present).toBe(before.yes);
+    await mark(yesterday, mia, "unexcused");
+    expect((await counts(yesterday)).present).toBe(before.yes - 1);
+    await mark(yesterday, ella, "present");
+    expect((await counts(yesterday)).present).toBe(before.yes);
+    expect((await counts(await eventIn(wd, 2))).present).toBeNull();
+  });
+});
+
 describe("Unentschuldigt: Hinweis an die Eltern", () => {
   it("sofort per Push an eingebundene Eltern, einmal je Termin und Kind", async () => {
     const { createExecutionContext, waitOnExecutionContext } = await import("cloudflare:test");

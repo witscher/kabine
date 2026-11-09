@@ -162,6 +162,8 @@ export interface EventCounts {
   inactive: number;
   /** Optional participants who have not accepted (not counted as open or declined). */
   optional: number;
+  /** Past events only: who was really there (accepted or recorded "present", not "excused"/"unexcused"); else null. */
+  present: number | null;
 }
 
 /**

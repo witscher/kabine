@@ -3281,6 +3281,10 @@ msgstr "wanted, but no confirmed e-mail address on the access"
 msgid "There is no one in the matching teams who does not already play here."
 msgstr "There is no one in the matching teams who does not already play here."
 
+#: src/pages/home.tsx
+msgid "{present} of {total} were there"
+msgstr "{present} of {total} were there"
+
 #: modules/duties/app/admin.tsx
 msgid "The youth referee is not part of any template: for youth home games F to C the duty is always added automatically (1 slot, 15 min before throw-off until the end of the game)."
 msgstr "The youth referee is not part of any template: for youth home games F to C the duty is always added automatically (1 slot, 15 min before throw-off until the end of the game)."
@@ -4865,6 +4869,10 @@ msgstr "Helper plan switched off. Entries are kept."
 #: modules/carpools/app/card.tsx
 msgid "Save change"
 msgstr "Save change"
+
+#: src/pages/event.tsx
+msgid "Were there"
+msgstr "Were there"
 
 #: src/pages/home.tsx
 msgid "{name} until {to}: no training for {teams}."

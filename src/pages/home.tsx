@@ -274,6 +274,8 @@ function EventRow({ event }: { event: EventSummary }) {
   const names = others.map((o) => o.person.firstName).join(", ");
   const counts = event.counts;
   const yes = counts?.yes ?? 0;
+  // Past events: who was really there
+  const present = counts?.present ?? null;
   const total = counts ? counts.yes + counts.no + counts.open + counts.standing + counts.inactive : 0;
   return (
     <a href={`/termine/${event.id}`} class={`event-row ${dark && !cancelled ? "dark" : ""} ${cancelled ? "cancelled" : ""}`}>
@@ -328,9 +330,9 @@ function EventRow({ event }: { event: EventSummary }) {
         </span>
       ) : null}
       {!cancelled && !mine.length && event.canManage && event.counts ? (
-        <span class="pill pill-muted" aria-label={t`${yes} of ${total} accepted`}>
-          <Icon name="check" size={13} stroke={3} />
-          {event.counts.yes}/{event.counts.yes + event.counts.no + event.counts.open + event.counts.standing + event.counts.inactive}
+        <span class="pill pill-muted" aria-label={present != null ? t`${present} of ${total} were there` : t`${yes} of ${total} accepted`}>
+          <Icon name={present != null ? "users" : "check"} size={13} stroke={3} />
+          {present ?? yes}/{total}
         </span>
       ) : null}
       {event.kind === "game" && !cancelled ? <Ball class="event-ball" /> : null}

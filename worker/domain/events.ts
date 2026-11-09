@@ -452,12 +452,17 @@ function respondedBy(ctx: EventContext, personId: number, response: ResponseRow 
   return "other";
 }
 
-export function countsOf(list: Participant[]): EventCounts {
-  const c: EventCounts = { yes: 0, no: 0, open: 0, standing: 0, inactive: 0, optional: 0 };
+export function countsOf(list: Participant[], marks?: (p: Participant) => AttendanceMark | null): EventCounts {
+  const c: EventCounts = { yes: 0, no: 0, open: 0, standing: 0, inactive: 0, optional: 0, present: marks ? 0 : null };
   for (const p of list) {
     // Optional participants count once they accept; otherwise they are neither open nor declined
     if (p.optional && p.status !== "yes" && p.status !== "inactive") c.optional++;
     else c[p.status]++;
+    // Past: the recorded attendance comes before the response (as in the attendance record)
+    if (marks) {
+      const mark = marks(p);
+      if (mark === "present" || (mark == null && p.status === "yes")) c.present!++;
+    }
   }
   return c;
 }
@@ -578,7 +583,7 @@ export function toSummary(e: EventRow, ctx: EventContext, actor: Actor, now: num
     deadline: toLocal(localToInstant(e.starts_at) - hours * 3_600_000),
     deadlineHours: hours,
     isPast: isPast(e, now),
-    counts: showCounts ? countsOf(parts) : null,
+    counts: showCounts ? countsOf(parts, isPast(e, now) && !e.cancelled_at ? (p) => ctx.marks.get(`${e.id}:${p.person.id}`) ?? null : undefined) : null,
     mine: myParticipations(e, ctx, actor, now),
     canManage,
     unexcusedCount: canManage ? parts.filter((p) => ctx.marks.get(`${e.id}:${p.person.id}`) === "unexcused").length : 0,

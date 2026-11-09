@@ -6,5 +6,7 @@
   "{name} is missing from “{title}”": "{name} fehlt bei „{title}“",
   "{when}: {name} had said yes, but according to {coach} did not arrive. Recorded as unexcused.": "{when}: {name} hatte zugesagt, ist laut {coach} aber nicht angekommen. Eingetragen als unentschuldigt.",
   "{when}: {name} had not declined, but according to {coach} did not arrive. Recorded as unexcused.": "{when}: {name} hatte nicht abgesagt, ist laut {coach} aber nicht angekommen. Eingetragen als unentschuldigt.",
-  "With \"Unexcused\", linked parents are told at once that their child did not arrive.": "Bei „Unentschuldigt“ bekommen eingebundene Eltern sofort einen Hinweis, dass ihr Kind nicht angekommen ist."
+  "With \"Unexcused\", linked parents are told at once that their child did not arrive.": "Bei „Unentschuldigt“ bekommen eingebundene Eltern sofort einen Hinweis, dass ihr Kind nicht angekommen ist.",
+  "Were there": "Waren da",
+  "{present} of {total} were there": "{present} von {total} waren da"
 }

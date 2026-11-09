@@ -202,11 +202,10 @@ export function EventPage({ id }: { id: string }) {
 
         {event.counts && !event.participants ? (
           <section class="stats" aria-label={t`Team responses`}>
+            {/* Past: who was really there (with recorded attendance) */}
             <div class="stat" style={{ background: "var(--card)" }}>
-              <div class="n">{event.counts.yes}</div>
-              <div class="l">
-                <Trans>Taking part</Trans>
-              </div>
+              <div class="n">{event.counts.present ?? event.counts.yes}</div>
+              <div class="l">{event.counts.present != null ? <Trans>Were there</Trans> : <Trans>Taking part</Trans>}</div>
             </div>
             <div class="stat" style={{ background: "var(--card)" }}>
               <div class="n">{event.counts.no + event.counts.standing}</div>
