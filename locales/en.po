@@ -602,10 +602,6 @@ msgstr "Join"
 msgid "The address has been changed in the meantime. Please confirm the new address."
 msgstr "The address has been changed in the meantime. Please confirm the new address."
 
-#: src/pages/group.tsx
-msgid "Members are automatically all people with the youth referee role, leads all admins. If someone joins or loses the role, the group adjusts."
-msgstr "Members are automatically all people with the youth referee role, leads all admins. If someone joins or loses the role, the group adjusts."
-
 #: modules/carpools/worker/domain.ts
 msgid "{seats, plural, one {{driver} has one free seat: {game}. Book it in the app.} other {{driver} has # free seats: {game}. Book it in the app.}}"
 msgstr "{seats, plural, one {{driver} has one free seat: {game}. Book it in the app.} other {{driver} has # free seats: {game}. Book it in the app.}}"
@@ -1676,6 +1672,10 @@ msgstr "{days, plural, one {# day ago} other {# days ago}}"
 #: src/pages/setup-wizard.tsx
 msgid "Skip"
 msgstr "Skip"
+
+#: src/pages/group.tsx
+msgid "Members are automatically all people with the youth referee role. You give the role under Admin → Youth referees. You assign the leads here."
+msgstr "Members are automatically all people with the youth referee role. You give the role under Admin → Youth referees. You assign the leads here."
 
 #: worker/routes/events.ts
 #: worker/routes/events.ts
@@ -8932,10 +8932,6 @@ msgstr "Meeting point and time not entered yet"
 msgid "After that the initial is shown again."
 msgstr "After that the initial is shown again."
 
-#: src/pages/group.tsx
-msgid "Members are automatically all people with the youth referee role, leads all admins. You give the role under Admin → Youth referees."
-msgstr "Members are automatically all people with the youth referee role, leads all admins. You give the role under Admin → Youth referees."
-
 #: src/howto.tsx
 msgid "You can find the guide at any time under help."
 msgstr "You can find the guide at any time under help."
@@ -11737,6 +11733,10 @@ msgstr "Permanent stand-in"
 #: modules/duties/app/admin.tsx
 msgid "with note"
 msgstr "with note"
+
+#: src/pages/group.tsx
+msgid "Members are automatically all people with the youth referee role. If someone joins or loses the role, the group adjusts. You assign the leads in the group afterwards."
+msgstr "Members are automatically all people with the youth referee role. If someone joins or loses the role, the group adjusts. You assign the leads in the group afterwards."
 
 #: src/game-import.tsx
 msgid "Home game vs {opponent}"

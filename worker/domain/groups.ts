@@ -30,8 +30,9 @@ export async function requireTeam(db: D1Database, teamIds: number | number[]): P
 }
 
 /**
- * Synchronises groups with automatic members. youth referee: members are all persons with the role,
- * those in charge are all admins. Repeatable, a second run changes nothing.
+ * Synchronises groups with automatic members. youth referee: members are all persons with the role; admins
+ * manage the leads by hand as in any group (before, all admins were leads, so an admin could not leave the group).
+ * Repeatable, a second run changes nothing.
  */
 export async function syncAutoGroups(db: D1Database): Promise<void> {
   const groups = await all<{ id: number }>(db, "SELECT id FROM teams WHERE kind = 'group' AND auto_members = 'referees'");
@@ -48,18 +49,6 @@ export async function syncAutoGroups(db: D1Database): Promise<void> {
         db,
         `INSERT OR IGNORE INTO team_memberships (person_id, team_id, role)
          SELECT r.person_id, ?1, 'player' FROM referees r JOIN persons p ON p.id = r.person_id AND p.is_former = 0`,
-        g.id,
-      ),
-      stmt(
-        db,
-        `DELETE FROM team_memberships WHERE team_id = ?1 AND role = 'coach'
-           AND person_id NOT IN (SELECT id FROM persons WHERE is_admin = 1 AND is_former = 0)`,
-        g.id,
-      ),
-      stmt(
-        db,
-        `INSERT OR IGNORE INTO team_memberships (person_id, team_id, role)
-         SELECT id, ?1, 'coach' FROM persons WHERE is_admin = 1 AND is_former = 0`,
         g.id,
       ),
     ]),

@@ -597,7 +597,8 @@ teamRoutes.post("/teams/:id/members", async (c) => {
   const teamId = intParam(c, "id");
   const input = parse(memberSchema, await readJson(c.req.raw));
   if (input.role === "staff") await requireTeam(c.env.DB, teamId);
-  if ((await teamKind(c.env.DB, teamId)).autoMembers) throw badRequest(t`The members of this group are determined automatically.`, "auto_members");
+  // Automatic groups: members follow the role, admins assign the leads by hand
+  if (input.role !== "coach" && (await teamKind(c.env.DB, teamId)).autoMembers) throw badRequest(t`The members of this group are determined automatically.`, "auto_members");
   const person = await first(c.env.DB, "SELECT 1 AS ok FROM persons WHERE id = ? AND is_former = 0", input.personId);
   if (!person) throw notFound(t`This person does not exist.`);
   await run(
@@ -618,7 +619,7 @@ teamRoutes.delete("/teams/:id/members/:personId", async (c) => {
   const { role } = parse(z.object({ role: z.enum(["player", "coach", "helper", "staff"]).default("player") }), { role: c.req.query("role") });
   if (role === "coach") requireAdmin(actor);
   else requireCoach(actor, teamId);
-  if ((await teamKind(c.env.DB, teamId)).autoMembers) throw badRequest(t`The members of this group are determined automatically.`, "auto_members");
+  if (role !== "coach" && (await teamKind(c.env.DB, teamId)).autoMembers) throw badRequest(t`The members of this group are determined automatically.`, "auto_members");
   const res = await c.env.DB.batch([
     stmt(c.env.DB, "DELETE FROM team_memberships WHERE team_id = ? AND person_id = ? AND role = ?", teamId, personId, role),
     stmt(

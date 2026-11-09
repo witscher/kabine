@@ -131,7 +131,7 @@ export function AdminGroupsPage() {
           />
           <p class="small muted">
             {create.auto === "referees"
-              ? t`Members are automatically all people with the youth referee role, leads all admins. If someone joins or loses the role, the group adjusts.`
+              ? t`Members are automatically all people with the youth referee role. If someone joins or loses the role, the group adjusts. You assign the leads in the group afterwards.`
               : t`You assign members and leads in the group afterwards.`}
           </p>
           {create.auto === "referees" && hasRefereeGroup ? (
@@ -179,6 +179,8 @@ export function GroupPage({ team, onChanged }: { team: TeamDetail; onChanged: ()
   const [renameOpen, setRenameOpen] = useState(false);
   const auto = team.autoMembers === "referees";
   const manage = me.isAdmin && !auto;
+  // Automatic group: members follow the role, admins manage the leads as in any group
+  const manageLeads = me.isAdmin;
   const teamName = team.name;
   const players = team.players.length;
   const coaches = team.coaches.length;
@@ -247,7 +249,7 @@ export function GroupPage({ team, onChanged }: { team: TeamDetail; onChanged: ()
 
         {auto ? (
           <Notice>
-            <Trans>Members are automatically all people with the youth referee role, leads all admins. You give the role under Admin → Youth referees.</Trans>
+            <Trans>Members are automatically all people with the youth referee role. You give the role under Admin → Youth referees. You assign the leads here.</Trans>
           </Notice>
         ) : null}
 
@@ -263,9 +265,9 @@ export function GroupPage({ team, onChanged }: { team: TeamDetail; onChanged: ()
               person: c.person,
               hasAccount: c.hasAccount,
             }))}
-            onRemove={manage ? (p) => remove(p, "coach") : undefined}
+            onRemove={manageLeads ? (p) => remove(p, "coach") : undefined}
           />
-          {manage ? (
+          {manageLeads ? (
             <Button icon="plus" onClick={() => setAddRole("coach")}>
               <Trans>Add leads</Trans>
             </Button>

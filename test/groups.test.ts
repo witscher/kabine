@@ -98,29 +98,36 @@ describe("Gruppen", () => {
     expect((await api(`/teams/${wd}`, { method: "DELETE", cookie: adminCookie })).status).toBe(409);
   });
 
-  it("Jugendschiedsrichter-Gruppe folgt der Rolle, Admins sind Verantwortliche", async () => {
+  it("Jugendschiedsrichter-Gruppe: Mitglieder folgen der Rolle, Verantwortliche von Hand", async () => {
     await api(`/admin/referees/${kira}`, { method: "PUT", cookie: adminCookie });
     const g = await createGroup("Jugendschiedsrichter", "referees");
     const members = async () =>
       (await rows<{ person_id: number; role: string }>("SELECT person_id, role FROM team_memberships WHERE team_id = ? ORDER BY role, person_id", g)).map(
         (r) => `${r.role}:${r.person_id}`,
       );
-    expect(await members()).toEqual([`coach:${admin}`, `player:${kira}`]);
+    expect(await members()).toEqual([`player:${kira}`]);
 
     await api(`/admin/referees/${alma}`, { method: "PUT", cookie: adminCookie });
-    expect(await members()).toEqual([`coach:${admin}`, `player:${alma}`, `player:${kira}`]);
+    expect(await members()).toEqual([`player:${alma}`, `player:${kira}`]);
     await api(`/admin/referees/${kira}`, { method: "DELETE", cookie: adminCookie });
-    expect(await members()).toEqual([`coach:${admin}`, `player:${alma}`]);
+    expect(await members()).toEqual([`player:${alma}`]);
 
-    // Neuer Admin wird Verantwortlicher, entzogene Rechte nehmen ihn wieder heraus
+    // Admins assign leads by hand; the sync keeps them and adds nobody
+    expect((await api(`/teams/${g}/members`, { cookie: adminCookie, body: { personId: admin, role: "coach" } })).status).toBe(201);
     await api(`/admin/persons/${coach}`, { method: "PATCH", cookie: adminCookie, body: { isAdmin: true, adminEmail: "coachy@example.org" } });
-    expect(await members()).toContain(`coach:${coach}`);
-    await api(`/admin/persons/${coach}`, { method: "PATCH", cookie: adminCookie, body: { isAdmin: false } });
-    expect(await members()).not.toContain(`coach:${coach}`);
+    expect(await members()).toEqual([`coach:${admin}`, `player:${alma}`]);
+    await api(`/admin/referees/${kira}`, { method: "PUT", cookie: adminCookie });
+    expect(await members()).toEqual([`coach:${admin}`, `player:${alma}`, `player:${kira}`]);
+    // An admin leaves again, and that also survives the next sync
+    expect((await api(`/teams/${g}/members/${admin}?role=coach`, { method: "DELETE", cookie: adminCookie })).status).toBe(200);
+    await api(`/admin/referees/${kira}`, { method: "DELETE", cookie: adminCookie });
+    expect(await members()).toEqual([`player:${alma}`]);
+    await api(`/teams/${g}/members`, { cookie: adminCookie, body: { personId: admin, role: "coach" } });
 
-    // Von Hand lässt sich nichts zuordnen
+    // Members cannot be assigned or removed by hand
     const manual = await api(`/teams/${g}/members`, { cookie: adminCookie, body: { personId: coach, role: "player" } });
     expect(manual.body.error?.code).toBe("auto_members");
+    expect((await api(`/teams/${g}/members/${alma}?role=player`, { method: "DELETE", cookie: adminCookie })).body.error?.code).toBe("auto_members");
     // Chat: Admin moderiert als Verantwortlicher
     const rooms = await api("/chat/rooms", { cookie: adminCookie });
     expect(rooms.body.rooms.find((r: any) => r.teamId === g)).toMatchObject({ isGroup: true, isMod: true, adminOnly: false });

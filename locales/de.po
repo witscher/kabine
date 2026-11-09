@@ -633,11 +633,6 @@ msgstr "Mitmachen"
 msgid "The address has been changed in the meantime. Please confirm the new address."
 msgstr "Die Adresse wurde inzwischen geändert. Bitte bestätige die neue Adresse."
 
-# ai
-#: src/pages/group.tsx
-msgid "Members are automatically all people with the youth referee role, leads all admins. If someone joins or loses the role, the group adjusts."
-msgstr "Mitglieder sind automatisch alle Personen mit der Rolle Jugendschiedsrichter, Verantwortliche alle Admins. Kommt jemand dazu oder verliert die Rolle, passt sich die Gruppe an."
-
 #: modules/carpools/worker/domain.ts
 msgid "{seats, plural, one {{driver} has one free seat: {game}. Book it in the app.} other {{driver} has # free seats: {game}. Book it in the app.}}"
 msgstr "{seats, plural, one {{driver} hat einen freien Platz: {game}. In der App mitfahren.} other {{driver} hat # freie Plätze: {game}. In der App mitfahren.}}"
@@ -1765,6 +1760,11 @@ msgstr "{days, plural, one {vor # Tag} other {vor # Tagen}}"
 #: src/pages/setup-wizard.tsx
 msgid "Skip"
 msgstr "Überspringen"
+
+# ai
+#: src/pages/group.tsx
+msgid "Members are automatically all people with the youth referee role. You give the role under Admin → Youth referees. You assign the leads here."
+msgstr "Mitglieder sind automatisch alle Personen mit der Rolle Jugendschiedsrichter. Die Rolle vergibst du unter Verwaltung → Jugendschiedsrichter. Verantwortliche ordnest du hier zu."
 
 #: worker/routes/events.ts
 #: worker/routes/events.ts
@@ -9459,11 +9459,6 @@ msgstr "Treffpunkt und Uhrzeit noch nicht eingetragen"
 msgid "After that the initial is shown again."
 msgstr "Danach steht wieder der Anfangsbuchstabe da."
 
-# ai
-#: src/pages/group.tsx
-msgid "Members are automatically all people with the youth referee role, leads all admins. You give the role under Admin → Youth referees."
-msgstr "Mitglieder sind automatisch alle Personen mit der Rolle Jugendschiedsrichter, Verantwortliche alle Admins. Die Rolle vergibst du unter Verwaltung → Jugendschiedsrichter."
-
 #: src/howto.tsx
 msgid "You can find the guide at any time under help."
 msgstr "Die Anleitung findest du jederzeit unter Hilfe."
@@ -12421,6 +12416,11 @@ msgid "with note"
 msgstr "mit Notiz"
 
 # ai
+#: src/pages/group.tsx
+msgid "Members are automatically all people with the youth referee role. If someone joins or loses the role, the group adjusts. You assign the leads in the group afterwards."
+msgstr "Mitglieder sind automatisch alle Personen mit der Rolle Jugendschiedsrichter. Kommt jemand dazu oder verliert die Rolle, passt sich die Gruppe an. Verantwortliche ordnest du danach in der Gruppe zu."
+
+# ai
 #: src/game-import.tsx
 msgid "Home game vs {opponent}"
 msgstr "Heimspiel gegen {opponent}"
@@ -12873,3 +12873,4 @@ msgstr "Chat schreiben"
 #: worker/routes/events.ts
 msgid "In one time block the end is before the start."
 msgstr "Bei einem Zeitblock liegt das Ende vor dem Beginn."
+

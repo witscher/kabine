@@ -358,7 +358,7 @@ For circles without training and games (coaching team, youth referees) there are
 
 A group is a row in `teams` with `kind = 'group'`. Chat, push, unread counters, `@alle` and special events work unchanged. Team features reject groups with `group_not_supported` (`requireTeam`).
 
-The youth referee group has `auto_members = 'referees'`: the members are all people with the role, the leads all admins, without parents. It is synced on every role or admin change and nightly in the cron. Nothing can be assigned there by hand.
+The youth referee group has `auto_members = 'referees'`: the members are all people with the role, without parents. They are synced on every role change and nightly in the cron and cannot be assigned by hand. Admins assign the leads by hand as in any group; before 0.8.0 all admins were leads automatically, so an admin could not leave the group (not even in coach mode). Existing leads stay.
 
 At the season change groups do not appear in the assignment; their members and leads stay. The chat is cleared as for teams.
 

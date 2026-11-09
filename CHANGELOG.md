@@ -6,6 +6,7 @@ Changes that are merged but not released yet go under *Unreleased*, one line eac
 
 ## Unreleased
 
+- Youth referee group: admins are no longer added as leads automatically. Admins assign the leads by hand like in any group; whoever is a lead now stays one.
 - An admin in coach mode who no longer coaches any team is an admin again, instead of being stuck without the switch back.
 
 ## v0.7.0
