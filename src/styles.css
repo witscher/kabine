@@ -2881,3 +2881,23 @@ button.announcement-head {
   margin-right: 6px;
   vertical-align: 2px;
 }
+
+/* Info button next to settings (InfoButton in ui.tsx) */
+.switch-with-info {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+.switch-with-info > .switch-row {
+  flex: 1;
+  min-width: 0;
+}
+.info-btn {
+  color: var(--text-3);
+  flex-shrink: 0;
+}
+.section-title .info-btn,
+.field-label .info-btn {
+  vertical-align: middle;
+  margin-left: 2px;
+}

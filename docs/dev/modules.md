@@ -59,6 +59,8 @@ modules/carpools/
 
 [`modules/carpools/`](../../modules/carpools/) uses all of the event hooks and is the reference module.
 
+Explanations of a module's settings go behind an info button (docs/dev/design.md, Info buttons): keep the texts in the module folder as functions returning a `HelpText` (`modules/duties/app/help.ts`) and pass them to `SwitchRow info={…}` or `InfoButton topic={…}`. No registry is needed.
+
 ## The modules
 
 <!-- Every module of modules/index.ts needs a row; test/modules-contract.test.ts checks it. -->

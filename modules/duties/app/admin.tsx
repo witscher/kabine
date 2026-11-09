@@ -8,6 +8,7 @@ import { Icon } from "../../../src/icons";
 import { useMe } from "../../../src/session";
 import { invalidate, useQuery } from "../../../src/store";
 import { Button, confirmDialog, ErrorBox, Field, Notice, Segmented, Sheet, Spinner, SwitchRow, TextField, toast, TopBar, useDocumentTitle } from "../../../src/ui";
+import { needsSkillHelp } from "./help";
 
 type TemplateItem = TemplateInfo["items"][number];
 
@@ -198,7 +199,7 @@ function DutyTypeSheet({ type, onClose, onDone }: { type: DutyTypeInfo | null; o
             <li>
               <SwitchRow
                 label={t`Needs prior knowledge`}
-                sub={t`The duty is only offered to those who turn it on in their profile under “I can do this”.`}
+                info={needsSkillHelp()}
                 checked={needsSkill}
                 onChange={setNeedsSkill}
               />

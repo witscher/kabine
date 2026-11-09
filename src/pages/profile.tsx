@@ -200,11 +200,7 @@ function AdminModeSwitch({ coachMode }: { coachMode: boolean }) {
       <li>
         <SwitchRow
           label={t`Work as admin`}
-          sub={
-            coachMode
-              ? t`Off: you see the app like a coach, without administration and without admin rights.`
-              : t`On: administration and all teams. Off: only your teams, like a coach.`
-          }
+          info="adminMode"
           checked={!coachMode}
           onChange={async (admin) => {
             await api.put("/profile/admin-mode", { coachMode: !admin });

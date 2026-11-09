@@ -61,6 +61,14 @@ One rule for every screen, so nobody has to guess whether something is saved:
 - **Creating or editing something in a sheet or form** (new event, edit event, new team, new training plan, duty type, the setup wizard) saves everything, switches included, with the main button at the end. There `onChange` only sets state, so no "Saved" appears.
 - **Never** both in one card. Filters and tabs are not saving controls.
 
+## Info buttons
+
+Settings explain themselves behind a small "i" instead of in lines under the switch: the button opens a sheet with a plain-language explanation, an example where it helps, and "Got it" (`InfoButton` in `src/ui.tsx`, `SwitchRow` with `info`, `.info-btn`). All core texts live in one place, `src/help-texts.ts` (`HELP`, one entry per setting, built when the sheet opens so it follows the language); a new switch on a settings page gets its entry there. Modules keep their texts in their own folder (e.g. `modules/duties/app/help.ts`) and pass the object to `info` or `InfoButton`.
+
+- A switch or heading with an info button has no sub text and no explanation paragraph any more; both together were redundant.
+- Hints that depend on the state (e.g. whether a child already has an account) stay as they are, and so do sub texts of switches without an info button.
+- Covered: team settings (decline deadlines, automatic squad, responses visible, helper plan, children in the app), groups (responses visible, include parents), administration (include parents, children in the app per age group, youth referee, full club member, sync reminder), profile (work as admin, calendar), duty types (prior knowledge).
+
 ## Coach buttons
 
 Whatever only coaches and other leads (organisers, admins) can do is a coach button, in views that players and parents see too, so a coach sees at a glance what is theirs: a light tint of the club's main colour, a border in that colour and a whistle before the text (`variant="coach"` on `Button`, `<a class="btn btn-coach">` with `CoachMark`, `.btn-coach` in `src/styles.css`). Headings such as "For coaches" get the whistle too (`.coach-head`). The colour follows the club profile, so a club with a yellow main colour gets yellow coach buttons.
@@ -278,7 +286,11 @@ Without an entry the response counts (`defaultMark` in `shared/attendance.ts`): 
 
 Coaches record until the end of the day after the event (local time), admins (not in coach mode) the whole season. The attendance record (`attendance`) follows a later entry: present stays present, excused becomes declined, unexcused stays unexcused; an optional participant gets a row only if present, and a short-notice decline is not late if the person came.
 
-Coaches and admins see all entries; the person and their parents see their own entry at their response where it differs from it ("Was there", "Excused", "Missed without excuse"). Other players do not get the participant list anyway. There is no push.
+Coaches and admins see all entries; the person and their parents see their own entry at their response where it differs from it ("Was there", "Excused", "Missed without excuse"). Other players do not get the participant list anyway.
+
+*Unexcused* tells the parents at once: linked parents who are in charge in one of the event's teams (`guardianAccounts` in `worker/domain/notify.ts`) get a push "Mia is missing from training … had said yes, but according to Tina did not arrive", with a link to the event. Not the child itself, not switchable off (it is about safety: parents notice quickly that their child did not arrive), once per event and child (`duty_notifications` kind `unexcused_parents`), also when the coach takes the entry back and sets it again. The attendance list tells the coach.
+
+Past events count who was really there (`EventCounts.present`: accepted or recorded *present*, without *excused* and *unexcused*): the event page shows "Were there" instead of "Taking part", and the events list shows coaches the number present (people icon) instead of the acceptances.
 
 Entries belong to the events and are deleted with them at the season change. The admin export contains the table. The former table `unexcused_absences` was copied into it and is dropped in a later release (`migrations/README.md`); the old route `PUT /events/:id/unexcused/:personId` stays for app versions still cached on devices.
 
@@ -340,7 +352,7 @@ A link from the parents does not block existing passkeys; the old one keeps work
 
 Admins who also coach mostly work as coaches. In the profile they switch "Work as admin" off and see the app like a coach.
 
-The choice is stored on the account (`accounts.coach_mode`) and applies on all devices. In coach mode the server builds the actor without admin rights, and the admin views are off too. The way back is only the switch, which checks the person in the database, not the actor. The owner protection is not affected.
+The choice is stored on the account (`accounts.coach_mode`) and applies on all devices. In coach mode the server builds the actor without admin rights, and the admin views are off too. The way back is only the switch, which checks the person in the database, not the actor. The owner protection is not affected. Coach mode only takes effect while the person coaches a team (`loadActor`): an admin who lost their last coach role in coach mode would otherwise have no switch to come back.
 
 ## Responses visible to the team
 

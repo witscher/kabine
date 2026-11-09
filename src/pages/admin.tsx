@@ -15,7 +15,7 @@ import { AdminAvatar, PersonAvatar } from "../avatar";
 import { Icon, type IconName } from "../icons";
 import { useMe, useSession } from "../session";
 import { invalidate, useQuery } from "../store";
-import { Button, confirmDialog, copyText, Empty, ErrorBox, Field, Notice, Segmented, Sheet, shareLink, Spinner, SwitchRow, TextField, toast, TopBar, useDocumentTitle } from "../ui";
+import { Button, confirmDialog, copyText, Empty, ErrorBox, Field, InfoButton, Notice, Segmented, shareLink, Sheet, Spinner, SwitchRow, TextField, toast, TopBar, useDocumentTitle } from "../ui";
 import { QrLink } from "./team";
 import { roleLabel } from "./group";
 import { loadRegionHolidays } from "../holidays";
@@ -529,7 +529,7 @@ export function AdminTeamsPage() {
             </Field>
             <SwitchRow
               label={t`Include parents`}
-              sub={t`Parents respond for their child, are in the chat and get notifications. Turn off when the players take responsibility themselves, for example in older youth teams and for adults.`}
+              info="parentsEnabled"
               checked={edit.parentsEnabled}
               onChange={(v) => setEdit({ ...edit, parentsEnabled: v })}
             />
@@ -1304,7 +1304,7 @@ function PersonAdminSheet({ p, all, selfId, onClose, onChanged }: { p: AdminPers
       </strong>
       <SwitchRow
         label={t`Youth referee`}
-        sub={t`May be assigned as referee at all youth home games from F to C.`}
+        info="referee"
         checked={p.isReferee}
         onChange={async (on) => {
           if (on) await api.put(`/admin/referees/${p.person.id}`);
@@ -1314,7 +1314,7 @@ function PersonAdminSheet({ p, all, selfId, onClose, onChanged }: { p: AdminPers
       />
       <SwitchRow
         label={t`Full club member`}
-        sub={t`Only visible to admins. Full club members can help organise special events and take on duties with “Who helps: members”.`}
+        info="clubMember"
         checked={p.isClubMember}
         onChange={async (on) => {
           if (on) await api.put(`/admin/club-members/${p.person.id}`);
@@ -1497,13 +1497,8 @@ export function AdminAgeClassesPage() {
             <section class="card card-body stack-sm" aria-label={t`Children in the app`}>
               <h2 class="section-title" style={{ margin: 0 }}>
                 <Trans>Children in the app</Trans>
+                <InfoButton topic="childLimits" />
               </h2>
-              <p class="small muted">
-                <Trans>
-                  What players of a youth class may do themselves. Without an own access there is no player link; the parents respond and are in the chat. Coaches can
-                  restrict this further for their team, and the parents' permissions apply within it. Adult classes are never limited.
-                </Trans>
-              </p>
               <ul class="list">
                 {rows.map((r, i) =>
                   r.isYouth ? (

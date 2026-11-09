@@ -6,7 +6,7 @@ import { useState } from "preact/hooks";
 import { api } from "./api";
 import { useMe } from "./session";
 import { useQuery } from "./store";
-import { Button, confirmDialog, copyText, Notice, Sheet, SwitchRow, toast } from "./ui";
+import { Button, confirmDialog, copyText, InfoButton, Notice, Sheet, SwitchRow, toast } from "./ui";
 
 interface CalendarPrefs {
   training: boolean;
@@ -34,10 +34,8 @@ export function MyCalendar() {
     <section class="stack-sm" aria-label={t`My events`}>
       <h2 class="section-title">
         <Trans>My events</Trans>
+        <InfoButton topic="calendar" />
       </h2>
-      <p class="small muted">
-        <Trans>Your events as a calendar on your phone, always up to date. Choose what it should contain.</Trans>
-      </p>
       <ul class="list">
         <li>
           <SwitchRow label={t`Training and other events`} checked={data.training} onChange={(v) => set("training", v)} />

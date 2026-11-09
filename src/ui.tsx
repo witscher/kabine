@@ -5,6 +5,7 @@ import type { ComponentChildren, JSX } from "preact";
 import { useEffect, useRef, useState } from "preact/hooks";
 import type { ParticipationStatus } from "../shared/types";
 import { errorMessage } from "./api";
+import { HELP, type HelpText, type HelpTopic } from "./help-texts";
 import { Icon, type IconName } from "./icons";
 
 // Headers -------------------------------------------------------------------------
@@ -349,8 +350,55 @@ export function SavedNote({ show }: { show: boolean }) {
   );
 }
 
-/** A switch. If onChange returns a promise, it saves at once and shows "Saved" (docs/dev/design.md, Saving). */
-export function SwitchRow(props: { label: ComponentChildren; sub?: ComponentChildren; checked: boolean; onChange: (v: boolean) => unknown; disabled?: boolean }) {
+/**
+ * Small "i" next to a setting or a section heading: opens the explanation in plain language, with an example where
+ * it helps (texts in src/help-texts.ts; modules pass their own text). A setting with an info button has no sub text
+ * or explanation paragraph next to it (docs/dev/design.md, Info buttons).
+ */
+export function InfoButton({ topic }: { topic: HelpTopic | HelpText }) {
+  const [open, setOpen] = useState(false);
+  const help: HelpText = typeof topic === "string" ? HELP[topic]() : topic;
+  const title = help.title;
+  return (
+    <>
+      <button type="button" class="icon-btn info-btn" aria-label={t`Explanation: ${title}`} onClick={() => setOpen(true)}>
+        <Icon name="info" size={18} />
+      </button>
+      {open ? (
+        <Sheet open onClose={() => setOpen(false)} title={help.title}>
+          <p>{help.text}</p>
+          {help.example ? (
+            <Notice kind="yellow">
+              <strong>
+                <Trans>Example:</Trans>{" "}
+              </strong>
+              {help.example}
+            </Notice>
+          ) : null}
+          <Button block onClick={() => setOpen(false)}>
+            <Trans>Got it</Trans>
+          </Button>
+        </Sheet>
+      ) : null}
+    </>
+  );
+}
+
+type SwitchProps = { label: ComponentChildren; sub?: ComponentChildren; checked: boolean; onChange: (v: boolean) => unknown; disabled?: boolean };
+
+/** A switch. If onChange returns a promise, it saves at once and shows "Saved" (docs/dev/design.md, Saving); `info` adds an info button. */
+export function SwitchRow({ info, ...props }: SwitchProps & { info?: HelpTopic | HelpText }) {
+  if (!info) return <SwitchButton {...props} />;
+  // The switch is a button itself; the "i" sits next to it
+  return (
+    <div class="switch-with-info">
+      <SwitchButton {...props} />
+      <InfoButton topic={info} />
+    </div>
+  );
+}
+
+function SwitchButton(props: SwitchProps) {
   const saving = useSaving();
   return (
     <button

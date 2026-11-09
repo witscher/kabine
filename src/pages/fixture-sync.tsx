@@ -10,7 +10,7 @@ import { api, errorMessage } from "../api";
 import { useClub } from "../club";
 import { ago } from "../format";
 import { invalidate, useQuery } from "../store";
-import { Button, ErrorBox, Segmented, Spinner, toast, TopBar, useDocumentTitle } from "../ui";
+import { Button, ErrorBox, InfoButton, Segmented, Spinner, toast, TopBar, useDocumentTitle } from "../ui";
 import { AdminOnly } from "./admin";
 import { syncGames } from "./games";
 
@@ -96,13 +96,8 @@ export function AdminFixtureSyncPage() {
             <section class="card card-pad stack-sm" aria-label={t`Reminder to sync`}>
               <h2 class="section-title" style={{ margin: 0 }}>
                 <Trans>Reminder to sync</Trans>
+                <InfoButton topic="scheduleReminder" />
               </h2>
-              <p class="small muted">
-                <Trans>
-                  When a team's last sync is this long ago, its coaches see a hint with "Sync now" at the top of their events list. The hint disappears after the
-                  sync. A coach or admin always syncs by hand.
-                </Trans>
-              </p>
               <Segmented label={t`Remind coaches after`} value={String(data.reminderDays)} options={options} onChange={setDays} />
             </section>
           ) : null}

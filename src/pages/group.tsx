@@ -303,7 +303,7 @@ export function GroupPage({ team, onChanged }: { team: TeamDetail; onChanged: ()
           </h2>
           <SwitchRow
             label={t`Responses visible to everyone`}
-            sub={t`For special events, all members see who accepted or declined. Only the leads see the reasons.`}
+            info="showResponsesGroup"
             checked={team.showResponses}
             onChange={async (value) => {
               await api.patch(`/teams/${team.id}`, { showResponses: value });
@@ -319,7 +319,7 @@ export function GroupPage({ team, onChanged }: { team: TeamDetail; onChanged: ()
           {me.isAdmin && !auto ? (
             <SwitchRow
               label={t`Include parents`}
-              sub={t`For a youth group: linked parents see the group's special events for their child, respond for it and are in the chat. Parents are linked through the child's team; groups have no parent links.`}
+              info="parentsEnabledGroup"
               checked={team.parentsEnabled}
               onChange={async (value) => {
                 if (!value) {

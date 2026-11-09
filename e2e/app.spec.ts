@@ -1885,3 +1885,15 @@ test("Helfer: ohne Filter alle Mannschaften, ein Tipp filtert, ein zweiter hebt 
   await expect(first).toHaveAttribute("aria-pressed", "true");
   await expect(referee).toHaveAttribute("aria-pressed", "false");
 });
+
+test("Info-Knopf: Erklärung mit Beispiel statt Untertext am Schalter", async () => {
+  const { page } = coach;
+  await page.goto("/team/1");
+  await page.getByRole("button", { name: "Einstellungen" }).click();
+  await page.getByRole("button", { name: "Erklärung: Stammkader automatisch nominieren" }).click();
+  const info = page.getByRole("dialog", { name: "Stammkader automatisch nominieren" });
+  await expect(info).toContainText("Beispiel:");
+  if (process.env.E2E_SHOTS) await page.screenshot({ path: `${process.env.E2E_SHOTS}/info-button.png` });
+  await info.getByRole("button", { name: "Verstanden" }).click();
+  await expect(info).toHaveCount(0);
+});

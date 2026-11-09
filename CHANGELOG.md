@@ -6,6 +6,7 @@ Changes that are merged but not released yet go under *Unreleased*, one line eac
 
 ## Unreleased
 
+- Info buttons: settings explain themselves behind a small "i" with an example, instead of long lines under every switch (team settings, groups, administration, profile, duty types).
 - Past events count who was really there (accepted or recorded as present by the coach): the event page shows "Were there", and the events list shows coaches the number of people present instead of the acceptances.
 - When a coach marks a child as unexcused after an event, the child's linked parents get a push at once that their child did not arrive (once per event and child, cannot be switched off). The attendance list tells the coach.
 - Helpers tab: without a selection it lists the events of all your teams together, each with its team; a tap on a team filters, a second tap clears the filter, as in the events list. Before, the first team was always selected.

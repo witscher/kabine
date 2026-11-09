@@ -26,10 +26,11 @@ import {
   Empty,
   ErrorBox,
   Field,
+  InfoButton,
   Notice,
   Segmented,
-  Sheet,
   shareLink,
+  Sheet,
   Spinner,
   SwitchRow,
   TextField,
@@ -978,19 +979,13 @@ function ReachOverview({ team }: { team: TeamDetail }) {
 
 /** Children in the app: the team restricts what its players may do beyond the age class. */
 function ChildLimitsSection({ team, classLimits, onChanged }: { team: TeamDetail; classLimits: ChildLimits; onChanged: () => void }) {
-  const ageClass = team.ageClassName;
   const own = Object.keys(team.teamChildLimits).length > 0;
   return (
     <section class="card card-body stack-sm" aria-label={t`Children in the app`}>
       <h2 class="section-title" style={{ margin: 0 }}>
         <Trans>Children in the app</Trans>
+        <InfoButton topic="childLimitsTeam" />
       </h2>
-      <p class="muted small">
-        <Trans>
-          What the players of this team may do themselves. The club sets the limit for the age group {ageClass}; here you can only restrict further, e.g. the chat
-          only for parents. Within this, the parents decide for their child.
-        </Trans>
-      </p>
       {team.parentsEnabled ? (
         <ChildLimitControls
           name={team.name}
@@ -1038,10 +1033,8 @@ function SettingsTab({ team, onChanged }: { team: TeamDetail; onChanged: () => v
       <section class="card card-body" aria-label={t`Decline deadlines`}>
         <h2 class="section-title" style={{ margin: 0 }}>
           <Trans>Decline deadlines</Trans>
+          <InfoButton topic="deadlines" />
         </h2>
-        <p class="muted small">
-          <Trans>Up to how many hours before the start can players decline without a note? Later declines are possible but count as short notice.</Trans>
-        </p>
         <div class="grid-2">
           <TextField label={t`Training (hrs)`} value={training} onInput={setTraining} inputMode="numeric" maxLength={3} />
           <TextField label={t`Game (hrs)`} value={game} onInput={setGame} inputMode="numeric" maxLength={3} />
@@ -1074,7 +1067,7 @@ function SettingsTab({ team, onChanged }: { team: TeamDetail; onChanged: () => v
         </h2>
         <SwitchRow
           label={t`Automatically nominate the core squad for all games`}
-          sub={t`Saves nominating for every game. Changes for individual games remain possible. Instead of a push about the nomination, a reminder comes three days before each game.`}
+          info="autoSquad"
           checked={team.autoSquad}
           onChange={async (value) => {
             await api.patch(`/teams/${team.id}`, { autoSquad: value });
@@ -1091,7 +1084,7 @@ function SettingsTab({ team, onChanged }: { team: TeamDetail; onChanged: () => v
         </h2>
         <SwitchRow
           label={t`Responses visible to everyone`}
-          sub={t`For training and special events, players (and included parents) see who has accepted or declined. Reasons remain visible to coaches only. Better left off for youth teams, so that nobody is swayed by others declining.`}
+          info="showResponses"
           checked={team.showResponses}
           onChange={async (value) => {
             await api.patch(`/teams/${team.id}`, { showResponses: value });
@@ -1110,11 +1103,7 @@ function SettingsTab({ team, onChanged }: { team: TeamDetail; onChanged: () => v
         </h2>
         <SwitchRow
           label={t`Helper plan for this team`}
-          sub={
-            team.parentsEnabled
-              ? t`Parents sign up for duties at games, such as cake & bar or jerseys ("Helpers" tab).`
-              : t`The players sign up for duties at games themselves ("Helpers" tab).`
-          }
+          info="helperPlan"
           checked={team.helperPlan}
           onChange={async (value) => {
             await api.patch(`/teams/${team.id}`, { helperPlan: value });
