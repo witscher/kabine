@@ -1044,7 +1044,10 @@ test("Liveticker und Spielbericht: erst beim Antippen ein Abruf, Seite öffnet i
         .formatToParts(new Date(Date.now() - minutesAgo * 60_000))
         .map((x) => [x.type, x.value]),
     );
-  const p = berlin(30);
+  // Started today: shortly after midnight 30 minutes ago would be yesterday, and only today's games are "in progress"
+  const now = berlin(0);
+  const sinceMidnight = Number(now.hour) * 60 + Number(now.minute);
+  const p = berlin(Math.max(1, Math.min(30, sinceMidnight - 1)));
   const game = {
     gID: "777001", gNo: "1", gDate: `${p.day}.${p.month}.${p.year!.slice(2)}`, gTime: `${p.hour}:${p.minute}`,
     gHomeTeam: "SV Musterstadt", gGuestTeam: "TSV Testdorf", gGymnasiumID: "901", gGymnasiumName: "Testhalle",
