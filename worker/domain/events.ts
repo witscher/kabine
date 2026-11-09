@@ -88,6 +88,8 @@ export interface TeamInfo {
   fixture_connector: string | null;
   fixture_source: string | null;
   show_responses: number;
+  /** Whole team at games: every player takes part, the nomination only decides who plays */
+  game_all_players: number;
 }
 
 interface MemberRow {
@@ -142,6 +144,8 @@ export interface Participant {
   /** All teams of the person involved, e.g. wC1 and wC2 at a joint training */
   teamIds: number[];
   isHelper: boolean;
+  /** Games: nominated (plays). With "whole team at games" players who are not nominated take part too. */
+  nominated: boolean;
   /**
    * Optional training for this person: all their teams at the event join optionally. No automatic
    * acceptance, no reminders, no "absent without excuse", in the statistics only when accepted.
@@ -208,7 +212,8 @@ export async function loadEventContext(db: D1Database, events: EventRow[]): Prom
     db
       .prepare(
         `SELECT et.event_id, et.optional AS et_optional, t.id, t.name, t.age_class_code, COALESCE(ac.game_minutes, 120) AS game_minutes, t.decline_hours_training,
-                t.decline_hours_game, t.max_squad, t.auto_squad, t.fixture_connector, t.fixture_source, t.show_responses
+                t.decline_hours_game, t.max_squad, t.auto_squad, t.fixture_connector, t.fixture_source, t.show_responses,
+                t.game_all_players
            FROM event_teams et JOIN teams t ON t.id = et.team_id
            ${CURRENT_AGE_CLASS_JOIN("t", "ac")}
           WHERE et.event_id IN (SELECT value FROM json_each(?)) ORDER BY t.name`,
@@ -327,7 +332,7 @@ export async function loadEventContext(db: D1Database, events: EventRow[]): Prom
     const standingRows = e.kind === "training" && e.rule_id != null ? (standingByRule.get(e.rule_id) ?? []) : [];
     const list: Participant[] = [];
 
-    const add = (personId: number, first: string, last: string | null, isActive: number, teamId: number, isHelper: boolean) => {
+    const add = (personId: number, first: string, last: string | null, isActive: number, teamId: number, isHelper: boolean, nominated = false) => {
       const response = resp.get(personId) ?? null;
       const hasStanding = standingRows.some((s) => s.person_id === personId && standingApplies(s, e));
       // Optional only if every team of the person at this training joins optionally
@@ -345,6 +350,7 @@ export async function loadEventContext(db: D1Database, events: EventRow[]): Prom
         teamId,
         teamIds: [teamId, ...(memberTeams.get(personId) ?? []).filter((t) => t !== teamId).sort((a, b) => teamName(a).localeCompare(teamName(b)))],
         isHelper,
+        nominated,
         optional: isOptional,
         isActive: isActive === 1,
         status,
@@ -354,9 +360,18 @@ export async function loadEventContext(db: D1Database, events: EventRow[]): Prom
     };
 
     if (e.kind === "game") {
-      for (const n of nominationsByEvent.get(e.id)?.values() ?? []) {
+      const nominated = nominationsByEvent.get(e.id) ?? new Map<number, NominationRow>();
+      for (const n of nominated.values()) {
         const m = evMembers.get(n.person_id);
-        add(n.person_id, n.first_name, n.last_name, n.is_active, m?.team_id ?? evTeams[0] ?? 0, n.is_helper === 1 || m?.role === "helper");
+        add(n.person_id, n.first_name, n.last_name, n.is_active, m?.team_id ?? evTeams[0] ?? 0, n.is_helper === 1 || m?.role === "helper", true);
+      }
+      // Whole team at games: every player of these teams, also without a nomination (helpers only when nominated)
+      const allTeams = evTeams.filter((id) => teams.get(id)?.game_all_players === 1);
+      if (allTeams.length) {
+        for (const m of source) {
+          if (m.role !== "player" || !allTeams.includes(m.team_id) || nominated.has(m.person_id) || list.some((p) => p.person.id === m.person_id)) continue;
+          add(m.person_id, m.first_name, m.last_name, m.is_active, m.team_id, false, false);
+        }
       }
     } else {
       for (const m of evMembers.values()) {
@@ -525,7 +540,7 @@ function myParticipations(e: EventRow, ctx: EventContext, actor: Actor, now: num
     out.push({
       person,
       participant: !!part,
-      nominated: e.kind === "game" ? !!part : false,
+      nominated: e.kind === "game" ? !!part?.nominated : false,
       isHelper: part?.isHelper ?? member?.role === "helper",
       optional: part?.optional ?? false,
       status: part?.status ?? null,
@@ -557,7 +572,9 @@ export function toSummary(e: EventRow, ctx: EventContext, actor: Actor, now: num
   const teamRefs = teams.map((t) => ({ id: t.id, name: t.name }));
   const parts = ctx.participants.get(e.id) ?? [];
   const hours = deadlineHours(e, teams);
-  const showCounts = e.kind !== "game" || e.squad_published_at != null;
+  const allPlayers = e.kind === "game" && teams.some((tm) => tm.game_all_players === 1);
+  // Games: only with a squad, unless the whole team takes part anyway
+  const showCounts = e.kind !== "game" || e.squad_published_at != null || allPlayers;
   const canManage = e.club_wide === 1 ? actor.isAdmin : isCoachOfAny(actor, teams.map((t) => t.id));
   return {
     id: e.id,
@@ -601,7 +618,8 @@ export function toSummary(e: EventRow, ctx: EventContext, actor: Actor, now: num
             meetingTime: e.meeting_time,
             coachNotes: e.coach_notes,
             squadPublished: e.squad_published_at != null,
-            nominatedCount: parts.length,
+            nominatedCount: parts.filter((p) => p.nominated).length,
+            allPlayers,
             table: gameTable(teams),
             source: gameSource(e, teams),
             liveMinutes: gameLiveMinutes(teams.map((t) => t.game_minutes)),
@@ -623,6 +641,7 @@ export function toDetail(e: EventRow, ctx: EventContext, actor: Actor, now: numb
   const participants: ParticipantDetail[] | null = summary.canManage
     ? parts.map((p) => ({
         person: p.person,
+        nominated: p.nominated,
         teamId: p.teamId,
         teamIds: p.teamIds,
         isHelper: p.isHelper,

@@ -36,5 +36,13 @@
   "When a team's game schedule has not been synced for this long, its coaches see a hint with \"Sync now\" at the top of their events list. The hint disappears after the sync. A coach or admin always syncs by hand.": "Trainer sehen oben auf der Terminübersicht einen Hinweis mit „Jetzt abgleichen“, wenn ihr Spielplan so lange nicht abgeglichen wurde. Nach dem Abgleich verschwindet er. Abgleichen muss immer ein Trainer oder Admin von Hand.",
   "With 15 days: if the schedule of a team was last synced on the 1st, the hint shows on the 16th.": "Bei 15 Tagen: Wurde der Spielplan einer Mannschaft zuletzt am 1. abgeglichen, erscheint der Hinweis am 16.",
   "The duty is only offered to those who can do it: they switch it on in their profile under “I can do this”. Coaches and admins can still enter anyone.": "Den Dienst bekommt nur angeboten, wer ihn kann: Die Person schaltet das selbst im Profil unter „Das kann ich“ ein. Trainer und Admins können trotzdem jeden eintragen.",
-  "Timekeeper: whoever can do it switches it on in their profile and then sees the free places.": "Zeitnehmer: Wer es kann, schaltet es im Profil ein und sieht dann die freien Plätze."
+  "Timekeeper: whoever can do it switches it on in their profile and then sees the free places.": "Zeitnehmer: Wer es kann, schaltet es im Profil ein und sieht dann die freien Plätze.",
+  "Whole team at games": "Ganze Mannschaft bei Spielen dabei",
+  "Every player of the team takes part in every game and declines if they cannot come. The nomination only decides who plays. Whoever is not nominated still comes along, sees “Not nominated” and can join a carpool. Notifications about the game go to the nominated players only.": "Alle Spieler der Mannschaft sind bei jedem Spiel dabei und sagen ab, wenn sie nicht können. Mit der Nominierung legst du nur fest, wer spielt. Wer nicht nominiert ist, kommt trotzdem mit, sieht „Nicht nominiert“ und kann bei Fahrgemeinschaften mitfahren. Benachrichtigungen zum Spiel bekommen nur die Nominierten.",
+  "The team has 22 players. By Wednesday 4 decline. On Thursday you nominate 14 of the other 18. The other 4 still come along to the game.": "Die Mannschaft hat 22 Spieler. Bis Mittwoch sagen 4 ab. Am Donnerstag nominierst du aus den 18 übrigen deine 14. Die anderen 4 fahren trotzdem mit zum Spiel.",
+  "Not nominated": "Nicht nominiert",
+  "Squad follows": "Kader folgt",
+  "{nominatedYes} nominated": "{nominatedYes} nominiert",
+  "{name}, nominated": "{name}, nominiert",
+  "Dark: nominated. The others take part but do not play.": "Dunkel: nominiert. Die anderen sind dabei, spielen aber nicht."
 }

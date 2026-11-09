@@ -495,6 +495,29 @@ export function Notice(props: { kind?: "info" | "warn" | "yellow"; icon?: IconNa
 
 // Status ------------------------------------------------------------------------
 
+/**
+ * Second mark at games with "whole team at games": whoever takes part also sees whether they play. Without that
+ * setting nothing (only nominated players take part there anyway).
+ */
+export function SquadPill(props: { allPlayers: boolean; published: boolean; participant: boolean; nominated: boolean; status: ParticipationStatus | null }) {
+  if (!props.allPlayers || !props.participant || props.status === "no" || props.status === "inactive") return null;
+  if (props.nominated)
+    return (
+      <span class="pill pill-nominated">
+        <Trans>Nominated</Trans>
+      </span>
+    );
+  return props.published ? (
+    <span class="pill pill-muted">
+      <Trans>Not nominated</Trans>
+    </span>
+  ) : (
+    <span class="pill pill-muted">
+      <Trans>Squad follows</Trans>
+    </span>
+  );
+}
+
 export function StatusPill(props: { status: ParticipationStatus | null; late?: boolean; nominated?: boolean; game?: boolean; optional?: boolean }) {
   const { status } = props;
   // Optional training without acceptance: neither open nor declined

@@ -515,6 +515,11 @@ msgstr "Adults"
 msgid "Discard season change?"
 msgstr "Discard season change?"
 
+#: src/help-texts.ts
+#: src/pages/team.tsx
+msgid "Whole team at games"
+msgstr "Whole team at games"
+
 #: modules/duties/app/admin.tsx
 msgid "Which duties a game needs, with slots and time span around the event. Coaches choose the template for home and away games in their team."
 msgstr "Which duties a game needs, with slots and time span around the event. Coaches choose the template for home and away games in their team."
@@ -1128,6 +1133,10 @@ msgstr "View as {mode}: {name}"
 #: src/pages/admin.tsx
 msgid "Appears as a highlighted announcement in the chat of every selected team, with your name."
 msgstr "Appears as a highlighted announcement in the chat of every selected team, with your name."
+
+#: src/ui.tsx
+msgid "Squad follows"
+msgstr "Squad follows"
 
 #: src/restore.tsx
 msgid "Nothing is deleted or overwritten: what exists here already stays and is skipped. Passkeys, sign-ins and invitation links are not part of an export; everyone signs in again afterwards. To be safe, <0>export the current data</0> first."
@@ -1865,6 +1874,10 @@ msgstr "New training location"
 #: modules/duties/worker/routes.ts
 msgid "This duty type does not fit into a template."
 msgstr "This duty type does not fit into a template."
+
+#: src/pages/event.tsx
+msgid "Dark: nominated. The others take part but do not play."
+msgstr "Dark: nominated. The others take part but do not play."
 
 #: src/pages/admin.tsx
 msgid "the access with all devices and notifications"
@@ -3098,6 +3111,10 @@ msgstr "{venue, select, hall {Opponents' halls (from the fixture list)} pitch {O
 msgid "e.g. Sam runs the training"
 msgstr "e.g. Sam runs the training"
 
+#: src/pages/event.tsx
+msgid "{nominatedYes} nominated"
+msgstr "{nominatedYes} nominated"
+
 #: src/respond.tsx
 msgid "I'm in after all"
 msgstr "I'm in after all"
@@ -3205,6 +3222,10 @@ msgstr "Change name"
 #: src/pages/admin.tsx
 msgid "{venue, select, hall {Club hall} pitch {Club pitch} other {Club venue}}"
 msgstr "{venue, select, hall {Club hall} pitch {Club pitch} other {Club venue}}"
+
+#: src/help-texts.ts
+msgid "The team has 22 players. By Wednesday 4 decline. On Thursday you nominate 14 of the other 18. The other 4 still come along to the game."
+msgstr "The team has 22 players. By Wednesday 4 decline. On Thursday you nominate 14 of the other 18. The other 4 still come along to the game."
 
 #: worker/routes/events.ts
 msgid "Events for several teams are created by admins or the coaches of all those teams."
@@ -5755,6 +5776,10 @@ msgstr "Additional team"
 msgid "Physio, team manager or kit manager: they see the events, who takes part and the chat, and get changes. They do not respond themselves."
 msgstr "Physio, team manager or kit manager: they see the events, who takes part and the chat, and get changes. They do not respond themselves."
 
+#: src/ui.tsx
+msgid "Not nominated"
+msgstr "Not nominated"
+
 #: src/app.tsx
 msgctxt "navigation"
 msgid "Admin"
@@ -7336,6 +7361,7 @@ msgstr "Automatically nominate the core squad for all games"
 
 #: src/pages/home.tsx
 #: src/ui.tsx
+#: src/ui.tsx
 msgid "Nominated"
 msgstr "Nominated"
 
@@ -8098,6 +8124,10 @@ msgstr "Personal data"
 #: modules/carpools/app/index.tsx
 msgid "{waiting, plural, one {# is still looking} other {# are still looking}}"
 msgstr "{waiting, plural, one {# is still looking} other {# are still looking}}"
+
+#: src/help-texts.ts
+msgid "Every player of the team takes part in every game and declines if they cannot come. The nomination only decides who plays. Whoever is not nominated still comes along, sees “Not nominated” and can join a carpool. Notifications about the game go to the nominated players only."
+msgstr "Every player of the team takes part in every game and declines if they cannot come. The nomination only decides who plays. Whoever is not nominated still comes along, sees “Not nominated” and can join a carpool. Notifications about the game go to the nominated players only."
 
 #: src/pages/admin.tsx
 msgid "active {days} days ago"
@@ -10899,6 +10929,10 @@ msgstr "{name} is riding with {driver}: {game} (entered by {coach})."
 #: src/pages/setup-wizard.tsx
 msgid "Sport and season"
 msgstr "Sport and season"
+
+#: src/pages/event.tsx
+msgid "{name}, nominated"
+msgstr "{name}, nominated"
 
 #: worker/routes/squad.ts
 msgid "{playerName} will help out {teamName} on {date}."

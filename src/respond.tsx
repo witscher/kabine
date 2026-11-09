@@ -11,7 +11,7 @@ import { useSession } from "./session";
 import { refreshBadge } from "./badge";
 import { currentLocale } from "./i18n";
 import { invalidate } from "./store";
-import { Button, Sheet, StatusPill, toast } from "./ui";
+import { Button, Sheet, SquadPill, StatusPill, toast } from "./ui";
 
 export const quickReasons = () => [t`School`, t`Ill`, t`Family`, t`Holiday`, t`Other sport`, t`Injured`];
 
@@ -274,7 +274,10 @@ export function PersonResponseRow(props: { event: EventSummary; p: MyParticipati
     <div class="stack-sm" style={{ paddingTop: "4px" }}>
       <div class="row-gap" style={{ justifyContent: "space-between" }}>
         <strong>{me?.person.id === p.person.id ? t`You` : personName(p.person)}</strong>
-        <StatusPill status={p.status} late={p.isLate} nominated={p.nominated} game={event.kind === "game"} optional={p.optional} />
+        <span class="row-gap" style={{ gap: "6px" }}>
+          <StatusPill status={p.status} late={p.isLate} nominated={p.nominated} game={event.kind === "game"} optional={p.optional} />
+          <SquadPill allPlayers={!!event.game?.allPlayers} published={!!event.game?.squadPublished} participant={p.participant} nominated={p.nominated} status={p.status} />
+        </span>
       </div>
       <AttendanceBadge mark={p.attendance} />
       {p.helpRequest ? <HelpRequestCard event={event} p={p} /> : null}

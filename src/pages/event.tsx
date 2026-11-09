@@ -13,7 +13,7 @@ import { AttendanceBadge, byGuardianText, DeclineSheet, deadlineText, PersonResp
 import { useActiveModules } from "../modules";
 import { useMe, useSession } from "../session";
 import { invalidate, useQuery, useSearch } from "../store";
-import { Button, CoachMark, confirmDialog, copyText, ErrorBox, Field, Notice, Segmented, Sheet, Spinner, StatusPill, SwitchRow, TextField, toast, useDocumentTitle } from "../ui";
+import { Button, CoachMark, confirmDialog, copyText, ErrorBox, Field, Notice, Segmented, Sheet, Spinner, SquadPill, StatusPill, SwitchRow, TextField, toast, useDocumentTitle } from "../ui";
 import { useVenue } from "../club";
 
 const kindLabel = (kind: EventDetail["kind"]) => ({ training: t`Training`, game: t`Game`, special: t`Event` })[kind];
@@ -162,6 +162,7 @@ export function EventPage({ id }: { id: string }) {
               <>
                 <div class="row-gap">
                   <StatusPill status={single.status} late={single.isLate} nominated={single.nominated} game={event.kind === "game"} optional={single.optional} />
+                  <SquadPill allPlayers={!!event.game?.allPlayers} published={!!event.game?.squadPublished} participant={single.participant} nominated={single.nominated} status={single.status} />
                   <AttendanceBadge mark={single.attendance} />
                   {single.respondedAt && respondedByText(single, me.person.id) ? (
                     <span class="small muted">
@@ -316,6 +317,7 @@ function CoachView({ event, onChanged, onAbsence }: { event: EventDetail; onChan
   const [person, setPerson] = useState<ParticipantDetail | null>(null);
   const missed = parts.filter((p) => p.unexcused);
   const yes = parts.filter((p) => p.status === "yes" && !p.unexcused);
+  const nominatedYes = yes.filter((p) => p.nominated).length;
   const no = parts.filter((p) => p.status === "no" && !p.optional);
   const away = parts.filter((p) => p.status === "standing" || p.status === "inactive");
   const open = parts.filter((p) => p.status === "open" && !p.unexcused && !p.optional);
@@ -452,14 +454,25 @@ function CoachView({ event, onChanged, onAbsence }: { event: EventDetail; onChan
             <section class="card card-body" aria-label={t`Accepted`}>
               <h2 class="section-title" style={{ margin: 0 }}>
                 <Trans>Accepted</Trans> · {yes.length}
+                {event.game?.allPlayers ? ` · ${t`${nominatedYes} nominated`}` : ""}
               </h2>
               <div class="chips">
-                {yes.map((p) => (
-                  <button type="button" class="chip" onClick={() => setPerson(p)}>
-                    {nameFor(p)}
-                  </button>
-                ))}
+                {yes.map((p) => {
+                  // Whole team at games: nominated players stand out, the others take part but do not play
+                  const marked = !!event.game?.allPlayers && p.nominated;
+                  const name = nameFor(p);
+                  return (
+                    <button type="button" class={`chip ${marked ? "selected" : ""}`} aria-label={marked ? t`${name}, nominated` : name} onClick={() => setPerson(p)}>
+                      {name}
+                    </button>
+                  );
+                })}
               </div>
+              {event.game?.allPlayers ? (
+                <p class="small muted">
+                  <Trans>Dark: nominated. The others take part but do not play.</Trans>
+                </p>
+              ) : null}
             </section>
           ) : null}
 

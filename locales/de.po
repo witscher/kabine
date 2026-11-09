@@ -544,6 +544,12 @@ msgstr "Aktive"
 msgid "Discard season change?"
 msgstr "Saisonwechsel verwerfen?"
 
+# ai
+#: src/help-texts.ts
+#: src/pages/team.tsx
+msgid "Whole team at games"
+msgstr "Ganze Mannschaft bei Spielen dabei"
+
 #: modules/duties/app/admin.tsx
 msgid "Which duties a game needs, with slots and time span around the event. Coaches choose the template for home and away games in their team."
 msgstr "Welche Dienste ein Spiel braucht, mit Plätzen und Zeitraum rund um den Termin. Trainer wählen in ihrer Mannschaft die Vorlage für Heim- und Auswärtsspiele."
@@ -1184,6 +1190,11 @@ msgstr "Ansicht als {mode}: {name}"
 #: src/pages/admin.tsx
 msgid "Appears as a highlighted announcement in the chat of every selected team, with your name."
 msgstr "Erscheint als hervorgehobene Ankündigung im Chat jeder gewählten Mannschaft, mit deinem Namen."
+
+# ai
+#: src/ui.tsx
+msgid "Squad follows"
+msgstr "Kader folgt"
 
 # ai
 #: src/restore.tsx
@@ -1967,6 +1978,11 @@ msgstr "Neuer Trainingsort"
 #: modules/duties/worker/routes.ts
 msgid "This duty type does not fit into a template."
 msgstr "Diese Dienstart passt nicht in eine Vorlage."
+
+# ai
+#: src/pages/event.tsx
+msgid "Dark: nominated. The others take part but do not play."
+msgstr "Dunkel: nominiert. Die anderen sind dabei, spielen aber nicht."
 
 #: src/pages/admin.tsx
 msgid "the access with all devices and notifications"
@@ -3284,6 +3300,11 @@ msgstr "{venue, select, hall {Gegnerische Hallen (aus dem Spielplan)} pitch {Geg
 msgid "e.g. Sam runs the training"
 msgstr "z. B. Sam leitet das Training"
 
+# ai
+#: src/pages/event.tsx
+msgid "{nominatedYes} nominated"
+msgstr "{nominatedYes} nominiert"
+
 #: src/respond.tsx
 msgid "I'm in after all"
 msgstr "Bin doch dabei"
@@ -3396,6 +3417,11 @@ msgstr "Name ändern"
 #: src/pages/admin.tsx
 msgid "{venue, select, hall {Club hall} pitch {Club pitch} other {Club venue}}"
 msgstr "{venue, select, hall {Vereinshalle} pitch {Vereinsplatz} other {Vereinsort}}"
+
+# ai
+#: src/help-texts.ts
+msgid "The team has 22 players. By Wednesday 4 decline. On Thursday you nominate 14 of the other 18. The other 4 still come along to the game."
+msgstr "Die Mannschaft hat 22 Spieler. Bis Mittwoch sagen 4 ab. Am Donnerstag nominierst du aus den 18 übrigen deine 14. Die anderen 4 fahren trotzdem mit zum Spiel."
 
 #: worker/routes/events.ts
 msgid "Events for several teams are created by admins or the coaches of all those teams."
@@ -6115,6 +6141,11 @@ msgstr "Weitere Mannschaft"
 msgid "Physio, team manager or kit manager: they see the events, who takes part and the chat, and get changes. They do not respond themselves."
 msgstr "Physio, Teammanager oder Zeugwart: Sie sehen die Termine, wer dabei ist, und den Chat und bekommen Änderungen mit. Selbst sagen sie nicht zu oder ab."
 
+# ai
+#: src/ui.tsx
+msgid "Not nominated"
+msgstr "Nicht nominiert"
+
 #: src/app.tsx
 msgctxt "navigation"
 msgid "Admin"
@@ -7787,6 +7818,7 @@ msgstr "Stammkader automatisch für alle Spiele nominieren"
 
 #: src/pages/home.tsx
 #: src/ui.tsx
+#: src/ui.tsx
 msgid "Nominated"
 msgstr "Nominiert"
 
@@ -8597,6 +8629,11 @@ msgstr "Stammdaten"
 #: modules/carpools/app/index.tsx
 msgid "{waiting, plural, one {# is still looking} other {# are still looking}}"
 msgstr "{waiting, plural, one {# sucht noch} other {# suchen noch}}"
+
+# ai
+#: src/help-texts.ts
+msgid "Every player of the team takes part in every game and declines if they cannot come. The nomination only decides who plays. Whoever is not nominated still comes along, sees “Not nominated” and can join a carpool. Notifications about the game go to the nominated players only."
+msgstr "Alle Spieler der Mannschaft sind bei jedem Spiel dabei und sagen ab, wenn sie nicht können. Mit der Nominierung legst du nur fest, wer spielt. Wer nicht nominiert ist, kommt trotzdem mit, sieht „Nicht nominiert“ und kann bei Fahrgemeinschaften mitfahren. Benachrichtigungen zum Spiel bekommen nur die Nominierten."
 
 #: src/pages/admin.tsx
 msgid "active {days} days ago"
@@ -11558,6 +11595,11 @@ msgstr "{name} fährt bei {driver} mit: {game} (eingetragen von {coach})."
 #: src/pages/setup-wizard.tsx
 msgid "Sport and season"
 msgstr "Sportart und Saison"
+
+# ai
+#: src/pages/event.tsx
+msgid "{name}, nominated"
+msgstr "{name}, nominiert"
 
 #: worker/routes/squad.ts
 msgid "{playerName} will help out {teamName} on {date}."

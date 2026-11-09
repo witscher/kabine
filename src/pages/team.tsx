@@ -58,6 +58,7 @@ export interface TeamDetail {
   homeTemplateId: number | null;
   awayTemplateId: number | null;
   showResponses: boolean;
+  gameAllPlayers: boolean;
   coaches: { person: PersonRef; hasAccount: boolean }[];
   /** Team staff (physio, manager): see everything of the team, take no part */
   staff: { person: PersonRef; hasAccount: boolean; hasPush: boolean }[];
@@ -1073,6 +1074,16 @@ function SettingsTab({ team, onChanged }: { team: TeamDetail; onChanged: () => v
             await api.patch(`/teams/${team.id}`, { autoSquad: value });
             invalidate("/events");
             toast(value ? t`The core squad is now nominated for all future games.` : t`Automatic squad switched off. Squads already nominated remain.`);
+            onChanged();
+          }}
+        />
+        <SwitchRow
+          label={t`Whole team at games`}
+          info="gameAllPlayers"
+          checked={team.gameAllPlayers}
+          onChange={async (value) => {
+            await api.patch(`/teams/${team.id}`, { gameAllPlayers: value });
+            invalidate("/events");
             onChanged();
           }}
         />

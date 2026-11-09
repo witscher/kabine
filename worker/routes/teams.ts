@@ -146,6 +146,7 @@ interface TeamRow {
   auto_squad: number;
   helper_plan: number;
   show_responses: number;
+  game_all_players: number;
   child_account: number | null;
   child_respond: number | null;
   child_chat: "none" | "read" | "write" | null;
@@ -280,6 +281,7 @@ teamRoutes.get("/teams/:id", async (c) => {
     autoSquad: team.auto_squad === 1,
     helperPlan: team.helper_plan === 1,
     showResponses: team.show_responses === 1,
+    gameAllPlayers: team.game_all_players === 1,
     homeTemplateId: team.home_template_id,
     awayTemplateId: team.away_template_id,
     coaches: members
@@ -336,6 +338,8 @@ const updateTeamSchema = z.object({
   helperPlan: z.boolean().optional(),
   /** Responses (without reasons) visible to players and parents (coaches and admins). */
   showResponses: z.boolean().optional(),
+  /** Whole team at games, the nomination only decides who plays (coaches and admins). */
+  gameAllPlayers: z.boolean().optional(),
   /** Helper duty template for home or away games, null = default (coaches and admins). */
   homeTemplateId: z.number().int().positive().nullable().optional(),
   awayTemplateId: z.number().int().positive().nullable().optional(),
@@ -362,7 +366,7 @@ teamRoutes.patch("/teams/:id", async (c) => {
   if ((input.name || input.ageClassCode || input.gender || input.level || input.parentsEnabled !== undefined) && !actor.isAdmin) requireAdmin(actor);
   const team = await first<TeamRow>(c.env.DB, "SELECT * FROM teams WHERE id = ?", teamId);
   if (!team) throw notFound();
-  if (team.kind === "group" && (input.ageClassCode || input.level || input.helperPlan || input.autoSquad || input.homeTemplateId || input.awayTemplateId)) {
+  if (team.kind === "group" && (input.ageClassCode || input.level || input.helperPlan || input.autoSquad || input.gameAllPlayers || input.homeTemplateId || input.awayTemplateId)) {
     throw badRequest(t`Groups only have chat and special events.`, "group_not_supported");
   }
   // Groups may include parents (a youth group across teams); the youth referee group follows the role and stays without
@@ -401,7 +405,7 @@ teamRoutes.patch("/teams/:id", async (c) => {
     await run(
       c.env.DB,
       `UPDATE teams SET name = ?, age_class_code = ?, gender = ?, level = ?, decline_hours_training = ?, decline_hours_game = ?, max_squad = ?,
-         auto_squad = ?, parents_enabled = ?, helper_plan = ?, show_responses = ?, home_template_id = ?, away_template_id = ? WHERE id = ?`,
+         auto_squad = ?, parents_enabled = ?, helper_plan = ?, show_responses = ?, game_all_players = ?, home_template_id = ?, away_template_id = ? WHERE id = ?`,
       input.name ?? team.name,
       input.ageClassCode ?? team.age_class_code,
       input.gender ?? team.gender,
@@ -413,6 +417,7 @@ teamRoutes.patch("/teams/:id", async (c) => {
       input.parentsEnabled === undefined ? team.parents_enabled : input.parentsEnabled ? 1 : 0,
       input.helperPlan === undefined ? team.helper_plan : input.helperPlan ? 1 : 0,
       input.showResponses === undefined ? team.show_responses : input.showResponses ? 1 : 0,
+      input.gameAllPlayers === undefined ? team.game_all_players : input.gameAllPlayers ? 1 : 0,
       input.homeTemplateId === undefined ? team.home_template_id : input.homeTemplateId,
       input.awayTemplateId === undefined ? team.away_template_id : input.awayTemplateId,
       teamId,

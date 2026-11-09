@@ -131,7 +131,7 @@ export type RespondedBy = "self" | "guardian" | "child" | "other";
 
 export interface MyParticipation {
   person: PersonRef;
-  /** false for games without nomination. */
+  /** false for games without nomination (unless the whole team takes part). */
   participant: boolean;
   nominated: boolean;
   isHelper: boolean;
@@ -274,6 +274,8 @@ export interface GameInfo {
   coachNotes: string | null;
   squadPublished: boolean;
   nominatedCount: number;
+  /** Whole team at games: every player takes part, the nomination only decides who plays. */
+  allPlayers: boolean;
   /** League table at the team's schedule source (fixture connector), if one is linked. */
   table: { url: string; name: string; connector: string } | null;
   /**
@@ -287,6 +289,8 @@ export interface GameInfo {
 
 export interface ParticipantDetail {
   person: PersonRef;
+  /** Games: nominated (plays). With "whole team at games" players who are not nominated take part too. */
+  nominated: boolean;
   teamId: number;
   /** All of the person's teams involved (players in two teams) */
   teamIds: number[];

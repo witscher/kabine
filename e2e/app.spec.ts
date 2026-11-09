@@ -1897,3 +1897,35 @@ test("Info-Knopf: Erklärung mit Beispiel statt Untertext am Schalter", async ()
   await info.getByRole("button", { name: "Verstanden" }).click();
   await expect(info).toHaveCount(0);
 });
+
+test("Ganze Mannschaft bei Spielen: alle dabei, „Kader folgt“ und „Nicht nominiert“", async () => {
+  const { page } = coach;
+  await page.goto("/team/1");
+  await page.getByRole("button", { name: "Einstellungen" }).click();
+  await page.getByRole("button", { name: "Erklärung: Ganze Mannschaft bei Spielen dabei" }).click();
+  const info = page.getByRole("dialog", { name: "Ganze Mannschaft bei Spielen dabei" });
+  await expect(info).toContainText("Beispiel:");
+  await info.getByRole("button", { name: "Verstanden" }).click();
+  const all = page.getByRole("switch", { name: /Ganze Mannschaft bei Spielen dabei/ });
+  await all.click();
+  await expect(all).toHaveAttribute("aria-checked", "true");
+
+  const date = new Date(Date.now() + 9 * 86_400_000).toLocaleDateString("sv-SE", { timeZone: "Europe/Berlin" });
+  const { id } = await (await page.request.post("/api/duties/teams/1/games", { data: { opponent: "SG Allestadt", isHome: false, date, time: "11:00" } })).json();
+  await player.page.goto(`/termine/${id}`);
+  await expect(player.page.getByText("Kader folgt").first()).toBeVisible();
+  await expect(player.page.getByText("Zugesagt").first()).toBeVisible();
+
+  // Squad without Ida: she takes part but does not play
+  const ids = (await (await page.request.get(`/api/events/${id}/squad`)).json()).candidates
+    .filter((c: { person: { firstName: string }; isActive: boolean }) => c.person.firstName !== "Ida" && c.isActive)
+    .map((c: { person: { id: number } }) => c.person.id);
+  expect((await page.request.put(`/api/events/${id}/squad`, { data: { personIds: ids } })).ok()).toBe(true);
+  await player.page.reload();
+  await expect(player.page.getByText("Nicht nominiert").first()).toBeVisible();
+  if (process.env.E2E_SHOTS) await player.page.screenshot({ path: `${process.env.E2E_SHOTS}/not-nominated.png` });
+
+  // Clean up: back as before
+  await page.request.patch("/api/teams/1", { data: { gameAllPlayers: false } });
+  await page.request.delete(`/api/duties/games/${id}`);
+});

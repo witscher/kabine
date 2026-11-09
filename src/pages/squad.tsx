@@ -50,6 +50,8 @@ export function SquadPage({ id }: { id: string }) {
 
   const max = data?.team.maxSquad ?? 20;
   const selected = picked ?? [];
+  // Whole team at games: show declines of players who are not nominated too, so the coach picks from those available
+  const allPlayers = !!data?.event.game?.allPlayers;
   const declined = useMemo(() => (data?.candidates ?? []).filter((c) => c.nominated && c.status === "no"), [data]);
   const replacements = useMemo(
     () => (data?.candidates ?? []).filter((c) => !c.nominated && c.isActive && !c.conflict && !selected.includes(c.person.id)).slice(0, 4),
@@ -204,7 +206,7 @@ export function SquadPage({ id }: { id: string }) {
                     <span class="small muted" style={{ display: "block" }}>
                       {c.nominated && c.status === "yes"
                         ? t`Accepted`
-                        : c.nominated && c.status === "no"
+                        : (c.nominated || allPlayers) && c.status === "no"
                           ? reason
                             ? t`Declined: ${reason}`
                             : t`Declined`

@@ -128,8 +128,9 @@ export async function sendGameReminders(env: Env, now = Date.now()): Promise<num
   let sent = 0;
   for (const e of events) {
     const teams = eventTeams(e, ctx).map((tm) => ({ id: tm.id, name: tm.name }));
+    // Nominated only: with "whole team at games" the others get no push (notification fatigue)
     const persons = (ctx.participants.get(e.id) ?? [])
-      .filter((p) => p.status === "yes" || p.status === "open")
+      .filter((p) => p.nominated && (p.status === "yes" || p.status === "open"))
       .map((p) => p.person.id)
       .filter((id) => !(remindedAt.get(id) ?? []).some((at) => overlaps(at, e.starts_at)));
     for (const id of persons) remindedAt.set(id, [...(remindedAt.get(id) ?? []), e.starts_at]);

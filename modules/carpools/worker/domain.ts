@@ -110,13 +110,14 @@ export function takenSeats(offerId: number, requests: RequestRow[]): number {
 /**
  * Who is involved in the game and sees the carpools: coaches and admins, whoever
  * has an offer, and once the squad is published the nominated players and
- * their parents in charge.
+ * their parents in charge. With "whole team at games" all players at once.
  */
 export function mayViewCarpool(actor: Actor, e: EventRow, ctx: EventContext, offers: OfferRow[]): boolean {
   const teamIds = ctx.eventTeams.get(e.id) ?? [];
   if (isCoachOfAny(actor, teamIds)) return true;
   if (offers.some((o) => o.person_id === actor.personId)) return true;
-  if (!e.squad_published_at) return false;
+  const allPlayers = teamIds.some((id) => ctx.teams.get(id)?.game_all_players === 1);
+  if (!e.squad_published_at && !allPlayers) return false;
   const family = scopePersonIds(actor).filter((pid) => actsFor(actor, pid, teamIds));
   return (ctx.participants.get(e.id) ?? []).some((p) => family.includes(p.person.id));
 }

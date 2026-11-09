@@ -108,6 +108,15 @@ No response counts as accepted. This is not stored but computed when loading: no
 
 Reminders still go only to those whose response is open, which leaves the stand-ins. The parental permission `may_accept` is called "Withdraw declines on their own", because that is all accepting means now.
 
+## Whole team at games
+
+Some youth coaches want every player at every game, to help and to ride along, while only some play. Per team (not for groups) the switch *Whole team at games* (`teams.game_all_players`, off by default) makes every active player of the team a participant of its games: they count as accepted and decline if they cannot come. The nomination only decides who plays.
+
+- `Participant.nominated` (and `nominated` on the coach's participant list): nominated players first, then the team's players with `nominated: false`. Stand-ins and helpers take part only when nominated.
+- Counts show before the squad is published; `game.allPlayers` and `game.nominatedCount` (nominated only) tell the app. Marks: "Squad follows" before the squad, then "Nominated" or "Not nominated" (`SquadPill`); the coach's accepted chips show the nominated players dark, the squad page shows declines of players who are not nominated.
+- Carpools are open to all participants at once (`mayViewCarpool`).
+- Notifications stay with the nominated players, against notification fatigue: game reminders, the short-notice decline push to coaches, and the new-event push.
+
 ## Automatic squad
 
 Automatic nominations are real rows in `nominations` that the app keeps in sync: on changes to the core squad, to the setting, to the active status, when someone is removed from the team, after every schedule import and hourly in the cron. Visibility, overlap warnings and reminders then work without special cases.

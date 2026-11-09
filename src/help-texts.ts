@@ -16,6 +16,11 @@ export const HELP = {
     text: t`Whoever is in the core squad is nominated for every new game automatically, so you don't have to choose before every game. You can still change the squad for a single game. Instead of a notification about the nomination, a reminder comes three days before each game.`,
     example: t`Your 12 core players are in the squad for every game. If one cannot come, she declines herself. For the cup game you add a stand-in.`,
   }),
+  gameAllPlayers: () => ({
+    title: t`Whole team at games`,
+    text: t`Every player of the team takes part in every game and declines if they cannot come. The nomination only decides who plays. Whoever is not nominated still comes along, sees “Not nominated” and can join a carpool. Notifications about the game go to the nominated players only.`,
+    example: t`The team has 22 players. By Wednesday 4 decline. On Thursday you nominate 14 of the other 18. The other 4 still come along to the game.`,
+  }),
   showResponses: () => ({
     title: t`Responses visible to everyone`,
     text: t`For trainings and special events, players and their parents see who accepted or declined. The reasons for declining stay visible to the coaches only. Games stay as they are. Better left off for youth teams, so that nobody is swayed by others declining.`,

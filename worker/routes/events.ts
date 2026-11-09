@@ -372,7 +372,8 @@ export async function respond(
     when: `${shortDate(event.starts_at)}, ${shortTime(event.starts_at)}`,
     what: eventLabel(event.kind, eventTitle(event, teams)),
   });
-  if (isLate) {
+  // With "whole team at games" only for nominated players: whoever does not play is not missed at short notice
+  if (isLate && (event.kind !== "game" || participant.nominated)) {
     await notifyCoaches(
       env,
       teams.map((tm) => tm.id),
@@ -810,7 +811,8 @@ eventRoutes.post("/events", async (c) => {
   const location = event.loc_name;
   await notifyPersons(
     c.env,
-    (ctx.participants.get(event.id) ?? []).filter((p) => p.isActive).map((p) => p.person.id),
+    // Games: nominated only (no push to everyone with "whole team at games")
+    (ctx.participants.get(event.id) ?? []).filter((p) => p.isActive && (event.kind !== "game" || p.nominated)).map((p) => p.person.id),
     "events",
     () => {
       const when = `${shortDate(input.startsAt)}, ${shortTime(input.startsAt)}`;

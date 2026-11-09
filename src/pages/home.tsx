@@ -15,7 +15,7 @@ import { NewsCard } from "../news";
 import { useMe } from "../session";
 import { useOffline } from "../offline";
 import { useQuery } from "../store";
-import { Button, CoachMark, Empty, ErrorBox, Segmented, StatusPill, useDocumentTitle } from "../ui";
+import { Button, CoachMark, Empty, ErrorBox, Segmented, SquadPill, StatusPill, useDocumentTitle } from "../ui";
 import { isLiveWindow, LiveCard } from "../live";
 import { isRelevantEvent } from "../../shared/relevance";
 
@@ -320,6 +320,9 @@ function EventRow({ event }: { event: EventSummary }) {
           <span class="pill pill-nominated">
             <Trans>Nominated</Trans>
           </span>
+        ) : event.game?.allPlayers && single.participant && single.status !== "no" && single.status !== "inactive" ? (
+          // Whole team at games: whoever does not play sees "Not nominated" (before the squad "Squad follows")
+          <SquadPill allPlayers published={event.game.squadPublished} participant nominated={single.nominated} status={single.status} />
         ) : (
           <StatusPill status={single.status} late={single.isLate} nominated={single.nominated} game={event.kind === "game"} optional={single.optional} />
         )
