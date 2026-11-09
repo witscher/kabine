@@ -2906,6 +2906,11 @@ msgstr "Niemand gefunden."
 msgid "Why can't I install the app from the App Store?"
 msgstr "Warum kann ich die App nicht aus dem App Store installieren?"
 
+# ai
+#: shared/changelog.ts
+msgid "New switch in your team's settings: \"Whole team at games\". When it is on, every player takes part in every game and declines if they cannot come; with the nomination you only decide who plays. Whoever is not nominated sees \"Not nominated\", still comes along and can join a carpool. Notifications about the game still go to the nominated players only. The small \"i\" next to the switch explains it with an example."
+msgstr "In den Einstellungen eurer Mannschaft gibt es einen neuen Schalter: „Ganze Mannschaft bei Spielen dabei“. Ist er an, sind alle Spieler bei jedem Spiel dabei und sagen ab, wenn sie nicht können; mit der Nominierung legt ihr nur noch fest, wer spielt. Wer nicht nominiert ist, sieht „Nicht nominiert“, kommt trotzdem mit und kann bei Fahrgemeinschaften mitfahren. Benachrichtigungen zum Spiel bekommen weiterhin nur die Nominierten. Das kleine „i“ neben dem Schalter erklärt alles mit einem Beispiel."
+
 #: src/email.tsx
 msgid "Your e-mail address is confirmed. You can now also sign in with an e-mail code."
 msgstr "Deine E-Mail-Adresse ist bestätigt. Du kannst dich jetzt auch per E-Mail-Code anmelden."
@@ -3803,6 +3808,11 @@ msgstr "Eigener Zugang"
 #: src/pages/group.tsx
 msgid "Create special events, send reminders and moderate the chat (including @alle)."
 msgstr "Legen Sondertermine an, erinnern und moderieren den Chat (auch @alle)."
+
+# ai
+#: shared/changelog.ts
+msgid "New team setting \"Whole team at games\": every player comes along, the nomination only decides who plays."
+msgstr "Neue Mannschaftseinstellung „Ganze Mannschaft bei Spielen dabei“: Alle Spieler kommen mit, die Nominierung legt nur fest, wer spielt."
 
 #: modules/duties/app/admin.tsx
 #: modules/duties/app/admin.tsx
@@ -5028,6 +5038,11 @@ msgid "Active"
 msgstr "Aktiv"
 
 # ai
+#: shared/changelog.ts
+msgid "Helpers tab: all your teams together, a tap on a team filters."
+msgstr "Reiter Helfer: alle deine Mannschaften zusammen, ein Tipp auf eine Mannschaft filtert."
+
+# ai
 #: worker/routes/teams.ts
 msgid "Stand-ins come from a lower-ranked team of the same age class or the next younger youth team."
 msgstr "Aushilfen kommen aus einer nachrangigen Mannschaft derselben Altersklasse oder der nächstjüngeren Jugend."
@@ -5992,6 +6007,11 @@ msgid "Parents respond for their child, are in the chat and get the notification
 msgstr "Eltern sagen für ihr Kind zu und ab, sind im Chat dabei und bekommen die Benachrichtigungen. Ausschalten, wenn die Spieler selbst Verantwortung übernehmen, etwa in älteren Jugendmannschaften und bei den Aktiven."
 
 # ai
+#: shared/changelog.ts
+msgid "Settings explain themselves behind a small \"i\", with an example."
+msgstr "Einstellungen erklären sich hinter einem kleinen „i“, mit Beispiel."
+
+# ai
 #: src/pages/setup-wizard.tsx
 msgid "Import from lists instead"
 msgstr "Stattdessen aus Listen übernehmen"
@@ -6265,6 +6285,11 @@ msgstr "Bitte wähle eine Altersklasse für „{name}“."
 #: src/pages/stats.tsx
 msgid "Season, data since {since} (start of the app)"
 msgstr "Saison, Daten seit {since} (Start der App)"
+
+# ai
+#: shared/changelog.ts
+msgid "Your team page now has \"Statistics\": for the last 4 weeks and the whole season, who came to training how often, how many were really there at each training, appearances in games, and declines at short notice or without excuse. With the helper plan you also see which families have helped already and can remind the others with one button. Record after the training who was there, then the figures are right. If you set someone to \"Unexcused\", the parents get a push at once."
+msgstr "Auf eurer Teamseite findet ihr jetzt „Statistik“: für die letzten 4 Wochen und die ganze Saison, wer wie oft beim Training war, wie viele bei jedem Training wirklich da waren, Einsätze bei Spielen und kurzfristige oder unentschuldigte Absagen. Mit Helferplan seht ihr außerdem, welche Familien schon geholfen haben, und könnt die anderen mit einem Knopf erinnern. Tragt nach dem Training ein, wer da war, dann stimmen die Zahlen. Setzt ihr jemanden auf „Unentschuldigt“, bekommen die Eltern sofort einen Push-Hinweis."
 
 #: src/pages/admin.tsx
 msgid "no access"
@@ -6655,6 +6680,11 @@ msgstr "Dienste zum Saisonwechsel; künftige Dienste, wenn jemand den Verein ver
 #: src/pages/group.tsx
 msgid "Group · {members} · {leads}"
 msgstr "Gruppe · {members} · {leads}"
+
+# ai
+#: shared/changelog.ts
+msgid "When a child is marked unexcused after an event, the parents get a push at once."
+msgstr "Wird ein Kind nach einem Termin als unentschuldigt eingetragen, bekommen die Eltern sofort eine Push."
 
 #: modules/carpools/worker/routes.ts
 msgid "New passenger"
@@ -11470,6 +11500,11 @@ msgctxt "module"
 msgid "New"
 msgstr "Neu"
 
+# ai
+#: shared/changelog.ts
+msgid "Duties that need prior knowledge can now be approved by an admin, under Administration → Approvals. Youth referees are such an approval now; existing youth referees were taken over."
+msgstr "Dienste mit Vorkenntnissen kann jetzt auch ein Admin freigeben, unter Verwaltung → Freigaben. Jugendschiedsrichter sind jetzt so eine Freigabe; bisherige Jugendschiedsrichter wurden übernommen."
+
 #: src/pages/admin.tsx
 #: src/pages/group.tsx
 msgid "Without parents"
@@ -11734,6 +11769,11 @@ msgstr "Notiz erlaubt"
 msgctxt "view as"
 msgid "approved helper"
 msgstr "freigegebener Helfer"
+
+# ai
+#: shared/changelog.ts
+msgid "Statistics: coaches find them on the team page (training, games, helpers), players and parents under Profile → My statistics."
+msgstr "Statistik: Trainer finden sie auf der Teamseite (Training, Spiele, Helfer), Spieler und Eltern unter Profil → Meine Statistik."
 
 # ai
 #: modules/duties/app/admin.tsx

@@ -26,6 +26,26 @@ export interface CoachNote {
 
 export const CHANGELOG: readonly ChangelogEntry[] = [
   {
+    version: "0.8.0",
+    date: "2026-11-10",
+    items: () => [
+      t`Statistics: coaches find them on the team page (training, games, helpers), players and parents under Profile → My statistics.`,
+      t`Duties that need prior knowledge can now be approved by an admin, under Administration → Approvals. Youth referees are such an approval now; existing youth referees were taken over.`,
+      t`New team setting "Whole team at games": every player comes along, the nomination only decides who plays.`,
+      t`Settings explain themselves behind a small "i", with an example.`,
+      t`Helpers tab: all your teams together, a tap on a team filters.`,
+      t`When a child is marked unexcused after an event, the parents get a push at once.`,
+    ],
+    coaches: () => [
+      {
+        text: t`Your team page now has "Statistics": for the last 4 weeks and the whole season, who came to training how often, how many were really there at each training, appearances in games, and declines at short notice or without excuse. With the helper plan you also see which families have helped already and can remind the others with one button. Record after the training who was there, then the figures are right. If you set someone to "Unexcused", the parents get a push at once.`,
+      },
+      {
+        text: t`New switch in your team's settings: "Whole team at games". When it is on, every player takes part in every game and declines if they cannot come; with the nomination you only decide who plays. Whoever is not nominated sees "Not nominated", still comes along and can join a carpool. Notifications about the game still go to the nominated players only. The small "i" next to the switch explains it with an example.`,
+      },
+    ],
+  },
+  {
     version: "0.7.0",
     date: "2026-11-07",
     items: () => [

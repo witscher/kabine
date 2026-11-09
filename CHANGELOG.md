@@ -6,6 +6,8 @@ Changes that are merged but not released yet go under *Unreleased*, one line eac
 
 ## Unreleased
 
+## v0.8.0
+
 - Statistics: coaches see *Team → Statistics* for the last 4 weeks or the season: training participation, appearances in games, a table per training and game, and each player's events. With the helper plan also the helper duties per family, with a button to remind the families without a duty. Players and parents see their own figures under *Profile → My statistics* (for parents per child), with the family's helper duties.
 - Qualifications: a duty type that needs prior knowledge can now be approved by an admin instead of by the person (e.g. tournament management). Admins approve people in the person sheet, on the new page *Administration → Approvals* or with a link; people without the approval do not see such a duty. The youth referee role is now such an approval of the youth referee duty: existing youth referees, links and the youth referee group are taken over by the update. The separate module "Youth referees" is gone; its duty is part of the helper duties. Under *Administration → Age groups* admins tick which home games get it, and other duties of approved people work the same way (e.g. referees in other sports).
 - Admins can delete a duty type that is used nowhere (no template, no time block at any event, past ones included). A duty type in use can still only be archived; the sheet says where it is used.

@@ -2722,6 +2722,10 @@ msgstr "No one found."
 msgid "Why can't I install the app from the App Store?"
 msgstr "Why can't I install the app from the App Store?"
 
+#: shared/changelog.ts
+msgid "New switch in your team's settings: \"Whole team at games\". When it is on, every player takes part in every game and declines if they cannot come; with the nomination you only decide who plays. Whoever is not nominated sees \"Not nominated\", still comes along and can join a carpool. Notifications about the game still go to the nominated players only. The small \"i\" next to the switch explains it with an example."
+msgstr "New switch in your team's settings: \"Whole team at games\". When it is on, every player takes part in every game and declines if they cannot come; with the nomination you only decide who plays. Whoever is not nominated sees \"Not nominated\", still comes along and can join a carpool. Notifications about the game still go to the nominated players only. The small \"i\" next to the switch explains it with an example."
+
 #: src/email.tsx
 msgid "Your e-mail address is confirmed. You can now also sign in with an e-mail code."
 msgstr "Your e-mail address is confirmed. You can now also sign in with an e-mail code."
@@ -3555,6 +3559,10 @@ msgstr "Own access"
 #: src/pages/group.tsx
 msgid "Create special events, send reminders and moderate the chat (including @alle)."
 msgstr "Create special events, send reminders and moderate the chat (including @alle)."
+
+#: shared/changelog.ts
+msgid "New team setting \"Whole team at games\": every player comes along, the nomination only decides who plays."
+msgstr "New team setting \"Whole team at games\": every player comes along, the nomination only decides who plays."
 
 #: modules/duties/app/admin.tsx
 #: modules/duties/app/admin.tsx
@@ -4692,6 +4700,10 @@ msgstr "Without e-mail there is no sign-in by code and no e-mail reminders. Pass
 msgid "Active"
 msgstr "Active"
 
+#: shared/changelog.ts
+msgid "Helpers tab: all your teams together, a tap on a team filters."
+msgstr "Helpers tab: all your teams together, a tap on a team filters."
+
 #: worker/routes/teams.ts
 msgid "Stand-ins come from a lower-ranked team of the same age class or the next younger youth team."
 msgstr "Stand-ins come from a lower-ranked team of the same age class or the next younger youth team."
@@ -5583,6 +5595,10 @@ msgstr "Main navigation"
 msgid "Parents respond for their child, are in the chat and get the notifications. Turn it off when the players take responsibility themselves, for example in older youth teams and for adults."
 msgstr "Parents respond for their child, are in the chat and get the notifications. Turn it off when the players take responsibility themselves, for example in older youth teams and for adults."
 
+#: shared/changelog.ts
+msgid "Settings explain themselves behind a small \"i\", with an example."
+msgstr "Settings explain themselves behind a small \"i\", with an example."
+
 #: src/pages/setup-wizard.tsx
 msgid "Import from lists instead"
 msgstr "Import from lists instead"
@@ -5837,6 +5853,10 @@ msgstr "Please choose an age class for \"{name}\"."
 #: src/pages/stats.tsx
 msgid "Season, data since {since} (start of the app)"
 msgstr "Season, data since {since} (start of the app)"
+
+#: shared/changelog.ts
+msgid "Your team page now has \"Statistics\": for the last 4 weeks and the whole season, who came to training how often, how many were really there at each training, appearances in games, and declines at short notice or without excuse. With the helper plan you also see which families have helped already and can remind the others with one button. Record after the training who was there, then the figures are right. If you set someone to \"Unexcused\", the parents get a push at once."
+msgstr "Your team page now has \"Statistics\": for the last 4 weeks and the whole season, who came to training how often, how many were really there at each training, appearances in games, and declines at short notice or without excuse. With the helper plan you also see which families have helped already and can remind the others with one button. Record after the training who was there, then the figures are right. If you set someone to \"Unexcused\", the parents get a push at once."
 
 #: src/pages/admin.tsx
 msgid "no access"
@@ -6200,6 +6220,10 @@ msgstr "Duties at the season change; future duties when someone leaves the club.
 #: src/pages/group.tsx
 msgid "Group · {members} · {leads}"
 msgstr "Group · {members} · {leads}"
+
+#: shared/changelog.ts
+msgid "When a child is marked unexcused after an event, the parents get a push at once."
+msgstr "When a child is marked unexcused after an event, the parents get a push at once."
 
 #: modules/carpools/worker/routes.ts
 msgid "New passenger"
@@ -10719,6 +10743,10 @@ msgctxt "module"
 msgid "New"
 msgstr "New"
 
+#: shared/changelog.ts
+msgid "Duties that need prior knowledge can now be approved by an admin, under Administration → Approvals. Youth referees are such an approval now; existing youth referees were taken over."
+msgstr "Duties that need prior knowledge can now be approved by an admin, under Administration → Approvals. Youth referees are such an approval now; existing youth referees were taken over."
+
 #: src/pages/admin.tsx
 #: src/pages/group.tsx
 msgid "Without parents"
@@ -10964,6 +10992,10 @@ msgstr "Note allowed"
 msgctxt "view as"
 msgid "approved helper"
 msgstr "approved helper"
+
+#: shared/changelog.ts
+msgid "Statistics: coaches find them on the team page (training, games, helpers), players and parents under Profile → My statistics."
+msgstr "Statistics: coaches find them on the team page (training, games, helpers), players and parents under Profile → My statistics."
 
 #: modules/duties/app/admin.tsx
 msgid "An admin"
