@@ -2877,6 +2877,7 @@ msgstr "Section"
 msgid "Declined at short notice"
 msgstr "Declined at short notice"
 
+#: modules/duties/app/helpers.tsx
 #: src/candidates.tsx
 #: src/pages/home.tsx
 msgid "Filter by team"
@@ -4663,10 +4664,6 @@ msgstr "Your helper duty tomorrow"
 #: worker/domain/invites.ts
 msgid "Parents are not involved in this team. The parent link is therefore not valid."
 msgstr "Parents are not involved in this team. The parent link is therefore not valid."
-
-#: modules/duties/app/helpers.tsx
-msgid "Team selection"
-msgstr "Team selection"
 
 #: src/pages/join.tsx
 #: src/pages/login.tsx

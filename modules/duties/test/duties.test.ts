@@ -454,3 +454,32 @@ describe("Live", () => {
     expect(denied.status).toBe(403);
   });
 });
+
+describe("Reiter Helfer: mehrere Mannschaften zusammen", () => {
+  it("?teamIds= liefert die Termine aller gewählten Mannschaften mit Mannschaft, gemeinsame nur einmal", async () => {
+    const wbGame = await game(wb, 7, 1);
+    await member(coach, wb, "coach");
+    const both = await api(`/duties?teamIds=${wd},${wb}`, { cookie: coachCookie });
+    expect(both.status).toBe(200);
+    expect(both.body.team).toBeNull();
+    expect(both.body.teams.map((t: any) => t.teamName)).toEqual(["wD", "wB"]);
+    expect(both.body.games.map((g: any) => [g.id, g.teamName])).toEqual([
+      [home, "wD"],
+      [wbGame, "wB"],
+      [away, "wD"],
+    ]);
+    // An event of both teams is listed once
+    await exec("INSERT INTO event_teams (event_id, team_id) VALUES (?, ?)", wbGame, wd);
+    const shared = await api(`/duties?teamIds=${wd},${wb}`, { cookie: coachCookie });
+    expect(shared.body.games.filter((g: any) => g.id === wbGame)).toHaveLength(1);
+    // A single team as before
+    expect((await api(`/duties?teamId=${wd}`, { cookie: coachCookie })).body.team).toMatchObject({ teamId: wd, teamName: "wD" });
+  });
+
+  it("nur Mannschaften, deren Helferplan man sieht", async () => {
+    // Mona is only in wD, through Kim
+    expect((await api(`/duties?teamIds=${wd}`, { cookie: monaCookie })).status).toBe(200);
+    expect((await api(`/duties?teamIds=${wd},${wb}`, { cookie: monaCookie })).status).toBe(403);
+    expect((await api("/duties?teamIds=", { cookie: monaCookie })).status).toBe(403);
+  });
+});

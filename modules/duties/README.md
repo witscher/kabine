@@ -6,6 +6,10 @@ Parents (or the players themselves) sign up for duties at home games and special
 - **Who sees it:** the helpers of the team see names as "First name L."; coaches and admins in full. The personal calendar link only contains one's own duties and those of one's children.
 - **Deleted:** at the season change.
 
+## Helpers tab
+
+Without a selection the tab lists the events of all the person's teams together (`GET /api/duties?teamIds=1,2`, an event of several teams only once), each with its team badge; a tap on a team filters, a second tap clears it, as in the events list. The youth referee view is a list of its own. Top helpers only show for a single team. A link from an event (`/helfer?mannschaft=<team>&spiel=<event>`) selects that team and scrolls to the event.
+
 ## Part of the core
 
 The helper plan shows up in many core screens: one's duties on event cards and in the calendar, "helpers needed" on the event page, the duty blocks of special events. These rules and the live channel therefore live in the core and work while the module is on:

@@ -1866,3 +1866,22 @@ test("Neuigkeiten für Trainer: Hinweis mit Beispielknopf, Spielerin sieht nicht
   await expect(player.page.getByRole("heading", { name: /Hallo/ })).toBeVisible();
   await expect(player.page.getByRole("region", { name: "Neuigkeiten" })).toHaveCount(0);
 });
+
+test("Helfer: ohne Filter alle Mannschaften, ein Tipp filtert, ein zweiter hebt den Filter auf", async () => {
+  const { page } = admin;
+  await page.goto("/helfer");
+  const chips = page.getByRole("group", { name: "Nach Mannschaft filtern" });
+  const first = chips.getByRole("button").first();
+  const referee = chips.getByRole("button", { name: "Jugendschiedsrichter" });
+  // Default: all teams (the youth referees are a list of their own)
+  await expect(first).toHaveAttribute("aria-pressed", "true");
+  await expect(referee).toHaveAttribute("aria-pressed", "false");
+  await first.click();
+  await expect(first).toHaveAttribute("aria-pressed", "true");
+  await referee.click();
+  await expect(referee).toHaveAttribute("aria-pressed", "true");
+  await expect(first).toHaveAttribute("aria-pressed", "false");
+  await referee.click();
+  await expect(first).toHaveAttribute("aria-pressed", "true");
+  await expect(referee).toHaveAttribute("aria-pressed", "false");
+});

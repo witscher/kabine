@@ -2875,3 +2875,9 @@ button.announcement-head {
 .duty-game.duty-game-target {
   box-shadow: 0 0 0 3px var(--yellow);
 }
+
+/* Team of the event in the Helpers tab (all teams, youth referees) */
+.team-badge.duty-team {
+  margin-right: 6px;
+  vertical-align: 2px;
+}

@@ -59,7 +59,7 @@ interface Game {
   hidden: boolean;
   manual: boolean;
   blocks: Block[];
-  /** Only in the youth referee view (all teams) */
+  /** Team of the event (youth referee view and several teams) */
   teamName?: string;
   teamId?: number;
   canManage?: boolean;
@@ -73,7 +73,8 @@ interface HelperTeam {
 }
 
 interface DutyList {
-  team: HelperTeam;
+  /** Only for a single team; null for "all" */
+  team: HelperTeam | null;
   games: Game[];
 }
 
@@ -109,8 +110,14 @@ function forChild(child: string): string {
 /** Virtual "team" of the youth referee view: all youth home games F–C */
 const REFEREE = 0;
 
-/** Live: reload on every change (debounced), fallback: every 60 seconds. */
-function useLiveReload(teamId: number | null, reload: () => void) {
+/** Live connection to one team (one per team for "all"); only one of them also polls every 5 minutes. */
+function LiveReload(props: { teamId: number; reload: () => void; poll: boolean }) {
+  useLiveReload(props.teamId, props.reload, props.poll);
+  return null;
+}
+
+/** Live: reload on every change (debounced), fallback: every 5 minutes. */
+function useLiveReload(teamId: number | null, reload: () => void, poll = true) {
   const reloadRef = useRef(reload);
   reloadRef.current = reload;
   useEffect(() => {
@@ -143,7 +150,7 @@ function useLiveReload(teamId: number | null, reload: () => void) {
     };
     connect();
     // Only as a fallback in case a live message gets lost: changes come through the connection
-    const poll = window.setInterval(() => document.visibilityState === "visible" && reloadRef.current(), 5 * 60_000);
+    const pollTimer = poll ? window.setInterval(() => document.visibilityState === "visible" && reloadRef.current(), 5 * 60_000) : undefined;
     const onVisible = () => {
       if (document.visibilityState !== "visible") return;
       reloadRef.current();
@@ -158,11 +165,11 @@ function useLiveReload(teamId: number | null, reload: () => void) {
       window.clearTimeout(timer);
       window.clearTimeout(debounce);
       window.clearInterval(ping);
-      window.clearInterval(poll);
+      window.clearInterval(pollTimer);
       document.removeEventListener("visibilitychange", onVisible);
       ws?.close();
     };
-  }, [teamId]);
+  }, [teamId, poll]);
 }
 
 export function HelpersPage() {
@@ -183,12 +190,18 @@ export function HelpersPage() {
   // Only with the youth referee module (handball); otherwise the tab would only show "switched off"
   const showReferee = useModule("youthReferees") && (me.referee || me.isAdmin || me.manageableTeams.length > 0);
   const teams = !showReferee ? helperTeams : me.referee ? [refereeChip, ...helperTeams] : [...helperTeams, refereeChip];
-  const [teamId, setTeamId] = useState<number | null>(() =>
-    showReferee && target.referee ? REFEREE : teams.some((ht) => ht.id === target.team) ? target.team : (teams[0]?.id ?? null),
+  // Like the team filter of the events list: without a selection all teams together, a tap filters, a second
+  // tap clears the filter. The youth referee view is a list of its own and not part of "all".
+  const [selected, setSelected] = useState<number | null>(() =>
+    showReferee && target.referee ? REFEREE : teams.some((ht) => ht.id === target.team) ? target.team : null,
   );
-  const isReferee = teamId === REFEREE;
-  const list = useQuery<DutyList>(teamId == null ? null : isReferee ? "/duties/referee" : `/duties?teamId=${teamId}`);
-  useLiveReload(teamId, () => void list.reload());
+  const isReferee = selected === REFEREE;
+  const allIds = helperTeams.map((ht) => ht.id);
+  // A single team: top helpers as before
+  const teamId = isReferee ? REFEREE : (selected ?? (allIds.length === 1 ? allIds[0]! : null));
+  const listPath = isReferee ? "/duties/referee" : selected != null ? `/duties?teamId=${selected}` : allIds.length ? `/duties?teamIds=${allIds.join(",")}` : null;
+  const list = useQuery<DutyList>(listPath);
+  const liveIds = isReferee ? [REFEREE] : selected != null ? [selected] : allIds;
   const [signup, setSignup] = useState<{ game: Game; block: Block } | null>(null);
   const [manage, setManage] = useState<number | null>(null);
   const [showTop, setShowTop] = useState(false);
@@ -242,17 +255,24 @@ export function HelpersPage() {
             ]}
             onChange={(v) => {
               setScope(v);
-              if (v === "own" && teamId !== REFEREE && !me.helperTeams.some((ht) => ht.own && ht.id === teamId)) setTeamId(me.helperTeams.find((ht) => ht.own)?.id ?? null);
+              if (v === "own" && selected !== REFEREE && !me.helperTeams.some((ht) => ht.own && ht.id === selected)) setSelected(null);
             }}
           />
         ) : null}
+        {liveIds.map((id, i) => (
+          <LiveReload key={id} teamId={id} poll={i === 0} reload={() => void list.reload()} />
+        ))}
         {teams.length > 1 || isReferee || (hasOwn && hasOthers) ? (
-          <div class="chips" role="group" aria-label={t`Team selection`}>
-            {teams.map((tm) => (
-              <button type="button" class={`chip ${teamId === tm.id ? "selected" : ""}`} aria-pressed={teamId === tm.id ? "true" : "false"} onClick={() => setTeamId(tm.id)}>
-                {tm.name}
-              </button>
-            ))}
+          <div class="chips" role="group" aria-label={t`Filter by team`}>
+            {teams.map((tm) => {
+              // Without a filter all teams are on (not the youth referees, that is a list of its own)
+              const on = selected == null ? tm.id !== REFEREE : selected === tm.id;
+              return (
+                <button type="button" class={`chip ${on ? "selected" : ""}`} aria-pressed={on ? "true" : "false"} onClick={() => setSelected(selected === tm.id ? null : tm.id)}>
+                  {tm.name}
+                </button>
+              );
+            })}
           </div>
         ) : null}
         {list.error ? <ErrorBox error={list.error} onRetry={list.reload} /> : null}
@@ -324,7 +344,7 @@ export function HelpersPage() {
                 </div>
                 <div class="main">
                   <div class="title">
-                    {g.teamName ? <span class="team-badge duty-team">{g.teamName}</span> : null}
+                    {g.teamName && (isReferee || teamId == null) ? <span class="team-badge duty-team">{g.teamName}</span> : null}
                     {opponent(g)}
                   </div>
                   <div class="sub">
@@ -403,7 +423,7 @@ export function HelpersPage() {
                     </span>
                     {b.referee && !isReferee ? (
                       free(b) > 0 && me.referee ? (
-                        <button type="button" class="take" onClick={() => setTeamId(REFEREE)}>
+                        <button type="button" class="take" onClick={() => setSelected(REFEREE)}>
                           <Trans>Youth referee list</Trans>
                         </button>
                       ) : null
@@ -452,8 +472,8 @@ export function HelpersPage() {
       </div>
 
       {signup ? <SignupSheet game={signup.game} block={signup.block} onClose={() => setSignup(null)} onDone={() => void list.reload()} /> : null}
-      {managed && team ? (
-        <ManageSheet teamId={managed.teamId ?? team.teamId} game={managed} refereeView={isReferee} onClose={() => setManage(null)} onDone={() => void list.reload()} />
+      {managed && (managed.teamId ?? team?.teamId) != null ? (
+        <ManageSheet teamId={(managed.teamId ?? team?.teamId)!} game={managed} refereeView={isReferee} onClose={() => setManage(null)} onDone={() => void list.reload()} />
       ) : null}
     </main>
   );

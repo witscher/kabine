@@ -3042,6 +3042,7 @@ msgstr "Bereich"
 msgid "Declined at short notice"
 msgstr "Kurzfristig abgesagt"
 
+#: modules/duties/app/helpers.tsx
 #: src/candidates.tsx
 #: src/pages/home.tsx
 msgid "Filter by team"
@@ -4946,10 +4947,6 @@ msgstr "Dein Helferdienst morgen"
 #: worker/domain/invites.ts
 msgid "Parents are not involved in this team. The parent link is therefore not valid."
 msgstr "In dieser Mannschaft sind keine Eltern eingebunden. Der Elternlink gilt deshalb nicht."
-
-#: modules/duties/app/helpers.tsx
-msgid "Team selection"
-msgstr "Mannschaft"
 
 #: src/pages/join.tsx
 #: src/pages/login.tsx

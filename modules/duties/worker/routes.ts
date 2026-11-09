@@ -11,6 +11,7 @@ import {
   type DutyType,
   ensureEventDuties,
   helperTeams,
+  type HelperRole,
   type HelperTeam,
   loadBlock,
   loadDutyTypes,
@@ -157,16 +158,14 @@ export function eventView(e: EventRow, now: string) {
   };
 }
 
-dutyRoutes.get("/duties", async (c) => {
-  const actor = requireActor(c);
-  const teamId = Number(c.req.query("teamId"));
-  const db = c.env.DB;
-  const types = await loadDutyTypes(db);
-  const team = (await helperTeams(db, actor, types)).find((t) => t.teamId === teamId);
-  if (!team) throw forbidden(t`This team has no helper plan, or you are not part of it.`);
-  const from = `${addDays(todayLocal(), -PAST_DAYS)}T00:00`;
-  const now = nowLocal();
-  const helperPlan = (await first<{ helper_plan: number }>(db, "SELECT helper_plan FROM teams WHERE id = ?", teamId))?.helper_plan === 1;
+/** Events with helper duties of one team, as in the list of the Helpers tab. */
+async function teamDutyGames(
+  db: D1Database,
+  actor: Actor,
+  team: HelperTeam,
+  ctx: { refRoles: HelperRole[]; consents: Set<number>; from: string; now: string },
+) {
+  const helperPlan = (await first<{ helper_plan: number }>(db, "SELECT helper_plan FROM teams WHERE id = ?", team.teamId))?.helper_plan === 1;
   const events = await all<EventRow>(
     db,
     `SELECT e.id, e.kind, e.starts_at, e.ends_at, e.is_home, e.home_team, e.guest_team, e.title, e.cancelled_at, e.duty_hidden, e.external_ref,
@@ -177,37 +176,54 @@ dutyRoutes.get("/duties", async (c) => {
         AND ((e.kind = 'game' AND ?4 = 1) OR (e.kind = 'special' AND EXISTS (SELECT 1 FROM event_duties ed WHERE ed.event_id = e.id)))
         AND (?3 = 1 OR (e.cancelled_at IS NULL AND (e.kind = 'special' OR e.duty_hidden = 0)))
       ORDER BY e.starts_at`,
-    teamId,
-    from,
+    team.teamId,
+    ctx.from,
     team.canManage ? 1 : 0,
     helperPlan ? 1 : 0,
   );
-  await ensureEventDuties(db, events.filter((e) => e.kind === "game").map((e) => e.id), from);
+  await ensureEventDuties(db, events.filter((e) => e.kind === "game").map((e) => e.id), ctx.from);
   const eventIds = events.map((e) => e.id);
-  const [{ blocks, entries }, allTypes, refRoles, consents, managers] = await Promise.all([
-    loadBlocksAndEntries(db, eventIds),
-    loadDutyTypes(db, eventIds),
-    refereeRoles(db, actor),
-    skillConsents(db, actor.accountId),
-    dutyManagers(db, eventIds),
-  ]);
-  return c.json({
-    team: publicHelperTeam(team),
-    games: events.map((e) => {
-      const past = e.starts_at < now;
-      // Managing: coaches of this team, or (for special events of several teams) creator and organisers
-      const canManage = team.canManage || mayManageDuties(actor, [], managers.get(e.id));
-      return {
-        ...eventView(e, now),
-        canManage,
-        blocks: blocks
-          .filter((b) => b.event_id === e.id && allTypes.has(b.duty_type_id))
-          // Places set to 0: only visible to managers (to restore them)
-          .filter((b) => b.slots > 0 || canManage)
-          .map((b) => blockView(b, allTypes.get(b.duty_type_id)!, entries, actor, { team, refRoles, consents, past })),
-      };
-    }),
+  const [{ blocks, entries }, allTypes, managers] = await Promise.all([loadBlocksAndEntries(db, eventIds), loadDutyTypes(db, eventIds), dutyManagers(db, eventIds)]);
+  return events.map((e) => {
+    const past = e.starts_at < ctx.now;
+    // Managing: coaches of this team, or (for special events of several teams) creator and organisers
+    const canManage = team.canManage || mayManageDuties(actor, [], managers.get(e.id));
+    return {
+      ...eventView(e, ctx.now),
+      teamId: team.teamId,
+      teamName: team.teamName,
+      canManage,
+      blocks: blocks
+        .filter((b) => b.event_id === e.id && allTypes.has(b.duty_type_id))
+        // Places set to 0: only visible to managers (to restore them)
+        .filter((b) => b.slots > 0 || canManage)
+        .map((b) => blockView(b, allTypes.get(b.duty_type_id)!, entries, actor, { team, refRoles: ctx.refRoles, consents: ctx.consents, past })),
+    };
   });
+}
+
+/**
+ * List of the Helpers tab: one team (?teamId=) or several together (?teamIds=1,2, the app's default "all").
+ * An event of several teams is listed once, with the first of them.
+ */
+dutyRoutes.get("/duties", async (c) => {
+  const actor = requireActor(c);
+  const db = c.env.DB;
+  const raw = c.req.query("teamIds") ?? c.req.query("teamId") ?? "";
+  const ids = [...new Set(raw.split(",").map(Number).filter((n) => Number.isInteger(n) && n > 0))].slice(0, 40);
+  const types = await loadDutyTypes(db);
+  const visible = await helperTeams(db, actor, types);
+  const teams = ids.map((id) => visible.find((ht) => ht.teamId === id)).filter((ht): ht is HelperTeam => !!ht);
+  if (!teams.length || teams.length !== ids.length) throw forbidden(t`This team has no helper plan, or you are not part of it.`);
+  const [refRoles, consents] = await Promise.all([refereeRoles(db, actor), skillConsents(db, actor.accountId)]);
+  const ctx = { refRoles, consents, from: `${addDays(todayLocal(), -PAST_DAYS)}T00:00`, now: nowLocal() };
+  const lists = await Promise.all(teams.map((ht) => teamDutyGames(db, actor, ht, ctx)));
+  const seen = new Set<number>();
+  const games = lists
+    .flat()
+    .filter((g) => !seen.has(g.id) && seen.add(g.id))
+    .sort((a, b) => a.startsAt.localeCompare(b.startsAt));
+  return c.json({ team: teams.length === 1 ? publicHelperTeam(teams[0]!) : null, teams: teams.map(publicHelperTeam), games });
 });
 
 const signupSchema = z.object({
