@@ -38,6 +38,7 @@ The helper plan shows up in many core screens: one's duties on event cards and i
 | `worker/routes.ts` | `/api/duties/...`, `/api/duty-types`, `/api/duty-templates`, `/api/admin/duty-...`, `/api/profile/duty-prefs` |
 | `worker/notify.ts` | reminders three days and one day before, "helpers wanted", "<duty> wanted" for approved people |
 | `worker/qualifications.ts` | approvals by admins, links, the list per duty type taken from all teams |
+| `worker/stats.ts`, `app/stats.tsx`, `types.ts` | statistics: helpers per family with a reminder, the family's duties (hooks `teamStats`, `myStats`) |
 | `app/index.tsx` | "Helpers" tab, admin entry |
 | `app/helpers.tsx` | the helper plan |
 | `app/admin.tsx` | duty types and templates |

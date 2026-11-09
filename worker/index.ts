@@ -33,6 +33,7 @@ import { pushRoutes } from "./routes/push";
 import { manualGameRoutes } from "./routes/manual-games";
 import { seasonRoutes } from "./routes/season";
 import { squadRoutes } from "./routes/squad";
+import { statsRoutes } from "./routes/stats";
 import { teamRoutes } from "./routes/teams";
 import { updateRoutes } from "./routes/updates";
 
@@ -73,6 +74,7 @@ for (const routes of [
   clubMemberRoutes,
   listImportRoutes,
   restoreRoutes,
+  statsRoutes,
 ]) {
   app.route("/api", routes);
 }

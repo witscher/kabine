@@ -143,6 +143,7 @@ export function TeamPage({ id }: { id: string }) {
   const teamName = team?.name ?? "";
   useDocumentTitle(team ? t`Team ${teamName}` : t`Team`);
   useEffect(() => sessionStorage.setItem(`team-tab-${id}`, tab), [tab]);
+  const dutiesOn = useModule("duties");
 
   if (loading) return <Spinner />;
   if (error || !team) {
@@ -191,6 +192,22 @@ export function TeamPage({ id }: { id: string }) {
             <Trans>Create event</Trans>
           </a>
         </div>
+        <ul class="list">
+          <li>
+            <a class="list-row" href={`/team/${team.id}/statistik`}>
+              <Icon name="chart" size={22} />
+              <span class="main">
+                <span class="title">
+                  <Trans>Statistics</Trans>
+                </span>
+                <span class="sub">
+                  {team.helperPlan && dutiesOn ? t`Training, games and helpers, last 4 weeks and season` : t`Training and games, last 4 weeks and season`}
+                </span>
+              </span>
+              <Icon name="chevron" size={18} />
+            </a>
+          </li>
+        </ul>
         <details class="card howto-fold faq">
           <summary>
             <span>

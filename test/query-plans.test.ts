@@ -10,6 +10,8 @@ import { loadCoachHints } from "../worker/domain/coach-hints";
 import { loadEventPage, ownCandidates } from "../worker/domain/event-page";
 import { SYNC_OVERVIEW_SQL } from "../worker/domain/fixtures";
 import { listVisibleEvents } from "../worker/domain/events";
+import { loadMyStats, loadPersonStatsEvents, loadTeamStats } from "../worker/domain/stats";
+import { loadHelperStats, loadMyHelperStats } from "../modules/duties/worker/stats";
 import { eventIn, exec, freshDb, guardian, member, person, season, team } from "./helpers";
 
 interface Recorded {
@@ -65,6 +67,7 @@ const session: SessionRow = { id: "test", account_id: 0, created_at: "", expires
 let actor: Actor;
 let eventIds: number[];
 let teamId: number;
+let childId: number;
 
 beforeAll(async () => {
   await freshDb();
@@ -74,6 +77,7 @@ beforeAll(async () => {
   await exec("UPDATE teams SET helper_plan = 1 WHERE id = ?", wd);
   const parent = await person("Paula");
   const child = await person("Lina");
+  childId = child;
   await member(child, wd);
   await guardian(parent, child);
   eventIds = [await eventIn(wd, 1), await eventIn(wd, 3, { kind: "game" }), await eventIn(wd, 5, { kind: "special", title: "Grillfest" })];
@@ -123,5 +127,18 @@ describe("Abfragepläne ohne Durchsuchen aller Termine", () => {
 
   it("Verwaltung → Spielplan: Spiele je Mannschaft über event_teams", async () => {
     expect(await fullScans([{ sql: SYNC_OVERVIEW_SQL, params: ["2000-01-01T00:00"] }])).toEqual([]);
+  });
+
+  it("Statistik der Mannschaft, einer Person und die eigene, mit Helfern", async () => {
+    const { db, seen } = recording(env.DB);
+    for (const range of ["4w", "season"] as const) {
+      await loadTeamStats(db, teamId, range);
+      await loadPersonStatsEvents(db, teamId, childId, range);
+    }
+    await loadMyStats(db, actor);
+    await loadHelperStats(db, teamId, "2026-07-01");
+    await loadMyHelperStats(db, actor);
+    expect(seen.length).toBeGreaterThan(8);
+    expect(await fullScans(seen)).toEqual([]);
   });
 });

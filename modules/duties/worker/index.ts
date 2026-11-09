@@ -8,10 +8,12 @@ import manifest from "../module";
 import { sendDutyNotifications } from "./notify";
 import { qualificationRoutes } from "./qualifications";
 import { dutyRoutes } from "./routes";
+import { helperStatsRoutes } from "./stats";
 
 const routes = new Hono<AppEnv>();
 // Qualifications first: /duties/qualified/... would otherwise match /duties/:id routes of the plan
 routes.route("/", qualificationRoutes);
+routes.route("/", helperStatsRoutes);
 routes.route("/", dutyRoutes);
 
 export default defineWorkerModule({

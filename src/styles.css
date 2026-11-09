@@ -2901,3 +2901,94 @@ button.announcement-head {
   vertical-align: middle;
   margin-left: 2px;
 }
+
+/* Statistics (src/pages/stats.tsx, helpers in modules/duties/app/stats.tsx) ------------- */
+
+.stat-bar {
+  height: 8px;
+  border-radius: 4px;
+  background: var(--muted);
+  overflow: hidden;
+  margin-top: 6px;
+}
+
+.stat-bar > i {
+  display: block;
+  height: 100%;
+  background: var(--black);
+  border-radius: 4px;
+}
+
+.stat-bar.low > i {
+  background: var(--warn);
+}
+
+.stat-pct {
+  font-family: var(--font-cond);
+  font-weight: 800;
+  font-size: 24px;
+  line-height: 1;
+  min-width: 56px;
+  text-align: right;
+}
+
+.stat-pct small {
+  display: block;
+  font: 500 12px var(--font);
+  color: var(--text-2);
+  margin-top: 2px;
+}
+
+.stat-row {
+  text-align: left;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  color: inherit;
+}
+
+.stat-table td {
+  padding: 7px 6px;
+}
+
+.stat-table .num {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.stat-table .num strong {
+  font-family: var(--font-cond);
+  font-size: 20px;
+}
+
+.flag {
+  font-weight: 700;
+  color: var(--warn);
+}
+
+.list-row.dim {
+  opacity: 0.65;
+}
+
+.kv {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 15px;
+}
+
+.kv:last-child {
+  border-bottom: 0;
+}
+
+.kv b {
+  font-family: var(--font-cond);
+  font-size: 20px;
+}
+
+.kv.sub {
+  padding-left: 14px;
+  color: var(--text-2);
+}

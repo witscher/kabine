@@ -26,6 +26,7 @@ const paths = {
   mail: <><rect x="3" y="5" width="18" height="14" rx="2" /><path d="M3 7l9 6 9-6" /></>,
   logout: <><path d="M15 4h4v16h-4" /><path d="M10 8l-4 4 4 4M6 12h10" /></>,
   info: <><circle cx="12" cy="12" r="9" /><path d="M12 11v6M12 7.5v.5" /></>,
+  chart: <><rect x="3.5" y="12" width="4" height="9" rx="1" /><rect x="10" y="4" width="4" height="17" rx="1" /><rect x="16.5" y="8.5" width="4" height="12.5" rx="1" /></>,
   alert: <><path d="M12 3l10 18H2z" /><path d="M12 10v5M12 18v.5" /></>,
   refresh: <><path d="M20 11a8 8 0 1 0-2.3 5.7" /><path d="M20 4v7h-7" /></>,
   send: <path d="M4 12l16-8-6 16-3-7z" />,

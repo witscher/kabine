@@ -77,6 +77,11 @@ export const HELP = {
     text: t`Your events show up in your phone's calendar and stay up to date by themselves. You choose what it should contain. The link is personal, do not pass it on.`,
     example: t`You subscribe to trainings and games. If a training is cancelled, it is struck through in your calendar shortly after.`,
   }),
+  statsTeam: () => ({
+    title: t`How it is counted`,
+    text: t`Only events where someone was expected count. Away long-term or inactive never counts as missing. Cancelled events do not count at all. At short notice means declined after the decline deadline. In games an appearance is: nominated and there. Stand-ins from other teams do not count.`,
+    example: t`Lukas was injured for two weeks and entered as away long-term. Of the other 6 trainings he came to 6: he is at 100 %, not at 75 %.`,
+  }),
   scheduleReminder: () => ({
     title: t`Reminder to sync`,
     text: t`When a team's game schedule has not been synced for this long, its coaches see a hint with "Sync now" at the top of their events list. The hint disappears after the sync. A coach or admin always syncs by hand.`,

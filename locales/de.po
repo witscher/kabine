@@ -230,6 +230,11 @@ msgstr "{count, plural, one {{names} ist schon mit dir verknüpft.} other {{name
 msgid "Open helper places · {team}"
 msgstr "Noch offene Helferplätze · {team}"
 
+# ai
+#: modules/duties/app/stats.tsx
+msgid "Place {place}"
+msgstr "Platz {place}"
+
 #: modules/handball4all/worker/connector.ts
 msgid "Link from the handball4all portal"
 msgstr "Link aus dem handball4all-Portal"
@@ -315,6 +320,11 @@ msgstr "Mitfahrer eintragen"
 #: src/pages/admin.tsx
 msgid "Born from"
 msgstr "Jg. von"
+
+# ai
+#: src/pages/stats.tsx
+msgid "by appearances"
+msgstr "nach Einsätzen"
 
 # ai
 #: src/restore.tsx
@@ -688,10 +698,16 @@ msgstr "Auf Ankündigung von {author} reagieren"
 msgid "No own access for children, but parents are not involved in: {teams}. Only coaches can respond there."
 msgstr "Kein eigener Zugang für Kinder, aber keine Eltern eingebunden in: {teams}. Dort können nur Trainer zu- und absagen."
 
+# ai
+#: modules/duties/worker/notify.ts
+msgid "{helped} of {total} families have helped already. If the others can do it, so can you! Give yourselves a nudge and sign up for a duty."
+msgstr "{helped} von {total} Familien haben schon geholfen. Was die anderen schaffen, schafft ihr auch! Gebt euch einen Ruck und tragt euch für einen Dienst ein."
+
 #: src/pages/plans.tsx
 msgid "From the plan “{planName}” of the {ownerTeam}."
 msgstr "Aus dem Plan „{planName}“ der {ownerTeam}."
 
+#: src/pages/stats.tsx
 #: src/ui.tsx
 msgid "Away long-term"
 msgstr "Dauerhaft abwesend"
@@ -768,6 +784,7 @@ msgstr "Du gehörst nicht zu dieser Mannschaft."
 msgid "Inactive players cannot be requested."
 msgstr "Inaktive Spieler können nicht angefragt werden."
 
+#: modules/duties/app/stats.tsx
 #: src/pages/event.tsx
 #: src/pages/event.tsx
 msgid "Remind"
@@ -908,6 +925,11 @@ msgstr "Dein Zugang ist eingerichtet. Du meldest dich per E-Mail-Code an."
 msgid "The season change resets team memberships, training plans, events, responses, nominations, core squads and chat histories. Persons, accesses, parent links, teams and training locations remain."
 msgstr "Der Saisonwechsel setzt Mannschaftszugehörigkeiten, Trainingspläne, Termine, Rückmeldungen, Nominierungen, Stammkader und Chatverläufe zurück. Personen, Zugänge, Eltern-Verknüpfungen, Mannschaften und Trainingsorte bleiben."
 
+# ai
+#: src/pages/stats.tsx
+msgid "of which declined at short notice"
+msgstr "davon kurzfristig abgesagt"
+
 #: modules/carpools/app/index.tsx
 msgid "Carpools ({taken}/{seats})"
 msgstr "Fahrgemeinschaften ({taken}/{seats})"
@@ -949,6 +971,13 @@ msgstr "Fahrgemeinschaften (Mitfahrer, freie Plätze)"
 msgid "The e-mail address is too long."
 msgstr "Die E-Mail-Adresse ist zu lang."
 
+# ai
+#: src/pages/stats.tsx
+#: src/pages/stats.tsx
+#: src/pages/team.tsx
+msgid "Statistics"
+msgstr "Statistik"
+
 #: src/pages/group.tsx
 msgid "An admin assigns members."
 msgstr "Mitglieder ordnet ein Admin zu."
@@ -986,6 +1015,11 @@ msgstr "Ich bin {playerName} – Passkey einrichten"
 #: src/pages/setup-wizard.tsx
 msgid "Moving from another installation: take over teams, people, events and chats from its export file."
 msgstr "Umzug von einer anderen Installation: Mannschaften, Personen, Termine und Chats aus deren Export-Datei übernehmen."
+
+# ai
+#: modules/duties/app/stats.tsx
+msgid "No family has taken a duty in this time span yet."
+msgstr "Im Zeitraum hat noch keine Familie einen Dienst übernommen."
 
 #: src/pages/admin.tsx
 msgid "Revoke admin rights?"
@@ -1034,6 +1068,11 @@ msgstr "Jugend"
 #: src/pages/event.tsx
 msgid "Table on {tableSource}"
 msgstr "Tabelle bei {tableSource}"
+
+# ai
+#: src/pages/stats.tsx
+msgid "Statistics {teamName}"
+msgstr "Statistik {teamName}"
 
 #: src/pages/home.tsx
 msgid "Other events"
@@ -1112,6 +1151,12 @@ msgstr "Wir haben einen sechsstelligen Code an <0>{email}</0> geschickt, falls z
 #: src/view-as.tsx
 msgid "View as {mode}: {name} · read only"
 msgstr "Ansicht als {mode}: {name} · nur lesen"
+
+# ai
+#: src/pages/stats.tsx
+#: src/pages/stats.tsx
+msgid "Not counted"
+msgstr "Nicht gezählt"
 
 # ai
 #: src/list-import.tsx
@@ -1258,6 +1303,11 @@ msgstr "{personCount, plural, one {# Person übernehmen} other {# Personen über
 msgid "Task · before"
 msgstr "Aufgabe · davor"
 
+# ai
+#: src/pages/profile.tsx
+msgid "Training, games and your family's helper duties"
+msgstr "Training, Spiele und Helferdienste eurer Familie"
+
 #: src/pages/admin.tsx
 msgid "The association sets the birth years per season. Please check them against the competition rules. “Rank” orders the classes from young to old and determines which is the next higher youth class."
 msgstr "Die Jahrgänge legt der Verband pro Saison fest. Bitte mit den Durchführungsbestimmungen abgleichen. „Rang“ ordnet die Klassen von jung nach alt und bestimmt, welches die nächsthöhere Jugend ist."
@@ -1375,6 +1425,11 @@ msgid "This setup password is not correct. If nobody knows it any more, set ADMI
 msgstr "Dieses Einrichtungspasswort stimmt nicht. Weiß es niemand mehr, setze ADMIN_BOOTSTRAP_TOKEN im Cloudflare-Dashboard neu: Workers & Pages → dieser Worker → Settings → Variables and Secrets."
 
 # ai
+#: modules/duties/app/stats.tsx
+msgid "Done this season"
+msgstr "Erledigt in dieser Saison"
+
+# ai
 #: modules/duties/app/admin.tsx
 msgid "Everyone an admin approved for it takes this duty, from all teams, for example youth referees for the home games of the youngest age groups. Approve people under Admin → Approvals; under Admin → Age groups you choose which home games get it."
 msgstr "Diesen Dienst übernehmen alle, die ein Admin dafür freigegeben hat, aus allen Mannschaften, zum Beispiel Jugendschiedsrichter für die Heimspiele der jüngsten Altersklassen. Personen gibst du unter Verwaltung → Freigaben frei; unter Verwaltung → Altersklassen wählst du, welche Heimspiele ihn bekommen."
@@ -1402,6 +1457,11 @@ msgstr "Ohne Mannschaft"
 #: worker/routes/events.ts
 msgid "Only special events can be deleted. Please cancel trainings and games instead."
 msgstr "Nur Sondertermine können gelöscht werden. Trainings und Spiele bitte absagen."
+
+# ai
+#: src/pages/team.tsx
+msgid "Training and games, last 4 weeks and season"
+msgstr "Training und Spiele, letzte 4 Wochen und Saison"
 
 #: modules/duties/worker/routes.ts
 #: modules/duties/worker/routes.ts
@@ -1693,6 +1753,11 @@ msgstr "Lösen"
 msgid "{parent} can then no longer act for {child}. Both people are kept."
 msgstr "{parent} kann danach nicht mehr für {child} handeln. Beide Personen bleiben erhalten."
 
+# ai
+#: src/pages/stats.tsx
+msgid "Show fewer"
+msgstr "Weniger anzeigen"
+
 #: src/pages/event.tsx
 msgid "Helper plan: duties for this game"
 msgstr "Helferplan: Dienste für dieses Spiel"
@@ -1810,6 +1875,11 @@ msgstr "{days, plural, one {vor # Tag} other {vor # Tagen}}"
 #: src/pages/setup-wizard.tsx
 msgid "Skip"
 msgstr "Überspringen"
+
+# ai
+#: modules/duties/app/stats.tsx
+msgid "all done"
+msgstr "alle erledigt"
 
 #: worker/routes/events.ts
 #: worker/routes/events.ts
@@ -1949,6 +2019,12 @@ msgstr "selbst"
 msgid "Demo and language links (?lang=en) no longer reload the app over and over."
 msgstr "Demo- und Sprachlinks (?lang=en) laden die App nicht mehr endlos neu."
 
+# ai
+#: src/pages/stats.tsx
+#: src/pages/stats.tsx
+msgid "Missed"
+msgstr "Gefehlt"
+
 #: src/pages/home.tsx
 msgid "Events of the {team}"
 msgstr "Termine der {team}"
@@ -1978,6 +2054,11 @@ msgstr "Die Mannschaft hat noch Mitglieder. Bitte zuerst alle entfernen."
 #: src/pages/plans.tsx
 msgid "New training location"
 msgstr "Neuer Trainingsort"
+
+# ai
+#: modules/duties/worker/stats.ts
+msgid "These families were already reminded today. Tomorrow it works again."
+msgstr "Heute ist schon eine Erinnerung an diese Familien rausgegangen. Morgen geht es wieder."
 
 # ai
 #: modules/duties/app/approvals.tsx
@@ -2113,9 +2194,20 @@ msgstr "Zu dieser Adresse gehören mehrere Zugänge. Mit welchem möchtest du di
 msgid "Administration"
 msgstr "Verwaltung"
 
+# ai
+#: modules/duties/app/stats.tsx
+msgid "No places are free at the moment. Reminding works again once duties are open."
+msgstr "Gerade sind keine Plätze frei. Erinnern geht wieder, sobald Dienste offen sind."
+
 #: worker/routes/events.ts
 msgid "{name} declined {what} on {when} at short notice."
 msgstr "{name} hat {what} am {when} kurzfristig abgesagt."
+
+# ai
+#: modules/duties/worker/stats.ts
+#: modules/duties/worker/stats.ts
+msgid "This team has no helper plan."
+msgstr "Diese Mannschaft hat keinen Helferplan."
 
 #: src/respond.tsx
 msgid "Not this time"
@@ -2461,6 +2553,11 @@ msgstr "Neues Spiel: {teamName} gegen {opponent}"
 msgid "Add leads"
 msgstr "Verantwortliche hinzufügen"
 
+# ai
+#: src/pages/stats.tsx
+msgid "{unexcused} unexc."
+msgstr "{unexcused} unentsch."
+
 #: src/pages/home.tsx
 msgid "Attending"
 msgstr "Nehmen teil"
@@ -2494,6 +2591,11 @@ msgstr "Schulferien und Feiertage deiner Region lassen sich jetzt auch für die 
 #: src/pages/setup-wizard.tsx
 msgid "From an export of Kabine"
 msgstr "Aus einem Kabine-Export"
+
+# ai
+#: modules/duties/worker/stats.ts
+msgid "{n, plural, one {Reminder sent to one family.} other {Reminder sent to # families.}}"
+msgstr "{n, plural, one {Erinnerung an eine Familie verschickt.} other {Erinnerung an # Familien verschickt.}}"
 
 # ai
 #: src/pages/setup-wizard.tsx
@@ -2597,6 +2699,11 @@ msgstr "vor {months} Monaten"
 msgid "The file contains personal data of people, including minors. It is only for the club's data backup and must not be passed on. Delete it from your computer after 30 days at the latest. The club's backup belongs encrypted in the storage intended for it. If a storage location, for example your computer, has become accessible to unauthorised persons through a virus or similar, inform the board immediately."
 msgstr "Die Datei enthält persönliche Daten von Personen, auch von Minderjährigen. Sie dient nur der Datensicherung des Vereins und darf nicht weitergegeben werden. Lösche sie nach spätestens 30 Tagen von deinem Rechner. Die Sicherung des Vereins gehört verschlüsselt in den dafür vorgesehenen Speicher. Ist ein Speicherort, zum Beispiel dein Rechner, durch einen Virus oder Ähnliches für Unbefugte zugänglich geworden, informiere unverzüglich die Vorstandschaft."
 
+# ai
+#: src/pages/stats.tsx
+msgid "{late} at short notice"
+msgstr "{late} kurzfristig"
+
 #: modules/duties/app/helpers.tsx
 msgid "Withdraw from {label}"
 msgstr "{label} austragen"
@@ -2657,6 +2764,11 @@ msgstr "Helferplan: {link}"
 #: src/pages/chat.tsx
 msgid "Chat"
 msgstr "Chat"
+
+# ai
+#: modules/duties/app/stats.tsx
+msgid "Sends a notification with an incentive and a link to the helper plan, without the names of the others."
+msgstr "Schickt eine Benachrichtigung mit Ansporn und Link zum Helferplan, ohne Namen der anderen."
 
 #: src/avatar.tsx
 #: src/avatar.tsx
@@ -2754,6 +2866,11 @@ msgstr "Aushilfe entfernen?"
 #: src/pages/setup-wizard.tsx
 msgid "Start again from the beginning"
 msgstr "Noch einmal von vorn"
+
+# ai
+#: src/pages/stats.tsx
+msgid "There are no games in this time span yet."
+msgstr "Im Zeitraum gibt es noch keine Spiele."
 
 # ai
 #: src/pages/profile.tsx
@@ -2858,6 +2975,11 @@ msgstr "Überall schon {teamRole}."
 #: src/pages/admin.tsx
 msgid "Load"
 msgstr "Laden"
+
+# ai
+#: modules/duties/app/stats.tsx
+msgid "Places open"
+msgstr "Plätze offen"
 
 #: shared/types.ts
 msgid "Answer stand-in requests on their own"
@@ -3126,6 +3248,7 @@ msgstr "Für diesen Zugang ist schon eine bestätigte E-Mail-Adresse hinterlegt.
 msgid "Section"
 msgstr "Bereich"
 
+#: src/pages/stats.tsx
 #: src/ui.tsx
 msgid "Declined at short notice"
 msgstr "Kurzfristig abgesagt"
@@ -3289,6 +3412,11 @@ msgstr "Diesen Ferienzeitraum gibt es nicht."
 msgid "You are signed in as {name} and already in the app."
 msgstr "Du bist als {name} angemeldet und schon in der App."
 
+# ai
+#: src/pages/stats.tsx
+msgid "Reasons for declines are at the event."
+msgstr "Gründe von Absagen stehen beim jeweiligen Termin."
+
 #: src/pages/chat.tsx
 #: worker/chat/room.ts
 #: worker/chat/room.ts
@@ -3308,6 +3436,11 @@ msgstr "Vorschau des Profilbilds"
 #: worker/routes/teams.ts
 msgid "No admin approves this duty."
 msgstr "Diesen Dienst gibt kein Admin frei."
+
+# ai
+#: src/pages/stats.tsx
+msgid "Only you, your child and the coaches see these figures."
+msgstr "Nur ihr, euer Kind und die Trainer sehen diese Zahlen."
 
 #: src/pages/admin.tsx
 msgid "e.g. invitation to the end-of-season party on …"
@@ -3358,6 +3491,12 @@ msgstr "Diese Person wurde bereits angefragt."
 #: src/list-import.tsx
 msgid "Birth year of {name}"
 msgstr "Jahrgang von {name}"
+
+# ai
+#: modules/duties/app/stats.tsx
+#: modules/duties/app/stats.tsx
+msgid "No duty yet"
+msgstr "Noch ohne Dienst"
 
 #: src/pages/team.tsx
 msgid "No one found"
@@ -3431,6 +3570,11 @@ msgstr "Hilfe"
 msgid "The team has been told that you are not there."
 msgstr "Die Mannschaft weiß schon, dass du nicht da bist."
 
+# ai
+#: src/pages/stats.tsx
+msgid "by name"
+msgstr "nach Name"
+
 #: src/pages/team.tsx
 msgid "Already in the app, e.g. for a sibling in another team or as a coach? Then open the link on the phone where the app is installed and sign in first. Otherwise a second access is created."
 msgstr "Ihr seid schon in der App, z. B. für ein Geschwisterkind in einer anderen Mannschaft oder als Trainer? Dann öffnet den Link auf dem Handy, auf dem die App installiert ist, und meldet euch zuerst an. Sonst entsteht ein zweiter Zugang."
@@ -3443,6 +3587,11 @@ msgstr "Wird aktualisiert"
 #: src/pages/team.tsx
 msgid "has access set up"
 msgstr "hat einen Zugang"
+
+# ai
+#: src/pages/stats.tsx
+msgid "Played"
+msgstr "Gespielt"
 
 #: modules/handball4all/app/live.tsx
 msgid "Opening {title} …"
@@ -3502,6 +3651,11 @@ msgstr "Mannschaften"
 #: shared/types.ts
 msgid "Coach notes (short-notice declines, stand-ins)"
 msgstr "Trainer-Hinweise (kurzfristige Absagen, Aushilfen)"
+
+# ai
+#: modules/duties/app/stats.tsx
+msgid "Families with duties"
+msgstr "Familien mit Diensten"
 
 #: modules/duties/worker/routes.ts
 msgid "More people are already signed up. Please remove someone first."
@@ -3583,6 +3737,11 @@ msgstr "Ohne Passkey: Code per E-Mail"
 msgid "New info on {label} on {date}."
 msgstr "Neue Infos zu {label} am {date}."
 
+# ai
+#: modules/duties/worker/stats.ts
+msgid "All families have helped already."
+msgstr "Alle Familien haben schon geholfen."
+
 #: modules/duties/app/helpers.tsx
 msgid "Remove {label}?"
 msgstr "{label} entfernen?"
@@ -3661,6 +3820,12 @@ msgstr "Löschen"
 msgid "{club} is an internal club app. If no code arrives, this address is not on file. Access is only available through an invitation from your coach."
 msgstr "{club} ist eine interne Vereins-App. Kommt kein Code, ist diese Adresse nicht hinterlegt. Einen Zugang gibt es nur über eine Einladung deiner Trainerin oder deines Trainers."
 
+# ai
+#: src/pages/stats.tsx
+#: src/pages/stats.tsx
+msgid "There, not nominated"
+msgstr "Dabei, nicht nominiert"
+
 #: src/howto.tsx
 msgid "In the browser menu, choose <0>Add to Home screen</0> or <1>Install app</1>. After that you start {club} from the icon on the home screen."
 msgstr "Im Browsermenü <0>Zum Startbildschirm hinzufügen</0> bzw. <1>App installieren</1> wählen. Danach startest du {club} über das Symbol auf dem Startbildschirm."
@@ -3680,6 +3845,11 @@ msgid "Public holidays (no training)"
 msgstr "Feiertage (kein Training)"
 
 # ai
+#: src/pages/stats.tsx
+msgid "Trainings"
+msgstr "Trainings"
+
+# ai
 #: src/pages/setup-wizard.tsx
 msgid "Progress"
 msgstr "Fortschritt"
@@ -3692,6 +3862,8 @@ msgstr "Antwort per E-Mail erwünscht"
 msgid "Season change completed."
 msgstr "Saisonwechsel abgeschlossen."
 
+#: modules/duties/worker/stats.ts
+#: modules/duties/worker/stats.ts
 #: worker/domain/groups.ts
 #: worker/routes/games.ts
 #: worker/routes/restore.ts
@@ -3711,6 +3883,11 @@ msgstr "Weitere Mannschaft entfernen"
 #: src/child-limits.tsx
 msgid "Read"
 msgstr "Lesen"
+
+# ai
+#: src/pages/stats.tsx
+msgid "Show {more} more of {total}"
+msgstr "Weitere {more} von {total} anzeigen"
 
 #: modules/duties/app/helpers.tsx
 msgid "Time slot {label} added."
@@ -3949,6 +4126,11 @@ msgstr "Du wirst der erste Admin und Inhaber dieser Installation. Deine E-Mail-A
 msgid "Request a stand-in"
 msgstr "Aushilfe anfragen"
 
+# ai
+#: modules/duties/app/stats.tsx
+msgid "Without names, with a link to the helper plan. Possible once a day."
+msgstr "Ohne Namen, mit Link zum Helferplan. Einmal am Tag möglich."
+
 #: src/pages/profile.tsx
 msgid "Child's access"
 msgstr "Zugang des Kindes"
@@ -4016,6 +4198,11 @@ msgstr "min vor Beginn"
 msgctxt "chat author"
 msgid "Coach"
 msgstr "Coach"
+
+# ai
+#: modules/duties/app/stats.tsx
+msgid "Duties"
+msgstr "Dienste"
 
 #: src/live.tsx
 msgid "Live"
@@ -4273,6 +4460,12 @@ msgstr "Saison, Altersklassen und Ferien"
 msgid "Sign up"
 msgstr "Eintragen"
 
+# ai
+#. placeholder {0}: c.played
+#: src/pages/stats.tsx
+msgid "{0, plural, one {# appearance} other {# appearances}}"
+msgstr "{0, plural, one {# Einsatz} other {# Einsätze}}"
+
 #: worker/routes/events.ts
 #: worker/routes/events.ts
 msgid "This person does not take part in the event."
@@ -4421,6 +4614,9 @@ msgstr "den Chat"
 #: modules/duties/app/helpers.tsx
 #: modules/duties/app/helpers.tsx
 #: modules/duties/app/index.tsx
+#: modules/duties/app/index.tsx
+#: modules/duties/app/stats.tsx
+#: modules/duties/app/stats.tsx
 #: src/pages/event.tsx
 msgid "Helpers"
 msgstr "Helfer"
@@ -4482,6 +4678,11 @@ msgstr "{at}: Admin-Link für {email}"
 #: src/duty-blocks.tsx
 msgid "New special duty …"
 msgstr "Neuer Sonderdienst …"
+
+# ai
+#: src/pages/stats.tsx
+msgid "There are no trainings in this time span yet."
+msgstr "Im Zeitraum gibt es noch keine Trainings."
 
 #: worker/app.ts
 msgid "The app is under maintenance and will be back shortly."
@@ -4580,6 +4781,11 @@ msgstr "Davor"
 msgid "Saved. Trainings have been adjusted."
 msgstr "Gespeichert. Trainings sind angepasst."
 
+# ai
+#: modules/duties/app/help.ts
+msgid "Helpers per family"
+msgstr "Helfer je Familie"
+
 #: modules/carpools/worker/routes.ts
 msgid "At least one free seat."
 msgstr "Mindestens ein freier Platz."
@@ -4642,6 +4848,11 @@ msgstr "Aushilfe aus der {homeTeam}"
 msgid "without parents"
 msgstr "ohne Eltern"
 
+# ai
+#: src/pages/stats.tsx
+msgid "Whoever was away long-term or inactive for the whole time span is only listed here. Stand-ins from other teams do not count."
+msgstr "Wer im ganzen Zeitraum dauerhaft abwesend oder inaktiv war, steht nur hier. Aushilfen aus anderen Teams zählen nicht mit."
+
 #: src/pages/squad.tsx
 msgid "Anyway"
 msgstr "Trotzdem"
@@ -4672,6 +4883,11 @@ msgstr "{venue, select, hall {Keine Angabe} pitch {Keine Angabe} other {Keine An
 #: src/child-limits.tsx
 msgid "Read and write"
 msgstr "Lesen und schreiben"
+
+# ai
+#: modules/duties/worker/stats.ts
+msgid "None of these families can be reached through the app. Best talk to them directly."
+msgstr "Keine dieser Familien ist über die App erreichbar. Sprich sie am besten direkt an."
 
 #: src/pages/help.tsx
 msgid "Contact for the app: {contact}"
@@ -4789,6 +5005,8 @@ msgstr "Freischalten kannst du nur dich selbst oder eines deiner Kinder."
 msgid "The passkey was not created because the dialog was cancelled. Please tap again."
 msgstr "Der Passkey wurde nicht angelegt, weil der Dialog abgebrochen wurde. Bitte tippe noch einmal."
 
+#: modules/duties/app/stats.tsx
+#: modules/duties/app/stats.tsx
 #: src/pages/event.tsx
 #: src/pages/event.tsx
 #: src/pages/event.tsx
@@ -4947,6 +5165,11 @@ msgstr "Suche löschen"
 msgid "Leads of {teamName}"
 msgstr "Verantwortliche {teamName}"
 
+# ai
+#: src/pages/stats.tsx
+msgid "Avg. in squad"
+msgstr "Ø im Kader"
+
 #: src/help-texts.ts
 #: src/help-texts.ts
 #: src/pages/admin.tsx
@@ -5036,6 +5259,11 @@ msgstr "Ohne Vorname"
 msgid "Sender: at most 11 letters and digits, or a phone number."
 msgstr "Absender: höchstens 11 Buchstaben und Ziffern oder eine Telefonnummer."
 
+# ai
+#: modules/duties/worker/notify.ts
+msgid "To the helper plan: {link}"
+msgstr "Zum Helferplan: {link}"
+
 #: modules/duties/worker/notify.ts
 msgid "You can choose which notifications you get by push or mail in the app under Profile → Notifications."
 msgstr "Welche Benachrichtigungen du per Push oder Mail bekommst, stellst du in der App unter Profil → Benachrichtigungen ein."
@@ -5082,6 +5310,11 @@ msgstr "Für {names} sind schon zwei Elternteile eingetragen. Wende dich bitte a
 msgid "Admins only"
 msgstr "Nur für Admins"
 
+# ai
+#: src/pages/stats.tsx
+msgid "{late} short n."
+msgstr "{late} kurzfr."
+
 #: modules/duties/app/admin.tsx
 msgid "New template"
 msgstr "Neue Vorlage"
@@ -5090,6 +5323,12 @@ msgstr "Neue Vorlage"
 #: src/pages/special.tsx
 msgid "Time slots"
 msgstr "Zeitblöcke"
+
+# ai
+#. placeholder {0}: c.standing
+#: src/pages/stats.tsx
+msgid "{0, plural, one {Away long-term at # game} other {Away long-term at # games}}"
+msgstr "{0, plural, one {Dauerhaft abwesend bei # Spiel} other {Dauerhaft abwesend bei # Spielen}}"
 
 #: worker/routes/teams.ts
 #: worker/routes/teams.ts
@@ -5242,6 +5481,8 @@ msgstr "Plan gespeichert."
 
 # ai
 #: src/pages/event.tsx
+#: src/pages/stats.tsx
+#: src/pages/stats.tsx
 msgid "unexcused"
 msgstr "unentschuldigt"
 
@@ -5258,6 +5499,11 @@ msgid "Save change"
 msgstr "Änderung speichern"
 
 # ai
+#: src/pages/stats.tsx
+msgid "{played} of {expected}"
+msgstr "{played} von {expected}"
+
+# ai
 #: src/pages/event.tsx
 msgid "Were there"
 msgstr "Waren da"
@@ -5270,6 +5516,11 @@ msgstr "{name} bis {to}: kein Training für {teams}."
 #: src/pages/event.tsx
 msgid "{name} is now co-organising."
 msgstr "{name} organisiert jetzt mit."
+
+# ai
+#: modules/duties/app/stats.tsx
+msgid "Families of stand-ins from other teams"
+msgstr "Familien von Aushilfen aus anderen Teams"
 
 # ai
 #: src/restore.tsx
@@ -5393,6 +5644,11 @@ msgstr "Weggelassen"
 msgid "New class"
 msgstr "Neue Klasse"
 
+# ai
+#: modules/duties/worker/notify.ts
+msgid "Helpers wanted: {team}"
+msgstr "Helfer gesucht: {team}"
+
 #: src/pages/season.tsx
 msgid "previously {teams}"
 msgstr "bisher {teams}"
@@ -5505,6 +5761,11 @@ msgid "Team for {name}"
 msgstr "Mannschaft für {name}"
 
 # ai
+#: src/pages/stats.tsx
+msgid "Missed nothing in this time span."
+msgstr "Im Zeitraum nicht gefehlt."
+
+# ai
 #: modules/duties/app/approvals.tsx
 msgid "{name} is no longer approved for {duty}."
 msgstr "{name} ist nicht mehr für {duty} freigegeben."
@@ -5536,6 +5797,11 @@ msgstr "Hilfe und Feedback"
 msgid "Copy"
 msgstr "Kopieren"
 
+# ai
+#: worker/routes/stats.ts
+msgid "This time span does not exist."
+msgstr "Diesen Zeitraum gibt es nicht."
+
 #: src/pages/event.tsx
 #: src/pages/home.tsx
 #: src/pages/team.tsx
@@ -5559,6 +5825,11 @@ msgstr "vorbei"
 #: modules/carpools/worker/routes.ts
 msgid "{rider} is not riding with you after all: {game} (entered by {coach})."
 msgstr "{rider} fährt doch nicht mit dir mit: {game} (eingetragen von {coach})."
+
+# ai
+#: src/pages/stats.tsx
+msgid "of which unexcused"
+msgstr "davon unentschuldigt"
 
 #: src/pages/event.tsx
 msgid "No venue"
@@ -5615,6 +5886,11 @@ msgstr "{free, plural, one {{game}. Noch # Platz frei.} other {{game}. Noch # Pl
 msgid "Revoke admin rights"
 msgstr "Admin-Rechte entziehen"
 
+# ai
+#: src/pages/stats.tsx
+msgid "Players training"
+msgstr "Spieler Training"
+
 #: src/pages/profile.tsx
 #: src/pages/profile.tsx
 msgid "E-mail for signing in"
@@ -5660,6 +5936,11 @@ msgstr "{label} entfernen"
 #: src/pages/setup-wizard.tsx
 msgid "Skip for now"
 msgstr "Erst einmal überspringen"
+
+# ai
+#: src/pages/stats.tsx
+msgid "Statistics of {child}"
+msgstr "Statistik von {child}"
 
 #: src/pages/plans.tsx
 msgid "Remove {teamName}"
@@ -5838,6 +6119,11 @@ msgstr "Dein Vorname"
 msgid "Home"
 msgstr "Heim"
 
+# ai
+#: src/pages/stats.tsx
+msgid "Last 4 weeks"
+msgstr "Letzte 4 Wochen"
+
 #: src/faq.tsx
 msgid "If the new phone is signed in with the same Apple or Google account, your passkey is usually already there: just <0>Sign in with passkey</0>."
 msgstr "Ist das neue Handy mit demselben Apple- bzw. Google-Konto angemeldet, ist dein Passkey meist schon da: einfach <0>Mit Passkey anmelden</0>."
@@ -5886,6 +6172,12 @@ msgstr "Lade vor dem Zurücksetzen einen vollständigen Export herunter. Zusätz
 msgid "Notifications are on."
 msgstr "Benachrichtigungen sind aktiv."
 
+# ai
+#: src/pages/stats.tsx
+#: src/pages/stats.tsx
+msgid "{present} of {expected}"
+msgstr "{present} von {expected}"
+
 #: src/pages/event.tsx
 msgid "Move event"
 msgstr "Termin verschieben"
@@ -5932,6 +6224,11 @@ msgid "The event is in the past."
 msgstr "Der Termin liegt in der Vergangenheit."
 
 # ai
+#: src/pages/stats.tsx
+msgid "Sort by name"
+msgstr "Nach Name sortieren"
+
+# ai
 #: src/pages/fixture-sync.tsx
 msgid "Remind coaches after"
 msgstr "Trainer erinnern nach"
@@ -5963,6 +6260,11 @@ msgstr "An seit {since}. Nur Admins können die App nutzen, Erinnerungen und and
 #: worker/routes/list-import.ts
 msgid "Please choose an age class for \"{name}\"."
 msgstr "Bitte wähle eine Altersklasse für „{name}“."
+
+# ai
+#: src/pages/stats.tsx
+msgid "Season, data since {since} (start of the app)"
+msgstr "Saison, Daten seit {since} (Start der App)"
 
 #: src/pages/admin.tsx
 msgid "no access"
@@ -6093,6 +6395,11 @@ msgstr "Der bisherige Link funktioniert dann nicht mehr."
 msgid "{days} days ago"
 msgstr "vor {days} Tagen"
 
+# ai
+#: src/pages/stats.tsx
+msgid "Away long-term in this time span; that does not count as missing."
+msgstr "Im Zeitraum dauerhaft abwesend, das zählt nicht als Fehlen."
+
 #: src/pages/season.tsx
 msgid "5 · Backup"
 msgstr "5 · Sicherung"
@@ -6108,6 +6415,11 @@ msgstr "Danach die App aufs Handy holen: iPhone in Safari über „Teilen“ →
 #: src/pages/event.tsx
 msgid "Manage helper duties in the Helpers tab"
 msgstr "Helferdienste im Reiter Helfer verwalten"
+
+# ai
+#: src/pages/team.tsx
+msgid "Training, games and helpers, last 4 weeks and season"
+msgstr "Training, Spiele und Helfer, letzte 4 Wochen und Saison"
 
 #: src/pages/profile.tsx
 msgid "Turn on for this device"
@@ -6147,6 +6459,11 @@ msgstr "Was ist dir aufgefallen?"
 msgid "3 · Check assignment"
 msgstr "3 · Zuordnung prüfen"
 
+# ai
+#: src/pages/stats.tsx
+msgid "Only missed ({missedCount})"
+msgstr "Nur gefehlt ({missedCount})"
+
 #: src/pages/team.tsx
 msgid "Players with their own smartphone select their name and set up a passkey."
 msgstr "Spielerinnen und Spieler mit eigenem Smartphone wählen ihren Namen aus und richten einen Passkey ein."
@@ -6184,6 +6501,11 @@ msgid "Physio, team manager or kit manager: they see the events, who takes part 
 msgstr "Physio, Teammanager oder Zeugwart: Sie sehen die Termine, wer dabei ist, und den Chat und bekommen Änderungen mit. Selbst sagen sie nicht zu oder ab."
 
 # ai
+#: modules/duties/app/stats.tsx
+msgid "with {names} · without the app"
+msgstr "mit {names} · ohne App"
+
+# ai
 #: src/ui.tsx
 msgid "Not nominated"
 msgstr "Nicht nominiert"
@@ -6192,6 +6514,11 @@ msgstr "Nicht nominiert"
 msgctxt "navigation"
 msgid "Admin"
 msgstr "Verwaltung"
+
+# ai
+#: src/pages/stats.tsx
+msgid "Away long-term (e.g. injured) does not count as missing."
+msgstr "Dauerhaft abwesend (z. B. verletzt) zählt nicht als Fehlen."
 
 #: worker/routes/feedback.ts
 msgctxt "feedback"
@@ -6273,6 +6600,12 @@ msgstr "Spielpläne"
 #: src/pages/home.tsx
 msgid "Coming up"
 msgstr "Demnächst"
+
+# ai
+#: src/pages/stats.tsx
+#: src/pages/stats.tsx
+msgid "Time span"
+msgstr "Zeitraum"
 
 # ai
 #: src/list-import.tsx
@@ -6464,6 +6797,11 @@ msgstr "Zu- und Absagen für alle sichtbar"
 msgid "View"
 msgstr "Ansicht"
 
+# ai
+#: modules/duties/worker/stats.ts
+msgid "No places are free at the moment. A reminder only helps once duties are open again."
+msgstr "Gerade sind keine Plätze frei. Eine Erinnerung hilft erst, wenn wieder Dienste offen sind."
+
 #: src/pages/team.tsx
 msgid "You are not registered as a coach for any team."
 msgstr "Du bist bei keiner Mannschaft als Trainer eingetragen."
@@ -6521,6 +6859,7 @@ msgstr "{firstName} ist jetzt Admin."
 
 #: src/pages/event.tsx
 #: src/pages/home.tsx
+#: src/pages/stats.tsx
 msgid "Declines"
 msgstr "Absagen"
 
@@ -6556,6 +6895,11 @@ msgstr "{count} ohne Nachnamen"
 #: src/faq.tsx
 msgid "Yes, via the same parent link of the team with their own access. Two parents can be linked per child."
 msgstr "Ja, über denselben Elternlink der Mannschaft mit eigenem Zugang. Pro Kind können zwei Elternteile verknüpft sein."
+
+# ai
+#: modules/duties/worker/notify.ts
+msgid "{helped} of {total} in the team have helped already. If the others can do it, so can you! Give yourselves a nudge and sign up for a duty."
+msgstr "{helped} von {total} aus der Mannschaft haben schon geholfen. Was die anderen schaffen, schafft ihr auch! Gebt euch einen Ruck und tragt euch für einen Dienst ein."
 
 #: src/faq.tsx
 msgid "Who sees my reasons for declining?"
@@ -6752,6 +7096,7 @@ msgstr "Aushilfe-Anfragen"
 #: src/app.tsx
 #: src/list-import.tsx
 #: src/pages/plans.tsx
+#: src/pages/stats.tsx
 #: src/pages/team.tsx
 #: src/pages/team.tsx
 #: src/pages/team.tsx
@@ -6775,6 +7120,11 @@ msgstr "Diesen Kader hast du von Hand angepasst. Änderungen am Stammkader wirke
 #: worker/routes/season.ts
 msgid "You do not manage this person."
 msgstr "Diese Person verwaltest du nicht."
+
+# ai
+#: src/pages/stats.tsx
+msgid "Nothing to count in this time span yet."
+msgstr "Im Zeitraum noch nichts zu zählen."
 
 #: src/pages/setup-wizard.tsx
 #: src/respond.tsx
@@ -6898,6 +7248,11 @@ msgstr "Unter Verwaltung → Helferdienste kann bei einer Dienstart mit Vorkennt
 #: src/pages/games.tsx
 msgid "Change source"
 msgstr "Quelle wechseln"
+
+# ai
+#: modules/duties/app/stats.tsx
+msgid "{others, plural, one {Also # duty of coaches, club members and helpers entered by hand.} other {Also # duties of coaches, club members and helpers entered by hand.}}"
+msgstr "{others, plural, one {Außerdem # Dienst von Trainern, Vereinsmitgliedern und von Hand eingetragenen Helfern.} other {Außerdem # Dienste von Trainern, Vereinsmitgliedern und von Hand eingetragenen Helfern.}}"
 
 #: src/pages/profile.tsx
 msgid "Your parents are linked to your access. They decide what you can do yourself in the app."
@@ -7045,9 +7400,20 @@ msgid "A mobile number is only stored if you enter it yourself, for sign-in code
 msgstr "Eine Handynummer wird nur gespeichert, wenn du sie selbst einträgst, für Anmeldecodes und Erinnerungen per SMS. Niemand sonst sieht sie. Du kannst sie jederzeit im Profil löschen. Die SMS laufen über einen Anbieter, den der Verein gewählt hat."
 
 # ai
+#: src/pages/profile.tsx
+#: src/pages/stats.tsx
+msgid "My statistics"
+msgstr "Meine Statistik"
+
+# ai
 #: worker/routes/squad.ts
 msgid "The game is not taking place."
 msgstr "Das Spiel findet nicht statt."
+
+# ai
+#: src/pages/stats.tsx
+msgid "No games yet"
+msgstr "Noch keine Spiele"
 
 #: src/coach-hints.tsx
 #: src/pages/fixture-sync.tsx
@@ -7313,6 +7679,11 @@ msgstr "Füge deine Listen hinzu: Excel-Dateien (.xlsx) mit einem oder mehreren 
 msgid "Choose meeting point"
 msgstr "Treffpunkt wählen"
 
+# ai
+#: src/pages/stats.tsx
+msgid "Show {more} more"
+msgstr "Weitere {more} anzeigen"
+
 #: src/pages/chat.tsx
 msgid "{selAuthor} is muted."
 msgstr "{selAuthor} ist stummgeschaltet."
@@ -7364,6 +7735,14 @@ msgid "Does your club have lists of its teams, coaches and players, for example 
 msgstr "Hat dein Verein Listen seiner Mannschaften, Trainer und Spieler, etwa in Excel? Dann lassen sie sich in einem Rutsch übernehmen."
 
 # ai
+#: src/pages/stats.tsx
+#: src/pages/stats.tsx
+#: src/pages/stats.tsx
+msgctxt "stats"
+msgid "There"
+msgstr "Da"
+
+# ai
 #: src/pages/event.tsx
 msgid "I'm there after all"
 msgstr "Ich bin doch da"
@@ -7386,6 +7765,8 @@ msgstr "Trainingspläne"
 #: src/pages/event.tsx
 #: src/pages/home.tsx
 #: src/pages/special.tsx
+#: src/pages/stats.tsx
+#: src/pages/stats.tsx
 #: worker/domain/calendar.ts
 #: worker/routes/manual-games.ts
 msgid "Game"
@@ -7399,6 +7780,11 @@ msgstr "{firstName} ist Trainer der {teamName}."
 #: src/respond.tsx
 msgid "Optional training: accept if you want to join. Nobody counts as missing."
 msgstr "Optionales Training: Sag zu, wenn du mitmachen willst. Niemand gilt als fehlend."
+
+# ai
+#: src/pages/profile.tsx
+msgid "Statistics of {firstName}"
+msgstr "Statistik von {firstName}"
 
 #: src/pages/group.tsx
 msgid "Create group"
@@ -7585,6 +7971,11 @@ msgid "Title"
 msgstr "Titel"
 
 # ai
+#: modules/duties/app/stats.tsx
+msgid "with {names}"
+msgstr "mit {names}"
+
+# ai
 #: src/pages/setup-wizard.tsx
 msgid "The sport brings suitable age groups, playing times and helper duties. You adjust them later under administration."
 msgstr "Die Sportart bringt passende Altersklassen, Spielzeiten und Helferdienste mit. Anpassen kannst du sie später in der Verwaltung."
@@ -7683,6 +8074,12 @@ msgstr "Stummschaltung aufgehoben."
 msgid "Delete game"
 msgstr "Spiel löschen"
 
+# ai
+#. placeholder {0}: c.standing
+#: src/pages/stats.tsx
+msgid "{0, plural, one {Away long-term at # training} other {Away long-term at # trainings}}"
+msgstr "{0, plural, one {Dauerhaft abwesend bei # Training} other {Dauerhaft abwesend bei # Trainings}}"
+
 #: src/pages/team.tsx
 msgid "Stand-in from {homeTeam}. Their coach maintains the personal data."
 msgstr "Aushilfe aus der {homeTeam}. Stammdaten pflegt deren Trainer."
@@ -7695,6 +8092,11 @@ msgstr "z. B. Schulveranstaltung"
 #: src/session.tsx
 msgid "The device rejected the sign-in with the passkey or it was cancelled. Please tap again."
 msgstr "Das Gerät hat die Anmeldung mit dem Passkey abgelehnt oder sie wurde abgebrochen. Bitte tippe noch einmal."
+
+# ai
+#: modules/duties/app/stats.tsx
+msgid "{others, plural, one {Also # duty of coaches, club members, stand-ins and helpers entered by hand.} other {Also # duties of coaches, club members, stand-ins and helpers entered by hand.}}"
+msgstr "{others, plural, one {Außerdem # Dienst von Trainern, Vereinsmitgliedern, Aushilfen und von Hand eingetragenen Helfern.} other {Außerdem # Dienste von Trainern, Vereinsmitgliedern, Aushilfen und von Hand eingetragenen Helfern.}}"
 
 #: src/pages/team.tsx
 msgid "without access"
@@ -8116,6 +8518,9 @@ msgstr "{actorName} hat für {name} das Training am {when} zugesagt."
 #: src/pages/event.tsx
 #: src/pages/event.tsx
 #: src/pages/home.tsx
+#: src/pages/stats.tsx
+#: src/pages/stats.tsx
+#: src/pages/stats.tsx
 #: src/pages/team.tsx
 #: src/ui.tsx
 msgid "Inactive"
@@ -8289,6 +8694,11 @@ msgstr "Vorschläge aus nachrangigen Mannschaften derselben Altersklasse und der
 msgid "Only people approved for this duty."
 msgstr "Nur Personen, die für diesen Dienst freigegeben sind."
 
+# ai
+#: src/pages/stats.tsx
+msgid "Game against {opponent}"
+msgstr "Spiel gegen {opponent}"
+
 #: worker/routes/events.ts
 msgid "New info on {label} on {date} at {meetAt}."
 msgstr "Neue Infos zu {label} am {date} um {meetAt}."
@@ -8415,6 +8825,7 @@ msgstr "Die Sprache des Vereins gilt für alle, die keine gewählt haben, und f�
 #: modules/duties/app/admin.tsx
 #: modules/duties/app/admin.tsx
 #: modules/duties/app/index.tsx
+#: modules/duties/app/stats.tsx
 #: modules/duties/module.ts
 #: src/calendar.tsx
 msgid "Helper duties"
@@ -8423,6 +8834,16 @@ msgstr "Helferdienste"
 #: worker/chat/room.ts
 msgid "{count} new messages, latest from {author}: {text}"
 msgstr "{count} neue Nachrichten, zuletzt {author}: {text}"
+
+# ai
+#: src/pages/stats.tsx
+msgid "Since {from}"
+msgstr "Seit {from}"
+
+# ai
+#: src/pages/stats.tsx
+msgid "Area"
+msgstr "Bereich"
 
 #: src/pages/group.tsx
 msgid "No group yet"
@@ -8450,6 +8871,7 @@ msgstr "Häufige Fragen: {title}"
 msgid "The club's full <0>privacy policy</0> applies."
 msgstr "Es gilt die vollständige <0>Datenschutzerklärung</0> des Vereins."
 
+#: modules/duties/worker/notify.ts
 #: modules/duties/worker/notify.ts
 msgid "Helpers wanted · {team}"
 msgstr "Helfer gesucht · {team}"
@@ -8570,6 +8992,11 @@ msgstr "{driver} fährt nicht: {game}. Die Suche nach einer Mitfahrgelegenheit f
 msgid "Withdraw"
 msgstr "Zurückziehen"
 
+# ai
+#: src/help-texts.ts
+msgid "Only events where someone was expected count. Away long-term or inactive never counts as missing. Cancelled events do not count at all. At short notice means declined after the decline deadline. In games an appearance is: nominated and there. Stand-ins from other teams do not count."
+msgstr "Gezählt werden nur Termine, bei denen jemand erwartet war. Dauerhaft abwesend oder inaktiv zählt nie als Fehlen. Abgesagte Termine zählen gar nicht. Kurzfristig heißt: nach der Absagefrist abgesagt. Bei Spielen ist ein Einsatz: nominiert und dabei. Aushilfen aus anderen Teams zählen nicht mit."
+
 #: src/offline.tsx
 msgid "You are offline. You are seeing the last loaded state."
 msgstr "Du bist gerade offline. Du siehst den zuletzt geladenen Stand."
@@ -8629,6 +9056,7 @@ msgstr "Bitte schreib kurz, worum es geht."
 msgid "Restore point from just before the database changes. If something is wrong after the update: roll back the Worker in the Cloudflare dashboard (Workers & Pages → this Worker → Deployments), then restore the database with this command in your copy:"
 msgstr "Wiederherstellungspunkt von kurz vor den Datenbankänderungen. Falls nach dem Update etwas nicht stimmt: Rolle den Worker im Cloudflare-Dashboard zurück (Workers & Pages → dieser Worker → Deployments) und stelle danach mit diesem Befehl in deiner Kopie die Datenbank wieder her:"
 
+#: src/pages/stats.tsx
 #: src/pages/team.tsx
 #: src/pages/team.tsx
 msgid "Person"
@@ -8637,6 +9065,12 @@ msgstr "Person"
 #: src/faq.tsx
 msgid "What does “absent without excuse” mean?"
 msgstr "Was heißt „unentschuldigt gefehlt“?"
+
+# ai
+#: src/pages/stats.tsx
+#: src/pages/stats.tsx
+msgid "Team {name}"
+msgstr "Team {name}"
 
 # ai
 #: src/list-import.tsx
@@ -8678,6 +9112,11 @@ msgstr "Chat {teamName}"
 #: src/pages/join.tsx
 msgid "Setup password"
 msgstr "Einrichtungspasswort"
+
+# ai
+#: modules/duties/app/stats.tsx
+msgid "{n, plural, one {One family without a duty gets a notification:} other {# families without a duty get a notification:}}"
+msgstr "{n, plural, one {Eine Familie ohne Dienst bekommt eine Benachrichtigung:} other {# Familien ohne Dienst bekommen eine Benachrichtigung:}}"
 
 # ai
 #: src/pages/event.tsx
@@ -8784,6 +9223,11 @@ msgid "{skipped, plural, one {# could not be restored} other {# could not be res
 msgstr "{skipped, plural, one {# nicht übernehmbar} other {# nicht übernehmbar}}"
 
 # ai
+#: modules/duties/app/stats.tsx
+msgid "Already reminded today"
+msgstr "Heute schon erinnert"
+
+# ai
 #: src/player-import.tsx
 msgid "{fresh, plural, one {Add # player} other {Add # players}}"
 msgstr "{fresh, plural, one {# Spieler anlegen} other {# Spieler anlegen}}"
@@ -8806,6 +9250,11 @@ msgid "Export started ({today}). Please check that the file was saved."
 msgstr "Export gestartet ({today}). Bitte prüfen, ob die Datei gespeichert wurde."
 
 # ai
+#: modules/duties/worker/notify.ts
+msgid "Helpers are still needed for the next events. Give yourselves a nudge and sign up for a duty!"
+msgstr "Für die nächsten Termine werden noch Helfer gesucht. Gebt euch einen Ruck und tragt euch für einen Dienst ein!"
+
+# ai
 #: worker/domain/mail.ts
 msgid "Privacy policy: {privacy}"
 msgstr "Datenschutzerklärung: {privacy}"
@@ -8814,6 +9263,11 @@ msgstr "Datenschutzerklärung: {privacy}"
 #: src/maintenance.tsx
 msgid "This takes about a minute. The page reloads automatically as soon as the update is done."
 msgstr "Das dauert etwa eine Minute. Die Seite lädt von selbst neu, sobald das Update fertig ist."
+
+# ai
+#: src/pages/stats.tsx
+msgid "There is nothing to count here yet. The statistics are for players and for parents who respond for their child."
+msgstr "Hier gibt es noch nichts zu zählen. Die Statistik gibt es für Spieler und für Eltern, die für ihr Kind antworten."
 
 #: src/pages/profile.tsx
 msgid "This device"
@@ -9062,8 +9516,14 @@ msgstr "Du bist als {loggedInAs} angemeldet. Wähle das Kind aus, das du zusätz
 
 # ai
 #: src/pages/event.tsx
+#: src/pages/stats.tsx
 msgid "Unexcused"
 msgstr "Unentschuldigt"
+
+# ai
+#: modules/duties/app/stats.tsx
+msgid "Next: {date} · {label} ({name})"
+msgstr "Nächster: {date} · {label} ({name})"
 
 # ai
 #: src/pages/team.tsx
@@ -9091,6 +9551,11 @@ msgstr "Einrichtung · Schritt {number} von {total}"
 #: worker/routes/plans.ts
 msgid "This plan does not exist."
 msgstr "Diesen Plan gibt es nicht."
+
+# ai
+#: src/pages/stats.tsx
+msgid "{unexcused} unexcused"
+msgstr "{unexcused} unentschuldigt"
 
 # ai
 #: worker/routes/mail.ts
@@ -9193,6 +9658,11 @@ msgstr "Kader"
 msgid "Mention in chat {teamName}"
 msgstr "Erwähnung im Chat {teamName}"
 
+# ai
+#: src/pages/stats.tsx
+msgid "of {expected}"
+msgstr "von {expected}"
+
 #: src/pages/chat.tsx
 msgid "Message removed."
 msgstr "Nachricht entfernt."
@@ -9240,6 +9710,7 @@ msgstr "Trainer verhindert"
 
 #: src/pages/event.tsx
 #: src/pages/event.tsx
+#: src/pages/stats.tsx
 msgid "No response"
 msgstr "Keine Rückmeldung"
 
@@ -9295,6 +9766,11 @@ msgstr "Dein Helferdienst in {days} Tagen"
 #: src/pages/season.tsx
 msgid "Completed"
 msgstr "Abgeschlossen"
+
+# ai
+#: src/pages/stats.tsx
+msgid "{standing} away long-term"
+msgstr "{standing} dauerhaft abwesend"
 
 #: src/pages/team.tsx
 msgid "The app stores no further data."
@@ -9404,6 +9880,11 @@ msgid "Quick selection"
 msgstr "Schnellauswahl"
 
 # ai
+#: modules/duties/app/stats.tsx
+msgid "No parents linked"
+msgstr "Keine Eltern verknüpft"
+
+# ai
 #: shared/changelog.ts
 msgid "Coaches, leads, staff and organisers can say “I'm not there” without cancelling the event."
 msgstr "Trainer, Leitungen, Betreuer und Organisatoren können sich mit „Ich bin nicht da“ abmelden, ohne den Termin abzusagen."
@@ -9476,6 +9957,11 @@ msgstr "Zu jedem Zugang speichert die App den Tag der letzten Nutzung, ohne Uhrz
 #: worker/routes/join.ts
 msgid "Please select at least one child."
 msgstr "Bitte wähle mindestens ein Kind aus."
+
+# ai
+#: modules/duties/app/help.ts
+msgid "A family is a child of the team with its parents; siblings in the same team count as one family. Duties done and those someone has already signed up for count. With “Remind these families”, everyone without a duty gets a notification, once a day and only while places are free."
+msgstr "Eine Familie ist ein Kind der Mannschaft mit seinen Eltern; Geschwister in derselben Mannschaft zählen als eine Familie. Gezählt werden erledigte Dienste und die, für die sich jemand schon eingetragen hat. Mit „Diese Familien erinnern“ bekommen alle ohne Dienst eine Benachrichtigung, einmal am Tag und nur, wenn noch Plätze frei sind."
 
 # ai
 #: src/restore.tsx
@@ -9574,6 +10060,11 @@ msgstr "Datenschutz"
 msgid "Offer withdrawn"
 msgstr "Angebot zurückgezogen"
 
+# ai
+#: src/pages/stats.tsx
+msgid "at short notice"
+msgstr "kurzfristig"
+
 #: src/pages/plans.tsx
 msgid "The dates follow the holiday period, even if it is changed under Administration → Holidays."
 msgstr "Die Daten folgen dem Ferienzeitraum, auch wenn er unter Verwaltung → Ferien geändert wird."
@@ -9604,6 +10095,11 @@ msgstr "kein eigener Zugang"
 #: src/pages/join.tsx
 msgid "Continue here anyway (only for trying out)"
 msgstr "Trotzdem hier weitermachen (nur zum Ausprobieren)"
+
+# ai
+#: modules/duties/app/stats.tsx
+msgid "Families involved"
+msgstr "Familien dabei"
 
 # ai
 #: src/pages/admin.tsx
@@ -9663,6 +10159,11 @@ msgstr "Treffpunkt und Uhrzeit noch nicht eingetragen"
 #: src/avatar.tsx
 msgid "After that the initial is shown again."
 msgstr "Danach steht wieder der Anfangsbuchstabe da."
+
+# ai
+#: src/pages/stats.tsx
+msgid "Season since {from}"
+msgstr "Saison seit {from}"
 
 #: src/howto.tsx
 msgid "You can find the guide at any time under help."
@@ -9932,6 +10433,11 @@ msgstr "{label} am {when}: Bist du dabei?"
 msgid "E.g. a photo shoot, a party or a parents' evening. Everyone in the team is invited and accepts or declines."
 msgstr "Z. B. Fotoshooting, Feier oder Elternabend. Alle der Mannschaft sind eingeladen und sagen zu oder ab."
 
+# ai
+#: modules/duties/app/stats.tsx
+msgid "{plannedCount} planned"
+msgstr "{plannedCount} geplant"
+
 #: src/faq.tsx
 msgid "A player should also play in the second team."
 msgstr "Ein Spieler soll auch in der zweiten Mannschaft spielen."
@@ -10024,6 +10530,11 @@ msgstr "Spiel gegen {opponent} am {date}, {at}"
 msgid "Work as admin"
 msgstr "Als Admin arbeiten"
 
+# ai
+#: src/pages/stats.tsx
+msgid "All ({all})"
+msgstr "Alle ({all})"
+
 #: src/faq.tsx
 msgid "My name is missing from the invitation link or is already taken."
 msgstr "Mein Name fehlt im Einladungslink oder ist schon vergeben."
@@ -10031,6 +10542,11 @@ msgstr "Mein Name fehlt im Einladungslink oder ist schon vergeben."
 #: modules/duties/app/helpers.tsx
 msgid "Game deleted."
 msgstr "Spiel gelöscht."
+
+# ai
+#: modules/duties/app/stats.tsx
+msgid "{helped} of {all} families have helped already. If the others can do it, so can you! Give yourselves a nudge and sign up for a duty."
+msgstr "{helped} von {all} Familien haben schon geholfen. Was die anderen schaffen, schafft ihr auch! Gebt euch einen Ruck und tragt euch für einen Dienst ein."
 
 #: modules/carpools/worker/domain.ts
 #: modules/carpools/worker/routes.ts
@@ -10082,6 +10598,11 @@ msgstr "vor {mins} Min."
 #: src/avatar.tsx
 msgid "Because you are not of age yet, your parents approve your picture before others see it."
 msgstr "Weil du noch nicht volljährig bist, geben deine Eltern dein Bild frei, bevor andere es sehen."
+
+# ai
+#: modules/duties/app/stats.tsx
+msgid "Remind these families"
+msgstr "Diese Familien erinnern"
 
 # ai
 #: src/pages/group.tsx
@@ -10224,6 +10745,11 @@ msgstr "Nachrichten"
 #: src/pages/admin.tsx
 msgid "{sent, plural, one {Sent to one chat.} other {Sent to # chats.}}"
 msgstr "{sent, plural, one {Gesendet an einen Chat.} other {Gesendet an # Chats.}}"
+
+# ai
+#: modules/duties/app/stats.tsx
+msgid "Signed up"
+msgstr "Eingetragen"
 
 #: src/pages/admin.tsx
 msgid "Assigned."
@@ -10485,6 +11011,11 @@ msgstr "Eingetragen."
 msgid "No passkey on this device?"
 msgstr "Kein Passkey auf diesem Gerät?"
 
+# ai
+#: src/pages/stats.tsx
+msgid "No trainings yet"
+msgstr "Noch keine Trainings"
+
 #: modules/duties/worker/notify.ts
 msgid "{game}. Still free: {open}"
 msgstr "{game}. Noch frei: {open}"
@@ -10534,6 +11065,8 @@ msgstr "Absage für {name} eingetragen."
 #: modules/duties/app/helpers.tsx
 #: src/app.tsx
 #: src/pages/home.tsx
+#: src/pages/stats.tsx
+#: src/pages/stats.tsx
 msgid "Events"
 msgstr "Termine"
 
@@ -10541,6 +11074,11 @@ msgstr "Termine"
 #: modules/handball4all/module.ts
 msgid "Game schedule from handball4all"
 msgstr "Spielplan von handball4all"
+
+# ai
+#: modules/duties/app/stats.tsx
+msgid "{done} done, {planned} signed up for upcoming events"
+msgstr "{done} erledigt, {planned} eingetragen für kommende Termine"
 
 #: worker/routes/events.ts
 msgid "Please choose at least one team."
@@ -10659,6 +11197,11 @@ msgstr "Admin"
 #: src/pages/join.tsx
 msgid "has access already"
 msgstr "hat schon einen Zugang"
+
+# ai
+#: src/pages/stats.tsx
+msgid "Sort by appearances"
+msgstr "Nach Einsätzen sortieren"
 
 #: src/pages/admin.tsx
 #: src/pages/setup-wizard.tsx
@@ -10898,8 +11441,14 @@ msgid "Not synced yet."
 msgstr "Noch nicht abgeglichen."
 
 #: modules/carpools/app/card.tsx
+#: src/pages/stats.tsx
 msgid "Me"
 msgstr "Ich"
+
+# ai
+#: src/pages/stats.tsx
+msgid "{extra} not nominated, there"
+msgstr "{extra} nicht nominiert, dabei"
 
 #: modules/carpools/app/card.tsx
 msgid "Who is driving?"
@@ -11172,6 +11721,7 @@ msgstr "Für diese Person gibt es inzwischen einen Zugang. Bitte frag nach einem
 #: src/app.tsx
 #: src/pages/profile.tsx
 #: src/pages/profile.tsx
+#: src/pages/stats.tsx
 msgid "Profile"
 msgstr "Profil"
 
@@ -11213,6 +11763,7 @@ msgstr "Noch kein Trainer zugeordnet."
 
 #: modules/duties/app/helpers.tsx
 #: src/pages/special.tsx
+#: src/pages/stats.tsx
 msgid "Away"
 msgstr "Auswärts"
 
@@ -11441,6 +11992,11 @@ msgid "New training time"
 msgstr "Neue Trainingszeit"
 
 # ai
+#: src/pages/stats.tsx
+msgid "Participation"
+msgstr "Beteiligung"
+
+# ai
 #: src/pages/updates.tsx
 msgid "{migrationCount, plural, one {# database change} other {# database changes}}"
 msgstr "{migrationCount, plural, one {# Datenbankänderung} other {# Datenbankänderungen}}"
@@ -11455,6 +12011,10 @@ msgid "Send"
 msgstr "Absenden"
 
 #: src/calendar.tsx
+#: src/pages/stats.tsx
+#: src/pages/stats.tsx
+#: src/pages/stats.tsx
+#: src/pages/stats.tsx
 msgid "Games"
 msgstr "Spiele"
 
@@ -11716,6 +12276,11 @@ msgstr "Zugang für {firstName} einrichten"
 msgid "New phone? With this link {firstName} sets up a new passkey. The previous one stays valid."
 msgstr "Neues Handy? Mit diesem Link richtet {firstName} einen neuen Passkey ein. Der bisherige bleibt gültig."
 
+# ai
+#: src/help-texts.ts
+msgid "How it is counted"
+msgstr "So wird gezählt"
+
 #: modules/duties/worker/notify.ts
 msgid "Open helper places: {team} {opponent}"
 msgstr "Noch offene Helferplätze: {team} {opponent}"
@@ -11765,6 +12330,11 @@ msgstr "Anbieter für Codes und Erinnerungen per SMS"
 msgid "Meeting point {teams} · {what}"
 msgstr "Treffpunkt {teams} · {what}"
 
+# ai
+#: src/pages/stats.tsx
+msgid "Sort by participation"
+msgstr "Nach Beteiligung sortieren"
+
 #: src/pages/team.tsx
 msgid "Leaving recorded."
 msgstr "Austritt eingetragen."
@@ -11789,6 +12359,11 @@ msgstr "Keine Leitung ist da. Sag den Termin für alle ab oder kläre im Chat ei
 #: src/pages/games.tsx
 msgid "Synced {when}"
 msgstr "Abgeglichen {when}"
+
+# ai
+#: modules/duties/app/stats.tsx
+msgid "Remind families?"
+msgstr "Familien erinnern?"
 
 #: worker/domain/email-login.ts
 msgid "If you use the app from the home screen, it is best to enter the code there directly."
@@ -11829,6 +12404,11 @@ msgstr "Benachrichtigungen im Helferplan"
 #: src/pages/plans.tsx
 msgid "Players accept by hand if they want to join."
 msgstr "Wer mitmachen will, sagt selbst zu."
+
+# ai
+#: src/pages/stats.tsx
+msgid "No events in this time span."
+msgstr "Im Zeitraum keine Termine."
 
 # ai
 #: worker/routes/persons.ts
@@ -11988,6 +12568,7 @@ msgstr "Noch niemand bietet Plätze an"
 
 # ai
 #: src/pages/setup-wizard.tsx
+#: src/pages/stats.tsx
 msgid "Season"
 msgstr "Saison"
 
@@ -12135,6 +12716,11 @@ msgstr "{players, plural, one {# Spieler} other {# Spieler}}"
 msgid "Only needed if you want to sign in by code without a passkey. Nobody else in the app sees it."
 msgstr "Nur nötig, wenn du dich ohne Passkey per Code anmelden möchtest. In der App sieht sie niemand sonst."
 
+# ai
+#: src/pages/stats.tsx
+msgid "by participation"
+msgstr "nach Beteiligung"
+
 #: src/pages/admin.tsx
 #: src/pages/team.tsx
 msgid "Save details"
@@ -12167,6 +12753,11 @@ msgstr "Hallo {playerName}! Du siehst jetzt deine Termine und kannst zu- und abs
 msgid "Responsible"
 msgstr "Verantwortlich"
 
+# ai
+#: src/pages/stats.tsx
+msgid "Only you, your parents and the coaches see these figures."
+msgstr "Nur du, deine Eltern und die Trainer sehen diese Zahlen."
+
 #: src/pages/home.tsx
 msgid "Up next: event"
 msgstr "Nächstes Event"
@@ -12191,6 +12782,11 @@ msgstr "Bestätige zuerst im Profil eine E-Mail-Adresse; dorthin geht die Testma
 #: src/howto.tsx
 msgid "In Safari, tap <0>Share</0> at the bottom, then <1>Add to Home Screen</1> and <2>Add</2>. After that you start {club} from the icon on the home screen. Only then do notifications work on the iPhone."
 msgstr "In Safari unten auf <0>Teilen</0> tippen, dann <1>Zum Home-Bildschirm</1> und <2>Hinzufügen</2>. Danach startest du {club} über das Symbol auf dem Home-Bildschirm. Nur so funktionieren auf dem iPhone auch Benachrichtigungen."
+
+# ai
+#: src/help-texts.ts
+msgid "Lukas was injured for two weeks and entered as away long-term. Of the other 6 trainings he came to 6: he is at 100 %, not at 75 %."
+msgstr "Lukas war zwei Wochen verletzt und als dauerhaft abwesend eingetragen. Von den übrigen 6 Trainings war er bei 6: Er steht bei 100 %, nicht bei 75 %."
 
 # ai
 #: worker/routes/events.ts
@@ -12284,9 +12880,19 @@ msgid "This link has been withdrawn. Please ask for a new link."
 msgstr "Dieser Link wurde zurückgezogen. Bitte frag nach einem neuen Link."
 
 # ai
+#: modules/duties/app/help.ts
+msgid "Anja baked a cake once, Marc is signed up for Saturday: the Jonas family has 2 duties, 1 of them planned."
+msgstr "Anja hat einmal Kuchen gebacken, Marc ist für Samstag eingetragen: Familie Jonas hat 2 Dienste, davon 1 geplant."
+
+# ai
 #: src/pages/team.tsx
 msgid "Parents are not included in this team, so the players always take care of everything themselves."
 msgstr "In dieser Mannschaft sind keine Eltern eingebunden, die Spieler kümmern sich also immer selbst um alles."
+
+# ai
+#: src/pages/profile.tsx
+msgid "Training, games and helper duties"
+msgstr "Training, Spiele und Helferdienste"
 
 #: src/pages/chat.tsx
 msgid "Waving"
@@ -12307,6 +12913,12 @@ msgstr "keine weiteren Änderungen"
 
 #: src/pages/event.tsx
 #: src/pages/home.tsx
+#: src/pages/stats.tsx
+#: src/pages/stats.tsx
+#: src/pages/stats.tsx
+#: src/pages/stats.tsx
+#: src/pages/stats.tsx
+#: src/pages/stats.tsx
 #: worker/cron.ts
 #: worker/domain/calendar.ts
 #: worker/domain/events.ts
@@ -12492,6 +13104,11 @@ msgstr "Betreuer"
 msgid "Squad for games"
 msgstr "Kader für Spiele"
 
+# ai
+#: src/pages/stats.tsx
+msgid "Players games"
+msgstr "Spieler Spiele"
+
 #: src/pages/event.tsx
 msgid "School holidays"
 msgstr "Ferien"
@@ -12558,6 +13175,11 @@ msgstr "Mindestens eine Mannschaft muss hier regulär trainieren."
 #: src/email.tsx
 msgid "Send a new code"
 msgstr "Neuen Code senden"
+
+# ai
+#: modules/duties/app/stats.tsx
+msgid "Helper duties of your family"
+msgstr "Helferdienste eurer Familie"
 
 #: src/pages/event.tsx
 msgid "Remind missing responses"
@@ -12685,6 +13307,7 @@ msgstr "Zu- und Absagen mit Begründung sehen nur Trainer und Admins. Bitte gib 
 msgid "Invalid start"
 msgstr "Ungültiger Beginn"
 
+#: src/pages/stats.tsx
 #: src/pages/team.tsx
 #: src/pages/team.tsx
 msgid "Team {teamName}"
@@ -12763,6 +13386,11 @@ msgstr "Feedback Kabine von {name}"
 #: src/pages/admin.tsx
 msgid "Without team"
 msgstr "Ohne Mannschaft"
+
+# ai
+#: src/pages/stats.tsx
+msgid "{declined} declined"
+msgstr "{declined} abgesagt"
 
 #: modules/duties/app/approvals.tsx
 #: src/pages/admin.tsx
@@ -13019,6 +13647,12 @@ msgstr "Name und E-Mail-Adresse, erscheint unter Hilfe"
 msgid "Enter by hand instead"
 msgstr "Stattdessen von Hand eingeben"
 
+# ai
+#: src/pages/stats.tsx
+#: src/pages/stats.tsx
+msgid "Appearances"
+msgstr "Einsätze"
+
 #: src/pages/plans.tsx
 msgid "Please enter a deadline between 0 and 168 hours."
 msgstr "Bitte eine Frist zwischen 0 und 168 Stunden angeben."
@@ -13035,6 +13669,7 @@ msgstr "Unbekannter Ort."
 #: src/pages/event.tsx
 #: src/pages/event.tsx
 #: src/pages/squad.tsx
+#: src/pages/stats.tsx
 #: src/ui.tsx
 msgid "Declined"
 msgstr "Abgesagt"
@@ -13112,9 +13747,19 @@ msgid "opponent"
 msgstr "Gegner"
 
 # ai
+#: modules/duties/app/stats.tsx
+msgid "Include stand-ins"
+msgstr "Aushilfen einbeziehen"
+
+# ai
 #: src/restore.tsx
 msgid "Passkeys and sign-ins are not part of an export. Everyone signs in again: with an e-mail code if their address was restored, otherwise with a personal link from Administration → People."
 msgstr "Passkeys und Anmeldungen sind nicht Teil eines Exports. Alle melden sich neu an: per E-Mail-Code, wenn ihre Adresse übernommen wurde, sonst mit einem persönlichen Link aus Verwaltung → Personen."
+
+# ai
+#: modules/duties/app/stats.tsx
+msgid "To the helper plan"
+msgstr "Zum Helferplan"
 
 #: src/pages/admin.tsx
 #: src/pages/special.tsx

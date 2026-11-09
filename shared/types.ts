@@ -345,3 +345,76 @@ export interface RosterEntry {
 export interface ApiErrorBody {
   error: { code: string; message: string };
 }
+
+// Statistics (docs/dev/design.md, Statistics) ------------------------------------------
+
+/** Time span of the statistics: the last 4 weeks or the current season. */
+export type StatsRange = "4w" | "season";
+
+/** A person's figures for trainings or games. expected counts only events where the person was expected. */
+export interface AttendanceCounts {
+  expected: number;
+  present: number;
+  /** Declined (in time or at short notice) */
+  declined: number;
+  /** of which after the decline deadline */
+  late: number;
+  unexcused: number;
+  /** No response, not there */
+  open: number;
+  /** Events the person was away long-term (do not count) */
+  standing: number;
+  /** Events the person was inactive (do not count) */
+  inactive: number;
+  /** Games only: nominated and present */
+  played: number;
+  /** Games only: present but not nominated ("whole team at games") */
+  presentNotNominated: number;
+}
+
+export interface TeamStatsPlayer {
+  person: PersonRef;
+  training: AttendanceCounts;
+  games: AttendanceCounts;
+}
+
+export interface TeamStats {
+  teamName: string;
+  range: StatsRange;
+  /** First day of the range (local date) */
+  from: string;
+  /** Since when there is data at all, if later than the start of the range */
+  dataSince: string | null;
+  trainings: number;
+  games: number;
+  /** Per training and game: who was really there (stand-ins included), newest first */
+  events: { eventId: number; startsAt: string; kind: "training" | "game"; title: string | null; present: number; expected: number; late: number; unexcused: number }[];
+  /** Average nominated per game (stand-ins included) */
+  avgSquad: number | null;
+  players: TeamStatsPlayer[];
+  /** The team uses the helper plan (the helper duties module adds its view) */
+  helperPlan: boolean;
+}
+
+export interface StatsEventRow {
+  eventId: number;
+  startsAt: string;
+  kind: "training" | "game";
+  title: string | null;
+  status: "present" | "open" | "declined" | "standing" | "inactive" | "unexcused";
+  late: boolean;
+  nominated: boolean;
+}
+
+/** One's own statistics (player) or a child's (parents), per team. */
+export interface MyStats {
+  persons: {
+    person: PersonRef;
+    self: boolean;
+    teams: {
+      teamId: number;
+      teamName: string;
+      ranges: Record<StatsRange, { training: AttendanceCounts; games: AttendanceCounts }>;
+    }[];
+  }[];
+}

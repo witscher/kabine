@@ -3,7 +3,7 @@
 import type { ComponentType } from "preact";
 import type { IconName } from "./icons";
 import type { ModuleManifest } from "../shared/module-api";
-import type { EventDetail, EventSummary, Me } from "../shared/types";
+import type { EventDetail, EventSummary, Me, StatsRange, TeamStats } from "../shared/types";
 
 export interface AppModule {
   manifest: ModuleManifest;
@@ -22,6 +22,13 @@ export interface AppModule {
   gameLinks?: ComponentType<{ event: EventSummary; phase: "live" | "after" }>;
   /** A section on the event page, from `event.modules[<id>]` (worker hook eventDetail). */
   eventSection?: ComponentType<{ event: EventDetail; data: unknown; reload: () => void }>;
+  /**
+   * A view of its own on a team's statistics page (coaches and admins), next to Training and Games, e.g. helper
+   * duties per family. `shown` decides from the core figures whether the team has it.
+   */
+  teamStats?: { label: () => string; shown: (stats: TeamStats) => boolean; view: ComponentType<{ teamId: number; range: StatsRange }> };
+  /** A card on "My statistics" per person and team (players, parents for a child), e.g. the family's helper duties. */
+  myStats?: ComponentType<{ personId: number; self: boolean; teamId: number }>;
 }
 
 export function defineAppModule(module: AppModule): AppModule {

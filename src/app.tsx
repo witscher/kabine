@@ -23,6 +23,8 @@ import { clubIsFresh, LegalLinks, useClub } from "./club";
 import { APP_MODULES, useActiveModules } from "./modules";
 import { ConfirmHost, Spinner, Toasts } from "./ui";
 
+const TeamStatsPage = lazyPage(() => import("./pages/stats").then((m) => m.TeamStatsPage));
+const MyStatsPage = lazyPage(() => import("./pages/stats").then((m) => m.MyStatsPage));
 const HelpPage = lazyPage(() => import("./pages/help").then((m) => m.HelpPage));
 const SquadPage = lazyPage(() => import("./pages/squad").then((m) => m.SquadPage));
 const ChatListPage = lazyPage(() => import("./pages/chat").then((m) => m.ChatListPage));
@@ -267,11 +269,13 @@ export function App() {
               <Route path="/chat" component={ChatListPage} />
               <Route path="/chat/:teamId" component={ChatRoomPage} />
               <Route path="/profil" component={ProfilePage} />
+              <Route path="/profil/statistik" component={MyStatsPage} />
               <Route path="/profil/kind/:id" component={ChildPage} />
               <Route path="/profil/benachrichtigungen" component={NotificationsPage} />
               <Route path="/profil/geraete" component={DevicesPage} />
               <Route path="/team" component={TeamIndexPage} />
               <Route path="/team/:id" component={TeamPage} />
+              <Route path="/team/:id/statistik" component={TeamStatsPage} />
               <Route path="/team/:id/person/:personId" component={PersonPage} />
               <Route path="/team/:id/plaene" component={PlansPage} />
               <Route path="/team/:id/plaene/:planId" component={PlanEditorPage} />

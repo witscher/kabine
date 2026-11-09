@@ -324,7 +324,15 @@ Who was expected is computed from the current state. For statistics every event 
 
 At the season change all open events are recorded first and then condensed per person and team name into `season_stats` (training and game totals, present, absent without excuse, late declines, duties, duties taken from all teams such as youth referee). Late counts declines after the deadline. Totals count only events at which the person was expected (not inactive, not away long-term). Only these figures stay over the years; they are deleted with the person.
 
-There is no screen for this yet. A later statistics view will show names only to coaches and admins. Record and figures are part of the admin export.
+Record and figures are part of the admin export. The record says for games whether someone was nominated (`attendance.nominated`; with "whole team at games" players who are not nominated take part too).
+
+## Statistics
+
+Built on the attendance record. Two fixed ranges: the last 4 weeks (28 days including today) and the season (from the current season's start, with "data since" while the app is younger).
+
+- **Team** (*Team → Statistics*, `/team/:id/statistik`, coaches of the team and admins, `GET /teams/:id/stats?range=4w|season`): training participation is present / expected, counting only events where the person was expected; away long-term and inactive never count as missing, and whoever was only that in the whole range is listed under "not counted". Late declines and unexcused in red, ranking by participation (switchable to names). A table per training and game, newest first (8 rows, then 20 more each), with how many were really there (stand-ins from other teams included), of how many expected, missing, unexcused and late. Games: an appearance is nominated and present; "present, not nominated" counts separately. Tapping a player opens a sheet with the single events (`GET /teams/:id/stats/persons/:personId`, filter "all / only missed", 15 at a time), never reasons.
+- **Helpers** (helper duties module, view through the app hook `teamStats`): duties at the team's events (not those of approved people from all teams), done and already signed up, grouped by family: a player with their parents, siblings with a shared parent are one family (union-find in `teamFamilies`). A duty belongs to the family of its linked child, else of the person, else to "others"; stand-ins' families only with a switch; medals for the top 3. The coach button "Remind these families" sends families without a duty a push (topic `duty_open`, so mail too if chosen) with the share of families that helped already, without names: once a day per team (`duty_notifications` kind `stats_remind`) and only while places are open (`POST /duties/teams/:id/stats/remind`).
+- **Own** (*Profile → My statistics*, `/profil/statistik`, `GET /stats/me`): for players and, per child, for parents in charge: present, missed, of which late or unexcused, for training and games, plus the family's helper duties with the next one (app hook `myStats`, `GET /duties/stats/me`). No comparison with others.
 
 ## Live ticker
 

@@ -56,6 +56,8 @@ modules/carpools/
 | `eventCardLine` | a line on event cards on the start page |
 | `eventSection` | a section on the event page |
 | `gameLinks` | links of a fixture module for a game (live ticker, game report) on the "In progress" card and the event page |
+| `teamStats` | a view of its own on a team's statistics page next to Training and Games (the helper duties show helpers per family) |
+| `myStats` | a card per person and team on "My statistics" (the helper duties show the family's duties) |
 
 [`modules/carpools/`](../../modules/carpools/) uses all of the event hooks and is the reference module.
 

@@ -18,6 +18,9 @@ export default defineAppModule({
   ],
   // Helpers of a team with a helper plan, and approved people of lists across teams (e.g. youth referees)
   tab: (me) => (me.helperTeams.length || me.qualifiedLists.some((q) => q.mine) ? { href: "/helfer", label: t`Helpers`, icon: "helping", match: (p) => p.startsWith("/helfer") } : null),
+  // Statistics: helpers per family (coaches) and the family's duties (players, parents)
+  teamStats: { label: () => t`Helpers`, shown: (stats) => stats.helperPlan, view: lazyPage(() => import("./stats").then((m) => m.HelperStatsView)) },
+  myStats: lazyPage(() => import("./stats").then((m) => m.MyHelperCard)),
   adminMenu: () => [
     { href: "/verwaltung/helferdienste", icon: "helping", title: t`Helper duties`, sub: t`Duty types and templates for games and special events` },
     { href: "/verwaltung/freigaben", icon: "whistle", title: t`Approvals`, sub: t`Who may take duties an admin approves, e.g. youth referees` },

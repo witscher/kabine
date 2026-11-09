@@ -1952,3 +1952,29 @@ test("Dienstart löschen: unbenutzte ja, verwendete nur archivieren", async () =
   await expect(cake.getByRole("button", { name: "Dienstart löschen" })).toBeDisabled();
   await expect(cake).toContainText("Archivieren blendet sie für Neues aus.");
 });
+
+test("Statistik: Trainer über die Teamseite, Spielerin im Profil", async () => {
+  const { page } = coach;
+  await page.goto("/team/1");
+  await page.getByRole("link", { name: /Statistik/ }).click();
+  await expect(page).toHaveURL(/\/team\/1\/statistik$/);
+  await expect(page.getByRole("heading", { name: "Statistik" })).toBeVisible();
+  await page.getByRole("group", { name: "Zeitraum" }).getByRole("button", { name: "Saison" }).click();
+  await expect(page.getByRole("region", { name: "Training" })).toBeVisible();
+  await page.getByRole("button", { name: "Erklärung: So wird gezählt" }).click();
+  await expect(page.getByRole("dialog", { name: "So wird gezählt" })).toContainText("dauerhaft abwesend");
+  await page.getByRole("dialog", { name: "So wird gezählt" }).getByRole("button", { name: "Verstanden" }).click();
+  await page.getByRole("group", { name: "Bereich" }).getByRole("button", { name: "Spiele" }).click();
+  await expect(page.getByRole("region", { name: "Spiele" })).toContainText("Ø im Kader");
+  // The helper plan of the team adds the helpers per family (helper duties module)
+  await page.getByRole("group", { name: "Bereich" }).getByRole("button", { name: "Helfer" }).click();
+  await expect(page.getByRole("region", { name: "Helfer" })).toContainText("Familien dabei");
+  if (process.env.E2E_SHOTS) await page.screenshot({ path: `${process.env.E2E_SHOTS}/stats-helpers.png` });
+
+  await player.page.goto("/profil");
+  await player.page.getByRole("link", { name: /Meine Statistik/ }).click();
+  await expect(player.page.getByRole("heading", { name: "Meine Statistik" })).toBeVisible();
+  await expect(player.page.getByRole("region", { name: "Training" })).toBeVisible();
+  // The team statistics stay with the coaches
+  expect((await player.page.request.get("/api/teams/1/stats")).status()).toBe(403);
+});

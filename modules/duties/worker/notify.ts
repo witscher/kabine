@@ -467,3 +467,35 @@ export async function sendDutyNotifications(env: Env, now = Date.now()): Promise
   sent += await openSlotsToCoaches(env, today, 2, types);
   return sent;
 }
+
+/**
+ * A coach reminds the families without a helper duty (Statistics → Helpers). Channel as "helpers wanted" (push,
+ * mail if chosen). helped/total: how many families helped already, as an incentive; without names.
+ */
+export async function sendHelperReminder(
+  env: Env,
+  accountIds: number[],
+  opts: { teamId: number; teamName: string; helped: number; total: number; parents: boolean; origin: string },
+): Promise<number> {
+  const path = `/helfer?mannschaft=${opts.teamId}`;
+  const link = `${opts.origin}${path}`;
+  const team = opts.teamName;
+  const helped = opts.helped;
+  const total = opts.total;
+  return deliver(env, accountIds, "duty_open", () => {
+    const body =
+      helped > 0
+        ? opts.parents
+          ? t`${helped} of ${total} families have helped already. If the others can do it, so can you! Give yourselves a nudge and sign up for a duty.`
+          : t`${helped} of ${total} in the team have helped already. If the others can do it, so can you! Give yourselves a nudge and sign up for a duty.`
+        : t`Helpers are still needed for the next events. Give yourselves a nudge and sign up for a duty!`;
+    return {
+      title: t`Helpers wanted · ${team}`,
+      body,
+      url: path,
+      tag: `stats-remind-${opts.teamId}`,
+      mailSubject: t`Helpers wanted: ${team}`,
+      mailText: mailText(body, t`To the helper plan: ${link}`),
+    };
+  });
+}

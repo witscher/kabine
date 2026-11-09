@@ -33,8 +33,8 @@ function recordStatement(db: D1Database, e: Pick<EventRow, "id" | "kind">, p: Pa
   if (!status) return null;
   return stmt(
     db,
-    `INSERT OR REPLACE INTO attendance (event_id, person_id, team_id, kind, status, is_helper, is_late, recorded_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT OR REPLACE INTO attendance (event_id, person_id, team_id, kind, status, is_helper, is_late, nominated, recorded_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     e.id,
     p.person.id,
     p.teamId || null,
@@ -42,6 +42,8 @@ function recordStatement(db: D1Database, e: Pick<EventRow, "id" | "kind">, p: Pa
     status,
     p.isHelper ? 1 : 0,
     status === "declined" && p.status === "no" && p.response?.is_late === 1 ? 1 : 0,
+    // Games: nominated (with "whole team at games" players who are not nominated take part too)
+    e.kind === "game" && p.nominated ? 1 : 0,
     at,
   );
 }

@@ -285,6 +285,25 @@ export function ProfilePage() {
           </section>
         ) : null}
 
+        {me.memberships.some((m) => m.role === "player") ? (
+          <ul class="list">
+            <li>
+              <a class="list-row" href="/profil/statistik">
+                <Icon name="chart" size={22} />
+                <span class="main">
+                  <span class="title">
+                    <Trans>My statistics</Trans>
+                  </span>
+                  <span class="sub">
+                    <Trans>Training, games and helper duties</Trans>
+                  </span>
+                </span>
+                <Icon name="chevron" size={18} />
+              </a>
+            </li>
+          </ul>
+        ) : null}
+
         {me.helperTeams.length ? <SkillSwitches /> : null}
 
         <MyCalendar />
@@ -470,6 +489,24 @@ export function ChildPage({ id }: { id: string }) {
       <div class="content">
         {error ? <ErrorBox error={error} onRetry={reload} /> : null}
         <AvatarEditor personId={child.id} name={personName(child)} view="guardian" />
+        {child.teams.some((tm) => tm.parentsEnabled) ? (
+          <ul class="list">
+            <li>
+              <a class="list-row" href={`/profil/statistik?person=${child.id}`}>
+                <Icon name="chart" size={22} />
+                <span class="main">
+                  <span class="title">
+                    <Trans>Statistics of {firstName}</Trans>
+                  </span>
+                  <span class="sub">
+                    <Trans>Training, games and your family's helper duties</Trans>
+                  </span>
+                </span>
+                <Icon name="chevron" size={18} />
+              </a>
+            </li>
+          </ul>
+        ) : null}
         {!data ? <Spinner /> : null}
         {data && !data.parentsInCharge ? (
           <Notice>
