@@ -1427,12 +1427,13 @@ test("Sprache: Spielerin stellt auf Englisch um und wieder zurück", async () =>
   const { page } = player;
   await page.goto("/profil");
   await page.getByRole("combobox", { name: "Sprache" }).selectOption("en");
-  await expect(page.getByRole("link", { name: "Profile" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Profile", exact: true })).toBeVisible();
   await page.goto("/");
   await expect(page.getByRole("heading", { name: "Hi Ida" }).or(page.getByRole("heading", { name: /Ida/ }))).toBeVisible();
   await page.goto("/profil");
   await page.getByRole("combobox", { name: "Language" }).selectOption("de");
-  await expect(page.getByRole("link", { name: "Profil" })).toBeVisible();
+  // exact: "Profil" also matches "Profile", and the test would end before the reload
+  await expect(page.getByRole("link", { name: "Profil", exact: true })).toBeVisible();
 });
 
 test("Sprache per Link (?lang=en): einmal laden, kein Hin und Her mit der Sprache des Kontos", async () => {
