@@ -13,7 +13,7 @@ import { needsSkillHelp } from "./help";
 type TemplateItem = TemplateInfo["items"][number];
 
 function whoLabel(type: DutyTypeInfo): string {
-  if (type.whoReferees) return t`Youth referee role`;
+  if (type.whoQualified) return t`Approved people, all teams`;
   if (type.whoParents && type.whoPlayers && type.whoCoaches) return type.whoMembers ? t`All, members` : t`All`;
   return [
     type.whoParents && t`Parents`,
@@ -31,7 +31,7 @@ function typeSub(type: DutyTypeInfo): string {
     t`Who helps: ${who}`,
     type.mode === "task" ? t`Task` : null,
     type.noteAllowed ? t`with note` : null,
-    type.needsSkill ? t`needs prior knowledge` : null,
+    type.needsSkill ? (type.skillGrant === "admin" ? t`approved by an admin` : t`needs prior knowledge`) : null,
     type.archived ? t`archived` : null,
   ]
     .filter(Boolean)
@@ -136,10 +136,13 @@ export function AdminDutiesPage() {
 
 /** Delete only when the duty type is used nowhere; otherwise the hint to archive it. */
 function DeleteDutyType({ type, onDone, onClose }: { type: DutyTypeInfo; onDone: () => void; onClose: () => void }) {
-  const used = type.usage ?? { blocks: 0, templates: 0 };
+  const used = type.usage ?? { blocks: 0, templates: 0, ageClasses: 0, grants: 0 };
   const where = [
     used.blocks ? plural(used.blocks, { one: "# time block at an event", other: "# time blocks at events" }) : null,
     used.templates ? plural(used.templates, { one: "# template", other: "# templates" }) : null,
+    used.ageClasses ? plural(used.ageClasses, { one: "# age group", other: "# age groups" }) : null,
+    // Approved people of a duty taken from all teams (e.g. youth referees) are kept
+    type.whoQualified && used.grants ? plural(used.grants, { one: "# approval", other: "# approvals" }) : null,
   ].filter(Boolean);
   const places = where.join(t` and `);
   const name = type.name;
@@ -180,8 +183,11 @@ function DutyTypeSheet({ type, onClose, onDone }: { type: DutyTypeInfo | null; o
   });
   const [noteAllowed, setNoteAllowed] = useState(type?.noteAllowed ?? false);
   const [needsSkill, setNeedsSkill] = useState(type?.needsSkill ?? false);
+  const [skillGrant, setSkillGrant] = useState<"self" | "admin">(type?.skillGrant ?? "self");
   const [archived, setArchived] = useState(type?.archived ?? false);
-  const referee = type?.whoReferees ?? false;
+  // Taken by approved people from all teams (e.g. youth referees): chosen when creating, fixed afterwards
+  const [qualified, setQualified] = useState(type?.whoQualified ?? false);
+  const referee = type?.whoQualified ?? false;
   const all = who.parents && who.players && who.coaches;
   const chip = (label: string, on: boolean, toggle: () => void) => (
     <button type="button" class={`chip ${on ? "selected" : ""}`} aria-pressed={on ? "true" : "false"} onClick={toggle}>
@@ -191,10 +197,33 @@ function DutyTypeSheet({ type, onClose, onDone }: { type: DutyTypeInfo | null; o
   return (
     <Sheet open onClose={onClose} title={type ? type.name : t`New duty type`}>
       <TextField label={t`Name`} value={name} onInput={setName} maxLength={40} placeholder={t`e.g. barbecue`} />
-      {referee ? (
-        <p class="small muted">
-          <Trans>Who takes on this duty is set by the youth referee role. Only the name can be changed here.</Trans>
-        </p>
+      {!type ? (
+        <Segmented
+          label={t`Who takes it`}
+          value={qualified ? "approved" : "team"}
+          onChange={(v) => setQualified(v === "approved")}
+          options={[
+            { value: "team", label: t`People of the team` },
+            { value: "approved", label: t`Approved, all teams` },
+          ]}
+        />
+      ) : null}
+      {qualified ? (
+        <>
+          <p class="small muted">
+            <Trans>
+              Everyone an admin approved for it takes this duty, from all teams, for example youth referees for the home games of the youngest age groups. Approve
+              people under Admin → Approvals; under Admin → Age groups you choose which home games get it.
+            </Trans>
+          </p>
+          {type ? (
+            <ul class="list">
+              <li>
+                <SwitchRow label={t`Archived`} sub={t`No longer available for new templates and time slots. Existing duties remain.`} checked={archived} onChange={setArchived} />
+              </li>
+            </ul>
+          ) : null}
+        </>
       ) : (
         <>
           <div class="field" role="group" aria-label={t`Who helps`}>
@@ -239,6 +268,19 @@ function DutyTypeSheet({ type, onClose, onDone }: { type: DutyTypeInfo | null; o
                 onChange={setNeedsSkill}
               />
             </li>
+            {needsSkill ? (
+              <li style={{ padding: "4px 14px 12px" }}>
+                <Segmented
+                  label={t`Who approves`}
+                  value={skillGrant}
+                  onChange={setSkillGrant}
+                  options={[
+                    { value: "self", label: t`The person` },
+                    { value: "admin", label: t`An admin` },
+                  ]}
+                />
+              </li>
+            ) : null}
             {type ? (
               <li>
                 <SwitchRow label={t`Archived`} sub={t`No longer available for new templates and time slots. Existing duties remain.`} checked={archived} onChange={setArchived} />
@@ -251,7 +293,7 @@ function DutyTypeSheet({ type, onClose, onDone }: { type: DutyTypeInfo | null; o
         variant="primary"
         size="lg"
         block
-        disabled={!name.trim() || (!referee && !who.parents && !who.players && !who.coaches && !who.members)}
+        disabled={!name.trim() || (!qualified && !who.parents && !who.players && !who.coaches && !who.members)}
         onClick={async () => {
           const body = {
             name: name.trim(),
@@ -262,6 +304,8 @@ function DutyTypeSheet({ type, onClose, onDone }: { type: DutyTypeInfo | null; o
             whoMembers: who.members,
             noteAllowed,
             needsSkill,
+            skillGrant,
+            whoQualified: qualified,
             archived,
           };
           if (type) await api.patch(`/admin/duty-types/${type.id}`, body);
@@ -273,13 +317,13 @@ function DutyTypeSheet({ type, onClose, onDone }: { type: DutyTypeInfo | null; o
       >
         <Trans>Save</Trans>
       </Button>
-      {type && !referee ? <DeleteDutyType type={type} onDone={onDone} onClose={onClose} /> : null}
+      {type ? <DeleteDutyType type={type} onDone={onDone} onClose={onClose} /> : null}
     </Sheet>
   );
 }
 
 function TemplateSheet({ template, types, onClose, onDone }: { template: TemplateInfo | null; types: DutyTypeInfo[]; onClose: () => void; onDone: () => void }) {
-  const choices = types.filter((ty) => !ty.whoReferees && (!ty.archived || template?.items.some((i) => i.dutyTypeId === ty.id)));
+  const choices = types.filter((ty) => !ty.whoQualified && (!ty.archived || template?.items.some((i) => i.dutyTypeId === ty.id)));
   const [name, setName] = useState(template?.name ?? "");
   const [items, setItems] = useState<TemplateItem[]>(template?.items ?? []);
   const typeOf = (id: number) => types.find((ty) => ty.id === id);
@@ -414,7 +458,8 @@ function TemplateSheet({ template, types, onClose, onDone }: { template: Templat
       </p>
       <p class="small muted">
         <Trans>
-          The youth referee is not part of any template: for youth home games F to C the duty is always added automatically (1 slot, 15 min before throw-off until the end of the game).
+          Duties of approved people from all teams (e.g. youth referee) are not part of any template: the home games of the age groups ticked under Admin → Age
+          groups get them automatically (1 slot, 15 min before throw-off until the end of the game).
         </Trans>
       </p>
       <Button

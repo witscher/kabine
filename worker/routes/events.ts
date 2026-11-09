@@ -852,7 +852,7 @@ async function createDutyBlocks(
     let typeId = b.dutyTypeId ?? null;
     if (typeId != null) {
       const type = types.get(typeId);
-      if (!type || type.archived || type.whoReferees) throw badRequest(t`This duty does not exist.`);
+      if (!type || type.archived || type.whoQualified) throw badRequest(t`This duty does not exist.`);
     } else if (b.newTypeName) {
       const key = b.newTypeName.toLowerCase();
       typeId = created.get(key) ?? null;

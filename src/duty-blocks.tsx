@@ -17,12 +17,14 @@ export interface DutyTypeInfo {
   whoPlayers: boolean;
   whoCoaches: boolean;
   whoMembers: boolean;
-  whoReferees: boolean;
+  whoQualified: boolean;
   noteAllowed: boolean;
   needsSkill: boolean;
+  /** Who approves the prior knowledge: the person in the profile or an admin */
+  skillGrant: "self" | "admin";
   archived: boolean;
   /** Admins only: where the type is used (it can only be deleted when nowhere) */
-  usage?: { blocks: number; templates: number };
+  usage?: { blocks: number; templates: number; ageClasses: number; grants: number };
 }
 
 export interface TemplateInfo {
@@ -97,7 +99,7 @@ export function BlockSheet(props: {
   onSave: (b: NewBlock) => Promise<void> | void;
 }) {
   const types = useQuery<{ types: DutyTypeInfo[] }>("/duty-types");
-  const choices = (types.data?.types ?? []).filter((t) => !t.whoReferees && !t.archived);
+  const choices = (types.data?.types ?? []).filter((t) => !t.whoQualified && !t.archived);
   const [typeId, setTypeId] = useState<string>(props.initial?.dutyTypeId ? String(props.initial.dutyTypeId) : props.initial?.newTypeName ? "new" : "");
   const [newName, setNewName] = useState(props.initial?.newTypeName ?? "");
   const [start, setStart] = useState(props.start);

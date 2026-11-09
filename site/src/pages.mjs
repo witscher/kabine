@@ -235,7 +235,7 @@ ${section(
   "Die Helferdienste für Heimspiele kommen aus Vorlagen: Zeitnehmer und Sekretär, Kuchen und Theke, Trikots waschen. Eltern tragen sich selbst ein, der Plan aktualisiert sich live.",
   cards("g3", [
     ["Zeitnehmer und Sekretär", "Dienste, für die man eine Einweisung braucht, sind als solche markiert."],
-    ["Jugendschiedsrichter", "Das Modul „Jugendschiedsrichter“ legt für Heimspiele der markierten Altersklassen einen Schiedsrichterdienst an, mit eigener Rolle per Link."],
+    ["Jugendschiedsrichter", "Heimspiele der markierten Altersklassen bekommen einen Dienst „Jugendschiedsrichter“. Wer ihn übernehmen darf, gibt ein Admin frei, auch per Link."],
     ["Fahrgemeinschaften", "Für Auswärtsspiele bieten Eltern Plätze an, Spieler buchen."],
   ]) + links([["/funktionen/helferdienste/", "Mehr zu Helferdiensten"], ["/funktionen/fahrgemeinschaften/", "Mehr zu Fahrgemeinschaften"]]),
 )}
@@ -288,7 +288,7 @@ ${section(
   "Helper duties for home games come from templates: timekeeper and scorer, cake and kiosk, washing shirts. Parents sign up themselves, the plan updates live.",
   cards("g3", [
     ["Timekeeper and scorer", "Duties that need training are marked as such."],
-    ["Youth referees", "The module “Youth referees” adds a referee duty to home games of the marked age groups, with its own role by link."],
+    ["Youth referees", "Home games of the marked age groups get a “Youth referee” duty. An admin approves who may take it, also by link."],
     ["Carpools", "For away games parents offer seats, players book."],
   ]) + links([["/en/features/helper-duties/", "More on helper duties"], ["/en/features/carpools/", "More on carpools"]]),
 )}

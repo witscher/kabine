@@ -35,5 +35,6 @@ expect(await one("SELECT seat_note FROM carpools …")).toEqual(…);
 Clean-ups that wait for a later release (contract step):
 
 - `DROP TABLE unexcused_absences;` once a release with `202610192200_core_attendance-marks.sql` is out (the marks live in `attendance_marks`). Remove it from `EXPORT_TABLES` in `worker/routes/season.ts` then.
+- Once a release with `202611092330_core_qualifications.sql` is out: `DROP TABLE referees; DROP TABLE referee_links;` and `age_classes.youth_referee` and `teams.auto_members` (both need a table rebuild; `youth_referee` is still written for the previous release by `writeAgeClasses`). Remove `referees` from `EXPORT_EXCLUDED` and `RESTORE_TABLES`, and `adoptLegacyQualifications` only once exports from before 0.8.0 no longer need to be restored.
 
 Wrangler only reads `.sql` files, so this README is ignored when migrating.

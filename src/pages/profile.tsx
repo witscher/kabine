@@ -601,11 +601,13 @@ const dutyTopicLabels = (): Record<DutyTopic, string> => ({
   duty_remind_1d: t`Reminder 1 day before`,
   duty_open: t`Helpers needed in my teams`,
   duty_coach_open: t`Open slots (coaches and admins)`,
-  duty_referee_open: t`Youth referee needed`,
+  duty_referee_open: t`Needed for a duty I am approved for (e.g. youth referee)`,
 });
 
 interface DutyPrefs {
   skills: { dutyTypeId: number; code: string | null; name: string; on: boolean }[];
+  /** Approved by an admin (oneself or a child): information only */
+  approved?: { dutyTypeId: number; name: string; child: string | null }[];
   channels: Record<DutyTopic, { push: boolean; mail: boolean; sms: boolean }>;
   mailAddressVerified: boolean;
   smsAvailable?: boolean;
@@ -614,7 +616,7 @@ interface DutyPrefs {
 /** Helper plan "I can do this": the helper plan only offers duties that need prior knowledge after consent. */
 function SkillSwitches() {
   const { data, mutate } = useQuery<DutyPrefs>("/profile/duty-prefs");
-  if (!data?.skills.length) return null;
+  if (!data?.skills.length && !data?.approved?.length) return null;
   // Timekeeper and scorer are the same qualification: one switch, internally two consents
   const table = data.skills.filter((sk) => ["timekeeper", "scorer", "zeitnehmer", "sekretaer"].includes(sk.code ?? ""));
   const rows = [
@@ -626,6 +628,25 @@ function SkillSwitches() {
       <h2 class="section-title">
         <Trans>I can do this</Trans>
       </h2>
+      {data.approved?.length ? (
+        <ul class="list" aria-label={t`Approved by an admin`}>
+          {data.approved.map((a) => {
+            const duty = a.name;
+            const child = a.child;
+            return (
+              <li class="list-row">
+                <Icon name="check" size={18} />
+                <span class="main">
+                  <span class="title">{child ? t`${duty} (${child})` : duty}</span>
+                  <span class="sub">
+                    <Trans>Approved by an admin</Trans>
+                  </span>
+                </span>
+              </li>
+            );
+          })}
+        </ul>
+      ) : null}
       <ul class="list">
         {rows.map((row) => (
           <li>
@@ -642,9 +663,11 @@ function SkillSwitches() {
           </li>
         ))}
       </ul>
-      <p class="small muted">
-        <Trans>These duties need prior knowledge. The helper plan only offers them to you if you turn them on here.</Trans>
-      </p>
+      {rows.length ? (
+        <p class="small muted">
+          <Trans>These duties need prior knowledge. The helper plan only offers them to you if you turn them on here.</Trans>
+        </p>
+      ) : null}
     </section>
   );
 }

@@ -6,7 +6,7 @@ import type { ChildLimits, LocationRef, PersonRef } from "../../shared/types";
 import { ChildLimitControls, FULL_LIMITS } from "../child-limits";
 import { api } from "../api";
 import { legalLinksMissing, moduleOn } from "../../shared/club";
-import { clubName, useClub, useVenue } from "../club";
+import { clubName, useClub, useModule, useVenue } from "../club";
 import { useActiveModules } from "../modules";
 import { daysBetween, fullDate, isoToLocalDate, personName, todayLocal } from "../format";
 import { downloadExport } from "../export";
@@ -321,8 +321,8 @@ interface AgeClass {
   birthYearMax: number | null;
   /** How long a game blocks the hall (helper duty blocks, "in progress" card). */
   gameMinutes: number;
-  /** Home games need a youth referee. */
-  youthReferee: boolean;
+  /** Duty types every home game of the class gets, e.g. a youth referee (age_class_duties). */
+  requiredDuties: number[];
   /** What players of this youth class may do themselves (children in the app). */
   childLimits: ChildLimits;
 }
@@ -336,7 +336,8 @@ interface AdminPerson {
   isAdmin: boolean;
   adminEmail: string | null;
   hasAccount: boolean;
-  isReferee: boolean;
+  /** Duty types an admin approved the person for (e.g. youth referee) */
+  skillGrants: number[];
   isClubMember: boolean;
   /** Last activity of the account (local date), null = never used or no account. */
   lastSeenOn: string | null;
@@ -390,9 +391,9 @@ function activityRank(p: AdminPerson): number {
   return days == null ? Number.MAX_SAFE_INTEGER : days;
 }
 
-/** Neither team nor child nor admin or Youth referee role: candidates for cleaning up. */
+/** Neither team nor child nor admin nor an approval (e.g. youth referee): candidates for cleaning up. */
 function withoutRole(p: AdminPerson): boolean {
-  return !p.teams.length && !p.childIds.length && !p.isAdmin && !p.isReferee;
+  return !p.teams.length && !p.childIds.length && !p.isAdmin && !p.skillGrants.length;
 }
 const NONE = "__none__";
 
@@ -994,16 +995,39 @@ function FamilySection({ p, all, onChanged }: { p: AdminPerson; all: AdminPerson
   );
 }
 
+/** One switch per duty type an admin approves (e.g. youth referee), only with helper duties on. */
+function ApprovalSwitches({ p, onChanged }: { p: AdminPerson; onChanged: () => void }) {
+  const dutiesOn = useModule("duties");
+  const types = useQuery<{ types: { id: number; name: string; needsSkill: boolean; skillGrant: "self" | "admin"; archived: boolean }[] }>(dutiesOn ? "/duty-types" : null);
+  const approvals = (types.data?.types ?? []).filter((dt) => dt.needsSkill && dt.skillGrant === "admin" && !dt.archived);
+  return (
+    <>
+      {approvals.map((dt) => (
+        <SwitchRow
+          label={dt.name}
+          info="skillGrant"
+          checked={p.skillGrants.includes(dt.id)}
+          onChange={async (on) => {
+            if (on) await api.put(`/admin/skill-grants/${p.person.id}/${dt.id}`);
+            else await api.del(`/admin/skill-grants/${p.person.id}/${dt.id}`);
+            onChanged();
+          }}
+        />
+      ))}
+    </>
+  );
+}
+
 /** Assign a person to teams or remove them (admins). */
 function TeamsSection({ p, onChanged }: { p: AdminPerson; onChanged: () => void }) {
-  const teams = useQuery<{ teams: { id: number; name: string; kind: "team" | "group"; autoMembers: string | null }[] }>("/teams");
+  const teams = useQuery<{ teams: { id: number; name: string; kind: "team" | "group"; autoSkill: { id: number } | null }[] }>("/teams");
   const [teamId, setTeamId] = useState("");
   const [role, setRole] = useState<"player" | "coach">("player");
   const [busy, setBusy] = useState(false);
   const all = teams.data?.teams ?? [];
   const idOf = new Map(all.map((x) => [x.name, x.id]));
-  // Groups with automatic members (youth referees) cannot be assigned by hand
-  const free = all.filter((x) => !x.autoMembers && !p.teams.some((m) => m.name === x.name && m.role === role));
+  // Groups with automatic members (e.g. youth referees) cannot be assigned by hand as members
+  const free = all.filter((x) => (!x.autoSkill || role === "coach") && !p.teams.some((m) => m.name === x.name && m.role === role));
   const selected = all.find((x) => x.id === Number(teamId || free[0]?.id));
   const selectedIsGroup = selected?.kind === "group";
   const roleName = roleLabel(role, selectedIsGroup);
@@ -1302,16 +1326,7 @@ function PersonAdminSheet({ p, all, selfId, onClose, onChanged }: { p: AdminPers
       <strong>
         <Trans>Roles in the club</Trans>
       </strong>
-      <SwitchRow
-        label={t`Youth referee`}
-        info="referee"
-        checked={p.isReferee}
-        onChange={async (on) => {
-          if (on) await api.put(`/admin/referees/${p.person.id}`);
-          else await api.del(`/admin/referees/${p.person.id}`);
-          onChanged();
-        }}
-      />
+      <ApprovalSwitches p={p} onChanged={onChanged} />
       <SwitchRow
         label={t`Full club member`}
         info="clubMember"
@@ -1392,6 +1407,10 @@ export function AdminAgeClassesPage() {
   const path = seasonId ? `/seasons/${seasonId}/age-classes` : "/age-classes";
   const { data, error, reload } = useQuery<{ season?: { name: string } | null; ageClasses: AgeClass[] }>(path);
   const [rows, setRows] = useState<AgeClass[] | null>(null);
+  // Duties taken by approved people from all teams (e.g. youth referee): a column each, ticked per class
+  const dutiesOn = useModule("duties");
+  const dutyTypes = useQuery<{ types: { id: number; name: string; whoQualified: boolean; archived: boolean }[] }>(dutiesOn ? "/duty-types" : null);
+  const requiredChoices = (dutyTypes.data?.types ?? []).filter((dt) => dt.whoQualified && !dt.archived);
   useEffect(() => {
     if (data) setRows(data.ageClasses);
   }, [data]);
@@ -1442,9 +1461,9 @@ export function AdminAgeClassesPage() {
                     <th>
                       <Trans>Game (min.)</Trans>
                     </th>
-                    <th>
-                      <Trans>Youth referee</Trans>
-                    </th>
+                    {requiredChoices.map((dt) => (
+                      <th>{dt.name}</th>
+                    ))}
                     <th>
                       <span class="sr-only">
                         <Trans>Remove</Trans>
@@ -1478,9 +1497,23 @@ export function AdminAgeClassesPage() {
                         <td>
                           <input class="input" style={{ width: "64px" }} inputMode="numeric" value={r.gameMinutes} aria-label={t`Game duration in minutes`} onInput={(e) => update(i, { gameMinutes: Number((e.target as HTMLInputElement).value) || 90 })} />
                         </td>
-                        <td>
-                          <input type="checkbox" checked={r.youthReferee} aria-label={t`Youth referee at home games`} onChange={(e) => update(i, { youthReferee: (e.target as HTMLInputElement).checked })} style={{ width: "22px", height: "22px" }} />
-                        </td>
+                        {requiredChoices.map((dt) => {
+                          const duty = dt.name;
+                          return (
+                            <td>
+                              <input
+                                type="checkbox"
+                                checked={r.requiredDuties.includes(dt.id)}
+                                aria-label={t`${duty} at home games of ${name}`}
+                                onChange={(e) => {
+                                  const on = (e.target as HTMLInputElement).checked;
+                                  update(i, { requiredDuties: on ? [...r.requiredDuties, dt.id] : r.requiredDuties.filter((id) => id !== dt.id) });
+                                }}
+                                style={{ width: "22px", height: "22px" }}
+                              />
+                            </td>
+                          );
+                        })}
                         <td>
                           <button type="button" class="icon-btn" aria-label={t`Remove ${name}`} onClick={() => setRows(rows.filter((_, j) => j !== i))}>
                             <Icon name="trash" size={18} />
@@ -1516,7 +1549,7 @@ export function AdminAgeClassesPage() {
           ) : null}
           {rows ? (
             <>
-              <Button icon="plus" onClick={() => setRows([...rows, { code: "", name: "", rank: 1, isYouth: true, birthYearMin: null, birthYearMax: null, gameMinutes: 90, youthReferee: false, childLimits: FULL_LIMITS }])}>
+              <Button icon="plus" onClick={() => setRows([...rows, { code: "", name: "", rank: 1, isYouth: true, birthYearMin: null, birthYearMax: null, gameMinutes: 90, requiredDuties: [], childLimits: FULL_LIMITS }])}>
                 <Trans>Add row</Trans>
               </Button>
               {!seasonId ? (

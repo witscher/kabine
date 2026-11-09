@@ -20,11 +20,12 @@ import {
   mayTake,
   resetTeamDuties,
   publicHelperTeam,
-  REFEREE_CODE,
-  REFEREE_TEAM_SQL,
-  refereeRoles,
+  loadSkills,
+  qualifiedRoles,
+  REQUIRED_DUTIES_SQL,
   rolesFor,
   SHORT_NAME_SQL,
+  type Skills,
   skillConsents,
   templateItems,
 } from "../../../worker/domain/duties";
@@ -42,8 +43,8 @@ export const dutyRoutes = new Hono<AppEnv>();
 /** Past games stay visible for 90 days (top helpers, review). */
 const PAST_DAYS = 90;
 
-/** Live channel of the youth referee view (team IDs are always > 0). */
-export const REFEREE_HUB = 0;
+/** Live channel of the list of a qualification taken from all teams (team IDs are always > 0). */
+export const qualifiedHub = (dutyTypeId: number) => -dutyTypeId;
 
 dutyRoutes.get("/duties/teams", async (c) => {
   const actor = requireActor(c);
@@ -109,23 +110,29 @@ export function blockView(
   type: DutyType,
   entries: EntryRow[],
   actor: Actor,
-  opts: { team: HelperTeam | null; refRoles: { childId: number | null; childName: string | null }[]; consents: Set<number>; past: boolean },
+  opts: { team: HelperTeam | null; skills: Skills; past: boolean },
 ) {
   const childIds = new Set(actor.children.map((ch) => ch.id));
-  const roles = type.whoReferees ? opts.refRoles : opts.team ? rolesFor(opts.team, type) : [];
+  const teamRoles = type.whoQualified ? qualifiedRoles(actor, opts.skills, type.id) : opts.team ? rolesFor(opts.team, type) : [];
+  // Approved by an admin: in a team the one signing up does the duty, so they need the approval (for types taken
+  // from all teams qualifiedRoles already holds only the approved people); coaches still enter anyone
+  const byAdmin = type.needsSkill && type.skillGrant === "admin";
+  const roles = byAdmin && !type.whoQualified && !mayTake(type, opts.skills, actor.personId) ? [] : teamRoles;
   return {
     id: b.id,
     dutyTypeId: type.id,
     label: type.name,
     mode: type.mode,
-    referee: type.whoReferees,
+    referee: type.whoQualified,
     special: type.eventId != null,
     startsAt: b.starts_at,
     endsAt: b.ends_at,
     total: b.slots,
     noteAllowed: type.noteAllowed,
     needsSkill: type.needsSkill,
-    skillMissing: type.needsSkill && !opts.consents.has(type.id),
+    /** Prior knowledge approved by an admin: no profile link, "Only with approval" */
+    skillByAdmin: byAdmin,
+    skillMissing: type.needsSkill && (byAdmin ? !roles.length && teamRoles.length > 0 : !opts.skills.consents.has(type.id)),
     roles: opts.past ? [] : roles,
     entries: entries
       .filter((x) => x.event_duty_id === b.id)
@@ -163,7 +170,7 @@ async function teamDutyGames(
   db: D1Database,
   actor: Actor,
   team: HelperTeam,
-  ctx: { refRoles: HelperRole[]; consents: Set<number>; from: string; now: string },
+  ctx: { skills: Skills; from: string; now: string },
 ) {
   const helperPlan = (await first<{ helper_plan: number }>(db, "SELECT helper_plan FROM teams WHERE id = ?", team.teamId))?.helper_plan === 1;
   const events = await all<EventRow>(
@@ -197,7 +204,15 @@ async function teamDutyGames(
         .filter((b) => b.event_id === e.id && allTypes.has(b.duty_type_id))
         // Places set to 0: only visible to managers (to restore them)
         .filter((b) => b.slots > 0 || canManage)
-        .map((b) => blockView(b, allTypes.get(b.duty_type_id)!, entries, actor, { team, refRoles: ctx.refRoles, consents: ctx.consents, past })),
+        // Approved by an admin: hidden for people without the approval, unless they manage the event or already
+        // have an entry in it (own or for a child, e.g. after the approval was taken back)
+        .filter((b) => {
+          const type = allTypes.get(b.duty_type_id)!;
+          if (!type.needsSkill || type.skillGrant !== "admin" || type.whoQualified || canManage) return true;
+          if (entries.some((x) => x.event_duty_id === b.id && (x.person_id === actor.personId || (x.child_id != null && actor.children.some((ch) => ch.id === x.child_id))))) return true;
+          return mayTake(type, ctx.skills, actor.personId);
+        })
+        .map((b) => blockView(b, allTypes.get(b.duty_type_id)!, entries, actor, { team, skills: ctx.skills, past })),
     };
   });
 }
@@ -215,8 +230,7 @@ dutyRoutes.get("/duties", async (c) => {
   const visible = await helperTeams(db, actor, types);
   const teams = ids.map((id) => visible.find((ht) => ht.teamId === id)).filter((ht): ht is HelperTeam => !!ht);
   if (!teams.length || teams.length !== ids.length) throw forbidden(t`This team has no helper plan, or you are not part of it.`);
-  const [refRoles, consents] = await Promise.all([refereeRoles(db, actor), skillConsents(db, actor.accountId)]);
-  const ctx = { refRoles, consents, from: `${addDays(todayLocal(), -PAST_DAYS)}T00:00`, now: nowLocal() };
+  const ctx = { skills: await loadSkills(db, actor), from: `${addDays(todayLocal(), -PAST_DAYS)}T00:00`, now: nowLocal() };
   const lists = await Promise.all(teams.map((ht) => teamDutyGames(db, actor, ht, ctx)));
   const seen = new Set<number>();
   const games = lists
@@ -244,7 +258,7 @@ dutyRoutes.post("/duties", async (c) => {
   const type = types.get(block.duty_type_id);
   if (!type) throw notFound(t`This duty does not exist.`);
   if (block.event_starts_at < nowLocal()) throw badRequest(t`The event is in the past.`, "game_in_past");
-  if (type.whoReferees) return refereeSignup(c, actor, block, input);
+  if (type.whoQualified) return qualifiedSignup(c, actor, block, type, input);
 
   const teams = (await helperTeams(db, actor, types)).filter((t) => block.teamIds.includes(t.teamId));
   const team = teams.find((t) => t.canManage) ?? teams[0];
@@ -286,9 +300,11 @@ dutyRoutes.post("/duties", async (c) => {
     // so that the other parent sees the duty
     personId = actor.personId;
     childId = input.childId ?? roles.find((r) => r.childId != null)?.childId ?? null;
-    if (!mayTake(type, await skillConsents(db, actor.accountId))) {
+    if (!mayTake(type, await loadSkills(db, actor), actor.personId)) {
       const duty = type.name;
-      throw badRequest(t`You can take on ${duty} once you switch it on in your profile under “I can do this”.`, "skill_missing");
+      throw type.skillGrant === "admin"
+        ? badRequest(t`Only people approved by an admin can take on ${duty}.`, "skill_missing")
+        : badRequest(t`You can take on ${duty} once you switch it on in your profile under “I can do this”.`, "skill_missing");
     }
   }
   await insertEntry(db, block, type, { personId, childId, manualName, note, createdBy: actor.personId });
@@ -326,12 +342,20 @@ async function insertEntry(
   if (!res.meta.changes) throw conflict(t`Sorry, this place has already been taken.`, "slot_taken");
 }
 
-const refereeUnavailable = () => t`This game does not need a youth referee.`;
-
-/** Sign up as youth referee: only with the role (oneself or a child), regardless of the team. */
-async function refereeSignup(c: Context<AppEnv>, actor: Actor, block: NonNullable<Awaited<ReturnType<typeof loadBlock>>>, input: z.infer<typeof signupSchema>) {
+/**
+ * Sign up for a type taken by qualified people from all teams (e.g. youth referee): only with the type's approval
+ * (oneself or a child), regardless of the team.
+ */
+async function qualifiedSignup(
+  c: Context<AppEnv>,
+  actor: Actor,
+  block: NonNullable<Awaited<ReturnType<typeof loadBlock>>>,
+  type: DutyType,
+  input: z.infer<typeof signupSchema>,
+) {
   const db = c.env.DB;
-  if (block.cancelled_at || block.slots === 0) throw badRequest(refereeUnavailable(), "game_unavailable");
+  const duty = type.name;
+  if (block.cancelled_at || block.slots === 0) throw badRequest(t`This game does not need ${duty}.`, "game_unavailable");
   const manage = isCoachOfAny(actor, block.teamIds);
   let personId: number | null = null;
   let childId: number | null = null;
@@ -340,26 +364,23 @@ async function refereeSignup(c: Context<AppEnv>, actor: Actor, block: NonNullabl
     if (!manage) throw forbidden(t`Only coaches and admins can sign up others.`);
     if (input.manualName != null) manualName = input.manualName;
     else {
-      const isRef = await first(db, "SELECT 1 AS ok FROM referees WHERE person_id = ?", input.onBehalfPersonId!);
-      if (!isRef) throw badRequest(t`This person is not enabled as youth referee.`, "not_referee");
+      const granted = await first(db, "SELECT 1 AS ok FROM skill_grants WHERE person_id = ? AND duty_type_id = ?", input.onBehalfPersonId!, type.id);
+      if (!granted) throw badRequest(t`This person is not approved for ${duty}.`, "not_qualified");
       personId = input.onBehalfPersonId!;
     }
   } else {
-    const roles = await refereeRoles(db, actor);
+    const roles = qualifiedRoles(actor, await loadSkills(db, actor), type.id);
     const role = input.childId != null ? roles.find((r) => r.childId === input.childId) : roles.length === 1 ? roles[0] : roles.find((r) => r.childId == null);
     if (!role) {
-      throw roles.length
-        ? badRequest(t`Who are you signing up for?`, "child_required")
-        : forbidden(t`Only people enabled for it can sign up as youth referee.`, "not_referee");
+      throw roles.length ? badRequest(t`Who are you signing up for?`, "child_required") : forbidden(t`Only people approved for ${duty} can sign up.`, "not_qualified");
     }
-    // The person refereeing is the person in the entry. For a child also child_id, so the parents see it.
+    // The person doing the duty is the person in the entry. For a child also child_id, so the parents see it.
     personId = role.childId ?? actor.personId;
     childId = role.childId;
   }
-  const type = (await loadDutyTypes(db)).get(block.duty_type_id)!;
   await insertEntry(db, block, type, { personId, childId, manualName, note: null, createdBy: actor.personId });
   for (const t of block.teamIds) c.executionCtx.waitUntil(notifyDutyChange(c.env, t));
-  c.executionCtx.waitUntil(notifyDutyChange(c.env, REFEREE_HUB));
+  c.executionCtx.waitUntil(notifyDutyChange(c.env, qualifiedHub(type.id)));
   return c.json({ ok: true }, 201);
 }
 
@@ -372,11 +393,12 @@ async function loadEntry(db: D1Database, id: number) {
     child_id: number | null;
     starts_at: string;
     note_allowed: number;
+    duty_type_id: number;
     who_referees: number;
     team_ids: string;
   }>(
     db,
-    `SELECT d.id, d.event_id, d.event_duty_id, d.person_id, d.child_id, e.starts_at, dt.note_allowed, dt.who_referees,
+    `SELECT d.id, d.event_id, d.event_duty_id, d.person_id, d.child_id, e.starts_at, dt.note_allowed, dt.id AS duty_type_id, dt.who_referees,
             (SELECT json_group_array(team_id) FROM (SELECT et.team_id FROM event_teams et WHERE et.event_id = e.id ORDER BY et.team_id)) AS team_ids
        FROM duties d JOIN events e ON e.id = d.event_id JOIN duty_types dt ON dt.id = d.duty_type_id WHERE d.id = ?`,
     id,
@@ -410,7 +432,7 @@ dutyRoutes.delete("/duties/:id", async (c) => {
   if (!manage && entry.starts_at < nowLocal()) throw badRequest(t`The event is in the past.`, "game_in_past");
   await run(c.env.DB, "DELETE FROM duties WHERE id = ?", entry.id);
   for (const t of entry.teamIds) c.executionCtx.waitUntil(notifyDutyChange(c.env, t));
-  if (entry.who_referees === 1) c.executionCtx.waitUntil(notifyDutyChange(c.env, REFEREE_HUB));
+  if (entry.who_referees === 1) c.executionCtx.waitUntil(notifyDutyChange(c.env, qualifiedHub(entry.duty_type_id)));
   return c.json({ ok: true });
 });
 
@@ -484,7 +506,7 @@ dutyRoutes.patch("/duties/blocks/:id", async (c) => {
   }
   await run(db, "UPDATE event_duties SET starts_at = ?, ends_at = ?, slots = ? WHERE id = ?", startsAt, endsAt, input.slots ?? block.slots, block.id);
   for (const t of block.teamIds) c.executionCtx.waitUntil(notifyDutyChange(c.env, t));
-  c.executionCtx.waitUntil(notifyDutyChange(c.env, REFEREE_HUB));
+  c.executionCtx.waitUntil(notifyDutyChange(c.env, qualifiedHub(block.duty_type_id)));
   return c.json({ ok: true });
 });
 
@@ -519,7 +541,7 @@ dutyRoutes.post("/duties/events/:id/apply-template", async (c) => {
   const end = event.ends_at ?? addMinutesLocal(event.starts_at, 120);
   const statements = items
     .map((item, i) => ({ item, i, type: types.get(item.dutyTypeId) }))
-    .filter((x) => x.type && !x.type.archived && !x.type.whoReferees)
+    .filter((x) => x.type && !x.type.archived && !x.type.whoQualified)
     .map(({ item, i, type }) => {
       const b = blockFromItem(item, type!.mode, event.starts_at, end);
       return stmt(db, "INSERT INTO event_duties (event_id, duty_type_id, starts_at, ends_at, slots, sort) VALUES (?, ?, ?, ?, ?, ?)", event.id, type!.id, b.startsAt, b.endsAt, item.slots, i + 1);
@@ -653,7 +675,7 @@ export const DEFAULT_CHANNEL = { push: true, mail: false, sms: false };
 dutyRoutes.get("/profile/duty-prefs", async (c) => {
   const actor = requireActor(c);
   const db = c.env.DB;
-  const [rows, email, types, consents] = await Promise.all([
+  const [rows, email, types, consents, skills] = await Promise.all([
     all<{ topic: DutyTopic; push: number; mail: number; sms: number }>(db, "SELECT topic, push, mail, sms FROM notification_channels WHERE account_id = ?", actor.accountId),
     first<{ email: string | null; email_verified_at: string | null; phone: string | null; phone_verified_at: string | null }>(
       db,
@@ -662,10 +684,18 @@ dutyRoutes.get("/profile/duty-prefs", async (c) => {
     ),
     loadDutyTypes(db),
     skillConsents(db, actor.accountId),
+    loadSkills(db, actor),
   ]);
+  const people = [{ id: actor.personId, name: null as string | null }, ...actor.children.map((ch) => ({ id: ch.id, name: ch.firstName }))];
   return c.json({
-    // Duty types needing skills: only after consent (“I can do this”)
-    skills: [...types.values()].filter((t) => t.needsSkill && !t.archived).map((t) => ({ dutyTypeId: t.id, code: t.code, name: t.name, on: consents.has(t.id) })),
+    // Duty types needing skills the person approves: only after consent (“I can do this”)
+    skills: [...types.values()]
+      .filter((dt) => dt.needsSkill && dt.skillGrant === "self" && !dt.archived)
+      .map((dt) => ({ dutyTypeId: dt.id, code: dt.code, name: dt.name, on: consents.has(dt.id) })),
+    // Approved by an admin, for oneself and the children: information only
+    approved: [...types.values()]
+      .filter((dt) => dt.needsSkill && dt.skillGrant === "admin" && !dt.archived)
+      .flatMap((dt) => people.filter((p) => skills.grants.get(p.id)?.has(dt.id)).map((p) => ({ dutyTypeId: dt.id, name: dt.name, child: p.name }))),
     channels: Object.fromEntries(
       DUTY_TOPICS.map((t) => {
         const r = rows.find((x) => x.topic === t);
@@ -691,7 +721,7 @@ dutyRoutes.put("/profile/duty-prefs", async (c) => {
   for (const s of input.skills ?? []) {
     statements.push(
       s.on
-        ? stmt(db, "INSERT OR IGNORE INTO skill_consents (account_id, duty_type_id) SELECT ?, id FROM duty_types WHERE id = ? AND needs_skill = 1", actor.accountId, s.dutyTypeId)
+        ? stmt(db, "INSERT OR IGNORE INTO skill_consents (account_id, duty_type_id) SELECT ?, id FROM duty_types WHERE id = ? AND needs_skill = 1 AND skill_grant = 'self'", actor.accountId, s.dutyTypeId)
         : stmt(db, "DELETE FROM skill_consents WHERE account_id = ? AND duty_type_id = ?", actor.accountId, s.dutyTypeId),
     );
   }
@@ -719,18 +749,36 @@ function requireCoachOrAdmin(actor: Actor) {
   if (!actor.isAdmin && !actor.coachTeamIds.length) throw forbidden();
 }
 
+interface DutyTypeUsage {
+  blocks: number;
+  templates: number;
+  /** Age groups whose home games get this duty */
+  ageClasses: number;
+  /** People approved by an admin */
+  grants: number;
+}
+
 /**
- * Where duty types are used: time blocks at events (past ones too) and templates. One pass over each table
- * instead of a count per type; only admins ask for it, and rarely.
+ * Where duty types are used: time blocks at events (past ones too), templates, age groups, approvals. One pass
+ * over each table instead of a count per type; only admins ask for it, and rarely.
  */
-async function dutyTypeUsage(db: D1Database): Promise<Map<number, { blocks: number; templates: number }>> {
-  const [blocks, templates] = await Promise.all([
+async function dutyTypeUsage(db: D1Database): Promise<Map<number, DutyTypeUsage>> {
+  const [blocks, templates, classes, grants] = await Promise.all([
     all<{ id: number; n: number }>(db, "SELECT duty_type_id AS id, count(*) AS n FROM event_duties GROUP BY duty_type_id"),
     all<{ id: number; n: number }>(db, "SELECT duty_type_id AS id, count(DISTINCT template_id) AS n FROM duty_template_items GROUP BY duty_type_id"),
+    all<{ id: number; n: number }>(
+      db,
+      `SELECT acd.duty_type_id AS id, count(*) AS n FROM age_class_duties acd JOIN age_classes ac ON ac.id = acd.age_class_id
+        WHERE ac.season_id = (SELECT id FROM seasons WHERE is_current = 1) GROUP BY acd.duty_type_id`,
+    ),
+    all<{ id: number; n: number }>(db, "SELECT duty_type_id AS id, count(*) AS n FROM skill_grants GROUP BY duty_type_id"),
   ]);
-  const usage = new Map<number, { blocks: number; templates: number }>();
-  for (const r of blocks) usage.set(r.id, { blocks: r.n, templates: 0 });
-  for (const r of templates) usage.set(r.id, { blocks: usage.get(r.id)?.blocks ?? 0, templates: r.n });
+  const usage = new Map<number, DutyTypeUsage>();
+  const of = (id: number) => usage.get(id) ?? usage.set(id, { blocks: 0, templates: 0, ageClasses: 0, grants: 0 }).get(id)!;
+  for (const r of blocks) of(r.id).blocks = r.n;
+  for (const r of templates) of(r.id).templates = r.n;
+  for (const r of classes) of(r.id).ageClasses = r.n;
+  for (const r of grants) of(r.id).grants = r.n;
   return usage;
 }
 
@@ -743,7 +791,7 @@ dutyRoutes.get("/duty-types", async (c) => {
   return c.json({
     types: [...types.values()]
       .filter((dt) => c.req.query("all") === "1" || !dt.archived)
-      .map((dt) => (usage ? { ...dt, usage: usage.get(dt.id) ?? { blocks: 0, templates: 0 } } : dt)),
+      .map((dt) => (usage ? { ...dt, usage: usage.get(dt.id) ?? { blocks: 0, templates: 0, ageClasses: 0, grants: 0 } } : dt)),
   });
 });
 
@@ -756,10 +804,15 @@ const dutyTypeSchema = z.object({
   whoMembers: z.boolean().default(false),
   noteAllowed: z.boolean(),
   needsSkill: z.boolean(),
+  /** Who approves the prior knowledge: the person in the profile or an admin */
+  skillGrant: z.enum(["self", "admin"]).default("self"),
+  /** Taken by the approved people from all teams (e.g. youth referees); only when creating, with an admin approval */
+  whoQualified: z.boolean().default(false),
   archived: z.boolean().optional(),
 });
 
 function checkWho(input: z.infer<typeof dutyTypeSchema>) {
+  if (input.whoQualified) return;
   if (!input.whoParents && !input.whoPlayers && !input.whoCoaches && !input.whoMembers) throw badRequest(t`Please choose who can help.`);
 }
 
@@ -767,18 +820,21 @@ dutyRoutes.post("/admin/duty-types", async (c) => {
   requireAdmin(requireActor(c));
   const input = parse(dutyTypeSchema, await readJson(c.req.raw));
   checkWho(input);
+  const qualified = input.whoQualified;
   const row = await first<{ id: number }>(
     c.env.DB,
-    `INSERT INTO duty_types (name, mode, who_parents, who_players, who_coaches, who_members, note_allowed, needs_skill, sort)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, (SELECT coalesce(max(sort), 0) + 1 FROM duty_types WHERE event_id IS NULL)) RETURNING id`,
+    `INSERT INTO duty_types (name, mode, who_parents, who_players, who_coaches, who_members, who_referees, note_allowed, needs_skill, skill_grant, sort)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, (SELECT coalesce(max(sort), 0) + 1 FROM duty_types WHERE event_id IS NULL)) RETURNING id`,
     input.name,
     input.mode,
-    input.whoParents ? 1 : 0,
-    input.whoPlayers ? 1 : 0,
-    input.whoCoaches ? 1 : 0,
-    input.whoMembers ? 1 : 0,
+    !qualified && input.whoParents ? 1 : 0,
+    !qualified && input.whoPlayers ? 1 : 0,
+    !qualified && input.whoCoaches ? 1 : 0,
+    !qualified && input.whoMembers ? 1 : 0,
+    qualified ? 1 : 0,
     input.noteAllowed ? 1 : 0,
-    input.needsSkill ? 1 : 0,
+    qualified || input.needsSkill ? 1 : 0,
+    qualified ? "admin" : input.needsSkill ? input.skillGrant : "self",
   );
   return c.json({ id: row!.id }, 201);
 });
@@ -789,15 +845,16 @@ dutyRoutes.patch("/admin/duty-types/:id", async (c) => {
   const type = (await loadDutyTypes(c.env.DB)).get(id);
   if (!type || type.eventId != null) throw notFound(t`This duty type does not exist.`);
   const input = parse(dutyTypeSchema, await readJson(c.req.raw));
-  // youth referee depends on the role: only name and archive can be changed
-  if (type.whoReferees) {
-    await run(c.env.DB, "UPDATE duty_types SET name = ? WHERE id = ?", input.name, id);
+  // Taken by approved people from all teams (e.g. youth referees): who helps and the approval stay as they are
+  if (type.whoQualified) {
+    await run(c.env.DB, "UPDATE duty_types SET name = ?, archived = ? WHERE id = ?", input.name, input.archived ? 1 : 0, id);
     return c.json({ ok: true });
   }
-  checkWho(input);
+  checkWho({ ...input, whoQualified: false });
   await run(
     c.env.DB,
-    `UPDATE duty_types SET name = ?, mode = ?, who_parents = ?, who_players = ?, who_coaches = ?, who_members = ?, note_allowed = ?, needs_skill = ?, archived = ? WHERE id = ?`,
+    `UPDATE duty_types SET name = ?, mode = ?, who_parents = ?, who_players = ?, who_coaches = ?, who_members = ?, note_allowed = ?, needs_skill = ?,
+            skill_grant = ?, archived = ? WHERE id = ?`,
     input.name,
     input.mode,
     input.whoParents ? 1 : 0,
@@ -806,6 +863,7 @@ dutyRoutes.patch("/admin/duty-types/:id", async (c) => {
     input.whoMembers ? 1 : 0,
     input.noteAllowed ? 1 : 0,
     input.needsSkill ? 1 : 0,
+    input.needsSkill ? input.skillGrant : "self",
     input.archived ? 1 : 0,
     id,
   );
@@ -821,12 +879,15 @@ dutyRoutes.delete("/admin/duty-types/:id", async (c) => {
   const id = intParam(c, "id");
   const type = (await loadDutyTypes(c.env.DB)).get(id);
   if (!type || type.eventId != null) throw notFound(t`This duty type does not exist.`);
-  if (type.whoReferees) throw conflict(t`The youth referee duty belongs to the role and cannot be deleted.`, "referee_type");
-  const [blocks, templates] = await Promise.all([
+  const [blocks, templates, required, grants] = await Promise.all([
     first<{ n: number }>(c.env.DB, "SELECT count(*) AS n FROM event_duties WHERE duty_type_id = ?", id),
     first<{ n: number }>(c.env.DB, "SELECT count(DISTINCT template_id) AS n FROM duty_template_items WHERE duty_type_id = ?", id),
+    first<{ n: number }>(c.env.DB, "SELECT count(*) AS n FROM age_class_duties WHERE duty_type_id = ?", id),
+    first<{ n: number }>(c.env.DB, "SELECT count(*) AS n FROM skill_grants WHERE duty_type_id = ?", id),
   ]);
-  if (blocks?.n || templates?.n) {
+  // Approved people (e.g. the youth referees) are kept: archive such a type instead
+  if (type.whoQualified && grants?.n) throw conflict(t`People are approved for this duty. Archive it instead.`, "duty_type_has_grants");
+  if (blocks?.n || templates?.n || required?.n) {
     const name = type.name;
     throw conflict(t`${name} is still in use. Archive the duty type instead.`, "duty_type_in_use");
   }
@@ -882,7 +943,7 @@ async function saveTemplate(db: D1Database, id: number, input: z.infer<typeof te
   const types = await loadDutyTypes(db);
   for (const i of input.items) {
     const type = types.get(i.dutyTypeId);
-    if (!type || type.eventId != null || type.whoReferees) throw badRequest(t`This duty type does not fit into a template.`);
+    if (!type || type.eventId != null || type.whoQualified) throw badRequest(t`This duty type does not fit into a template.`);
   }
   await db.batch([
     stmt(db, "UPDATE duty_templates SET name = ? WHERE id = ?", input.name, id),

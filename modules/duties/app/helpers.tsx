@@ -5,7 +5,6 @@ import { useEffect, useRef, useState } from "preact/hooks";
 import { api, errorMessage } from "../../../src/api";
 import { dayOfMonth, monthShort, shortDate, time, todayLocal, weekdayShort } from "../../../src/format";
 import { Icon } from "../../../src/icons";
-import { useModule } from "../../../src/club";
 import { useMe } from "../../../src/session";
 import { useQuery, useSearch } from "../../../src/store";
 import { BlockEditSheet, BlockSheet, blockTime, type TemplateInfo } from "../../../src/duty-blocks";
@@ -31,6 +30,7 @@ interface Block {
   dutyTypeId: number;
   label: string;
   mode: "onsite" | "task";
+  /** Taken by approved people from all teams (e.g. youth referee): signed up in that list */
   referee: boolean;
   special: boolean;
   startsAt: string;
@@ -38,6 +38,8 @@ interface Block {
   total: number;
   noteAllowed: boolean;
   needsSkill: boolean;
+  /** Prior knowledge approved by an admin */
+  skillByAdmin?: boolean;
   skillMissing: boolean;
   /** As whom one can sign up (empty: not at all) */
   roles: Role[];
@@ -107,8 +109,11 @@ function forChild(child: string): string {
   return t`for ${child}`;
 }
 
-/** Virtual "team" of the youth referee view: all youth home games F–C */
-const REFEREE = 0;
+/**
+ * Lists of duties taken by approved people from all teams (e.g. youth referees) are virtual "teams" with the
+ * negative duty type id (team ids are always > 0), as in the live channel.
+ */
+const listChip = (dutyTypeId: number) => -dutyTypeId;
 
 /** Live connection to one team (one per team for "all"); only one of them also polls every 5 minutes. */
 function LiveReload(props: { teamId: number; reload: () => void; poll: boolean }) {
@@ -129,7 +134,7 @@ function useLiveReload(teamId: number | null, reload: () => void, poll = true) {
     let debounce: number | undefined;
     let ping: number | undefined;
     const connect = () => {
-      const path = teamId === REFEREE ? "/api/duties/referee/live" : `/api/duties/teams/${teamId}/live`;
+      const path = teamId < 0 ? `/api/duties/qualified/${-teamId}/live` : `/api/duties/teams/${teamId}/live`;
       ws = new WebSocket(`${location.protocol === "https:" ? "wss" : "ws"}://${location.host}${path}`);
       ws.onopen = () => {
         retry = 0;
@@ -181,27 +186,27 @@ export function HelpersPage() {
   // From an event: ?mannschaft=<id>&spiel=<id> selects the team and jumps to the event
   const [target] = useState(() => {
     const q = new URLSearchParams(location.search);
-    return { team: Number(q.get("mannschaft")) || null, game: Number(q.get("spiel")) || null, referee: q.has("kihasl") };
+    // ?liste=<duty type>: a list of approved people; ?kihasl from before 0.8.0: the first of one's own lists
+    const list = Number(q.get("liste")) || (q.has("kihasl") ? (me.qualifiedLists.find((l) => l.mine)?.id ?? null) : null);
+    return { team: Number(q.get("mannschaft")) || null, game: Number(q.get("spiel")) || null, list };
   });
   const [scope, setScope] = useState<"own" | "all">(() => (target.team && me.helperTeams.some((ht) => ht.id === target.team && !ht.own) ? "all" : "own"));
   const helperTeams = hasOwn && hasOthers && scope === "own" ? me.helperTeams.filter((ht) => ht.own) : me.helperTeams;
-  // youth referee: first for everyone with the role, last for coaches and admins
-  const refereeChip = { id: REFEREE, name: t`Youth referees`, own: true };
-  // Only with the youth referee module (handball); otherwise the tab would only show "switched off"
-  const showReferee = useModule("youthReferees") && (me.referee || me.isAdmin || me.manageableTeams.length > 0);
-  const teams = !showReferee ? helperTeams : me.referee ? [refereeChip, ...helperTeams] : [...helperTeams, refereeChip];
+  // Lists of approved people (e.g. youth referees): first for the approved, last for coaches and admins
+  const listChips = me.qualifiedLists.map((l) => ({ id: listChip(l.id), name: l.name, own: true, mine: l.mine }));
+  const teams = [...listChips.filter((l) => l.mine), ...helperTeams, ...listChips.filter((l) => !l.mine)];
   // Like the team filter of the events list: without a selection all teams together, a tap filters, a second
-  // tap clears the filter. The youth referee view is a list of its own and not part of "all".
+  // tap clears the filter. A list of approved people is a list of its own and not part of "all".
   const [selected, setSelected] = useState<number | null>(() =>
-    showReferee && target.referee ? REFEREE : teams.some((ht) => ht.id === target.team) ? target.team : null,
+    target.list && teams.some((ht) => ht.id === listChip(target.list!)) ? listChip(target.list) : teams.some((ht) => ht.id === target.team) ? target.team : null,
   );
-  const isReferee = selected === REFEREE;
+  const isReferee = selected != null && selected < 0;
   const allIds = helperTeams.map((ht) => ht.id);
   // A single team: top helpers as before
-  const teamId = isReferee ? REFEREE : (selected ?? (allIds.length === 1 ? allIds[0]! : null));
-  const listPath = isReferee ? "/duties/referee" : selected != null ? `/duties?teamId=${selected}` : allIds.length ? `/duties?teamIds=${allIds.join(",")}` : null;
+  const teamId = isReferee ? selected : (selected ?? (allIds.length === 1 ? allIds[0]! : null));
+  const listPath = isReferee ? `/duties/qualified/${-selected!}` : selected != null ? `/duties?teamId=${selected}` : allIds.length ? `/duties?teamIds=${allIds.join(",")}` : null;
   const list = useQuery<DutyList>(listPath);
-  const liveIds = isReferee ? [REFEREE] : selected != null ? [selected] : allIds;
+  const liveIds = isReferee ? [selected!] : selected != null ? [selected] : allIds;
   const [signup, setSignup] = useState<{ game: Game; block: Block } | null>(null);
   const [manage, setManage] = useState<number | null>(null);
   const [showTop, setShowTop] = useState(false);
@@ -233,7 +238,7 @@ export function HelpersPage() {
 
   const data = list.data;
   const team = data?.team;
-  // In the team view the youth referee slot does not count (separate list)
+  // In the team view the slots of lists of approved people do not count (separate list)
   const openSlots = (g: Game) => g.blocks.reduce((n, b) => n + (b.referee && !isReferee ? 0 : free(b)), 0);
   const allUpcoming = (data?.games ?? []).filter((g) => !g.isPast);
   const upcoming = onlyOpen ? allUpcoming.filter((g) => !g.cancelled && openSlots(g) > 0) : allUpcoming;
@@ -255,7 +260,7 @@ export function HelpersPage() {
             ]}
             onChange={(v) => {
               setScope(v);
-              if (v === "own" && selected !== REFEREE && !me.helperTeams.some((ht) => ht.own && ht.id === selected)) setSelected(null);
+              if (v === "own" && !isReferee && !me.helperTeams.some((ht) => ht.own && ht.id === selected)) setSelected(null);
             }}
           />
         ) : null}
@@ -265,8 +270,8 @@ export function HelpersPage() {
         {teams.length > 1 || isReferee || (hasOwn && hasOthers) ? (
           <div class="chips" role="group" aria-label={t`Filter by team`}>
             {teams.map((tm) => {
-              // Without a filter all teams are on (not the youth referees, that is a list of its own)
-              const on = selected == null ? tm.id !== REFEREE : selected === tm.id;
+              // Without a filter all teams are on (not the lists of approved people, those are lists of their own)
+              const on = selected == null ? tm.id > 0 : selected === tm.id;
               return (
                 <button type="button" class={`chip ${on ? "selected" : ""}`} aria-pressed={on ? "true" : "false"} onClick={() => setSelected(selected === tm.id ? null : tm.id)}>
                   {tm.name}
@@ -323,7 +328,7 @@ export function HelpersPage() {
         {data && !allUpcoming.length ? (
           <Empty title={t`No upcoming events`} icon="ball">
             {isReferee
-              ? t`As soon as there are youth home games F to C, they appear here.`
+              ? t`As soon as games need this duty, they appear here.`
               : t`The games come from the team's fixture list. Special events appear here as soon as helpers are needed for them.`}
           </Empty>
         ) : null}
@@ -422,11 +427,16 @@ export function HelpersPage() {
                       ) : null}
                     </span>
                     {b.referee && !isReferee ? (
-                      free(b) > 0 && me.referee ? (
-                        <button type="button" class="take" onClick={() => setSelected(REFEREE)}>
-                          <Trans>Youth referee list</Trans>
+                      free(b) > 0 && me.qualifiedLists.some((l) => l.mine && l.id === b.dutyTypeId) ? (
+                        <button type="button" class="take" onClick={() => setSelected(listChip(b.dutyTypeId))}>
+                          <Trans>To the list</Trans>
                         </button>
                       ) : null
+                    ) : free(b) > 0 && !g.cancelled && !already && b.skillByAdmin && b.skillMissing ? (
+                      // Approved by an admin: shown only to the approved people, managers and those with an entry
+                      <span class="small muted">
+                        <Trans>Only with approval</Trans>
+                      </span>
                     ) : free(b) > 0 && !g.cancelled && !already && b.roles.length ? (
                       b.skillMissing ? (
                         <a class="small muted" href="/profil" title={t`Turn on in your profile under “I can do this”`}>
@@ -557,7 +567,7 @@ function OnBehalfPicker({ game, blocks, onDone }: { game: Game; blocks: Block[];
     return () => window.clearTimeout(timer);
   }, [search]);
   const referee = !!selected?.referee;
-  const team = useQuery<{ people: PersonOption[] }>(referee ? "/duties/referee/people" : `/duties/events/${game.id}/people`);
+  const team = useQuery<{ people: PersonOption[] }>(referee ? `/duties/qualified/${selected!.dutyTypeId}/people` : `/duties/events/${game.id}/people`);
   const club = useSearch<{ people: PersonOption[] }>(`/duties/events/${game.id}/people/search`, !referee && q.length >= 2 ? { q } : null);
   const needle = search.trim().toLowerCase();
   const name = search.trim();
@@ -590,11 +600,11 @@ function OnBehalfPicker({ game, blocks, onDone }: { game: Game; blocks: Block[];
         )}
       </Field>
       <TextField
-        label={referee ? t`Search youth referees` : t`Search name`}
+        label={referee ? t`Search approved people` : t`Search name`}
         value={search}
         onInput={setSearch}
         maxLength={60}
-        hint={referee ? t`Only people with the youth referee role.` : t`Without input: people of the team. From 2 letters: everyone in the club.`}
+        hint={referee ? t`Only people approved for this duty.` : t`Without input: people of the team. From 2 letters: everyone in the club.`}
       />
       <ul class="list" aria-label={t`People`}>
         {list.slice(0, 30).map((p) => (

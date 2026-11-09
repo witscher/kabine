@@ -23,6 +23,11 @@ SELECT * FROM (VALUES
 ) AS v
 WHERE NOT EXISTS (SELECT 1 FROM app_meta WHERE key = 'demo_v1');
 
+-- Home games of E to C get the youth referee duty (approved by an admin)
+INSERT OR IGNORE INTO age_class_duties (age_class_id, duty_type_id)
+SELECT ac.id, dt.id FROM age_classes ac JOIN duty_types dt ON dt.code = 'referee'
+ WHERE ac.youth_referee = 1 AND NOT EXISTS (SELECT 1 FROM app_meta WHERE key = 'demo_v1');
+
 INSERT INTO locations (id, name, address, kind)
 SELECT * FROM (VALUES
   (1, 'Sporthalle Musterstadt', 'Hallenweg 1, 12345 Musterstadt', 'hall'),

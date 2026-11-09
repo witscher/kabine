@@ -44,7 +44,8 @@ export interface TeamDetail {
   name: string;
   /** Group: only chat and special events (src/pages/group.tsx). */
   kind: "team" | "group";
-  autoMembers: "referees" | null;
+  /** Group of everyone approved for a duty (e.g. all youth referees) */
+  autoSkill: { id: number; name: string } | null;
   ageClassCode: string;
   ageClassName: string;
   level: number;

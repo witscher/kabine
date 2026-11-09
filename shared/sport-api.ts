@@ -19,8 +19,8 @@ export interface AgeClassTemplate {
   ageTo: number | null;
   /** How long a game blocks the hall, in minutes (helper duty blocks, "live" window). */
   gameMinutes: number;
-  /** Home games get a youth referee duty block . */
-  youthReferee?: boolean;
+  /** Duty codes (of `dutyTypes`) every home game of the class gets, e.g. `["referee"]` for a youth referee. */
+  requiredDuties?: string[];
   /**
    * What players of this youth class may do in the app themselves (children in the app); missing: everything.
    * Without an own account they can do nothing themselves, the parents respond and chat.
@@ -36,9 +36,12 @@ export interface DutyTypeTemplate {
   name: Record<Locale, string>;
   mode: "onsite" | "task";
   whoParents: boolean;
-  whoReferees?: boolean;
+  /** Taken by the people an admin approved for it, from all teams (e.g. youth referees); implies an admin approval. */
+  whoQualified?: boolean;
   noteAllowed?: boolean;
   needsSkill?: boolean;
+  /** Who approves the prior knowledge: the person in the profile (default) or an admin. */
+  skillGrant?: "self" | "admin";
 }
 
 export interface SportProfile {

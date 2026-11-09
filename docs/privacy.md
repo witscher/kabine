@@ -36,6 +36,7 @@ Only admins change their own name; players, parents and coaches ask their coach 
 | Attendance after an event (present, excused, unexcused), attendance statistics | Players | Overview for coaches | Coaches, admins; the player and their parents see their own entry; parents in charge get a push at once when their child is marked unexcused | Event data at the season change; season totals stay with the person until they leave |
 | Squad nominations | Players | Games | Team | At the season change |
 | Helper duties | Parents, players | Duties at games and events | Helpers of the team ("First name L."), coaches | At the season change |
+| Approvals for duties that need prior knowledge ("I can do this" in the profile, or approved by an admin, e.g. youth referee, also for children) | Parents, players | Only suitable people are offered such a duty | The person and their parents, admins; coaches when they sign someone up | When taken back (by the person or an admin), when leaving the club |
 | Carpools | Drivers, riders | Away games | Nominated players and their parents ("First name L."), coaches | At the season change |
 | Chat messages, reactions | Members | Team communication | Team chat members | At the season change |
 | E-mail address | Everyone who enters one | Sign-in codes, access links; helper plan mails and feedback replies only if chosen | Nobody in the app; admins only in the data export | When leaving |

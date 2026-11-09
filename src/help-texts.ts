@@ -63,9 +63,10 @@ export const HELP = {
     title: t`Full club member`,
     text: t`A hidden marker that only admins see. Full club members can help organise special events and take on duties with “Who helps: members”.`,
   }),
-  referee: () => ({
-    title: t`Youth referee`,
-    text: t`Whoever has the role sees all youth home games in the Helpers tab that still need a referee, and can sign up.`,
+  skillGrant: () => ({
+    title: t`Approved by an admin`,
+    text: t`This person may take the duty and sees it in the Helpers tab. Without the approval they do not see it at all. Coaches and admins can still enter anyone. For duties taken across teams, such as youth referee, the Helpers tab lists all games that still need someone.`,
+    example: t`Only whoever has done the tournament management before is approved for it.`,
   }),
   adminMode: () => ({
     title: t`Work as admin`,

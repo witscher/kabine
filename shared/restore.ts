@@ -10,6 +10,7 @@ export const RESTORE_TABLES: Record<Exclude<RestoreCategory, "club">, readonly s
   season: ["seasons", "age_classes", "holiday_periods", "public_holidays"],
   teams: ["teams"],
   people: ["persons", "accounts", "guardianships", "child_permissions", "child_permission_log", "club_members", "notification_settings", "notification_channels", "avatars"],
+  // referees: exports from before 0.8.0 (they become approvals of the youth referee duty)
   memberships: ["team_memberships", "core_squad", "referees"],
   plans: ["locations", "training_plans", "training_rules", "rule_teams", "standing_absences"],
   events: [
@@ -27,9 +28,11 @@ export const RESTORE_TABLES: Record<Exclude<RestoreCategory, "club">, readonly s
     "duty_types",
     "duty_templates",
     "duty_template_items",
+    "age_class_duties",
     "event_duties",
     "duties",
     "skill_consents",
+    "skill_grants",
     "duty_notifications",
     "carpool_offers",
     "carpool_requests",

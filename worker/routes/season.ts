@@ -13,7 +13,7 @@ import { loadClub } from "../domain/club";
 import { all, first, list, run, stmt } from "../lib/db";
 import { badRequest, conflict, forbidden, notFound, parse, readJson } from "../lib/http";
 import { isDate, nowLocal, utcIso } from "../lib/time";
-import { type AgeClassDbRow, ageClassJson, ageClassSchema, writeAgeClasses } from "./admin";
+import { type AgeClassDbRow, ageClassJson, ageClassSchema, requiredDuties, writeAgeClasses } from "./admin";
 import { canManagePerson } from "./persons";
 import { syncAutoGroups } from "../domain/groups";
 import { MODULE_EXPORT_TABLES, modulePersonLeaves } from "../modules";
@@ -107,6 +107,16 @@ seasonRoutes.post("/seasons", async (c) => {
       season!.id,
       current.id,
     );
+    // Their required duties come along (e.g. a youth referee for the youngest classes)
+    await run(
+      c.env.DB,
+      `INSERT OR IGNORE INTO age_class_duties (age_class_id, duty_type_id)
+       SELECT nac.id, acd.duty_type_id FROM age_classes oac JOIN age_class_duties acd ON acd.age_class_id = oac.id
+         JOIN age_classes nac ON nac.season_id = ? AND nac.code = oac.code
+        WHERE oac.season_id = ?`,
+      season!.id,
+      current.id,
+    );
   }
   return c.json({ id: season!.id }, 201);
 });
@@ -139,8 +149,10 @@ seasonRoutes.delete("/seasons/:id", async (c) => {
 
 seasonRoutes.get("/seasons/:id/age-classes", async (c) => {
   requireAdmin(requireActor(c));
-  const rows = await all<AgeClassDbRow>(c.env.DB, "SELECT * FROM age_classes WHERE season_id = ? ORDER BY rank, code", intParam(c, "id"));
-  return c.json({ ageClasses: rows.map(ageClassJson) });
+  const seasonId = intParam(c, "id");
+  const rows = await all<AgeClassDbRow>(c.env.DB, "SELECT * FROM age_classes WHERE season_id = ? ORDER BY rank, code", seasonId);
+  const required = await requiredDuties(c.env.DB, seasonId);
+  return c.json({ ageClasses: rows.map((r) => ageClassJson(r, required)) });
 });
 
 seasonRoutes.put("/seasons/:id/age-classes", async (c) => {
@@ -446,6 +458,9 @@ export const EXPORT_EXCLUDED = [
   "push_subscriptions",
   "calendar_tokens",
   "referee_links",
+  "skill_grant_links",
+  // The youth referee role before 0.8.0: the approvals are in skill_grants (dropped in a later release)
+  "referees",
   "d1_migrations",
   // Generated keys (worker/lib/instance-secrets.ts): never in a file that leaves the installation
   "instance_secrets",

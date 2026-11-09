@@ -13,7 +13,7 @@ const THRESHOLD = 70;
 const MAX_PULL = 110;
 
 /** Pages with their own refresh (chat) or without data to reload. */
-const EXCLUDED = [/^\/chat/, /^\/einladung/, /^\/einrichtung/, /^\/email/, /^\/datenschutz/, /^\/kihasl/];
+const EXCLUDED = [/^\/chat/, /^\/einladung/, /^\/einrichtung/, /^\/email/, /^\/datenschutz/, /^\/kihasl/, /^\/freigabe/];
 
 export function ResumeRefresh() {
   useEffect(() => {

@@ -3,11 +3,12 @@
 // - "helpers wanted" 3 days before to everyone in the team who has not signed up yet
 //   and could take a free duty (who helps per duty type)
 // - "open places" 5 and 2 days before to coaches and admins
-// - "youth referee wanted" 3 days before to everyone with this role (or their parents)
+// - "<duty> wanted" 3 days before for duties taken by approved people from all teams (e.g. youth referee), to the
+//   approved people (or their parents)
 // Channel (push, mail) per account and topic, see notification_channels.
 // Texts are built per recipient language: pushes once per language, mails per account (withLocale).
 import { plural, t } from "@lingui/core/macro";
-import { type DutyType, ensureEventDuties, loadAllDutyTypes, opponentOf } from "../../../worker/domain/duties";
+import { type DutyType, ensureEventDuties, loadAllDutyTypes, opponentOf, REFEREE_CODE } from "../../../worker/domain/duties";
 import { mailer } from "../../../worker/domain/email-login";
 import { enqueuePush, shortDate, shortTime } from "../../../worker/domain/notify";
 import { all, list, run } from "../../../worker/lib/db";
@@ -144,13 +145,13 @@ async function gamesOn(db: D1Database, date: string): Promise<GameRow[]> {
   );
 }
 
-/** Events with a youth referee block on a day, regardless of the helper plan. */
-async function refereeGamesOn(db: D1Database, date: string): Promise<GameRow[]> {
-  return all<GameRow>(
+/** Events with a block of a duty taken by approved people from all teams on a day, with that type. */
+async function qualifiedGamesOn(db: D1Database, date: string): Promise<(GameRow & { duty_type_id: number })[]> {
+  return all<GameRow & { duty_type_id: number }>(
     db,
-    `SELECT ${GAME_COLUMNS} FROM events e ${FIRST_TEAM}
-      WHERE e.cancelled_at IS NULL AND substr(e.starts_at, 1, 10) = ?
-        AND EXISTS (SELECT 1 FROM event_duties ed JOIN duty_types dt ON dt.id = ed.duty_type_id AND dt.who_referees = 1 WHERE ed.event_id = e.id)`,
+    `SELECT DISTINCT ${GAME_COLUMNS}, ed.duty_type_id FROM events e ${FIRST_TEAM}
+       JOIN event_duties ed ON ed.event_id = e.id JOIN duty_types dt ON dt.id = ed.duty_type_id AND dt.who_referees = 1 AND dt.archived = 0
+      WHERE e.cancelled_at IS NULL AND substr(e.starts_at, 1, 10) = ?`,
     date,
   );
 }
@@ -165,7 +166,7 @@ async function gamesWithDutiesOn(db: D1Database, date: string): Promise<GameRow[
   );
 }
 
-/** Free places per block of an event (without youth referee, those go through refereeWanted). */
+/** Free places per block of an event (without duties taken from all teams, those go through qualifiedWanted). */
 async function freeBlocks(db: D1Database, g: GameRow, types: Map<number, DutyType>): Promise<FreeBlock[]> {
   const rows = await all<{ duty_type_id: number; free: number }>(
     db,
@@ -176,7 +177,7 @@ async function freeBlocks(db: D1Database, g: GameRow, types: Map<number, DutyTyp
   const out: FreeBlock[] = [];
   for (const r of rows) {
     const type = types.get(r.duty_type_id);
-    if (!type || type.whoReferees || r.free <= 0) continue;
+    if (!type || type.whoQualified || r.free <= 0) continue;
     const same = out.find((x) => x.type.id === type.id);
     if (same) same.free += r.free;
     else out.push({ type, free: r.free });
@@ -184,49 +185,60 @@ async function freeBlocks(db: D1Database, g: GameRow, types: Map<number, DutyTyp
   return out;
 }
 
-/** "youth referee wanted" to everyone with the role (or parents of a child with the role) who has not signed up yet. */
-async function refereeWanted(env: Env, today: string): Promise<number> {
-  const games = await refereeGamesOn(env.DB, addDays(today, 3));
+/**
+ * "<duty> wanted" (e.g. youth referee) to everyone approved for the duty type (or the parents of an approved child)
+ * who has not signed up yet.
+ */
+async function qualifiedWanted(env: Env, today: string, types: Map<number, DutyType>): Promise<number> {
+  const games = await qualifiedGamesOn(env.DB, addDays(today, 3));
   let sent = 0;
   for (const g of games) {
+    const type = types.get(g.duty_type_id);
+    if (!type) continue;
     const blocks = await all<{ slots: number; taken: number }>(
       env.DB,
-      `SELECT sum(ed.slots) AS slots, (SELECT count(*) FROM duties d WHERE d.event_id = ?1 AND d.duty_type_id IN (SELECT id FROM duty_types WHERE who_referees = 1)) AS taken
-         FROM event_duties ed JOIN duty_types dt ON dt.id = ed.duty_type_id AND dt.who_referees = 1 WHERE ed.event_id = ?1`,
+      `SELECT sum(ed.slots) AS slots, (SELECT count(*) FROM duties d WHERE d.event_id = ?1 AND d.duty_type_id = ?2) AS taken
+         FROM event_duties ed WHERE ed.event_id = ?1 AND ed.duty_type_id = ?2`,
       g.id,
+      type.id,
     );
     const slots = blocks[0]?.slots ?? 0;
     const takenCount = blocks[0]?.taken ?? 0;
     if (takenCount >= slots) continue;
     const taken = await all<{ person_id: number | null; child_id: number | null }>(
       env.DB,
-      "SELECT person_id, child_id FROM duties WHERE event_id = ? AND duty_type_id IN (SELECT id FROM duty_types WHERE who_referees = 1)",
+      "SELECT person_id, child_id FROM duties WHERE event_id = ? AND duty_type_id = ?",
       g.id,
+      type.id,
     );
-    const busy = new Set(taken.flatMap((t) => [t.person_id, t.child_id]).filter((x): x is number => x != null));
+    const busy = new Set(taken.flatMap((x) => [x.person_id, x.child_id]).filter((x): x is number => x != null));
     const candidates = await all<{ account_id: number; person_id: number }>(
       env.DB,
-      `SELECT a.id AS account_id, r.person_id FROM referees r JOIN accounts a ON a.person_id = r.person_id AND a.disabled_at IS NULL
+      `SELECT a.id AS account_id, g.person_id FROM skill_grants g JOIN accounts a ON a.person_id = g.person_id AND a.disabled_at IS NULL WHERE g.duty_type_id = ?1
        UNION
-       SELECT a.id, r.person_id FROM referees r JOIN guardianships gu ON gu.child_id = r.person_id
-         JOIN accounts a ON a.person_id = gu.guardian_id AND a.disabled_at IS NULL`,
+       SELECT a.id, g.person_id FROM skill_grants g JOIN guardianships gu ON gu.child_id = g.person_id
+         JOIN accounts a ON a.person_id = gu.guardian_id AND a.disabled_at IS NULL WHERE g.duty_type_id = ?1`,
+      type.id,
     );
     const free = slots - takenCount;
+    const path = `/helfer?liste=${type.id}&spiel=${g.id}`;
     for (const c of candidates) {
       if (busy.has(c.person_id)) continue;
-      if (!(await claim(env.DB, "refopen", `${g.id}:${c.account_id}`))) continue;
+      // The youth referee type keeps its earlier key, so nobody gets the same hint twice after the update
+      if (!(await claim(env.DB, "refopen", type.code === REFEREE_CODE ? `${g.id}:${c.account_id}` : `${g.id}:${c.account_id}:${type.id}`))) continue;
       const team = g.team_name;
-      const link = appLink(env, "/helfer?kihasl");
+      const duty = type.name;
+      const link = appLink(env, path);
       sent += await deliver(env, [c.account_id], "duty_referee_open", () => {
         const game = gameText(g);
         const opponent = opponentOf(g);
         return {
-          title: t`Youth referee wanted · ${team}`,
+          title: t`${duty} wanted · ${team}`,
           body: plural(free, { one: `${game}. # place still free.`, other: `${game}. # places still free.` }),
-          url: "/helfer?kihasl",
-          tag: `duty-referee-${g.id}`,
-          mailSubject: t`Youth referee wanted: ${team} ${opponent}`,
-          mailText: mailText(t`A youth referee is still needed for the game ${game}.`, t`Sign up: ${link}`),
+          url: path,
+          tag: `duty-qualified-${g.id}-${type.id}`,
+          mailSubject: t`${duty} wanted: ${team} ${opponent}`,
+          mailText: mailText(t`${duty} is still needed for the game ${game}.`, t`Sign up: ${link}`),
         };
       });
     }
@@ -255,7 +267,7 @@ async function remind(env: Env, today: string, days: 3 | 1): Promise<number> {
   for (const g of games) {
     const entries = await all<{ id: number; label: string; child: string | null; account_id: number; via_parent: number }>(
       env.DB,
-      // youth referee children without their own access: reminder to the parents
+      // Approved children doing a duty taken from all teams (e.g. youth referee): reminder to the parents too
       `SELECT d.id, dt.name AS label, CASE WHEN d.child_id = d.person_id THEN NULL ELSE ch.first_name END AS child, a.id AS account_id, 0 AS via_parent
          FROM duties d JOIN duty_types dt ON dt.id = d.duty_type_id JOIN accounts a ON a.person_id = d.person_id LEFT JOIN persons ch ON ch.id = d.child_id
         WHERE d.event_id = ?1
@@ -321,6 +333,12 @@ async function helpWanted(env: Env, today: string, types: Map<number, DutyType>)
       "SELECT account_id, duty_type_id FROM skill_consents WHERE account_id IN (SELECT value FROM json_each(?))",
       list(candidates.map((c) => c.account_id)),
     );
+    // Approved by an admin: only people with the approval (they do the duty themselves)
+    const grants = await all<{ person_id: number; duty_type_id: number }>(
+      env.DB,
+      "SELECT person_id, duty_type_id FROM skill_grants WHERE person_id IN (SELECT value FROM json_each(?))",
+      list(candidates.map((c) => c.person_id)),
+    );
     const helping = new Set((await all<{ person_id: number }>(env.DB, "SELECT person_id FROM duties WHERE event_id = ? AND person_id IS NOT NULL", g.id)).map((r) => r.person_id));
     const members = new Set(
       (
@@ -340,7 +358,8 @@ async function helpWanted(env: Env, today: string, types: Map<number, DutyType>)
     for (const [accountId, c] of byAccount) {
       if (helping.has(c.person_id)) continue;
       const possible = free.filter(({ type }) => {
-        if (type.needsSkill && !consents.some((k) => k.account_id === accountId && k.duty_type_id === type.id)) return false;
+        if (type.needsSkill && type.skillGrant === "admin" && !grants.some((k) => k.person_id === c.person_id && k.duty_type_id === type.id)) return false;
+        if (type.needsSkill && type.skillGrant === "self" && !consents.some((k) => k.account_id === accountId && k.duty_type_id === type.id)) return false;
         return (
           (type.whoParents && (c.roles.has("parent") || (g.parents_enabled === 0 && c.roles.has("player")))) ||
           (type.whoPlayers && c.roles.has("player")) ||
@@ -443,7 +462,7 @@ export async function sendDutyNotifications(env: Env, now = Date.now()): Promise
   sent += await remind(env, today, 3);
   sent += await remind(env, today, 1);
   sent += await helpWanted(env, today, types);
-  sent += await refereeWanted(env, today);
+  sent += await qualifiedWanted(env, today, types);
   sent += await openSlotsToCoaches(env, today, 5, types);
   sent += await openSlotsToCoaches(env, today, 2, types);
   return sent;

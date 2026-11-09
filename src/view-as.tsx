@@ -12,7 +12,7 @@ const labels = () =>
     player: t({ message: "player", context: "view as" }),
     parent: t({ message: "parent", context: "view as" }),
     trainer: t({ message: "coach", context: "view as" }),
-    referee: t({ message: "youth referee", context: "view as" }),
+    referee: t({ message: "approved helper", context: "view as" }),
   }) as const;
 
 function setCookie(value: string | null) {

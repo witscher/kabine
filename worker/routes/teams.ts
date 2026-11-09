@@ -30,7 +30,8 @@ teamRoutes.get("/teams", async (c) => {
     id: number;
     name: string;
     kind: "team" | "group";
-    auto_members: "referees" | null;
+    auto_skill: number | null;
+    auto_skill_name: string | null;
     age_class_code: string;
     gender: "f" | "m" | "x";
     level: number;
@@ -39,7 +40,8 @@ teamRoutes.get("/teams", async (c) => {
     coaches: number;
   }>(
     c.env.DB,
-    `SELECT t.id, t.name, t.kind, t.auto_members, t.age_class_code, t.gender, t.level, t.parents_enabled,
+    `SELECT t.id, t.name, t.kind, t.auto_skill, (SELECT dt.name FROM duty_types dt WHERE dt.id = t.auto_skill) AS auto_skill_name,
+            t.age_class_code, t.gender, t.level, t.parents_enabled,
             (SELECT count(*) FROM team_memberships tm JOIN persons p ON p.id = tm.person_id
               WHERE tm.team_id = t.id AND tm.role = 'player' AND p.is_former = 0) AS players,
             (SELECT count(*) FROM team_memberships tm WHERE tm.team_id = t.id AND tm.role = 'coach') AS coaches
@@ -54,7 +56,8 @@ teamRoutes.get("/teams", async (c) => {
       id: r.id,
       name: r.name,
       kind: r.kind,
-      autoMembers: r.auto_members,
+      // Group of everyone approved for a duty (e.g. all youth referees)
+      autoSkill: r.kind === "group" && r.auto_skill != null ? { id: r.auto_skill, name: r.auto_skill_name ?? "" } : null,
       ageClassCode: r.age_class_code,
       gender: r.gender,
       level: r.level,
@@ -104,8 +107,8 @@ teamRoutes.post("/teams", async (c) => {
 
 const createGroupSchema = z.object({
   name: z.string().trim().min(1).max(30),
-  /** referees: members follow the youth referee role, admins are in charge. */
-  autoMembers: z.enum(["referees"]).nullable().default(null),
+  /** Members are everyone approved for this duty type (e.g. all youth referees); admins assign the leads. */
+  autoSkill: z.number().int().positive().nullable().default(null),
 });
 
 /** Creates a group: only chat and special events (admins). */
@@ -113,15 +116,19 @@ teamRoutes.post("/groups", async (c) => {
   const actor = requireActor(c);
   requireAdmin(actor);
   const input = parse(createGroupSchema, await readJson(c.req.raw));
+  if (input.autoSkill != null) {
+    const type = await first(c.env.DB, "SELECT 1 AS ok FROM duty_types WHERE id = ? AND event_id IS NULL AND skill_grant = 'admin'", input.autoSkill);
+    if (!type) throw badRequest(t`No admin approves this duty.`);
+  }
   try {
     const row = await first<{ id: number }>(
       c.env.DB,
-      `INSERT INTO teams (name, kind, auto_members, age_class_code, level, parents_enabled, helper_plan, max_squad)
+      `INSERT INTO teams (name, kind, auto_skill, age_class_code, level, parents_enabled, helper_plan, max_squad)
        VALUES (?, 'group', ?, '', 1, 0, 0, 40) RETURNING id`,
       input.name,
-      input.autoMembers,
+      input.autoSkill,
     );
-    if (input.autoMembers) await syncAutoGroups(c.env.DB);
+    if (input.autoSkill != null) await syncAutoGroups(c.env.DB);
     return c.json({ id: row!.id }, 201);
   } catch (err) {
     if (err instanceof Error && /UNIQUE/.test(err.message)) throw conflict(t`A team or group with this name already exists.`);
@@ -136,7 +143,7 @@ interface TeamRow {
   home_template_id: number | null;
   away_template_id: number | null;
   kind: "team" | "group";
-  auto_members: "referees" | null;
+  auto_skill: number | null;
   age_class_code: string;
   level: number;
   parents_enabled: number;
@@ -270,7 +277,7 @@ teamRoutes.get("/teams/:id", async (c) => {
     id: team.id,
     name: team.name,
     kind: team.kind,
-    autoMembers: team.auto_members,
+    autoSkill: team.kind === "group" && team.auto_skill != null ? { id: team.auto_skill, name: (await first<{ name: string }>(c.env.DB, "SELECT name FROM duty_types WHERE id = ?", team.auto_skill))?.name ?? "" } : null,
     ageClassCode: team.age_class_code,
     ageClassName: ac?.name ?? team.age_class_code,
     level: team.level,
@@ -369,8 +376,8 @@ teamRoutes.patch("/teams/:id", async (c) => {
   if (team.kind === "group" && (input.ageClassCode || input.level || input.helperPlan || input.autoSquad || input.gameAllPlayers || input.homeTemplateId || input.awayTemplateId)) {
     throw badRequest(t`Groups only have chat and special events.`, "group_not_supported");
   }
-  // Groups may include parents (a youth group across teams); the youth referee group follows the role and stays without
-  if (team.kind === "group" && team.auto_members && input.parentsEnabled) {
+  // Groups may include parents (a youth group across teams); a group of approved people (e.g. youth referees) stays without
+  if (team.kind === "group" && team.auto_skill != null && input.parentsEnabled) {
     throw badRequest(t`The members of this group are determined automatically.`, "auto_members");
   }
   let child: { account: number | null; respond: number | null; chat: string | null; help: number | null } | null = null;
@@ -603,7 +610,7 @@ teamRoutes.post("/teams/:id/members", async (c) => {
   const input = parse(memberSchema, await readJson(c.req.raw));
   if (input.role === "staff") await requireTeam(c.env.DB, teamId);
   // Automatic groups: members follow the role, admins assign the leads by hand
-  if (input.role !== "coach" && (await teamKind(c.env.DB, teamId)).autoMembers) throw badRequest(t`The members of this group are determined automatically.`, "auto_members");
+  if (input.role !== "coach" && (await teamKind(c.env.DB, teamId)).autoSkill != null) throw badRequest(t`The members of this group are determined automatically.`, "auto_members");
   const person = await first(c.env.DB, "SELECT 1 AS ok FROM persons WHERE id = ? AND is_former = 0", input.personId);
   if (!person) throw notFound(t`This person does not exist.`);
   await run(
@@ -624,7 +631,7 @@ teamRoutes.delete("/teams/:id/members/:personId", async (c) => {
   const { role } = parse(z.object({ role: z.enum(["player", "coach", "helper", "staff"]).default("player") }), { role: c.req.query("role") });
   if (role === "coach") requireAdmin(actor);
   else requireCoach(actor, teamId);
-  if (role !== "coach" && (await teamKind(c.env.DB, teamId)).autoMembers) throw badRequest(t`The members of this group are determined automatically.`, "auto_members");
+  if (role !== "coach" && (await teamKind(c.env.DB, teamId)).autoSkill != null) throw badRequest(t`The members of this group are determined automatically.`, "auto_members");
   const res = await c.env.DB.batch([
     stmt(c.env.DB, "DELETE FROM team_memberships WHERE team_id = ? AND person_id = ? AND role = ?", teamId, personId, role),
     stmt(

@@ -8,10 +8,11 @@ import { badRequest, notFound } from "../lib/http";
 /** SQL condition: t is a real team, not a group. */
 export const IS_TEAM_SQL = (alias: string) => `${alias}.kind = 'team'`;
 
-export async function teamKind(db: D1Database, teamId: number): Promise<{ kind: "team" | "group"; autoMembers: "referees" | null }> {
-  const row = await first<{ kind: "team" | "group"; auto_members: "referees" | null }>(db, "SELECT kind, auto_members FROM teams WHERE id = ?", teamId);
+/** Kind of a team, and for a group with automatic members the duty type whose approved people are its members. */
+export async function teamKind(db: D1Database, teamId: number): Promise<{ kind: "team" | "group"; autoSkill: number | null }> {
+  const row = await first<{ kind: "team" | "group"; auto_skill: number | null }>(db, "SELECT kind, auto_skill FROM teams WHERE id = ?", teamId);
   if (!row) throw notFound(t`This team does not exist.`);
-  return { kind: row.kind, autoMembers: row.auto_members };
+  return { kind: row.kind, autoSkill: row.kind === "group" ? row.auto_skill : null };
 }
 
 /** Training, games, squad, invitations etc. exist only for teams. */
@@ -30,26 +31,29 @@ export async function requireTeam(db: D1Database, teamIds: number | number[]): P
 }
 
 /**
- * Synchronises groups with automatic members. youth referee: members are all persons with the role; admins
- * manage the leads by hand as in any group (before, all admins were leads, so an admin could not leave the group).
- * Repeatable, a second run changes nothing.
+ * Synchronises groups with automatic members (teams.auto_skill): the members are everyone an admin approved for
+ * that duty type (e.g. all youth referees), without parents. Admins manage the leads by hand as in any group
+ * (before 0.8.0 all admins were leads, so an admin could not leave the group). Repeatable, a second run changes
+ * nothing.
  */
 export async function syncAutoGroups(db: D1Database): Promise<void> {
-  const groups = await all<{ id: number }>(db, "SELECT id FROM teams WHERE kind = 'group' AND auto_members = 'referees'");
+  const groups = await all<{ id: number; auto_skill: number }>(db, "SELECT id, auto_skill FROM teams WHERE kind = 'group' AND auto_skill IS NOT NULL");
   if (!groups.length) return;
   await db.batch(
     groups.flatMap((g) => [
       stmt(
         db,
         `DELETE FROM team_memberships WHERE team_id = ?1 AND role = 'player'
-           AND person_id NOT IN (SELECT r.person_id FROM referees r JOIN persons p ON p.id = r.person_id AND p.is_former = 0)`,
+           AND person_id NOT IN (SELECT sg.person_id FROM skill_grants sg JOIN persons p ON p.id = sg.person_id AND p.is_former = 0 WHERE sg.duty_type_id = ?2)`,
         g.id,
+        g.auto_skill,
       ),
       stmt(
         db,
         `INSERT OR IGNORE INTO team_memberships (person_id, team_id, role)
-         SELECT r.person_id, ?1, 'player' FROM referees r JOIN persons p ON p.id = r.person_id AND p.is_former = 0`,
+         SELECT sg.person_id, ?1, 'player' FROM skill_grants sg JOIN persons p ON p.id = sg.person_id AND p.is_former = 0 WHERE sg.duty_type_id = ?2`,
         g.id,
+        g.auto_skill,
       ),
     ]),
   );

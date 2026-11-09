@@ -13,7 +13,7 @@ import { loadMailSettings } from "../domain/mail";
 import { all, first, run, stmt } from "../lib/db";
 import { parse, readJson } from "../lib/http";
 import { todayLocal } from "../lib/time";
-import { ageClassesFromProfile, writeAgeClasses } from "./admin";
+import { ageClassesFromProfile, dutyCodes, writeAgeClasses } from "./admin";
 
 export const setupRoutes = new Hono<AppEnv>();
 
@@ -77,12 +77,27 @@ setupRoutes.post("/admin/setup/sport", async (c) => {
       }
     }
   }
-  const hasClasses = await first(db, "SELECT 1 AS ok FROM age_classes WHERE season_id = ?", season!.id);
-  if (!hasClasses) {
-    await writeAgeClasses(db, season!.id, ageClassesFromProfile(sport as SportId, season!.starts_on, locale));
-  }
+  // Duty types first: the age classes refer to them (duties every home game of a class gets)
   const dutiesUsed = await first(db, "SELECT 1 AS used FROM event_duties LIMIT 1");
   if (!dutiesUsed) await applyDutyProfile(db, sport as SportId, locale);
+  const hasClasses = await first(db, "SELECT 1 AS ok FROM age_classes WHERE season_id = ?", season!.id);
+  if (!hasClasses) {
+    await writeAgeClasses(db, season!.id, ageClassesFromProfile(sport as SportId, season!.starts_on, locale, await dutyCodes(db)));
+  } else if (!dutiesUsed) {
+    // New duty types took the required duties of the existing classes along: those of the profile, by code
+    for (const a of SPORTS[sport as SportId].ageClasses) {
+      for (const code of a.requiredDuties ?? []) {
+        await run(
+          db,
+          `INSERT OR IGNORE INTO age_class_duties (age_class_id, duty_type_id)
+           SELECT ac.id, dt.id FROM age_classes ac JOIN duty_types dt ON dt.code = ? AND dt.event_id IS NULL WHERE ac.season_id = ? AND ac.code = ?`,
+          code,
+          season!.id,
+          a.code,
+        );
+      }
+    }
+  }
   return c.json({ ok: true });
 });
 
@@ -98,14 +113,16 @@ async function applyDutyProfile(db: D1Database, sport: SportId, locale: "en" | "
   for (const [i, d] of profile.dutyTypes.entries()) {
     await run(
       db,
-      `INSERT INTO duty_types (code, name, mode, who_parents, who_referees, note_allowed, needs_skill, sort) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO duty_types (code, name, mode, who_parents, who_referees, note_allowed, needs_skill, skill_grant, sort) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       d.code,
       d.name[locale],
       d.mode,
       d.whoParents ? 1 : 0,
-      d.whoReferees ? 1 : 0,
+      d.whoQualified ? 1 : 0,
       d.noteAllowed ? 1 : 0,
-      d.needsSkill ? 1 : 0,
+      d.needsSkill || d.whoQualified ? 1 : 0,
+      // Taken by approved people from all teams (e.g. youth referee): an admin approves
+      d.whoQualified || d.skillGrant === "admin" ? "admin" : "self",
       i + 1,
     );
   }

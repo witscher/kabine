@@ -90,8 +90,13 @@ export interface Me {
   helperTeams: (TeamRef & { own: boolean })[];
   /** Admins only: current view (player, parent, coach), otherwise null. */
   viewAs: { mode: "player" | "parent" | "trainer" | "referee"; readOnly: boolean } | null;
-  /** May take on youth referee duties (personally or for a child). */
+  /** Approved (personally or for a child) for a duty taken from all teams, e.g. youth referee. */
   referee: boolean;
+  /**
+   * Lists of duties taken by approved people from all teams (e.g. youth referees) in the Helpers tab: the ones the
+   * person or a child is approved for (`mine`), for coaches and admins all of them.
+   */
+  qualifiedLists: { id: number; name: string; mine: boolean }[];
   /** IDs of all groups (chat and special events only, see docs/dev/design.md, Groups). */
   groupIds: number[];
   /** Admins with a coach role only: admin/coach switch in the profile (coachMode = currently working as coach). */
@@ -254,7 +259,7 @@ export interface LeaderEntry {
 
 export interface MyDuty {
   dutyTypeId: number;
-  /** youth referee duty (own overview in the "Helfer" tab) */
+  /** Duty taken by approved people from all teams, e.g. youth referee (own list in the "Helfer" tab) */
   referee: boolean;
   label: string;
   /** First name of the child if someone else took on the duty for my child */

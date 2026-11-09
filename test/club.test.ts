@@ -6,7 +6,7 @@ import { DEFAULT_CLUB, clubAbbr } from "../shared/club";
 import { loadClub, saveClub } from "../worker/domain/club";
 import { eventTitle } from "../worker/domain/events";
 import { handleFetch } from "../worker/index";
-import { api, freshDb, loginAs, person, season } from "./helpers";
+import { api, freshDb, loginAs, one, person, season } from "./helpers";
 
 let adminCookie: string;
 let playerCookie: string;
@@ -146,7 +146,7 @@ describe("Region und Sportart", () => {
       birthYearMin: 2014,
       birthYearMax: 2015,
       gameMinutes: 90,
-      youthReferee: true,
+      requiredDuties: [(await one<{ id: number }>("SELECT id FROM duty_types WHERE code = 'referee'")).id],
       childLimits: { account: true, respond: true, chat: "write", help: true },
     });
     expect((await api("/age-classes", { method: "PUT", cookie: adminCookie, body: { ageClasses: res.body.ageClasses } })).status).toBe(200);

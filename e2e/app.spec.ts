@@ -744,32 +744,33 @@ test("Anmeldung per E-Mail: Hinweis auf die interne Vereins-App", async ({ brows
   await visitor.context.close();
 });
 
-test("Jugendschiedsrichter: Admin erzeugt den Link, Spielerin schaltet sich frei und trägt sich ein", async () => {
+test("Jugendschiedsrichter: Admin erzeugt den Freigabe-Link, Spielerin wird freigegeben und trägt sich ein", async () => {
   await admin.page.goto("/verwaltung");
-  await admin.page.getByRole("link", { name: /Jugendschiedsrichter/ }).click();
-  await admin.page.getByRole("button", { name: "Neuen Link erzeugen" }).click();
-  const url = await admin.page.locator(".url-box").first().innerText();
-  expect(url).toContain("/kihasl#");
+  await admin.page.getByRole("link", { name: /Freigaben/ }).click();
+  const card = admin.page.getByRole("region", { name: "Jugendschiedsrichter" });
+  await card.getByRole("button", { name: "Neuen Link erzeugen" }).click();
+  const url = await card.locator(".url-box").first().innerText();
+  expect(url).toContain("/freigabe#");
 
   const { page } = player;
   await page.goto(url);
   await page.getByRole("radio", { name: /Ida Probe \(ich\)/ }).check();
-  await page.getByRole("button", { name: "Freischalten" }).click();
-  await expect(page.getByText("ist jetzt Jugendschiedsrichter")).toBeVisible();
-  await page.getByRole("link", { name: "Zu den Spielen" }).click();
+  await page.getByRole("button", { name: "Freigeben" }).click();
+  await expect(page.getByText("ist jetzt für Jugendschiedsrichter freigegeben")).toBeVisible();
+  await page.getByRole("link", { name: "Zum Reiter Helfer" }).click();
   await expect(page.getByRole("button", { name: "Jugendschiedsrichter" })).toHaveAttribute("aria-pressed", "true");
 
   // Heimspiel der Jugend D aus dem Helferplan-Test
-  const card = page.getByRole("article", { name: /Turnier Musterstadt/ });
-  await card.locator(".duty-slot", { hasText: "Jugendschiedsrichter" }).getByRole("button", { name: "Eintragen" }).click();
+  const game = page.getByRole("article", { name: /Turnier Musterstadt/ });
+  await game.locator(".duty-slot", { hasText: "Jugendschiedsrichter" }).getByRole("button", { name: "Eintragen" }).click();
   await page.getByRole("dialog", { name: "Jugendschiedsrichter" }).getByRole("button", { name: "Eintragen" }).click();
-  await expect(card).toContainText("Ida P.");
+  await expect(game).toContainText("Ida P.");
   await expect(page.getByRole("region", { name: "Meine Dienste" })).toContainText("Jugendschiedsrichter");
   // Filter: das Spiel ist jetzt voll und verschwindet bei „Nur mit freien Plätzen“
   await page.getByRole("button", { name: "Nur mit freien Plätzen" }).click();
   await expect(page.getByRole("article", { name: /Turnier Musterstadt/ })).toHaveCount(0);
   await page.getByRole("button", { name: "Alle Termine" }).click();
-  await expect(card).toBeVisible();
+  await expect(game).toBeVisible();
 });
 
 test("Stammkader: dauerhafte Aushilfe aufnehmen", async () => {
@@ -1490,7 +1491,7 @@ test("Einrichtungsassistent: Admin geht alle Schritte durch", async () => {
   await expect(page.getByRole("heading", { name: "Funktionen" })).toBeVisible();
   // A switched-off module stays in the list and can be switched on again
   const switches = await page.getByRole("switch").count();
-  for (const name of [/Jugendschiedsrichter/, /Fahrgemeinschaften/, /handball4all/]) {
+  for (const name of [/Fahrgemeinschaften/, /handball4all/]) {
     const sw = page.getByRole("switch", { name });
     await sw.click();
     await expect(sw).toHaveAttribute("aria-checked", "false");

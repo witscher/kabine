@@ -11,8 +11,15 @@ export default defineAppModule({
   routes: [
     { path: "/helfer", page: lazyPage(() => import("./helpers").then((m) => m.HelpersPage)) },
     { path: "/verwaltung/helferdienste", page: lazyPage(() => import("./admin").then((m) => m.AdminDutiesPage)) },
+    { path: "/verwaltung/freigaben", page: lazyPage(() => import("./approvals").then((m) => m.AdminApprovalsPage)) },
+    { path: "/freigabe", page: lazyPage(() => import("./approvals").then((m) => m.ApprovalJoinPage)) },
+    // Links from before 0.8.0 (youth referees)
+    { path: "/kihasl", page: lazyPage(() => import("./approvals").then((m) => m.ApprovalJoinPage)) },
   ],
-  // Helpers of a team with a helper plan, and youth referees (their plan is in the same tab)
-  tab: (me) => (me.helperTeams.length || me.referee ? { href: "/helfer", label: t`Helpers`, icon: "helping", match: (p) => p.startsWith("/helfer") } : null),
-  adminMenu: () => [{ href: "/verwaltung/helferdienste", icon: "helping", title: t`Helper duties`, sub: t`Duty types and templates for games and special events` }],
+  // Helpers of a team with a helper plan, and approved people of lists across teams (e.g. youth referees)
+  tab: (me) => (me.helperTeams.length || me.qualifiedLists.some((q) => q.mine) ? { href: "/helfer", label: t`Helpers`, icon: "helping", match: (p) => p.startsWith("/helfer") } : null),
+  adminMenu: () => [
+    { href: "/verwaltung/helferdienste", icon: "helping", title: t`Helper duties`, sub: t`Duty types and templates for games and special events` },
+    { href: "/verwaltung/freigaben", icon: "whistle", title: t`Approvals`, sub: t`Who may take duties an admin approves, e.g. youth referees` },
+  ],
 });

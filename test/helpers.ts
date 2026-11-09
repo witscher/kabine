@@ -124,6 +124,13 @@ export async function season() {
       referee,
     );
   }
+  // Youth home games of the youngest classes get the youth referee duty (as from the handball profile); not yet in
+  // upgrade tests before migration 202611092330_core_qualifications.sql, which takes youth_referee over itself
+  if (await one<{ n: number }>("SELECT count(*) AS n FROM sqlite_master WHERE name = 'age_class_duties'").then((r) => r.n)) {
+    await exec(
+      "INSERT INTO age_class_duties (age_class_id, duty_type_id) SELECT ac.id, dt.id FROM age_classes ac JOIN duty_types dt ON dt.code = 'referee' WHERE ac.youth_referee = 1",
+    );
+  }
 }
 
 export async function hall(name = "Testhalle") {

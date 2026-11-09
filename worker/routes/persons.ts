@@ -205,7 +205,7 @@ personRoutes.get("/admin/persons", async (c) => {
     is_admin: number;
     admin_email: string | null;
     has_account: number;
-    is_referee: number;
+    skill_grants: string | null;
     is_club_member: number;
     last_seen_on: string | null;
     teams: string | null;
@@ -217,7 +217,7 @@ personRoutes.get("/admin/persons", async (c) => {
     c.env.DB,
     `SELECT p.id, p.first_name, p.last_name, p.birth_year, p.is_active, p.is_admin, p.admin_email,
             EXISTS (SELECT 1 FROM accounts a WHERE a.person_id = p.id) AS has_account,
-            EXISTS (SELECT 1 FROM referees r WHERE r.person_id = p.id) AS is_referee,
+            (SELECT json_group_array(sg.duty_type_id) FROM skill_grants sg WHERE sg.person_id = p.id) AS skill_grants,
             EXISTS (SELECT 1 FROM club_members cm WHERE cm.person_id = p.id) AS is_club_member,
             (SELECT a.last_seen_on FROM accounts a WHERE a.person_id = p.id) AS last_seen_on,
             (SELECT group_concat(t.name || ':' || tm.role || ':' || t.kind, ',') FROM team_memberships tm JOIN teams t ON t.id = tm.team_id WHERE tm.person_id = p.id) AS teams,
@@ -239,7 +239,8 @@ personRoutes.get("/admin/persons", async (c) => {
       isAdmin: r.is_admin === 1,
       adminEmail: r.admin_email,
       hasAccount: r.has_account === 1,
-      isReferee: r.is_referee === 1,
+      /** Duty types an admin approved the person for (e.g. youth referee) */
+      skillGrants: JSON.parse(r.skill_grants ?? "[]") as number[],
       /** Full member (hidden attribute, only admins see and change it) */
       isClubMember: r.is_club_member === 1,
       /** Last activity of the access (local date), null = access never used or no access. */
@@ -301,7 +302,7 @@ personRoutes.patch("/admin/persons/:id", async (c) => {
       throw err;
     }
   }
-  // Admins are in charge of the youth referee group
+  // Safety net for groups with automatic members (admins no longer become their leads by themselves)
   await syncAutoGroups(c.env.DB);
   return c.json({ ok: true });
 });

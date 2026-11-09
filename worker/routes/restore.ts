@@ -9,6 +9,7 @@ import { z } from "zod";
 import { type AppEnv, requireActor } from "../app";
 import { requireAdmin } from "../auth/actor";
 import { chatStub } from "../domain/chat";
+import { adoptLegacyQualifications } from "../domain/duties";
 import { loadClub, saveClub } from "../domain/club";
 import { all, batch, first, stmt, type Param } from "../lib/db";
 import { badRequest, parse, readJson } from "../lib/http";
@@ -168,6 +169,8 @@ restoreRoutes.post("/admin/restore/rows", async (c) => {
     } else for (const col of schema.columns.filter((x) => x.pk)) where[col.name] = p.values[col.name] ?? null;
     for (const f of p.pending) result.fixups.push({ table, where, ...f });
   });
+  // An export from before 0.8.0: its youth referees become approvals of the youth referee duty
+  if (["referees", "age_classes", "teams", "duty_types"].includes(table)) await adoptLegacyQualifications(db);
   return c.json(result);
 });
 

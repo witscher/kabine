@@ -1,7 +1,7 @@
 // Helper plan: duty types, templates and time blocks per event. A duty type defines
-// who helps (parents, players, coaches, youth referee role) and whether it is an on-site
-// duty or a task. Games get their blocks from the team's template, special events by hand.
-// See docs/dev/design.md, Helper duties.
+// who helps (parents, players, coaches, members, or the people with its qualification) and whether it is an
+// on-site duty or a task. Games get their blocks from the team's template and the duties of their age group,
+// special events by hand. See docs/dev/design.md, Helper duties and Qualifications.
 import { t } from "@lingui/core/macro";
 import type { Actor } from "../auth/actor";
 import { isCoachOf, isCoachOfAny } from "../auth/actor";
@@ -12,7 +12,7 @@ import { addMinutesLocal, localToInstant } from "../lib/time";
 import { CURRENT_AGE_CLASS_JOIN } from "./events";
 import { isModuleOn } from "./club";
 
-/** Code of the youth referee duty type (initial data of migration 0018). */
+/** Code of the youth referee duty type of the handball profile (a qualification approved by admins). */
 export const REFEREE_CODE = "referee";
 
 export interface DutyType {
@@ -25,9 +25,16 @@ export interface DutyType {
   whoCoaches: boolean;
   /** Full club members (club_members) who belong to the team */
   whoMembers: boolean;
-  whoReferees: boolean;
+  /**
+   * Taken by the people with this type's qualification, from every team (column who_referees): e.g. youth
+   * referees for the home games of all youth teams. Only with skillGrant "admin".
+   */
+  whoQualified: boolean;
   noteAllowed: boolean;
+  /** Needs prior knowledge: a qualification the person switches on in the profile or an admin approves. */
   needsSkill: boolean;
+  /** Who approves the prior knowledge: the person in the profile ("I can do this") or an admin. */
+  skillGrant: "self" | "admin";
   /** Special duty only for this event */
   eventId: number | null;
   archived: boolean;
@@ -45,6 +52,7 @@ interface DutyTypeRow {
   who_referees: number;
   note_allowed: number;
   needs_skill: number;
+  skill_grant: "self" | "admin";
   event_id: number | null;
   archived: number;
 }
@@ -59,9 +67,11 @@ export function toDutyType(r: DutyTypeRow): DutyType {
     whoPlayers: r.who_players === 1,
     whoCoaches: r.who_coaches === 1,
     whoMembers: r.who_members === 1,
-    whoReferees: r.who_referees === 1,
+    whoQualified: r.who_referees === 1,
     noteAllowed: r.note_allowed === 1,
-    needsSkill: r.needs_skill === 1,
+    // Admin approval always means prior knowledge (the youth referee type has needs_skill = 0 for the previous release)
+    needsSkill: r.needs_skill === 1 || r.skill_grant === "admin",
+    skillGrant: r.skill_grant === "admin" ? "admin" : "self",
     eventId: r.event_id,
     archived: r.archived === 1,
   };
@@ -84,15 +94,15 @@ export async function loadAllDutyTypes(db: D1Database): Promise<Map<number, Duty
 }
 
 /**
- * A youth referee is needed at every home game of the age classes marked
- * so in the sport profile, regardless of the team's helper plan. SQL condition (alias of the team).
+ * Home games of an age group with required duties (age_class_duties, e.g. a youth referee for the youngest
+ * classes) get them regardless of the team's helper plan. SQL condition (alias of the team).
  */
-export const REFEREE_TEAM_SQL = (t: string) =>
-  `EXISTS (SELECT 1 FROM age_classes rac WHERE rac.code = ${t}.age_class_code AND rac.youth_referee = 1
-             AND rac.season_id = (SELECT id FROM seasons WHERE is_current = 1))`;
+export const REQUIRED_DUTIES_SQL = (t: string) =>
+  `EXISTS (SELECT 1 FROM age_classes rac JOIN age_class_duties acd ON acd.age_class_id = rac.id
+            WHERE rac.code = ${t}.age_class_code AND rac.season_id = (SELECT id FROM seasons WHERE is_current = 1))`;
 
-/** Time span of the youth referee block: from 15 minutes before throw-off until the end of the game. */
-const REFEREE_BEFORE_MIN = 15;
+/** Time span of a required duty's block: from 15 minutes before throw-off until the end of the game. */
+const REQUIRED_BEFORE_MIN = 15;
 
 /** As whom one can sign up: oneself or as a parent for a child. */
 export interface HelperRole {
@@ -124,10 +134,11 @@ export interface HelperTeam {
  * - Players: themselves
  * - Coaches: themselves
  * Coaches and admins of the team may always sign up themselves (as before).
- * youth referee goes through refereeRoles.
+ * Types taken by qualified people from all teams go through qualifiedRoles; the qualification itself is
+ * checked with mayTake.
  */
 export function rolesFor(team: HelperTeam, type: DutyType): HelperRole[] {
-  if (type.whoReferees) return [];
+  if (type.whoQualified) return [];
   const self =
     team.canManage ||
     (type.whoParents && !team.parentsEnabled && team.isPlayer) ||
@@ -246,19 +257,61 @@ export function publicHelperTeam(t: HelperTeam) {
 }
 
 /**
- * For whom can the actor take youth referee duties? Oneself and/or
- * children with the role. In the admin view “referee” oneself always counts.
+ * What the actor and their children may take: the qualifications switched on in the profile (per account) and
+ * those approved by an admin (per person, also for children without an account).
  */
-export async function refereeRoles(db: D1Database, actor: Actor): Promise<HelperRole[]> {
-  if (!isModuleOn("youthReferees")) return [];
+export interface Skills {
+  consents: Set<number>;
+  /** person id → duty type ids approved by an admin */
+  grants: Map<number, Set<number>>;
+}
+
+export async function loadSkills(db: D1Database, actor: Actor): Promise<Skills> {
   const ids = [actor.personId, ...actor.children.map((c) => c.id)];
-  const rows = await all<{ person_id: number }>(db, "SELECT person_id FROM referees WHERE person_id IN (SELECT value FROM json_each(?))", JSON.stringify(ids));
-  const set = new Set(rows.map((r) => r.person_id));
-  if (actor.refereeOverride) set.add(actor.personId);
+  const [consents, grants] = await Promise.all([
+    all<{ duty_type_id: number }>(db, "SELECT duty_type_id FROM skill_consents WHERE account_id = ?", actor.accountId),
+    all<{ person_id: number; duty_type_id: number }>(db, "SELECT person_id, duty_type_id FROM skill_grants WHERE person_id IN (SELECT value FROM json_each(?))", JSON.stringify(ids)),
+  ]);
+  const byPerson = new Map<number, Set<number>>();
+  for (const g of grants) byPerson.set(g.person_id, (byPerson.get(g.person_id) ?? new Set()).add(g.duty_type_id));
+  // Admin view "qualified helper": oneself counts as approved for every qualification taken from all teams
+  if (actor.refereeOverride) {
+    const all_ = await all<{ id: number }>(db, "SELECT id FROM duty_types WHERE who_referees = 1 AND event_id IS NULL");
+    byPerson.set(actor.personId, new Set([...(byPerson.get(actor.personId) ?? []), ...all_.map((r) => r.id)]));
+  }
+  return { consents: new Set(consents.map((r) => r.duty_type_id)), grants: byPerson };
+}
+
+/** Has the person (oneself or a child) the type's admin approval? */
+export function hasGrant(skills: Skills, personId: number, typeId: number): boolean {
+  return !!skills.grants.get(personId)?.has(typeId);
+}
+
+/**
+ * For whom can the actor take a duty of a type taken by qualified people from all teams? Oneself and/or
+ * children with the type's approval.
+ */
+export function qualifiedRoles(actor: Actor, skills: Skills, typeId: number): HelperRole[] {
   const roles: HelperRole[] = [];
-  if (set.has(actor.personId)) roles.push({ childId: null, childName: null });
-  for (const ch of actor.children) if (set.has(ch.id)) roles.push({ childId: ch.id, childName: ch.firstName });
+  if (hasGrant(skills, actor.personId, typeId)) roles.push({ childId: null, childName: null });
+  for (const ch of actor.children) if (hasGrant(skills, ch.id, typeId)) roles.push({ childId: ch.id, childName: ch.firstName });
   return roles;
+}
+
+/**
+ * Lists of qualified helpers the actor sees in the Helpers tab: the types taken from all teams for which they
+ * or a child are approved; coaches and admins see all of them (to sign people up).
+ */
+export async function qualifiedLists(db: D1Database, actor: Actor): Promise<{ id: number; name: string; mine: boolean }[]> {
+  if (!isModuleOn("duties")) return [];
+  const [types, skills] = await Promise.all([
+    all<{ id: number; name: string }>(db, "SELECT id, name FROM duty_types WHERE who_referees = 1 AND event_id IS NULL AND archived = 0 ORDER BY sort, id"),
+    loadSkills(db, actor),
+  ]);
+  const manager = actor.isAdmin || actor.coachTeamIds.length > 0;
+  return types
+    .map((ty) => ({ id: ty.id, name: ty.name, mine: qualifiedRoles(actor, skills, ty.id).length > 0 }))
+    .filter((ty) => ty.mine || manager);
 }
 
 /** Opponent from the club's point of view, for texts ("vs X", "at X"). */
@@ -282,8 +335,15 @@ export async function skillConsents(db: D1Database, accountId: number): Promise<
   return new Set(rows.map((r) => r.duty_type_id));
 }
 
-export function mayTake(type: DutyType, consents: Set<number>): boolean {
-  return !type.needsSkill || consents.has(type.id);
+/**
+ * May the person (the actor or a child, who will do the duty) take a duty of this type? Self-approved prior
+ * knowledge is the account's consent in the profile; admin-approved prior knowledge needs the person's approval,
+ * so earlier self-consents no longer count once a type is switched to "admin".
+ */
+export function mayTake(type: DutyType, skills: Skills, personId: number): boolean {
+  if (!type.needsSkill) return true;
+  if (type.skillGrant === "admin") return hasGrant(skills, personId, type.id);
+  return skills.consents.has(type.id);
 }
 
 // Time blocks --------------------------------------------------------------------
@@ -326,7 +386,7 @@ function minutesBetween(from: string, to: string): number {
 /**
  * Keep the time blocks of games up to date (lazily, on every read):
  * - games of teams with a helper plan get the blocks of their template once,
- * - youth home games F–C get the youth referee block once,
+ * - home games of age groups with required duties (e.g. a youth referee) get those blocks once,
  * - if the throw-off time changed, all blocks move by the same amount.
  * Without eventIds: all games from today minus 90 days.
  */
@@ -340,14 +400,14 @@ export async function ensureEventDuties(db: D1Database, eventIds: number[] | nul
     duties_generated: number;
     helper_plan: number;
     game_minutes: number;
-    youth_referee: number;
+    age_class_id: number | null;
     home_template_id: number | null;
     away_template_id: number | null;
   }>(
     db,
     // Two variants instead of “?2 IS NULL OR …”: only then does SQLite look up the IDs directly
     `SELECT e.id, e.starts_at, e.is_home, e.duties_anchor, e.duties_generated, t.helper_plan, COALESCE(ac.game_minutes, 120) AS game_minutes,
-            COALESCE(ac.youth_referee, 0) AS youth_referee, t.home_template_id, t.away_template_id
+            ac.id AS age_class_id, t.home_template_id, t.away_template_id
        FROM events e
        JOIN teams t ON t.id = (SELECT et.team_id FROM event_teams et WHERE et.event_id = e.id ORDER BY et.team_id LIMIT 1)
        ${CURRENT_AGE_CLASS_JOIN("t", "ac")}
@@ -356,17 +416,24 @@ export async function ensureEventDuties(db: D1Database, eventIds: number[] | nul
         AND (
           (e.duties_anchor IS NOT NULL AND e.duties_anchor <> e.starts_at)
           OR (t.helper_plan = 1 AND (e.duties_generated & 1) = 0)
-          OR (e.is_home = 1 AND ${REFEREE_TEAM_SQL("t")} AND (e.duties_generated & 2) = 0)
+          OR (e.is_home = 1 AND ${REQUIRED_DUTIES_SQL("t")} AND (e.duties_generated & 2) = 0)
         )`,
     from,
     ...(eventIds ? [JSON.stringify(eventIds)] : []),
   );
   if (!games.length) return;
-  const [types, defaults] = await Promise.all([
+  const classIds = [...new Set(games.filter((g) => g.is_home === 1 && g.age_class_id != null).map((g) => g.age_class_id!))];
+  const [types, defaults, required] = await Promise.all([
     loadDutyTypes(db),
     all<{ id: number; default_for: "home" | "away" }>(db, "SELECT id, default_for FROM duty_templates WHERE default_for IS NOT NULL"),
+    classIds.length
+      ? all<{ age_class_id: number; duty_type_id: number }>(
+          db,
+          "SELECT age_class_id, duty_type_id FROM age_class_duties WHERE age_class_id IN (SELECT value FROM json_each(?)) ORDER BY duty_type_id",
+          JSON.stringify(classIds),
+        )
+      : Promise.resolve([]),
   ]);
-  const referee = [...types.values()].find((t) => t.code === REFEREE_CODE);
   const itemsCache = new Map<number, TemplateItem[]>();
   const items = async (templateId: number) => {
     if (!itemsCache.has(templateId)) itemsCache.set(templateId, await templateItems(db, templateId));
@@ -389,7 +456,7 @@ export async function ensureEventDuties(db: D1Database, eventIds: number[] | nul
       const templateId = (home ? g.home_template_id : g.away_template_id) ?? defaults.find((d) => d.default_for === (home ? "home" : "away"))?.id;
       for (const [i, item] of (templateId ? await items(templateId) : []).entries()) {
         const type = types.get(item.dutyTypeId);
-        if (!type || type.archived || type.whoReferees) continue;
+        if (!type || type.archived || type.whoQualified) continue;
         const b = blockFromItem(item, type.mode, g.starts_at, end);
         statements.push(
           stmt(db, "INSERT INTO event_duties (event_id, duty_type_id, starts_at, ends_at, slots, sort) VALUES (?, ?, ?, ?, ?, ?)", g.id, type.id, b.startsAt, b.endsAt, item.slots, i + 1),
@@ -397,17 +464,21 @@ export async function ensureEventDuties(db: D1Database, eventIds: number[] | nul
       }
       generated |= 1;
     }
-    if (g.is_home === 1 && g.youth_referee === 1 && (generated & 2) === 0 && referee && isModuleOn("youthReferees")) {
-      statements.push(
-        stmt(
-          db,
-          "INSERT INTO event_duties (event_id, duty_type_id, starts_at, ends_at, slots, sort) VALUES (?, ?, ?, ?, 1, 99)",
-          g.id,
-          referee.id,
-          addMinutesLocal(g.starts_at, -REFEREE_BEFORE_MIN),
-          end,
-        ),
-      );
+    const requiredTypes = required.filter((r) => r.age_class_id === g.age_class_id).map((r) => types.get(r.duty_type_id)).filter((ty) => ty && !ty.archived);
+    if (g.is_home === 1 && requiredTypes.length && (generated & 2) === 0) {
+      for (const [i, type] of requiredTypes.entries()) {
+        statements.push(
+          stmt(
+            db,
+            "INSERT INTO event_duties (event_id, duty_type_id, starts_at, ends_at, slots, sort) VALUES (?, ?, ?, ?, 1, ?)",
+            g.id,
+            type!.id,
+            addMinutesLocal(g.starts_at, -REQUIRED_BEFORE_MIN),
+            end,
+            99 + i,
+          ),
+        );
+      }
       generated |= 2;
     }
     statements.push(stmt(db, "UPDATE events SET duties_anchor = starts_at, duties_generated = ? WHERE id = ?", generated, g.id));
@@ -486,7 +557,7 @@ export async function loadHelpersNeeded(db: D1Database, actor: Actor, eventIds: 
   const teams = (await helperTeams(db, actor, types)).filter((t) => t.childRoles.length > 0 || t.isPlayer || (t.isCoach && !t.canManage));
   if (!teams.length) return out;
   await ensureEventDuties(db, eventIds, now.slice(0, 10));
-  const [blocks, consents] = await Promise.all([
+  const [blocks, skills] = await Promise.all([
     all<{ id: number; event_id: number; duty_type_id: number; slots: number; taken: number; team_id: number }>(
       db,
       `SELECT ed.id, ed.event_id, ed.duty_type_id, ed.slots, (SELECT count(*) FROM duties d WHERE d.event_duty_id = ed.id) AS taken,
@@ -501,12 +572,13 @@ export async function loadHelpersNeeded(db: D1Database, actor: Actor, eventIds: 
       JSON.stringify(teams.map((t) => t.teamId)),
       actor.personId,
     ),
-    skillConsents(db, actor.accountId),
+    loadSkills(db, actor),
   ]);
   for (const b of blocks) {
     const type = types.get(b.duty_type_id);
     const team = teams.find((t) => t.teamId === b.team_id);
-    if (!type || !team || !mayTake(type, consents)) continue;
+    // In a team the one signing up does the duty (types taken from all teams have no team roles)
+    if (!type || !team || !mayTake(type, skills, actor.personId)) continue;
     // Coaches/admins only count with their own roles (child, player), not as managers
     const roles = rolesFor({ ...team, canManage: false }, type);
     if (!roles.length) continue;
@@ -556,4 +628,27 @@ export async function managedEvent(db: D1Database, actor: Actor, eventId: number
   if (!teamIds.length) throw badRequest(t`Helpers only exist for events of teams.`);
   if (!mayManageDuties(actor, teamIds, (await dutyManagers(db, [e.id])).get(e.id))) throw forbidden(t`Only coaches of this team and the organisers of the event can do this.`);
   return { ...e, teamIds };
+}
+
+/**
+ * Takes over the youth referee role of an export from before 0.8.0 (tables referees, referee_links, the age class
+ * flag youth_referee, groups with auto_members = 'referees') as qualifications, like the migration
+ * 202611092330_core_qualifications.sql did. Repeatable: rows already there stay.
+ */
+export async function adoptLegacyQualifications(db: D1Database): Promise<void> {
+  const type = "(SELECT min(id) FROM duty_types WHERE who_referees = 1 AND event_id IS NULL)";
+  await db.batch([
+    stmt(db, "UPDATE duty_types SET skill_grant = 'admin' WHERE who_referees = 1 AND skill_grant <> 'admin'"),
+    stmt(
+      db,
+      `INSERT OR IGNORE INTO skill_grants (person_id, duty_type_id, granted_by, granted_at)
+       SELECT r.person_id, ${type}, r.added_by, r.created_at FROM referees r WHERE ${type} IS NOT NULL`,
+    ),
+    stmt(
+      db,
+      `INSERT OR IGNORE INTO age_class_duties (age_class_id, duty_type_id)
+       SELECT ac.id, ${type} FROM age_classes ac WHERE ac.youth_referee = 1 AND ${type} IS NOT NULL`,
+    ),
+    stmt(db, `UPDATE teams SET auto_skill = ${type} WHERE kind = 'group' AND auto_members = 'referees' AND auto_skill IS NULL`),
+  ]);
 }

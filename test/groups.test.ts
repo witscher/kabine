@@ -23,8 +23,12 @@ beforeEach(async () => {
   adminCookie = await loginAs(admin);
 });
 
-async function createGroup(name: string, autoMembers: "referees" | null = null): Promise<number> {
-  const res = await api("/groups", { cookie: adminCookie, body: { name, autoMembers } });
+const refereeType = async () => (await one<{ id: number }>("SELECT id FROM duty_types WHERE code = 'referee'")).id;
+
+/** "referees": a group of everyone approved for the youth referee duty. */
+async function createGroup(name: string, auto: "referees" | null = null): Promise<number> {
+  const autoSkill = auto ? (await one<{ id: number }>("SELECT id FROM duty_types WHERE code = 'referee'")).id : null;
+  const res = await api("/groups", { cookie: adminCookie, body: { name, autoSkill } });
   expect(res.status).toBe(201);
   return res.body.id;
 }
@@ -35,7 +39,7 @@ describe("Gruppen", () => {
     const jt = await createGroup("JT");
     expect((await api("/groups", { cookie: adminCookie, body: { name: "wD" } })).status).toBe(409);
     const list = await api("/teams", { cookie: adminCookie });
-    expect(list.body.teams.find((t: any) => t.id === jt)).toMatchObject({ kind: "group", autoMembers: null });
+    expect(list.body.teams.find((t: any) => t.id === jt)).toMatchObject({ kind: "group", autoSkill: null });
     expect(list.body.teams.find((t: any) => t.id === wd)).toMatchObject({ kind: "team" });
 
     expect((await api(`/teams/${jt}/members`, { cookie: adminCookie, body: { personId: coach, role: "player" } })).status).toBe(201);
@@ -99,7 +103,7 @@ describe("Gruppen", () => {
   });
 
   it("Jugendschiedsrichter-Gruppe: Mitglieder folgen der Rolle, Verantwortliche von Hand", async () => {
-    await api(`/admin/referees/${kira}`, { method: "PUT", cookie: adminCookie });
+    await api(`/admin/skill-grants/${kira}/${await refereeType()}`, { method: "PUT", cookie: adminCookie });
     const g = await createGroup("Jugendschiedsrichter", "referees");
     const members = async () =>
       (await rows<{ person_id: number; role: string }>("SELECT person_id, role FROM team_memberships WHERE team_id = ? ORDER BY role, person_id", g)).map(
@@ -107,20 +111,20 @@ describe("Gruppen", () => {
       );
     expect(await members()).toEqual([`player:${kira}`]);
 
-    await api(`/admin/referees/${alma}`, { method: "PUT", cookie: adminCookie });
+    await api(`/admin/skill-grants/${alma}/${await refereeType()}`, { method: "PUT", cookie: adminCookie });
     expect(await members()).toEqual([`player:${alma}`, `player:${kira}`]);
-    await api(`/admin/referees/${kira}`, { method: "DELETE", cookie: adminCookie });
+    await api(`/admin/skill-grants/${kira}/${await refereeType()}`, { method: "DELETE", cookie: adminCookie });
     expect(await members()).toEqual([`player:${alma}`]);
 
     // Admins assign leads by hand; the sync keeps them and adds nobody
     expect((await api(`/teams/${g}/members`, { cookie: adminCookie, body: { personId: admin, role: "coach" } })).status).toBe(201);
     await api(`/admin/persons/${coach}`, { method: "PATCH", cookie: adminCookie, body: { isAdmin: true, adminEmail: "coachy@example.org" } });
     expect(await members()).toEqual([`coach:${admin}`, `player:${alma}`]);
-    await api(`/admin/referees/${kira}`, { method: "PUT", cookie: adminCookie });
+    await api(`/admin/skill-grants/${kira}/${await refereeType()}`, { method: "PUT", cookie: adminCookie });
     expect(await members()).toEqual([`coach:${admin}`, `player:${alma}`, `player:${kira}`]);
     // An admin leaves again, and that also survives the next sync
     expect((await api(`/teams/${g}/members/${admin}?role=coach`, { method: "DELETE", cookie: adminCookie })).status).toBe(200);
-    await api(`/admin/referees/${kira}`, { method: "DELETE", cookie: adminCookie });
+    await api(`/admin/skill-grants/${kira}/${await refereeType()}`, { method: "DELETE", cookie: adminCookie });
     expect(await members()).toEqual([`player:${alma}`]);
     await api(`/teams/${g}/members`, { cookie: adminCookie, body: { personId: admin, role: "coach" } });
 

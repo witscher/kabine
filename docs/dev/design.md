@@ -233,21 +233,24 @@ Whoever creates a special event (`events.created_by`) always manages its helper 
 
 Coaches may create a duty type for a single special event. It disappears with its last block and does not show in the club-wide list, so the admins' list stays clean.
 
-## Youth referees
+## Qualifications
 
-Youth referees are an optional module. In the code the duty is called `referee` throughout (tables `referees` and `referee_links`, topic `duty_referee_open`, view `refereeview`). The German UI calls it "Jugendschiedsrichter" (until October 2026 "KiHaSL/JuHaSL", the handball terms for children's and youth referees).
+Some duties need prior knowledge. A duty type with "Needs prior knowledge" says who approves it (`duty_types.skill_grant`):
 
-Whether home games of an age group need a youth referee is a property of the age group (`age_classes.youth_referee`), set by the sport profile and editable by admins. In handball these are the E, D and C youth.
+- **The person** (`self`): they switch it on in the profile under "I can do this" (`skill_consents`, per account), e.g. timekeeper.
+- **An admin** (`admin`): only people an admin approved may take it (`skill_grants`, per person, so children without an account can be approved and their parents act for them), e.g. tournament management. Admins approve in the person sheet under "Roles in the club" (one switch per such duty type), on *Administration → Approvals* or with a link. The profile lists one's own and one's children's approvals as information only. People without the approval do not see such a duty in the Helpers tab at all, unless they manage the event or already have an entry in it (e.g. after the approval was taken back). Switching a type from "the person" to "an admin" makes earlier consents count no longer.
 
-Every such home game needs a referee, so the referee view shows all of them, even if the team does not use the helper plan.
+`mayTake` checks this for the person who will do the duty: in a team the one signing up, in a list across teams the approved person (oneself or a child). Coaches and admins entering someone else keep ignoring prior knowledge.
 
-The referee link can be used many times, is valid for 30 days and can be revoked; only its hash is stored. It creates no person and no access, it only gives people who are already signed in the role for themselves or their own child. The role must not open the app to strangers.
+**Taken by approved people from all teams** (`who_referees`, `whoQualified` in the code): a duty type approved by an admin can be taken by everyone approved for it, regardless of their team, for example youth referees for the home games of the youngest age groups. This replaces the youth referee role and module of releases before 0.8.0 (the handball profile brings the duty type "Youth referee" this way); other sports get referees, scorers or licensed timekeepers the same way, without a module of their own.
 
-Children often referee without an own access. The sign-up names the child as helper (`person_id`) so it shows in lists; the parents sign it up, get the reminders and can sign it off.
+- **Required per age group** (`age_class_duties`): home games of the ticked age groups get one block of such a duty each, regardless of the team's helper plan (`ensureEventDuties`, bit 2 of `duties_generated`), from 15 minutes before throw-off to the end of the game. The sport profile sets them (`requiredDuties` per age class), admins tick them under *Administration → Age groups*; the season change copies them.
+- **A list per duty type** in the Helpers tab (`GET /duties/qualified/:typeId`, live channel with the negative type id): all upcoming games with such a block, for the approved people (oneself or a child), coaches and admins. Who does the duty is the person in the entry (for a child also `child_id`, so the parents see and are reminded of it).
+- **Links** (`skill_grant_links`, `/freigabe#token`, links of the old `/kihasl#token` page keep working): many uses, 30 days, revocable, only the hash is stored. A link creates no person and no access; it only approves people who are already signed in, for themselves or their own child where parents are in charge. It must not open the app to strangers.
+- **"<duty> wanted"** three days before to the approved people or their parents who have not signed up yet (topic `duty_referee_open`).
+- **A group of all approved people** (`teams.auto_skill`, see Groups).
 
-A game with an own referee duty is visible even without a team, but without participant list and without accepting or declining. Open referee slots create no red marker, otherwise it would sit on almost every youth game.
-
-Changes to the referee duty are announced to the team's `DutyHub` and to an extra hub (key 0) for the referee view.
+The migration `202611092330_core_qualifications.sql` turned the youth referee role (`referees`), its links, the age group flag `youth_referee` and the group with `auto_members = 'referees'` into the new tables; a club that had switched the youth referee module off got the duty type archived. The old tables stay for the previous release and are dropped later (`migrations/README.md`). A restore from an export of an older version takes them over the same way (`adoptLegacyQualifications`).
 
 ## Players in two teams
 
@@ -269,7 +272,7 @@ Holiday plans are linked to a period (`training_plans.holiday_period_id`) and fo
 
 ## Admin views
 
-Admins can see the app from another perspective for testing. These views are reached only through the address; the app has no link or hint to them: `?playerview=1` (first own child by first name), `?parentview=1` (oneself without admin and coach rights), `?trainerview=1` (coach of the first own coached team, else of the first child's team; if one coaches it oneself, it is oneself with write access, otherwise the coach with the smallest ID), `?refereeview=1` (oneself without admin and coach rights, with the youth referee role, with write access).
+Admins can see the app from another perspective for testing. These views are reached only through the address; the app has no link or hint to them: `?playerview=1` (first own child by first name), `?parentview=1` (oneself without admin and coach rights), `?trainerview=1` (coach of the first own coached team, else of the first child's team; if one coaches it oneself, it is oneself with write access, otherwise the coach with the smallest ID), `?refereeview=1` (oneself without admin and coach rights, approved for every duty taken from all teams such as youth referee, with write access).
 
 The flag sets the cookie `kabine_view` and disappears from the address. The server reads the cookie only for admins and builds the actor from it; for everyone else it has no effect. A red bar names the view and ends it ("End" deletes the cookie).
 
@@ -319,7 +322,7 @@ Who was expected is computed from the current state. For statistics every event 
 
 "Absent without excuse" also changes the recorded entry. Other changes after the start, such as responses, do not exist.
 
-At the season change all open events are recorded first and then condensed per person and team name into `season_stats` (training and game totals, present, absent without excuse, late declines, duties, youth referee duties). Late counts declines after the deadline. Totals count only events at which the person was expected (not inactive, not away long-term). Only these figures stay over the years; they are deleted with the person.
+At the season change all open events are recorded first and then condensed per person and team name into `season_stats` (training and game totals, present, absent without excuse, late declines, duties, duties taken from all teams such as youth referee). Late counts declines after the deadline. Totals count only events at which the person was expected (not inactive, not away long-term). Only these figures stay over the years; they are deleted with the person.
 
 There is no screen for this yet. A later statistics view will show names only to coaches and admins. Record and figures are part of the admin export.
 
@@ -375,11 +378,11 @@ When it is on, players and involved parents who take part in the event themselve
 
 ## Groups
 
-For circles without training and games (coaching team, youth referees) there are groups: only chat and special events with responses, reminders, push and calendar. No training, no games, no squad, no helper plan, no age group. Parents only if an admin includes them ("Include parents", off by default), for example for a youth group across teams: then linked parents see its special events for their children, respond for them and are in the chat, as in teams; there are no parent invitation links for groups, parents are linked through the child's team. The youth referee group always stays without parents. In the UI the members are "Members" and "Leads" (internally `player` and `coach`).
+For circles without training and games (coaching team, youth referees) there are groups: only chat and special events with responses, reminders, push and calendar. No training, no games, no squad, no helper plan, no age group. Parents only if an admin includes them ("Include parents", off by default), for example for a youth group across teams: then linked parents see its special events for their children, respond for them and are in the chat, as in teams; there are no parent invitation links for groups, parents are linked through the child's team. A group of approved people always stays without parents. In the UI the members are "Members" and "Leads" (internally `player` and `coach`).
 
 A group is a row in `teams` with `kind = 'group'`. Chat, push, unread counters, `@alle` and special events work unchanged. Team features reject groups with `group_not_supported` (`requireTeam`).
 
-The youth referee group has `auto_members = 'referees'`: the members are all people with the role, without parents. They are synced on every role change and nightly in the cron and cannot be assigned by hand. Admins assign the leads by hand as in any group; before 0.8.0 all admins were leads automatically, so an admin could not leave the group (not even in coach mode). Existing leads stay.
+A group can have automatic members (`teams.auto_skill`): everyone an admin approved for a duty type, e.g. all youth referees, without parents. They are synced on every approval change and nightly in the cron and cannot be assigned by hand. Admins assign the leads by hand as in any group; before 0.8.0 all admins were leads of the youth referee group automatically, so an admin could not leave it (not even in coach mode). Existing leads stay.
 
 At the season change groups do not appear in the assignment; their members and leads stay. The chat is cleared as for teams.
 

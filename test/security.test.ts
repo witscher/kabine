@@ -177,19 +177,20 @@ describe("Sicherheitsfunde", () => {
     expect(res.status).toBe(400);
   });
 
-  it("9: Jugendschiedsrichter-Rolle für Kinder nur, wo Eltern eingebunden sind", async () => {
+  it("9: Freigabe per Link (z. B. Jugendschiedsrichter) für Kinder nur, wo Eltern eingebunden sind", async () => {
     const admin = await loginAs(await person("Ada", { admin: true }));
-    const token = String((await api("/admin/referee-links", { cookie: admin, body: {} })).body.url).split("#")[1];
+    const referee = (await one<{ id: number }>("SELECT id FROM duty_types WHERE code = 'referee'")).id;
+    const token = String((await api("/admin/skill-links", { cookie: admin, body: { dutyTypeId: referee } })).body.url).split("#")[1];
     const kid = await person("Ole", { lastName: "Ort" });
     const parent = await person("Olga", { lastName: "Ort" });
     await member(kid, wc);
     await guardian(parent, kid);
     await exec("UPDATE teams SET parents_enabled = 0 WHERE id = ?", wc);
     const cookie = await loginAs(parent);
-    expect((await api("/referee/info", { cookie, body: { token } })).body.candidates.map((c: any) => c.personId)).toEqual([parent]);
-    expect((await api("/referee/accept", { cookie, body: { token, personId: kid } })).status).toBe(400);
+    expect((await api("/skill-link/info", { cookie, body: { token } })).body.candidates.map((c: any) => c.personId)).toEqual([parent]);
+    expect((await api("/skill-link/accept", { cookie, body: { token, personId: kid } })).status).toBe(400);
     await exec("UPDATE teams SET parents_enabled = 1 WHERE id = ?", wc);
-    expect((await api("/referee/accept", { cookie: await loginAs(parent), body: { token, personId: kid } })).status).toBe(200);
+    expect((await api("/skill-link/accept", { cookie: await loginAs(parent), body: { token, personId: kid } })).status).toBe(200);
   });
 
   it("10: Einladungslink zeigt nur „Vorname N.“, bei Gleichheit mit Jahrgang", async () => {

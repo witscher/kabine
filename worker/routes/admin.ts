@@ -211,13 +211,15 @@ adminRoutes.get("/age-classes", async (c) => {
     "SELECT id, name, starts_on, ends_on FROM seasons WHERE is_current = 1",
   );
   const rows = season ? await all<AgeClassDbRow>(c.env.DB, "SELECT * FROM age_classes WHERE season_id = ? ORDER BY rank, code", season.id) : [];
+  const required = season ? await requiredDuties(c.env.DB, season.id) : new Map<number, number[]>();
   return c.json({
     season: season ? { id: season.id, name: season.name, startsOn: season.starts_on, endsOn: season.ends_on } : null,
-    ageClasses: rows.map(ageClassJson),
+    ageClasses: rows.map((r) => ageClassJson(r, required)),
   });
 });
 
 export interface AgeClassDbRow extends LimitRow {
+  id: number;
   code: string;
   name: string;
   rank: number;
@@ -228,7 +230,20 @@ export interface AgeClassDbRow extends LimitRow {
   youth_referee: number;
 }
 
-export function ageClassJson(r: AgeClassDbRow) {
+/** Duty types every home game of an age class gets (age_class_duties), per age class id, for a season. */
+export async function requiredDuties(db: D1Database, seasonId: number): Promise<Map<number, number[]>> {
+  const rows = await all<{ age_class_id: number; duty_type_id: number }>(
+    db,
+    `SELECT acd.age_class_id, acd.duty_type_id FROM age_class_duties acd JOIN age_classes ac ON ac.id = acd.age_class_id
+      WHERE ac.season_id = ? ORDER BY acd.duty_type_id`,
+    seasonId,
+  );
+  const out = new Map<number, number[]>();
+  for (const r of rows) out.set(r.age_class_id, [...(out.get(r.age_class_id) ?? []), r.duty_type_id]);
+  return out;
+}
+
+export function ageClassJson(r: AgeClassDbRow, required: Map<number, number[]>) {
   return {
     code: r.code,
     name: r.name,
@@ -237,7 +252,8 @@ export function ageClassJson(r: AgeClassDbRow) {
     birthYearMin: r.birth_year_min,
     birthYearMax: r.birth_year_max,
     gameMinutes: r.game_minutes,
-    youthReferee: r.youth_referee === 1,
+    /** Duty types every home game of the class gets, e.g. a youth referee */
+    requiredDuties: required.get(r.id) ?? [],
     childLimits: toLimits(r),
   };
 }
@@ -250,7 +266,8 @@ export const ageClassSchema = z.object({
   birthYearMin: z.number().int().min(1900).max(2100).nullable(),
   birthYearMax: z.number().int().min(1900).max(2100).nullable(),
   gameMinutes: z.number().int().min(15).max(300).default(90),
-  youthReferee: z.boolean().default(false),
+  /** Duty types every home game of the class gets (e.g. a youth referee); left out: as before (an older app version) */
+  requiredDuties: z.array(z.number().int().positive()).max(10).optional(),
   /** What players of this youth class may do themselves (children in the app); no effect on adult classes. */
   childLimits: z.object({ account: z.boolean(), respond: z.boolean(), chat: z.enum(["none", "read", "write"]), help: z.boolean() }).optional(),
 });
@@ -262,7 +279,12 @@ type AgeClassInput = z.infer<typeof ageClassSchema>;
  * of the class with the same code stay, otherwise everything is allowed.
  */
 export async function writeAgeClasses(db: D1Database, seasonId: number, ageClasses: AgeClassInput[]): Promise<void> {
-  const before = new Map((await all<AgeClassDbRow>(db, "SELECT * FROM age_classes WHERE season_id = ?", seasonId)).map((r) => [r.code, toLimits(r)]));
+  const previous = await all<AgeClassDbRow>(db, "SELECT * FROM age_classes WHERE season_id = ?", seasonId);
+  const before = new Map(previous.map((r) => [r.code, toLimits(r)]));
+  const requiredBefore = await requiredDuties(db, seasonId);
+  const requiredOf = (a: AgeClassInput) => a.requiredDuties ?? requiredBefore.get(previous.find((r) => r.code === a.code)?.id ?? 0) ?? [];
+  // Duty types taken by approved people from all teams: the previous release reads them as youth_referee
+  const qualified = new Set((await all<{ id: number }>(db, "SELECT id FROM duty_types WHERE who_referees = 1")).map((r) => r.id));
   await db.batch([
     stmt(db, "DELETE FROM age_classes WHERE season_id = ?", seasonId),
     ...ageClasses.map((a) => {
@@ -280,13 +302,26 @@ export async function writeAgeClasses(db: D1Database, seasonId: number, ageClass
         a.birthYearMin,
         a.birthYearMax,
         a.gameMinutes,
-        a.youthReferee ? 1 : 0,
+        requiredOf(a).some((id) => qualified.has(id)) ? 1 : 0,
         l.account ? 1 : 0,
         l.account && l.respond ? 1 : 0,
         l.account ? l.chat : "none",
         l.account && l.help ? 1 : 0,
       );
     }),
+    // The classes have new ids: their required duties anew (the old rows went with the classes)
+    ...ageClasses.flatMap((a) =>
+      requiredOf(a).map((dutyTypeId) =>
+        stmt(
+          db,
+          `INSERT OR IGNORE INTO age_class_duties (age_class_id, duty_type_id)
+           SELECT ac.id, dt.id FROM age_classes ac JOIN duty_types dt ON dt.id = ? AND dt.event_id IS NULL WHERE ac.season_id = ? AND ac.code = ?`,
+          dutyTypeId,
+          seasonId,
+          a.code,
+        ),
+      ),
+    ),
   ]);
 }
 
@@ -314,8 +349,14 @@ adminRoutes.put("/age-classes", async (c) => {
   return c.json({ ok: true, teamsWithoutParents: withoutParents.map((t) => t.name) });
 });
 
+/** The club's duty types by code (sport profile codes such as "referee"). */
+export async function dutyCodes(db: D1Database): Promise<Map<string, number>> {
+  const rows = await all<{ id: number; code: string }>(db, "SELECT id, code FROM duty_types WHERE code IS NOT NULL AND event_id IS NULL AND archived = 0");
+  return new Map(rows.map((r) => [r.code, r.id]));
+}
+
 /** Age classes of a season from the club's sport profile (shared/sports.ts), names in the club language. */
-export function ageClassesFromProfile(sport: SportId, startsOn: string, locale: Locale) {
+export function ageClassesFromProfile(sport: SportId, startsOn: string, locale: Locale, dutyIds: Map<string, number>) {
   const startYear = Number(startsOn.slice(0, 4));
   return SPORTS[sport].ageClasses.map((a) => {
     const years = birthYears(a, startYear);
@@ -327,7 +368,8 @@ export function ageClassesFromProfile(sport: SportId, startsOn: string, locale: 
       birthYearMin: years.min,
       birthYearMax: years.max,
       gameMinutes: a.gameMinutes,
-      youthReferee: !!a.youthReferee,
+      // Duty codes of the profile, as the club's duty types (a code the club no longer has is left out)
+      requiredDuties: (a.requiredDuties ?? []).map((code) => dutyIds.get(code)).filter((id): id is number => id != null),
       childLimits: a.youth ? completeLimits(a.child) : FULL_LIMITS,
     };
   });
@@ -339,7 +381,7 @@ adminRoutes.get("/age-classes/from-profile", async (c) => {
   const season = await first<{ starts_on: string }>(c.env.DB, "SELECT starts_on FROM seasons WHERE is_current = 1");
   if (!season) throw conflict(t`There is no current season.`);
   const club = await loadClub(c.env.DB);
-  return c.json({ sport: club.sport, ageClasses: ageClassesFromProfile(club.sport, season.starts_on, club.defaultLocale) });
+  return c.json({ sport: club.sport, ageClasses: ageClassesFromProfile(club.sport, season.starts_on, club.defaultLocale, await dutyCodes(c.env.DB)) });
 });
 
 /**

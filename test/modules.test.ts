@@ -26,8 +26,11 @@ beforeEach(async () => {
 describe("Module", () => {
   it("ordnet API-Pfade den Modulen zu", () => {
     expect(moduleOfPath("/api/duties/teams")).toBe("duties");
-    expect(moduleOfPath("/api/duties/referee")).toBe("youthReferees");
-    expect(moduleOfPath("/api/admin/referee-links")).toBe("youthReferees");
+    // Qualifications (e.g. youth referees) belong to the helper duties since 0.8.0
+    expect(moduleOfPath("/api/duties/qualified/5")).toBe("duties");
+    expect(moduleOfPath("/api/admin/skill-links")).toBe("duties");
+    expect(moduleOfPath("/api/admin/skill-grants/3/5")).toBe("duties");
+    expect(moduleOfPath("/api/skill-link/info")).toBe("duties");
     expect(moduleOfPath("/api/events/12/carpool/offers/3")).toBe("carpools");
     // Schedule routes are the core's; they answer 404 while no fixtures module is on (worker/routes/games.ts)
     expect(moduleOfPath("/api/teams/4/games/claim")).toBeNull();
@@ -37,15 +40,8 @@ describe("Module", () => {
     expect(moduleOfPath("/api/admin/club-members/3")).toBeNull();
   });
 
-  it("Jugendschiedsrichter brauchen Helferdienste", () => {
-    const all = { ...DEFAULT_MODULES, duties: true, youthReferees: true };
-    expect(moduleOn({ modules: all, sport: "handball" }, "youthReferees")).toBe(true);
-    expect(moduleOn({ modules: { ...all, duties: false }, sport: "handball" }, "youthReferees")).toBe(false);
-  });
-
   it("Handball-Module sind bei anderen Sportarten aus, auch wenn sie gespeichert an sind", () => {
-    const all = { ...DEFAULT_MODULES, duties: true, youthReferees: true, handball4all: true, carpools: true };
-    expect(moduleOn({ modules: all, sport: "football" }, "youthReferees")).toBe(false);
+    const all = { ...DEFAULT_MODULES, duties: true, handball4all: true, carpools: true };
     expect(moduleOn({ modules: all, sport: "football" }, "handball4all")).toBe(false);
     expect(moduleOn({ modules: all, sport: "football" }, "carpools")).toBe(true);
     expect(moduleOffered(moduleManifest("handball4all"), "football")).toBe(false);
@@ -63,11 +59,11 @@ describe("Module", () => {
   });
 
   it("ausgeschaltet: Pfade 404, keine Helfer- und Fahrgemeinschaftsdaten", async () => {
-    await saveClub(env.DB, { modules: { ...DEFAULT_MODULES, duties: false, carpools: false, youthReferees: true, handball4all: false, sms: false } });
+    await saveClub(env.DB, { modules: { ...DEFAULT_MODULES, duties: false, carpools: false, handball4all: false, sms: false } });
     const duties = await api(`/duties?teamId=${wd}`, { cookie: coachCookie });
     expect(duties.status).toBe(404);
     expect(duties.body.error.code).toBe("module_off");
-    expect((await api("/duties/referee", { cookie: coachCookie })).status).toBe(404);
+    expect((await api("/duties/qualified/5", { cookie: coachCookie })).status).toBe(404);
     expect((await api(`/events/${game}/carpool/offers/1`, { cookie: coachCookie, method: "PUT", body: { seats: 2 } })).status).toBe(404);
     expect((await api(`/teams/${wd}/games/claim`, { cookie: coachCookie, body: { manual: true } })).status).toBe(404);
     expect((await api("/session", { cookie: coachCookie })).body.me.helperTeams).toEqual([]);

@@ -72,7 +72,7 @@ Gebaut mit TypeScript, [Hono](https://hono.dev), [Preact](https://preactjs.com) 
 - **Trainer** legen einmal pro Saison Trainingspläne an (Schulferien werden ausgelassen), nominieren Kader, sagen Trainings mit einer Benachrichtigung ab oder verlegen sie, laden Spieler und Eltern per Link ein und sehen, wer noch nicht erreichbar ist.
 - **Admins** richten den Verein mit einem Assistenten ein, übernehmen Mannschaften und Personen aus Excel- oder CSV-Listen und führen einmal im Jahr den Saisonwechsel durch.
 
-Zuschaltbare Module: Helferdienste, Jugendschiedsrichter, Fahrgemeinschaften, Spielpläne von handball4all, Codes und Erinnerungen per SMS.
+Zuschaltbare Module: Helferdienste (mit Jugendschiedsrichtern und anderen Diensten, die ein Admin freigibt), Fahrgemeinschaften, Spielpläne von handball4all, Codes und Erinnerungen per SMS.
 
 ## Für Vereine und Datenschutzbeauftragte
 

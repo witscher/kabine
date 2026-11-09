@@ -15,12 +15,13 @@ export function dutyLines(duties: MyDuty[]): string[] {
 
 /**
  * Link into the Helpers tab, straight to the team and the event: the event's first team with a helper plan,
- * else the youth referee view for referees.
+ * else the first list of approved people one is in (e.g. youth referees).
  */
-export function helperPath(event: { id: number; teams: TeamRef[] }, me: Pick<Me, "helperTeams" | "referee">): string {
+export function helperPath(event: { id: number; teams: TeamRef[] }, me: Pick<Me, "helperTeams" | "qualifiedLists">): string {
   const team = event.teams.find((t) => me.helperTeams.some((h) => h.id === t.id));
   if (team) return `/helfer?mannschaft=${team.id}&spiel=${event.id}`;
-  return me.referee ? `/helfer?kihasl&spiel=${event.id}` : "/helfer";
+  const list = me.qualifiedLists.find((l) => l.mine);
+  return list ? `/helfer?liste=${list.id}&spiel=${event.id}` : "/helfer";
 }
 
 /** "Helpers needed · 2 spots free" */

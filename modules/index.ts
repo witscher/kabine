@@ -5,10 +5,8 @@ import carpools from "./carpools/module";
 import duties from "./duties/module";
 import handball4all from "./handball4all/module";
 import sms from "./sms/module";
-import youthReferees from "./youth-referees/module";
 
 export const MODULES = [
-  youthReferees,
   duties,
   carpools,
   handball4all,

@@ -72,7 +72,7 @@ Built with TypeScript, [Hono](https://hono.dev), [Preact](https://preactjs.com) 
 - **Coaches** set up training plans once a season (school holidays are skipped), nominate squads, cancel or move trainings with one notification, invite players and parents by link and see who cannot be reached yet.
 - **Admins** set up the club with a wizard, import teams and people from Excel or CSV lists, and run the season change once a year.
 
-Optional modules: helper duties, youth referees, carpools, game schedules from handball4all (German handball), SMS codes and reminders.
+Optional modules: helper duties (with youth referees and other duties an admin approves), carpools, game schedules from handball4all (German handball), SMS codes and reminders.
 
 ## For clubs and data protection officers
 

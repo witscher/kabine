@@ -10,7 +10,7 @@ import { Icon } from "../icons";
 import { ExtraEventList } from "../extra-events";
 import { useMe, useSession } from "../session";
 import { invalidate, useQuery } from "../store";
-import { Button, confirmDialog, Empty, ErrorBox, Notice, Segmented, Sheet, Spinner, SwitchRow, TextField, toast, TopBar, useDocumentTitle } from "../ui";
+import { Button, confirmDialog, Empty, ErrorBox, Field, Notice, Sheet, Spinner, SwitchRow, TextField, toast, TopBar, useDocumentTitle } from "../ui";
 import type { TeamDetail } from "./team";
 
 /** Role label: in groups "Member" and "Lead" instead of player and coach. */
@@ -36,7 +36,8 @@ interface GroupListItem {
   id: number;
   name: string;
   kind: "team" | "group";
-  autoMembers: "referees" | null;
+  /** Group of everyone approved for a duty (e.g. all youth referees) */
+  autoSkill: { id: number; name: string } | null;
   players: number;
   coaches: number;
 }
@@ -47,12 +48,15 @@ export function AdminGroupsPage() {
   const me = useMe();
   const { refresh } = useSession();
   const { data, error, reload } = useQuery<{ teams: GroupListItem[] }>("/teams");
-  const [create, setCreate] = useState<{
-    name: string;
-    auto: "manual" | "referees";
-  } | null>(null);
+  // auto: the duty type whose approved people are the members, null: members by hand
+  const [create, setCreate] = useState<{ name: string; auto: number | null } | null>(null);
+  const approvals = useQuery<{ types: { id: number; name: string; needsSkill: boolean; skillGrant: "self" | "admin"; archived: boolean }[] }>(
+    me.isAdmin && create ? "/duty-types" : null,
+  );
+  const approvalTypes = (approvals.data?.types ?? []).filter((dt) => dt.needsSkill && dt.skillGrant === "admin" && !dt.archived);
   const groups = (data?.teams ?? []).filter((tm) => tm.kind === "group");
-  const hasRefereeGroup = groups.some((g) => g.autoMembers === "referees");
+  const autoName = approvalTypes.find((dt) => dt.id === create?.auto)?.name ?? "";
+  const hasAutoGroup = create?.auto != null && groups.some((g) => g.autoSkill?.id === create.auto);
   if (!me.isAdmin)
     return (
       <Empty title={t`Admins only`}>
@@ -64,7 +68,7 @@ export function AdminGroupsPage() {
       <TopBar title={t`Groups`} kicker={t`Administration`} back="/verwaltung" />
       <div class="content">
         <GroupExplainer />
-        <Button variant="primary" icon="plus" onClick={() => setCreate({ name: "", auto: "manual" })}>
+        <Button variant="primary" icon="plus" onClick={() => setCreate({ name: "", auto: null })}>
           <Trans>Create group</Trans>
         </Button>
         {error ? <ErrorBox error={error} onRetry={reload} /> : null}
@@ -98,7 +102,7 @@ export function AdminGroupsPage() {
                       <Trans>
                         Group · {members} · {leads}
                       </Trans>
-                      {g.autoMembers === "referees" ? ` · ${t`automatically all youth referees`}` : ""}
+                      {g.autoSkill ? ` · ${t`automatically everyone approved for ${g.autoSkill.name}`}` : ""}
                     </span>
                   </span>
                   <Icon name="chevron" size={18} />
@@ -114,29 +118,37 @@ export function AdminGroupsPage() {
             <Trans>Only chat and special events. No training, no games, no squad.</Trans>
           </p>
           <TextField label={t`Name`} value={create.name} onInput={(v) => setCreate({ ...create, name: v })} maxLength={30} hint={t`Short, shown like a team name, e.g. JT`} />
-          <Segmented<"manual" | "referees">
-            label={t`Members`}
-            value={create.auto}
-            onChange={(v) =>
-              setCreate({
-                ...create,
-                auto: v,
-                name: v === "referees" && !create.name ? t`Youth referees` : create.name,
-              })
-            }
-            options={[
-              { value: "manual", label: t`Manually` },
-              { value: "referees", label: t`All youth referees` },
-            ]}
-          />
+          {approvalTypes.length ? (
+            <Field label={t`Members`}>
+              {(id) => (
+                <select
+                  id={id}
+                  class="select"
+                  value={String(create.auto ?? "")}
+                  onChange={(e) => {
+                    const v = (e.target as HTMLSelectElement).value;
+                    const auto = v ? Number(v) : null;
+                    const name = approvalTypes.find((dt) => dt.id === auto)?.name ?? "";
+                    setCreate({ ...create, auto, name: auto != null && !create.name ? name.slice(0, 30) : create.name });
+                  }}
+                >
+                  <option value="">{t`Manually`}</option>
+                  {approvalTypes.map((dt) => {
+                    const duty = dt.name;
+                    return <option value={String(dt.id)}>{t`Everyone approved for ${duty}`}</option>;
+                  })}
+                </select>
+              )}
+            </Field>
+          ) : null}
           <p class="small muted">
-            {create.auto === "referees"
-              ? t`Members are automatically all people with the youth referee role. If someone joins or loses the role, the group adjusts. You assign the leads in the group afterwards.`
+            {create.auto != null
+              ? t`Members are automatically everyone approved for ${autoName}. If someone is approved or loses the approval, the group adjusts. You assign the leads in the group afterwards.`
               : t`You assign members and leads in the group afterwards.`}
           </p>
-          {create.auto === "referees" && hasRefereeGroup ? (
+          {hasAutoGroup ? (
             <Notice kind="warn">
-              <Trans>There is already a group for all youth referees.</Trans>
+              <Trans>There is already a group for everyone approved for {autoName}.</Trans>
             </Notice>
           ) : null}
           <Button
@@ -147,7 +159,7 @@ export function AdminGroupsPage() {
             onClick={async () => {
               const { id } = await api.post<{ id: number }>("/groups", {
                 name: create.name.trim(),
-                autoMembers: create.auto === "referees" ? "referees" : null,
+                autoSkill: create.auto,
               });
               toast(t`Group created.`);
               setCreate(null);
@@ -177,7 +189,8 @@ export function GroupPage({ team, onChanged }: { team: TeamDetail; onChanged: ()
   const { refresh } = useSession();
   const [addRole, setAddRole] = useState<"player" | "coach" | null>(null);
   const [renameOpen, setRenameOpen] = useState(false);
-  const auto = team.autoMembers === "referees";
+  const auto = team.autoSkill != null;
+  const autoName = team.autoSkill?.name ?? "";
   const manage = me.isAdmin && !auto;
   // Automatic group: members follow the role, admins manage the leads as in any group
   const manageLeads = me.isAdmin;
@@ -249,7 +262,7 @@ export function GroupPage({ team, onChanged }: { team: TeamDetail; onChanged: ()
 
         {auto ? (
           <Notice>
-            <Trans>Members are automatically all people with the youth referee role. You give the role under Admin → Youth referees. You assign the leads here.</Trans>
+            <Trans>Members are automatically everyone approved for {autoName}. You approve people under Admin → Approvals. You assign the leads here.</Trans>
           </Notice>
         ) : null}
 

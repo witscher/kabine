@@ -36,6 +36,7 @@ Den eigenen Namen ändern nur Admins; Spieler, Eltern und Trainer wenden sich an
 | Anwesenheit nach dem Termin (anwesend, entschuldigt, unentschuldigt), Anwesenheitsstatistik | Spieler | Überblick für Trainer | Trainer, Admins; der Spieler und seine Eltern sehen den eigenen Eintrag; eingebundene Eltern bekommen sofort eine Push, wenn ihr Kind als unentschuldigt eingetragen wird | Termindaten zum Saisonwechsel; Saisonsummen bleiben bis zum Austritt |
 | Kadernominierungen | Spieler | Spiele | Mannschaft | Zum Saisonwechsel |
 | Helferdienste | Eltern, Spieler | Dienste bei Spielen und Veranstaltungen | Helfer der Mannschaft („Vorname N.“), Trainer | Zum Saisonwechsel |
+| Freigaben für Dienste mit Vorkenntnissen („Das kann ich“ im Profil oder Freigabe durch einen Admin, z. B. Jugendschiedsrichter, auch für Kinder) | Eltern, Spieler | Nur Geeigneten wird ein solcher Dienst angeboten | Die Person und ihre Eltern, Admins; Trainer, wenn sie jemanden eintragen | Bei Rücknahme (durch die Person oder einen Admin), beim Austritt |
 | Fahrgemeinschaften | Fahrer, Mitfahrer | Auswärtsspiele | Nominierte und ihre Eltern („Vorname N.“), Trainer | Zum Saisonwechsel |
 | Chatnachrichten, Reaktionen | Mitglieder | Kommunikation der Mannschaft | Mitglieder des Chats | Zum Saisonwechsel |
 | E-Mail-Adresse | Wer eine einträgt | Anmeldecodes, Zugangslinks; Helferplan-Mails und Antworten auf Feedback nur auf Wunsch | Niemand in der App; Admins nur im Datenexport | Beim Austritt |

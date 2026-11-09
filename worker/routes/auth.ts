@@ -1,6 +1,6 @@
 import { t } from "@lingui/core/macro";
 import { ownClubSport } from "../domain/club";
-import { helperTeams, refereeRoles } from "../domain/duties";
+import { helperTeams, qualifiedLists } from "../domain/duties";
 import { loadNews, markNewsSeen } from "../domain/news";
 import type { AuthenticationResponseJSON, RegistrationResponseJSON } from "@simplewebauthn/server";
 import { Hono } from "hono";
@@ -20,7 +20,7 @@ import { isLocale, LOCALES } from "../../shared/i18n";
 
 export async function buildMe(env: Env, actor: Actor): Promise<Me> {
   const childIds = actor.children.map((c) => c.id);
-  const [memberships, childTeams, manageable, groups] = await Promise.all([
+  const [memberships, childTeams, manageable, groups, lists] = await Promise.all([
     all<{ id: number; name: string; role: Role; parents_enabled: number }>(
       env.DB,
       `SELECT t.id, t.name, tm.role, t.parents_enabled FROM team_memberships tm JOIN teams t ON t.id = tm.team_id
@@ -38,6 +38,7 @@ export async function buildMe(env: Env, actor: Actor): Promise<Me> {
       ? all<TeamRef>(env.DB, "SELECT id, name FROM teams ORDER BY name")
       : all<TeamRef>(env.DB, "SELECT id, name FROM teams WHERE id IN (SELECT value FROM json_each(?)) ORDER BY name", JSON.stringify(actor.coachTeamIds)),
     all<{ id: number }>(env.DB, "SELECT id FROM teams WHERE kind = 'group'"),
+    qualifiedLists(env.DB, actor),
   ]);
   return {
     accountId: actor.accountId,
@@ -59,7 +60,8 @@ export async function buildMe(env: Env, actor: Actor): Promise<Me> {
     vapidPublicKey: env.VAPID_PUBLIC_KEY || null,
     helperTeams: (await helperTeams(env.DB, actor)).map((t) => ({ id: t.teamId, name: t.teamName, own: t.own })),
     viewAs: actor.viewAs ? { mode: actor.viewAs, readOnly: !!actor.readOnly } : null,
-    referee: (await refereeRoles(env.DB, actor)).length > 0,
+    referee: lists.some((q) => q.mine),
+    qualifiedLists: lists,
     groupIds: groups.map((g) => g.id),
     // Admin/coach switch in the profile: only admins with an own coach role
     adminSwitch:
