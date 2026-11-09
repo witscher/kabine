@@ -1,7 +1,7 @@
 import { t } from "@lingui/core/macro";
 import { Hono } from "hono";
 import { z } from "zod";
-import type { EventSummary, MyDuty } from "../../shared/types";
+import type { EventSummary, MyDuty, TeamRef } from "../../shared/types";
 import { type AppEnv, intParam, requireActor } from "../app";
 import { type Actor, isCoachOfAny, PARENTS_HANDLE_IT, requireActFor, requireAdmin } from "../auth/actor";
 import { postSystemMessage } from "../domain/chat";
@@ -15,6 +15,7 @@ import {
   loadEvent,
   loadEventContext,
   loadVisibleEvent,
+  type Participant,
   toDetail,
   toSummary,
 } from "../domain/events";
@@ -26,7 +27,7 @@ import { loadCoachHints } from "../domain/coach-hints";
 import { loadEventPage } from "../domain/event-page";
 import { absenceChangeable, leaderAccounts, leaderEntries, loadLeaders } from "../domain/leaders";
 import { ensureGenerated } from "../domain/generate";
-import { eventLabel, notifyCoaches, notifyPersons, recipientsForPersons, enqueuePush, shortDate, shortTime, staffOf } from "../domain/notify";
+import { eventLabel, guardianAccounts, notifyCoaches, notifyPersons, recipientsForPersons, enqueuePush, shortDate, shortTime, staffOf } from "../domain/notify";
 import { all, first, list, run, stmt } from "../lib/db";
 import { moduleEventDetail, moduleEventSummaries, moduleParticipantsLeft } from "../modules";
 import { badRequest, conflict, forbidden, notFound, parse, readJson } from "../lib/http";
@@ -474,8 +475,9 @@ eventRoutes.put("/events/:id/teams/:teamId/optional", async (c) => {
  * After the start: coaches record attendance (shared/attendance.ts). Coaches until the end of the day after the
  * event, admins the whole season. The player's response stays; an entry equal to its default is not stored.
  */
-async function setAttendance(db: D1Database, actor: Actor, eventId: number, personId: number, mark: AttendanceMark | null) {
-  const { event, ctx } = await managedEvent(db, actor, eventId);
+async function setAttendance(env: Env, actor: Actor, eventId: number, personId: number, mark: AttendanceMark | null) {
+  const db = env.DB;
+  const { event, ctx, teams } = await managedEvent(db, actor, eventId);
   if (event.cancelled_at) throw conflict(t`The event is not taking place.`);
   if (localToInstant(event.starts_at) > Date.now()) throw conflict(t`This is only possible once the event has started.`);
   if (!attendanceEditable(event, actor, Date.now())) {
@@ -504,20 +506,49 @@ async function setAttendance(db: D1Database, actor: Actor, eventId: number, pers
     // If the event is already in the attendance record, it follows
     ...attendanceSync(db, event, part, stored),
   ]);
+  if (stored === "unexcused" && ctx.marks.get(`${event.id}:${personId}`) !== "unexcused") await notifyParentsUnexcused(env, actor, event, teams, part);
   return { ok: true, attendance: stored };
+}
+
+/**
+ * "Unexcused": the parents learn at once that their child did not arrive, according to the coach (safety).
+ * Once per event and child, also when the coach takes the mark back and sets it again. Push only, cannot be
+ * switched off.
+ */
+async function notifyParentsUnexcused(env: Env, actor: Actor, event: EventRow, teams: TeamRef[], part: Participant): Promise<void> {
+  const accounts = await guardianAccounts(env.DB, part.person.id, teams.map((tm) => tm.id));
+  if (!accounts.length) return;
+  const claimed = await run(env.DB, "INSERT OR IGNORE INTO duty_notifications (kind, ref) VALUES ('unexcused_parents', ?)", `${event.id}:${part.person.id}`);
+  if (!(claimed.meta.changes ?? 0)) return;
+  const name = part.person.firstName;
+  const coach = actor.firstName;
+  const team = teams.find((tm) => tm.id === part.teamId) ?? teams[0];
+  await enqueuePush(env, accounts, () => {
+    const title = eventTitle(event, teams);
+    const when = `${shortDate(event.starts_at)}, ${shortTime(event.starts_at)}${team ? ` · ${team.name}` : ""}`;
+    return {
+      title: event.kind === "training" ? t`${name} is missing from training` : event.kind === "game" ? t`${name} is missing from the game` : t`${name} is missing from “${title}”`,
+      body:
+        part.status === "yes"
+          ? t`${when}: ${name} had said yes, but according to ${coach} did not arrive. Recorded as unexcused.`
+          : t`${when}: ${name} had not declined, but according to ${coach} did not arrive. Recorded as unexcused.`,
+      url: `/termine/${event.id}`,
+      tag: `unexcused-${event.id}-${part.person.id}`,
+    };
+  });
 }
 
 eventRoutes.put("/events/:id/attendance/:personId", async (c) => {
   const actor = requireActor(c);
   const { mark } = parse(z.object({ mark: z.enum(ATTENDANCE_MARKS).nullable() }), await readJson(c.req.raw));
-  return c.json(await setAttendance(c.env.DB, actor, intParam(c, "id"), intParam(c, "personId"), mark));
+  return c.json(await setAttendance(c.env, actor, intParam(c, "id"), intParam(c, "personId"), mark));
 });
 
 /** Before attendance: only "absent without excuse". Stays for app versions still cached on devices. */
 eventRoutes.put("/events/:id/unexcused/:personId", async (c) => {
   const actor = requireActor(c);
   const { unexcused } = parse(z.object({ unexcused: z.boolean() }), await readJson(c.req.raw));
-  await setAttendance(c.env.DB, actor, intParam(c, "id"), intParam(c, "personId"), unexcused ? "unexcused" : null);
+  await setAttendance(c.env, actor, intParam(c, "id"), intParam(c, "personId"), unexcused ? "unexcused" : null);
   return c.json({ ok: true });
 });
 

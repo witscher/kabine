@@ -709,6 +709,7 @@ function AttendanceList({ event, onChanged, onPerson }: { event: EventDetail; on
             ? t`Record who was there, until the end of ${until}. Without an entry the response counts.`
             : t`Record who was there. Without an entry the response counts.`
           : t`Attendance can no longer be changed here. Admins can still change it.`}
+        {event.attendanceEditable ? ` ${t`With "Unexcused", linked parents are told at once that their child did not arrive.`}` : ""}
       </p>
       {open.length ? (
         <section class="card card-body stack-sm" aria-label={t`Still to record`}>

@@ -33,7 +33,7 @@ Only admins change their own name; players, parents and coaches ask their coach 
 | Responses (yes/no, late) | Players | Planning trainings and games | Coaches, admins; team staff and, if the team switches it on, the team (without reasons) | At the season change |
 | Decline reasons | Players | Planning | Coaches, admins | 60 days after the event |
 | "I'm not there" of coaches, leads, staff and organisers, with an optional note | Leaders of the event | Planning, stand-ins | That someone is not there: everyone who sees the event. The note: coaches and admins of the event | Note 60 days after the event, the entry with the event at the season change |
-| Attendance after an event (present, excused, unexcused), attendance statistics | Players | Overview for coaches | Coaches, admins; the player and their parents see their own entry | Event data at the season change; season totals stay with the person until they leave |
+| Attendance after an event (present, excused, unexcused), attendance statistics | Players | Overview for coaches | Coaches, admins; the player and their parents see their own entry; parents in charge get a push at once when their child is marked unexcused | Event data at the season change; season totals stay with the person until they leave |
 | Squad nominations | Players | Games | Team | At the season change |
 | Helper duties | Parents, players | Duties at games and events | Helpers of the team ("First name L."), coaches | At the season change |
 | Carpools | Drivers, riders | Away games | Nominated players and their parents ("First name L."), coaches | At the season change |

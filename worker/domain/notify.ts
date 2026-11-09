@@ -171,3 +171,20 @@ export function eventLabel(kind: string, title: string): string {
   if (kind === "game") return t`Game ${title}`;
   return title;
 }
+
+/**
+ * Accounts of a child's linked parents, if they are in charge in the event's teams. Not filtered by the
+ * notification settings: for hints that must always reach the parents.
+ */
+export async function guardianAccounts(db: D1Database, childId: number, teamIds: readonly number[]): Promise<number[]> {
+  const rows = await all<{ id: number }>(
+    db,
+    `SELECT DISTINCT a.id FROM guardianships g
+       JOIN accounts a ON a.person_id = g.guardian_id AND a.disabled_at IS NULL
+       JOIN persons p ON p.id = g.guardian_id AND p.is_former = 0
+      WHERE g.child_id = ?1 AND ${parentsInChargeSql("g.child_id", "SELECT value FROM json_each(?2)")}`,
+    childId,
+    list([...teamIds]),
+  );
+  return rows.map((r) => r.id);
+}

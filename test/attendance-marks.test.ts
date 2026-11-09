@@ -2,6 +2,7 @@
 import { env } from "cloudflare:workers";
 import { beforeEach, describe, expect, it } from "vitest";
 import { recordAttendance } from "../worker/domain/attendance";
+import type { PushJob } from "../worker/domain/notify";
 import { addDays } from "../worker/lib/time";
 import { api, eventIn, exec, freshDb, guardian, loginAs, member, migrateRest, one, person, rows, season, team, upgradeFrom } from "./helpers";
 
@@ -133,5 +134,52 @@ describe("migration 202610192200_core_attendance-marks.sql", () => {
       { event_id: event, person_id: mia, status: "unexcused", marked_by: coach, marked_at: "2026-10-01T19:30:00.000Z" },
     ]);
     expect(await rows("SELECT person_id FROM unexcused_absences")).toEqual([{ person_id: mia }]);
+  });
+});
+
+describe("Unentschuldigt: Hinweis an die Eltern", () => {
+  it("sofort per Push an eingebundene Eltern, einmal je Termin und Kind", async () => {
+    const { createExecutionContext, waitOnExecutionContext } = await import("cloudflare:test");
+    const { default: worker } = await import("../worker/index");
+    const pushes: PushJob[] = [];
+    const testEnv = { ...env, PUSH_QUEUE: { sendBatch: async (jobs: { body: PushJob }[]) => void pushes.push(...jobs.map((j) => j.body)) } } as unknown as Env;
+    await loginAs(parent);
+    await loginAs(mia);
+    await exec("INSERT INTO push_subscriptions (account_id, endpoint, p256dh, auth) SELECT id, 'https://push.example/' || id, 'k', 'a' FROM accounts");
+    const parentAccount = (await one<{ id: number }>("SELECT id FROM accounts WHERE person_id = ?", parent)).id;
+    const put = async (event: number, value: string | null) => {
+      const ctx = createExecutionContext();
+      const res = await worker.fetch(
+        new Request(`http://localhost:5173/api/events/${event}/attendance/${mia}`, {
+          method: "PUT",
+          headers: { cookie: coachCookie, origin: "http://localhost:5173", "content-type": "application/json" },
+          body: JSON.stringify({ mark: value }),
+        }),
+        testEnv,
+        ctx,
+      );
+      await waitOnExecutionContext(ctx);
+      expect(res.status).toBe(200);
+    };
+    const toParents = () => pushes.filter((p) => p.payload.title.startsWith("Mia fehlt"));
+
+    await put(yesterday, "excused");
+    expect(toParents()).toEqual([]);
+    await put(yesterday, "unexcused");
+    expect(toParents()).toHaveLength(1);
+    // Only the parents, not Mia herself
+    expect(toParents()[0]!.accountIds).toEqual([parentAccount]);
+    expect(toParents()[0]!.payload).toMatchObject({ title: "Mia fehlt beim Training", url: `/termine/${yesterday}` });
+    expect(toParents()[0]!.payload.body).toContain("ist laut Tina aber nicht angekommen");
+    // Taken back and set again: not a second time
+    await put(yesterday, null);
+    await put(yesterday, "unexcused");
+    expect(toParents()).toHaveLength(1);
+
+    // Team without parents: no hint
+    await exec("UPDATE teams SET parents_enabled = 0 WHERE id = ?", wd);
+    const other = await eventIn(wd, 0, { time: "00:00" });
+    await put(other, "unexcused");
+    expect(toParents()).toHaveLength(1);
   });
 });

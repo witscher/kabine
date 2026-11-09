@@ -1210,6 +1210,11 @@ msgstr "Trainingszeit hinzugefügt."
 msgid "The automatic squad is switched off for this team."
 msgstr "Für diese Mannschaft ist der automatische Kader ausgeschaltet."
 
+# ai
+#: worker/routes/events.ts
+msgid "{when}: {name} had said yes, but according to {coach} did not arrive. Recorded as unexcused."
+msgstr "{when}: {name} hatte zugesagt, ist laut {coach} aber nicht angekommen. Eingetragen als unentschuldigt."
+
 #: src/pages/profile.tsx
 msgid "Hear straight away about new events, cancellations, nominations and chat messages."
 msgstr "Erfahre sofort von neuen Terminen, Absagen, Nominierungen und Chatnachrichten."
@@ -1319,6 +1324,11 @@ msgstr "{n, plural, one {# neue Nachricht} other {# neue Nachrichten}}"
 #: src/calendar.tsx
 msgid "With a personal link your events appear in the calendar app on your phone and stay up to date. Do not share the link: anyone who has it can see your events."
 msgstr "Mit einem persönlichen Link erscheinen deine Termine in der Kalender-App deines Handys und bleiben aktuell. Den Link nicht weitergeben: Wer ihn hat, sieht deine Termine."
+
+# ai
+#: worker/routes/events.ts
+msgid "{when}: {name} had not declined, but according to {coach} did not arrive. Recorded as unexcused."
+msgstr "{when}: {name} hatte nicht abgesagt, ist laut {coach} aber nicht angekommen. Eingetragen als unentschuldigt."
 
 #: src/avatar.tsx
 #: src/avatar.tsx
@@ -3442,6 +3452,11 @@ msgstr "Über {staleDays} Tage nicht aktiv"
 msgid "Game report"
 msgstr "Spielbericht"
 
+# ai
+#: src/pages/event.tsx
+msgid "With \"Unexcused\", linked parents are told at once that their child did not arrive."
+msgstr "Bei „Unentschuldigt“ bekommen eingebundene Eltern sofort einen Hinweis, dass ihr Kind nicht angekommen ist."
+
 #: worker/domain/email-login.ts
 msgid "The most secure way to sign in is with a passkey (Face ID, fingerprint or device lock). You can set one up in the app under Profile, Passkeys and devices."
 msgstr "Am sichersten meldest du dich mit einem Passkey an (Face ID, Fingerabdruck oder Gerätesperre). Einrichten kannst du ihn in der App unter Profil, Passkeys und Geräte."
@@ -4771,6 +4786,11 @@ msgstr "Bis wie viele Stunden vor Beginn darf ohne Hinweis abgesagt werden? Spä
 #: src/pages/plans.tsx
 msgid "Holiday plan"
 msgstr "Ferienplan"
+
+# ai
+#: worker/routes/events.ts
+msgid "{name} is missing from training"
+msgstr "{name} fehlt beim Training"
 
 #: src/pages/group.tsx
 msgid "Frequent questions, guides, feedback on the app"
@@ -8070,6 +8090,11 @@ msgid "New, changed and cancelled events"
 msgstr "Neue, geänderte und abgesagte Termine"
 
 # ai
+#: worker/routes/events.ts
+msgid "{name} is missing from the game"
+msgstr "{name} fehlt beim Spiel"
+
+# ai
 #: src/pages/admin.tsx
 msgid "Continue the setup wizard"
 msgstr "Einrichtungsassistent fortsetzen"
@@ -9232,6 +9257,11 @@ msgstr "{label} per SMS"
 #: src/pages/event.tsx
 msgid "created the event"
 msgstr "hat den Termin angelegt"
+
+# ai
+#: worker/routes/events.ts
+msgid "{name} is missing from “{title}”"
+msgstr "{name} fehlt bei „{title}“"
 
 # ai
 #: src/pages/group.tsx

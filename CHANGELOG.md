@@ -6,6 +6,7 @@ Changes that are merged but not released yet go under *Unreleased*, one line eac
 
 ## Unreleased
 
+- When a coach marks a child as unexcused after an event, the child's linked parents get a push at once that their child did not arrive (once per event and child, cannot be switched off). The attendance list tells the coach.
 - Helpers tab: without a selection it lists the events of all your teams together, each with its team; a tap on a team filters, a second tap clears the filter, as in the events list. Before, the first team was always selected.
 - The helper plan link on an event opens the Helpers tab at that event's team and scrolls to the event, highlighted for a moment. Before, it opened the first team.
 - Youth referee group: admins are no longer added as leads automatically. Admins assign the leads by hand like in any group; whoever is a lead now stays one.
