@@ -35,6 +35,8 @@ export const CHANGELOG: readonly ChangelogEntry[] = [
       t`Settings explain themselves behind a small "i", with an example.`,
       t`Helpers tab: all your teams together, a tap on a team filters.`,
       t`When a child is marked unexcused after an event, the parents get a push at once.`,
+      t`New: Administration → Protocol shows who removed an access, changed admin rights, members or game schedules, and when.`,
+      t`Several security fixes for sign-in codes, personal links, restoring an export and the chat.`,
     ],
     coaches: () => [
       {

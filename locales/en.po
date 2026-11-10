@@ -901,6 +901,10 @@ msgstr "This team does not take part in the event."
 msgid "Then: event"
 msgstr "Then: event"
 
+#: shared/changelog.ts
+msgid "Several security fixes for sign-in codes, personal links, restoring an export and the chat."
+msgstr "Several security fixes for sign-in codes, personal links, restoring an export and the chat."
+
 #: src/pages/audit.tsx
 msgid "{who} deleted {label} ({team})"
 msgstr "{who} deleted {label} ({team})"
@@ -11303,6 +11307,10 @@ msgstr "What the club has and who may help."
 #: src/respond.tsx
 msgid "Injured"
 msgstr "Injured"
+
+#: shared/changelog.ts
+msgid "New: Administration → Protocol shows who removed an access, changed admin rights, members or game schedules, and when."
+msgstr "New: Administration → Protocol shows who removed an access, changed admin rights, members or game schedules, and when."
 
 #: src/pages/admin.tsx
 msgid "Upcoming events of other teams, create a special event"

@@ -6,10 +6,6 @@ Changes that are merged but not released yet go under *Unreleased*, one line eac
 
 ## Unreleased
 
-- Security: a personal link on an existing access no longer sets an e-mail address for sign-in; it sets up a new passkey as before. If the address of an access may not be the person's own, admins switch on *Also remove the e-mail address for sign-in* in the person's sheet before creating the link: using the link removes the address, and the person can enter a new one. The protocol shows when a personal link was used on an existing access.
-- Security: the limit for sign-in codes no longer shows whether an address belongs to someone in the club; unknown addresses are counted the same way (as a hash, nothing is sent).
-- Security: restoring an export can no longer move an existing access to another person, which another admin could have used against the owner of the installation.
-
 ## v0.8.0
 
 - Statistics: coaches see *Team → Statistics* for the last 4 weeks or the season: training participation, appearances in games, a table per training and game, and each player's events. With the helper plan also the helper duties per family, with a button to remind the families without a duty. Players and parents see their own figures under *Profile → My statistics* (for parents per child), with the family's helper duties.
@@ -20,6 +16,9 @@ Changes that are merged but not released yet go under *Unreleased*, one line eac
 - Security: sign-in codes by e-mail or SMS can no longer be guessed with many parallel tries; at most five codes per address and hour and ten per day.
 - Security: the role next to a name in the chat (e.g. "Coach") can no longer be faked by a modified app.
 - Security: open chats follow rights at once. Whoever is removed from a team, leaves the club, loses a parent link, admin rights or a device, or whose parents switch off the chat, is disconnected; the app reconnects with the rights that are left.
+- Security: a personal link on an existing access no longer sets an e-mail address for sign-in; it sets up a new passkey as before. If the address of an access may not be the person's own, admins switch on *Also remove the e-mail address for sign-in* in the person's sheet before creating the link: using the link removes the address, and the person can enter a new one. The protocol shows when a personal link was used on an existing access.
+- Security: the limit for sign-in codes no longer shows whether an address belongs to someone in the club; unknown addresses are counted the same way (as a hash, nothing is sent).
+- Security: restoring an export can no longer move an existing access to another person, which another admin could have used against the owner of the installation.
 - New *Administration → Protocol* for admins: who removed an access, created a personal link, recorded a leaving, deleted a person, changed admin rights, members, parent links or game schedules, cancelled or deleted events, changed the season or downloaded the export, and when. Everyday things are not listed. Emptied by the season change, not in the export; the privacy page lists it.
 - New team setting *Whole team at games* (*Team → Settings*, off by default): every player takes part in every game and declines if they cannot come; the nomination only decides who plays. Players who are not nominated see "Squad follows" and later "Not nominated" and can join carpools; game notifications still go to the nominated players only.
 - Info buttons: settings explain themselves behind a small "i" with an example, instead of long lines under every switch (team settings, groups, administration, profile, duty types).

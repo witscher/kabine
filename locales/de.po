@@ -955,6 +955,11 @@ msgid "Then: event"
 msgstr "Danach: Event"
 
 # ai
+#: shared/changelog.ts
+msgid "Several security fixes for sign-in codes, personal links, restoring an export and the chat."
+msgstr "Mehrere Sicherheitskorrekturen bei Anmeldecodes, persönlichen Links, dem Wiederherstellen eines Exports und im Chat."
+
+# ai
 #: src/pages/audit.tsx
 msgid "{who} deleted {label} ({team})"
 msgstr "{who} hat {label} gelöscht ({team})"
@@ -12132,6 +12137,11 @@ msgstr "Was es im Verein gibt und wer helfen darf."
 #: src/respond.tsx
 msgid "Injured"
 msgstr "Verletzt"
+
+# ai
+#: shared/changelog.ts
+msgid "New: Administration → Protocol shows who removed an access, changed admin rights, members or game schedules, and when."
+msgstr "Neu: Verwaltung → Protokoll zeigt, wer einen Zugang entfernt, Admin-Rechte, Mitglieder oder Spielpläne geändert hat, und wann."
 
 #: src/pages/admin.tsx
 msgid "Upcoming events of other teams, create a special event"
