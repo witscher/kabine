@@ -13056,6 +13056,7 @@ msgstr "Ungültiges Datum."
 
 # ai
 #: worker/chat/room.ts
+#: worker/chat/room.ts
 msgid "Your rights in this chat have changed."
 msgstr "Deine Rechte in diesem Chat haben sich geändert."
 

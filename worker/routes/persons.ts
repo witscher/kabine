@@ -6,7 +6,7 @@ import { type Actor, parentsInCharge, requireAdmin } from "../auth/actor";
 import { assertNotProtected, assertNotStaffUnlessAdmin } from "../auth/owner";
 import { relyingParty } from "../auth/webauthn";
 import { syncAutoSquads } from "../domain/auto-squad";
-import { forgetInChats } from "../domain/chat";
+import { forgetInChats, revalidateChatAccess } from "../domain/chat";
 import { childAccountAllowed } from "../domain/child-limits";
 import { createInvite, inviteUrl } from "../domain/invites";
 import { syncAutoGroups } from "../domain/groups";
@@ -111,6 +111,7 @@ personRoutes.delete("/persons/:id/account", async (c) => {
   if (target?.is_admin && !actor.isAdmin) throw forbidden();
   const res = await run(c.env.DB, "DELETE FROM accounts WHERE person_id = ?", personId);
   if (!res.meta.changes) throw notFound(t`This person has no access.`);
+  c.executionCtx.waitUntil(revalidateChatAccess(c.env, { personIds: [personId] }));
   return c.json({ ok: true });
 });
 
@@ -124,6 +125,7 @@ personRoutes.delete("/guardianships/:guardianId/:childId", async (c) => {
   const res = await run(c.env.DB, "DELETE FROM guardianships WHERE guardian_id = ? AND child_id = ?", guardianId, childId);
   if (!res.meta.changes) throw notFound(t`This link does not exist.`);
   await deleteOrphanParent(c.env.DB, guardianId);
+  c.executionCtx.waitUntil(revalidateChatAccess(c.env, { personIds: [guardianId] }));
   return c.json({ ok: true });
 });
 
@@ -140,6 +142,8 @@ personRoutes.post("/admin/guardianships", async (c) => {
   const reverse = await first(c.env.DB, "SELECT 1 AS x FROM guardianships WHERE guardian_id = ? AND child_id = ?", childId, guardianId);
   if (reverse) throw conflict(t`A link already exists the other way round: the child is registered as a parent of this person.`);
   await run(c.env.DB, "INSERT OR IGNORE INTO guardianships (guardian_id, child_id) VALUES (?, ?)", guardianId, childId);
+  // An open chat of the child's team shows the parent label after reconnecting
+  c.executionCtx.waitUntil(revalidateChatAccess(c.env, { personIds: [guardianId] }));
   return c.json({ ok: true }, 201);
 });
 
@@ -147,8 +151,10 @@ personRoutes.post("/admin/guardianships", async (c) => {
 personRoutes.delete("/admin/guardianships/:guardianId/:childId", async (c) => {
   const actor = requireActor(c);
   requireAdmin(actor);
-  const res = await run(c.env.DB, "DELETE FROM guardianships WHERE guardian_id = ? AND child_id = ?", intParam(c, "guardianId"), intParam(c, "childId"));
+  const guardianId = intParam(c, "guardianId");
+  const res = await run(c.env.DB, "DELETE FROM guardianships WHERE guardian_id = ? AND child_id = ?", guardianId, intParam(c, "childId"));
   if (!res.meta.changes) throw notFound(t`This link does not exist.`);
+  c.executionCtx.waitUntil(revalidateChatAccess(c.env, { personIds: [guardianId] }));
   return c.json({ ok: true });
 });
 
@@ -304,6 +310,8 @@ personRoutes.patch("/admin/persons/:id", async (c) => {
   }
   // Safety net for groups with automatic members (admins no longer become their leads by themselves)
   await syncAutoGroups(c.env.DB);
+  // Admins read every chat: without the right their open chats of other teams close
+  if (!input.isAdmin) c.executionCtx.waitUntil(revalidateChatAccess(c.env, { personIds: [personId] }));
   return c.json({ ok: true });
 });
 
@@ -331,9 +339,14 @@ personRoutes.delete("/admin/persons/:id", async (c) => {
     personId,
   );
   const ids = [personId, ...parents.map((p) => p.id)];
+  // All parents, also those who stay: they read along through this child
+  const guardians = await all<{ id: number }>(c.env.DB, "SELECT guardian_id AS id FROM guardianships WHERE child_id = ?", personId);
   await c.env.DB.batch(ids.map((id) => stmt(c.env.DB, "DELETE FROM persons WHERE id = ?", id)));
   const teams = await all<{ id: number }>(c.env.DB, "SELECT id FROM teams");
-  c.executionCtx.waitUntil(forgetInChats(c.env, teams.map((t) => t.id), ids));
+  const teamIds = teams.map((t) => t.id);
+  c.executionCtx.waitUntil(
+    Promise.all([forgetInChats(c.env, teamIds, ids), revalidateChatAccess(c.env, { personIds: [...ids, ...guardians.map((g) => g.id)], teamIds })]),
+  );
   return c.json({ ok: true, parentsDeleted: parents.length });
 });
 

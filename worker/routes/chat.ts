@@ -6,7 +6,7 @@ import { type Actor, isCoachOf, requireAdmin } from "../auth/actor";
 import { chatStub, postAnnouncement, setMuteInChat } from "../domain/chat";
 import { currentLocale } from "../i18n";
 import { all, first, run } from "../lib/db";
-import { badRequest, forbidden, notFound, parse, readJson } from "../lib/http";
+import { badRequest, forbidden, notFound, parse, readJson, upgradeHeaders } from "../lib/http";
 
 export const chatRoutes = new Hono<AppEnv>();
 
@@ -155,7 +155,7 @@ chatRoutes.get("/chat/:teamId/connect", async (c) => {
             : actor.isAdmin
               ? "admin"
               : null;
-  const headers = new Headers(c.req.raw.headers);
+  const headers = upgradeHeaders(c.req.raw);
   headers.set("x-team-id", String(teamId));
   headers.set("x-account-id", String(actor.accountId));
   headers.set("x-person-id", String(actor.personId));

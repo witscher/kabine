@@ -1,4 +1,5 @@
 // Bridge from the worker to the chat Durable Objects (one per team).
+import { all, list } from "../lib/db";
 
 /**
  * Chat rooms live in the EU (messages from minors, GDPR).
@@ -69,4 +70,27 @@ export async function closeChildConnections(env: Env, teamId: number, personIds:
 
 export async function clearChats(env: Env, teamIds: number[]): Promise<void> {
   await Promise.all(teamIds.map((teamId) => callRoom(env, teamId, "/clear", {})));
+}
+
+/**
+ * Rights are checked when a chat connects. After a change of them (removed from a team, left the club, chat
+ * permission of a child, guardianship, account, signed-out device, admin rights) the open sockets of these
+ * people are closed with 4004; the app reconnects and gets the current rights or none. teamIds: only these
+ * rooms, else all. withGuardians: also the parents, who read along through their child.
+ */
+export async function revalidateChatAccess(env: Env, input: { personIds: number[]; teamIds?: number[]; withGuardians?: boolean }): Promise<void> {
+  if (!input.personIds.length) return;
+  const ids = new Set(input.personIds);
+  if (input.withGuardians) {
+    const guardians = await all<{ guardian_id: number }>(env.DB, "SELECT guardian_id FROM guardianships WHERE child_id IN (SELECT value FROM json_each(?))", list(input.personIds));
+    for (const g of guardians) ids.add(g.guardian_id);
+  }
+  const teamIds = input.teamIds ?? (await all<{ id: number }>(env.DB, "SELECT id FROM teams")).map((r) => r.id);
+  await Promise.all(teamIds.map((teamId) => callRoom(env, teamId, "/kick", { personIds: [...ids] })));
+}
+
+/** Everyone in these rooms reconnects, e.g. after the season change or new child limits of the age classes. */
+export async function reconnectChats(env: Env, teamIds?: number[]): Promise<void> {
+  const ids = teamIds ?? (await all<{ id: number }>(env.DB, "SELECT id FROM teams")).map((r) => r.id);
+  await Promise.all(ids.map((teamId) => callRoom(env, teamId, "/kick", { all: true })));
 }

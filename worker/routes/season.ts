@@ -7,7 +7,7 @@ import { requireAdmin } from "../auth/actor";
 import { assertNotProtected, assertNotStaffUnlessAdmin } from "../auth/owner";
 import { recordAttendance, seasonStatsStatements } from "../domain/attendance";
 import { KABINE_VERSION } from "../../shared/changelog";
-import { chatStub, clearChats, markFormerInChats } from "../domain/chat";
+import { chatStub, clearChats, markFormerInChats, reconnectChats, revalidateChatAccess } from "../domain/chat";
 import { holidayDays, type HolidayInput, holidaySource, holidaySourceLabel } from "../domain/holidays";
 import { loadClub } from "../domain/club";
 import { all, first, list, run, stmt } from "../lib/db";
@@ -388,7 +388,8 @@ seasonRoutes.post("/season-change/execute", async (c) => {
     stmt(db, "DELETE FROM app_meta WHERE key = 'generated_on'"),
   ]);
   await syncAutoGroups(db);
-  c.executionCtx.waitUntil(clearChats(c.env, allTeamIds));
+  // New teams, new rights: everyone reconnects to the emptied chats
+  c.executionCtx.waitUntil(clearChats(c.env, allTeamIds).then(() => reconnectChats(c.env, allTeamIds)));
   return c.json({
     ok: true,
     assigned: new Set(memberships.map((m) => m.p)).size,
@@ -559,6 +560,8 @@ seasonRoutes.post("/persons/:id/leave", async (c) => {
     (async () => {
       await markFormerInChats(c.env, teams, personId);
       for (const p of parents) await markFormerInChats(c.env, teams, p.id);
+      // Open chats close, also those of the parents who read along through this person
+      await revalidateChatAccess(c.env, { personIds: [personId, ...parents.map((p) => p.id)], withGuardians: true });
     })(),
   );
   return c.json({ ok: true, parentsDeactivated: parents.length });

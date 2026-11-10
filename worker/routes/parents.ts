@@ -12,6 +12,7 @@ import { enqueuePush } from "../domain/notify";
 import { all, first, stmt } from "../lib/db";
 import { forbidden, parse, readJson } from "../lib/http";
 import { utcIso } from "../lib/time";
+import { revalidateChatAccess } from "../domain/chat";
 
 export const parentRoutes = new Hono<AppEnv>();
 
@@ -88,6 +89,8 @@ parentRoutes.put("/children/:id/permissions", async (c) => {
     stmt(c.env.DB, `UPDATE child_permissions SET ${permission} = ?, updated_at = ? WHERE child_id = ?`, value ? 1 : 0, now, childId),
     stmt(c.env.DB, "INSERT INTO child_permission_log (child_id, account_id, permission, value, changed_at) VALUES (?, ?, ?, ?, ?)", childId, actor.accountId, permission, value ? 1 : 0, now),
   ]);
+  // The child's open chats reconnect with the new permission (reading or writing)
+  if (permission.includes("chat")) c.executionCtx.waitUntil(revalidateChatAccess(c.env, { personIds: [childId] }));
   // Inform the other parent
   const others = await all<{ id: number }>(
     c.env.DB,

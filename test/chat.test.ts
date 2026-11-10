@@ -2,15 +2,16 @@ import { exports } from "cloudflare:workers";
 import { beforeEach, describe, expect, it } from "vitest";
 import { api, eventIn, exec, freshDb, guardian, loginAs, member, person, rows, season, team } from "./helpers";
 
-async function connect(teamId: number, cookie: string) {
+async function connect(teamId: number, cookie: string, extra: Record<string, string> = {}) {
   const res = await exports.default.fetch(
-    new Request(`http://localhost:5173/api/chat/${teamId}/connect`, { headers: { upgrade: "websocket", cookie, origin: "http://localhost:5173" } }),
+    new Request(`http://localhost:5173/api/chat/${teamId}/connect`, { headers: { ...extra, upgrade: "websocket", cookie, origin: "http://localhost:5173" } }),
   );
   if (res.status !== 101) return { status: res.status, body: await res.json() };
   const ws = res.webSocket!;
   ws.accept();
   const messages: any[] = [];
   const waiters: ((m: any) => void)[] = [];
+  const closed = new Promise<{ code: number; reason: string }>((resolve) => ws.addEventListener("close", (e) => resolve({ code: e.code, reason: e.reason })));
   ws.addEventListener("message", (e) => {
     const data = JSON.parse(e.data as string);
     messages.push(data);
@@ -31,7 +32,7 @@ async function connect(teamId: number, cookie: string) {
       };
       waiters.push(check);
     });
-  return { status: 101, ws, messages, next };
+  return { status: 101, ws, messages, next, closed };
 }
 
 let wd: number;
@@ -106,6 +107,44 @@ describe("Mannschaftschat", () => {
     const deleted = await a.next("deleted");
     expect(deleted.id).toBe(fromMum.message.id);
     for (const s of [c, a, m]) s.ws.close();
+  });
+
+  it("ein mitgeschicktes Etikett des Clients wird nicht übernommen", async () => {
+    const c = (await connect(wd, await loginAs(coach))) as any;
+    const forged = { "x-label": "coach", "x-is-mod": "1", "x-can-moderate": "1", "x-name": "Coachy%20M." };
+    const a = (await connect(wd, await loginAs(alma), forged)) as any;
+    expect((await a.next("hello")).me).toMatchObject({ isMod: false });
+    await c.next("hello");
+    a.ws.send(JSON.stringify({ type: "send", text: "Ich bin der Trainer" }));
+    const got = await c.next("message");
+    expect(got.message).toMatchObject({ authorName: "Alma M.", authorLabel: null });
+    for (const s of [c, a]) s.ws.close();
+  });
+
+  it("aus der Mannschaft entfernt: der offene Chat schließt, auch bei den Eltern, und lässt sich nicht wieder öffnen", async () => {
+    const coachCookie = await loginAs(coach);
+    const k = (await connect(wd, await loginAs(kid))) as any;
+    const m = (await connect(wd, await loginAs(mum))) as any;
+    const a = (await connect(wd, await loginAs(alma))) as any;
+    for (const s of [k, m, a]) await s.next("hello");
+    expect((await api(`/teams/${wd}/members/${kid}`, { method: "DELETE", cookie: coachCookie })).status).toBe(200);
+    expect((await k.closed).code).toBe(4004);
+    expect((await m.closed).code).toBe(4004);
+    expect((await connect(wd, await loginAs(kid))).status).toBe(403);
+    expect((await connect(wd, await loginAs(mum))).status).toBe(403);
+    // Others stay connected
+    a.ws.send(JSON.stringify({ type: "send", text: "Noch da" }));
+    expect((await a.next("message")).message.text).toBe("Noch da");
+    a.ws.close();
+  });
+
+  it("Eltern schalten „Chat lesen“ ab: der offene Chat des Kindes schließt", async () => {
+    const k = (await connect(wd, await loginAs(kid))) as any;
+    await k.next("hello");
+    const res = await api(`/children/${kid}/permissions`, { method: "PUT", cookie: await loginAs(mum), body: { permission: "may_read_chat", value: false } });
+    expect(res.status).toBe(200);
+    expect((await k.closed).code).toBe(4004);
+    expect((await connect(wd, await loginAs(kid))).status).toBe(403);
   });
 
   it("Elternfreigaben gelten serverseitig für den Chat", async () => {

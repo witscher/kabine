@@ -12202,6 +12202,7 @@ msgid "Invalid date."
 msgstr "Invalid date."
 
 #: worker/chat/room.ts
+#: worker/chat/room.ts
 msgid "Your rights in this chat have changed."
 msgstr "Your rights in this chat have changed."
 

@@ -17,6 +17,7 @@ import { loadMailSettings } from "../domain/mail";
 import { textsAvailable } from "../domain/texts";
 import { setupPending } from "./join";
 import { isLocale, LOCALES } from "../../shared/i18n";
+import { revalidateChatAccess } from "../domain/chat";
 
 export async function buildMe(env: Env, actor: Actor): Promise<Me> {
   const childIds = actor.children.map((c) => c.id);
@@ -212,6 +213,8 @@ authRoutes.delete("/me/sessions/:id", async (c) => {
   const actor = requireActor(c);
   const res = await run(c.env.DB, "DELETE FROM sessions WHERE id = ? AND account_id = ?", c.req.param("id"), actor.accountId);
   if (!res.meta.changes) throw notFound();
+  // The signed-out device may still have a chat open: all own chats reconnect, the others get in again at once
+  c.executionCtx.waitUntil(revalidateChatAccess(c.env, { personIds: [actor.personId] }));
   return c.json({ ok: true });
 });
 

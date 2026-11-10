@@ -268,7 +268,17 @@ export class ChatRoom extends DurableObject<Env> {
         const ids = new Set(body.personIds as number[]);
         for (const ws of this.ctx.getWebSockets()) {
           const att = ws.deserializeAttachment() as ChatAttachment | null;
-          if (att && !att.viaChildren && !att.isMod && ids.has(att.personId)) ws.close(4003, inLocale(att, () => t`Your rights in this chat have changed.`));
+          if (att && !att.viaChildren && !att.isMod && ids.has(att.personId)) ws.close(4004, inLocale(att, () => t`Your rights in this chat have changed.`));
+        }
+        return Response.json({ ok: true });
+      }
+      case "/kick": {
+        // Rights checked at connect changed (team, guardianship, account, admin): the app reconnects and gets the
+        // current rights or none
+        const ids = body.all === true ? null : new Set(body.personIds as number[]);
+        for (const ws of this.ctx.getWebSockets()) {
+          const att = ws.deserializeAttachment() as ChatAttachment | null;
+          if (att && (!ids || ids.has(att.personId))) ws.close(4004, inLocale(att, () => t`Your rights in this chat have changed.`));
         }
         return Response.json({ ok: true });
       }

@@ -17,6 +17,7 @@ Kabine is used mostly by children and teenagers and their parents. It is built t
 - **Profile pictures need parental approval.** A picture a minor uploads is only visible to others once a parent approves it. Pictures are optional, visible only to people signed in, and deleted when the person leaves the club.
 - **Chat with supervision.** Team chats always include the coaches. Coaches can mute a member and delete messages. Parents read along in the chats of their children's teams unless they opt out. There are no private messages between members.
 - **Names are shortened where others see them.** Helper duties and carpools show "First name L." to the other parents and players. Full names are visible to coaches and admins.
+- **Rights apply at once.** When someone is removed from a team, leaves the club, loses a parent link, admin rights or a device, or parents switch off the chat for their child, chats that are open right now close and reopen only with the rights that are left.
 - **Leaving is complete.** When someone leaves the club, sign-ins, passkeys, push subscriptions, the profile picture and future responses are removed at once; the person and their history are deleted at the next season change at the latest. Chat histories are deleted at every season change.
 
 ## Data inventory

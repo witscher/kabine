@@ -10,6 +10,7 @@ import { generateTrainings } from "../domain/generate";
 import { completeLimits, FULL_LIMITS, type LimitRow, toLimits } from "../domain/child-limits";
 import { holidayPeriods, holidaySourceLabel, importRegionHolidays, MAX_HOLIDAY_DAYS } from "../domain/holidays";
 import { all, first, run, stmt } from "../lib/db";
+import { reconnectChats } from "../domain/chat";
 import { badRequest, conflict, forbidden, notFound, parse, readJson } from "../lib/http";
 import { eachDay, isDate, nowLocal, todayLocal, utcIso } from "../lib/time";
 import { loadClub, ownVenue } from "../domain/club";
@@ -339,6 +340,8 @@ adminRoutes.put("/age-classes", async (c) => {
   const season = await first<{ id: number }>(c.env.DB, "SELECT id FROM seasons WHERE is_current = 1");
   if (!season) throw conflict(t`There is no current season.`);
   await writeAgeClasses(c.env.DB, season.id, ageClasses);
+  // What children of an age class may do in the chat may have changed: every chat reconnects
+  c.executionCtx.waitUntil(reconnectChats(c.env));
   // Without children's access and without parents only the coach could respond there: a hint for the admin
   const withoutParents = await all<{ name: string }>(
     c.env.DB,

@@ -109,6 +109,12 @@ The "Deploy to Cloudflare" button asks for none of these; the app works without 
 
 The club is the provider of the app and the controller for its data. Its legal notice and privacy policy are linked under *Administration → Club* and appear under every screen and every e-mail of the app; admins see a warning while one is missing. Update the privacy policy when the club switches on a module that stores something new (SMS, helper duties, carpools, a fixture connector) or changes its mail or SMS provider: the app's privacy page lists what each switched-on module stores.
 
+## Roles and trust
+
+A club rests on trust, above all in its coaches, and Kabine reflects that. Coaches are trusted with their teams, admins with the whole club: coaches add players and stand-ins, plan trainings with other teams and record who was there without asking an admin. Choose coaches and admins accordingly, and take the role away when someone leaves the job.
+
+What Kabine closes in any case: anything a person without a login or any signed-in user (often a child) could misuse, anything a taken-over account could use to take over someone else's access, and steps that happen easily by mistake with a large effect, such as a wrong schedule link or club-wide changes that cannot be undone. Sign-in codes by e-mail or SMS allow five tries each and at most five codes per address and hour, ten per day.
+
 ## Owner and admins
 
 The first admin is the **owner**. Other admins cannot take away the owner's admin role or access. Keep at least two admins, so the club does not depend on one person. An admin who lost their device gets a personal link from another admin, or signs in with a code by e-mail when e-mail is set up.

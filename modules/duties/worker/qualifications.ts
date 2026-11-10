@@ -12,7 +12,8 @@ import { dutyHubStub } from "../../../worker/duties/hub";
 import { relyingParty } from "../../../worker/auth/webauthn";
 import { randomToken, sha256Hex } from "../../../worker/lib/crypto";
 import { all, first, run, SHORT_NAME_SQL } from "../../../worker/lib/db";
-import { badRequest, forbidden, notFound, parse, readJson } from "../../../worker/lib/http";
+import { revalidateChatAccess } from "../../../worker/domain/chat";
+import { badRequest, forbidden, notFound, parse, readJson, upgradeHeaders } from "../../../worker/lib/http";
 import { nowLocal, todayLocal, utcIso } from "../../../worker/lib/time";
 import { blockView, type EventRow, eventView, loadBlocksAndEntries, qualifiedHub } from "./routes";
 
@@ -68,8 +69,13 @@ qualificationRoutes.put("/admin/skill-grants/:personId/:dutyTypeId", async (c) =
 
 qualificationRoutes.delete("/admin/skill-grants/:personId/:dutyTypeId", async (c) => {
   requireAdmin(requireActor(c));
-  await run(c.env.DB, "DELETE FROM skill_grants WHERE person_id = ? AND duty_type_id = ?", intParam(c, "personId"), intParam(c, "dutyTypeId"));
+  const personId = intParam(c, "personId");
+  const dutyTypeId = intParam(c, "dutyTypeId");
+  await run(c.env.DB, "DELETE FROM skill_grants WHERE person_id = ? AND duty_type_id = ?", personId, dutyTypeId);
   await syncAutoGroups(c.env.DB);
+  // Out of the group of the approved people: its open chat closes
+  const groups = await all<{ id: number }>(c.env.DB, "SELECT id FROM teams WHERE auto_skill = ?", dutyTypeId);
+  if (groups.length) c.executionCtx.waitUntil(revalidateChatAccess(c.env, { personIds: [personId], teamIds: groups.map((g) => g.id) }));
   return c.json({ ok: true });
 });
 
@@ -248,5 +254,5 @@ qualificationRoutes.get("/duties/qualified/:typeId/live", async (c) => {
   const actor = requireActor(c);
   if (c.req.header("upgrade")?.toLowerCase() !== "websocket") throw badRequest(t`Expected a WebSocket connection.`);
   const { type } = await listAccess(c.env.DB, actor, intParam(c, "typeId"));
-  return dutyHubStub(c.env, qualifiedHub(type.id)).fetch(new Request("https://duties.internal/connect", { headers: c.req.raw.headers }));
+  return dutyHubStub(c.env, qualifiedHub(type.id)).fetch(new Request("https://duties.internal/connect", { headers: upgradeHeaders(c.req.raw) }));
 });

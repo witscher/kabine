@@ -5,7 +5,7 @@ import { loadClub } from "./club";
 import { deliver, MailNotConfigured } from "./mail";
 import { sendText } from "./texts";
 import { z } from "zod";
-import { hmacB64url, randomToken, sha256Hex } from "../lib/crypto";
+import { hmacB64url, randomToken, safeEqual, sha256Hex } from "../lib/crypto";
 import { first, run } from "../lib/db";
 import { badRequest, conflict, gone } from "../lib/http";
 import { utcIso } from "../lib/time";
@@ -13,6 +13,8 @@ import { utcIso } from "../lib/time";
 export const CODE_TTL_MS = 15 * 60_000;
 export const MAX_ATTEMPTS = 5;
 const SENDS_PER_ADDRESS_PER_HOUR = 5;
+/** With five tries per code this bounds guessing a six-digit code to 50 tries per address and day. */
+const SENDS_PER_ADDRESS_PER_DAY = 10;
 const SENDS_PER_IP_PER_HOUR = 20;
 
 export type EmailPurpose = "login" | "verify" | "join";
@@ -81,18 +83,18 @@ async function codeHash(env: Env, requestId: string, code: string): Promise<stri
   return hmacB64url(env.APP_SECRET, `email-code:${requestId}:${code}`);
 }
 
-/** At most a few e-mails per address and sender IP per hour. */
-async function rateLimit(env: Env, email: string, ip: string | null): Promise<void> {
-  const keys: [string, number][] = [[`mail:to:${await sha256Hex(email)}`, SENDS_PER_ADDRESS_PER_HOUR]];
-  if (ip) keys.push([`mail:ip:${await sha256Hex(ip)}`, SENDS_PER_IP_PER_HOUR]);
-  for (const [key, limit] of keys) {
-    const count = Number((await env.KV.get(key)) ?? 0);
-    if (count >= limit) throw conflict(t`Many e-mails have just been sent. Please try again in an hour.`, "rate_limited");
-  }
-  for (const [key] of keys) {
-    const count = Number((await env.KV.get(key)) ?? 0);
-    await env.KV.put(key, String(count + 1), { expirationTtl: 3600 });
-  }
+const rateLimited = () => conflict(t`Many e-mails have just been sent. Please try again in an hour.`, "rate_limited");
+
+/**
+ * At most a few codes per sender IP per hour, kept in KV as an extra brake. KV is read, then written, so it is
+ * not exact under parallel requests; the limit per address is enforced in the database (issueEmailCode).
+ */
+async function rateLimitIp(env: Env, ip: string | null): Promise<void> {
+  if (!ip) return;
+  const key = `mail:ip:${await sha256Hex(ip)}`;
+  const count = Number((await env.KV.get(key)) ?? 0);
+  if (count >= SENDS_PER_IP_PER_HOUR) throw rateLimited();
+  await env.KV.put(key, String(count + 1), { expirationTtl: 3600 });
 }
 
 const texts = (): Record<EmailPurpose, { subject: (code: string, app: string) => string; intro: (app: string) => string }> => ({
@@ -139,14 +141,18 @@ export async function issueEmailCode(
   now = Date.now(),
 ): Promise<string> {
   const channel = input.channel ?? "email";
-  await rateLimit(env, channel === "sms" ? `sms:${input.email}` : input.email, input.ip);
+  await rateLimitIp(env, input.ip);
   const requestId = randomToken(18);
   const token = randomToken(24);
   const code = sixDigits();
-  await run(
+  // The limit per address is checked in the same statement that creates the code, so parallel requests cannot
+  // get past it (a read, then a write, would let them)
+  const created = await run(
     env.DB,
     `INSERT INTO email_codes (request_id, purpose, channel, email, account_id, context, token_hash, code_hash, expires_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+     SELECT ?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9
+      WHERE (SELECT count(*) FROM email_codes WHERE email = ?4 AND channel = ?3 AND created_at > ?10) < ?11
+        AND (SELECT count(*) FROM email_codes WHERE email = ?4 AND channel = ?3 AND created_at > ?12) < ?13`,
     requestId,
     input.purpose,
     channel,
@@ -156,7 +162,12 @@ export async function issueEmailCode(
     await sha256Hex(token),
     await codeHash(env, requestId, code),
     utcIso(now + CODE_TTL_MS),
+    utcIso(now - 3_600_000),
+    SENDS_PER_ADDRESS_PER_HOUR,
+    utcIso(now - 86_400_000),
+    SENDS_PER_ADDRESS_PER_DAY,
   );
+  if (!created.meta.changes) throw rateLimited();
   const club = await loadClub(env.DB);
   if (channel === "sms") {
     const app = club.shortName;
@@ -183,13 +194,16 @@ export async function checkEmailCode(env: Env, by: { requestId: string; code: st
       ? await first<EmailCodeRow>(env.DB, "SELECT * FROM email_codes WHERE token_hash = ?", await sha256Hex(by.token))
       : await first<EmailCodeRow>(env.DB, "SELECT * FROM email_codes WHERE request_id = ?", by.requestId);
   if (!row || row.used_at || Date.parse(row.expires_at) <= now) throw gone(invalid(), "code_invalid");
-  if (row.attempts >= MAX_ATTEMPTS) throw gone(t`Too many failed attempts. Please request a new code.`, "code_invalid");
+  const tooMany = () => gone(t`Too many failed attempts. Please request a new code.`, "code_invalid");
+  if (row.attempts >= MAX_ATTEMPTS) throw tooMany();
   if ("code" in by) {
+    // Book the attempt before comparing, in one statement: parallel guesses cannot all read the same count
+    const booked = await run(env.DB, "UPDATE email_codes SET attempts = attempts + 1 WHERE id = ? AND attempts < ? AND used_at IS NULL", row.id, MAX_ATTEMPTS);
+    if (!booked.meta.changes) throw tooMany();
     const expected = await codeHash(env, row.request_id, by.code.replace(/\s/g, ""));
-    if (expected !== row.code_hash) {
-      await run(env.DB, "UPDATE email_codes SET attempts = attempts + 1 WHERE id = ?", row.id);
-      throw badRequest(t`The code is wrong.`, "code_wrong");
-    }
+    if (!safeEqual(expected, row.code_hash)) throw badRequest(t`The code is wrong.`, "code_wrong");
+    // A right code costs no attempt: the account chooser checks it twice
+    await run(env.DB, "UPDATE email_codes SET attempts = attempts - 1 WHERE id = ? AND attempts > 0", row.id);
   }
   return row;
 }

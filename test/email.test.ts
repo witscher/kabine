@@ -86,6 +86,19 @@ describe("Anmeldung per E-Mail", () => {
     expect((await api("/auth/email/verify", { body: { requestId: start.body.requestId, code: right } })).status).toBe(410);
   });
 
+  it("gleichzeitige Fehlversuche zählen alle, danach hilft auch der richtige Code nicht", async () => {
+    const p = await person("Mara");
+    await withEmail(p, "mara@example.org");
+    const start = await api("/auth/email/start", { body: { email: "mara@example.org" } });
+    const right = codeOf(sent[0]!);
+    const wrong = right === "000000" ? "111111" : "000000";
+    const guesses = await Promise.all(Array.from({ length: 40 }, () => api("/auth/email/verify", { body: { requestId: start.body.requestId, code: wrong } })));
+    // Only five guesses are compared at all, the others are refused before
+    expect(guesses.filter((g) => g.status === 400)).toHaveLength(5);
+    expect(await one("SELECT attempts FROM email_codes WHERE request_id = ?", start.body.requestId)).toEqual({ attempts: 5 });
+    expect((await api("/auth/email/verify", { body: { requestId: start.body.requestId, code: right } })).status).toBe(410);
+  });
+
   it("lässt bei gemeinsamer Adresse den Zugang auswählen", async () => {
     const mum = await person("Mara");
     const kid = await person("Yara");
@@ -107,6 +120,20 @@ describe("Anmeldung per E-Mail", () => {
     const sixth = await api("/auth/email/start", { body: { email: "mara@example.org" } });
     expect(sixth.status).toBe(409);
     expect(sent).toHaveLength(5);
+  });
+
+  it("höchstens fünf Codes pro Adresse und Stunde und zehn pro Tag, auch bei gleichzeitigen Anfragen", async () => {
+    const p = await person("Mara");
+    await withEmail(p, "mara@example.org");
+    const burst = await Promise.all(Array.from({ length: 12 }, () => api("/auth/email/start", { body: { email: "mara@example.org" } })));
+    expect(burst.filter((r) => r.status === 200)).toHaveLength(5);
+    expect(sent).toHaveLength(5);
+    // An hour later five more, then the day is full
+    await exec("UPDATE email_codes SET created_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-2 hours')");
+    for (let i = 0; i < 5; i++) expect((await api("/auth/email/start", { body: { email: "mara@example.org" } })).status).toBe(200);
+    await exec("UPDATE email_codes SET created_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-2 hours')");
+    expect((await api("/auth/email/start", { body: { email: "mara@example.org" } })).status).toBe(409);
+    expect(sent).toHaveLength(10);
   });
 });
 

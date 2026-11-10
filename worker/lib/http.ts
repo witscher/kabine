@@ -40,3 +40,15 @@ export async function readJson(request: Request): Promise<unknown> {
     throw badRequest(t`Invalid JSON.`);
   }
 }
+
+/**
+ * Headers for a WebSocket connect passed on to a Durable Object: only the upgrade handshake of the client.
+ * Everything else the DO reads (person, role label, rights) the server sets itself, so a client cannot send it.
+ */
+export function upgradeHeaders(request: Request): Headers {
+  const out = new Headers();
+  for (const [name, value] of request.headers) {
+    if (name === "upgrade" || name === "connection" || name.startsWith("sec-websocket-")) out.set(name, value);
+  }
+  return out;
+}

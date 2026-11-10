@@ -17,6 +17,7 @@ Kabine wird vor allem von Kindern, Jugendlichen und ihren Eltern genutzt. Die Ap
 - **Profilbilder nur mit Freigabe.** Ein Bild, das ein Minderjähriger hochlädt, sehen andere erst nach der Freigabe durch ein Elternteil. Profilbilder sind freiwillig, nur für Angemeldete sichtbar und werden beim Austritt gelöscht.
 - **Chat unter Aufsicht.** In jedem Mannschaftschat sind die Trainer dabei. Sie können Mitglieder stummschalten und Nachrichten löschen. Eltern lesen im Chat der Mannschaften ihrer Kinder mit, wenn sie sich nicht abmelden. Private Nachrichten zwischen Mitgliedern gibt es nicht.
 - **Abgekürzte Namen, wo andere sie sehen.** Helferdienste und Fahrgemeinschaften zeigen anderen Eltern und Spielern „Vorname N.“. Vollständige Namen sehen Trainer und Admins.
+- **Rechte gelten sofort.** Wird jemand aus einer Mannschaft genommen, tritt aus, verliert eine Elternverknüpfung, Admin-Rechte oder ein Gerät, oder schalten Eltern den Chat für ihr Kind ab, schließen gerade offene Chats und öffnen sich nur mit den Rechten wieder, die bleiben.
 - **Austritt ist vollständig.** Wer den Verein verlässt, verliert sofort Anmeldungen, Passkeys, Push-Abos, Profilbild und künftige Rückmeldungen. Die Person und ihr Verlauf sind spätestens zum nächsten Saisonwechsel gelöscht. Chatverläufe werden bei jedem Saisonwechsel gelöscht.
 
 ## Übersicht der Daten

@@ -392,6 +392,13 @@ export function ChatRoomPage({ teamId }: { teamId: string }) {
           invalidate("/chat/rooms");
           return;
         }
+        if (ev.code === 4004) {
+          // Rights changed: reload the rooms (without access the room disappears and this ends) and reconnect
+          invalidate("/chat/rooms");
+          retry.current = 0;
+          timer = window.setTimeout(connect, 300);
+          return;
+        }
         const delay = [1000, 2000, 5000, 10000, 20000][Math.min(retry.current++, 4)]!;
         timer = window.setTimeout(connect, delay);
       };

@@ -18,6 +18,7 @@ import { utcIso } from "../lib/time";
 import { distinctShortNames } from "../../shared/names";
 import { insertPasskey } from "./auth";
 import { currentLocale, withLocale } from "../i18n";
+import { revalidateChatAccess } from "../domain/chat";
 
 /** email: address for sign-in. Required as soon as a new access is created. */
 export type JoinContext =
@@ -414,6 +415,8 @@ async function createJoinAccount(env: Env, request: Request, context: JoinContex
         stmt(db, "DELETE FROM sessions WHERE account_id = ?", accountId),
         stmt(db, "DELETE FROM push_subscriptions WHERE account_id = ?", accountId),
       ]);
+      // Chats still open on the old devices close
+      await revalidateChatAccess(env, { personIds: [context.personId] });
     }
     await addPasskey(accountId);
     await run(db, "UPDATE invites SET used_at = ? WHERE id = ?", utcIso(), context.inviteId);

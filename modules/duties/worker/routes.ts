@@ -34,7 +34,7 @@ import { dutyHubStub, notifyDutyChange } from "../../../worker/duties/hub";
 import { notifyPersons, shortDate, shortTime } from "../../../worker/domain/notify";
 import { textsOn } from "../../../worker/domain/texts";
 import { all, first, run, stmt } from "../../../worker/lib/db";
-import { badRequest, conflict, forbidden, notFound, parse, readJson } from "../../../worker/lib/http";
+import { badRequest, conflict, forbidden, notFound, parse, readJson, upgradeHeaders } from "../../../worker/lib/http";
 import { teamGameMinutes } from "../../../worker/domain/events";
 import { addDays, addMinutesLocal, isDate, isLocalDateTime, isTime, nowLocal, todayLocal } from "../../../worker/lib/time";
 
@@ -662,7 +662,7 @@ dutyRoutes.get("/duties/teams/:id/live", async (c) => {
   const teamId = intParam(c, "id");
   if (c.req.header("upgrade")?.toLowerCase() !== "websocket") throw badRequest(t`Expected a WebSocket connection.`);
   if (!(await helperTeams(c.env.DB, actor)).some((t) => t.teamId === teamId)) throw forbidden();
-  return dutyHubStub(c.env, teamId).fetch(new Request("https://duties.internal/connect", { headers: c.req.raw.headers }));
+  return dutyHubStub(c.env, teamId).fetch(new Request("https://duties.internal/connect", { headers: upgradeHeaders(c.req.raw) }));
 });
 
 // Profile: “I can do this”, channels ---------------------------------------------

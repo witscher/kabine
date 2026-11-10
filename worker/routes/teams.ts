@@ -4,7 +4,7 @@ import { z } from "zod";
 import { type AppEnv, intParam, requireActor } from "../app";
 import { requireAdmin, requireCoach } from "../auth/actor";
 import { syncAutoSquads } from "../domain/auto-squad";
-import { closeChildConnections, closeParentConnections } from "../domain/chat";
+import { closeChildConnections, closeParentConnections, revalidateChatAccess } from "../domain/chat";
 import { listExtraEvents } from "../domain/extra-events";
 import { requireTeam, syncAutoGroups, teamKind } from "../domain/groups";
 import { clubMemberStmt, resetTeamDuties } from "../domain/duties";
@@ -621,6 +621,8 @@ teamRoutes.post("/teams/:id/members", async (c) => {
     input.role,
   );
   await clubMemberStmt(c.env.DB, [input.personId], teamId).run();
+  // An open chat of this team (e.g. as a parent) reconnects with the new role
+  c.executionCtx.waitUntil(revalidateChatAccess(c.env, { personIds: [input.personId], teamIds: [teamId] }));
   return c.json({ ok: true }, 201);
 });
 
@@ -646,6 +648,8 @@ teamRoutes.delete("/teams/:id/members/:personId", async (c) => {
   ]);
   if (!res[0]!.meta.changes) throw notFound(t`This assignment does not exist.`);
   await syncAutoSquads(c.env.DB, [teamId]);
+  // The person and the parents who read along through them lose (or change) access to this chat
+  c.executionCtx.waitUntil(revalidateChatAccess(c.env, { personIds: [personId], teamIds: [teamId], withGuardians: true }));
   return c.json({ ok: true });
 });
 
@@ -722,6 +726,7 @@ teamRoutes.post("/teams/:id/players/existing", async (c) => {
     clubMemberStmt(c.env.DB, [personId], teamId),
   ]);
   await syncAutoSquads(c.env.DB, [teamId]);
+  c.executionCtx.waitUntil(revalidateChatAccess(c.env, { personIds: [personId], teamIds: [teamId], withGuardians: true }));
   const playerName = candidate.first_name;
   const teamName = team?.name;
   const by = actor.firstName;
@@ -760,6 +765,7 @@ teamRoutes.post("/teams/:id/helpers", async (c) => {
     teamId,
     input.trainings ? 1 : 0,
   );
+  c.executionCtx.waitUntil(revalidateChatAccess(c.env, { personIds: [input.personId], teamIds: [teamId], withGuardians: true }));
   return c.json({ ok: true }, 201);
 });
 
