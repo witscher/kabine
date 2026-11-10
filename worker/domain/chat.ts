@@ -79,6 +79,15 @@ export async function clearChats(env: Env, teamIds: number[]): Promise<void> {
  * rooms, else all. withGuardians: also the parents, who read along through their child.
  */
 export async function revalidateChatAccess(env: Env, input: { personIds: number[]; teamIds?: number[]; withGuardians?: boolean }): Promise<void> {
+  try {
+    await kickPersons(env, input);
+  } catch (err) {
+    // Runs after the response (waitUntil): a failure must not surface anywhere, the next connect checks anyway
+    console.warn("Chat revalidation failed", err instanceof Error ? err.message : err);
+  }
+}
+
+async function kickPersons(env: Env, input: { personIds: number[]; teamIds?: number[]; withGuardians?: boolean }): Promise<void> {
   if (!input.personIds.length) return;
   const ids = new Set(input.personIds);
   if (input.withGuardians) {
@@ -91,6 +100,12 @@ export async function revalidateChatAccess(env: Env, input: { personIds: number[
 
 /** Everyone in these rooms reconnects, e.g. after the season change or new child limits of the age classes. */
 export async function reconnectChats(env: Env, teamIds?: number[]): Promise<void> {
-  const ids = teamIds ?? (await all<{ id: number }>(env.DB, "SELECT id FROM teams")).map((r) => r.id);
+  let ids = teamIds;
+  try {
+    ids ??= (await all<{ id: number }>(env.DB, "SELECT id FROM teams")).map((r) => r.id);
+  } catch (err) {
+    console.warn("Chat reconnect failed", err instanceof Error ? err.message : err);
+    return;
+  }
   await Promise.all(ids.map((teamId) => callRoom(env, teamId, "/kick", { all: true })));
 }

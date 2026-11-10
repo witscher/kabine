@@ -10,6 +10,7 @@ import { maintenanceState } from "./lib/maintenance";
 import { WORKER_MODULES } from "./modules";
 import { handleQueue } from "./queue";
 import { adminRoutes } from "./routes/admin";
+import { auditRoutes } from "./routes/audit";
 import { authRoutes } from "./routes/auth";
 import { avatarRoutes } from "./routes/avatars";
 import { chatRoutes } from "./routes/chat";
@@ -59,6 +60,7 @@ for (const routes of [
   personRoutes,
   planRoutes,
   adminRoutes,
+  auditRoutes,
   parentRoutes,
   pushRoutes,
   chatRoutes,

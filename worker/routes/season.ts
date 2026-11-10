@@ -17,6 +17,7 @@ import { type AgeClassDbRow, ageClassJson, ageClassSchema, requiredDuties, write
 import { canManagePerson } from "./persons";
 import { syncAutoGroups } from "../domain/groups";
 import { MODULE_EXPORT_TABLES, modulePersonLeaves } from "../modules";
+import { audit, auditStmt } from "../domain/audit";
 
 export const seasonRoutes = new Hono<AppEnv>();
 
@@ -386,6 +387,9 @@ seasonRoutes.post("/season-change/execute", async (c) => {
     stmt(db, "DELETE FROM chat_mutes"),
     stmt(db, "UPDATE invites SET revoked_at = ? WHERE revoked_at IS NULL AND kind IN ('player', 'parent')", utcIso()),
     stmt(db, "DELETE FROM app_meta WHERE key = 'generated_on'"),
+    // The protocol starts over with the new season: only the season change itself stays in it
+    stmt(db, "DELETE FROM audit_log"),
+    auditStmt(db, actor, "season_change", { detail: { season: next.name, former: formerIds.length } }),
   ]);
   await syncAutoGroups(db);
   // New teams, new rights: everyone reconnects to the emptied chats
@@ -465,6 +469,8 @@ export const EXPORT_EXCLUDED = [
   "d1_migrations",
   // Generated keys (worker/lib/instance-secrets.ts): never in a file that leaves the installation
   "instance_secrets",
+  // The protocol stays in the installation (docs/privacy.md)
+  "audit_log",
 ];
 
 function base64(bytes: ArrayBuffer | Uint8Array | number[]): string {
@@ -477,8 +483,9 @@ function base64(bytes: ArrayBuffer | Uint8Array | number[]): string {
 seasonRoutes.get("/admin/export", async (c) => {
   const actor = requireActor(c);
   requireAdmin(actor);
-  // Log for the club's accountability: who exported when (IDs only, in the worker logs)
+  // Log for the club's accountability: who exported when (IDs only, in the worker logs, and in the protocol)
   console.info(JSON.stringify({ event: "admin_export", personId: actor.personId, accountId: actor.accountId, viewAs: actor.viewAs ?? null, at: utcIso() }));
+  await audit(c.env.DB, actor, "export");
   const db = c.env.DB;
   const data: Record<string, unknown> = {};
   for (const table of EXPORT_TABLES) data[table] = await all(db, `SELECT * FROM ${table}`);
@@ -553,8 +560,8 @@ seasonRoutes.post("/persons/:id/leave", async (c) => {
                          WHERE g2.guardian_id = g.guardian_id AND g2.child_id <> ?1 AND cp.is_former = 0)`,
     personId,
   );
-  const statements = await retirePerson(c.env.DB, personId, now);
-  for (const p of parents) statements.push(...(await retirePerson(c.env.DB, p.id, now)));
+  const statements = [auditStmt(c.env.DB, actor, "left_club", { personId }), ...(await retirePerson(c.env.DB, personId, now))];
+  for (const p of parents) statements.push(auditStmt(c.env.DB, actor, "left_club", { personId: p.id, detail: { parent: true } }), ...(await retirePerson(c.env.DB, p.id, now)));
   await c.env.DB.batch(statements);
   c.executionCtx.waitUntil(
     (async () => {

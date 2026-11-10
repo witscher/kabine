@@ -13,6 +13,7 @@ import { syncAutoGroups } from "../domain/groups";
 import { all, first, list, run, stmt } from "../lib/db";
 import { badRequest, conflict, forbidden, notFound, parse, readJson } from "../lib/http";
 import { utcIso } from "../lib/time";
+import { audit, auditStmt, personName } from "../domain/audit";
 
 export const personRoutes = new Hono<AppEnv>();
 
@@ -93,6 +94,7 @@ personRoutes.post("/persons/:id/active", async (c) => {
     personId,
   );
   if (!res.meta.changes) throw notFound();
+  await audit(c.env.DB, actor, active ? "set_active" : "set_inactive", { personId });
   // Inactive persons drop out of automatic squads, reactivated ones come back
   const teams = await all<{ team_id: number }>(c.env.DB, "SELECT team_id FROM core_squad WHERE person_id = ?", personId);
   if (teams.length) await syncAutoSquads(c.env.DB, teams.map((t) => t.team_id));
@@ -111,6 +113,7 @@ personRoutes.delete("/persons/:id/account", async (c) => {
   if (target?.is_admin && !actor.isAdmin) throw forbidden();
   const res = await run(c.env.DB, "DELETE FROM accounts WHERE person_id = ?", personId);
   if (!res.meta.changes) throw notFound(t`This person has no access.`);
+  await audit(c.env.DB, actor, "account_removed", { personId });
   c.executionCtx.waitUntil(revalidateChatAccess(c.env, { personIds: [personId] }));
   return c.json({ ok: true });
 });
@@ -122,8 +125,10 @@ personRoutes.delete("/guardianships/:guardianId/:childId", async (c) => {
   const childId = intParam(c, "childId");
   const isSelf = guardianId === actor.personId;
   if (!isSelf) await requireManagePerson(c.env.DB, actor, childId);
+  const child = await personName(c.env.DB, childId);
   const res = await run(c.env.DB, "DELETE FROM guardianships WHERE guardian_id = ? AND child_id = ?", guardianId, childId);
   if (!res.meta.changes) throw notFound(t`This link does not exist.`);
+  await audit(c.env.DB, actor, "guardian_removed", { personId: guardianId, detail: { child } });
   await deleteOrphanParent(c.env.DB, guardianId);
   c.executionCtx.waitUntil(revalidateChatAccess(c.env, { personIds: [guardianId] }));
   return c.json({ ok: true });
@@ -141,7 +146,8 @@ personRoutes.post("/admin/guardianships", async (c) => {
   if (found.length !== 2) throw notFound(t`This person does not exist.`);
   const reverse = await first(c.env.DB, "SELECT 1 AS x FROM guardianships WHERE guardian_id = ? AND child_id = ?", childId, guardianId);
   if (reverse) throw conflict(t`A link already exists the other way round: the child is registered as a parent of this person.`);
-  await run(c.env.DB, "INSERT OR IGNORE INTO guardianships (guardian_id, child_id) VALUES (?, ?)", guardianId, childId);
+  const added = await run(c.env.DB, "INSERT OR IGNORE INTO guardianships (guardian_id, child_id) VALUES (?, ?)", guardianId, childId);
+  if (added.meta.changes) await audit(c.env.DB, actor, "guardian_set", { personId: guardianId, detail: { child: await personName(c.env.DB, childId) } });
   // An open chat of the child's team shows the parent label after reconnecting
   c.executionCtx.waitUntil(revalidateChatAccess(c.env, { personIds: [guardianId] }));
   return c.json({ ok: true }, 201);
@@ -152,8 +158,11 @@ personRoutes.delete("/admin/guardianships/:guardianId/:childId", async (c) => {
   const actor = requireActor(c);
   requireAdmin(actor);
   const guardianId = intParam(c, "guardianId");
-  const res = await run(c.env.DB, "DELETE FROM guardianships WHERE guardian_id = ? AND child_id = ?", guardianId, intParam(c, "childId"));
+  const childId = intParam(c, "childId");
+  const child = await personName(c.env.DB, childId);
+  const res = await run(c.env.DB, "DELETE FROM guardianships WHERE guardian_id = ? AND child_id = ?", guardianId, childId);
   if (!res.meta.changes) throw notFound(t`This link does not exist.`);
+  await audit(c.env.DB, actor, "guardian_removed", { personId: guardianId, detail: { child } });
   c.executionCtx.waitUntil(revalidateChatAccess(c.env, { personIds: [guardianId] }));
   return c.json({ ok: true });
 });
@@ -194,6 +203,9 @@ personRoutes.post("/persons/:id/personal-link", async (c) => {
   }
   // On an existing account the link always replaces the previous passkeys and sessions (see routes/join.ts)
   const invite = await createInvite(c.env, { kind: "personal", personId, createdBy: actor.personId });
+  // With an existing access the link signs out the previous devices once it is used
+  const hasAccess = !!(await first(c.env.DB, "SELECT 1 AS ok FROM accounts WHERE person_id = ?", personId));
+  await audit(c.env.DB, actor, "personal_link", { personId, detail: { replacesAccess: hasAccess } });
   return c.json({ url: inviteUrl(relyingParty(c.env, c.req.raw).origin, invite.token), expiresAt: invite.expiresAt }, 201);
 });
 
@@ -298,6 +310,8 @@ personRoutes.patch("/admin/persons/:id", async (c) => {
   const input = parse(adminFlagSchema, await readJson(c.req.raw));
   if (personId === actor.personId && !input.isAdmin) throw conflict(t`You cannot remove your own admin rights.`);
   await assertNotProtected(c.env.DB, actor, personId);
+  const wasAdmin = (await first<{ is_admin: number }>(c.env.DB, "SELECT is_admin FROM persons WHERE id = ?", personId))?.is_admin === 1;
+  if (wasAdmin !== input.isAdmin) await audit(c.env.DB, actor, input.isAdmin ? "admin_granted" : "admin_removed", { personId });
   if (!input.isAdmin) {
     await run(c.env.DB, "UPDATE persons SET is_admin = 0, admin_email = NULL WHERE id = ?", personId);
   } else {
@@ -327,7 +341,7 @@ personRoutes.delete("/admin/persons/:id", async (c) => {
   const personId = intParam(c, "id");
   if (personId === actor.personId) throw badRequest(t`You cannot delete yourself.`);
   await assertNotProtected(c.env.DB, actor, personId);
-  const person = await first<{ id: number }>(c.env.DB, "SELECT id FROM persons WHERE id = ?", personId);
+  const person = await first<{ id: number; name: string }>(c.env.DB, "SELECT id, trim(first_name || ' ' || coalesce(last_name, '')) AS name FROM persons WHERE id = ?", personId);
   if (!person) throw notFound(t`This person does not exist.`);
   const parents = await all<{ id: number }>(
     c.env.DB,
@@ -341,7 +355,11 @@ personRoutes.delete("/admin/persons/:id", async (c) => {
   const ids = [personId, ...parents.map((p) => p.id)];
   // All parents, also those who stay: they read along through this child
   const guardians = await all<{ id: number }>(c.env.DB, "SELECT guardian_id AS id FROM guardianships WHERE child_id = ?", personId);
-  await c.env.DB.batch(ids.map((id) => stmt(c.env.DB, "DELETE FROM persons WHERE id = ?", id)));
+  // The entries go first in the batch, while the names are still there
+  await c.env.DB.batch([
+    ...ids.map((id) => auditStmt(c.env.DB, actor, "person_deleted", { personId: id, detail: id === personId ? {} : { parentOf: person.name } })),
+    ...ids.map((id) => stmt(c.env.DB, "DELETE FROM persons WHERE id = ?", id)),
+  ]);
   const teams = await all<{ id: number }>(c.env.DB, "SELECT id FROM teams");
   const teamIds = teams.map((t) => t.id);
   c.executionCtx.waitUntil(

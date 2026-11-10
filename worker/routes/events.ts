@@ -32,6 +32,7 @@ import { all, first, list, run, stmt } from "../lib/db";
 import { moduleEventDetail, moduleEventSummaries, moduleParticipantsLeft } from "../modules";
 import { badRequest, conflict, forbidden, notFound, parse, readJson } from "../lib/http";
 import { addDays, isDate, isLocalDateTime, isTime, localToInstant, nowLocal, todayLocal, utcIso } from "../lib/time";
+import { audit, auditEvent, auditStmt } from "../domain/audit";
 
 export const eventRoutes = new Hono<AppEnv>();
 
@@ -570,6 +571,7 @@ eventRoutes.post("/events/:id/cancel", async (c) => {
     reason,
     event.id,
   );
+  await audit(c.env.DB, actor, "event_cancelled", { teamId: teams[0]?.id, eventId: event.id, detail: auditEvent(event) });
   const labelOf = () => (event.kind === "training" ? t`Training` : eventTitle(event, teams));
   await notifyPersons(
     c.env,
@@ -606,6 +608,7 @@ eventRoutes.post("/events/:id/uncancel", async (c) => {
        updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now') WHERE id = ?`,
     event.id,
   );
+  await audit(c.env.DB, actor, "event_uncancelled", { teamId: teams[0]?.id, eventId: event.id, detail: auditEvent(event) });
   const labelOf = () => (event.kind === "training" ? t`Training` : eventTitle(event, teams));
   await notifyPersons(
     c.env,
@@ -876,9 +879,12 @@ async function createDutyBlocks(
 
 eventRoutes.delete("/events/:id", async (c) => {
   const actor = requireActor(c);
-  const { event } = await managedEvent(c.env.DB, actor, intParam(c, "id"));
+  const { event, teams } = await managedEvent(c.env.DB, actor, intParam(c, "id"));
   if (event.kind !== "special") throw badRequest(t`Only special events can be deleted. Please cancel trainings and games instead.`);
-  await run(c.env.DB, "DELETE FROM events WHERE id = ?", event.id);
+  await c.env.DB.batch([
+    auditStmt(c.env.DB, actor, "event_deleted", { teamId: teams[0]?.id, eventId: event.id, detail: auditEvent(event) }),
+    stmt(c.env.DB, "DELETE FROM events WHERE id = ?", event.id),
+  ]);
   return c.json({ ok: true });
 });
 

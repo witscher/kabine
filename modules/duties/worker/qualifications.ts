@@ -16,6 +16,7 @@ import { revalidateChatAccess } from "../../../worker/domain/chat";
 import { badRequest, forbidden, notFound, parse, readJson, upgradeHeaders } from "../../../worker/lib/http";
 import { nowLocal, todayLocal, utcIso } from "../../../worker/lib/time";
 import { blockView, type EventRow, eventView, loadBlocksAndEntries, qualifiedHub } from "./routes";
+import { audit } from "../../../worker/domain/audit";
 
 export const qualificationRoutes = new Hono<AppEnv>();
 
@@ -62,16 +63,22 @@ qualificationRoutes.put("/admin/skill-grants/:personId/:dutyTypeId", async (c) =
   const personId = intParam(c, "personId");
   const type = await adminType(db, intParam(c, "dutyTypeId"));
   if (!(await first(db, "SELECT 1 AS ok FROM persons WHERE id = ? AND is_former = 0", personId))) throw notFound(t`This person does not exist.`);
-  await run(db, "INSERT OR IGNORE INTO skill_grants (person_id, duty_type_id, granted_by) VALUES (?, ?, ?)", personId, type.id, actor.personId);
+  const added = await run(db, "INSERT OR IGNORE INTO skill_grants (person_id, duty_type_id, granted_by) VALUES (?, ?, ?)", personId, type.id, actor.personId);
+  if (added.meta.changes) await audit(db, actor, "duties.grant", { personId, detail: { duty: type.name } });
   await syncAutoGroups(db);
   return c.json({ ok: true });
 });
 
 qualificationRoutes.delete("/admin/skill-grants/:personId/:dutyTypeId", async (c) => {
-  requireAdmin(requireActor(c));
+  const actor = requireActor(c);
+  requireAdmin(actor);
   const personId = intParam(c, "personId");
   const dutyTypeId = intParam(c, "dutyTypeId");
-  await run(c.env.DB, "DELETE FROM skill_grants WHERE person_id = ? AND duty_type_id = ?", personId, dutyTypeId);
+  const removed = await run(c.env.DB, "DELETE FROM skill_grants WHERE person_id = ? AND duty_type_id = ?", personId, dutyTypeId);
+  if (removed.meta.changes) {
+    const duty = (await first<{ name: string }>(c.env.DB, "SELECT name FROM duty_types WHERE id = ?", dutyTypeId))?.name ?? null;
+    await audit(c.env.DB, actor, "duties.ungrant", { personId, detail: { duty } });
+  }
   await syncAutoGroups(c.env.DB);
   // Out of the group of the approved people: its open chat closes
   const groups = await all<{ id: number }>(c.env.DB, "SELECT id FROM teams WHERE auto_skill = ?", dutyTypeId);

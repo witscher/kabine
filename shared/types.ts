@@ -418,3 +418,21 @@ export interface MyStats {
     }[];
   }[];
 }
+
+/**
+ * Short facts of a protocol entry, e.g. `{ role: "helper" }`, `{ new: 2, moved: 1, cancelled: 0 }`,
+ * `{ title: "Summer party", startsAt: "2027-06-20T15:00" }`. The app turns them into text.
+ */
+export type AuditDetail = Record<string, string | number | boolean | null>;
+
+/** An entry of Administration → Protocol (admins only). */
+export interface AuditEntry {
+  id: number;
+  at: string;
+  actor: { id: number | null; name: string | null };
+  action: string;
+  person: { id: number; name: string | null } | null;
+  team: { id: number; name: string | null } | null;
+  eventId: number | null;
+  detail: AuditDetail | null;
+}

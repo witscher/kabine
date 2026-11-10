@@ -5,7 +5,7 @@ import { t } from "@lingui/core/macro";
 import { Hono } from "hono";
 import { z } from "zod";
 import { type AppEnv, intParam, requireActor } from "../app";
-import { isCoachOf, requireAdmin, requireCoach } from "../auth/actor";
+import { type Actor, isCoachOf, requireAdmin, requireCoach } from "../auth/actor";
 import { activeConnectors, allConnectors, type Connector, connectorById, importGames, SYNC_OVERVIEW_SQL, TEAM_FIXTURES_SELECT, type TeamFixtures, teamSource } from "../domain/fixtures";
 import { ownScheduleReminderDays } from "../domain/club";
 import { scheduleStale } from "../domain/coach-hints";
@@ -14,6 +14,7 @@ import { all, first, run } from "../lib/db";
 import { ApiError, badRequest, conflict, notFound, parse, readJson } from "../lib/http";
 import { nowLocal, utcIso } from "../lib/time";
 import { FixtureFormatError } from "../module-api";
+import { audit } from "../domain/audit";
 
 export const gameRoutes = new Hono<AppEnv>();
 
@@ -90,11 +91,13 @@ gameRoutes.put("/teams/:id/games/source", async (c) => {
     await readJson(c.req.raw),
   );
   if (link === null) {
+    const before = await first<{ fixture_connector: string | null }>(c.env.DB, "SELECT fixture_connector FROM teams WHERE id = ?", teamId);
     await run(
       c.env.DB,
       "UPDATE teams SET fixture_connector = NULL, fixture_source = NULL, fixture_synced_at = NULL, fixture_error = NULL WHERE id = ?",
       teamId,
     );
+    if (before?.fixture_connector) await audit(c.env.DB, actor, "schedule_removed", { teamId, detail: { source: connectorById(before.fixture_connector)?.name ?? before.fixture_connector } });
     return c.json(await sourceView(c.env.DB, await teamFixtures(c.env.DB, teamId)));
   }
   const candidates = activeConnectors().filter((x) => !chosen || x.id === chosen);
@@ -111,6 +114,7 @@ gameRoutes.put("/teams/:id/games/source", async (c) => {
     JSON.stringify(match.source),
     teamId,
   );
+  await audit(c.env.DB, actor, "schedule_linked", { teamId, detail: { source: match.connector.name } });
   return c.json(await sourceView(c.env.DB, await teamFixtures(c.env.DB, teamId)));
 });
 
@@ -198,7 +202,7 @@ gameRoutes.post("/teams/:id/games/claim", async (c) => {
     await run(c.env.DB, "UPDATE teams SET fixture_claimed_at = NULL, fixture_error = ? WHERE id = ?", t`Fetch failed: ${detail}`, teamId);
     throw new ApiError(503, "fetch_failed", t`Fetch failed: ${detail}`);
   }
-  return c.json({ claimed: true, summary: await runImport(c.env, team, data, (id) => isCoachOf(actor, id)) });
+  return c.json({ claimed: true, summary: await runImport(c.env, team, data, actor) });
 });
 
 /** Fetch on the device failed: release the reservation and remember the error. */
@@ -222,13 +226,18 @@ gameRoutes.post("/teams/:id/games/import", async (c) => {
   if (!team.fixture_claimed_at || Date.now() - Date.parse(team.fixture_claimed_at) > CLAIM_MS) {
     throw conflict(t`The fetch was not reserved or has expired. Please try again.`);
   }
-  return c.json(await runImport(c.env, team, body.data, (id) => isCoachOf(actor, id)));
+  return c.json(await runImport(c.env, team, body.data, actor));
 });
 
-async function runImport(env: Env, team: TeamFixtures, data: unknown, mayCoach: (teamId: number) => boolean) {
+async function runImport(env: Env, team: TeamFixtures, data: unknown, actor: Actor) {
   const name = connectorById(team.fixture_connector)?.name ?? "";
   try {
-    return await importGames(env, team, data, Date.now(), mayCoach);
+    const summary = await importGames(env, team, data, Date.now(), (id) => isCoachOf(actor, id));
+    // Only syncs that changed something: new, moved or cancelled games
+    if (summary.created || summary.moved || summary.cancelled) {
+      await audit(env.DB, actor, "schedule_sync", { teamId: team.id, detail: { source: name, new: summary.created, moved: summary.moved, cancelled: summary.cancelled } });
+    }
+    return summary;
   } catch (err) {
     const detail = err instanceof Error ? err.message : "";
     const message =

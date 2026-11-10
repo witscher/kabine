@@ -3,7 +3,7 @@
 import type { ComponentType } from "preact";
 import type { IconName } from "./icons";
 import type { ModuleManifest } from "../shared/module-api";
-import type { EventDetail, EventSummary, Me, StatsRange, TeamStats } from "../shared/types";
+import type { AuditEntry, EventDetail, EventSummary, Me, StatsRange, TeamStats } from "../shared/types";
 
 export interface AppModule {
   manifest: ModuleManifest;
@@ -29,6 +29,11 @@ export interface AppModule {
   teamStats?: { label: () => string; shown: (stats: TeamStats) => boolean; view: ComponentType<{ teamId: number; range: StatsRange }> };
   /** A card on "My statistics" per person and team (players, parents for a child), e.g. the family's helper duties. */
   myStats?: ComponentType<{ personId: number; self: boolean; teamId: number }>;
+  /**
+   * Sentences for the module's own entries in Administration → Protocol, by action code (e.g. "duties.grant",
+   * written with `audit()` from worker/domain/audit.ts). `who`, `person` and `team` are already named.
+   */
+  auditTexts?: () => Record<string, (entry: AuditEntry, names: { who: string; person: string; team: string }) => string>;
 }
 
 export function defineAppModule(module: AppModule): AppModule {

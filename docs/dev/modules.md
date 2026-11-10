@@ -58,6 +58,7 @@ modules/carpools/
 | `gameLinks` | links of a fixture module for a game (live ticker, game report) on the "In progress" card and the event page |
 | `teamStats` | a view of its own on a team's statistics page next to Training and Games (the helper duties show helpers per family) |
 | `myStats` | a card per person and team on "My statistics" (the helper duties show the family's duties) |
+| `auditTexts` | sentences for the module's own entries in *Administration → Protocol*, by action code; the worker writes them with `audit()` from `worker/domain/audit.ts`, codes prefixed with the module id (`duties.grant`) |
 
 [`modules/carpools/`](../../modules/carpools/) uses all of the event hooks and is the reference module.
 

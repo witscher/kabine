@@ -18,6 +18,7 @@ import { all, first, list, run, stmt } from "../lib/db";
 import { badRequest, conflict, notFound, parse, readJson } from "../lib/http";
 import { nowLocal, utcIso } from "../lib/time";
 import { relyingParty } from "../auth/webauthn";
+import { audit, auditStmt } from "../domain/audit";
 
 export const teamRoutes = new Hono<AppEnv>();
 
@@ -479,6 +480,7 @@ teamRoutes.delete("/teams/:id", async (c) => {
   const members = await first<{ n: number }>(c.env.DB, "SELECT count(*) AS n FROM team_memberships WHERE team_id = ?", teamId);
   if (kind === "team" && (members?.n ?? 0) > 0) throw conflict(t`The team still has members. Please remove all of them first.`);
   await c.env.DB.batch([
+    auditStmt(c.env.DB, actor, "team_deleted", { teamId, detail: { group: kind === "group" } }),
     stmt(
       c.env.DB,
       `DELETE FROM events WHERE id IN (SELECT event_id FROM event_teams WHERE team_id = ?)
@@ -514,6 +516,7 @@ teamRoutes.post("/teams/:id/players", async (c) => {
   );
   await run(c.env.DB, "INSERT INTO team_memberships (person_id, team_id, role) VALUES (?, ?, 'player')", person!.id, teamId);
   await clubMemberStmt(c.env.DB, [person!.id], teamId).run();
+  await audit(c.env.DB, actor, "member_added", { personId: person!.id, teamId, detail: { role: "player", created: true } });
   return c.json({ id: person!.id }, 201);
 });
 
@@ -536,6 +539,7 @@ teamRoutes.post("/teams/:id/staff", async (c) => {
     input.lastName ?? null,
   );
   await run(c.env.DB, "INSERT INTO team_memberships (person_id, team_id, role) VALUES (?, ?, 'staff')", person!.id, teamId);
+  await audit(c.env.DB, actor, "member_added", { personId: person!.id, teamId, detail: { role: "staff", created: true } });
   return c.json({ id: person!.id }, 201);
 });
 
@@ -595,7 +599,10 @@ teamRoutes.post("/teams/:id/players/import", async (c) => {
       ]);
       created++;
     }
-    if (created) await syncAutoSquads(c.env.DB, [teamId]);
+    if (created) {
+      await syncAutoSquads(c.env.DB, [teamId]);
+      await audit(c.env.DB, actor, "member_added", { teamId, detail: { role: "player", imported: created } });
+    }
   }
   return c.json({ rows, created });
 });
@@ -613,13 +620,14 @@ teamRoutes.post("/teams/:id/members", async (c) => {
   if (input.role !== "coach" && (await teamKind(c.env.DB, teamId)).autoSkill != null) throw badRequest(t`The members of this group are determined automatically.`, "auto_members");
   const person = await first(c.env.DB, "SELECT 1 AS ok FROM persons WHERE id = ? AND is_former = 0", input.personId);
   if (!person) throw notFound(t`This person does not exist.`);
-  await run(
+  const added = await run(
     c.env.DB,
     "INSERT OR IGNORE INTO team_memberships (person_id, team_id, role) VALUES (?, ?, ?)",
     input.personId,
     teamId,
     input.role,
   );
+  if (added.meta.changes) await audit(c.env.DB, actor, "member_added", { personId: input.personId, teamId, detail: { role: input.role } });
   await clubMemberStmt(c.env.DB, [input.personId], teamId).run();
   // An open chat of this team (e.g. as a parent) reconnects with the new role
   c.executionCtx.waitUntil(revalidateChatAccess(c.env, { personIds: [input.personId], teamIds: [teamId] }));
@@ -636,6 +644,8 @@ teamRoutes.delete("/teams/:id/members/:personId", async (c) => {
   if (role !== "coach" && (await teamKind(c.env.DB, teamId)).autoSkill != null) throw badRequest(t`The members of this group are determined automatically.`, "auto_members");
   const res = await c.env.DB.batch([
     stmt(c.env.DB, "DELETE FROM team_memberships WHERE team_id = ? AND person_id = ? AND role = ?", teamId, personId, role),
+    // Only when the membership existed (the statement before removed it)
+    auditStmt(c.env.DB, actor, "member_removed", { personId, teamId, detail: { role } }, { ifChanged: true }),
     stmt(
       c.env.DB,
       `DELETE FROM core_squad WHERE team_id = ? AND person_id = ?
@@ -724,6 +734,7 @@ teamRoutes.post("/teams/:id/players/existing", async (c) => {
     stmt(c.env.DB, "DELETE FROM team_memberships WHERE team_id = ? AND person_id = ? AND role = 'helper'", teamId, personId),
     stmt(c.env.DB, "INSERT OR IGNORE INTO team_memberships (person_id, team_id, role) VALUES (?, ?, 'player')", personId, teamId),
     clubMemberStmt(c.env.DB, [personId], teamId),
+    auditStmt(c.env.DB, actor, "member_added", { personId, teamId, detail: { role: "player" } }),
   ]);
   await syncAutoSquads(c.env.DB, [teamId]);
   c.executionCtx.waitUntil(revalidateChatAccess(c.env, { personIds: [personId], teamIds: [teamId], withGuardians: true }));
@@ -765,6 +776,7 @@ teamRoutes.post("/teams/:id/helpers", async (c) => {
     teamId,
     input.trainings ? 1 : 0,
   );
+  await audit(c.env.DB, actor, "member_added", { personId: input.personId, teamId, detail: { role: "helper" } });
   c.executionCtx.waitUntil(revalidateChatAccess(c.env, { personIds: [input.personId], teamIds: [teamId], withGuardians: true }));
   return c.json({ ok: true }, 201);
 });

@@ -21,6 +21,17 @@ export default defineAppModule({
   // Statistics: helpers per family (coaches) and the family's duties (players, parents)
   teamStats: { label: () => t`Helpers`, shown: (stats) => stats.helperPlan, view: lazyPage(() => import("./stats").then((m) => m.HelperStatsView)) },
   myStats: lazyPage(() => import("./stats").then((m) => m.MyHelperCard)),
+  // Approvals by an admin (Administration → Protocol)
+  auditTexts: () => ({
+    "duties.grant": (e, { who, person }) => {
+      const duty = String(e.detail?.duty ?? "");
+      return t`${who} approved ${person} for ${duty}`;
+    },
+    "duties.ungrant": (e, { who, person }) => {
+      const duty = String(e.detail?.duty ?? "");
+      return t`${who} took back the approval of ${person} for ${duty}`;
+    },
+  }),
   adminMenu: () => [
     { href: "/verwaltung/helferdienste", icon: "helping", title: t`Helper duties`, sub: t`Duty types and templates for games and special events` },
     { href: "/verwaltung/freigaben", icon: "whistle", title: t`Approvals`, sub: t`Who may take duties an admin approves, e.g. youth referees` },

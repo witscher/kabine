@@ -308,6 +308,8 @@ describe("Vereinsaustritt und Saisonwechsel", () => {
       },
     });
     expect(done.body).toMatchObject({ ok: true, assigned: 2, deletedPersons: 1 });
+    // The protocol starts over: only the season change itself is in it
+    expect(await rows("SELECT action, detail FROM audit_log")).toEqual([{ action: "season_change", detail: JSON.stringify({ season: "2027/28", former: 1 }) }]);
     expect((await rows("SELECT * FROM events")).length).toBe(0);
     expect((await rows("SELECT * FROM persons WHERE id = ?", cleo)).length).toBe(0);
     expect((await rows("SELECT * FROM team_memberships WHERE role = 'coach'")).length).toBe(0);

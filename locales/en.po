@@ -388,6 +388,10 @@ msgstr "Create new link"
 msgid "This assignment does not exist."
 msgstr "This assignment does not exist."
 
+#: src/pages/audit.tsx
+msgid "{who} cancelled {label}"
+msgstr "{who} cancelled {label}"
+
 #: src/news.tsx
 msgid "Mark as read"
 msgstr "Mark as read"
@@ -569,6 +573,7 @@ msgid "Automatic again"
 msgstr "Automatic again"
 
 #: modules/duties/app/helpers.tsx
+#: src/pages/audit.tsx
 #: src/pages/event.tsx
 #: src/pages/event.tsx
 #: src/pages/event.tsx
@@ -892,6 +897,10 @@ msgstr "This team does not take part in the event."
 msgid "Then: event"
 msgstr "Then: event"
 
+#: src/pages/audit.tsx
+msgid "{who} deleted {label} ({team})"
+msgstr "{who} deleted {label} ({team})"
+
 #: src/howto.tsx
 msgid "This way you learn right away about new events, cancellations, nominations and chat messages."
 msgstr "This way you learn right away about new events, cancellations, nominations and chat messages."
@@ -1040,10 +1049,18 @@ msgstr "Special duty"
 msgid "The link will stop working afterwards. Existing access remains."
 msgstr "The link will stop working afterwards. Existing access remains."
 
+#: src/pages/audit.tsx
+msgid "{count, plural, one {{who} added # player to {team} from a list} other {{who} added # players to {team} from a list}}"
+msgstr "{count, plural, one {{who} added # player to {team} from a list} other {{who} added # players to {team} from a list}}"
+
 #: src/pages/admin.tsx
 #: src/pages/admin.tsx
 msgid "Rank"
 msgstr "Rank"
+
+#: src/pages/audit.tsx
+msgid "{who} deleted {person}, as parent of {child}"
+msgstr "{who} deleted {person}, as parent of {child}"
 
 #: src/avatar.tsx
 msgid "Take photo"
@@ -1557,6 +1574,12 @@ msgctxt "chat badge"
 msgid "Coach"
 msgstr "Coach"
 
+#: src/pages/admin.tsx
+#: src/pages/audit.tsx
+#: src/pages/audit.tsx
+msgid "Protocol"
+msgstr "Protocol"
+
 #: src/pages/event.tsx
 msgid "{persons, plural, one {Reminder sent to # person.} other {Reminder sent to # people.}}"
 msgstr "{persons, plural, one {Reminder sent to # person.} other {Reminder sent to # people.}}"
@@ -1750,6 +1773,10 @@ msgstr "{0, plural, one {# upcoming game} other {# upcoming games}}"
 #: worker/domain/child-limits.ts
 msgid "Children in this team have no own access. Please use the parent link."
 msgstr "Children in this team have no own access. Please use the parent link."
+
+#: src/pages/audit.tsx
+msgid "{who} removed the access of {person}"
+msgstr "{who} removed the access of {person}"
 
 #: worker/domain/calendar.ts
 msgctxt "calendar"
@@ -2056,6 +2083,7 @@ msgstr "Several accesses belong to this address. Which one do you want to sign i
 #: src/pages/admin.tsx
 #: src/pages/admin.tsx
 #: src/pages/admin.tsx
+#: src/pages/audit.tsx
 #: src/pages/chat.tsx
 #: src/pages/club-settings.tsx
 #: src/pages/fixture-sync.tsx
@@ -2083,6 +2111,10 @@ msgstr "This team has no helper plan."
 #: src/respond.tsx
 msgid "Not this time"
 msgstr "Not this time"
+
+#: src/pages/audit.tsx
+msgid "{who} cancelled {label} ({team})"
+msgstr "{who} cancelled {label} ({team})"
 
 #: worker/domain/groups.ts
 msgid "{names} is a group. Groups only have chat and special events."
@@ -2558,6 +2590,10 @@ msgstr "Import games from a table"
 msgid "Remove all entries first"
 msgstr "Remove all entries first"
 
+#: src/pages/audit.tsx
+msgid "{who} carried out the season change to {season}"
+msgstr "{who} carried out the season change to {season}"
+
 #: src/help-texts.ts
 msgid "In the under-11s the children have no access of their own; the parents respond and are in the chat. From the under-13s the children accept and decline themselves."
 msgstr "In the under-11s the children have no access of their own; the parents respond and are in the chat. From the under-13s the children accept and decline themselves."
@@ -2577,6 +2613,10 @@ msgstr "Chat: the chat list shows how many messages are unread and puts chats wi
 #: src/respond.tsx
 msgid "In this time"
 msgstr "In this time"
+
+#: src/pages/audit.tsx
+msgid "Show older entries"
+msgstr "Show older entries"
 
 #: modules/duties/worker/notify.ts
 msgid "Helper plan: {link}"
@@ -2651,6 +2691,10 @@ msgstr "There is a new version of the app."
 #: src/pages/login.tsx
 msgid "We send a code to the e-mail address or mobile number you confirmed for your access."
 msgstr "We send a code to the e-mail address or mobile number you confirmed for your access."
+
+#: modules/duties/app/index.tsx
+msgid "{who} took back the approval of {person} for {duty}"
+msgstr "{who} took back the approval of {person} for {duty}"
 
 #: src/update.tsx
 msgid "Check your internet connection and reload the app."
@@ -2893,6 +2937,10 @@ msgstr "Google Calendar: on a computer, go to calendar.google.com → Other cale
 #: shared/changelog.ts
 msgid "KiHaSL/JuHaSL is now called “Jugendschiedsrichter” (youth referees)."
 msgstr "KiHaSL/JuHaSL is now called “Jugendschiedsrichter” (youth referees)."
+
+#: src/pages/audit.tsx
+msgid "{who} took back the cancellation of {label}"
+msgstr "{who} took back the cancellation of {label}"
 
 #: src/pages/home.tsx
 msgid "Events for {childNames}"
@@ -3346,6 +3394,10 @@ msgstr "Help"
 msgid "The team has been told that you are not there."
 msgstr "The team has been told that you are not there."
 
+#: src/pages/audit.tsx
+msgid "{title} on {date}"
+msgstr "{title} on {date}"
+
 #: src/pages/stats.tsx
 msgid "by name"
 msgstr "by name"
@@ -3397,6 +3449,10 @@ msgstr "Events for several teams are created by admins or the coaches of all tho
 #: modules/duties/worker/routes.ts
 msgid "Sorry, this place has already been taken."
 msgstr "Sorry, this place has already been taken."
+
+#: src/pages/audit.tsx
+msgid "{who} added {person} to {team} as {role}"
+msgstr "{who} added {person} to {team} as {role}"
 
 #: src/restore.tsx
 msgid "Export file (.json)"
@@ -3453,6 +3509,10 @@ msgstr "No entries in this team yet."
 #: src/faq.tsx
 msgid "How do I update the game schedule?"
 msgstr "How do I update the game schedule?"
+
+#: src/pages/audit.tsx
+msgid "Who did what to whom, for actions with a large effect: access, leaving, admin rights, members, game schedules, cancelled events, the season change and the export. Responses, squads, chats and helper duties are not listed. Only admins see this; the season change empties it."
+msgstr "Who did what to whom, for actions with a large effect: access, leaving, admin rights, members, game schedules, cancelled events, the season change and the export. Responses, squads, chats and helper duties are not listed. Only admins see this; the season change empties it."
 
 #: src/extra-events.tsx
 #: src/pages/home.tsx
@@ -3845,6 +3905,10 @@ msgstr "Declined {by}"
 msgid "Abbreviation"
 msgstr "Abbreviation"
 
+#: src/pages/audit.tsx
+msgid "{who} removed the game schedule of {team} ({source})"
+msgstr "{who} removed the game schedule of {team} ({source})"
+
 #: worker/domain/calendar.ts
 msgid "Meet at {meetAt} · {point}"
 msgstr "Meet at {meetAt} · {point}"
@@ -3983,6 +4047,10 @@ msgstr "Please paste the link to your team's page at {names}."
 msgid "Announcement · {author}"
 msgstr "Announcement · {author}"
 
+#: src/pages/audit.tsx
+msgid "{who} set {person} inactive"
+msgstr "{who} set {person} inactive"
+
 #: worker/domain/calendar.ts
 msgid "Meet at {meetAt}"
 msgstr "Meet at {meetAt}"
@@ -4105,6 +4173,10 @@ msgstr "Address"
 #: src/pages/join.tsx
 msgid "Your child (one or more)"
 msgstr "Your child (one or more)"
+
+#: src/pages/audit.tsx
+msgid "{who} set {person} active again"
+msgstr "{who} set {person} active again"
 
 #: worker/routes/teams.ts
 msgid "{playerName} now also plays in the {teamName} (added by {by})."
@@ -4349,6 +4421,10 @@ msgstr "Add venue"
 msgid "Age groups saved."
 msgstr "Age groups saved."
 
+#: src/pages/audit.tsx
+msgid "{who} downloaded the export of all data"
+msgstr "{who} downloaded the export of all data"
+
 #: src/email.tsx
 msgid "Code from the e-mail"
 msgstr "Code from the e-mail"
@@ -4401,6 +4477,10 @@ msgstr "Linked holiday plans keep their dates but no longer follow changes."
 #: src/pages/team.tsx
 msgid "Without notifications people only see changes when they open the app. The guide under help shows how to switch them on. Parents count for their child."
 msgstr "Without notifications people only see changes when they open the app. The guide under help shows how to switch them on. Parents count for their child."
+
+#: src/pages/audit.tsx
+msgid "{who} recorded that {person} left the club, as parent without a remaining child"
+msgstr "{who} recorded that {person} left the club, as parent without a remaining child"
 
 #: src/pages/admin.tsx
 msgid "e.g. 2015"
@@ -4911,6 +4991,10 @@ msgstr "to follow"
 msgid "Without first name"
 msgstr "Without first name"
 
+#: src/pages/audit.tsx
+msgid "{who} removed {person} from {team} ({role})"
+msgstr "{who} removed {person} from {team} ({role})"
+
 #: modules/sms/worker/routes.ts
 msgid "Sender: at most 11 letters and digits, or a phone number."
 msgstr "Sender: at most 11 letters and digits, or a phone number."
@@ -5279,6 +5363,10 @@ msgstr "New class"
 msgid "Helpers wanted: {team}"
 msgstr "Helpers wanted: {team}"
 
+#: src/pages/audit.tsx
+msgid "{who} recorded that {person} left the club"
+msgstr "{who} recorded that {person} left the club"
+
 #: src/pages/season.tsx
 msgid "previously {teams}"
 msgstr "previously {teams}"
@@ -5537,6 +5625,10 @@ msgstr "Another companion"
 msgid "Import from lists"
 msgstr "Import from lists"
 
+#: src/pages/audit.tsx
+msgid "Nothing recorded yet."
+msgstr "Nothing recorded yet."
+
 #: modules/duties/app/admin.tsx
 #: modules/duties/app/helpers.tsx
 msgid "Remove {label}"
@@ -5792,6 +5884,10 @@ msgstr "{name}: The oldest birth year must come before the youngest."
 msgid "Reset filters"
 msgstr "Reset filters"
 
+#: src/pages/audit.tsx
+msgid "{who} linked {person} as parent of {child}"
+msgstr "{who} linked {person} as parent of {child}"
+
 #: src/pages/home.tsx
 msgid "Upcoming"
 msgstr "Upcoming"
@@ -5822,6 +5918,10 @@ msgstr "Sort by name"
 #: src/pages/fixture-sync.tsx
 msgid "Remind coaches after"
 msgstr "Remind coaches after"
+
+#: src/pages/audit.tsx
+msgid "{who} took back the cancellation of {label} ({team})"
+msgstr "{who} took back the cancellation of {label} ({team})"
 
 #: modules/sms/app/settings.tsx
 #: src/pages/club-settings.tsx
@@ -6504,6 +6604,10 @@ msgstr "Decline deadline: {hours} hours before the start ({deadline})."
 msgid "<0>Meeting point:</0> {point}, {meetTime}"
 msgstr "<0>Meeting point:</0> {point}, {meetTime}"
 
+#: src/pages/audit.tsx
+msgid "{who} linked the game schedule of {team} ({source})"
+msgstr "{who} linked the game schedule of {team} ({source})"
+
 #: src/respond.tsx
 #: src/respond.tsx
 msgid "Accepted."
@@ -6530,6 +6634,10 @@ msgstr "Only coaches of this team and the organisers of the event can do this."
 #: src/list-import.tsx
 msgid "Team name"
 msgstr "Team name"
+
+#: src/pages/audit.tsx
+msgid "staff"
+msgstr "staff"
 
 #: src/pages/admin.tsx
 msgid "For circles without training and games, such as the coaching team, there are <0>groups</0>."
@@ -6669,6 +6777,10 @@ msgstr "Other sport"
 #: src/list-import.tsx
 msgid "Same, named {aName}"
 msgstr "Same, named {aName}"
+
+#: src/pages/audit.tsx
+msgid "{who} synced the game schedule of {team}: {created} new, {moved} moved, {cancelled} cancelled"
+msgstr "{who} synced the game schedule of {team}: {created} new, {moved} moved, {cancelled} cancelled"
 
 #: src/pages/squad.tsx
 msgid "Declined: {reason}"
@@ -6880,6 +6992,10 @@ msgstr "player"
 #: src/pages/admin.tsx
 msgid "{coaches, plural, one {# coach} other {# coaches}}"
 msgstr "{coaches, plural, one {# coach} other {# coaches}}"
+
+#: src/pages/audit.tsx
+msgid "player"
+msgstr "player"
 
 #: src/list-import.tsx
 msgid "Choose a team"
@@ -7257,6 +7373,7 @@ msgstr "Lift changed"
 msgid "Training plans"
 msgstr "Training plans"
 
+#: src/pages/audit.tsx
 #: src/pages/event.tsx
 #: src/pages/event.tsx
 #: src/pages/home.tsx
@@ -7399,6 +7516,10 @@ msgstr "If this was not you, please contact your coach or an admin immediately."
 #: modules/carpools/worker/routes.ts
 msgid "At least one passenger is not riding with this driver."
 msgstr "At least one passenger is not riding with this driver."
+
+#: src/pages/audit.tsx
+msgid "stand-in"
+msgstr "stand-in"
 
 #: src/pages/setup-wizard.tsx
 msgid "Coaches do this in their team: import players from a list, enter training times, send invitations."
@@ -7696,6 +7817,10 @@ msgstr "The passkey could not be verified."
 #: src/pages/setup-wizard.tsx
 msgid "The app is set up"
 msgstr "The app is set up"
+
+#: src/pages/audit.tsx
+msgid "{who} deleted the group {team}"
+msgstr "{who} deleted the group {team}"
 
 #: src/help-texts.ts
 msgid "Before training Lena sees: 11 accepted, Mia and Paul declined. She does not see why."
@@ -8570,6 +8695,10 @@ msgstr "active {days} days ago"
 msgid "Sign-in by passkey or e-mail, devices"
 msgstr "Sign-in by passkey or e-mail, devices"
 
+#: src/pages/audit.tsx
+msgid "{who} created a personal link for {person}; using it signs out the previous devices"
+msgstr "{who} created a personal link for {person}; using it signs out the previous devices"
+
 #: modules/carpools/app/card.tsx
 msgid "{taken} people are riding along. Please enter more seats or deselect passengers."
 msgstr "{taken} people are riding along. Please enter more seats or deselect passengers."
@@ -8753,6 +8882,10 @@ msgstr "Only with free slots"
 #: worker/routes/season.ts
 msgid "You cannot mark yourself as former."
 msgstr "You cannot mark yourself as former."
+
+#: src/pages/audit.tsx
+msgid "{who} took the admin rights from {person}"
+msgstr "{who} took the admin rights from {person}"
 
 #: worker/domain/invites.ts
 msgid "This invitation link has been withdrawn. Please ask for a new link."
@@ -9170,6 +9303,10 @@ msgstr "Load the holidays of the club's region, or add periods yourself."
 msgid "Environment: {environment}"
 msgstr "Environment: {environment}"
 
+#: src/pages/audit.tsx
+msgid "{who} deleted {person}"
+msgstr "{who} deleted {person}"
+
 #: src/pages/admin.tsx
 msgid "active {months} months ago"
 msgstr "active {months} months ago"
@@ -9281,6 +9418,10 @@ msgstr "{label} by SMS"
 #: src/pages/event.tsx
 msgid "created the event"
 msgstr "created the event"
+
+#: src/pages/audit.tsx
+msgid "{who} deleted {label}"
+msgstr "{who} deleted {label}"
 
 #: worker/routes/events.ts
 msgid "{name} is missing from “{title}”"
@@ -9417,6 +9558,10 @@ msgstr "Offer withdrawn"
 #: src/pages/stats.tsx
 msgid "at short notice"
 msgstr "at short notice"
+
+#: src/pages/admin.tsx
+msgid "Who did what: access, leaving, admin rights, members, schedules, cancellations"
+msgstr "Who did what: access, leaving, admin rights, members, schedules, cancellations"
 
 #: src/pages/plans.tsx
 msgid "The dates follow the holiday period, even if it is changed under Administration → Holidays."
@@ -10117,6 +10262,10 @@ msgstr "{n, plural, one {# chat} other {# chats}}"
 msgid "Archived"
 msgstr "Archived"
 
+#: src/pages/audit.tsx
+msgid "coach"
+msgstr "coach"
+
 #: src/pages/login.tsx
 msgid "Events, responses and the team chat in one place."
 msgstr "Events, responses and the team chat in one place."
@@ -10407,6 +10556,10 @@ msgstr "Start"
 #: src/pages/team.tsx
 msgid "Settings"
 msgstr "Settings"
+
+#: src/pages/audit.tsx
+msgid "a deleted person"
+msgstr "a deleted person"
 
 #: modules/duties/app/admin.tsx
 msgid "e.g. barbecue"
@@ -10759,6 +10912,10 @@ msgstr "uses the app"
 msgid "changed"
 msgstr "changed"
 
+#: src/pages/audit.tsx
+msgid "a deleted team"
+msgstr "a deleted team"
+
 #: modules/carpools/app/card.tsx
 msgid "Cancel ride"
 msgstr "Cancel ride"
@@ -11053,6 +11210,10 @@ msgstr "Feedback is not set up at the moment."
 msgid "No upcoming special events yet."
 msgstr "No upcoming special events yet."
 
+#: src/pages/audit.tsx
+msgid "{who} created a personal link for {person}"
+msgstr "{who} created a personal link for {person}"
+
 #: src/pages/help.tsx
 msgid "Thank you, your message has arrived. For a reply by e-mail, your access lacks a confirmed address (profile)."
 msgstr "Thank you, your message has arrived. For a reply by e-mail, your access lacks a confirmed address (profile)."
@@ -11291,6 +11452,10 @@ msgstr "Language"
 #: worker/routes/restore.ts
 msgid "This part of the export cannot be restored."
 msgstr "This part of the export cannot be restored."
+
+#: src/pages/audit.tsx
+msgid "{who} deleted the team {team}"
+msgstr "{who} deleted the team {team}"
 
 #: modules/carpools/app/card.tsx
 msgid "Offer withdrawn."
@@ -11780,6 +11945,10 @@ msgstr "Functions"
 msgid "Start time"
 msgstr "Start time"
 
+#: modules/duties/app/index.tsx
+msgid "{who} approved {person} for {duty}"
+msgstr "{who} approved {person} for {duty}"
+
 #: modules/carpools/app/card.tsx
 msgid "Nobody is offering seats yet"
 msgstr "Nobody is offering seats yet"
@@ -12108,6 +12277,7 @@ msgstr "Valid until {createdUntil}, can be used several times."
 msgid "no other changes"
 msgstr "no other changes"
 
+#: src/pages/audit.tsx
 #: src/pages/event.tsx
 #: src/pages/home.tsx
 #: src/pages/stats.tsx
@@ -12279,6 +12449,10 @@ msgstr "{name}: please save it as .xlsx or .csv first (.xls and .ods files canno
 #: src/child-limits.tsx
 msgid "Respond"
 msgstr "Respond"
+
+#: src/pages/audit.tsx
+msgid "The app"
+msgstr "The app"
 
 #: worker/chat/room.ts
 msgctxt "chat author"
@@ -12468,6 +12642,10 @@ msgstr "Close"
 msgid "Please type in a valid e-mail address."
 msgstr "Please type in a valid e-mail address."
 
+#: src/pages/audit.tsx
+msgid "{who} removed the link of {person} as parent of {child}"
+msgstr "{who} removed the link of {person} as parent of {child}"
+
 #: src/pages/privacy.tsx
 msgid "Only coaches and admins see responses with reasons. Please do not give any details about illnesses when declining, “ill” is enough. Reasons are deleted automatically 60 days after the event."
 msgstr "Only coaches and admins see responses with reasons. Please do not give any details about illnesses when declining, “ill” is enough. Reasons are deleted automatically 60 days after the event."
@@ -12646,6 +12824,10 @@ msgstr "What is new"
 #: src/restore.tsx
 msgid "Exported on {exportedOn}, Kabine {version}"
 msgstr "Exported on {exportedOn}, Kabine {version}"
+
+#: src/pages/audit.tsx
+msgid "{who} made {person} an admin"
+msgstr "{who} made {person} an admin"
 
 #: src/pages/join.tsx
 msgid "Access for"

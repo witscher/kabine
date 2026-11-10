@@ -427,6 +427,14 @@ test("Admin ordnet eine Person einer Mannschaft zu und entfernt sie wieder", asy
   await neu.getByRole("button", { name: "Endgültig löschen" }).click();
   await expect(page.getByText("Lea Neumann wurde gelöscht.")).toBeVisible();
   await expect(page.getByRole("button", { name: /Lea Neumann/ })).toHaveCount(0);
+
+  // Protokoll: alles nachvollziehbar, auch über die gelöschte Person
+  await page.goto("/verwaltung");
+  await page.getByRole("link", { name: /Protokoll/ }).click();
+  await expect(page.getByRole("heading", { name: "Protokoll" })).toBeVisible();
+  await expect(page.getByText(/hat Lea Neumann gelöscht/)).toBeVisible();
+  await expect(page.getByText(/hat Lea Neu aus wT entfernt \(Spieler\)/)).toBeVisible();
+  await expect(page.getByText(/hat Lea Neu als Spieler zu wT hinzugefügt/)).toBeVisible();
 });
 
 test("Admin schickt eine Rundnachricht, sie erscheint als Ankündigung im Chat", async () => {

@@ -53,6 +53,7 @@ const AdminMailPage = lazyPage(() => import("./pages/mail-settings").then((m) =>
 const AdminListImportPage = lazyPage(() => import("./pages/list-import").then((m) => m.AdminListImportPage));
 const AdminFixtureSyncPage = lazyPage(() => import("./pages/fixture-sync").then((m) => m.AdminFixtureSyncPage));
 const AdminUpdatesPage = lazyPage(() => import("./pages/updates").then((m) => m.AdminUpdatesPage));
+const AdminAuditPage = lazyPage(() => import("./pages/audit").then((m) => m.AdminAuditPage));
 const SetupWizardPage = lazyPage(() => import("./pages/setup-wizard").then((m) => m.SetupWizardPage));
 const SeasonChangePage = lazyPage(() => import("./pages/season").then((m) => m.SeasonChangePage));
 
@@ -293,6 +294,7 @@ export function App() {
               <Route path="/verwaltung/mail" component={AdminMailPage} />
               <Route path="/verwaltung/spielplan" component={AdminFixtureSyncPage} />
               <Route path="/verwaltung/updates" component={AdminUpdatesPage} />
+              <Route path="/verwaltung/protokoll" component={AdminAuditPage} />
               <Route path="/verwaltung/import" component={AdminListImportPage} />
               <Route path="/verwaltung/saisonwechsel" component={SeasonChangePage} />
               <Route path="/verwaltung/einrichtung" component={SetupWizardPage} />
