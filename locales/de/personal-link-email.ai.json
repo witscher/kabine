@@ -1,0 +1,11 @@
+{
+  "{who} created a personal link for {person}; using it signs out the previous devices and removes the e-mail address for sign-in": "{who} hat einen persönlichen Link für {person} erzeugt; wer ihn nutzt, meldet die bisherigen Geräte ab und entfernt die E-Mail-Adresse für die Anmeldung",
+  "The personal link for {person} was used: previous devices signed out, e-mail address for sign-in now {address}": "Der persönliche Link für {person} wurde genutzt: bisherige Geräte abgemeldet, E-Mail-Adresse für die Anmeldung jetzt {address}",
+  "The personal link for {person} was used: previous devices signed out": "Der persönliche Link für {person} wurde genutzt: bisherige Geräte abgemeldet",
+  "The personal link for {person} was used: previous devices signed out, e-mail address for sign-in removed": "Der persönliche Link für {person} wurde genutzt: bisherige Geräte abgemeldet, E-Mail-Adresse für die Anmeldung entfernt",
+  "This link sets up a new passkey for an existing access. You can add an e-mail address in the profile afterwards.": "Mit diesem Link richtest du einen neuen Passkey für einen bestehenden Zugang ein. Eine E-Mail-Adresse kannst du danach im Profil eintragen.",
+  "Your previous passkeys and sessions will be signed out, and the e-mail address of your access is removed. You can enter a new one here.": "Deine bisherigen Passkeys und Anmeldungen werden dabei abgemeldet, und die E-Mail-Adresse deines Zugangs wird entfernt. Du kannst hier eine neue eintragen.",
+  "For example when it may not be the person's own. A new one can be entered when the link is opened.": "Zum Beispiel, wenn sie vielleicht nicht die eigene der Person ist. Beim Öffnen des Links kann eine neue eingetragen werden.",
+  "Only an admin removes the e-mail address of an access.": "Nur ein Admin entfernt die E-Mail-Adresse eines Zugangs.",
+  "Also remove the e-mail address for sign-in": "Auch die E-Mail-Adresse für die Anmeldung entfernen"
+}

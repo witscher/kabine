@@ -5,7 +5,7 @@ import { z } from "zod";
 import { type AppEnv, requireActor } from "../app";
 import { createSession, sessionCookie } from "../auth/session";
 import { relyingParty } from "../auth/webauthn";
-import { checkEmailCode, type EmailCodeRow, emailSchema, issueEmailCode, markEmailCodeUsed } from "../domain/email-login";
+import { bookUnknownAddress, checkEmailCode, type EmailCodeRow, emailSchema, issueEmailCode, markEmailCodeUsed } from "../domain/email-login";
 import { randomToken } from "../lib/crypto";
 import { all, first, run } from "../lib/db";
 import { ApiError, badRequest, conflict, gone, parse, readJson } from "../lib/http";
@@ -27,7 +27,11 @@ emailRoutes.post("/auth/email/start", async (c) => {
       WHERE a.email = ? AND a.email_verified_at IS NOT NULL AND a.disabled_at IS NULL AND p.is_former = 0`,
     email,
   );
-  if (!known?.n) return c.json({ requestId: randomToken(18) });
+  if (!known?.n) {
+    // Counts against the same limits as a known address, so "too many" does not tell who is in the club
+    await bookUnknownAddress(c.env, { address: email, ip: ipOf(c.req.raw) });
+    return c.json({ requestId: randomToken(18) });
+  }
   try {
     const requestId = await issueEmailCode(c.env, { purpose: "login", email, origin: relyingParty(c.env, c.req.raw).origin, ip: ipOf(c.req.raw) });
     return c.json({ requestId });

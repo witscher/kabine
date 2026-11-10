@@ -125,6 +125,38 @@ describe("Wiederherstellen aus dem Export", () => {
     expect(await rows("SELECT first_name, is_admin FROM persons WHERE first_name = 'Ada'")).toEqual([{ first_name: "Ada", is_admin: 0 }]);
   });
 
+  it("Nachbesserungen füllen nur leere Verweise: ein Zugang wandert nicht zu einer anderen Person", async () => {
+    await freshDb();
+    await season();
+    const owner = await person("Ina", { lastName: "Inhaberin", admin: true });
+    const ownerCookie = await loginAs(owner);
+    const other = await loginAs(await person("Zoe", { lastName: "Zweite", admin: true }));
+    const account = await one<{ id: number }>("SELECT id FROM accounts WHERE person_id = ?", owner);
+    const empty = (await api("/admin/persons", { cookie: other, body: { firstName: "Nie", lastName: "Mand" } })).body.id as number;
+    const moved = await api("/admin/restore/fixups", {
+      cookie: other,
+      body: { fixups: [{ table: "accounts", where: { id: account.id }, column: "person_id", refTable: "persons", old: 1 }], maps: { persons: { "1": empty } } },
+    });
+    expect(moved.body).toEqual({ updated: 0 });
+    expect(await one("SELECT person_id FROM accounts WHERE id = ?", account.id)).toEqual({ person_id: owner });
+    expect((await api("/session", { cookie: ownerCookie })).body.me.person).toMatchObject({ id: owner, isAdmin: true });
+    // Auch ein leerer Verweis, der schon gesetzt ist, bleibt
+    const wd = await team("wD", "wD");
+    const a = await eventIn(wd, 3, { kind: "special", title: "Fest" });
+    await exec("UPDATE events SET created_by = ? WHERE id = ?", owner, a);
+    const kept = await api("/admin/restore/fixups", {
+      cookie: other,
+      body: { fixups: [{ table: "events", where: { id: a }, column: "created_by", refTable: "persons", old: 1 }], maps: { persons: { "1": empty } } },
+    });
+    expect(kept.body).toEqual({ updated: 0 });
+    await exec("UPDATE events SET created_by = NULL WHERE id = ?", a);
+    const filled = await api("/admin/restore/fixups", {
+      cookie: other,
+      body: { fixups: [{ table: "events", where: { id: a }, column: "created_by", refTable: "persons", old: 1 }], maps: { persons: { "1": empty } } },
+    });
+    expect(filled.body).toEqual({ updated: 1 });
+  });
+
   it("nur für Admins, nur Tabellen des Exports", async () => {
     await freshDb();
     const cookie = await loginAs(await person("Theo"));

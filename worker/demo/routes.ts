@@ -2,7 +2,7 @@
 //   GET  /api/demo/login/:role?lang=de|en  signs in as the demo person of a role and opens the app
 //   POST /api/demo/reset                   wipes and fills the demo again (Bearer DEMO_RESET_TOKEN)
 // Everything that could lock others out or reach outside the demo (passkeys, e-mail, SMS, owner
-// handover, invitations, the links in the club profile) is blocked by demoGuard.
+// handover, invitations, the links in the club profile, restoring an export) is blocked by demoGuard.
 import { t } from "@lingui/core/macro";
 import { type ExecutionContext as HonoExecutionContext, Hono } from "hono";
 import type { AppEnv } from "../app";
@@ -26,6 +26,8 @@ const BLOCKED: RegExp[] = [
   // No photos: visitors would show real faces to everyone until the next reset
   /^\/api\/persons\/\d+\/avatar/,
   /^\/api\/admin\/club\/logo$/,
+  // Restore writes rows and club settings as they come: it would bring in photos, other links and handball4all
+  /^\/api\/admin\/restore\//,
 ];
 
 /** Blocks the routes a visitor must not use in the demo (reading stays possible). */

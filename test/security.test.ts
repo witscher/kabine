@@ -3,7 +3,7 @@
 import { env, exports } from "cloudflare:workers";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { type MailMessage, mailer } from "../worker/domain/email-login";
-import { api, eventIn, exec, freshDb, guardian, hall, loginAs, member, one, person, rows, season, team } from "./helpers";
+import { api, eventIn, exec, freshDb, guardian, hall, loginAs, member, migrateRest, one, person, rows, season, team, upgradeFrom } from "./helpers";
 
 let wd: number;
 let wc: number;
@@ -87,6 +87,70 @@ describe("Sicherheitsfunde", () => {
     expect(mails.map((m) => m.subject)).toContain("Neues Gerät für deinen Zugang zu Kabine");
     expect((await one<{ n: number }>("SELECT count(*) AS n FROM sessions s JOIN accounts a ON a.id = s.account_id WHERE a.person_id = ?", lina)).n).toBe(1);
     expect(await one("SELECT email FROM accounts WHERE person_id = ?", lina)).toEqual({ email: "lina@example.org" });
+  });
+
+  it("3: persönlicher Link setzt auf einem bestehenden Zugang keine Adresse, nur der Link eines Admins entfernt sie", async () => {
+    const lina = await person("Lina", { lastName: "Lauf" });
+    await member(lina, wd);
+    await loginAs(lina);
+    const verify = (requestId: string) =>
+      exports.default.fetch(
+        new Request(`${ORIGIN}/api/auth/email/verify`, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ requestId, code: mails.at(-1)!.subject.match(/\d{6}/)![0] }),
+        }),
+      );
+    const linkOf = async (cookie: string, body: object = {}) => {
+      const link = await api(`/persons/${lina}/personal-link`, { cookie, body });
+      return { status: link.status, token: String(link.body.url ?? "").split("#")[1]! };
+    };
+    // Ohne bestätigte Adresse: über den Link der Trainerin lässt sich keine unterschieben
+    const first = await linkOf(coachDCookie);
+    const planted = await api("/join/email", { body: { token: first.token, email: "fremd@example.org" } });
+    expect(planted.status).toBe(400);
+    expect(planted.body.error.code).toBe("email_locked");
+    expect(mails).toHaveLength(0);
+    expect(await one("SELECT email FROM accounts WHERE person_id = ?", lina)).toEqual({ email: null });
+
+    // Eine fremde, bestätigte Adresse hängt am Zugang: nur ein Admin lässt den Link sie entfernen
+    await exec("UPDATE accounts SET email = 'fremd@example.org', email_verified_at = '2026-01-01T00:00:00Z' WHERE person_id = ?", lina);
+    expect((await linkOf(coachDCookie, { clearEmail: true })).status).toBe(403);
+    const admin = await loginAs(await person("Ada", { admin: true }));
+    const cleared = await linkOf(admin, { clearEmail: true });
+    expect(cleared.status).toBe(201);
+    expect((await api("/join/info", { body: { token: cleared.token } })).body).toMatchObject({ revokeExisting: true, clearEmail: true });
+    // Bis der Link benutzt wird, bleibt alles, wie es ist
+    expect(await one("SELECT email FROM accounts WHERE person_id = ?", lina)).toEqual({ email: "fremd@example.org" });
+    const start = await api("/join/email", { body: { token: cleared.token, email: "lina@example.org" } });
+    expect(start.status).toBe(200);
+    expect((await verify(start.body.requestId)).status).toBe(200);
+    expect(await one("SELECT email, email_verified_at IS NOT NULL AS verified FROM accounts WHERE person_id = ?", lina)).toEqual({ email: "lina@example.org", verified: 1 });
+    // Die alte Adresse erfährt davon und meldet niemanden mehr an
+    expect(mails.find((m) => m.to === "fremd@example.org")?.subject).toBe("Neues Gerät für deinen Zugang zu Kabine");
+    const sentBefore = mails.length;
+    expect((await api("/auth/email/start", { body: { email: "fremd@example.org" } })).status).toBe(200);
+    expect(mails).toHaveLength(sentBefore);
+
+    // Im Protokoll: der Link mit dem Häkchen, und was sein Einlösen am Zugang geändert hat (Adresse gekürzt)
+    const log = (await api("/admin/audit-log", { cookie: admin })).body.entries as { action: string; actor: { name: string | null }; person: { name: string }; detail: object | null }[];
+    expect(log.filter((e) => e.action.startsWith("personal_link")).map((e) => [e.action, e.actor.name, e.detail])).toEqual([
+      ["personal_link_used", null, { emailCleared: true, email: "li…@example.org" }],
+      ["personal_link", "Ada Muster", { replacesAccess: true, clearsEmail: true }],
+      ["personal_link", "Doris Dach", { replacesAccess: true }],
+    ]);
+  });
+
+  it("3: ohne Adresse am Zugang gibt es nichts zu entfernen, der Link bleibt ein gewöhnlicher", async () => {
+    const lina = await person("Lina", { lastName: "Lauf" });
+    await member(lina, wd);
+    await loginAs(lina);
+    const admin = await loginAs(await person("Ada", { admin: true }));
+    const link = await api(`/persons/${lina}/personal-link`, { cookie: admin, body: { clearEmail: true } });
+    expect(link.status).toBe(201);
+    const token = String(link.body.url).split("#")[1]!;
+    expect((await api("/join/info", { body: { token } })).body.clearEmail).toBe(false);
+    expect((await api("/join/email", { body: { token, email: "fremd@example.org" } })).body.error.code).toBe("email_locked");
   });
 
   it("4: Austritt und Zugang lösen bei Trainern anderer Mannschaften nur durch Admins", async () => {
@@ -236,5 +300,15 @@ describe("Sicherheitsfunde", () => {
     expect((await api("/duties", { cookie: mumCookie, body: { blockId: block.id } })).status).toBe(201);
     const seen = await api(`/duties?teamId=${wd}`, { cookie: coachDCookie });
     expect(seen.body.games[0].blocks[0].entries[0].child).toBe("Kim K.");
+  });
+});
+
+describe("migration 202611101500_core_invite-clear-email.sql", () => {
+  it("links created before keep the e-mail address", async () => {
+    await upgradeFrom("202611101500_core_invite-clear-email.sql");
+    await exec("INSERT INTO persons (id, first_name) VALUES (900, 'Ida')");
+    await exec("INSERT INTO invites (kind, nonce, token_hash, person_id, expires_at) VALUES ('personal', 'n1', 'h1', 900, '2099-01-01T00:00:00Z')");
+    await migrateRest();
+    expect(await one("SELECT person_id, clear_email FROM invites WHERE nonce = 'n1'")).toEqual({ person_id: 900, clear_email: 0 });
   });
 });

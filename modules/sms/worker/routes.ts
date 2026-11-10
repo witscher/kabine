@@ -6,7 +6,7 @@ import { z } from "zod";
 import { type AppEnv, requireActor } from "../../../worker/app";
 import { requireAdmin } from "../../../worker/auth/actor";
 import { relyingParty } from "../../../worker/auth/webauthn";
-import { issueEmailCode } from "../../../worker/domain/email-login";
+import { bookUnknownAddress, issueEmailCode } from "../../../worker/domain/email-login";
 import { loadSmsSettings, saveSmsSettings, sendSmsTo } from "./settings";
 import { randomToken } from "../../../worker/lib/crypto";
 import { first, run } from "../../../worker/lib/db";
@@ -70,7 +70,11 @@ smsRoutes.post("/auth/sms/start", async (c) => {
       WHERE a.phone = ? AND a.phone_verified_at IS NOT NULL AND a.disabled_at IS NULL AND p.is_former = 0`,
     phone,
   );
-  if (!known?.n) return c.json({ requestId: randomToken(18) });
+  if (!known?.n) {
+    // Counts against the same limits as a known number, so "too many" does not tell who is in the club
+    await bookUnknownAddress(c.env, { address: phone, channel: "sms", ip: c.req.header("cf-connecting-ip") ?? null });
+    return c.json({ requestId: randomToken(18) });
+  }
   try {
     const requestId = await issueEmailCode(c.env, {
       purpose: "login",

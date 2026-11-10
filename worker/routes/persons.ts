@@ -184,6 +184,9 @@ export async function deleteOrphanParent(db: D1Database, personId: number): Prom
 personRoutes.post("/persons/:id/personal-link", async (c) => {
   const actor = requireActor(c);
   const personId = intParam(c, "id");
+  const { clearEmail } = parse(z.object({ clearEmail: z.boolean().optional() }), await readJson(c.req.raw).catch(() => ({})));
+  // The address is the person's own way in: only an admin has a link remove it (e.g. when it may be someone else's)
+  if (clearEmail && !actor.isAdmin) throw forbidden(t`Only an admin removes the e-mail address of an access.`);
   const target = await first<{ is_admin: number; coach: number }>(
     c.env.DB,
     `SELECT is_admin, EXISTS (SELECT 1 FROM team_memberships WHERE person_id = persons.id AND role = 'coach') AS coach
@@ -202,10 +205,12 @@ personRoutes.post("/persons/:id/personal-link", async (c) => {
     throw conflict(t`Children in this team have no own access. The parents use the app for their child.`, "no_child_account");
   }
   // On an existing account the link always replaces the previous passkeys and sessions (see routes/join.ts)
-  const invite = await createInvite(c.env, { kind: "personal", personId, createdBy: actor.personId });
+  const account = await first<{ email: string | null }>(c.env.DB, "SELECT email FROM accounts WHERE person_id = ?", personId);
+  // Only when there is an address to remove
+  const clearsEmail = !!clearEmail && !!account?.email;
+  const invite = await createInvite(c.env, { kind: "personal", personId, createdBy: actor.personId, clearEmail: clearsEmail });
   // With an existing access the link signs out the previous devices once it is used
-  const hasAccess = !!(await first(c.env.DB, "SELECT 1 AS ok FROM accounts WHERE person_id = ?", personId));
-  await audit(c.env.DB, actor, "personal_link", { personId, detail: { replacesAccess: hasAccess } });
+  await audit(c.env.DB, actor, "personal_link", { personId, detail: { replacesAccess: !!account, ...(clearsEmail ? { clearsEmail: true } : {}) } });
   return c.json({ url: inviteUrl(relyingParty(c.env, c.req.raw).origin, invite.token), expiresAt: invite.expiresAt }, 201);
 });
 
@@ -223,6 +228,7 @@ personRoutes.get("/admin/persons", async (c) => {
     is_admin: number;
     admin_email: string | null;
     has_account: number;
+    has_email: number | null;
     skill_grants: string | null;
     is_club_member: number;
     last_seen_on: string | null;
@@ -235,6 +241,7 @@ personRoutes.get("/admin/persons", async (c) => {
     c.env.DB,
     `SELECT p.id, p.first_name, p.last_name, p.birth_year, p.is_active, p.is_admin, p.admin_email,
             EXISTS (SELECT 1 FROM accounts a WHERE a.person_id = p.id) AS has_account,
+            (SELECT a.email IS NOT NULL FROM accounts a WHERE a.person_id = p.id) AS has_email,
             (SELECT json_group_array(sg.duty_type_id) FROM skill_grants sg WHERE sg.person_id = p.id) AS skill_grants,
             EXISTS (SELECT 1 FROM club_members cm WHERE cm.person_id = p.id) AS is_club_member,
             (SELECT a.last_seen_on FROM accounts a WHERE a.person_id = p.id) AS last_seen_on,
@@ -257,6 +264,8 @@ personRoutes.get("/admin/persons", async (c) => {
       isAdmin: r.is_admin === 1,
       adminEmail: r.admin_email,
       hasAccount: r.has_account === 1,
+      /** The access has an e-mail address for sign-in (only whether, never the address) */
+      hasEmail: r.has_email === 1,
       /** Duty types an admin approved the person for (e.g. youth referee) */
       skillGrants: JSON.parse(r.skill_grants ?? "[]") as number[],
       /** Full member (hidden attribute, only admins see and change it) */

@@ -98,7 +98,7 @@ describe("demo installation", () => {
     expect(res.status).toBe(404);
   });
 
-  it("blocks passkeys, owner handover, mail settings and photos for visitors", async () => {
+  it("blocks passkeys, owner handover, mail settings, photos and restoring an export for visitors", async () => {
     const login = await fetchApp(new Request("https://demo.example/api/demo/login/admin", { redirect: "manual" }));
     const cookie = login.headers.get("set-cookie")!.split(";")[0]!;
     for (const [method, path] of [
@@ -108,6 +108,11 @@ describe("demo installation", () => {
       ["PUT", "/api/me/email"],
       ["PUT", "/api/persons/1/avatar"],
       ["PUT", "/api/admin/club/logo"],
+      // Restore would bring in photos, other links and handball4all past the checks above
+      ["POST", "/api/admin/restore/rows"],
+      ["POST", "/api/admin/restore/fixups"],
+      ["POST", "/api/admin/restore/chat"],
+      ["POST", "/api/admin/restore/club"],
     ] as const) {
       const res = await fetchApp(new Request(`https://demo.example${path}`, { method, headers: { cookie, "content-type": "application/json" }, body: "{}" }));
       expect(res.status, `${method} ${path}`).toBe(403);

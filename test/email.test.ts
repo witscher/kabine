@@ -122,6 +122,24 @@ describe("Anmeldung per E-Mail", () => {
     expect(sent).toHaveLength(5);
   });
 
+  it("das Limit verrät nicht, ob eine Adresse zum Verein gehört", async () => {
+    const p = await person("Mara");
+    await withEmail(p, "mara@example.org");
+    const statuses = async (email: string) => {
+      const out: number[] = [];
+      for (let i = 0; i < 6; i++) out.push((await api("/auth/email/start", { body: { email } })).status);
+      return out;
+    };
+    const known = await statuses("mara@example.org");
+    expect(known).toEqual([200, 200, 200, 200, 200, 409]);
+    expect(await statuses("niemand@example.org")).toEqual(known);
+    // An die fremde Adresse geht nichts, und sie steht nirgends: nur ein Hash, schon abgelaufen
+    expect(sent.filter((m) => m.to !== "mara@example.org")).toHaveLength(0);
+    const stored = await rows<{ email: string; expired: number }>("SELECT email, expires_at <= strftime('%Y-%m-%dT%H:%M:%fZ', 'now') AS expired FROM email_codes WHERE email <> 'mara@example.org'");
+    expect(stored).toHaveLength(5);
+    expect(stored.every((r) => r.email.startsWith("unknown:") && !r.email.includes("niemand") && r.expired === 1)).toBe(true);
+  });
+
   it("höchstens fünf Codes pro Adresse und Stunde und zehn pro Tag, auch bei gleichzeitigen Anfragen", async () => {
     const p = await person("Mara");
     await withEmail(p, "mara@example.org");

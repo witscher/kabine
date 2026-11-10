@@ -28,6 +28,8 @@ type JoinInfo =
       loggedInAs: string | null;
       person: { name: string; hasAccount: boolean; isAdmin: boolean; email?: string | null };
       revokeExisting: boolean;
+      /** The link also removes the e-mail address of the access; a new one can be entered */
+      clearEmail?: boolean;
     };
 
 function tokenFromHash(): string {
@@ -128,7 +130,7 @@ export function JoinPage() {
   }, [token]);
 
   /** New access? Then there is the e-mail address field; it is only mandatory for admins. */
-  const needsEmail = !!info && (info.kind === "player" || (info.kind === "parent" && !me) || (info.kind === "personal" && !info.person.hasAccount));
+  const needsEmail = !!info && (info.kind === "player" || (info.kind === "parent" && !me) || (info.kind === "personal" && (!info.person.hasAccount || !!info.clearEmail)));
   const emailRequired = !!info && info.kind === "personal" && !info.person.hasAccount && info.person.isAdmin;
 
   /** Request for passkey and e-mail code, or null as long as something is missing. */
@@ -219,7 +221,11 @@ export function JoinPage() {
             </p>
             {info.revokeExisting ? (
               <Notice kind="yellow">
-                <Trans>Your previous passkeys and sessions will be signed out.</Trans>
+                {info.clearEmail ? (
+                  <Trans>Your previous passkeys and sessions will be signed out, and the e-mail address of your access is removed. You can enter a new one here.</Trans>
+                ) : (
+                  <Trans>Your previous passkeys and sessions will be signed out.</Trans>
+                )}
               </Notice>
             ) : null}
           </div>

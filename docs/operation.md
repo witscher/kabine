@@ -117,7 +117,7 @@ What Kabine closes in any case: anything a person without a login or any signed-
 
 ## Owner and admins
 
-The first admin is the **owner**. Other admins cannot take away the owner's admin role or access. Keep at least two admins, so the club does not depend on one person. An admin who lost their device gets a personal link from another admin, or signs in with a code by e-mail when e-mail is set up.
+The first admin is the **owner**. Other admins cannot take away the owner's admin role or access. Keep at least two admins, so the club does not depend on one person. An admin who lost their device gets a personal link from another admin, or signs in with a code by e-mail when e-mail is set up. A personal link on an existing access sets up a new passkey and signs out the previous devices; the e-mail address of the access stays. If that address may not be the person's own, an admin switches on *Also remove the e-mail address for sign-in* in the person's sheet (*Administration → People*) before creating the link: using the link then removes it, and the person can enter a new one. *Administration → Protocol* shows when such a link was used.
 
 ### Break-glass: emergency admin access
 

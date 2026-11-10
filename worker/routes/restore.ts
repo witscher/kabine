@@ -251,7 +251,11 @@ const fixupSchema = z.object({
   maps: z.record(z.string(), z.record(z.string(), z.number())),
 });
 
-/** The references that pointed to rows restored later. */
+/**
+ * The references that pointed to rows restored later. Like the rest of the restore this only adds: a reference is
+ * filled where it may be empty and still is. It never moves an existing one, e.g. an access to another person
+ * (which would get around the protection of the owner, worker/auth/owner.ts).
+ */
 restoreRoutes.post("/admin/restore/fixups", async (c) => {
   requireAdmin(requireActor(c));
   const { fixups, maps } = parse(fixupSchema, await readJson(c.req.raw));
@@ -263,10 +267,10 @@ restoreRoutes.post("/admin/restore/fixups", async (c) => {
     const schema = schemas.get(f.table) ?? (await schemaOf(db, f.table));
     schemas.set(f.table, schema);
     const id = maps[f.refTable]?.[String(f.old)];
-    if (id == null || !schema.fks.some((fk) => fk.from === f.column && fk.table === f.refTable)) continue;
+    if (id == null || !schema.fks.some((fk) => fk.from === f.column && fk.table === f.refTable && !fk.notnull)) continue;
     const keys = Object.keys(f.where).filter((k) => schema.names.has(k));
     if (!keys.length) continue;
-    statements.push(stmt(db, `UPDATE ${f.table} SET ${f.column} = ? WHERE ${keys.map((k) => `${k} IS ?`).join(" AND ")}`, id, ...keys.map((k) => f.where[k]!)));
+    statements.push(stmt(db, `UPDATE ${f.table} SET ${f.column} = ? WHERE ${f.column} IS NULL AND ${keys.map((k) => `${k} IS ?`).join(" AND ")}`, id, ...keys.map((k) => f.where[k]!)));
   }
   const res = await batch(db, statements);
   return c.json({ updated: res.reduce((n, r) => n + (r.meta.changes ?? 0), 0) });

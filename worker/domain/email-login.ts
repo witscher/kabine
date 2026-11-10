@@ -125,6 +125,73 @@ function mailText(purpose: EmailPurpose, code: string, link: string, club: strin
   ].join("\n");
 }
 
+/**
+ * Stores a code if the limits allow it, else throws "rate_limited". The limit per address is checked in the same
+ * statement that creates the row, so parallel requests cannot get past it (a read, then a write, would let them).
+ */
+async function bookCode(
+  env: Env,
+  row: {
+    requestId: string;
+    purpose: EmailPurpose;
+    channel: "email" | "sms";
+    address: string;
+    accountId: number | null;
+    context: string | null;
+    tokenHash: string;
+    codeHash: string;
+    expiresAt: number;
+    ip: string | null;
+    now: number;
+  },
+): Promise<void> {
+  await rateLimitIp(env, row.ip);
+  const created = await run(
+    env.DB,
+    `INSERT INTO email_codes (request_id, purpose, channel, email, account_id, context, token_hash, code_hash, expires_at)
+     SELECT ?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9
+      WHERE (SELECT count(*) FROM email_codes WHERE email = ?4 AND channel = ?3 AND created_at > ?10) < ?11
+        AND (SELECT count(*) FROM email_codes WHERE email = ?4 AND channel = ?3 AND created_at > ?12) < ?13`,
+    row.requestId,
+    row.purpose,
+    row.channel,
+    row.address,
+    row.accountId,
+    row.context,
+    row.tokenHash,
+    row.codeHash,
+    utcIso(row.expiresAt),
+    utcIso(row.now - 3_600_000),
+    SENDS_PER_ADDRESS_PER_HOUR,
+    utcIso(row.now - 86_400_000),
+    SENDS_PER_ADDRESS_PER_DAY,
+  );
+  if (!created.meta.changes) throw rateLimited();
+}
+
+/**
+ * A sign-in request for an address or number that belongs to no access: nothing is sent, but it counts against the
+ * same limits as a known one. Otherwise the limit would answer "too many" only for people of the club and so tell
+ * who is in it. The row keeps a keyed hash instead of the address and is expired from the start; the hourly
+ * clean-up removes it after a day, like every code.
+ */
+export async function bookUnknownAddress(env: Env, input: { address: string; channel?: "email" | "sms"; ip: string | null }, now = Date.now()): Promise<void> {
+  const channel = input.channel ?? "email";
+  await bookCode(env, {
+    requestId: randomToken(18),
+    purpose: "login",
+    channel,
+    address: `unknown:${await hmacB64url(env.APP_SECRET, `unknown-address:${channel}:${input.address}`)}`,
+    accountId: null,
+    context: null,
+    tokenHash: await sha256Hex(randomToken(24)),
+    codeHash: randomToken(24),
+    expiresAt: now,
+    ip: input.ip,
+    now,
+  });
+}
+
 /** Creates a code and sends it. Returns the request ID for entering the code. */
 export async function issueEmailCode(
   env: Env,
@@ -141,33 +208,22 @@ export async function issueEmailCode(
   now = Date.now(),
 ): Promise<string> {
   const channel = input.channel ?? "email";
-  await rateLimitIp(env, input.ip);
   const requestId = randomToken(18);
   const token = randomToken(24);
   const code = sixDigits();
-  // The limit per address is checked in the same statement that creates the code, so parallel requests cannot
-  // get past it (a read, then a write, would let them)
-  const created = await run(
-    env.DB,
-    `INSERT INTO email_codes (request_id, purpose, channel, email, account_id, context, token_hash, code_hash, expires_at)
-     SELECT ?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9
-      WHERE (SELECT count(*) FROM email_codes WHERE email = ?4 AND channel = ?3 AND created_at > ?10) < ?11
-        AND (SELECT count(*) FROM email_codes WHERE email = ?4 AND channel = ?3 AND created_at > ?12) < ?13`,
+  await bookCode(env, {
     requestId,
-    input.purpose,
+    purpose: input.purpose,
     channel,
-    input.email,
-    input.accountId ?? null,
-    input.context === undefined ? null : JSON.stringify(input.context),
-    await sha256Hex(token),
-    await codeHash(env, requestId, code),
-    utcIso(now + CODE_TTL_MS),
-    utcIso(now - 3_600_000),
-    SENDS_PER_ADDRESS_PER_HOUR,
-    utcIso(now - 86_400_000),
-    SENDS_PER_ADDRESS_PER_DAY,
-  );
-  if (!created.meta.changes) throw rateLimited();
+    address: input.email,
+    accountId: input.accountId ?? null,
+    context: input.context === undefined ? null : JSON.stringify(input.context),
+    tokenHash: await sha256Hex(token),
+    codeHash: await codeHash(env, requestId, code),
+    expiresAt: now + CODE_TTL_MS,
+    ip: input.ip,
+    now,
+  });
   const club = await loadClub(env.DB);
   if (channel === "sms") {
     const app = club.shortName;

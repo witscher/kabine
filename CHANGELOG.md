@@ -6,6 +6,10 @@ Changes that are merged but not released yet go under *Unreleased*, one line eac
 
 ## Unreleased
 
+- Security: a personal link on an existing access no longer sets an e-mail address for sign-in; it sets up a new passkey as before. If the address of an access may not be the person's own, admins switch on *Also remove the e-mail address for sign-in* in the person's sheet before creating the link: using the link removes the address, and the person can enter a new one. The protocol shows when a personal link was used on an existing access.
+- Security: the limit for sign-in codes no longer shows whether an address belongs to someone in the club; unknown addresses are counted the same way (as a hash, nothing is sent).
+- Security: restoring an export can no longer move an existing access to another person, which another admin could have used against the owner of the installation.
+
 ## v0.8.0
 
 - Statistics: coaches see *Team → Statistics* for the last 4 weeks or the season: training participation, appearances in games, a table per training and game, and each player's events. With the helper plan also the helper duties per family, with a button to remind the families without a duty. Players and parents see their own figures under *Profile → My statistics* (for parents per child), with the family's helper duties.

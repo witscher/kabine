@@ -14,6 +14,8 @@ export interface InviteRow {
   team_id: number | null;
   person_id: number | null;
   revoke_existing: number;
+  /** Personal link of an admin: using it also removes the e-mail address of the access */
+  clear_email: number;
   created_at: string;
   expires_at: string;
   revoked_at: string | null;
@@ -37,7 +39,7 @@ export function inviteUrl(origin: string, token: string): string {
 
 export async function createInvite(
   env: Env,
-  input: { kind: InviteRow["kind"]; teamId?: number; personId?: number; createdBy: number; revokeExisting?: boolean },
+  input: { kind: InviteRow["kind"]; teamId?: number; personId?: number; createdBy: number; revokeExisting?: boolean; clearEmail?: boolean },
   now = Date.now(),
 ): Promise<{ id: number; token: string; expiresAt: string }> {
   const nonce = randomToken(18);
@@ -64,14 +66,15 @@ export async function createInvite(
   }
   const row = await first<{ id: number }>(
     env.DB,
-    `INSERT INTO invites (kind, nonce, token_hash, team_id, person_id, revoke_existing, created_by, created_at, expires_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id`,
+    `INSERT INTO invites (kind, nonce, token_hash, team_id, person_id, revoke_existing, clear_email, created_by, created_at, expires_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id`,
     input.kind,
     nonce,
     await sha256Hex(token),
     input.teamId ?? null,
     input.personId ?? null,
     input.revokeExisting ? 1 : 0,
+    input.clearEmail ? 1 : 0,
     input.createdBy,
     utcIso(now),
     expiresAt,

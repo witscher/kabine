@@ -19,6 +19,7 @@ import { distinctShortNames } from "../../shared/names";
 import { insertPasskey } from "./auth";
 import { currentLocale, withLocale } from "../i18n";
 import { revalidateChatAccess } from "../domain/chat";
+import { audit } from "../domain/audit";
 
 /** email: address for sign-in. Required as soon as a new access is created. */
 export type JoinContext =
@@ -111,6 +112,8 @@ joinRoutes.post("/join/info", async (c) => {
       email: person!.has_account === 1 ? null : person!.admin_email,
     },
     revokeExisting: person!.has_account === 1,
+    // The admin had the link remove the e-mail address too: the page offers to enter a new one
+    clearEmail: person!.has_account === 1 && invite.clear_email === 1,
   });
 });
 
@@ -195,9 +198,16 @@ async function buildJoinContext(
   // An admin whose address was entered with the admin role need not type it again
   if (!account && !email && person.is_admin && person.admin_email) email = person.admin_email.toLowerCase();
   if (!account && !email && person.is_admin) throw badRequest(adminEmailRequired(), "email_required");
-  // A link never replaces a confirmed address: whoever holds it could otherwise take over the e-mail login
-  if (account?.email_verified_at && email && email !== account.email) {
-    throw badRequest(t`A confirmed e-mail address is already stored for this access. Use this address or set up a passkey.`, "email_locked");
+  // On an existing access a link never sets or replaces the address: whoever holds it could otherwise keep an e-mail
+  // login of their own. The exception is a link an admin created to remove the address (clear_email); then the
+  // person enters a new one. Signing in with the confirmed address the access already has stays possible.
+  if (account && email && invite.clear_email !== 1 && !(account.email_verified_at && email === account.email)) {
+    throw badRequest(
+      account.email_verified_at
+        ? t`A confirmed e-mail address is already stored for this access. Use this address or set up a passkey.`
+        : t`This link sets up a new passkey for an existing access. You can add an e-mail address in the profile afterwards.`,
+      "email_locked",
+    );
   }
   // Taking over an existing account always signs out its previous devices, so the owner notices
   const context: JoinContext = {
@@ -266,6 +276,9 @@ export async function finishJoin(
   credential: Credential | null,
   emailVerified = false,
 ): Promise<number> {
+  // A personal link on an existing access: what it did to the sign-in goes into the protocol
+  const replaced = context.kind === "personal" && context.accountId != null ? context : null;
+  const before = replaced ? await first<{ email: string | null }>(env.DB, "SELECT email FROM accounts WHERE id = ?", replaced.accountId) : null;
   const accountId = await createJoinAccount(env, request, context, credential);
   if (context.email) {
     await run(
@@ -278,7 +291,23 @@ export async function finishJoin(
       accountId,
     );
   }
+  if (replaced) {
+    const after = await first<{ email: string | null }>(env.DB, "SELECT email FROM accounts WHERE id = ?", accountId);
+    await audit(env.DB, null, "personal_link_used", {
+      personId: replaced.personId,
+      detail: {
+        ...(before?.email && before.email !== after?.email ? { emailCleared: true } : {}),
+        ...(after?.email && after.email !== before?.email ? { email: maskEmail(after.email) } : {}),
+      },
+    });
+  }
   return accountId;
+}
+
+/** "pa…@example.org": enough for an admin to ask "is this yours?", without the protocol collecting addresses. */
+function maskEmail(email: string): string {
+  const at = email.lastIndexOf("@");
+  return `${email.slice(0, Math.min(2, Math.max(at, 0)))}…${email.slice(at)}`;
 }
 
 /** After a passkey access, have the given address confirmed (sending errors block nothing). */
@@ -394,7 +423,7 @@ async function createJoinAccount(env: Env, request: Request, context: JoinContex
   }
 
   if (context.kind === "personal") {
-    await stillValid(env, context.inviteId);
+    const invite = await stillValid(env, context.inviteId);
     let accountId = context.accountId;
     if (accountId == null) {
       try {
@@ -414,6 +443,8 @@ async function createJoinAccount(env: Env, request: Request, context: JoinContex
         stmt(db, "DELETE FROM passkeys WHERE account_id = ?", accountId),
         stmt(db, "DELETE FROM sessions WHERE account_id = ?", accountId),
         stmt(db, "DELETE FROM push_subscriptions WHERE account_id = ?", accountId),
+        // The admin had the link remove the address too (after the notice above went to it)
+        ...(invite.clear_email === 1 ? [stmt(db, "UPDATE accounts SET email = NULL, email_verified_at = NULL WHERE id = ?", accountId)] : []),
       ]);
       // Chats still open on the old devices close
       await revalidateChatAccess(env, { personIds: [context.personId] });

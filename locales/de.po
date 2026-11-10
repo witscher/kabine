@@ -843,6 +843,11 @@ msgstr "Kader nominieren"
 msgid "People"
 msgstr "Personen"
 
+# ai
+#: src/pages/audit.tsx
+msgid "{who} created a personal link for {person}; using it signs out the previous devices and removes the e-mail address for sign-in"
+msgstr "{who} hat einen persönlichen Link für {person} erzeugt; wer ihn nutzt, meldet die bisherigen Geräte ab und entfernt die E-Mail-Adresse für die Anmeldung"
+
 #: src/avatar.tsx
 msgid "For a profile picture you need your parents' consent. But no parent is linked to your access yet. Ask your coach whether your parents can be added."
 msgstr "Für ein Profilbild brauchst du die Zustimmung deiner Eltern. Mit deinem Zugang ist aber noch kein Elternteil verknüpft. Frag deinen Trainer, ob deine Eltern eingebunden werden können."
@@ -2988,6 +2993,11 @@ msgid "Not riding after all?"
 msgstr "Doch nicht mitfahren?"
 
 # ai
+#: src/pages/audit.tsx
+msgid "The personal link for {person} was used: previous devices signed out, e-mail address for sign-in now {address}"
+msgstr "Der persönliche Link für {person} wurde genutzt: bisherige Geräte abgemeldet, E-Mail-Adresse für die Anmeldung jetzt {address}"
+
+# ai
 #: modules/duties/app/admin.tsx
 msgid "Duties of approved people from all teams (e.g. youth referee) are not part of any template: the home games of the age groups ticked under Admin → Age groups get them automatically (1 slot, 15 min before throw-off until the end of the game)."
 msgstr "Dienste für Freigegebene aus allen Mannschaften (z. B. Jugendschiedsrichter) gehören zu keiner Vorlage: Die Heimspiele der Altersklassen, die unter Verwaltung → Altersklassen angehakt sind, bekommen sie automatisch (1 Platz, 15 Min. vor Anwurf bis Spielende)."
@@ -4248,6 +4258,11 @@ msgid "Only chat and special events, e.g. coaching team"
 msgstr "Nur Chat und Sondertermine, z. B. Trainerteam"
 
 # ai
+#: worker/routes/join.ts
+msgid "This link sets up a new passkey for an existing access. You can add an e-mail address in the profile afterwards."
+msgstr "Mit diesem Link richtest du einen neuen Passkey für einen bestehenden Zugang ein. Eine E-Mail-Adresse kannst du danach im Profil eintragen."
+
+# ai
 #: src/game-import.tsx
 msgid "Away game at {opponent}"
 msgstr "Auswärtsspiel bei {opponent}"
@@ -4894,6 +4909,11 @@ msgstr "Davor"
 #: src/pages/admin.tsx
 msgid "Saved. Trainings have been adjusted."
 msgstr "Gespeichert. Trainings sind angepasst."
+
+# ai
+#: src/pages/join.tsx
+msgid "Your previous passkeys and sessions will be signed out, and the e-mail address of your access is removed. You can enter a new one here."
+msgstr "Deine bisherigen Passkeys und Anmeldungen werden dabei abgemeldet, und die E-Mail-Adresse deines Zugangs wird entfernt. Du kannst hier eine neue eintragen."
 
 # ai
 #: modules/duties/app/help.ts
@@ -9128,6 +9148,11 @@ msgid "Times refer to the start and end of the event. For games, they begin with
 msgstr "Zeiten beziehen sich auf Beginn und Ende des Termins. Bei Spielen gelten der Spielbeginn und das Ende nach der Spieldauer der Altersklasse. Bei Sonderterminen gelten Beginn und Ende des Termins."
 
 # ai
+#: src/pages/audit.tsx
+msgid "The personal link for {person} was used: previous devices signed out"
+msgstr "Der persönliche Link für {person} wurde genutzt: bisherige Geräte abgemeldet"
+
+# ai
 #: src/pages/updates.tsx
 msgid "Copy command"
 msgstr "Befehl kopieren"
@@ -9154,6 +9179,11 @@ msgstr "Zu-/Absagen: selbst antworten. Aushilfe-Anfragen: Anfragen anderer Manns
 #: src/pages/event.tsx
 msgid "Change note"
 msgstr "Notiz ändern"
+
+# ai
+#: src/pages/audit.tsx
+msgid "The personal link for {person} was used: previous devices signed out, e-mail address for sign-in removed"
+msgstr "Der persönliche Link für {person} wurde genutzt: bisherige Geräte abgemeldet, E-Mail-Adresse für die Anmeldung entfernt"
 
 # ai
 #: src/child-limits.tsx
@@ -10116,6 +10146,11 @@ msgstr "hat den Termin angelegt"
 #: src/pages/audit.tsx
 msgid "{who} deleted {label}"
 msgstr "{who} hat {label} gelöscht"
+
+# ai
+#: src/pages/admin.tsx
+msgid "For example when it may not be the person's own. A new one can be entered when the link is opened."
+msgstr "Zum Beispiel, wenn sie vielleicht nicht die eigene der Person ist. Beim Öffnen des Links kann eine neue eingetragen werden."
 
 # ai
 #: worker/routes/events.ts
@@ -12152,6 +12187,11 @@ msgstr "Der Passkey ist die sicherste Anmeldung: Face ID, Fingerabdruck oder Ger
 msgid "No picture is waiting for approval."
 msgstr "Es wartet kein Bild auf Freigabe."
 
+# ai
+#: worker/routes/persons.ts
+msgid "Only an admin removes the e-mail address of an access."
+msgstr "Nur ein Admin entfernt die E-Mail-Adresse eines Zugangs."
+
 #: src/pages/team.tsx
 msgid "Copy text"
 msgstr "Text kopieren"
@@ -12433,6 +12473,11 @@ msgstr "{name} hat für das Training am {when} abgesagt."
 #: src/pages/special.tsx
 msgid "Opponent or tournament"
 msgstr "Gegner oder Turnier"
+
+# ai
+#: src/pages/admin.tsx
+msgid "Also remove the e-mail address for sign-in"
+msgstr "Auch die E-Mail-Adresse für die Anmeldung entfernen"
 
 # ai
 #: worker/routes/events.ts

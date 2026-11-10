@@ -337,6 +337,8 @@ interface AdminPerson {
   isAdmin: boolean;
   adminEmail: string | null;
   hasAccount: boolean;
+  /** The access has an e-mail address for sign-in */
+  hasEmail: boolean;
   /** Duty types an admin approved the person for (e.g. youth referee) */
   skillGrants: number[];
   isClubMember: boolean;
@@ -1262,6 +1264,7 @@ function DeletePersonSection({ p, all, onDeleted }: { p: AdminPerson; all: Admin
 function PersonAdminSheet({ p, all, selfId, onClose, onChanged }: { p: AdminPerson; all: AdminPerson[]; selfId: number; onClose: () => void; onChanged: () => void }) {
   const [email, setEmail] = useState(p.adminEmail ?? "");
   const [link, setLink] = useState<{ url: string; expiresAt: string } | null>(null);
+  const [clearEmail, setClearEmail] = useState(false);
   const children = p.children;
   const firstName = p.person.firstName;
   const fullName = personName(p.person);
@@ -1289,10 +1292,22 @@ function PersonAdminSheet({ p, all, selfId, onClose, onChanged }: { p: AdminPers
           {p.hasAccount ? t`Has access.` : t`Has no access yet.`}{" "}
           <Trans>A personal one-time link sets up a new passkey and signs out the previous devices.</Trans>
         </p>
+        {p.hasEmail ? (
+          <SwitchRow
+            label={t`Also remove the e-mail address for sign-in`}
+            sub={t`For example when it may not be the person's own. A new one can be entered when the link is opened.`}
+            checked={clearEmail}
+            onChange={(on) => {
+              setClearEmail(on);
+              // The link shown was created with the other choice
+              setLink(null);
+            }}
+          />
+        ) : null}
         <Button
           icon="link"
           onClick={async () => {
-            setLink(await api.post<{ url: string; expiresAt: string }>(`/persons/${p.person.id}/personal-link`, {}));
+            setLink(await api.post<{ url: string; expiresAt: string }>(`/persons/${p.person.id}/personal-link`, p.hasEmail && clearEmail ? { clearEmail: true } : {}));
           }}
         >
           <Trans>Create personal link</Trans>

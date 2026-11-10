@@ -794,6 +794,10 @@ msgstr "Nominate squad"
 msgid "People"
 msgstr "People"
 
+#: src/pages/audit.tsx
+msgid "{who} created a personal link for {person}; using it signs out the previous devices and removes the e-mail address for sign-in"
+msgstr "{who} created a personal link for {person}; using it signs out the previous devices and removes the e-mail address for sign-in"
+
 #: src/avatar.tsx
 msgid "For a profile picture you need your parents' consent. But no parent is linked to your access yet. Ask your coach whether your parents can be added."
 msgstr "For a profile picture you need your parents' consent. But no parent is linked to your access yet. Ask your coach whether your parents can be added."
@@ -2790,6 +2794,10 @@ msgstr "No training venues yet"
 msgid "Not riding after all?"
 msgstr "Not riding after all?"
 
+#: src/pages/audit.tsx
+msgid "The personal link for {person} was used: previous devices signed out, e-mail address for sign-in now {address}"
+msgstr "The personal link for {person} was used: previous devices signed out, e-mail address for sign-in now {address}"
+
 #: modules/duties/app/admin.tsx
 msgid "Duties of approved people from all teams (e.g. youth referee) are not part of any template: the home games of the age groups ticked under Admin → Age groups get them automatically (1 slot, 15 min before throw-off until the end of the game)."
 msgstr "Duties of approved people from all teams (e.g. youth referee) are not part of any template: the home games of the age groups ticked under Admin → Age groups get them automatically (1 slot, 15 min before throw-off until the end of the game)."
@@ -3957,6 +3965,10 @@ msgstr "Current season"
 msgid "Only chat and special events, e.g. coaching team"
 msgstr "Only chat and special events, e.g. coaching team"
 
+#: worker/routes/join.ts
+msgid "This link sets up a new passkey for an existing access. You can add an e-mail address in the profile afterwards."
+msgstr "This link sets up a new passkey for an existing access. You can add an e-mail address in the profile afterwards."
+
 #: src/game-import.tsx
 msgid "Away game at {opponent}"
 msgstr "Away game at {opponent}"
@@ -4557,6 +4569,10 @@ msgstr "Before"
 #: src/pages/admin.tsx
 msgid "Saved. Trainings have been adjusted."
 msgstr "Saved. Trainings have been adjusted."
+
+#: src/pages/join.tsx
+msgid "Your previous passkeys and sessions will be signed out, and the e-mail address of your access is removed. You can enter a new one here."
+msgstr "Your previous passkeys and sessions will be signed out, and the e-mail address of your access is removed. You can enter a new one here."
 
 #: modules/duties/app/help.ts
 msgid "Helpers per family"
@@ -8500,6 +8516,10 @@ msgstr "Anyone who declined, is permanently absent or inactive is excused."
 msgid "Times refer to the start and end of the event. For games, they begin with the start of play and end after the game length of the age group. For special events, the start and end of the event apply."
 msgstr "Times refer to the start and end of the event. For games, they begin with the start of play and end after the game length of the age group. For special events, the start and end of the event apply."
 
+#: src/pages/audit.tsx
+msgid "The personal link for {person} was used: previous devices signed out"
+msgstr "The personal link for {person} was used: previous devices signed out"
+
 #: src/pages/updates.tsx
 msgid "Copy command"
 msgstr "Copy command"
@@ -8524,6 +8544,10 @@ msgstr "Respond: accept and decline themselves. Stand-in requests: answer reques
 #: src/pages/event.tsx
 msgid "Change note"
 msgstr "Change note"
+
+#: src/pages/audit.tsx
+msgid "The personal link for {person} was used: previous devices signed out, e-mail address for sign-in removed"
+msgstr "The personal link for {person} was used: previous devices signed out, e-mail address for sign-in removed"
 
 #: src/child-limits.tsx
 msgid "responses"
@@ -9422,6 +9446,10 @@ msgstr "created the event"
 #: src/pages/audit.tsx
 msgid "{who} deleted {label}"
 msgstr "{who} deleted {label}"
+
+#: src/pages/admin.tsx
+msgid "For example when it may not be the person's own. A new one can be entered when the link is opened."
+msgstr "For example when it may not be the person's own. A new one can be entered when the link is opened."
 
 #: worker/routes/events.ts
 msgid "{name} is missing from “{title}”"
@@ -11328,6 +11356,10 @@ msgstr "The passkey is the safest way to sign in: Face ID, fingerprint or screen
 msgid "No picture is waiting for approval."
 msgstr "No picture is waiting for approval."
 
+#: worker/routes/persons.ts
+msgid "Only an admin removes the e-mail address of an access."
+msgstr "Only an admin removes the e-mail address of an access."
+
 #: src/pages/team.tsx
 msgid "Copy text"
 msgstr "Copy text"
@@ -11591,6 +11623,10 @@ msgstr "{name} declined training on {when}."
 #: src/pages/special.tsx
 msgid "Opponent or tournament"
 msgstr "Opponent or tournament"
+
+#: src/pages/admin.tsx
+msgid "Also remove the e-mail address for sign-in"
+msgstr "Also remove the e-mail address for sign-in"
 
 #: worker/routes/events.ts
 #: worker/routes/events.ts

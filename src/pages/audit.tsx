@@ -53,9 +53,18 @@ export function auditText(e: AuditEntry): string {
     case "account_removed":
       return t`${who} removed the access of ${person}`;
     case "personal_link":
+      if (d.clearsEmail) return t`${who} created a personal link for ${person}; using it signs out the previous devices and removes the e-mail address for sign-in`;
       return d.replacesAccess
         ? t`${who} created a personal link for ${person}; using it signs out the previous devices`
         : t`${who} created a personal link for ${person}`;
+    case "personal_link_used": {
+      // Written when the link is opened: nobody is signed in then
+      const address = str(d.email);
+      if (address) return t`The personal link for ${person} was used: previous devices signed out, e-mail address for sign-in now ${address}`;
+      return d.emailCleared
+        ? t`The personal link for ${person} was used: previous devices signed out, e-mail address for sign-in removed`
+        : t`The personal link for ${person} was used: previous devices signed out`;
+    }
     case "left_club":
       return d.parent ? t`${who} recorded that ${person} left the club, as parent without a remaining child` : t`${who} recorded that ${person} left the club`;
     case "person_deleted": {

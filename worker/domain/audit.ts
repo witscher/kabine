@@ -9,6 +9,7 @@ import { first, stmt } from "../lib/db";
 export type AuditAction =
   | "account_removed"
   | "personal_link"
+  | "personal_link_used"
   | "left_club"
   | "person_deleted"
   | "admin_granted"
