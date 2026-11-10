@@ -146,7 +146,7 @@ describe("Region und Sportart", () => {
       birthYearMin: 2014,
       birthYearMax: 2015,
       gameMinutes: 90,
-      requiredDuties: [(await one<{ id: number }>("SELECT id FROM duty_types WHERE code = 'referee'")).id],
+      requiredDuties: [],
       childLimits: { account: true, respond: true, chat: "write", help: true },
     });
     expect((await api("/age-classes", { method: "PUT", cookie: adminCookie, body: { ageClasses: res.body.ageClasses } })).status).toBe(200);

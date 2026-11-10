@@ -2807,6 +2807,11 @@ msgstr "{name} (Stammkader)"
 msgid "another game"
 msgstr "ein anderes Spiel"
 
+# ai
+#: modules/duties/worker/routes.ts
+msgid "Remove the duty type from the templates first."
+msgstr "Nimm die Dienstart zuerst aus den Vorlagen."
+
 #: src/pages/admin.tsx
 msgid "{groupCount, plural, one {# group} other {# groups}}"
 msgstr "{groupCount, plural, one {# Gruppe} other {# Gruppen}}"
@@ -5154,12 +5159,6 @@ msgid "Delete {name}?"
 msgstr "{name} löschen?"
 
 # ai
-#. placeholder {0}: used.grants
-#: modules/duties/app/admin.tsx
-msgid "{0, plural, one {# approval} other {# approvals}}"
-msgstr "{0, plural, one {# Freigabe} other {# Freigaben}}"
-
-# ai
 #: src/list-import.tsx
 msgid "Answer the questions above first."
 msgstr "Beantworte zuerst die Fragen oben."
@@ -7090,11 +7089,6 @@ msgstr "Beides ist möglich, es gilt die letzte Rückmeldung. Ihr seht jeweils, 
 #: worker/routes/parents.ts
 msgid "Parents are not involved in your child's teams."
 msgstr "In den Mannschaften deines Kindes sind keine Eltern eingebunden."
-
-# ai
-#: modules/duties/worker/routes.ts
-msgid "People are approved for this duty. Archive it instead."
-msgstr "Für diesen Dienst sind Personen freigegeben. Archiviere ihn stattdessen."
 
 #: worker/routes/parents.ts
 msgid "Permission changed"
@@ -10696,6 +10690,11 @@ msgid "{venue, select, hall {Hall to follow} pitch {Pitch to follow} other {Venu
 msgstr "{venue, select, hall {Halle folgt} pitch {Platz folgt} other {Spielort folgt}}"
 
 # ai
+#: modules/duties/app/admin.tsx
+msgid "{grants, plural, one {The duty type is used nowhere and disappears completely, together with # approval.} other {The duty type is used nowhere and disappears completely, together with # approvals.}}"
+msgstr "{grants, plural, one {Die Dienstart wird nirgends verwendet und verschwindet ganz, zusammen mit # Freigabe.} other {Die Dienstart wird nirgends verwendet und verschwindet ganz, zusammen mit # Freigaben.}}"
+
+# ai
 #: src/pages/setup-wizard.tsx
 msgid "Create person"
 msgstr "Person anlegen"
@@ -12181,6 +12180,11 @@ msgstr "Das lässt sich nicht rückgängig machen. Gelöscht werden {name} und:"
 #: worker/routes/avatars.ts
 msgid "For a profile picture you need your parents' consent, and no parent is linked to your access yet. Ask your coach whether parents can be involved."
 msgstr "Für ein Profilbild brauchst du die Zustimmung deiner Eltern, und mit deinem Zugang ist noch kein Elternteil verknüpft. Frag deinen Trainer, ob Eltern eingebunden werden können."
+
+# ai
+#: modules/duties/app/admin.tsx
+msgid "From now on it is a duty of the team: put it into the templates of the teams that need it. Age groups no longer get it automatically; time blocks already created and the approvals stay."
+msgstr "Ab jetzt ist es ein Dienst der Mannschaft: Nimm ihn in die Vorlagen der Mannschaften auf, die ihn brauchen. Altersklassen bekommen ihn nicht mehr automatisch; schon angelegte Zeitblöcke und die Freigaben bleiben."
 
 #: src/pages/chat.tsx
 msgid "Leave the chat"

@@ -4,6 +4,7 @@
 import { t } from "@lingui/core/macro";
 import { Hono } from "hono";
 import { z } from "zod";
+import type { SportProfile } from "../../shared/sport-api";
 import { seasonAround, SPORT_IDS, SPORTS, type SportId } from "../../shared/sports";
 import { type AppEnv, requireActor } from "../app";
 import { requireAdmin } from "../auth/actor";
@@ -127,10 +128,12 @@ async function applyDutyProfile(db: D1Database, sport: SportId, locale: "en" | "
     );
   }
   const ids = new Map((await all<{ id: number; code: string }>(db, "SELECT id, code FROM duty_types WHERE event_id IS NULL")).map((r) => [r.code, r.id]));
-  const templates: ["home" | "away", string, SportProfileTemplate][] = [
+  const templates: ["home" | "away" | null, string, SportProfileTemplate][] = [
     ["home", t`Home game`, profile.homeTemplate],
     ["away", t`Away game`, profile.awayTemplate],
   ];
+  const extra: SportProfile["extraHomeTemplates"] = profile.extraHomeTemplates;
+  for (const x of extra ?? []) templates.push([null, x.name[locale], x.items]);
   for (const [kind, name, items] of templates) {
     if (!items.length) continue;
     const tpl = await first<{ id: number }>(db, "INSERT INTO duty_templates (name, default_for) VALUES (?, ?) RETURNING id", name, kind);
@@ -149,12 +152,35 @@ async function applyDutyProfile(db: D1Database, sport: SportId, locale: "en" | "
       ),
     );
   }
+  await assignProfileTemplates(db, sport, locale);
 }
 
 type SportProfileTemplate = (typeof SPORTS)[SportId]["homeTemplate"];
 
+/**
+ * Gives the further home game templates of the profile (e.g. "Home game adults") to the teams of their
+ * age classes that have no home template of their own yet: after the duty profile and once the wizard's
+ * teams exist.
+ */
+async function assignProfileTemplates(db: D1Database, sport: SportId, locale: "en" | "de"): Promise<void> {
+  const extra: SportProfile["extraHomeTemplates"] = SPORTS[sport].extraHomeTemplates;
+  for (const tpl of extra ?? []) {
+    await run(
+      db,
+      `UPDATE teams SET home_template_id = (SELECT min(id) FROM duty_templates WHERE name = ?1)
+        WHERE kind = 'team' AND home_template_id IS NULL AND age_class_code IN (SELECT value FROM json_each(?2))
+          AND EXISTS (SELECT 1 FROM duty_templates WHERE name = ?1)`,
+      tpl.name[locale],
+      JSON.stringify(tpl.ageClasses),
+    );
+  }
+}
+
 setupRoutes.post("/admin/setup/done", async (c) => {
   requireAdmin(requireActor(c));
+  const club = await loadClub(c.env.DB);
+  // Wizard teams created after the duty profile get the profile's template of their age class
+  if (!club.setupDone) await assignProfileTemplates(c.env.DB, club.sport, club.defaultLocale);
   await saveClub(c.env.DB, { setupDone: true });
   return c.json({ ok: true });
 });

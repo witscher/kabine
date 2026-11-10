@@ -53,13 +53,25 @@ export interface SportProfile {
   ageClasses: AgeClassTemplate[];
   dutyTypes: DutyTypeTemplate[];
   /** Duty templates for home and away games: duty code, slots, minutes before kick-off/after the end. */
-  homeTemplate: { duty: string; slots: number; before: number; after: number }[];
-  awayTemplate: { duty: string; slots: number; before: number; after: number }[];
+  homeTemplate: TemplateItem[];
+  awayTemplate: TemplateItem[];
+  /**
+   * Further home game templates, e.g. a smaller one for adults. The setup gives them to the teams of
+   * `ageClasses` (codes); coaches choose another one in the team settings.
+   */
+  extraHomeTemplates?: { name: Record<Locale, string>; ageClasses: string[]; items: TemplateItem[] }[];
   /**
    * Where the sport is played: the app says "hall" (handball, basketball, volleyball), "pitch" (football,
    * hockey on grass) or, for "venue", a neutral word. Texts pick their wording with ICU select (venueOf).
    */
   venue: VenueKind;
+}
+
+export interface TemplateItem {
+  duty: string;
+  slots: number;
+  before: number;
+  after: number;
 }
 
 export type VenueKind = "hall" | "pitch" | "venue";
@@ -101,3 +113,10 @@ export function seasonAround(today: string, start: { month: number; day: number 
     endsOn: `${end.getUTCFullYear()}-${pad(end.getUTCMonth() + 1)}-${pad(end.getUTCDate())}`,
   };
 }
+
+/** Home game template of the adults: only washing the shirts, no kiosk or table duties. */
+export const ADULTS_HOME_TEMPLATE = {
+  name: { en: "Home game adults", de: "Heimspiel Erwachsene" },
+  ageClasses: ["Adults"],
+  items: [{ duty: "shirts", slots: 1, before: 0, after: 0 }],
+};

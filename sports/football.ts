@@ -1,5 +1,5 @@
 // Football (soccer) with the German youth classes G to A (U7 to U19).
-import { CHILD_VIA_PARENTS, defineSport, DUTY_KIOSK, DUTY_SHIRTS } from "../shared/sport-api";
+import { ADULTS_HOME_TEMPLATE, CHILD_VIA_PARENTS, defineSport, DUTY_KIOSK, DUTY_SHIRTS } from "../shared/sport-api";
 
 export default defineSport({
   id: "football",
@@ -21,5 +21,6 @@ export default defineSport({
     { duty: "kiosk", slots: 2, before: 30, after: 30 },
     { duty: "shirts", slots: 1, before: 0, after: 0 },
   ],
+  extraHomeTemplates: [ADULTS_HOME_TEMPLATE],
   awayTemplate: [{ duty: "shirts", slots: 1, before: 0, after: 0 }],
 });

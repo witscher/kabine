@@ -16,7 +16,7 @@ Duties that need prior knowledge are approved by the person ("I can do this") or
 
 ## Deleting a duty type
 
-Admins delete a duty type only when it is used nowhere: in no template and in no time block of any event, past ones included, since those rows and the helpers' entries would go with it (`DELETE /api/admin/duty-types/:id`, 409 `duty_type_in_use` otherwise; the youth referee duty never, `referee_type`). Consents to it go with it. `GET /api/duty-types` tells admins where each type is used (`usage`).
+Admins delete a duty type only when it is used nowhere: in no template, in no age group's required duties and in no time block of any event, past ones included, since those rows and the helpers' entries would go with it (`DELETE /api/admin/duty-types/:id`, 409 `duty_type_in_use` otherwise). Consents and admin approvals to it go with it. *Who takes it* can be changed later: a type taken from all teams that becomes a duty of the team loses its required age groups and fits into templates; the way back needs it out of all templates (409 `duty_type_in_template`). `GET /api/duty-types` tells admins where each type is used (`usage`).
 
 ## Part of the core
 

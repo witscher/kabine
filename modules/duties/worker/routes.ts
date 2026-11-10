@@ -845,48 +845,60 @@ dutyRoutes.patch("/admin/duty-types/:id", async (c) => {
   const type = (await loadDutyTypes(c.env.DB)).get(id);
   if (!type || type.eventId != null) throw notFound(t`This duty type does not exist.`);
   const input = parse(dutyTypeSchema, await readJson(c.req.raw));
-  // Taken by approved people from all teams (e.g. youth referees): who helps and the approval stay as they are
-  if (type.whoQualified) {
-    await run(c.env.DB, "UPDATE duty_types SET name = ?, archived = ? WHERE id = ?", input.name, input.archived ? 1 : 0, id);
+  // Taken by approved people from all teams (e.g. youth referees): admins approve, nobody of a team helps
+  if (input.whoQualified) {
+    if (!type.whoQualified) {
+      const templates = await first<{ n: number }>(c.env.DB, "SELECT count(*) AS n FROM duty_template_items WHERE duty_type_id = ?", id);
+      if (templates?.n) throw conflict(t`Remove the duty type from the templates first.`, "duty_type_in_template");
+    }
+    await run(
+      c.env.DB,
+      `UPDATE duty_types SET name = ?, mode = 'onsite', who_parents = 0, who_players = 0, who_coaches = 0, who_members = 0, who_referees = 1, needs_skill = 1,
+              skill_grant = 'admin', archived = ? WHERE id = ?`,
+      input.name,
+      input.archived ? 1 : 0,
+      id,
+    );
     return c.json({ ok: true });
   }
-  checkWho({ ...input, whoQualified: false });
-  await run(
-    c.env.DB,
-    `UPDATE duty_types SET name = ?, mode = ?, who_parents = ?, who_players = ?, who_coaches = ?, who_members = ?, note_allowed = ?, needs_skill = ?,
-            skill_grant = ?, archived = ? WHERE id = ?`,
-    input.name,
-    input.mode,
-    input.whoParents ? 1 : 0,
-    input.whoPlayers ? 1 : 0,
-    input.whoCoaches ? 1 : 0,
-    input.whoMembers ? 1 : 0,
-    input.noteAllowed ? 1 : 0,
-    input.needsSkill ? 1 : 0,
-    input.needsSkill ? input.skillGrant : "self",
-    input.archived ? 1 : 0,
-    id,
-  );
+  checkWho(input);
+  await c.env.DB.batch([
+    stmt(
+      c.env.DB,
+      `UPDATE duty_types SET name = ?, mode = ?, who_parents = ?, who_players = ?, who_coaches = ?, who_members = ?, who_referees = 0, note_allowed = ?, needs_skill = ?,
+              skill_grant = ?, archived = ? WHERE id = ?`,
+      input.name,
+      input.mode,
+      input.whoParents ? 1 : 0,
+      input.whoPlayers ? 1 : 0,
+      input.whoCoaches ? 1 : 0,
+      input.whoMembers ? 1 : 0,
+      input.noteAllowed ? 1 : 0,
+      input.needsSkill ? 1 : 0,
+      input.needsSkill ? input.skillGrant : "self",
+      input.archived ? 1 : 0,
+      id,
+    ),
+    // Now a duty of the team (e.g. the youth referee in the home game template): no longer required per age group
+    stmt(c.env.DB, "DELETE FROM age_class_duties WHERE duty_type_id = ?", id),
+  ]);
   return c.json({ ok: true });
 });
 
 /**
  * Delete a duty type: only when it is used nowhere (its time blocks would take the helpers' entries along),
- * otherwise archive it. Consents to it go with it.
+ * otherwise archive it. Consents and admin approvals to it go with it.
  */
 dutyRoutes.delete("/admin/duty-types/:id", async (c) => {
   requireAdmin(requireActor(c));
   const id = intParam(c, "id");
   const type = (await loadDutyTypes(c.env.DB)).get(id);
   if (!type || type.eventId != null) throw notFound(t`This duty type does not exist.`);
-  const [blocks, templates, required, grants] = await Promise.all([
+  const [blocks, templates, required] = await Promise.all([
     first<{ n: number }>(c.env.DB, "SELECT count(*) AS n FROM event_duties WHERE duty_type_id = ?", id),
     first<{ n: number }>(c.env.DB, "SELECT count(DISTINCT template_id) AS n FROM duty_template_items WHERE duty_type_id = ?", id),
     first<{ n: number }>(c.env.DB, "SELECT count(*) AS n FROM age_class_duties WHERE duty_type_id = ?", id),
-    first<{ n: number }>(c.env.DB, "SELECT count(*) AS n FROM skill_grants WHERE duty_type_id = ?", id),
   ]);
-  // Approved people (e.g. the youth referees) are kept: archive such a type instead
-  if (type.whoQualified && grants?.n) throw conflict(t`People are approved for this duty. Archive it instead.`, "duty_type_has_grants");
   if (blocks?.n || templates?.n || required?.n) {
     const name = type.name;
     throw conflict(t`${name} is still in use. Archive the duty type instead.`, "duty_type_in_use");

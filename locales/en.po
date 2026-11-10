@@ -2628,6 +2628,10 @@ msgstr "{name} (core squad)"
 msgid "another game"
 msgstr "another game"
 
+#: modules/duties/worker/routes.ts
+msgid "Remove the duty type from the templates first."
+msgstr "Remove the duty type from the templates first."
+
 #: src/pages/admin.tsx
 msgid "{groupCount, plural, one {# group} other {# groups}}"
 msgstr "{groupCount, plural, one {# group} other {# groups}}"
@@ -4806,11 +4810,6 @@ msgstr "INFO"
 msgid "Delete {name}?"
 msgstr "Delete {name}?"
 
-#. placeholder {0}: used.grants
-#: modules/duties/app/admin.tsx
-msgid "{0, plural, one {# approval} other {# approvals}}"
-msgstr "{0, plural, one {# approval} other {# approvals}}"
-
 #: src/list-import.tsx
 msgid "Answer the questions above first."
 msgstr "Answer the questions above first."
@@ -6604,10 +6603,6 @@ msgstr "Both are possible, the latest response counts. You each see who answered
 #: worker/routes/parents.ts
 msgid "Parents are not involved in your child's teams."
 msgstr "Parents are not involved in your child's teams."
-
-#: modules/duties/worker/routes.ts
-msgid "People are approved for this duty. Archive it instead."
-msgstr "People are approved for this duty. Archive it instead."
 
 #: worker/routes/parents.ts
 msgid "Permission changed"
@@ -9982,6 +9977,10 @@ msgstr "taking part"
 msgid "{venue, select, hall {Hall to follow} pitch {Pitch to follow} other {Venue to follow}}"
 msgstr "{venue, select, hall {Hall to follow} pitch {Pitch to follow} other {Venue to follow}}"
 
+#: modules/duties/app/admin.tsx
+msgid "{grants, plural, one {The duty type is used nowhere and disappears completely, together with # approval.} other {The duty type is used nowhere and disappears completely, together with # approvals.}}"
+msgstr "{grants, plural, one {The duty type is used nowhere and disappears completely, together with # approval.} other {The duty type is used nowhere and disappears completely, together with # approvals.}}"
+
 #: src/pages/setup-wizard.tsx
 msgid "Create person"
 msgstr "Create person"
@@ -11383,6 +11382,10 @@ msgstr "This cannot be undone. This deletes {name} and:"
 #: worker/routes/avatars.ts
 msgid "For a profile picture you need your parents' consent, and no parent is linked to your access yet. Ask your coach whether parents can be involved."
 msgstr "For a profile picture you need your parents' consent, and no parent is linked to your access yet. Ask your coach whether parents can be involved."
+
+#: modules/duties/app/admin.tsx
+msgid "From now on it is a duty of the team: put it into the templates of the teams that need it. Age groups no longer get it automatically; time blocks already created and the approvals stay."
+msgstr "From now on it is a duty of the team: put it into the templates of the teams that need it. Age groups no longer get it automatically; time blocks already created and the approvals stay."
 
 #: src/pages/chat.tsx
 msgid "Leave the chat"

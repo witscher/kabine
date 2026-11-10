@@ -2,7 +2,7 @@
 import { plural, t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { useState } from "preact/hooks";
-import { api } from "../../../src/api";
+import { api, errorMessage } from "../../../src/api";
 import type { DutyTypeInfo, TemplateInfo } from "../../../src/duty-blocks";
 import { Icon } from "../../../src/icons";
 import { useMe } from "../../../src/session";
@@ -141,9 +141,8 @@ function DeleteDutyType({ type, onDone, onClose }: { type: DutyTypeInfo; onDone:
     used.blocks ? plural(used.blocks, { one: "# time block at an event", other: "# time blocks at events" }) : null,
     used.templates ? plural(used.templates, { one: "# template", other: "# templates" }) : null,
     used.ageClasses ? plural(used.ageClasses, { one: "# age group", other: "# age groups" }) : null,
-    // Approved people of a duty taken from all teams (e.g. youth referees) are kept
-    type.whoQualified && used.grants ? plural(used.grants, { one: "# approval", other: "# approvals" }) : null,
   ].filter(Boolean);
+  const grants = used.grants;
   const places = where.join(t` and `);
   const name = type.name;
   return (
@@ -153,7 +152,12 @@ function DeleteDutyType({ type, onDone, onClose }: { type: DutyTypeInfo; onDone:
         icon="trash"
         disabled={where.length > 0}
         onClick={async () => {
-          const ok = await confirmDialog({ title: t`Delete ${name}?`, message: t`The duty type is used nowhere and disappears completely.`, confirmLabel: t`Delete`, danger: true });
+          const ok = await confirmDialog({ title: t`Delete ${name}?`, message: grants
+              ? plural(grants, {
+                  one: "The duty type is used nowhere and disappears completely, together with # approval.",
+                  other: "The duty type is used nowhere and disappears completely, together with # approvals.",
+                })
+              : t`The duty type is used nowhere and disappears completely.`, confirmLabel: t`Delete`, danger: true });
           if (!ok) return;
           await api.del(`/admin/duty-types/${type.id}`);
           toast(t`${name} deleted.`);
@@ -176,7 +180,8 @@ function DutyTypeSheet({ type, onClose, onDone }: { type: DutyTypeInfo | null; o
   const [name, setName] = useState(type?.name ?? "");
   const [mode, setMode] = useState<"onsite" | "task">(type?.mode ?? "onsite");
   const [who, setWho] = useState({
-    parents: type?.whoParents ?? true,
+    // A type taken from all teams has nobody of a team: parents when it becomes a duty of the team
+    parents: type ? type.whoParents || type.whoQualified : true,
     players: type?.whoPlayers ?? false,
     coaches: type?.whoCoaches ?? false,
     members: type?.whoMembers ?? false,
@@ -185,9 +190,8 @@ function DutyTypeSheet({ type, onClose, onDone }: { type: DutyTypeInfo | null; o
   const [needsSkill, setNeedsSkill] = useState(type?.needsSkill ?? false);
   const [skillGrant, setSkillGrant] = useState<"self" | "admin">(type?.skillGrant ?? "self");
   const [archived, setArchived] = useState(type?.archived ?? false);
-  // Taken by approved people from all teams (e.g. youth referees): chosen when creating, fixed afterwards
+  // Taken by approved people from all teams (e.g. youth referees) or by the people of the team
   const [qualified, setQualified] = useState(type?.whoQualified ?? false);
-  const referee = type?.whoQualified ?? false;
   const all = who.parents && who.players && who.coaches;
   const chip = (label: string, on: boolean, toggle: () => void) => (
     <button type="button" class={`chip ${on ? "selected" : ""}`} aria-pressed={on ? "true" : "false"} onClick={toggle}>
@@ -197,16 +201,29 @@ function DutyTypeSheet({ type, onClose, onDone }: { type: DutyTypeInfo | null; o
   return (
     <Sheet open onClose={onClose} title={type ? type.name : t`New duty type`}>
       <TextField label={t`Name`} value={name} onInput={setName} maxLength={40} placeholder={t`e.g. barbecue`} />
-      {!type ? (
-        <Segmented
-          label={t`Who takes it`}
-          value={qualified ? "approved" : "team"}
-          onChange={(v) => setQualified(v === "approved")}
-          options={[
-            { value: "team", label: t`People of the team` },
-            { value: "approved", label: t`Approved, all teams` },
-          ]}
-        />
+      <Segmented
+        label={t`Who takes it`}
+        value={qualified ? "approved" : "team"}
+        onChange={(v) => {
+          setQualified(v === "approved");
+          // A duty of the team that was taken from all teams keeps its admin approvals
+          if (v === "team" && type?.whoQualified) {
+            setNeedsSkill(true);
+            setSkillGrant("admin");
+          }
+        }}
+        options={[
+          { value: "team", label: t`People of the team` },
+          { value: "approved", label: t`Approved, all teams` },
+        ]}
+      />
+      {type?.whoQualified && !qualified ? (
+        <p class="small muted">
+          <Trans>
+            From now on it is a duty of the team: put it into the templates of the teams that need it. Age groups no longer get it automatically; time blocks already
+            created and the approvals stay.
+          </Trans>
+        </p>
       ) : null}
       {qualified ? (
         <>
@@ -308,8 +325,13 @@ function DutyTypeSheet({ type, onClose, onDone }: { type: DutyTypeInfo | null; o
             whoQualified: qualified,
             archived,
           };
-          if (type) await api.patch(`/admin/duty-types/${type.id}`, body);
-          else await api.post("/admin/duty-types", body);
+          try {
+            if (type) await api.patch(`/admin/duty-types/${type.id}`, body);
+            else await api.post("/admin/duty-types", body);
+          } catch (err) {
+            toast(errorMessage(err), "error");
+            return;
+          }
           toast(t`Saved.`);
           onDone();
           onClose();

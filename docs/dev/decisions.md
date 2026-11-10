@@ -134,3 +134,7 @@ Names: the tables follow the original club app (`skill_grant`, `skill_grants`), 
 ## Statistics with module views (November 2026)
 
 The club app's statistics put the helper duties per family into the same page and route as the attendance. In Kabine the helper duties are a module, so the core statistics only know attendance, and the module adds its part through two app hooks (`teamStats`, `myStats` in `src/module-api.ts`) and its own routes under `/duties/...`. A club without the helper duties module gets the statistics without helpers, and other modules (e.g. carpools) can add a view later without touching the core. The core still says whether the team uses the helper plan (`TeamStats.helperPlan`), because that switch is a core column of the team.
+
+## Youth referee as a duty of the team in new installations (November 2026)
+
+Clubs solved the youth referee with their own home game templates per age group ("Home game F youth" with the referee in it) rather than with one list across teams and required duties per age group. New installations therefore get the youth referee as an ordinary duty of the team with an admin approval, in no template, and a second template "Home game adults" that shows how teams get different duties. Existing installations keep their setup; admins can now change *Who takes it* of a duty type later and so turn the youth referee into a duty of the team themselves. The duty type taken by approved people from all teams stays for clubs that want it.

@@ -1,0 +1,5 @@
+{
+  "Remove the duty type from the templates first.": "Nimm die Dienstart zuerst aus den Vorlagen.",
+  "{grants, plural, one {The duty type is used nowhere and disappears completely, together with # approval.} other {The duty type is used nowhere and disappears completely, together with # approvals.}}": "{grants, plural, one {Die Dienstart wird nirgends verwendet und verschwindet ganz, zusammen mit # Freigabe.} other {Die Dienstart wird nirgends verwendet und verschwindet ganz, zusammen mit # Freigaben.}}",
+  "From now on it is a duty of the team: put it into the templates of the teams that need it. Age groups no longer get it automatically; time blocks already created and the approvals stay.": "Ab jetzt ist es ein Dienst der Mannschaft: Nimm ihn in die Vorlagen der Mannschaften auf, die ihn brauchen. Altersklassen bekommen ihn nicht mehr automatisch; schon angelegte Zeitblöcke und die Freigaben bleiben."
+}

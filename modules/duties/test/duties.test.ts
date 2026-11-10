@@ -485,7 +485,7 @@ describe("Reiter Helfer: mehrere Mannschaften zusammen", () => {
 });
 
 describe("Dienstart löschen", () => {
-  it("nur Admins, nur wenn nirgends verwendet; Jugendschiedsrichter nie", async () => {
+  it("nur Admins, nur wenn nirgends verwendet; Freigaben gehen mit", async () => {
     const adminCookie = await loginAs(await person("Ada", { admin: true }));
     const body = { name: "Grill", mode: "onsite", whoParents: true, whoPlayers: false, whoCoaches: false, noteAllowed: false, needsSkill: false };
     const grill = (await api("/admin/duty-types", { cookie: adminCookie, body })).body.id as number;
@@ -517,12 +517,46 @@ describe("Dienstart löschen", () => {
     expect(await usage()).toBeUndefined();
     expect(await one("SELECT count(*) AS n FROM skill_consents WHERE duty_type_id = ?", grill)).toEqual({ n: 0 });
 
-    // The youth referee duty: needed by age groups, and approved people are kept
+    // The youth referee duty: needed by age groups; approvals do not keep it
     const referee = (await api("/duty-types", { cookie: adminCookie })).body.types.find((t: any) => t.whoQualified);
     expect(referee.usage.ageClasses).toBeGreaterThan(0);
     expect((await api(`/admin/duty-types/${referee.id}`, { method: "DELETE", cookie: adminCookie })).body.error.code).toBe("duty_type_in_use");
     await exec("DELETE FROM age_class_duties");
     await exec("INSERT INTO skill_grants (person_id, duty_type_id) VALUES (?, ?)", mona, referee.id);
-    expect((await api(`/admin/duty-types/${referee.id}`, { method: "DELETE", cookie: adminCookie })).body.error.code).toBe("duty_type_has_grants");
+    expect((await api(`/admin/duty-types/${referee.id}`, { method: "DELETE", cookie: adminCookie })).status).toBe(200);
+    expect(await one("SELECT count(*) AS n FROM skill_grants WHERE duty_type_id = ?", referee.id)).toEqual({ n: 0 });
+  });
+
+  it("Jugendschiedsrichter wird Dienst der Mannschaft und zurück", async () => {
+    const adminCookie = await loginAs(await person("Ada", { admin: true }));
+    const referee = (await api("/duty-types", { cookie: adminCookie })).body.types.find((t: any) => t.whoQualified);
+    expect(referee.usage.ageClasses).toBeGreaterThan(0);
+    await exec("INSERT INTO skill_grants (person_id, duty_type_id) VALUES (?, ?)", mona, referee.id);
+    const body = { name: "Jugendschiri", mode: "onsite", whoParents: true, whoPlayers: true, whoCoaches: false, whoMembers: false, noteAllowed: false, needsSkill: true, skillGrant: "admin" };
+    expect((await api(`/admin/duty-types/${referee.id}`, { method: "PATCH", cookie: adminCookie, body: { ...body, whoQualified: false } })).status).toBe(200);
+    expect(await one("SELECT who_referees, who_parents, who_players, needs_skill, skill_grant FROM duty_types WHERE id = ?", referee.id)).toEqual({
+      who_referees: 0,
+      who_parents: 1,
+      who_players: 1,
+      needs_skill: 1,
+      skill_grant: "admin",
+    });
+    // No longer required per age group, the approvals stay, and it fits into templates now
+    expect(await one("SELECT count(*) AS n FROM age_class_duties WHERE duty_type_id = ?", referee.id)).toEqual({ n: 0 });
+    expect(await one("SELECT count(*) AS n FROM skill_grants WHERE duty_type_id = ?", referee.id)).toEqual({ n: 1 });
+    const template = await api("/admin/duty-templates", { cookie: adminCookie, body: { name: "Heimspiel E-Jugend", items: [{ dutyTypeId: referee.id, slots: 1, beforeMin: 15, afterMin: 0, taskWhen: "after" }] } });
+    expect(template.status).toBe(201);
+
+    // Back to all teams only once no template has it
+    const back = await api(`/admin/duty-types/${referee.id}`, { method: "PATCH", cookie: adminCookie, body: { ...body, whoQualified: true } });
+    expect(back.body.error.code).toBe("duty_type_in_template");
+    await exec("DELETE FROM duty_template_items WHERE duty_type_id = ?", referee.id);
+    expect((await api(`/admin/duty-types/${referee.id}`, { method: "PATCH", cookie: adminCookie, body: { ...body, whoQualified: true } })).status).toBe(200);
+    expect(await one("SELECT who_referees, who_parents, needs_skill, skill_grant FROM duty_types WHERE id = ?", referee.id)).toEqual({
+      who_referees: 1,
+      who_parents: 0,
+      needs_skill: 1,
+      skill_grant: "admin",
+    });
   });
 });

@@ -44,14 +44,27 @@ describe("Einrichtungsassistent", () => {
       { code: "referee", name: "Jugendschiedsrichter" },
     ]);
     expect(await rows("SELECT name, default_for FROM duty_templates ORDER BY default_for")).toEqual([
+      { name: "Heimspiel Erwachsene", default_for: null },
       { name: "Auswärtsspiel", default_for: "away" },
       { name: "Heimspiel", default_for: "home" },
+    ]);
+    // Der Jugendschiedsrichter ist ein Dienst der Mannschaft, mit Freigabe durch Admins
+    expect(await rows("SELECT who_parents, who_referees, needs_skill, skill_grant FROM duty_types WHERE code = 'referee'")).toEqual([
+      { who_parents: 1, who_referees: 0, needs_skill: 1, skill_grant: "admin" },
     ]);
     // Zweiter Lauf mit anderer Sportart: Saison und Altersklassen bleiben, Dienste werden ersetzt
     await api("/admin/setup/sport", { cookie, body: { sport: "football" } });
     expect((await api("/admin/setup", { cookie })).body.ageClasses).toBe(8);
     expect(await rows("SELECT code FROM duty_types WHERE event_id IS NULL ORDER BY sort")).toEqual([{ code: "kiosk" }, { code: "linesman" }, { code: "shirts" }]);
+    // Mannschaften des Assistenten: die Aktiven bekommen beim Abschluss die Vorlage der Erwachsenen
+    for (const [name, ageClassCode] of [["Herren 1", "Adults"], ["D-Jugend", "D"]]) {
+      expect((await api("/teams", { cookie, body: { name, ageClassCode, gender: "m", level: 1 } })).status).toBe(201);
+    }
     expect((await api("/admin/setup/done", { cookie, body: {} })).status).toBe(200);
     expect((await api("/club")).body.setupDone).toBe(true);
+    expect(await rows("SELECT t.name, d.name AS template FROM teams t LEFT JOIN duty_templates d ON d.id = t.home_template_id ORDER BY t.name")).toEqual([
+      { name: "D-Jugend", template: null },
+      { name: "Herren 1", template: "Heimspiel Erwachsene" },
+    ]);
   });
 });
