@@ -8,6 +8,10 @@ Format per entry: date, title, what changed and why, where in the code (file and
 
 ## Open
 
+- **2026-11-12 Duty types the coach assigns.** Some duties nobody should pick themselves; the coach assigns them (e.g. for adult teams). New switch on the duty type, "Assigned by the coach" (`duty_types.assign_only`, migration `0031_duty_assign_only.sql`), independent of "needs prior knowledge" (where an admin approves people who then sign up themselves). Nobody signs up themselves (`rolesFor` returns no role unless the person manages the team; `POST /duties` answers 403 `assign_only`); the helper tab shows "assigned by the coach" on free slots. Coaches, admins and organisers assign through "enter someone", and "who helps" still applies: the picker (`GET /duties/events/:id/people?type=<id>`) only lists matching people and the server rejects others with 400 `not_in_who` (`whoSql(type, person, teamSet)` in `worker/domain/duties.ts`, same rules as `rolesFor`; for all other duty types "enter someone" stays open to anyone in the club). A name without account stays possible. The assigned person gets a notification right away, "You are assigned: <duty>" with time and who assigned, over the channel of the 3-day reminder (`sendDutyAssigned` in `worker/domain/duty-notify.ts`), and may remove themselves. No "helpers wanted" for these duties, they do not count as "helpers needed"; coaches still get the open-slot reminder. Tests in `test/duties.test.ts` ("Dienst, den der Trainer vergibt") and `test/duty-notify.test.ts`, e2e. In Kabine this belongs to the duties module; texts through Lingui.
+
+- **2026-11-12 Duty block duration 2.5 h.** The duration chips of a new time block get 150 minutes ("2,5 h") between 2 h and 3 h (`DURATIONS` in `src/duty-blocks.tsx`).
+
 ## Parked
 
 Notes on changes in the club app that the maintainer does not want in Kabine yet. Do not port and do not add to the roadmap; the maintainer moves an entry to "Open" when it is wanted.
