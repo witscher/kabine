@@ -4,7 +4,7 @@
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { useLocation } from "preact-iso";
-import { useEffect, useState } from "preact/hooks";
+import { useEffect, useRef, useState } from "preact/hooks";
 import { seasonAround, SPORTS, type SportId, type TeamGender } from "../../shared/sports";
 import { api, errorMessage } from "../api";
 import { clubName, loadClub, useClub } from "../club";
@@ -153,8 +153,11 @@ function SportStep({ onNext }: { onNext: () => void }) {
   const [busy, setBusy] = useState(false);
   const locale = currentLocale();
 
+  // Take the saved values once: a later refetch of /admin/setup must not undo a choice made in the meantime
+  const filled = useRef(false);
   useEffect(() => {
-    if (!data) return;
+    if (!data || filled.current) return;
+    filled.current = true;
     setSport(data.sport);
     if (!data.season) setSeason(data.proposedSeason);
   }, [data]);

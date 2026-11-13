@@ -6,6 +6,8 @@ Changes that are merged but not released yet go under *Unreleased*, one line eac
 
 ## Unreleased
 
+- Setup wizard: the chosen sport could jump back to handball when the step reloaded its data in the background; the choice now stays.
+
 ## v0.8.0
 
 - Statistics: coaches see *Team → Statistics* for the last 4 weeks or the season: training participation, appearances in games, a table per training and game, and each player's events. With the helper plan also the helper duties per family, with a button to remind the families without a duty. Players and parents see their own figures under *Profile → My statistics* (for parents per child), with the family's helper duties.
