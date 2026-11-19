@@ -84,7 +84,7 @@ export const HELP = {
   }),
   scheduleReminder: () => ({
     title: t`Reminder to sync`,
-    text: t`When a team's game schedule has not been synced for this long, its coaches see a hint with "Sync now" at the top of their events list. The hint disappears after the sync. A coach or admin always syncs by hand.`,
+    text: t`When a team's game schedule has not been synced for this long, its coaches see a hint with "Sync now" at the top of their events list. The hint disappears after the sync. Coaches and admins sync by hand; schedules from handball.net also sync once a week by themselves when a coach opens the app.`,
     example: t`With 15 days: if the schedule of a team was last synced on the 1st, the hint shows on the 16th.`,
   }),
 } satisfies Record<string, () => HelpText>;

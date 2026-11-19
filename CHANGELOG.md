@@ -12,7 +12,7 @@ Changes that are merged but not released yet go under *Unreleased*, one line eac
 - Fewer database reads: teams, memberships, parent links and duty types stay in memory per Worker instance and are reloaded only after a change, and the helper duties of games are checked only when something changed. This keeps clubs further below the daily limit of the free plan. `npm run d1:stats` shows the read load of an installation.
 - Pushes about a person now address the recipient: parents read "Mia is in the squad" or "Is Mia coming?" instead of "You are in the squad"; with several children or when they play themselves, all of them are named in one push.
 - Setup wizard: the chosen sport could jump back to handball when the step reloaded its data in the background; the choice now stays.
-- New module (beta, off by default): game schedules from handball.net for clubs whose association runs its games in Handball360. It works like handball4all: the coach pastes the team's link from handball.net (or its calendar link) under *Team → Settings* and syncs with "Sync now"; the device fetches the team's public calendar. Games link to their page on handball.net.
+- New module, on by default for handball clubs like handball4all: game schedules from handball.net for clubs whose association runs its games in Handball360. The coach pastes the team's link from handball.net (or its calendar link) under *Team → Settings* and syncs with "Sync now"; the device fetches the team's public calendar. The schedule also syncs once a week by itself: when a coach opens the app and the last sync is 7 days or more ago, the coach's device syncs it in the background. Games link to their page on handball.net.
 
 ## v0.8.0
 

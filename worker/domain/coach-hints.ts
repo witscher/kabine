@@ -1,6 +1,6 @@
 // What coaches still have to do in their own teams, as hints at the top of the events list (GET /api/coach-hints).
 // A hint is a state, not a message: it disappears once the job is done and cannot be dismissed.
-import type { CoachHint } from "../../shared/types";
+import type { CoachHint, ScheduleAutoSync } from "../../shared/types";
 import type { Actor } from "../auth/actor";
 import { ownScheduleReminderDays } from "./club";
 import { all, list } from "../lib/db";
@@ -20,18 +20,22 @@ export function gameOpponent(g: { is_home: number | null; home_team: string | nu
   return g.is_home === 1 ? g.guest_team : g.is_home === 0 ? g.home_team : (g.title ?? g.guest_team);
 }
 
-/** Hints for the teams the person coaches; admins only for their own teams. */
-export async function loadCoachHints(db: D1Database, actor: Actor, now = Date.now()): Promise<CoachHint[]> {
+/** Hints for the teams the person coaches, and the schedules their device syncs now; admins only for their own teams. */
+export async function loadCoachHints(db: D1Database, actor: Actor, now = Date.now()): Promise<{ hints: CoachHint[]; autoSync: ScheduleAutoSync[] }> {
   const teamIds = actor.coachTeamIds;
-  if (!teamIds.length || actor.readOnly) return [];
-  const [schedules, meetings] = await Promise.all([staleSchedules(db, teamIds, now), missingMeetingPoints(db, teamIds, now)]);
-  return [...schedules, ...meetings];
+  if (!teamIds.length || actor.readOnly) return { hints: [], autoSync: [] };
+  const [schedules, meetings] = await Promise.all([dueSchedules(db, teamIds, now), missingMeetingPoints(db, teamIds, now)]);
+  return { hints: [...schedules.hints, ...meetings], autoSync: schedules.autoSync };
 }
 
-async function staleSchedules(db: D1Database, teamIds: number[], now: number): Promise<CoachHint[]> {
+/**
+ * Linked schedules that are due: as a hint after the club's reminder days, and for a sync from the coach's device
+ * after the source's `autoSyncDays` (only sources that sync by themselves). One query for both.
+ */
+async function dueSchedules(db: D1Database, teamIds: number[], now: number): Promise<{ hints: CoachHint[]; autoSync: ScheduleAutoSync[] }> {
   const connectors = activeConnectors();
   const days = ownScheduleReminderDays();
-  if (!connectors.length || !days) return [];
+  if (!connectors.some((c) => days || c.autoSyncDays)) return { hints: [], autoSync: [] };
   const teams = (
     await all<{ id: number; name: string; fixture_connector: string; fixture_source: string | null; fixture_synced_at: string | null }>(
       db,
@@ -39,11 +43,14 @@ async function staleSchedules(db: D1Database, teamIds: number[], now: number): P
         WHERE id IN (SELECT value FROM json_each(?)) AND fixture_connector IS NOT NULL ORDER BY name`,
       list(teamIds),
     )
-  ).filter((t) => {
-    if (!connectors.some((c) => c.id === t.fixture_connector) || !teamSource(t)) return false;
-    return scheduleStale(t.fixture_synced_at, days, now);
+  ).flatMap((t) => {
+    const connector = connectors.find((c) => c.id === t.fixture_connector);
+    if (!connector || !teamSource(t)) return [];
+    const remind = scheduleStale(t.fixture_synced_at, days, now);
+    const auto = scheduleStale(t.fixture_synced_at, connector.autoSyncDays ?? 0, now);
+    return remind || auto ? [{ ...t, source: connector.name, remind, auto }] : [];
   });
-  if (!teams.length) return [];
+  if (!teams.length) return { hints: [], autoSync: [] };
   // A team with only past games left has played its season: nothing to sync
   const games = await all<{ team_id: number; upcoming: number; n: number }>(
     db,
@@ -53,18 +60,22 @@ async function staleSchedules(db: D1Database, teamIds: number[], now: number): P
     nowLocal(now),
     list(teams.map((t) => t.id)),
   );
-  return teams
-    .filter((t) => {
-      const g = games.find((x) => x.team_id === t.id);
-      return !g || g.upcoming === 1;
-    })
-    .map((t) => ({
-      kind: "schedule" as const,
-      teamId: t.id,
-      team: t.name,
-      source: connectors.find((c) => c.id === t.fixture_connector)!.name,
-      days: t.fixture_synced_at ? Math.floor((now - Date.parse(t.fixture_synced_at)) / 86_400_000) : null,
-    }));
+  const open = teams.filter((t) => {
+    const g = games.find((x) => x.team_id === t.id);
+    return !g || g.upcoming === 1;
+  });
+  return {
+    hints: open
+      .filter((t) => t.remind)
+      .map((t) => ({
+        kind: "schedule" as const,
+        teamId: t.id,
+        team: t.name,
+        source: t.source,
+        days: t.fixture_synced_at ? Math.floor((now - Date.parse(t.fixture_synced_at)) / 86_400_000) : null,
+      })),
+    autoSync: open.filter((t) => t.auto).map((t) => ({ teamId: t.id, team: t.name, source: t.source })),
+  };
 }
 
 /** Games in the next days without a meeting time: the same rule as the push (sendMeetingReminders). */

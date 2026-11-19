@@ -10,6 +10,7 @@ let md: number;
 let coach: string;
 
 const hints = async (cookie: string) => (await api("/coach-hints", { cookie })).body.hints;
+const autoSync = async (cookie: string) => (await api("/coach-hints", { cookie })).body.autoSync;
 const daysAgo = (n: number) => utcIso(Date.now() - n * 86_400_000);
 
 beforeEach(async () => {
@@ -72,6 +73,39 @@ describe("Hinweise für Trainer", () => {
     expect(await hints(coach)).toEqual([]);
   });
 
+  it("Abgleich von selbst: handball.net ab 7 Tagen, unabhängig von der Erinnerung, nie bei handball4all", async () => {
+    await eventIn(wd, 10, { kind: "game" });
+    const link = (connector: string, syncedAt: string | null) =>
+      exec("UPDATE teams SET fixture_connector = ?, fixture_source = '{\"teamId\":\"999\"}', fixture_synced_at = ? WHERE id = ?", connector, syncedAt, wd);
+    // Noch nie abgeglichen: fällig, und die Erinnerung steht auch da
+    await link("handballnet", null);
+    expect(await autoSync(coach)).toEqual([{ teamId: wd, team: "wD", source: "handball.net" }]);
+    expect(await hints(coach)).toMatchObject([{ kind: "schedule", days: null, source: "handball.net" }]);
+    // Vor 6 Tagen: nichts
+    await link("handballnet", daysAgo(6));
+    expect(await autoSync(coach)).toEqual([]);
+    expect(await hints(coach)).toEqual([]);
+    // Ab 7 Tagen: still im Hintergrund, die Erinnerung kommt erst nach 15 Tagen
+    await link("handballnet", daysAgo(7));
+    expect(await autoSync(coach)).toEqual([{ teamId: wd, team: "wD", source: "handball.net" }]);
+    expect(await hints(coach)).toEqual([]);
+    // Erinnerung aus: der Abgleich von selbst bleibt
+    await saveClub(env.DB, { scheduleReminderDays: 0 });
+    expect(await autoSync(coach)).toHaveLength(1);
+    // handball4all gleicht nie von selbst ab
+    await link("handball4all", daysAgo(40));
+    expect(await autoSync(coach)).toEqual([]);
+    // Saison gespielt oder Modul aus: nichts
+    await link("handballnet", daysAgo(8));
+    await exec("DELETE FROM events");
+    await eventIn(wd, -3, { kind: "game" });
+    expect(await autoSync(coach)).toEqual([]);
+    await eventIn(wd, 3, { kind: "game" });
+    expect(await autoSync(coach)).toHaveLength(1);
+    await saveClub(env.DB, { modules: { handballnet: false } as never });
+    expect(await autoSync(coach)).toEqual([]);
+  });
+
   it("Übersicht für Admins: Quelle, letzter Abgleich, Fehler, kommende Spiele, ob erinnert wird", async () => {
     await exec("UPDATE teams SET fixture_connector = 'handball4all', fixture_source = '{\"x\":1}', fixture_synced_at = ?, fixture_error = 'Fetch failed: HTTP 500' WHERE id = ?", daysAgo(16), wd);
     await eventIn(wd, 4, { kind: "game" });
@@ -95,6 +129,7 @@ describe("Hinweise für Trainer", () => {
     const player = await person("Pia");
     await member(player, wd);
     expect(await hints(admin)).toEqual([]);
+    expect(await autoSync(admin)).toEqual([]);
     expect(await hints(await loginAs(player))).toEqual([]);
     expect((await api("/coach-hints")).status).toBe(401);
   });

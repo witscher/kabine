@@ -722,6 +722,7 @@ msgstr "Important: each parent uses the link only once, for themselves. This is 
 msgid "Access of coaches and admins is managed by an admin."
 msgstr "Access of coaches and admins is managed by an admin."
 
+#: src/coach-hints.tsx
 #: src/pages/games.tsx
 msgid "{created} new, {moved} moved, {cancelled} cancelled."
 msgstr "{created} new, {moved} moved, {cancelled} cancelled."
@@ -2147,6 +2148,10 @@ msgstr "{names} is a group. Groups only have chat and special events."
 #: src/help-texts.ts
 msgid "What the players of this team may do themselves. The club sets the limit per age group; here you can only restrict further. Within this, the parents decide for their child."
 msgstr "What the players of this team may do themselves. The club sets the limit per age group; here you can only restrict further. Within this, the parents decide for their child."
+
+#: src/help-texts.ts
+msgid "When a team's game schedule has not been synced for this long, its coaches see a hint with \"Sync now\" at the top of their events list. The hint disappears after the sync. Coaches and admins sync by hand; schedules from handball.net also sync once a week by themselves when a coach opens the app."
+msgstr "When a team's game schedule has not been synced for this long, its coaches see a hint with \"Sync now\" at the top of their events list. The hint disappears after the sync. Coaches and admins sync by hand; schedules from handball.net also sync once a week by themselves when a coach opens the app."
 
 #: src/calendar.tsx
 msgid "Remove calendar link?"
@@ -4992,6 +4997,10 @@ msgstr "Your browser cannot open this image format. Please choose a photo or scr
 #: src/pages/team.tsx
 msgid "How it works: open the link, select your own name and set up a passkey (Face ID, fingerprint or screen lock)."
 msgstr "How it works: open the link, select your own name and set up a passkey (Face ID, fingerprint or screen lock)."
+
+#: modules/handballnet/module.ts
+msgid "Coaches sync the games of their team from handball.net, and the app syncs them once a week when a coach opens it."
+msgstr "Coaches sync the games of their team from handball.net, and the app syncs them once a week when a coach opens it."
 
 #: src/pages/event.tsx
 msgid "Activate"
@@ -8388,6 +8397,10 @@ msgstr "Additional team for {name}"
 msgid "Name, colours, logo, region, modules"
 msgstr "Name, colours, logo, region, modules"
 
+#: src/coach-hints.tsx
+msgid "Game schedule of {team} synced."
+msgstr "Game schedule of {team} synced."
+
 #: worker/domain/events.ts
 #: worker/routes/events.ts
 msgid "Currently marked as inactive. Please talk to your coach."
@@ -10487,10 +10500,6 @@ msgstr "Message was removed by a coach"
 #: worker/chat/room.ts
 msgid "To everyone in chat {teamName}"
 msgstr "To everyone in chat {teamName}"
-
-#: src/help-texts.ts
-msgid "When a team's game schedule has not been synced for this long, its coaches see a hint with \"Sync now\" at the top of their events list. The hint disappears after the sync. A coach or admin always syncs by hand."
-msgstr "When a team's game schedule has not been synced for this long, its coaches see a hint with \"Sync now\" at the top of their events list. The hint disappears after the sync. A coach or admin always syncs by hand."
 
 #: src/pages/home.tsx
 msgid "Create a training plan in the Team section, then the events will appear here."
@@ -13049,10 +13058,6 @@ msgstr "Withdraw offer"
 #: src/pages/join.tsx
 msgid "First give the app the club's address"
 msgstr "First give the app the club's address"
-
-#: modules/handballnet/module.ts
-msgid "Coaches sync the games of their team from handball.net."
-msgstr "Coaches sync the games of their team from handball.net."
 
 #: src/pages/chat.tsx
 msgid "as admin"

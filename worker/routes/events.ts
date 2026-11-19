@@ -100,10 +100,10 @@ async function visibleEventOr404(db: D1Database, actor: Actor, eventId: number):
   return event;
 }
 
-/** What coaches still have to do in their own teams (hints at the top of the events list). */
+/** What coaches still have to do in their own teams (hints at the top of the events list), and schedules due for a sync by itself. */
 eventRoutes.get("/coach-hints", async (c) => {
   const actor = requireActor(c);
-  return c.json({ hints: await loadCoachHints(c.env.DB, actor) });
+  return c.json(await loadCoachHints(c.env.DB, actor));
 });
 
 eventRoutes.get("/events/:id", async (c) => {

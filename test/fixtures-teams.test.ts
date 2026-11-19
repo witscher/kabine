@@ -103,7 +103,7 @@ beforeEach(async () => {
   await member(coach, teamA, "coach");
   await member(coach, teamB, "coach");
   cookie = await loginAs(coach);
-  await saveClub(env.DB, { modules: { ...DEFAULT_MODULES, handball4all: true, testSource: true } as typeof DEFAULT_MODULES });
+  await saveClub(env.DB, { modules: { ...DEFAULT_MODULES, handball4all: true, handballnet: false, testSource: true } as typeof DEFAULT_MODULES });
 });
 
 describe("one game schedule source per team", () => {
@@ -157,7 +157,7 @@ describe("one game schedule source per team", () => {
   it("switching a source off pauses the sync of its teams, their games stay", async () => {
     await link(teamB, "testSource", TEST_LINK);
     await sync(teamB, testPayload([{ id: "t1", date: addDays(todayLocal(), 10) }]));
-    await saveClub(env.DB, { modules: { ...DEFAULT_MODULES, handball4all: true, testSource: false } as typeof DEFAULT_MODULES });
+    await saveClub(env.DB, { modules: { ...DEFAULT_MODULES, handball4all: true, handballnet: false, testSource: false } as typeof DEFAULT_MODULES });
 
     const source = (await api(`/teams/${teamB}/games/source`, { cookie })).body;
     expect(source).toMatchObject({ configured: false, paused: { id: "testSource" } });
