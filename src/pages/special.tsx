@@ -206,9 +206,7 @@ export function SpecialEventPage({ id }: { id?: string }) {
                 </div>
               </div>
             ) : null}
-            {!clubWide ? (
-              <HelperBlocks date={date} start={start} end={end} blocks={blocks} onChange={setBlocks} />
-            ) : null}
+            <HelperBlocks date={date} start={start} end={end} blocks={blocks} onChange={setBlocks} />
             <Button
               variant="primary"
               size="lg"
@@ -227,14 +225,13 @@ export function SpecialEventPage({ id }: { id?: string }) {
                   teamIds: clubWide ? [] : teamIds,
                   clubWide,
                   // Time slots follow the date of the event (the date may have been changed after the slots were created)
-                  duties: clubWide
-                    ? []
-                    : blocks.map((b) => ({
-                        ...(b.newTypeName ? { newTypeName: b.newTypeName } : { dutyTypeId: b.dutyTypeId }),
-                        startsAt: `${date}${b.startsAt.slice(10)}`,
-                        endsAt: `${date}${b.endsAt.slice(10)}`,
-                        slots: b.slots,
-                      })),
+                  duties: blocks.map((b) => ({
+                    ...(b.newTypeName ? { newTypeName: b.newTypeName } : { dutyTypeId: b.dutyTypeId }),
+                    startsAt: `${date}${b.startsAt.slice(10)}`,
+                    endsAt: `${date}${b.endsAt.slice(10)}`,
+                    slots: b.slots,
+                    helperTeams: b.helperMode === "teams" ? (b.helperTeams ?? []) : [],
+                  })),
                 });
                 if (blocks.length) invalidate("/duties");
                 invalidate("/events");
@@ -376,11 +373,13 @@ function HelperBlocks({ date, start, end, blocks, onChange }: { date: string; st
     for (const item of t.items) {
       const type = types.data?.types.find((x) => x.id === item.dutyTypeId);
       if (!type) continue;
+      // "Helpers from" of the template; taking turns only exists for games, here all teams of the list may help
+      const helper = item.helperMode && item.helperMode !== "default" && item.helperTeams?.length ? { helperMode: "teams" as const, helperTeams: item.helperTeams } : {};
       if (type.mode === "task") {
         const at = item.taskWhen === "before" ? eventStart : coreEnd;
-        added.push({ dutyTypeId: type.id, label: type.name, startsAt: at, endsAt: at, slots: item.slots });
+        added.push({ dutyTypeId: type.id, label: type.name, startsAt: at, endsAt: at, slots: item.slots, ...helper });
       } else {
-        added.push({ dutyTypeId: type.id, label: type.name, startsAt: addMinutes(eventStart, -item.beforeMin), endsAt: addMinutes(coreEnd, item.afterMin), slots: item.slots });
+        added.push({ dutyTypeId: type.id, label: type.name, startsAt: addMinutes(eventStart, -item.beforeMin), endsAt: addMinutes(coreEnd, item.afterMin), slots: item.slots, ...helper });
       }
     }
     onChange([...blocks, ...added]);

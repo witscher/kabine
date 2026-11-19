@@ -5,13 +5,28 @@
 // - "open places" 5 and 2 days before to coaches and admins
 // - "<duty> wanted" 3 days before for duties taken by approved people from all teams (e.g. youth referee), to the
 //   approved people (or their parents)
+// - "You are assigned" at once when a coach assigns a duty only coaches give out
+// - taking turns ("helpers from"): a week before, the team in charge gets a message in its chat
+// Club events (no team) get reminders, but no "helpers wanted" and no "open places" (they would reach the whole club).
 // Channel (push, mail) per account and topic, see notification_channels.
 // Texts are built per recipient language: pushes once per language, mails per account (withLocale).
 import { plural, t } from "@lingui/core/macro";
-import { type DutyType, ensureEventDuties, loadAllDutyTypes, opponentOf, REFEREE_CODE } from "../../../worker/domain/duties";
+import {
+  adultBirthYearMax,
+  type DutyType,
+  ensureEventDuties,
+  HELPER_COLUMNS,
+  type HelperColumns,
+  helperSource,
+  helperTeamsOf,
+  loadAllDutyTypes,
+  opponentOf,
+  REFEREE_CODE,
+} from "../../../worker/domain/duties";
+import { postSystemMessage } from "../../../worker/domain/chat";
 import { mailer } from "../../../worker/domain/email-login";
 import { enqueuePush, shortDate, shortTime } from "../../../worker/domain/notify";
-import { all, list, run } from "../../../worker/lib/db";
+import { all, first, list, run } from "../../../worker/lib/db";
 import { isModuleOn, ownClubAbbr, ownClubShortName } from "../../../worker/domain/club";
 import { withLocale } from "../../../worker/i18n";
 import { sendText, textsOn } from "../../../worker/domain/texts";
@@ -32,14 +47,22 @@ interface GameRow {
   home_team: string | null;
   guest_team: string | null;
   title: string | null;
-  team_id: number;
-  team_name: string;
-  parents_enabled: number;
+  /** null for club events (no team) */
+  team_id: number | null;
+  team_name: string | null;
+  parents_enabled: number | null;
 }
+
+/** Event with a team: "helpers wanted" and "open places" go only to events of teams. */
+type TeamGameRow = GameRow & { team_id: number; team_name: string; parents_enabled: number };
 
 interface FreeBlock {
   type: DutyType;
   free: number;
+  /** "Helpers from": teams whose players take these blocks */
+  teamIds: number[];
+  /** At least one block by "who helps" of the duty type (without "helpers from") */
+  viaWho: boolean;
 }
 
 /** Only once: true if this notification had not been sent yet. */
@@ -133,9 +156,9 @@ function mailText(...paragraphs: string[]): string {
 const GAME_COLUMNS = `e.id, e.kind, e.starts_at, e.is_home, e.home_team, e.guest_team, e.title, t.id AS team_id, t.name AS team_name, t.parents_enabled`;
 const FIRST_TEAM = `JOIN teams t ON t.id = (SELECT et.team_id FROM event_teams et WHERE et.event_id = e.id ORDER BY et.team_id LIMIT 1)`;
 
-/** Events with helper duties on a day: games with a helper plan (not hidden) and special events with blocks. */
-async function gamesOn(db: D1Database, date: string): Promise<GameRow[]> {
-  return all<GameRow>(
+/** Events of teams with helper duties on a day: games with a helper plan (not hidden) and special events with blocks. */
+async function gamesOn(db: D1Database, date: string): Promise<TeamGameRow[]> {
+  return all<TeamGameRow>(
     db,
     `SELECT ${GAME_COLUMNS} FROM events e ${FIRST_TEAM}
       WHERE e.cancelled_at IS NULL AND substr(e.starts_at, 1, 10) = ?
@@ -146,8 +169,8 @@ async function gamesOn(db: D1Database, date: string): Promise<GameRow[]> {
 }
 
 /** Events with a block of a duty taken by approved people from all teams on a day, with that type. */
-async function qualifiedGamesOn(db: D1Database, date: string): Promise<(GameRow & { duty_type_id: number })[]> {
-  return all<GameRow & { duty_type_id: number }>(
+async function qualifiedGamesOn(db: D1Database, date: string): Promise<(TeamGameRow & { duty_type_id: number })[]> {
+  return all<TeamGameRow & { duty_type_id: number }>(
     db,
     `SELECT DISTINCT ${GAME_COLUMNS}, ed.duty_type_id FROM events e ${FIRST_TEAM}
        JOIN event_duties ed ON ed.event_id = e.id JOIN duty_types dt ON dt.id = ed.duty_type_id AND dt.who_referees = 1 AND dt.archived = 0
@@ -156,11 +179,11 @@ async function qualifiedGamesOn(db: D1Database, date: string): Promise<(GameRow 
   );
 }
 
-/** Events with entries on a day (for reminders). */
+/** Events with entries on a day (for reminders); LEFT: club events have no team, those signed up are reminded too. */
 async function gamesWithDutiesOn(db: D1Database, date: string): Promise<GameRow[]> {
   return all<GameRow>(
     db,
-    `SELECT ${GAME_COLUMNS} FROM events e ${FIRST_TEAM}
+    `SELECT ${GAME_COLUMNS} FROM events e LEFT ${FIRST_TEAM}
       WHERE e.cancelled_at IS NULL AND substr(e.starts_at, 1, 10) = ? AND EXISTS (SELECT 1 FROM duties d WHERE d.event_id = e.id)`,
     date,
   );
@@ -168,9 +191,9 @@ async function gamesWithDutiesOn(db: D1Database, date: string): Promise<GameRow[
 
 /** Free places per block of an event (without duties taken from all teams, those go through qualifiedWanted). */
 async function freeBlocks(db: D1Database, g: GameRow, types: Map<number, DutyType>): Promise<FreeBlock[]> {
-  const rows = await all<{ duty_type_id: number; free: number }>(
+  const rows = await all<{ duty_type_id: number; free: number } & HelperColumns>(
     db,
-    `SELECT ed.duty_type_id, ed.slots - (SELECT count(*) FROM duties d WHERE d.event_duty_id = ed.id) AS free
+    `SELECT ed.duty_type_id, ${HELPER_COLUMNS}, ed.slots - (SELECT count(*) FROM duties d WHERE d.event_duty_id = ed.id) AS free
        FROM event_duties ed WHERE ed.event_id = ? ORDER BY ed.starts_at, ed.sort, ed.id`,
     g.id,
   );
@@ -178,9 +201,14 @@ async function freeBlocks(db: D1Database, g: GameRow, types: Map<number, DutyTyp
   for (const r of rows) {
     const type = types.get(r.duty_type_id);
     if (!type || type.whoQualified || r.free <= 0) continue;
+    const source = helperSource(r);
+    const teams = helperTeamsOf(source);
     const same = out.find((x) => x.type.id === type.id);
-    if (same) same.free += r.free;
-    else out.push({ type, free: r.free });
+    if (same) {
+      same.free += r.free;
+      same.teamIds = [...new Set([...same.teamIds, ...teams])];
+      same.viaWho ||= source.mode === "default";
+    } else out.push({ type, free: r.free, teamIds: teams, viaWho: source.mode === "default" });
   }
   return out;
 }
@@ -246,13 +274,14 @@ async function qualifiedWanted(env: Env, today: string, types: Map<number, DutyT
   return sent;
 }
 
-/** "K wD vs X on Fri 2 Oct at 14:00", in the current language. */
+/** "K wD vs X on Fri 2 Oct at 14:00", in the current language; for club events (no team) only the title. */
 function gameText(g: GameRow): string {
   const club = ownClubAbbr();
   const team = g.team_name;
   const opponent = opponentOf(g);
   const date = shortDate(g.starts_at);
   const time = shortTime(g.starts_at);
+  if (!team) return t`${opponent} on ${date} at ${time}`;
   return t`${club} ${team} ${opponent} on ${date} at ${time}`;
 }
 
@@ -267,13 +296,14 @@ async function remind(env: Env, today: string, days: 3 | 1): Promise<number> {
   for (const g of games) {
     const entries = await all<{ id: number; label: string; child: string | null; account_id: number; via_parent: number }>(
       env.DB,
-      // Approved children doing a duty taken from all teams (e.g. youth referee): reminder to the parents too
+      // Children doing the duty themselves: reminder to the parents too (second part)
       `SELECT d.id, dt.name AS label, CASE WHEN d.child_id = d.person_id THEN NULL ELSE ch.first_name END AS child, a.id AS account_id, 0 AS via_parent
          FROM duties d JOIN duty_types dt ON dt.id = d.duty_type_id JOIN accounts a ON a.person_id = d.person_id LEFT JOIN persons ch ON ch.id = d.child_id
         WHERE d.event_id = ?1
        UNION
        SELECT d.id, dt.name, ch.first_name, a.id, 1
-         FROM duties d JOIN duty_types dt ON dt.id = d.duty_type_id AND dt.who_referees = 1
+         -- The child does the duty itself (approved people from all teams, "helpers from"): the parents are reminded too
+         FROM duties d JOIN duty_types dt ON dt.id = d.duty_type_id AND (dt.who_referees = 1 OR d.child_id = d.person_id)
          JOIN persons ch ON ch.id = d.person_id JOIN guardianships gu ON gu.child_id = d.person_id
          JOIN accounts a ON a.person_id = gu.guardian_id
         WHERE d.event_id = ?1`,
@@ -340,6 +370,19 @@ async function helpWanted(env: Env, today: string, types: Map<number, DutyType>)
       list(candidates.map((c) => c.person_id)),
     );
     const helping = new Set((await all<{ person_id: number }>(env.DB, "SELECT person_id FROM duties WHERE event_id = ? AND person_id IS NOT NULL", g.id)).map((r) => r.person_id));
+    // Duties "adults only": minors (by birth year) are out
+    const minors = free.some((f) => f.type.adultsOnly)
+      ? new Set(
+          (
+            await all<{ id: number }>(
+              env.DB,
+              "SELECT id FROM persons WHERE id IN (SELECT value FROM json_each(?)) AND birth_year IS NOT NULL AND birth_year > ?",
+              list(candidates.map((c) => c.person_id)),
+              adultBirthYearMax(today),
+            )
+          ).map((r) => r.id),
+        )
+      : new Set<number>();
     const members = new Set(
       (
         await all<{ person_id: number }>(
@@ -355,9 +398,18 @@ async function helpWanted(env: Env, today: string, types: Map<number, DutyType>)
       x.roles.add(c.role);
       byAccount.set(c.account_id, x);
     }
+    // Helpers from other teams: players of the block's teams (children through their involved parents)
+    const viaTeams = await teamHelperAccounts(env.DB, free, helping, today);
+    for (const accountId of viaTeams.keys()) if (!byAccount.has(accountId)) byAccount.set(accountId, { person_id: 0, roles: new Set() });
     for (const [accountId, c] of byAccount) {
-      if (helping.has(c.person_id)) continue;
-      const possible = free.filter(({ type }) => {
+      if (c.person_id && helping.has(c.person_id)) continue;
+      const possible = free.filter(({ type, viaWho }) => {
+        // Assigned by the coach: nobody signs up themselves, so no "helpers wanted"; nor when it is off for the duty
+        if (type.assignOnly || !type.notifyOpen) return false;
+        if (viaTeams.get(accountId)?.has(type.id)) return true;
+        // Blocks with "helpers from" only to their teams
+        if (!c.person_id || !viaWho) return false;
+        if (type.adultsOnly && minors.has(c.person_id)) return false;
         if (type.needsSkill && type.skillGrant === "admin" && !grants.some((k) => k.person_id === c.person_id && k.duty_type_id === type.id)) return false;
         if (type.needsSkill && type.skillGrant === "self" && !consents.some((k) => k.account_id === accountId && k.duty_type_id === type.id)) return false;
         return (
@@ -372,15 +424,17 @@ async function helpWanted(env: Env, today: string, types: Map<number, DutyType>)
       const team = g.team_name;
       const open = freeText(possible);
       const link = appLink(env, "/helfer");
+      // When only one duty is wanted, it is in the title
+      const only = possible.length === 1 ? possible[0]!.type.name : null;
       sent += await deliver(env, [accountId], "duty_open", () => {
         const game = gameText(g);
         const opponent = opponentOf(g);
         return {
-          title: t`Helpers wanted · ${team}`,
+          title: only ? t`${only} wanted · ${team}` : t`Helpers wanted · ${team}`,
           body: t`${game}. Still free: ${open}`,
           url: "/helfer",
           tag: `duty-open-${g.id}`,
-          mailSubject: t`Helpers wanted: ${team} ${opponent}`,
+          mailSubject: only ? t`${only} wanted: ${team} ${opponent}` : t`Helpers wanted: ${team} ${opponent}`,
           mailText: mailText(t`Helpers are still needed for ${game}. Still free: ${open}.`, t`Sign up: ${link}`),
         };
       });
@@ -465,7 +519,112 @@ export async function sendDutyNotifications(env: Env, now = Date.now()): Promise
   sent += await qualifiedWanted(env, today, types);
   sent += await openSlotsToCoaches(env, today, 5, types);
   sent += await openSlotsToCoaches(env, today, 2, types);
+  await rotationNotices(env, today);
   return sent;
+}
+
+/**
+ * "Helpers wanted" through "helpers from": per account the duty types it can take. Players of the block's teams
+ * themselves, for children the parents when they are involved in that team. Whoever helps at this event already (the
+ * child too) gets nothing. Without duties needing prior knowledge; for "adults only" no minors (the player does it).
+ */
+async function teamHelperAccounts(db: D1Database, free: FreeBlock[], helping: Set<number>, today: string): Promise<Map<number, Set<number>>> {
+  const out = new Map<number, Set<number>>();
+  for (const { type, teamIds } of free.filter((f) => f.teamIds.length && f.type.notifyOpen && !f.type.assignOnly && !f.type.needsSkill)) {
+    const rows = await all<{ account_id: number; player_id: number }>(
+      db,
+      `SELECT a.id AS account_id, tm.person_id AS player_id
+         FROM team_memberships tm JOIN accounts a ON a.person_id = tm.person_id AND a.disabled_at IS NULL
+         JOIN persons pl ON pl.id = tm.person_id
+        WHERE tm.role = 'player' AND tm.team_id IN (SELECT value FROM json_each(?1)) AND (?2 IS NULL OR pl.birth_year IS NULL OR pl.birth_year <= ?2)
+       UNION
+       SELECT a.id, tm.person_id
+         FROM team_memberships tm JOIN teams t ON t.id = tm.team_id AND t.parents_enabled = 1
+         JOIN persons pl ON pl.id = tm.person_id
+         JOIN guardianships gu ON gu.child_id = tm.person_id
+         JOIN accounts a ON a.person_id = gu.guardian_id AND a.disabled_at IS NULL
+        WHERE tm.role = 'player' AND tm.team_id IN (SELECT value FROM json_each(?1)) AND (?2 IS NULL OR pl.birth_year IS NULL OR pl.birth_year <= ?2)`,
+      JSON.stringify(teamIds),
+      type.adultsOnly ? adultBirthYearMax(today) : null,
+    );
+    for (const r of rows) {
+      if (helping.has(r.player_id)) continue;
+      out.set(r.account_id, (out.get(r.account_id) ?? new Set()).add(type.id));
+    }
+  }
+  return out;
+}
+
+/** Days before the event when the team in charge (taking turns) is told in its chat. */
+const ROTATION_NOTICE_DAYS = 7;
+
+/**
+ * "Helpers from: taking turns": the team in charge this time gets a message in its chat a week before, once per
+ * assignment (after a change the new team). No push to all parents; if places stay open, coaches and admins get the
+ * usual "open places" and assign people. In the club's language (one chat message for everyone).
+ */
+async function rotationNotices(env: Env, today: string): Promise<number> {
+  const rows = await all<GameRow & { block_id: number; rotate_team_id: number; label: string; mode: "onsite" | "task"; block_start: string; block_end: string }>(
+    env.DB,
+    `SELECT ${GAME_COLUMNS}, ed.id AS block_id, ed.rotate_team_id, dt.name AS label, dt.mode, ed.starts_at AS block_start, ed.ends_at AS block_end
+       FROM events e JOIN event_duties ed ON ed.event_id = e.id JOIN duty_types dt ON dt.id = ed.duty_type_id LEFT ${FIRST_TEAM}
+      WHERE e.starts_at >= ?1 AND e.starts_at < ?2 AND e.cancelled_at IS NULL
+        AND ed.helper_mode = 'rotate' AND ed.rotate_team_id IS NOT NULL AND ed.slots > 0
+        AND (ed.rotate_notified IS NULL OR ed.rotate_notified <> ed.rotate_team_id)`,
+    `${today}T00:00`,
+    `${addDays(today, ROTATION_NOTICE_DAYS + 1)}T00:00`,
+  );
+  for (const r of rows) {
+    const label = r.label;
+    const game = gameText(r);
+    const from = shortTime(r.block_start);
+    const until = shortTime(r.block_end);
+    const text = r.mode === "onsite" ? t`It's your turn for ${label}: ${game}, ${from}–${until}. Sign up in the Helpers tab under “Help out”.` : t`It's your turn for ${label}: ${game}. Sign up in the Helpers tab under “Help out”.`;
+    await postSystemMessage(env, [r.rotate_team_id], text);
+    await run(env.DB, "UPDATE event_duties SET rotate_notified = rotate_team_id WHERE id = ?", r.block_id);
+  }
+  return rows.length;
+}
+
+/**
+ * Assigned (a duty the coach gives out): the person learns it at once, over the channel of the reminder three days
+ * before. A child is told through its parents too (young children mostly have no account).
+ */
+export async function sendDutyAssigned(env: Env, input: { blockId: number; personId: number; byName: string }): Promise<number> {
+  const row = await first<GameRow & { label: string; block_start: string; block_end: string; mode: "onsite" | "task" }>(
+    env.DB,
+    `SELECT ${GAME_COLUMNS}, dt.name AS label, dt.mode, ed.starts_at AS block_start, ed.ends_at AS block_end
+       FROM event_duties ed JOIN duty_types dt ON dt.id = ed.duty_type_id JOIN events e ON e.id = ed.event_id LEFT ${FIRST_TEAM}
+      WHERE ed.id = ?`,
+    input.blockId,
+  );
+  if (!row) return 0;
+  const accounts = await all<{ id: number }>(
+    env.DB,
+    `SELECT id FROM accounts WHERE disabled_at IS NULL
+        AND (person_id = ?1 OR person_id IN (SELECT guardian_id FROM guardianships WHERE child_id = ?1))`,
+    input.personId,
+  );
+  if (!accounts.length) return 0;
+  // Club event without a team: the club list
+  const path = row.team_id ? `/helfer?mannschaft=${row.team_id}&spiel=${row.id}` : `/helfer?verein&spiel=${row.id}`;
+  const label = row.label;
+  const by = input.byName;
+  const link = appLink(env, path);
+  return deliver(env, accounts.map((a) => a.id), "duty_remind_3d", () => {
+    const game = gameText(row);
+    const from = shortTime(row.block_start);
+    const until = shortTime(row.block_end);
+    const what = row.mode === "onsite" ? t`${game}, ${from}–${until}` : game;
+    return {
+      title: t`Assigned: ${label}`,
+      body: t`${what}. Assigned by ${by}. If you can't make it, withdraw in the helper plan.`,
+      url: path,
+      tag: `duty-assigned-${input.blockId}-${input.personId}`,
+      mailSubject: t`Assigned: ${label}`,
+      mailText: mailText(t`${by} assigned you to ${label}: ${what}.`, t`If you can't make it, withdraw in the helper plan: ${link}`),
+    };
+  });
 }
 
 /**

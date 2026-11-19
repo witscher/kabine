@@ -1,6 +1,6 @@
 import { t } from "@lingui/core/macro";
 import { ownClubSport } from "../domain/club";
-import { helperTeams, qualifiedLists } from "../domain/duties";
+import { canHelpOut, hasClubDuties, helperTeams, qualifiedLists } from "../domain/duties";
 import { loadNews, markNewsSeen } from "../domain/news";
 import type { AuthenticationResponseJSON, RegistrationResponseJSON } from "@simplewebauthn/server";
 import { Hono } from "hono";
@@ -21,7 +21,7 @@ import { revalidateChatAccess } from "../domain/chat";
 
 export async function buildMe(env: Env, actor: Actor): Promise<Me> {
   const childIds = actor.children.map((c) => c.id);
-  const [memberships, childTeams, manageable, groups, lists] = await Promise.all([
+  const [memberships, childTeams, manageable, groups, lists, helpOut, clubDuties] = await Promise.all([
     all<{ id: number; name: string; role: Role; parents_enabled: number }>(
       env.DB,
       `SELECT t.id, t.name, tm.role, t.parents_enabled FROM team_memberships tm JOIN teams t ON t.id = tm.team_id
@@ -40,6 +40,8 @@ export async function buildMe(env: Env, actor: Actor): Promise<Me> {
       : all<TeamRef>(env.DB, "SELECT id, name FROM teams WHERE id IN (SELECT value FROM json_each(?)) ORDER BY name", JSON.stringify(actor.coachTeamIds)),
     all<{ id: number }>(env.DB, "SELECT id FROM teams WHERE kind = 'group'"),
     qualifiedLists(env.DB, actor),
+    canHelpOut(env.DB, actor),
+    hasClubDuties(env.DB, actor),
   ]);
   return {
     accountId: actor.accountId,
@@ -63,6 +65,8 @@ export async function buildMe(env: Env, actor: Actor): Promise<Me> {
     viewAs: actor.viewAs ? { mode: actor.viewAs, readOnly: !!actor.readOnly } : null,
     referee: lists.some((q) => q.mine),
     qualifiedLists: lists,
+    helpOut,
+    clubDuties,
     groupIds: groups.map((g) => g.id),
     // Admin/coach switch in the profile: only admins with an own coach role
     adminSwitch:

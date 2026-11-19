@@ -5,7 +5,7 @@ import { env } from "cloudflare:workers";
 import { beforeAll, describe, expect, it } from "vitest";
 import { type Actor, buildActor } from "../worker/auth/actor";
 import type { SessionRow } from "../worker/auth/session";
-import { ensureEventDuties, helperTeams, loadMyDuties } from "../worker/domain/duties";
+import { canHelpOut, ensureEventDuties, hasClubDuties, helperTeams, loadHelpersNeeded, loadMyDuties } from "../worker/domain/duties";
 import { loadCoachHints } from "../worker/domain/coach-hints";
 import { loadEventPage, ownCandidates } from "../worker/domain/event-page";
 import { SYNC_OVERVIEW_SQL } from "../worker/domain/fixtures";
@@ -114,6 +114,15 @@ describe("Abfragepläne ohne Durchsuchen aller Termine", () => {
     const { db, seen } = recording(env.DB);
     await loadMyDuties(db, actor, eventIds);
     await ensureEventDuties(db, eventIds, "2000-01-01");
+    expect(await fullScans(seen)).toEqual([]);
+  });
+
+  it("Helferplan beim Start der App (Aushelfen, Vereinstermine) und „Helfer benötigt“", async () => {
+    const { db, seen } = recording(env.DB);
+    await canHelpOut(db, actor);
+    await hasClubDuties(db, actor);
+    await loadHelpersNeeded(db, actor, eventIds, "2000-01-01T00:00");
+    expect(seen.length).toBeGreaterThan(3);
     expect(await fullScans(seen)).toEqual([]);
   });
 

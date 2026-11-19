@@ -689,7 +689,10 @@ export function toDetail(e: EventRow, ctx: EventContext, actor: Actor, now: numb
   };
 }
 
-/** SQL: the person (expression) takes part in event e, is nominated, requested or referees there as youth referee. */
+/**
+ * SQL: the person (expression) takes part in event e, is nominated, requested, or has a duty there that makes it
+ * visible (youth referee, helpers from other teams, assigned by the coach).
+ */
 function relatesSql(person: string): string {
   return `(
     EXISTS (
@@ -700,7 +703,12 @@ function relatesSql(person: string): string {
     )
     OR EXISTS (SELECT 1 FROM nominations n WHERE n.event_id = e.id AND n.person_id = ${person})
     OR EXISTS (SELECT 1 FROM help_requests h WHERE h.event_id = e.id AND h.status IN ('open', 'accepted') AND h.person_id = ${person})
-    OR EXISTS (SELECT 1 FROM duties dd JOIN duty_types ddt ON ddt.id = dd.duty_type_id AND ddt.who_referees = 1 WHERE dd.event_id = e.id AND dd.person_id = ${person})
+    -- A duty makes another team's event visible for approved people from all teams, helpers from other teams and duties
+    -- the coach assigns; an ordinary duty does not (e.g. a parent of a team without parents)
+    OR EXISTS (SELECT 1 FROM duties dd JOIN duty_types ddt ON ddt.id = dd.duty_type_id
+                WHERE dd.event_id = e.id AND dd.person_id = ${person}
+                  AND (ddt.who_referees = 1 OR ddt.assign_only = 1
+                       OR EXISTS (SELECT 1 FROM event_duties ded WHERE ded.id = dd.event_duty_id AND ded.helper_mode <> 'default')))
   )`;
 }
 

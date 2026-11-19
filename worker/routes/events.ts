@@ -22,7 +22,7 @@ import {
 import { ATTENDANCE_MARKS, type AttendanceMark, defaultMark, unexcusedAllowed } from "../../shared/attendance";
 import { attendanceSync } from "../domain/attendance";
 import { dutyManagers, loadDutyTypes, loadHelpersNeeded, loadMyDuties, mayManageDuties, SHORT_NAME_SQL } from "../domain/duties";
-import { notifyDutyChange } from "../duties/hub";
+import { notifyDutyHubs } from "../duties/hub";
 import { loadCoachHints } from "../domain/coach-hints";
 import { loadEventPage } from "../domain/event-page";
 import { absenceChangeable, leaderAccounts, leaderEntries, loadLeaders } from "../domain/leaders";
@@ -118,7 +118,7 @@ eventRoutes.get("/events/:id", async (c) => {
   const now = Date.now();
   const detail = withDuties(toDetail(event, ctx, actor, now), duties, needed);
   const [info, modules, leaders] = await Promise.all([
-    organizerInfo(c.env.DB, actor, event.id, event.kind, detail.teams.map((t) => t.id)),
+    organizerInfo(c.env.DB, actor, event.id, event.kind, detail.teams.map((t) => t.id), event.club_wide === 1),
     moduleEventDetail(c.env.DB, actor, event, ctx, now),
     loadLeaders(c.env.DB, event, detail.teams.map((t) => t.id)),
   ]);
@@ -127,9 +127,10 @@ eventRoutes.get("/events/:id", async (c) => {
 });
 
 /** Creator and organisers of a special event; they manage the helper duties. */
-async function organizerInfo(db: D1Database, actor: Actor, eventId: number, kind: string, teamIds: number[]) {
+async function organizerInfo(db: D1Database, actor: Actor, eventId: number, kind: string, teamIds: number[], clubWide = false) {
   const managers = (await dutyManagers(db, [eventId])).get(eventId);
-  const dutyManage = teamIds.length > 0 && (kind === "game" || kind === "special") && mayManageDuties(actor, teamIds, managers);
+  // Club events have no team: admins and the organisers manage their helper duties
+  const dutyManage = (teamIds.length > 0 || (clubWide && kind === "special")) && (kind === "game" || kind === "special") && mayManageDuties(actor, teamIds, managers);
   if (kind !== "special") return { dutyManage, organizers: null };
   const [creator, people] = await Promise.all([
     first<{ id: number; name: string }>(db, `SELECT p.id, ${SHORT_NAME_SQL("p")} AS name FROM events e JOIN persons p ON p.id = e.created_by WHERE e.id = ?`, eventId),
@@ -198,7 +199,7 @@ eventRoutes.post("/events/:id/organizers", async (c) => {
       }, { teamIds: event.teamIds }),
     );
   }
-  for (const t of event.teamIds) c.executionCtx.waitUntil(notifyDutyChange(c.env, t));
+  notifyDutyHubs(c.env, event.teamIds, (p) => c.executionCtx.waitUntil(p));
   return c.json({ ok: true }, 201);
 });
 
@@ -206,7 +207,7 @@ eventRoutes.delete("/events/:id/organizers/:personId", async (c) => {
   const actor = requireActor(c);
   const event = await organizerEvent(c.env.DB, actor, intParam(c, "id"));
   await run(c.env.DB, "DELETE FROM event_organizers WHERE event_id = ? AND person_id = ?", event.id, intParam(c, "personId"));
-  for (const t of event.teamIds) c.executionCtx.waitUntil(notifyDutyChange(c.env, t));
+  notifyDutyHubs(c.env, event.teamIds, (p) => c.executionCtx.waitUntil(p));
   return c.json({ ok: true });
 });
 
@@ -784,6 +785,8 @@ const specialSchema = z.object({
         startsAt: z.string().refine(isLocalDateTime, { error: () => t`Invalid time` }),
         endsAt: z.string().refine(isLocalDateTime, { error: () => t`Invalid time` }),
         slots: z.number().int().min(1).max(20),
+        /** "Helpers from": certain teams instead of "who helps" of the duty type */
+        helperTeams: z.array(z.number().int().positive()).max(30).default([]),
       }),
     )
     .max(30)
@@ -819,7 +822,7 @@ eventRoutes.post("/events", async (c) => {
   if (teamIds.length) {
     await c.env.DB.batch(teamIds.map((t) => stmt(c.env.DB, "INSERT INTO event_teams (event_id, team_id) VALUES (?, ?)", row!.id, t)));
   }
-  if (input.duties.length && teamIds.length) await createDutyBlocks(c.env.DB, row!.id, input.duties);
+  if (input.duties.length && (teamIds.length || input.clubWide)) await createDutyBlocks(c.env.DB, row!.id, input.duties);
   const event = (await loadEvent(c.env.DB, row!.id))!;
   const ctx = await loadEventContext(c.env.DB, [event]);
   const title = input.title;
@@ -865,9 +868,11 @@ eventRoutes.post("/events", async (c) => {
 async function createDutyBlocks(
   db: D1Database,
   eventId: number,
-  blocks: { dutyTypeId?: number; newTypeName?: string; startsAt: string; endsAt: string; slots: number }[],
+  blocks: { dutyTypeId?: number; newTypeName?: string; startsAt: string; endsAt: string; slots: number; helperTeams?: number[] }[],
 ) {
   const types = await loadDutyTypes(db);
+  // "Helpers from": only teams (no groups) that exist
+  const teamIds = blocks.some((b) => b.helperTeams?.length) ? new Set((await all<{ id: number }>(db, "SELECT id FROM teams WHERE kind = 'team'")).map((r) => r.id)) : new Set<number>();
   const created = new Map<string, number>();
   const statements: D1PreparedStatement[] = [];
   for (const [i, b] of blocks.entries()) {
@@ -890,8 +895,21 @@ async function createDutyBlocks(
         created.set(key, typeId);
       }
     } else throw badRequest(t`Please choose a duty for each time block.`);
+    const helperTeams = [...new Set(b.helperTeams ?? [])];
+    if (helperTeams.some((id) => !teamIds.has(id))) throw badRequest(t`Unknown team under “Helpers from”.`, "unknown_team");
     statements.push(
-      stmt(db, "INSERT INTO event_duties (event_id, duty_type_id, starts_at, ends_at, slots, sort) VALUES (?, ?, ?, ?, ?, ?)", eventId, typeId, b.startsAt, b.endsAt, b.slots, i + 1),
+      stmt(
+        db,
+        "INSERT INTO event_duties (event_id, duty_type_id, starts_at, ends_at, slots, sort, helper_mode, helper_teams) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+        eventId,
+        typeId,
+        b.startsAt,
+        b.endsAt,
+        b.slots,
+        i + 1,
+        helperTeams.length ? "teams" : "default",
+        helperTeams.length ? JSON.stringify(helperTeams) : null,
+      ),
     );
   }
   if (statements.length) await db.batch(statements);

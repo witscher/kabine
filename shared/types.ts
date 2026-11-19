@@ -97,6 +97,10 @@ export interface Me {
    * person or a child is approved for (`mine`), for coaches and admins all of them.
    */
   qualifiedLists: { id: number; name: string; mine: boolean }[];
+  /** Can help out at other teams' events (oneself or a child, "helpers from" on templates and time blocks): list "Help out". */
+  helpOut: boolean;
+  /** Upcoming club events with helper duties where one can help or which one manages: list "Whole club" in the Helpers tab. */
+  clubDuties: boolean;
   /** IDs of all groups (chat and special events only, see docs/dev/design.md, Groups). */
   groupIds: number[];
   /** Admins with a coach role only: admin/coach switch in the profile (coachMode = currently working as coach). */

@@ -123,6 +123,8 @@ restoreRoutes.post("/admin/restore/rows", async (c) => {
       result.skipped++;
       continue;
     }
+    // "Helpers from" of duty template lines and blocks: a JSON list of team ids, without a foreign key
+    if (typeof values.helper_teams === "string") values.helper_teams = remapIdList(values.helper_teams, maps.teams);
     prepared.push({ old: schema.idTable ? Number(row.id) : null, values, pending });
   }
   await special(db, table, prepared);
@@ -175,6 +177,18 @@ restoreRoutes.post("/admin/restore/rows", async (c) => {
 });
 
 /** Table-specific rules before inserting. */
+/** A JSON list of ids with the new ids; ids that were not restored are left out. */
+function remapIdList(json: string, map: Record<string, number> | undefined): string {
+  let ids: unknown;
+  try {
+    ids = JSON.parse(json);
+  } catch {
+    return "[]";
+  }
+  if (!Array.isArray(ids)) return "[]";
+  return JSON.stringify(ids.map((id) => map?.[String(id)]).filter((id): id is number => id != null));
+}
+
 async function special(db: D1Database, table: string, rows: { values: Record<string, Param> }[]): Promise<void> {
   if (table === "accounts") {
     // The passkey handle is not in the export: a new one; passkeys are set up again

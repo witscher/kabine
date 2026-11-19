@@ -269,8 +269,7 @@ describe("Helferplan", () => {
     expect((await api(`/duties/teams/${wd}/people/search`, { cookie: coachCookie, body: { q: "eh" } })).body.people).toEqual([]);
     expect((await api(`/duties/teams/${wd}/people/search`, { cookie: monaCookie, body: { q: "fr" } })).status).toBe(403);
     expect((await api(`/duties/events/${away}/people/search`, { cookie: coachCookie, body: { q: "fr" } })).body.people.map((p: any) => p.personId)).toEqual([stranger]);
-    // Block mit Einträgen lässt sich nicht löschen, Plätze nicht unter die Einträge senken
-    expect((await api(`/duties/blocks/${awayJerseys}`, { method: "DELETE", cookie: coachCookie })).body.error.code).toBe("block_has_entries");
+    // Plätze nicht unter die Einträge senken (Löschen samt Einträgen: test/duty-sources.test.ts)
     expect((await api(`/duties/blocks/${awayJerseys}`, { method: "PATCH", cookie: coachCookie, body: { slots: 0 } })).body.error.code).toBe("slots_below_entries");
 
     // Mona sieht den Eintrag für sich und kann ihn selbst austragen

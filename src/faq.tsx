@@ -368,7 +368,8 @@ const coaches = (): Faq[] => [
           The duties of a game come from a template. Under <em>Team → Settings → Helper plan</em> you choose the template for home and away games; admins
           maintain templates and duty types under <em>Admin → Helper duties</em>. For a special event, switch on <em>Helpers needed</em> and create time blocks,
           also a separate duty just for this event, for example barbecue. For an existing special event this is done in the event under{" "}
-          <em>Helpers: add time block</em>. There, under <em>Organisers</em>, you also add further people who help manage the helper duties.
+          <em>Manage helper duties</em>. There, under <em>Organisers</em>, you also add further people who help manage the helper duties. Under{" "}
+          <em>Helpers from</em> a duty can also be taken by the players of other teams, for example wipers from the youth at adult games.
         </Trans>
       </p>
     ),

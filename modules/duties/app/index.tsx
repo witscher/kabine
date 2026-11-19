@@ -16,8 +16,9 @@ export default defineAppModule({
     // Links from before 0.8.0 (youth referees)
     { path: "/kihasl", page: lazyPage(() => import("./approvals").then((m) => m.ApprovalJoinPage)) },
   ],
-  // Helpers of a team with a helper plan, and approved people of lists across teams (e.g. youth referees)
-  tab: (me) => (me.helperTeams.length || me.qualifiedLists.some((q) => q.mine) ? { href: "/helfer", label: t`Helpers`, icon: "helping", match: (p) => p.startsWith("/helfer") } : null),
+  // Helpers of a team with a helper plan, approved people of lists across teams (e.g. youth referees), helpers from
+  // other teams and club events with helper duties
+  tab: (me) => (me.helperTeams.length || me.qualifiedLists.some((q) => q.mine) || me.helpOut || me.clubDuties ? { href: "/helfer", label: t`Helpers`, icon: "helping", match: (p) => p.startsWith("/helfer") } : null),
   // Statistics: helpers per family (coaches) and the family's duties (players, parents)
   teamStats: { label: () => t`Helpers`, shown: (stats) => stats.helperPlan, view: lazyPage(() => import("./stats").then((m) => m.HelperStatsView)) },
   myStats: lazyPage(() => import("./stats").then((m) => m.MyHelperCard)),

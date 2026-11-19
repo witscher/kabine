@@ -658,8 +658,12 @@ test("Helferdienste: Admin pflegt Dienstarten, Trainer legt Sondertermin mit Zei
   await page.getByRole("button", { name: "Termin anlegen" }).click();
   await expect(page).toHaveURL(/\/termine\/\d+/);
 
-  // Termin-Detail verweist auf den Helferplan; im Reiter Helfer die Karte mit drei Blöcken
-  await expect(page.getByRole("link", { name: "Helferdienste im Reiter Helfer verwalten" })).toBeVisible();
+  // Auf der Terminseite öffnet „Helferdienste verwalten“ dasselbe Fenster wie im Reiter Helfer
+  await page.getByRole("button", { name: "Helferdienste verwalten" }).click();
+  const manageHere = page.getByRole("dialog", { name: "Dienste verwalten" });
+  await expect(manageHere.getByRole("region", { name: "Zeitblöcke" })).toContainText("15:00–17:00");
+  await manageHere.getByRole("button", { name: "Schließen" }).click();
+  // Im Reiter Helfer die Karte mit drei Blöcken
   await page.getByRole("link", { name: "Helfer", exact: true }).click();
   const card = page.getByRole("article", { name: /Saisonabschluss/ });
   await expect(card).toContainText("15:00–19:00");
@@ -668,6 +672,11 @@ test("Helferdienste: Admin pflegt Dienstarten, Trainer legt Sondertermin mit Zei
   await page.getByRole("dialog", { name: "Grill" }).getByRole("button", { name: "Eintragen" }).click();
   await expect(card.locator(".duty-slot", { hasText: "15:00–17:00" })).toContainText("Theo T.");
   await expect(page.getByRole("region", { name: "Meine Dienste" })).toContainText("Grill · 15:00–17:00");
+  // Verwalten: die Einträge nennen die Uhrzeit des Zeitblocks (zwei Grill-Schichten)
+  await card.getByRole("button", { name: "Verwalten" }).click();
+  const manage = page.getByRole("dialog", { name: "Dienste verwalten" });
+  await expect(manage.getByRole("region", { name: "Einträge" })).toContainText("Grill · 15:00–17:00");
+  await manage.getByRole("button", { name: "Schließen" }).click();
 
   // Admin macht die Spielerin zum ordentlichen Mitglied, der Trainer fügt sie als Organisatorin hinzu
   await a.goto("/verwaltung/personen");
@@ -690,6 +699,124 @@ test("Helferdienste: Admin pflegt Dienstarten, Trainer legt Sondertermin mit Zei
   // Die Spielerin sieht im Reiter Helfer „Verwalten“ beim Saisonabschluss
   await player.page.goto("/helfer");
   await expect(player.page.getByRole("article", { name: /Saisonabschluss/ }).getByRole("button", { name: "Verwalten" })).toBeVisible();
+});
+
+test("Dienstart, die der Trainer vergibt: Schalter mit Erklärung, in der Liste gekennzeichnet", async () => {
+  const a = admin.page;
+  await a.goto("/verwaltung/helferdienste");
+  await a.getByRole("button", { name: "Dienstart hinzufügen" }).click();
+  const sheet = a.getByRole("dialog", { name: "Neue Dienstart" });
+  await sheet.getByLabel("Name").fill("Hallendienst");
+  await sheet.getByRole("button", { name: "Erklärung: Vergibt der Trainer" }).click();
+  const info = a.getByRole("dialog", { name: "Vergibt der Trainer" });
+  await expect(info).toContainText("Niemand trägt sich selbst ein");
+  await info.getByRole("button", { name: "Verstanden" }).click();
+  await sheet.getByRole("switch", { name: /Vergibt der Trainer/ }).click();
+  // „Helfer gesucht“ gibt es dann nicht, der Schalter verschwindet; „Nur Erwachsene“ bleibt
+  await expect(sheet.getByRole("switch", { name: /Helfer gesucht/ })).toHaveCount(0);
+  await sheet.getByRole("switch", { name: /Nur Erwachsene/ }).click();
+  if (process.env.E2E_SHOTS) await a.screenshot({ path: `${process.env.E2E_SHOTS}/vergibt-der-trainer.png` });
+  await sheet.getByRole("button", { name: "Speichern" }).click();
+  await expect(a.getByRole("region", { name: "Dienstarten" })).toContainText("vergibt der Trainer · nur Erwachsene");
+});
+
+test("Helfer aus: Vorlage mit Wischern abwechselnd aus Mannschaften", async () => {
+  const a = admin.page;
+  await a.goto("/verwaltung/helferdienste");
+  await a.getByRole("button", { name: "Vorlage hinzufügen" }).click();
+  const sheet = a.getByRole("dialog", { name: "Neue Vorlage" });
+  await sheet.getByLabel("Name").fill("Erste Heimspiel");
+  await sheet.getByRole("button", { name: "Dienst hinzufügen" }).click();
+  const from = sheet.getByRole("group", { name: "Helfer aus", exact: true });
+  await from.getByRole("button", { name: "Abwechselnd" }).click();
+  await from.getByRole("group", { name: "Mannschaften für Helfer aus" }).getByRole("button", { name: "wT" }).click();
+  await expect(from).toContainText("Reihenfolge: wT");
+  if (process.env.E2E_SHOTS) await a.screenshot({ path: `${process.env.E2E_SHOTS}/helfer-aus-vorlage.png`, fullPage: true });
+  await sheet.getByRole("button", { name: "Speichern" }).click();
+  await a.getByRole("button", { name: /Erste Heimspiel/ }).click();
+  const again = a.getByRole("dialog", { name: "Erste Heimspiel" });
+  await expect(again.getByRole("group", { name: "Helfer aus", exact: true }).getByRole("button", { name: "Abwechselnd" })).toHaveAttribute("aria-pressed", "true");
+  await expect(again.getByRole("group", { name: "Mannschaften für Helfer aus" }).getByRole("button", { name: "1. wT" })).toHaveAttribute("aria-pressed", "true");
+  await again.getByRole("button", { name: "Schließen" }).click();
+});
+
+test("Vereinstermin mit Helferdienst: anlegen, in der Gesamtansicht eintragen, auf der Terminseite verwalten", async () => {
+  const a = admin.page;
+  await a.goto("/verwaltung/termin-neu");
+  await a.getByLabel("Titel").fill("Sommerturnier");
+  await a.getByLabel("Datum").fill("2099-07-04");
+  await a.getByLabel("Beginn").fill("10:00");
+  await a.getByLabel("Ende (optional)").fill("16:00");
+  await a.getByRole("switch", { name: /Für den ganzen Verein/ }).click();
+  await a.getByRole("switch", { name: /Helfer benötigt/ }).click();
+  await a.getByRole("button", { name: "Zeitblock" }).click();
+  const block = a.getByRole("dialog", { name: "Zeitblock hinzufügen" });
+  await block.getByLabel("Dienst").selectOption({ label: "Aufbau" });
+  await block.getByLabel("Beginn").fill("09:00");
+  // Neu: 2,5 h zwischen 2 h und 3 h
+  await block.getByRole("button", { name: "2,5 h" }).click();
+  await expect(block.locator(".duty-preview")).toContainText("09:00–11:30");
+  await block.getByRole("button", { name: "1 h" }).click();
+  await block.getByRole("button", { name: "Hinzufügen" }).click();
+  await expect(a.getByRole("list", { name: "Zeitblöcke" })).toContainText("09:00–10:00 · Aufbau");
+  await a.getByRole("button", { name: "Termin anlegen" }).click();
+  await expect(a).toHaveURL(/\/termine\/\d+/);
+  const eventUrl = a.url();
+
+  // Trainer: ohne Filter gehört der Vereinstermin schon dazu, der Chip „Ganzer Verein“ ist mit aktiv
+  const c = coach.page;
+  await c.goto("/");
+  await c.reload();
+  await c.getByRole("link", { name: "Helfer", exact: true }).click();
+  const clubChip = c.getByRole("group", { name: "Nach Mannschaft filtern" }).getByRole("button", { name: "Ganzer Verein" });
+  await expect(clubChip).toHaveAttribute("aria-pressed", "true");
+  await expect(c.getByRole("article", { name: /Sommerturnier/ })).toBeVisible();
+  // Antippen filtert auf die Vereinstermine allein
+  await clubChip.click();
+  const card = c.getByRole("article", { name: /Sommerturnier/ });
+  await card.locator(".duty-slot", { hasText: "09:00–10:00" }).getByRole("button", { name: "Eintragen" }).click();
+  await c.getByRole("dialog", { name: "Aufbau" }).getByRole("button", { name: "Eintragen" }).click();
+  await expect(card.locator(".duty-slot", { hasText: "09:00–10:00" })).toContainText("Theo T.");
+  if (process.env.E2E_SHOTS) await c.screenshot({ path: `${process.env.E2E_SHOTS}/verein-helfer.png`, fullPage: true });
+
+  // Admin: auf der Terminseite mehrere Zeitblöcke nacheinander, dann den ersten samt Eintrag entfernen
+  await a.goto(eventUrl);
+  await a.getByRole("button", { name: "Helferdienste verwalten" }).click();
+  const manage = a.getByRole("dialog", { name: "Dienste verwalten" });
+  for (const start of ["16:00", "17:00"]) {
+    await manage.getByRole("button", { name: "Zeitblock hinzufügen" }).click();
+    const more = a.getByRole("dialog", { name: "Zeitblock hinzufügen" });
+    await more.getByLabel("Dienst").selectOption({ label: "Aufbau" });
+    await more.getByLabel("Beginn").fill(start);
+    await more.getByRole("button", { name: "1 h" }).click();
+    await more.getByRole("button", { name: "Hinzufügen" }).click();
+  }
+  const slots = manage.getByRole("region", { name: "Zeitblöcke" });
+  await expect(slots).toContainText("16:00–17:00");
+  await expect(slots).toContainText("17:00–18:00");
+  await expect(manage.getByRole("region", { name: "Einträge" })).toContainText("Aufbau · 09:00–10:00");
+  await slots.getByRole("button", { name: "Aufbau entfernen" }).first().click();
+  const confirm = a.getByRole("dialog", { name: "Aufbau entfernen?" });
+  await expect(confirm).toContainText("1 Eintrag wird mit entfernt");
+  await confirm.getByRole("button", { name: "Entfernen" }).click();
+  await expect(slots).not.toContainText("09:00–10:00");
+  await expect(manage.getByRole("region", { name: "Einträge" })).not.toContainText("Theo T.");
+  await manage.getByRole("button", { name: "Schließen" }).click();
+});
+
+test("Sondertermin ohne Helferdienste: „Helferdienste verwalten“ beginnt mit dem ersten Zeitblock", async () => {
+  const { page } = coach;
+  const date = new Date(Date.now() + 12 * 86_400_000).toLocaleDateString("sv-SE", { timeZone: "Europe/Berlin" });
+  const created = await (await page.request.post("/api/events", { data: { title: "Elternabend", startsAt: `${date}T19:00`, endsAt: `${date}T20:30`, teamIds: [1] } })).json();
+  await page.goto(`/termine/${created.id}`);
+  await page.getByRole("button", { name: "Helferdienste verwalten" }).click();
+  const first = page.getByRole("dialog", { name: "Zeitblock hinzufügen" });
+  await expect(first).toBeVisible();
+  await first.getByRole("button", { name: "Schließen" }).click();
+  const manage = page.getByRole("dialog", { name: "Dienste verwalten" });
+  await expect(manage).toContainText("Noch keine Dienste.");
+  await manage.getByRole("button", { name: "Schließen" }).click();
+  await page.request.delete(`/api/events/${created.id}`);
 });
 
 test("Hilfe und Feedback: Spielerin im eigenen Reiter, Admin unter Verwaltung", async () => {

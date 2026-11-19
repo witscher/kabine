@@ -157,6 +157,24 @@ describe("Wiederherstellen aus dem Export", () => {
     expect(filled.body).toEqual({ updated: 1 });
   });
 
+  it("„Helfer aus“ an Zeitblöcken: die Mannschaften der Liste bekommen ihre neuen Nummern", async () => {
+    await freshDb();
+    await season();
+    await team("Platzhalter", "F");
+    const wd = await team("wD", "wD");
+    const ev = await eventIn(wd, 3, { kind: "special", title: "Turnier" });
+    const type = await one<{ id: number }>("INSERT INTO duty_types (name, mode, who_parents) VALUES ('Wischer', 'onsite', 0) RETURNING id");
+    const admin = await loginAs(await person("Ada", { admin: true }));
+    const row = { id: 50, event_id: 7, duty_type_id: 3, starts_at: "2026-12-05T10:00", ends_at: "2026-12-05T12:00", slots: 2, sort: 1, helper_mode: "teams", helper_teams: "[11,12]" };
+    const res = await api("/admin/restore/rows", {
+      cookie: admin,
+      body: { table: "event_duties", rows: [row], maps: { events: { "7": ev }, duty_types: { "3": type.id }, teams: { "11": wd } } },
+    });
+    expect(res.status).toBe(200);
+    // Mannschaft 12 kam nicht mit: sie fällt aus der Liste
+    expect(await one("SELECT helper_mode, helper_teams FROM event_duties WHERE event_id = ?", ev)).toEqual({ helper_mode: "teams", helper_teams: `[${wd}]` });
+  });
+
   it("nur für Admins, nur Tabellen des Exports", async () => {
     await freshDb();
     const cookie = await loginAs(await person("Theo"));

@@ -2992,3 +2992,15 @@ button.announcement-head {
   padding-left: 14px;
   color: var(--text-2);
 }
+
+/* "Helpers from" on a duty: the teams, and a hint for managers when the team in charge has an event of its own */
+.duty-from {
+  display: block;
+  font-size: 13px;
+  color: var(--text-2);
+}
+.duty-conflict {
+  display: block;
+  font-size: 13px;
+  color: var(--warn);
+}

@@ -5,7 +5,7 @@ import { type AttendanceMark, defaultMark, unexcusedAllowed } from "../../shared
 import type { EventDetail, LeaderRole, LocationRef, MyParticipation, ParticipantDetail, RosterEntry } from "../../shared/types";
 import { api, errorMessage } from "../api";
 import { dutyLines, helperPath, neededText } from "../duties";
-import { BlockSheet } from "../duty-blocks";
+import { EventDutyManager } from "../duty-manage";
 import { longDate, personName, shortName, stamp, time, timeRange, weekdayPlural } from "../format";
 import { Icon } from "../icons";
 import { GameLinks, isLiveWindow, isReportWindow } from "../live";
@@ -143,7 +143,8 @@ export function EventPage({ id }: { id: string }) {
         ) : null}
 
         {event.kind === "game" && event.game ? <GameInfo event={event} /> : null}
-        {event.kind === "special" && !event.isPast && !event.cancelled && event.teams.length ? <SpecialHelpers event={event} onChanged={reload} /> : null}
+        {/* Club events have no team, but can have helper duties too */}
+        {event.kind === "special" && !event.isPast && !event.cancelled && (event.teams.length || event.clubWide) ? <SpecialHelpers event={event} onChanged={reload} /> : null}
         {event.notes ? (
           <div class="card card-pad">
             <div class="small muted" style={{ fontWeight: 700 }}>
@@ -1284,15 +1285,14 @@ function RosterList({ roster }: { roster: RosterEntry[] }) {
 }
 
 /**
- * Special event: note on your own duties or open spots. Coaches, the creator and organisers create
- * time blocks; coaches, admins and the creator assign organisers.
+ * Special event: note on your own duties or open spots. Coaches, the creator and organisers manage the helper duties
+ * right here (the same sheet as in the Helpers tab); coaches, admins and the creator assign organisers.
  */
 function SpecialHelpers({ event, onChanged }: { event: EventDetail; onChanged: () => void }) {
   const me = useMe();
   const { refresh: refreshSession } = useSession();
-  const [adding, setAdding] = useState(false);
+  const [managing, setManaging] = useState(false);
   const [addOrganizer, setAddOrganizer] = useState(false);
-  const inHelperTab = event.teams.some((t) => me.helperTeams.some((h) => h.id === t.id));
   const text = event.myDuties.length ? dutyLines(event.myDuties).join(" · ") : event.helpersNeeded ? neededText(event.helpersNeeded) : null;
   const org = event.organizers;
   const showOrganizers = !!org && (org.editable || event.dutyManage || org.people.length > 0);
@@ -1306,17 +1306,9 @@ function SpecialHelpers({ event, onChanged }: { event: EventDetail; onChanged: (
         </a>
       ) : null}
       {event.dutyManage ? (
-        <>
-          {inHelperTab && !text ? (
-            <a class="ext-link" href={helperPath(event, me)}>
-              <Icon name="helping" size={16} />
-              <Trans>Manage helper duties in the Helpers tab</Trans>
-            </a>
-          ) : null}
-          <Button size="sm" variant="coach" onClick={() => setAdding(true)}>
-            <Trans>Helpers: add time block</Trans>
-          </Button>
-        </>
+        <Button size="sm" variant="coach" onClick={() => setManaging(true)}>
+          <Trans>Manage helper duties</Trans>
+        </Button>
       ) : null}
       {showOrganizers && org ? (
         <div class="stack-sm" aria-label={t`Organisers`} role="group">
@@ -1369,22 +1361,11 @@ function SpecialHelpers({ event, onChanged }: { event: EventDetail; onChanged: (
           ) : null}
         </div>
       ) : null}
-      {adding ? (
-        <BlockSheet
-          date={event.startsAt.slice(0, 10)}
-          start={event.startsAt.slice(11, 16)}
-          eventEnd={event.endsAt}
-          allowNewType
-          onClose={() => setAdding(false)}
-          onSave={async (b) => {
-            await api.post(`/duties/events/${event.id}/blocks`, {
-              ...(b.newTypeName ? { newTypeName: b.newTypeName } : { dutyTypeId: b.dutyTypeId }),
-              startsAt: b.startsAt,
-              endsAt: b.endsAt,
-              slots: b.slots,
-            });
-            const label = b.label;
-            toast(t`Time block ${label} added. It is now in the Helpers tab.`);
+      {managing ? (
+        <EventDutyManager
+          eventId={event.id}
+          onClose={() => setManaging(false)}
+          onChanged={() => {
             invalidate("/duties");
             void refreshSession();
             onChanged();

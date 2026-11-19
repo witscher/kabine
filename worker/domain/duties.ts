@@ -7,9 +7,9 @@ import type { Actor } from "../auth/actor";
 import { isCoachOf, isCoachOfAny } from "../auth/actor";
 import type { MyDuty } from "../../shared/types";
 import { badRequest, forbidden, notFound } from "../lib/http";
-import { all, first, stmt } from "../lib/db";
+import { all, first, list, stmt } from "../lib/db";
 import { cached, cacheVersions } from "../lib/cache";
-import { addMinutesLocal, localToInstant } from "../lib/time";
+import { addMinutesLocal, localToInstant, todayLocal } from "../lib/time";
 import { CURRENT_AGE_CLASS_JOIN } from "./events";
 import { isModuleOn } from "./club";
 
@@ -36,6 +36,12 @@ export interface DutyType {
   needsSkill: boolean;
   /** Who approves the prior knowledge: the person in the profile ("I can do this") or an admin. */
   skillGrant: "self" | "admin";
+  /** Assigned by the coach: nobody signs up themselves, managers assign people who fit "who helps". */
+  assignOnly: boolean;
+  /** Send "helpers wanted" three days before. */
+  notifyOpen: boolean;
+  /** Adults only: whoever is under 18 by birth year does not take the duty (no birth year counts as adult). */
+  adultsOnly: boolean;
   /** Special duty only for this event */
   eventId: number | null;
   archived: boolean;
@@ -54,6 +60,9 @@ interface DutyTypeRow {
   note_allowed: number;
   needs_skill: number;
   skill_grant: "self" | "admin";
+  assign_only: number;
+  notify_open: number;
+  adults_only: number;
   event_id: number | null;
   archived: number;
   sort: number;
@@ -74,6 +83,10 @@ export function toDutyType(r: DutyTypeRow): DutyType {
     // Admin approval always means prior knowledge (the youth referee type has needs_skill = 0 for the previous release)
     needsSkill: r.needs_skill === 1 || r.skill_grant === "admin",
     skillGrant: r.skill_grant === "admin" ? "admin" : "self",
+    // Missing before the migration 202611200200 (restore of an older export): as before
+    assignOnly: r.assign_only === 1,
+    notifyOpen: r.notify_open !== 0,
+    adultsOnly: r.adults_only === 1,
     eventId: r.event_id,
     archived: r.archived === 1,
   };
@@ -98,6 +111,49 @@ export async function loadAllDutyTypes(db: D1Database): Promise<Map<number, Duty
   return new Map(rows.map((r) => [r.id, toDutyType(r)]));
 }
 
+// "Helpers from": on the template line and the time block, not on the duty type ---------------------------------
+
+/** default: "who helps" of the duty type; teams: players of these teams; rotate: one team of the list in turn. */
+export type HelperMode = "default" | "teams" | "rotate";
+
+export interface HelperSource {
+  mode: HelperMode;
+  /** Teams (for rotate in the order of the rotation) */
+  pool: number[];
+  /** rotate: the team in charge this time */
+  rotateTeamId: number | null;
+}
+
+/** Columns of a block (alias ed) for helperSource. */
+export const HELPER_COLUMNS = "ed.helper_mode, ed.helper_teams, ed.rotate_team_id";
+
+export interface HelperColumns {
+  helper_mode: HelperMode;
+  helper_teams: string | null;
+  rotate_team_id?: number | null;
+}
+
+export function parsePool(json: string | null | undefined): number[] {
+  if (!json) return [];
+  try {
+    const v = JSON.parse(json) as unknown;
+    return Array.isArray(v) ? v.filter((x): x is number => Number.isInteger(x)) : [];
+  } catch {
+    return [];
+  }
+}
+
+export function helperSource(r: HelperColumns): HelperSource {
+  return { mode: r.helper_mode ?? "default", pool: parsePool(r.helper_teams), rotateTeamId: r.rotate_team_id ?? null };
+}
+
+/** Teams whose players sign up for this block (empty: "who helps" of the duty type). */
+export function helperTeamsOf(s: HelperSource): number[] {
+  if (s.mode === "teams") return s.pool;
+  if (s.mode === "rotate") return s.rotateTeamId != null ? [s.rotateTeamId] : [];
+  return [];
+}
+
 /**
  * Home games of an age group with required duties (age_class_duties, e.g. a youth referee for the youngest
  * classes) get them regardless of the team's helper plan. SQL condition (alias of the team).
@@ -113,6 +169,8 @@ const REQUIRED_BEFORE_MIN = 15;
 export interface HelperRole {
   childId: number | null;
   childName: string | null;
+  /** The child does the duty itself (helpers from other teams); otherwise the parent does it for the child. */
+  doer?: boolean;
 }
 
 export interface HelperTeam {
@@ -131,6 +189,44 @@ export interface HelperTeam {
   /** Full club member (for “who helps: members”) */
   isMember: boolean;
   childRoles: HelperRole[];
+  /** Club event: "parents" includes oneself (player of a team without parents); otherwise from parentsEnabled. */
+  parentsSelf?: boolean;
+}
+
+/** Key of the club list in the Helpers tab and its live channel (team ids are > 0, lists of approved people < 0). */
+export const CLUB_KEY = 0;
+
+/**
+ * Club events (the whole club, no team): "who helps" applies across all teams, no groups. Parents: for children in
+ * teams with parents; players of a team without parents count as "parents" themselves, as at team events. Managing:
+ * admins (organisers per event through mayManageDuties).
+ */
+export async function clubHelperTeam(db: D1Database, actor: Actor): Promise<HelperTeam> {
+  const ms = [...actor.memberships, ...[...actor.childMemberships.values()].flat()];
+  const ids = [...new Set(ms.map((m) => m.teamId))];
+  const [kinds, member] = await Promise.all([
+    ids.length ? all<{ id: number; kind: string }>(db, "SELECT id, kind FROM teams WHERE id IN (SELECT value FROM json_each(?))", list(ids)) : Promise.resolve([]),
+    isClubMember(db, actor.personId),
+  ]);
+  const teamIds = new Set(kinds.filter((k) => k.kind === "team").map((k) => k.id));
+  const own = actor.memberships.filter((m) => teamIds.has(m.teamId));
+  const playing = (m: { role: string }) => m.role === "player" || m.role === "helper";
+  const childRoles: HelperRole[] = actor.children
+    .filter((ch) => (actor.childMemberships.get(ch.id) ?? []).some((m) => teamIds.has(m.teamId) && playing(m) && m.parentsEnabled))
+    .map((ch) => ({ childId: ch.id, childName: ch.firstName }));
+  return {
+    teamId: CLUB_KEY,
+    teamName: t`Whole club`,
+    canManage: actor.isAdmin,
+    roles: [],
+    own: true,
+    parentsEnabled: true,
+    isPlayer: own.some(playing),
+    isCoach: own.some((m) => m.role === "coach"),
+    isMember: member,
+    childRoles,
+    parentsSelf: own.some((m) => playing(m) && !m.parentsEnabled),
+  };
 }
 
 /**
@@ -144,9 +240,11 @@ export interface HelperTeam {
  */
 export function rolesFor(team: HelperTeam, type: DutyType): HelperRole[] {
   if (type.whoQualified) return [];
+  // Assigned by the coach: only managers sign up themselves (for themselves, as for someone else)
+  if (type.assignOnly) return team.canManage ? [{ childId: null, childName: null }] : [];
   const self =
     team.canManage ||
-    (type.whoParents && !team.parentsEnabled && team.isPlayer) ||
+    (type.whoParents && (team.parentsSelf ?? (!team.parentsEnabled && team.isPlayer))) ||
     (type.whoPlayers && team.isPlayer) ||
     (type.whoCoaches && team.isCoach) ||
     (type.whoMembers && team.isMember && (team.isPlayer || team.isCoach || team.childRoles.length > 0));
@@ -359,6 +457,8 @@ export interface TemplateItem {
   beforeMin: number;
   afterMin: number;
   taskWhen: "before" | "after";
+  helperMode: HelperMode;
+  helperTeams: number[];
 }
 
 /** Block from a template line for an event from start to end. */
@@ -371,12 +471,58 @@ export function blockFromItem(item: TemplateItem, mode: DutyType["mode"], start:
 }
 
 export async function templateItems(db: D1Database, templateId: number): Promise<TemplateItem[]> {
-  const rows = await all<{ duty_type_id: number; slots: number; before_min: number; after_min: number; task_when: "before" | "after" }>(
+  const rows = await all<{ duty_type_id: number; slots: number; before_min: number; after_min: number; task_when: "before" | "after" } & HelperColumns>(
     db,
-    "SELECT duty_type_id, slots, before_min, after_min, task_when FROM duty_template_items WHERE template_id = ? ORDER BY sort, id",
+    "SELECT duty_type_id, slots, before_min, after_min, task_when, helper_mode, helper_teams FROM duty_template_items WHERE template_id = ? ORDER BY sort, id",
     templateId,
   );
-  return rows.map((r) => ({ dutyTypeId: r.duty_type_id, slots: r.slots, beforeMin: r.before_min, afterMin: r.after_min, taskWhen: r.task_when }));
+  return rows.map((r) => ({
+    dutyTypeId: r.duty_type_id,
+    slots: r.slots,
+    beforeMin: r.before_min,
+    afterMin: r.after_min,
+    taskWhen: r.task_when,
+    helperMode: r.helper_mode ?? "default",
+    helperTeams: parsePool(r.helper_teams),
+  }));
+}
+
+/**
+ * Rotation: the team after the one in charge of the last block of this duty type with the same list. last: the state
+ * while generating many blocks in one go (key duty type and list), so the games take their turns in start order.
+ */
+export async function nextRotationTeam(db: D1Database, typeId: number, pool: number[], last?: Map<string, number | null>): Promise<number | null> {
+  if (!pool.length) return null;
+  const key = `${typeId}:${JSON.stringify(pool)}`;
+  let prev: number | null | undefined = last?.get(key);
+  if (prev === undefined) {
+    prev =
+      (
+        await first<{ rotate_team_id: number | null }>(
+          db,
+          // helper_mode <> 'default' as well: only then the partial index event_duties_helper_from applies
+          `SELECT ed.rotate_team_id FROM event_duties ed JOIN events e ON e.id = ed.event_id
+            WHERE ed.duty_type_id = ?1 AND ed.helper_mode <> 'default' AND ed.helper_mode = 'rotate' AND ed.helper_teams = ?2
+              AND ed.rotate_team_id IS NOT NULL
+            ORDER BY e.starts_at DESC, ed.id DESC LIMIT 1`,
+          typeId,
+          JSON.stringify(pool),
+        )
+      )?.rotate_team_id ?? null;
+  }
+  const i = prev != null ? pool.indexOf(prev) : -1;
+  const next = pool[(i + 1) % pool.length]!;
+  last?.set(key, next);
+  return next;
+}
+
+/** Columns and values of a new block from a template line (helpers from, rotation). */
+export async function itemSource(db: D1Database, item: TemplateItem, rotation?: Map<string, number | null>) {
+  return {
+    mode: item.helperMode,
+    teams: item.helperMode === "default" ? null : JSON.stringify(item.helperTeams),
+    rotateTeamId: item.helperMode === "rotate" ? await nextRotationTeam(db, item.dutyTypeId, item.helperTeams, rotation) : null,
+  };
 }
 
 /** End of a game: throw-off plus the playing time of the age class. */
@@ -452,7 +598,9 @@ export async function ensureEventDuties(db: D1Database, eventIds: number[] | nul
           (e.duties_anchor IS NOT NULL AND e.duties_anchor <> e.starts_at)
           OR (t.helper_plan = 1 AND (e.duties_generated & 1) = 0)
           OR (e.is_home = 1 AND ${REQUIRED_DUTIES_SQL("t")} AND (e.duties_generated & 2) = 0)
-        )`,
+        )
+      -- Rotation: the games take their turns in start order
+      ORDER BY e.starts_at, e.id`,
     from,
     ...(eventIds ? [JSON.stringify(eventIds)] : []),
   );
@@ -478,6 +626,7 @@ export async function ensureEventDuties(db: D1Database, eventIds: number[] | nul
     return itemsCache.get(templateId)!;
   };
   const statements: D1PreparedStatement[] = [];
+  const rotation = new Map<string, number | null>();
   for (const g of games) {
     // Moved game: move the blocks along
     if (g.duties_anchor && g.duties_anchor !== g.starts_at) {
@@ -496,8 +645,21 @@ export async function ensureEventDuties(db: D1Database, eventIds: number[] | nul
         const type = types.get(item.dutyTypeId);
         if (!type || type.archived || type.whoQualified) continue;
         const b = blockFromItem(item, type.mode, g.starts_at, end);
+        const src = await itemSource(db, item, rotation);
         statements.push(
-          stmt(db, "INSERT INTO event_duties (event_id, duty_type_id, starts_at, ends_at, slots, sort) VALUES (?, ?, ?, ?, ?, ?)", g.id, type.id, b.startsAt, b.endsAt, item.slots, i + 1),
+          stmt(
+            db,
+            "INSERT INTO event_duties (event_id, duty_type_id, starts_at, ends_at, slots, sort, helper_mode, helper_teams, rotate_team_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            g.id,
+            type.id,
+            b.startsAt,
+            b.endsAt,
+            item.slots,
+            i + 1,
+            src.mode,
+            src.teams,
+            src.rotateTeamId,
+          ),
         );
       }
       generated |= 1;
@@ -593,12 +755,15 @@ export async function loadHelpersNeeded(db: D1Database, actor: Actor, eventIds: 
   if (!eventIds.length || !isModuleOn("duties")) return out;
   const types = await loadDutyTypes(db, eventIds);
   const teams = (await helperTeams(db, actor, types)).filter((t) => t.childRoles.length > 0 || t.isPlayer || (t.isCoach && !t.canManage));
-  if (!teams.length) return out;
+  if (!teams.length) {
+    await clubHelpersNeeded(db, actor, eventIds, now, types, out);
+    return out;
+  }
   await ensureEventDuties(db, eventIds, now.slice(0, 10));
   const [blocks, skills] = await Promise.all([
-    all<{ id: number; event_id: number; duty_type_id: number; slots: number; taken: number; team_id: number }>(
+    all<{ id: number; event_id: number; duty_type_id: number; slots: number; taken: number; team_id: number } & HelperColumns>(
       db,
-      `SELECT ed.id, ed.event_id, ed.duty_type_id, ed.slots, (SELECT count(*) FROM duties d WHERE d.event_duty_id = ed.id) AS taken,
+      `SELECT ed.id, ed.event_id, ed.duty_type_id, ed.slots, ${HELPER_COLUMNS}, (SELECT count(*) FROM duties d WHERE d.event_duty_id = ed.id) AS taken,
               (SELECT et.team_id FROM event_teams et WHERE et.event_id = e.id AND et.team_id IN (SELECT value FROM json_each(?3)) ORDER BY et.team_id LIMIT 1) AS team_id
          FROM event_duties ed JOIN events e ON e.id = ed.event_id
         WHERE ed.event_id IN (SELECT value FROM json_each(?1)) AND e.starts_at > ?2
@@ -618,12 +783,35 @@ export async function loadHelpersNeeded(db: D1Database, actor: Actor, eventIds: 
     // In a team the one signing up does the duty (types taken from all teams have no team roles)
     if (!type || !team || !mayTake(type, skills, actor.personId)) continue;
     // Coaches/admins only count with their own roles (child, player), not as managers
-    const roles = rolesFor({ ...team, canManage: false }, type);
+    const roles = blockRoles(actor, [{ ...team, canManage: false }], type, helperSource(b));
     if (!roles.length) continue;
     const free = Math.max(0, b.slots - b.taken);
     if (free > 0) out.set(b.event_id, (out.get(b.event_id) ?? 0) + free);
   }
+  await clubHelpersNeeded(db, actor, eventIds, now, types, out);
   return out;
+}
+
+/** Club events: free places one could take by "who helps" (across all teams) or a block's teams. */
+async function clubHelpersNeeded(db: D1Database, actor: Actor, eventIds: number[], now: string, types: Map<number, DutyType>, out: Map<number, number>): Promise<void> {
+  const blocks = await all<{ event_id: number; duty_type_id: number; free: number } & HelperColumns>(
+    db,
+    `SELECT ed.event_id, ed.duty_type_id, ${HELPER_COLUMNS}, ed.slots - (SELECT count(*) FROM duties d WHERE d.event_duty_id = ed.id) AS free
+       FROM event_duties ed
+      -- Only the club events among the listed ones: their blocks, not those of all listed events
+      WHERE ed.event_id IN (SELECT e.id FROM events e WHERE e.id IN (SELECT value FROM json_each(?1)) AND e.club_wide = 1 AND e.starts_at > ?2 AND e.cancelled_at IS NULL)
+        AND NOT EXISTS (SELECT 1 FROM duties d WHERE d.event_id = ed.event_id AND d.person_id = ?3)`,
+    JSON.stringify(eventIds),
+    now,
+    actor.personId,
+  );
+  if (!blocks.length) return;
+  const [club, skills] = await Promise.all([clubHelperTeam(db, actor), loadSkills(db, actor)]);
+  for (const b of blocks) {
+    const type = types.get(b.duty_type_id);
+    if (!type || b.free <= 0 || !mayTake(type, skills, actor.personId)) continue;
+    if (blockRoles(actor, [{ ...club, canManage: false }], type, helperSource(b)).length) out.set(b.event_id, (out.get(b.event_id) ?? 0) + b.free);
+  }
 }
 
 /** Block with event and team, for signing up and managing. */
@@ -638,34 +826,202 @@ export interface BlockRow {
   event_kind: "game" | "special" | "training";
   cancelled_at: string | null;
   duty_hidden: number;
+  club_wide: number;
   team_ids: string;
+  helper_mode: HelperMode;
+  helper_teams: string | null;
+  rotate_team_id: number | null;
 }
 
 export async function loadBlock(db: D1Database, id: number): Promise<(BlockRow & { teamIds: number[] }) | null> {
   const row = await first<BlockRow>(
     db,
-    `SELECT ed.id, ed.event_id, ed.duty_type_id, ed.starts_at, ed.ends_at, ed.slots, e.starts_at AS event_starts_at, e.kind AS event_kind,
-            e.cancelled_at, e.duty_hidden, (SELECT json_group_array(team_id) FROM (SELECT et.team_id FROM event_teams et WHERE et.event_id = e.id ORDER BY et.team_id)) AS team_ids
+    `SELECT ed.id, ed.event_id, ed.duty_type_id, ed.starts_at, ed.ends_at, ed.slots, ${HELPER_COLUMNS}, e.starts_at AS event_starts_at, e.kind AS event_kind,
+            e.cancelled_at, e.duty_hidden, e.club_wide, (SELECT json_group_array(team_id) FROM (SELECT et.team_id FROM event_teams et WHERE et.event_id = e.id ORDER BY et.team_id)) AS team_ids
        FROM event_duties ed JOIN events e ON e.id = ed.event_id WHERE ed.id = ?`,
     id,
   );
   return row ? { ...row, teamIds: JSON.parse(row.team_ids) as number[] } : null;
 }
 
-/** An event whose helper duties the actor may manage (coaches of its teams, organisers); else 404/403. */
+/** An event whose helper duties the actor may manage (coaches of its teams, admins and organisers); else 404/403. */
 export async function managedEvent(db: D1Database, actor: Actor, eventId: number) {
-  const e = await first<{ id: number; kind: string; starts_at: string; ends_at: string | null; team_ids: string }>(
+  const e = await first<{ id: number; kind: string; starts_at: string; ends_at: string | null; club_wide: number; team_ids: string }>(
     db,
-    `SELECT e.id, e.kind, e.starts_at, e.ends_at,
+    `SELECT e.id, e.kind, e.starts_at, e.ends_at, e.club_wide,
             (SELECT json_group_array(team_id) FROM (SELECT et.team_id FROM event_teams et WHERE et.event_id = e.id ORDER BY et.team_id)) AS team_ids
        FROM events e WHERE e.id = ?`,
     eventId,
   );
   if (!e || (e.kind !== "game" && e.kind !== "special")) throw notFound(t`This event does not exist.`);
   const teamIds = JSON.parse(e.team_ids) as number[];
-  if (!teamIds.length) throw badRequest(t`Helpers only exist for events of teams.`);
+  // Club events have no team: admins and the organisers manage them
+  if (!teamIds.length && e.club_wide !== 1) throw badRequest(t`Helpers only exist for events of teams.`);
   if (!mayManageDuties(actor, teamIds, (await dutyManagers(db, [e.id])).get(e.id))) throw forbidden(t`Only coaches of this team and the organisers of the event can do this.`);
   return { ...e, teamIds };
+}
+
+/**
+ * Helpers tab, list "Help out": does "helpers from" of a template line or an upcoming block name a team in which
+ * oneself or a child (parents involved) plays? For taking turns the whole list counts, so one sees when it is one's turn.
+ */
+export async function canHelpOut(db: D1Database, actor: Actor): Promise<boolean> {
+  if (!isModuleOn("duties")) return false;
+  const own = actor.memberships.filter((m) => m.role === "player").map((m) => m.teamId);
+  const kids = [...actor.childMemberships.values()].flat().filter((m) => m.role === "player" && m.parentsEnabled).map((m) => m.teamId);
+  const teams = [...new Set([...own, ...kids])];
+  if (!teams.length) return false;
+  const rows = await all<{ duty_type_id: number; helper_teams: string | null }>(
+    db,
+    // helper_mode <> 'default': few template lines; blocks through the partial index event_duties_helper_from
+    `SELECT DISTINCT i.duty_type_id, i.helper_teams FROM duty_template_items i
+      WHERE i.helper_mode <> 'default' AND EXISTS (SELECT 1 FROM json_each(i.helper_teams) h WHERE h.value IN (SELECT value FROM json_each(?1)))
+     UNION
+     SELECT DISTINCT ed.duty_type_id, ed.helper_teams FROM event_duties ed JOIN events e ON e.id = ed.event_id
+      WHERE ed.helper_mode <> 'default' AND e.starts_at >= ?2 AND e.cancelled_at IS NULL
+        AND EXISTS (SELECT 1 FROM json_each(ed.helper_teams) h WHERE h.value IN (SELECT value FROM json_each(?1)))`,
+    JSON.stringify(teams),
+    `${todayLocal()}T00:00`,
+  );
+  if (!rows.length) return false;
+  // The duty type decides too (assigned by the coach, adults only), as when signing up
+  const types = await loadDutyTypes(db);
+  return rows.some((r) => {
+    const type = types.get(r.duty_type_id);
+    return !!type && !type.archived && teamRolesFor(actor, type, parsePool(r.helper_teams)).length > 0;
+  });
+}
+
+/** Upcoming club events with time blocks where one can help ("who helps", "helpers from") or which one manages. */
+export async function hasClubDuties(db: D1Database, actor: Actor): Promise<boolean> {
+  if (!isModuleOn("duties")) return false;
+  const rows = await all<{ event_id: number; duty_type_id: number } & HelperColumns>(
+    db,
+    `SELECT DISTINCT ed.event_id, ed.duty_type_id, ${HELPER_COLUMNS} FROM events e JOIN event_duties ed ON ed.event_id = e.id
+      WHERE e.kind = 'special' AND e.starts_at >= ? AND e.club_wide = 1 AND e.cancelled_at IS NULL AND ed.slots > 0`,
+    `${todayLocal()}T00:00`,
+  );
+  if (!rows.length) return false;
+  if (actor.isAdmin) return true;
+  const eventIds = [...new Set(rows.map((r) => r.event_id))];
+  const [types, managers, club] = await Promise.all([loadDutyTypes(db, eventIds), dutyManagers(db, eventIds), clubHelperTeam(db, actor)]);
+  if (eventIds.some((id) => managers.get(id)?.has(actor.personId))) return true;
+  return rows.some((r) => {
+    const type = types.get(r.duty_type_id);
+    return !!type && blockRoles(actor, [club], type, helperSource(r)).length > 0;
+  });
+}
+
+/** All teams (no groups): the frame of "who helps" at club events. */
+export async function allTeamIds(db: D1Database): Promise<number[]> {
+  return (await all<{ id: number }>(db, "SELECT id FROM teams WHERE kind = 'team'")).map((r) => r.id);
+}
+
+/**
+ * SQL: does the person (expression) fit "who helps" of the duty type, for the teams in teamSet (subquery)? For duties
+ * the coach assigns: they only assign who could otherwise take the duty. Same rules as rolesFor: parents only in teams
+ * with parents, without parents the players themselves. With "helpers from" on the block only the players of its teams.
+ */
+export function whoSql(type: DutyType, person: string, teamSet: string, source?: HelperSource): string {
+  if (source && source.mode !== "default") {
+    // Team ids come from the database (integers)
+    const ids = helperTeamsOf(source).filter(Number.isInteger);
+    if (!ids.length) return "0";
+    const clause = `EXISTS (SELECT 1 FROM team_memberships w WHERE w.person_id = ${person} AND w.role = 'player' AND w.team_id IN (${ids.join(", ")}))`;
+    return type.adultsOnly ? `(${clause} AND ${adultSql(person)})` : clause;
+  }
+  const inTeam = (roles: string) =>
+    `EXISTS (SELECT 1 FROM team_memberships w JOIN teams wt ON wt.id = w.team_id WHERE w.person_id = ${person} AND w.team_id IN (${teamSet}) AND w.role IN (${roles})`;
+  const parts: string[] = [];
+  if (type.whoPlayers) parts.push(`${inTeam("'player', 'helper'")})`);
+  if (type.whoCoaches) parts.push(`${inTeam("'coach'")})`);
+  if (type.whoParents) {
+    parts.push(
+      `EXISTS (SELECT 1 FROM guardianships wg JOIN team_memberships w ON w.person_id = wg.child_id JOIN teams wt ON wt.id = w.team_id
+                WHERE wg.guardian_id = ${person} AND w.team_id IN (${teamSet}) AND w.role IN ('player', 'helper') AND wt.parents_enabled = 1)`,
+      `${inTeam("'player', 'helper'")} AND wt.parents_enabled = 0)`,
+    );
+  }
+  if (type.whoMembers) {
+    parts.push(
+      `(EXISTS (SELECT 1 FROM club_members wm WHERE wm.person_id = ${person})
+        AND (${inTeam("'player', 'helper', 'coach'")})
+             OR EXISTS (SELECT 1 FROM guardianships wg JOIN team_memberships w ON w.person_id = wg.child_id
+                         WHERE wg.guardian_id = ${person} AND w.team_id IN (${teamSet}))))`,
+    );
+  }
+  if (!parts.length) return "0";
+  return type.adultsOnly ? `((${parts.join(" OR ")}) AND ${adultSql(person)})` : `(${parts.join(" OR ")})`;
+}
+
+/**
+ * Roles through "helpers from" (teams on the block): oneself as a player of one of these teams, one's children when
+ * they play there and the parents are involved (the child does the duty, the parents sign it up). Regardless of the
+ * event the block belongs to. Not for duties the coach assigns or approved people from all teams take.
+ */
+export function teamRolesFor(actor: Actor, type: DutyType, teamIds: readonly number[]): HelperRole[] {
+  if (!teamIds.length || type.assignOnly || type.whoQualified) return [];
+  const teams = new Set(teamIds);
+  const playing = (m: { role: string; teamId: number }) => m.role === "player" && teams.has(m.teamId);
+  const roles: HelperRole[] = [];
+  if (actor.memberships.some(playing)) roles.push({ childId: null, childName: null });
+  for (const child of actor.children) {
+    if ((actor.childMemberships.get(child.id) ?? []).some((m) => playing(m) && m.parentsEnabled)) roles.push({ childId: child.id, childName: child.firstName, doer: true });
+  }
+  return adultRoles(actor, type, roles);
+}
+
+/**
+ * Roles at a block: without "helpers from" by "who helps" of the duty type (teams: the event's team or the club), with
+ * "helpers from" only the players of those teams; managers can always sign up themselves.
+ */
+export function blockRoles(actor: Actor, teams: HelperTeam[], type: DutyType, source: HelperSource): HelperRole[] {
+  const base =
+    source.mode === "default"
+      ? teams.flatMap((t) => rolesForActor(actor, t, type))
+      : teams.some((t) => t.canManage) && !type.whoQualified
+        ? [{ childId: null, childName: null }]
+        : [];
+  return mergeRoles(base, teamRolesFor(actor, type, helperTeamsOf(source)));
+}
+
+/** Roles of both ways together; a child role as helper from a team wins (the child does the duty). */
+export function mergeRoles(a: HelperRole[], b: HelperRole[]): HelperRole[] {
+  const out = [...b];
+  for (const r of a) if (!out.some((x) => x.childId === r.childId)) out.push(r);
+  return out;
+}
+
+/** Of age by birth year (only the year is known): one counts as adult in the year of the 18th birthday. */
+export const ADULT_AGE = 18;
+
+/** Youngest birth year that counts as adult. */
+export function adultBirthYearMax(today = todayLocal()): number {
+  return Number(today.slice(0, 4)) - ADULT_AGE;
+}
+
+/** Under age by birth year; without a birth year (parents, coaches) not. */
+export function isMinor(birthYear: number | null | undefined, today = todayLocal()): boolean {
+  return birthYear != null && birthYear > adultBirthYearMax(today);
+}
+
+/**
+ * Duties "adults only": roles without minors. Whoever does the duty counts: oneself, or the child for helpers from other
+ * teams (doer); a parent signing up for their child's team does the duty themselves.
+ */
+export function adultRoles(actor: Actor, type: DutyType, roles: HelperRole[]): HelperRole[] {
+  if (!type.adultsOnly) return roles;
+  return roles.filter((r) => (r.doer && r.childId != null ? !isMinor(actor.childBirthYears.get(r.childId)) : !isMinor(actor.birthYear)));
+}
+
+/** rolesFor with the age limit of the duty type. */
+export function rolesForActor(actor: Actor, team: HelperTeam, type: DutyType): HelperRole[] {
+  return adultRoles(actor, type, rolesFor(team, type));
+}
+
+/** SQL: the person (expression) is not under age by birth year. */
+export function adultSql(person: string, today = todayLocal()): string {
+  return `NOT EXISTS (SELECT 1 FROM persons ap WHERE ap.id = ${person} AND ap.birth_year IS NOT NULL AND ap.birth_year > ${adultBirthYearMax(today)})`;
 }
 
 /**
