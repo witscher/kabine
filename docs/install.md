@@ -20,6 +20,8 @@ The copy does not include the update workflow; step 6 adds it.
 
 In the Worker's settings under *Build*, check that the deploy command is `npm run deploy`. It applies the database migrations before uploading the new version. With a plain `npx wrangler deploy` the database stays on the old schema.
 
+In the same place, on the tab *Previews Base*, switch off *Builds for Preview branches* and save. Kabine needs no previews: a preview would need its own database, KV namespace and queue (a `previews` block in `wrangler.jsonc`), and new code against the club's real database without its migrations would be risky. Left on, every update pull request shows a failed check "Workers Builds" (`npx wrangler preview` stops with "needs a `previews` block"), although the deploy after merging works.
+
 **Data in Europe:** when the button creates the D1 database, choose the EU jurisdiction for it. This can only be set when the database is created, not changed later. If your privacy policy promises the EU, check it under *Storage & Databases → D1 → kabine* after the deploy. The team chat already lives in the EU jurisdiction. (Installing by hand: `npx wrangler d1 create kabine --jurisdiction eu`.)
 
 ## 2. Add your domain

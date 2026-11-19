@@ -29,7 +29,7 @@ The switch lives in KV (key `maintenance`), independent of the database.
 
 ## Updates
 
-A pull request "Update Kabine to vX.Y.Z" appears in the club's copy when a release is out (`.github/workflows/update.yml`, weekly). It says whether the release changes the database and whether `wrangler.jsonc` needs new entries. You choose when to merge; Workers Builds then deploys with `npm run deploy` (`scripts/deploy.mjs`):
+A pull request "Update Kabine to vX.Y.Z" appears in the club's copy when a release is out (`.github/workflows/update.yml`, weekly). It says whether the release changes the database and whether `wrangler.jsonc` needs new entries. You choose when to merge; Workers Builds then deploys with `npm run deploy` (`scripts/deploy.mjs`). A failed check "Workers Builds" on the pull request itself comes from builds for preview branches; switch them off as in `docs/install.md` (step 1), the deploy after merging is not affected:
 
 1. **No database changes:** build and upload. The app keeps running; open pages pick up the new version on their next start.
 2. **With database changes:** the script first notes a **restore point** (D1 Time Travel bookmark, printed in the build log), then marks the update in the database. For about a minute everyone, admins included, sees "Kabine is being updated", and the cron run pauses. The migrations run, the new version is uploaded, the mark is removed and the app reloads by itself. If the build is cut off, the mark expires after 15 minutes.
@@ -55,7 +55,7 @@ If you would rather check a release on your own first, switch maintenance mode o
 Copies created before the first release (v0.2.0, October 2026) need three things once. After that, updates arrive as described above.
 
 1. **Add or replace the update workflow.** Copies made with the deploy button have none, and older ones cannot finish an update. In your copy on GitHub create or edit `.github/workflows/update.yml` with the content of the [current version](https://github.com/witscher/kabine/blob/main/.github/workflows/update.yml), and under *Settings → Actions → General → Workflow permissions* tick *Allow GitHub Actions to create and approve pull requests*. Then run it once: *Actions → Kabine updates → Run workflow*. A pull request "Update Kabine to v…" (or an issue with a link to it) appears within a minute.
-2. **Check the deploy command.** In the Cloudflare dashboard: *Workers & Pages → your Worker → Settings → Build*, the deploy command must be `npm run deploy`.
+2. **Check the build settings.** In the Cloudflare dashboard: *Workers & Pages → your Worker → Settings → Build*, the deploy command must be `npm run deploy`; on the tab *Previews Base*, switch off *Builds for Preview branches*.
 3. **Switch maintenance mode on by hand for this one update.** The running old version does not know the automatic pause yet. In a checkout of your copy (with `npm ci` done and `npx wrangler login`):
 
    ```sh

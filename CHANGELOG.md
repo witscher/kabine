@@ -6,6 +6,8 @@ Changes that are merged but not released yet go under *Unreleased*, one line eac
 
 ## Unreleased
 
+- Docs: switch off *Builds for Preview branches* in the Worker's build settings (*Settings → Build → Previews Base*). Left on, every update pull request shows a failed check "Workers Builds", although the deploy after merging works (`docs/install.md`, step 1).
+
 ## v0.9.0
 
 - New module (beta, off by default): polls. Coaches ask their team or group, admins the whole club: choose an answer, find a date (yes/maybe/no) or collect orders with prices, sizes, product photos and payment (PayPal.me and bank transfer with QR code, set under *Administration → Polls*). Optionally one vote per family, anonymous, results only after the end. An open poll sits at the very top of the start page with a dot on the Events tab and counts on the app icon; orders can be ignored. Participants of an order see only their own order. Polls are deleted at the season change and are not in the export.
