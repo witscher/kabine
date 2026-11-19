@@ -8,7 +8,7 @@ import { closeChildConnections, closeParentConnections, revalidateChatAccess } f
 import { listExtraEvents } from "../domain/extra-events";
 import { requireTeam, syncAutoGroups, teamKind } from "../domain/groups";
 import { clubMemberStmt, resetTeamDuties } from "../domain/duties";
-import { createInvite, inviteUrl, tokenForNonce } from "../domain/invites";
+import { assertGuardianCapacity, createInvite, inviteUrl, tokenForNonce } from "../domain/invites";
 import { FULL_LIMITS, type LimitRow, loosens, NO_CHILD_ACCOUNT, teamLimits, toLimits } from "../domain/child-limits";
 import type { ChildLimits } from "../../shared/types";
 import { helpCandidates, teamCandidates } from "./squad";
@@ -232,7 +232,7 @@ teamRoutes.get("/teams/:id", async (c) => {
     all<{ id: number; kind: "player" | "parent"; nonce: string; expires_at: string; created_at: string }>(
       db,
       `SELECT id, kind, nonce, expires_at, created_at FROM invites
-        WHERE team_id = ? AND kind IN ('player', 'parent') AND revoked_at IS NULL AND expires_at > ?`,
+        WHERE team_id = ? AND kind IN ('player', 'parent') AND person_id IS NULL AND revoked_at IS NULL AND expires_at > ?`,
       teamId,
       utcIso(),
     ),
@@ -804,13 +804,29 @@ teamRoutes.post("/teams/:id/invites", async (c) => {
   const teamId = intParam(c, "id");
   requireCoach(actor, teamId);
   await requireTeam(c.env.DB, teamId);
-  const { kind } = parse(z.object({ kind: z.enum(["player", "parent"]) }), await readJson(c.req.raw));
+  const { kind, personId } = parse(
+    z.object({ kind: z.enum(["player", "parent"]), personId: z.number().int().positive().optional() }),
+    await readJson(c.req.raw),
+  );
   if (kind === "parent") {
     const team = await first<{ parents_enabled: number }>(c.env.DB, "SELECT parents_enabled FROM teams WHERE id = ?", teamId);
     if (team?.parents_enabled !== 1) throw conflict(t`Parents are not involved in this team. An admin can change that.`);
   }
+  if (personId != null) {
+    // A parent link for one child: only for a player of this team, whose parents may still link (rule 19)
+    if (kind !== "parent") throw badRequest(t`Only a parent link can be made for one player.`);
+    const player = await first(
+      c.env.DB,
+      `SELECT 1 AS ok FROM team_memberships tm JOIN persons p ON p.id = tm.person_id
+        WHERE tm.team_id = ? AND tm.person_id = ? AND tm.role = 'player' AND p.is_former = 0`,
+      teamId,
+      personId,
+    );
+    if (!player) throw notFound(t`This person does not belong to this team.`);
+    await assertGuardianCapacity(c.env.DB, [personId], null);
+  }
   if (kind === "player" && !(await teamLimits(c.env.DB, teamId)).account) throw conflict(NO_CHILD_ACCOUNT(), "no_child_account");
-  const invite = await createInvite(c.env, { kind, teamId, createdBy: actor.personId });
+  const invite = await createInvite(c.env, { kind, teamId, personId, createdBy: actor.personId });
   return c.json(
     { id: invite.id, url: inviteUrl(relyingParty(c.env, c.req.raw).origin, invite.token), expiresAt: invite.expiresAt },
     201,

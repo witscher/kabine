@@ -21,6 +21,8 @@ type JoinInfo =
       expiresAt: string;
       loggedInAs: string | null;
       persons: { id: number; name: string; taken: boolean; linkedToMe: boolean }[];
+      /** Parent link for one child: persons holds only that child, preselected */
+      forChild?: boolean;
     }
   | {
       kind: "personal";
@@ -117,6 +119,8 @@ export function JoinPage() {
     try {
       const res = await api.post<JoinInfo>("/join/info", { token });
       setInfo(res);
+      // A parent link for one child: no choice to make
+      if (res.kind === "parent" && res.forChild && res.persons[0] && !res.persons[0].linkedToMe) setSelected([res.persons[0].id]);
       // An admin's address entered with the admin role: no need to type it again
       if (res.kind === "personal" && res.person.email) setEmail(res.person.email);
     } catch (err) {
@@ -263,8 +267,11 @@ export function JoinPage() {
   }
 
   const isParent = info.kind === "parent";
+  const forChild = isParent && !!info.forChild;
+  const fixedChild = forChild ? (info.persons[0]?.name.split(" ")[0] ?? "") : "";
   const toggle = (id: number) => {
     setFormError(null);
+    if (forChild) return;
     if (isParent) setSelected((s) => (s.includes(id) ? s.filter((x) => x !== id) : [...s, id]));
     else setSelected([id]);
   };
@@ -343,7 +350,11 @@ export function JoinPage() {
       </div>
       <h1>{isParent ? t`For parents` : t`For players`}</h1>
       <div class="hero-sub">
-        {isParent ? t`You are setting up a parent access for the ${teamName}.` : t`You are setting up your own access for the ${teamName}.`}
+        {forChild
+          ? t`You are setting up a parent access for ${fixedChild} in the ${teamName}.`
+          : isParent
+            ? t`You are setting up a parent access for the ${teamName}.`
+            : t`You are setting up your own access for the ${teamName}.`}
       </div>
     </header>
   );
@@ -369,7 +380,11 @@ export function JoinPage() {
         {alreadyIn ? <SignedInBox name={loggedInAs ?? ""} linked={linkedChildren.map((p) => p.name.split(" ")[0]!)} /> : null}
         {isParent && me && !alreadyIn ? (
           <Notice kind="yellow">
-            <Trans>You are signed in as {loggedInAs}. Select the child you want to link in addition.</Trans>
+            {forChild ? (
+              <Trans>You are signed in as {loggedInAs}. This link adds {fixedChild} to your access.</Trans>
+            ) : (
+              <Trans>You are signed in as {loggedInAs}. Select the child you want to link in addition.</Trans>
+            )}
           </Notice>
         ) : null}
         {isParent && !me ? (
@@ -416,7 +431,9 @@ export function JoinPage() {
           </div>
         ) : null}
         <div class="stack-sm">
-          <h2 class="section-title">{isParent ? (alreadyIn ? t`Link another child, e.g. a sibling` : t`Your child (one or more)`) : t`Who are you?`}</h2>
+          <h2 class="section-title">
+            {forChild ? t`Your child` : isParent ? (alreadyIn ? t`Link another child, e.g. a sibling` : t`Your child (one or more)`) : t`Who are you?`}
+          </h2>
           <ul class="list" role={isParent ? "group" : "radiogroup"} aria-label={isParent ? t`Children` : t({ message: "Players", context: "player list" })}>
             {info.persons.map((p) => (
               <PersonChoice

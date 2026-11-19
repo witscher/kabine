@@ -1276,6 +1276,38 @@ test("Elternlink: einmal einrichten, beim erneuten Öffnen direkt zur App", asyn
   await expect(card).toContainText("Den Link braucht es nur einmal zum Einrichten.");
 });
 
+test("Elternlink für ein Kind: Trainer erstellt ihn bei der Person, er verknüpft nur dieses Kind und nur einmal", async ({ browser }) => {
+  const { page } = coach;
+  await page.goto("/team/1/person/12");
+  await page.getByRole("button", { name: "Elternlink für Jana" }).click();
+  const sheet = page.getByRole("dialog", { name: "Elternlink für Jana" });
+  await expect(sheet).toContainText("Er verknüpft nur Jana.");
+  await expect(sheet.getByRole("button", { name: "Mit Text teilen" })).toBeVisible();
+  const url = (await sheet.locator(".url-box").textContent())!.trim();
+  expect(url).toContain("/einladung#");
+
+  const parent = await newUser(browser);
+  const p = parent.page;
+  await p.goto(url);
+  await expect(p.getByText("Du richtest einen Elternzugang für Jana in der wT ein.")).toBeVisible();
+  await expect(p.getByRole("heading", { name: "Dein Kind", exact: true })).toBeVisible();
+  await expect(p.getByRole("checkbox", { name: /Jana P\./ })).toHaveAttribute("aria-checked", "true");
+  await expect(p.getByRole("checkbox", { name: /Kim P\./ })).toHaveCount(0);
+  await p.getByLabel("Dein Vorname").fill("Nora");
+  await p.getByLabel("Dein Nachname").fill("Probe");
+  await p.getByRole("button", { name: /Passkey einrichten/ }).click();
+  await expect(p.getByText("Geschafft!")).toBeVisible();
+  await parent.context.close();
+
+  // Used once: the link no longer works, the coach sees the parent at the child
+  const late = await newUser(browser);
+  await late.page.goto(url);
+  await expect(late.page.getByText("Dieser Link wurde bereits verwendet.", { exact: false })).toBeVisible();
+  await late.context.close();
+  await page.goto("/team/1/person/12");
+  await expect(page.getByRole("region", { name: "Eltern" })).toContainText("Nora Probe");
+});
+
 test("Spielerlink angemeldet: keine Namensauswahl, nur direkt zur App; ungültiger Link ebenso", async () => {
   const res = await coach.page.request.post("/api/teams/1/invites", { data: { kind: "player" } });
   const { url } = (await res.json()) as { url: string };

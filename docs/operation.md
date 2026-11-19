@@ -111,6 +111,16 @@ The "Deploy to Cloudflare" button asks for none of these; the app works without 
 
 The club is the provider of the app and the controller for its data. Its legal notice and privacy policy are linked under *Administration → Club* and appear under every screen and every e-mail of the app; admins see a warning while one is missing. Update the privacy policy when the club switches on a module that stores something new (SMS, helper duties, carpools, a fixture connector) or changes its mail or SMS provider: the app's privacy page lists what each switched-on module stores.
 
+## Invitations
+
+Nobody gets into the app without an invitation link. There are three kinds:
+
+- **Team links** (*Team → Invitations*): one player link and one parent link per team, valid for 14 days, for the team's private group chat or as a QR code at training. Whoever holds such a link can pick a name of the team, so share it only where the team is among itself. A new link withdraws the previous one; the season change withdraws all of them.
+- **Parent link for one child** (*Team → Squad → the player → Parents*): a one-time link for one parent of this child, valid for 7 days. It links only this child, works once, and can be created by the child's coaches and by admins while the team has parents and the child has fewer than two parents linked. Use it for parents who are not in the group chat, or once the team is set up, instead of sharing the team's parent link again. A new link for the same child withdraws the previous one.
+- **Personal links** (the person's sheet): a one-time link for one person's own access, valid for 7 days, also to set up a new passkey after a lost device (see *Owner and admins*).
+
+Only a hash of every link is stored.
+
 ## Roles and trust
 
 A club rests on trust, above all in its coaches, and Kabine reflects that. Coaches are trusted with their teams, admins with the whole club: coaches add players and stand-ins, plan trainings with other teams and record who was there without asking an admin. Choose coaches and admins accordingly, and take the role away when someone leaves the job.

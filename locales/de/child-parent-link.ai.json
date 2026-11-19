@@ -1,0 +1,14 @@
+{
+  "One-time link for one parent of {linkFor}, valid until {linkExpires}. It links only {linkFor}. Please send it to that parent directly.": "Einmal-Link für ein Elternteil von {linkFor}, gültig bis {linkExpires}. Er verknüpft nur {linkFor}. Bitte direkt an dieses Elternteil schicken.",
+  "A one-time link for a parent of {firstName} only, to send directly instead of the team's parent link.": "Ein Einmal-Link nur für ein Elternteil von {firstName}, zum direkten Verschicken statt des Elternlinks der Mannschaft.",
+  "The link works once and only for you. Already in the app, e.g. for a sibling? Then open it on the phone where the app is installed.": "Der Link funktioniert einmal und nur für dich. Schon in der App, z. B. für ein Geschwisterkind? Dann öffne ihn auf dem Handy, auf dem die App installiert ist.",
+  "This child no longer belongs to the team. Please ask the coach for a new link.": "Dieses Kind gehört nicht mehr zur Mannschaft. Bitte frag beim Trainerteam nach einem neuen Link.",
+  "Your child": "Dein Kind",
+  "Hello! {teamName} uses the {club} app for events, responses, helper duties and the team chat.": "Hallo! Die {teamName} nutzt die App {club} für Termine, Zu- und Absagen, Helferdienste und den Mannschaftschat.",
+  "Only a parent link can be made for one player.": "Nur einen Elternlink gibt es für ein einzelnes Kind.",
+  "You are signed in as {loggedInAs}. This link adds {fixedChild} to your access.": "Du bist als {loggedInAs} angemeldet. Dieser Link verknüpft {fixedChild} mit deinem Zugang.",
+  "With this link you set up your parent access for {childName}: open it, enter your own name and set up a passkey (Face ID, fingerprint or screen lock).": "Mit diesem Link richtest du deinen Elternzugang für {childName} ein: öffnen, deinen eigenen Namen eintragen und einen Passkey einrichten (Face ID, Fingerabdruck oder Displaysperre).",
+  "Parent link for {linkFor}": "Elternlink für {linkFor}",
+  "Parent link for {firstName}": "Elternlink für {firstName}",
+  "You are setting up a parent access for {fixedChild} in the {teamName}.": "Du richtest einen Elternzugang für {fixedChild} in der {teamName} ein."
+}

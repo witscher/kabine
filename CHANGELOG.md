@@ -6,6 +6,7 @@ Changes that are merged but not released yet go under *Unreleased*, one line eac
 
 ## Unreleased
 
+- Parent link for one child: coaches open a player under *Team → Squad* and create a one-time link for one parent of that child, with a text to send. It links only this child, works once and is valid for 7 days, so parents who are not in the group chat no longer need the team's parent link.
 - Privacy: `docs/privacy.md` now also lists feedback (sent by e-mail, a daily count per access) and the hourly count of sign-in code requests per network address (as a hash). Clubs can add both to their privacy policy.
 - Server errors: people never see the technical error text any more. When Cloudflare is overloaded (e.g. the database limit of the account) the app says that things are busy and to try again in a few minutes. Errors are counted per day, and from the third error of a day the owner of the installation gets one e-mail with the list (needs a confirmed e-mail address in the owner's profile).
 - Fewer database reads: teams, memberships, parent links and duty types stay in memory per Worker instance and are reloaded only after a change, and the helper duties of games are checked only when something changed. This keeps clubs further below the daily limit of the free plan. `npm run d1:stats` shows the read load of an installation.
