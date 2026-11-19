@@ -1,0 +1,277 @@
+/* Polls module (modules/polls). Colours from the design system (src/styles.css), --yellow is the club colour. */
+
+.poll-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+.poll-row.top {
+  align-items: flex-start;
+}
+.pre-wrap {
+  white-space: pre-wrap;
+}
+
+/* Card on the start page: needs action, so a club-colour border, a slow light sweep and a pulsing dot */
+.poll-card {
+  text-decoration: none;
+  color: inherit;
+}
+.poll-card-open {
+  position: relative;
+  border: 2px solid var(--yellow);
+}
+.poll-card-open::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 35%, color-mix(in srgb, var(--yellow) 30%, transparent) 50%, transparent 65%);
+  transform: translateX(-100%);
+  animation: poll-shine 6s ease-in-out 1s infinite;
+  pointer-events: none;
+}
+.poll-card-head {
+  align-items: flex-start;
+}
+.poll-card-head .kicker {
+  color: var(--text-2);
+}
+.poll-card-title {
+  color: inherit;
+  text-decoration: none;
+}
+.poll-card-actions,
+.poll-card-button {
+  position: relative;
+  z-index: 1;
+}
+.poll-card-button {
+  align-self: flex-start;
+}
+.poll-open-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  white-space: nowrap;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: var(--yellow);
+  color: var(--black);
+}
+.poll-open-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--black);
+  animation: poll-pulse 1.6s ease-in-out infinite;
+}
+@keyframes poll-shine {
+  0% {
+    transform: translateX(-100%);
+  }
+  40%,
+  100% {
+    transform: translateX(100%);
+  }
+}
+@keyframes poll-pulse {
+  50% {
+    opacity: 0.35;
+    transform: scale(0.65);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .poll-card-open::after,
+  .poll-open-dot {
+    animation: none;
+  }
+}
+
+/* Form */
+.poll-title {
+  font-size: 1.35rem;
+  margin: 0;
+}
+.poll-option-edit {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.poll-option-edit > .input {
+  flex: 1;
+}
+
+/* Voting */
+.poll-choice {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--card);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+}
+.poll-choice.selected {
+  border-color: var(--black);
+  box-shadow: inset 0 0 0 1px var(--black);
+}
+.poll-check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  flex: none;
+  border: 2px solid var(--line-2);
+  border-radius: 50%;
+}
+.poll-choice.selected .poll-check {
+  background: var(--black);
+  border-color: var(--black);
+  color: var(--yellow);
+}
+.poll-slot {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+}
+.poll-slot-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+}
+.poll-yesno {
+  display: flex;
+  gap: 6px;
+}
+.poll-yesno > .chip {
+  flex: 1;
+  justify-content: center;
+}
+.poll-stepper {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.poll-stepper .icon-btn {
+  font-size: 1.2rem;
+}
+.poll-stepper-value {
+  min-width: 24px;
+  text-align: center;
+  font-weight: 600;
+}
+
+/* Results */
+.poll-pending {
+  margin: 0;
+  padding-left: 18px;
+}
+.poll-bar {
+  height: 8px;
+  border-radius: 4px;
+  background: var(--muted);
+  overflow: hidden;
+}
+.poll-bar > span {
+  display: block;
+  height: 100%;
+  background: var(--black);
+}
+.poll-names {
+  overflow-wrap: anywhere;
+}
+.poll-paid {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+/* Reported as paid by the family, confirmation pending */
+.poll-reported {
+  font-weight: 600;
+  background: var(--yellow-tint);
+  border-radius: 6px;
+  padding: 1px 6px;
+}
+
+/* Payment */
+.poll-pay {
+  border-top: 1px solid var(--line);
+  padding-top: 12px;
+}
+.poll-bank {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 12px;
+  margin: 0;
+}
+.poll-bank dt {
+  color: var(--text-2);
+  font-size: 0.9em;
+}
+.poll-bank dd {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow-wrap: anywhere;
+}
+.poll-bank .icon-btn,
+.poll-note .icon-btn {
+  flex: none;
+}
+.poll-paid-note {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--ok);
+}
+.poll-mono {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+.poll-note {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow-wrap: anywhere;
+}
+
+/* Product photos */
+.poll-thumb {
+  width: 52px;
+  height: 52px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  overflow: hidden;
+  padding: 0;
+  border: 1px solid var(--line);
+  background: var(--card);
+  object-fit: cover;
+}
+.poll-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.poll-thumb-space {
+  visibility: hidden;
+}
+.poll-photo {
+  width: 100%;
+  max-height: 70vh;
+  object-fit: contain;
+  border-radius: var(--radius-sm);
+  background: var(--card);
+}

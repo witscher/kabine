@@ -431,6 +431,7 @@ const byStart = (list: EventSummary[]) => [...new Map(list.map((e) => [e.id, e])
 export function HomePage() {
   useDocumentTitle(t`Events`);
   const me = useMe();
+  const modules = useActiveModules();
   const offline = useOffline();
   const { query } = useLocation();
   const [when, setWhen] = useState<When>(query.zeit === "vergangen" ? "past" : "upcoming");
@@ -581,6 +582,8 @@ export function HomePage() {
       </header>
 
       <div class="content">
+        {/* What waits for the person comes first (modules/<id>/app, homeCards), e.g. an open poll */}
+        {modules.map((m) => (m.homeCards ? <m.homeCards key={m.manifest.id} /> : null))}
         <NewsCard />
         <CoachHints />
         {!noTeam ? <MotdBanner /> : null}

@@ -26,6 +26,9 @@ const BLOCKED: RegExp[] = [
   // No photos: visitors would show real faces to everyone until the next reset
   /^\/api\/persons\/\d+\/avatar/,
   /^\/api\/admin\/club\/logo$/,
+  // Product photos of orders, and the PayPal name and account of the polls module (would lead every visitor there)
+  /^\/api\/polls\/\d+\/options\/\d+\/image$/,
+  /^\/api\/polls\/payment$/,
   // Restore writes rows and club settings as they come: it would bring in photos, other links and handball4all
   /^\/api\/admin\/restore\//,
 ];

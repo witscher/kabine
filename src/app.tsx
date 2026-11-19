@@ -94,6 +94,8 @@ function TabBar() {
         <a class="tab" href={tab.href} aria-current={tab.match(path) ? "page" : undefined}>
           <Icon name={tab.icon} size={22} />
           {tab.label}
+          {/* Something on the start page waits for the person (modules/<id>/app, eventsTabDot), e.g. an open poll */}
+          {tab.href === "/" && !tab.dot ? modules.map((m) => (m.eventsTabDot ? <m.eventsTabDot key={m.manifest.id} /> : null)) : null}
           {tab.dot ? (
             <>
               <span class="dot" aria-hidden="true" />

@@ -17,7 +17,7 @@ import { isDate, nowLocal, utcIso } from "../lib/time";
 import { type AgeClassDbRow, ageClassJson, ageClassSchema, requiredDuties, writeAgeClasses } from "./admin";
 import { canManagePerson } from "./persons";
 import { syncAutoGroups } from "../domain/groups";
-import { MODULE_EXPORT_TABLES, modulePersonLeaves } from "../modules";
+import { MODULE_EXPORT_EXCLUDED, MODULE_EXPORT_TABLES, modulePersonLeaves, moduleSeasonChange } from "../modules";
 import { audit, auditStmt } from "../domain/audit";
 
 export const seasonRoutes = new Hono<AppEnv>();
@@ -389,6 +389,7 @@ seasonRoutes.post("/season-change/execute", async (c) => {
     stmt(db, "DELETE FROM chat_mutes"),
     stmt(db, "UPDATE invites SET revoked_at = ? WHERE revoked_at IS NULL AND kind IN ('player', 'parent')", utcIso()),
     stmt(db, "DELETE FROM app_meta WHERE key = 'generated_on'"),
+    ...moduleSeasonChange(db),
     // The protocol starts over with the new season: only the season change itself stays in it
     stmt(db, "DELETE FROM audit_log"),
     auditStmt(db, actor, "season_change", { detail: { season: next.name, former: formerIds.length } }),
@@ -478,6 +479,8 @@ export const EXPORT_EXCLUDED = [
   "audit_log",
   // Version numbers of the cache (worker/lib/cache.ts), no data
   "cache_versions",
+  // Modules' own choices (worker/module-api.ts, exportExcluded)
+  ...MODULE_EXPORT_EXCLUDED,
 ];
 
 function base64(bytes: ArrayBuffer | Uint8Array | number[]): string {

@@ -124,6 +124,18 @@ export interface WorkerModule {
   fixtures?: FixtureConnector;
   /** Tables of the module in the admin's data export (every table must be listed somewhere, test/export.test.ts). */
   exportTables?: readonly string[];
+  /**
+   * Tables deliberately left out of the export, e.g. short-lived data the season change deletes anyway (polls), or
+   * pictures. Listed so test/export.test.ts knows the choice was made.
+   */
+  exportExcluded?: readonly string[];
+  /** Cleanup in the core's batch when the admin starts a new season (worker/routes/season.ts). */
+  seasonChange?: (db: D1Database) => D1PreparedStatement[];
+  /**
+   * What waits for this account's reaction, added to the number on the app icon (worker/domain/badge.ts). Runs for
+   * every push sent, so keep it to one cheap query.
+   */
+  badgeCount?: (db: D1Database, accountId: number, nowLocal: string) => Promise<number>;
 }
 
 export function defineWorkerModule(module: WorkerModule): WorkerModule {

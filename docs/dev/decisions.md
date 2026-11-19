@@ -2,6 +2,23 @@
 
 Decisions not covered by `docs/dev/roadmap.md`, with reasons. Newest first.
 
+## Polls: names, photos, payment (November 2026)
+
+Ported from the original club app as the module `modules/polls/` (README there).
+
+- **Names in scheduling polls:** participants see who answered what as "First name L." when the poll is not anonymous. This is an exception to "names only to coaches and admins": finding a date for a party only works when people see who can come. The form says so under the switches. In choice polls participants see counts only, in orders only their own order.
+- **Product photos like profile pictures:** in D1, shrunk on the device, served under `/api` with the session and the version in the URL (`private, immutable`). The club app serves them through a signed URL outside `/api`; Kabine keeps one way of serving pictures, and the browser cache makes the extra session check rare.
+- **Payment details in the module:** PayPal.me name, account holder, IBAN and a currency (EUR by default) in `app_meta` (`polls_payment`), set under *Administration → Polls*; never a link in code. The demo blocks changing them and uploading photos, as visitors would send every other visitor to their own account.
+- **Not in the export:** polls are short-lived and gone at the season change; a restore would need to map units, options and persons.
+
+## Module hooks for the polls module (November 2026)
+
+Polls (`modules/polls/`) need places in the core screens a module could not reach yet. Each hook is generic and as small as the first user needs:
+
+- **App:** `homeCards` (cards at the very top of the start page, for something that waits for the person: an open poll), `eventsTabDot` (the dot on the Events tab while such a card is there; a component, so it can load data without breaking the hook order of the tab bar), `profileMenu` (entries on the profile page, like `adminMenu`, for the person's own polls). No hook for the team page: coaches pick the team in the poll form.
+- **Worker:** `badgeCount` (adds to the number on the app icon; runs for every push, so one cheap query), `seasonChange` (cleanup in the season change batch: polls are gone with the season), `exportExcluded` (tables a module leaves out of the export on purpose; polls are short-lived and their ids would need a mapping on restore).
+- **Chat:** system messages may carry a link to a page of the app (`postSystemMessage(…, link)`), only a plain path such as `/umfragen/12`, checked in the chat room. So the chat note about a new poll opens it.
+- **Notification topics:** the CHECK on `notification_settings.topic` listed the core topics and `carpool`. A module topic (`polls`) would have needed a core migration rebuilding the table every time. Migration `202611200100_core_notification-topics.sql` rebuilds it once without that list; the code checks topics (`worker/routes/parents.ts`).
 ## handball.net out of beta, weekly sync from the coach's device (November 2026)
 
 The handball.net module is stable and, like handball4all, on by default for handball clubs; a club with both chooses the source per team, as before. Its schedule also syncs once a week by itself, because coaches forget the button and games are moved during the season. The sync stays where it was: on the coach's device, the same way as "Sync now" (claim, fetch from handball.net, import). The server never fetches, there is no cron and no push, and nothing blocks the app: when a coach of the team opens the app and the last sync (`teams.fixture_synced_at`) is 7 days or more ago, the device syncs once in the background; if no coach opens the app for a week, the next one who does syncs. That is far below what a subscribed calendar app does (every 6 hours), so the calendar is still used as the public export it is.

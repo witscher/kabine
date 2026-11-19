@@ -43,6 +43,9 @@ modules/carpools/
 | `participantsDropped` | SQL cleanup in the core's batch (automatic squads, withdrawn stand-ins) | yes |
 | `personLeaves` | SQL cleanup when someone leaves the club | yes |
 | `exportTables` | the module's tables in the admin's data export | yes |
+| `exportExcluded` | tables left out of the export on purpose (short-lived data, pictures) | yes |
+| `seasonChange` | SQL cleanup in the season change batch | yes |
+| `badgeCount` | adds to the number on the app icon (one cheap query, runs for every push) | no |
 | `fixtures` | a fixture connector (kind `fixtures`, [connectors.md](connectors.md)) | no |
 | `texts` | text messages (SMS) for sign-in codes and reminders (`worker/domain/texts.ts`) | no |
 
@@ -53,6 +56,9 @@ modules/carpools/
 | `routes` | own pages (lazy with `lazyPage` from `src/update.tsx`) |
 | `tab` | a tab in the bottom navigation |
 | `adminMenu` | entries under *Administration* |
+| `profileMenu` | entries on the profile page (e.g. the person's own polls) |
+| `homeCards` | cards at the very top of the start page for something that waits for the person |
+| `eventsTabDot` | the dot on the Events tab while such a card is there |
 | `eventCardLine` | a line on event cards on the start page |
 | `eventSection` | a section on the event page |
 | `gameLinks` | links of a fixture module for a game (live ticker, game report) on the "In progress" card and the event page |
@@ -75,6 +81,7 @@ Explanations of a module's settings go behind an info button (docs/dev/design.md
 | `handball4all` | Game schedule from handball4all | on | `modules/handball4all/` (fixture connector, see [connectors.md](connectors.md)) |
 | `sms` | SMS | off | `modules/sms/` (text channel for the core, see its README) |
 | `handballnet` | Game schedule from handball.net | on | `modules/handballnet/` (fixture connector, syncs weekly by itself) |
+| `polls` | Polls | off (beta) | `modules/polls/` |
 
 ## Adding a module
 

@@ -13,6 +13,18 @@ export interface AppModule {
   tab?: (me: Me) => { href: string; label: string; icon: IconName; match: (path: string) => boolean } | null;
   /** Entries in Administration (admins only), e.g. the module's settings page. */
   adminMenu?: () => { href: string; icon: IconName; title: string; sub: string }[];
+  /** Entries on the profile page, e.g. the person's own polls; empty when the person has nothing there. */
+  profileMenu?: (me: Me) => { href: string; icon: IconName; title: string; sub: string }[];
+  /**
+   * Cards at the very top of the start page, above everything else, for something that waits for the person (an open
+   * poll). Render nothing when nothing waits.
+   */
+  homeCards?: ComponentType;
+  /**
+   * Marks the Events tab while something on the start page waits for the person: render the tab's `<span class="dot">`
+   * with a screen reader text, or nothing.
+   */
+  eventsTabDot?: ComponentType;
   /** One line on event cards (home), from `event.modules[<id>]` (worker hook eventSummaries). */
   eventCardLine?: ComponentType<{ event: EventSummary; data: unknown }>;
   /**

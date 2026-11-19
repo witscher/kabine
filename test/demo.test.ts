@@ -3,6 +3,7 @@ import { beforeAll, describe, expect, it } from "vitest";
 import { app } from "../worker/index";
 import { DEMO_ROLES, demoLocalHour, resetDemo } from "../worker/demo/reset";
 import { splitSql } from "../worker/demo/split-sql";
+import { loadClub, saveClub } from "../worker/domain/club";
 import { freshDb, one, rows } from "./helpers";
 
 const demoEnv = { ...env, APP_ENV: "demo", DEMO_RESET_TOKEN: "demo-reset-token-0123456789" } as Env;
@@ -101,6 +102,8 @@ describe("demo installation", () => {
   it("blocks passkeys, owner handover, mail settings, photos and restoring an export for visitors", async () => {
     const login = await fetchApp(new Request("https://demo.example/api/demo/login/admin", { redirect: "manual" }));
     const cookie = login.headers.get("set-cookie")!.split(";")[0]!;
+    // Also where a module that takes photos or payment details is switched on
+    await saveClub(env.DB, { modules: { ...(await loadClub(env.DB)).modules, polls: true } });
     for (const [method, path] of [
       ["POST", "/api/me/passkeys/options"],
       ["PUT", "/api/admin/club/owner"],
@@ -108,6 +111,9 @@ describe("demo installation", () => {
       ["PUT", "/api/me/email"],
       ["PUT", "/api/persons/1/avatar"],
       ["PUT", "/api/admin/club/logo"],
+      // Polls module: product photos, and the PayPal name and account every visitor would be sent to
+      ["PUT", "/api/polls/1/options/2/image"],
+      ["PUT", "/api/polls/payment"],
       // Restore would bring in photos, other links and handball4all past the checks above
       ["POST", "/api/admin/restore/rows"],
       ["POST", "/api/admin/restore/fixups"],

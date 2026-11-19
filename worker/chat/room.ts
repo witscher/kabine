@@ -48,6 +48,8 @@ export interface ChatMessage {
   mentionAll: boolean;
   /** Emoji reactions, at most one per person. */
   reactions: ChatReaction[];
+  /** System messages: a path in the app the message links to (e.g. a module's page), else null. */
+  link: string | null;
 }
 
 export interface ChatReaction {
@@ -80,12 +82,15 @@ type MessageRow = {
   created_at: string;
   deleted_at: string | null;
   mentions: string | null;
+  link: string | null;
   name: string | null;
   label: string | null;
   is_former: number | null;
 };
 
 const PAGE = 60;
+/** Links of system messages: a path within the app such as /umfragen/12. */
+export const SYSTEM_LINK = /^\/[a-z0-9-]+(\/[a-z0-9-]+)*$/;
 const MAX_LENGTH = 2000;
 const MAX_MENTIONS = 10;
 /** Pushes for new messages are bundled. */
@@ -162,6 +167,8 @@ export class ChatRoom extends DurableObject<Env> {
     // Add the mentions column to existing chat rooms
     const columns = this.sql.exec<{ name: string }>("PRAGMA table_info(messages)").toArray();
     if (!columns.some((c) => c.name === "mentions")) this.sql.exec("ALTER TABLE messages ADD COLUMN mentions TEXT");
+    // Link of a system message (postSystemMessage), e.g. to a poll
+    if (!columns.some((c) => c.name === "link")) this.sql.exec("ALTER TABLE messages ADD COLUMN link TEXT");
   }
 
   /**
@@ -216,7 +223,11 @@ export class ChatRoom extends DurableObject<Env> {
     const body = (await request.json().catch(() => ({}))) as Record<string, unknown>;
     switch (url.pathname) {
       case "/system":
-        if (typeof body.text === "string" && body.text.trim()) await this.addMessage("system", null, body.text.trim().slice(0, 300));
+        if (typeof body.text === "string" && body.text.trim()) {
+          // Only paths within the app, never addresses elsewhere
+          const link = typeof body.link === "string" && SYSTEM_LINK.test(body.link) ? body.link : null;
+          await this.addMessage("system", null, body.text.trim().slice(0, 300), [], link);
+        }
         return Response.json({ ok: true });
       case "/announce": {
         // Announcement (worker/routes/chat.ts checks that an admin sends it)
@@ -383,7 +394,7 @@ export class ChatRoom extends DurableObject<Env> {
   private page(beforeId: number | null, viewer: ChatAttachment): ChatMessage[] {
     const rows = this.sql
       .exec<MessageRow>(
-        `SELECT m.id, m.kind, m.person_id, m.text, m.created_at, m.deleted_at, m.mentions, a.name, a.label, a.is_former
+        `SELECT m.id, m.kind, m.person_id, m.text, m.created_at, m.deleted_at, m.mentions, m.link, a.name, a.label, a.is_former
            FROM messages m LEFT JOIN authors a ON a.person_id = m.person_id
           WHERE (? IS NULL OR m.id < ?) ORDER BY m.id DESC LIMIT ?`,
         beforeId,
@@ -439,6 +450,7 @@ export class ChatRoom extends DurableObject<Env> {
       mentions: r.deleted_at || !r.mentions ? [] : (JSON.parse(r.mentions) as number[]).filter((id) => id !== ALL),
       mentionAll: !r.deleted_at && !!r.mentions && (JSON.parse(r.mentions) as number[]).includes(ALL),
       reactions: r.deleted_at ? [] : this.reactionsFor(r.id, reactions, viewer),
+      link: r.kind === "system" && !r.deleted_at ? (r.link ?? null) : null,
     };
   }
 
@@ -457,21 +469,22 @@ export class ChatRoom extends DurableObject<Env> {
     }
   }
 
-  private async addMessage(kind: MessageKind, personId: number | null, text: string, mentions: number[] = []): Promise<number> {
+  private async addMessage(kind: MessageKind, personId: number | null, text: string, mentions: number[] = [], link: string | null = null): Promise<number> {
     const createdAt = new Date().toISOString();
     const row = this.sql
       .exec<{ id: number }>(
-        "INSERT INTO messages (kind, person_id, text, created_at, mentions) VALUES (?, ?, ?, ?, ?) RETURNING id",
+        "INSERT INTO messages (kind, person_id, text, created_at, mentions, link) VALUES (?, ?, ?, ?, ?, ?) RETURNING id",
         kind,
         personId,
         text,
         createdAt,
         mentions.length ? JSON.stringify(mentions) : null,
+        link,
       )
       .one();
     const message = this.sql
       .exec<MessageRow>(
-        `SELECT m.id, m.kind, m.person_id, m.text, m.created_at, m.deleted_at, m.mentions, a.name, a.label, a.is_former
+        `SELECT m.id, m.kind, m.person_id, m.text, m.created_at, m.deleted_at, m.mentions, m.link, a.name, a.label, a.is_former
            FROM messages m LEFT JOIN authors a ON a.person_id = m.person_id WHERE m.id = ?`,
         row.id,
       )
@@ -688,7 +701,7 @@ export class ChatRoom extends DurableObject<Env> {
     const pushedUpTo = Number(this.sql.exec<{ value: string }>("SELECT value FROM meta WHERE key = 'pushed_upto'").toArray()[0]?.value ?? 0);
     const fresh = this.sql
       .exec<MessageRow>(
-        `SELECT m.id, m.kind, m.person_id, m.text, m.created_at, m.deleted_at, m.mentions, a.name, a.label, a.is_former
+        `SELECT m.id, m.kind, m.person_id, m.text, m.created_at, m.deleted_at, m.mentions, m.link, a.name, a.label, a.is_former
            FROM messages m LEFT JOIN authors a ON a.person_id = m.person_id
           WHERE m.id > ? AND m.kind IN ('user', 'announcement') AND m.deleted_at IS NULL ORDER BY m.id`,
         pushedUpTo,

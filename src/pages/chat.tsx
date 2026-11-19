@@ -49,6 +49,8 @@ interface Message {
   mentionAll?: boolean;
   reactions?: Reaction[];
   pending?: string;
+  /** System messages: page in the app it links to (e.g. a poll). */
+  link?: string | null;
 }
 
 interface Reaction {
@@ -633,7 +635,7 @@ export function ChatRoomPage({ teamId }: { teamId: string }) {
                 {sep}
                 <div class="system-msg">
                   <Icon name="calendar" size={16} />
-                  <span>{m.text}</span>
+                  {m.link ? <a href={m.link}>{m.text}</a> : <span>{m.text}</span>}
                 </div>
               </>
             );

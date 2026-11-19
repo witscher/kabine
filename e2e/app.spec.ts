@@ -2332,3 +2332,58 @@ test("Sondertermin mit Anmeldung je Familie: Zahl je Familie statt Zusage, Warnu
   await expect(c.getByRole("group", { name: "Anmeldungen" }).locator(".stat-tile").first()).toContainText("3");
   await expect(c.getByRole("region", { name: "Angemeldete Familien" })).toContainText("Ida");
 });
+
+test("Umfragen: Admin schaltet das Modul ein, Trainer legt eine Umfrage mit Vorschau an, Spielerin stimmt ab", async () => {
+  await admin.page.goto("/verwaltung/verein");
+  const moduleSwitch = admin.page.getByRole("switch", { name: /Umfragen/ });
+  await moduleSwitch.click();
+  await expect(moduleSwitch).toHaveAttribute("aria-checked", "true");
+
+  const { page } = coach;
+  await page.goto("/umfragen/neu?team=1");
+  await page.reload();
+  await page.getByRole("textbox", { name: "Frage", exact: true }).fill("Wohin geht die Abschlussfahrt?");
+  await page.getByLabel("Antwort 1", { exact: true }).fill("Kletterhalle");
+  await page.getByLabel("Antwort 2", { exact: true }).fill("Freibad");
+  // Preview: voting can be tried, nothing is saved
+  await page.getByRole("button", { name: "Vorschau" }).click();
+  const preview = page.getByRole("dialog", { name: "Vorschau" });
+  await preview.getByRole("radio", { name: "Kletterhalle" }).click();
+  await preview.getByRole("button", { name: "Abstimmen" }).click();
+  await expect(page.getByText("Nur Vorschau, nichts gespeichert.")).toBeVisible();
+  await preview.getByRole("button", { name: "Zurück zum Bearbeiten" }).click();
+  await page.getByRole("button", { name: "Umfrage starten" }).click();
+  await expect(page).toHaveURL(/\/umfragen\/\d+$/);
+  await expect(page.getByRole("heading", { name: "Wohin geht die Abschlussfahrt?" })).toBeVisible();
+
+  // The player sees the poll at the very top of the start page and a dot on the Events tab
+  const p = player.page;
+  await p.goto("/");
+  await p.reload();
+  const card = p.getByRole("link", { name: /Umfrage: Wohin geht die Abschlussfahrt\?/ });
+  await expect(card).toBeVisible();
+  await expect(card).toContainText("Stimme fehlt");
+  await expect(p.getByRole("navigation", { name: "Hauptnavigation" }).getByText("(offene Umfrage)")).toBeAttached();
+  await card.click();
+  await expect(p).toHaveURL(/\/umfragen\/\d+$/);
+  await p.getByRole("radio", { name: "Freibad" }).click();
+  await p.getByRole("button", { name: "Abstimmen" }).click();
+  await expect(p.getByText("Stimme gespeichert.")).toBeVisible();
+  await expect(p.getByRole("region", { name: "Deine Stimme" })).toContainText("Abgestimmt");
+  // Participants see the result without names
+  await expect(p.getByRole("region", { name: "Ergebnis" })).toContainText("Freibad");
+  await p.goto("/");
+  await expect(p.getByRole("heading", { name: "Hallo Ida" })).toBeVisible();
+  await expect(p.getByRole("link", { name: /Umfrage: Wohin geht/ })).toHaveCount(0);
+  await expect(p.getByRole("navigation", { name: "Hauptnavigation" }).getByText("(offene Umfrage)")).toHaveCount(0);
+  // The poll stays under Profile → Polls
+  await p.goto("/profil");
+  await p.getByRole("link", { name: /Umfragen/ }).click();
+  await expect(p.getByRole("link", { name: /Wohin geht die Abschlussfahrt\?/ })).toBeVisible();
+
+  // The coach sees who voted what
+  await page.reload();
+  const result = page.getByRole("region", { name: "Ergebnis" });
+  await expect(result).toContainText("Freibad");
+  await expect(result).toContainText(/Ida P/);
+});
