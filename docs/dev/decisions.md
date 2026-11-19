@@ -2,6 +2,15 @@
 
 Decisions not covered by `docs/dev/roadmap.md`, with reasons. Newest first.
 
+## Polls: names, photos, payment (November 2026)
+
+Ported from the original club app as the module `modules/polls/` (README there).
+
+- **Names in scheduling polls:** participants see who answered what as "First name L." when the poll is not anonymous. This is an exception to "names only to coaches and admins": finding a date for a party only works when people see who can come. The form says so under the switches. In choice polls participants see counts only, in orders only their own order.
+- **Product photos like profile pictures:** in D1, shrunk on the device, served under `/api` with the session and the version in the URL (`private, immutable`). The club app serves them through a signed URL outside `/api`; Kabine keeps one way of serving pictures, and the browser cache makes the extra session check rare.
+- **Payment details in the module:** PayPal.me name, account holder, IBAN and a currency (EUR by default) in `app_meta` (`polls_payment`), set under *Administration → Polls*; never a link in code. The demo blocks changing them and uploading photos, as visitors would send every other visitor to their own account.
+- **Not in the export:** polls are short-lived and gone at the season change; a restore would need to map units, options and persons.
+
 ## Module hooks for the polls module (November 2026)
 
 Polls (`modules/polls/`) need places in the core screens a module could not reach yet. Each hook is generic and as small as the first user needs:

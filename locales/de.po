@@ -21,6 +21,7 @@ msgstr "Mitglieder und Verantwortliche ordnest du danach in der Gruppe zu."
 msgid "Change helper slots or create a game without handball4all."
 msgstr "Helferplätze ändern oder ein Spiel ohne handball4all anlegen."
 
+#: modules/polls/worker/routes.ts
 #: worker/routes/avatars.ts
 msgid "Please upload a picture in JPEG or WebP format."
 msgstr "Bitte ein Bild im Format JPEG oder WebP hochladen."
@@ -37,6 +38,11 @@ msgstr "Die Handynummer von Personen, die selbst eine eintragen, und ob sie best
 #: worker/routes/events.ts
 msgid "A reminder was just sent. Please wait a few minutes."
 msgstr "Gerade wurde schon erinnert. Bitte warte ein paar Minuten."
+
+# ai
+#: modules/polls/app/pages.tsx
+msgid "{item}: quantity"
+msgstr "{item}: Menge"
 
 #: modules/duties/app/helpers.tsx
 msgid "Turn on in your profile under “I can do this”"
@@ -55,6 +61,11 @@ msgstr "Leg die Mannschaften an, die jetzt starten. Trainer, Spieler und Trainin
 #: modules/handballnet/worker/connector.ts
 msgid "The calendar names no team"
 msgstr "Der Kalender nennt keine Mannschaft"
+
+# ai
+#: modules/polls/app/pages.tsx
+msgid "No: {noNames}"
+msgstr "Nein: {noNames}"
 
 #: worker/routes/squad.ts
 msgid "Inactive players cannot be nominated."
@@ -136,6 +147,11 @@ msgstr "{withoutCount, plural, one {# ohne Zugang} other {# ohne Zugang}}"
 msgid "{name} until {to}: holiday training times for {teams}."
 msgstr "{name} bis {to}: Ferien-Trainingszeiten für {teams}."
 
+# ai
+#: modules/polls/worker/domain.ts
+msgid "Poll ends soon"
+msgstr "Umfrage endet bald"
+
 #: modules/duties/app/admin.tsx
 #: modules/duties/app/admin.tsx
 #: src/pages/admin.tsx
@@ -188,6 +204,21 @@ msgstr "Diesen Dienst gibt es nicht."
 msgid "At least one of the teams does not exist."
 msgstr "Mindestens eine Mannschaft gibt es nicht."
 
+# ai
+#: modules/polls/app/pages.tsx
+msgid "Paid: {paidSum} of {totalSum}"
+msgstr "Bezahlt: {paidSum} von {totalSum}"
+
+# ai
+#: modules/polls/app/pages.tsx
+msgid "Ask for a date or an opinion, or collect orders."
+msgstr "Frag nach einem Termin, einer Meinung oder sammle Bestellungen."
+
+# ai
+#: modules/polls/app/pages.tsx
+msgid "{total, plural, one {{voted} of # family ordered} other {{voted} of # families ordered}}"
+msgstr "{total, plural, one {{voted} von # Familie haben bestellt} other {{voted} von # Familien haben bestellt}}"
+
 #: src/pages/chat.tsx
 msgid "Announcement from {author}, options"
 msgstr "Ankündigung von {author}, Optionen"
@@ -200,6 +231,11 @@ msgstr "Gesucht für einen Dienst, für den ich freigegeben bin (z. B. Jugendsch
 #: src/pages/chat.tsx
 msgid "Message from {author}, options"
 msgstr "Nachricht von {author}, Optionen"
+
+# ai
+#: modules/polls/worker/domain.ts
+msgid "Family of {names}"
+msgstr "Familie von {names}"
 
 #: src/avatar.tsx
 msgid "Loading picture"
@@ -260,6 +296,11 @@ msgstr "Noch keine Nachrichten"
 #: modules/carpools/app/card.tsx
 msgid "{name} (you)"
 msgstr "{name} (du)"
+
+# ai
+#: modules/polls/app/pages.tsx
+msgid "This is how voters see the poll. You can try it, nothing is saved."
+msgstr "So sehen die Abstimmenden die Umfrage. Du kannst sie ausprobieren, gespeichert wird nichts."
 
 # ai
 #. placeholder {0}: used.templates
@@ -359,6 +400,11 @@ msgstr "{count, plural, one {# Zeitblock übernommen. Er wird mit dem Termin ges
 msgid "you take care of {list} there"
 msgstr "dort übernimmst du {list}"
 
+# ai
+#: modules/polls/app/pages.tsx
+msgid "Photo: {photoName}"
+msgstr "Foto: {photoName}"
+
 #: src/pages/team.tsx
 #: src/pages/team.tsx
 msgid "Remove from the team"
@@ -415,6 +461,12 @@ msgstr "Neuen Link erzeugen"
 #: worker/routes/teams.ts
 msgid "This assignment does not exist."
 msgstr "Diese Zuordnung gibt es nicht."
+
+# ai
+#: modules/polls/app/pages.tsx
+#: modules/polls/app/pages.tsx
+msgid "Answers"
+msgstr "Antworten"
 
 # ai
 #: src/pages/audit.tsx
@@ -481,6 +533,11 @@ msgstr "Die Test-SMS konnte nicht verschickt werden: {detail}"
 msgid "Enter meeting point · {teamName}"
 msgstr "Treffpunkt eintragen · {teamName}"
 
+# ai
+#: modules/polls/app/pages.tsx
+msgid "bank transfer to {holder}"
+msgstr "Überweisung an {holder}"
+
 #: src/pages/team.tsx
 msgid "Text with link copied."
 msgstr "Text mit Link kopiert."
@@ -530,6 +587,12 @@ msgctxt "age group"
 msgid "Code"
 msgstr "Kürzel"
 
+# ai
+#: modules/polls/app/pages.tsx
+#: modules/polls/app/pages.tsx
+msgid "Multiple answers possible"
+msgstr "Mehrere Antworten möglich"
+
 #: src/pages/season.tsx
 msgid "Former (will be deleted)"
 msgstr "Ehemalig (wird gelöscht)"
@@ -547,6 +610,16 @@ msgstr "<0>Gruppe oder Mannschaft?</0> Eine Gruppe hat nur einen Chat und Sonder
 #: src/pages/event.tsx
 msgid "Title and info are saved quietly, without notification."
 msgstr "Titel und Infos werden still gespeichert, ohne Benachrichtigung."
+
+# ai
+#: modules/polls/app/pages.tsx
+msgid "As soon as we see the payment we mark the order as paid. This can take 1 to 2 days."
+msgstr "Sobald wir den Geldeingang feststellen, markieren wir die Bestellung als bezahlt. Das kann 1 bis 2 Tage dauern."
+
+# ai
+#: modules/polls/app/pages.tsx
+msgid "Add answer"
+msgstr "Antwort hinzufügen"
 
 #: src/pages/event.tsx
 msgid "Taking part"
@@ -592,6 +665,16 @@ msgstr "Unbekannte Mannschaft in der Zuordnung."
 msgid "Your team's next event"
 msgstr "Nächster Termin deiner Mannschaft"
 
+# ai
+#: modules/polls/app/pages.tsx
+msgid "Withdraw vote?"
+msgstr "Stimme zurückziehen?"
+
+# ai
+#: modules/polls/worker/routes.ts
+msgid "Only who created the poll and admins may edit it."
+msgstr "Bearbeiten dürfen, wer die Umfrage angelegt hat, und Admins."
+
 #: src/respond.tsx
 msgid "Reason (required)"
 msgstr "Grund (Pflicht)"
@@ -614,6 +697,11 @@ msgstr "FÜR TRAINER"
 msgid "Automatic again"
 msgstr "Wieder automatisch"
 
+# ai
+#: modules/polls/app/pages.tsx
+msgid "Everyone has ordered."
+msgstr "Alle haben bestellt."
+
 #: modules/duties/app/helpers.tsx
 #: src/pages/audit.tsx
 #: src/pages/event.tsx
@@ -628,6 +716,11 @@ msgstr "Termin"
 #: src/pages/special.tsx
 msgid "e.g. HSG Musterstadt"
 msgstr "z. B. HSG Musterstadt"
+
+# ai
+#: modules/polls/app/pages.tsx
+msgid "Still open"
+msgstr "Noch offen"
 
 #: worker/routes/plans.ts
 msgid "Training time changed"
@@ -680,6 +773,11 @@ msgstr "Die Adresse wurde inzwischen geändert. Bitte bestätige die neue Adress
 #: modules/carpools/worker/domain.ts
 msgid "{seats, plural, one {{driver} has one free seat: {game}. Book it in the app.} other {{driver} has # free seats: {game}. Book it in the app.}}"
 msgstr "{seats, plural, one {{driver} hat einen freien Platz: {game}. In der App mitfahren.} other {{driver} hat # freie Plätze: {game}. In der App mitfahren.}}"
+
+# ai
+#: modules/polls/worker/routes.ts
+msgid "Only orders have photos."
+msgstr "Fotos gibt es nur bei Bestellungen."
 
 #: src/pages/season.tsx
 msgid "Final confirmation"
@@ -745,6 +843,12 @@ msgstr "Der Link meldet die bisherigen Geräte ab, zum Beispiel nach einem Gerä
 msgid "Link your club's privacy policy and legal notice, and name a contact for questions about the app."
 msgstr "Verlinke Datenschutzerklärung und Impressum deines Vereins und nenne eine Ansprechperson für Fragen zur App."
 
+# ai
+#: modules/polls/app/pages.tsx
+#: modules/polls/app/pages.tsx
+msgid "Orders"
+msgstr "Bestellungen"
+
 #: src/pages/admin.tsx
 msgid "Holiday periods"
 msgstr "Ferienzeiträume"
@@ -778,6 +882,11 @@ msgstr "{created} neu, {moved} verlegt, {cancelled} entfallen."
 #: src/pages/home.tsx
 msgid "Then: training"
 msgstr "Danach: Training"
+
+# ai
+#: modules/polls/app/pages.tsx
+msgid "Order saved"
+msgstr "Bestellung gespeichert"
 
 #: src/pages/event.tsx
 msgid "Cancel this event for everyone?"
@@ -830,6 +939,7 @@ msgid "Getting a ride"
 msgstr "Mitfahrgelegenheit"
 
 # ai
+#: modules/polls/app/pages.tsx
 #: src/child-limits.tsx
 msgid "No"
 msgstr "Nein"
@@ -911,6 +1021,11 @@ msgstr "Ich habe ein neues Handy und komme nicht mehr in die App."
 msgid "What data does the app store about me?"
 msgstr "Welche Daten speichert die App über mich?"
 
+# ai
+#: modules/polls/app/pages.tsx
+msgid "Ended"
+msgstr "Beendet"
+
 #: worker/routes/feedback.ts
 msgid "wanted, to {replyTo} (replies to this mail go there)"
 msgstr "erwünscht, an {replyTo} (Antworten an diese Mail gehen dorthin)"
@@ -924,6 +1039,11 @@ msgstr "Regulärer Plan"
 msgid "Open squads, create, assign coaches"
 msgstr "Kader öffnen, anlegen, Trainer zuordnen"
 
+# ai
+#: modules/polls/app/pages.tsx
+msgid "{total, plural, one {{voted} of # person ordered} other {{voted} of # people ordered}}"
+msgstr "{total, plural, one {{voted} von # Person haben bestellt} other {{voted} von # Personen haben bestellt}}"
+
 #: src/pages/squad.tsx
 msgid "nominated"
 msgstr "nominiert"
@@ -932,6 +1052,11 @@ msgstr "nominiert"
 msgctxt "home team"
 msgid "Home"
 msgstr "Heim"
+
+# ai
+#: modules/polls/app/pages.tsx
+msgid "{no} no"
+msgstr "{no} Nein"
 
 #: src/pages/join.tsx
 msgid "Your access is set up. You sign in with an e-mail code."
@@ -949,6 +1074,16 @@ msgstr "davon kurzfristig abgesagt"
 #: modules/carpools/app/index.tsx
 msgid "Carpools ({taken}/{seats})"
 msgstr "Fahrgemeinschaften ({taken}/{seats})"
+
+# ai
+#: modules/polls/app/pages.tsx
+msgid "More"
+msgstr "Mehr"
+
+# ai
+#: modules/polls/app/pages.tsx
+msgid "I have paid"
+msgstr "Ich habe bezahlt"
 
 # ai
 #: worker/routes/events.ts
@@ -1199,6 +1334,11 @@ msgstr "Nicht gezählt"
 msgid "Year"
 msgstr "Jahrgang"
 
+# ai
+#: modules/polls/app/pages.tsx
+msgid "No answers entered yet."
+msgstr "Noch keine Antworten eingetragen."
+
 #: src/pages/admin.tsx
 msgid "Remove link?"
 msgstr "Verknüpfung lösen?"
@@ -1211,9 +1351,19 @@ msgstr "Offline – verbinde neu …"
 msgid "There is no team for the new age class. Please assign or leave without a team for now."
 msgstr "Für die neue Altersklasse gibt es keine Mannschaft. Bitte zuordnen oder vorerst ohne Mannschaft lassen."
 
+# ai
+#: modules/polls/app/pages.tsx
+msgid "Nothing ordered ({nothingCount})"
+msgstr "Nichts bestellt ({nothingCount})"
+
 #: modules/duties/worker/notify.ts
 msgid "There are still free places at {game}: {open}."
 msgstr "bei {game} sind noch Plätze frei: {open}."
+
+# ai
+#: modules/polls/app/pages.tsx
+msgid "You can vote again afterwards while the poll runs."
+msgstr "Du kannst danach neu abstimmen, solange die Umfrage läuft."
 
 #: worker/routes/events.ts
 msgid "Response: accepted"
@@ -1335,6 +1485,12 @@ msgstr "Lege zuerst eine Subdomain des Vereins an, zum Beispiel <0>app.dein-vere
 msgid "{personCount, plural, one {Import # person} other {Import # persons}}"
 msgstr "{personCount, plural, one {# Person übernehmen} other {# Personen übernehmen}}"
 
+# ai
+#: modules/polls/app/pages.tsx
+#: modules/polls/app/pages.tsx
+msgid "Pay"
+msgstr "Bezahlen"
+
 #: src/duty-blocks.tsx
 msgid "Task · before"
 msgstr "Aufgabe · davor"
@@ -1376,6 +1532,11 @@ msgstr "Danke! Wer mitfahren möchte, kann jetzt buchen."
 #: src/pages/event.tsx
 msgid "Remove {name} as organiser"
 msgstr "{name} als Organisator entfernen"
+
+# ai
+#: modules/polls/worker/routes.ts
+msgid "New poll · {teamName}"
+msgstr "Neue Umfrage · {teamName}"
 
 #: src/pages/team.tsx
 msgid "Only the year. The app stores no further data."
@@ -1440,6 +1601,13 @@ msgstr "{n, plural, one {# neue Nachricht} other {# neue Nachrichten}}"
 #: src/calendar.tsx
 msgid "With a personal link your events appear in the calendar app on your phone and stay up to date. Do not share the link: anyone who has it can see your events."
 msgstr "Mit einem persönlichen Link erscheinen deine Termine in der Kalender-App deines Handys und bleiben aktuell. Den Link nicht weitergeben: Wer ihn hat, sieht deine Termine."
+
+# ai
+#: modules/polls/app/common.tsx
+#: modules/polls/app/pages.tsx
+#: modules/polls/app/pages.tsx
+msgid "Poll"
+msgstr "Umfrage"
 
 # ai
 #: worker/routes/events.ts
@@ -1522,6 +1690,11 @@ msgstr "Eingefügte Tabelle {n}"
 #: src/pages/club-settings.tsx
 msgid "Privacy and contact"
 msgstr "Datenschutz und Kontakt"
+
+# ai
+#: modules/polls/app/pages.tsx
+msgid "Copy reference"
+msgstr "Verwendungszweck kopieren"
 
 #: modules/carpools/worker/domain.ts
 msgid "Lift available"
@@ -2002,9 +2175,20 @@ msgstr "Bild wählen"
 msgid "Not in this team"
 msgstr "Nicht in dieser Mannschaft"
 
+# ai
+#: modules/polls/app/pages.tsx
+msgid "{voted, plural, one {There is one vote already.} other {There are # votes already.}}"
+msgstr "{voted, plural, one {Es gibt schon eine Stimme.} other {Es gibt schon # Stimmen.}}"
+
 #: src/pages/team.tsx
 msgid "The core squad is preselected for every new game."
 msgstr "Der Stammkader ist bei jedem neuen Spiel vorausgewählt."
+
+# ai
+#: modules/polls/app/pages.tsx
+#: modules/polls/app/pages.tsx
+msgid "Total"
+msgstr "Summe"
 
 #: worker/auth/actor.ts
 msgid "You can only act for yourself or your children."
@@ -2019,6 +2203,7 @@ msgid "Connection removed."
 msgstr "Verknüpfung gelöst."
 
 # ai
+#: modules/polls/app/common.tsx
 #: src/howto.tsx
 #: src/ui.tsx
 msgid "Got it"
@@ -2063,6 +2248,11 @@ msgstr "Diese Anfrage gibt es nicht."
 #: src/pages/group.tsx
 msgid "Continue without parents?"
 msgstr "Ohne Eltern weiterführen?"
+
+# ai
+#: modules/polls/worker/routes.ts
+msgid "A bank transfer needs both the account holder and the IBAN."
+msgstr "Für eine Überweisung braucht es Kontoinhaber und IBAN."
 
 #: src/pages/admin.tsx
 #: src/pages/admin.tsx
@@ -2219,6 +2409,11 @@ msgstr "Helferdienst {label} · {game}"
 msgid "Enter decline"
 msgstr "Absage eintragen"
 
+# ai
+#: modules/polls/app/pages.tsx
+msgid "Change the end"
+msgstr "Ende ändern"
+
 #: src/pages/admin.tsx
 #: src/pages/team.tsx
 #: src/restore.tsx
@@ -2235,6 +2430,7 @@ msgstr "Zu dieser Adresse gehören mehrere Zugänge. Mit welchem möchtest du di
 
 #: modules/duties/app/admin.tsx
 #: modules/duties/app/approvals.tsx
+#: modules/polls/app/settings.tsx
 #: modules/sms/app/settings.tsx
 #: src/pages/admin.tsx
 #: src/pages/admin.tsx
@@ -2341,6 +2537,11 @@ msgstr "Plan löschen?"
 msgid "Joining for {teamName}"
 msgstr "Teilnahme für {teamName}"
 
+# ai
+#: modules/polls/app/common.tsx
+msgid "ended {date}, {at}"
+msgstr "beendet {date}, {at} Uhr"
+
 #: src/pages/admin.tsx
 msgid "Signed in as admin {firstName}"
 msgstr "Angemeldet als Admin {firstName}"
@@ -2425,6 +2626,12 @@ msgstr "{firstName} als Aushilfe entfernen"
 msgid "Without teams there is nothing to coach yet; you can assign coaches later under administration → teams."
 msgstr "Ohne Mannschaften gibt es noch nichts zu trainieren; Trainer ordnest du später unter Verwaltung → Mannschaften zu."
 
+# ai
+#: modules/polls/app/help.ts
+#: modules/polls/app/pages.tsx
+msgid "One vote per family"
+msgstr "Eine Stimme je Familie"
+
 #: src/pages/event.tsx
 #: src/pages/special.tsx
 msgid "Info (optional)"
@@ -2489,6 +2696,13 @@ msgstr "{label}: ein Platz weniger"
 msgid "This is only possible once the event has started."
 msgstr "Das geht erst, wenn der Termin begonnen hat."
 
+# ai
+#. Order number in a bank reference, e.g. 'Club kit No. 17'
+#: modules/polls/app/pages.tsx
+#: modules/polls/worker/domain.ts
+msgid "No."
+msgstr "Nr."
+
 #: src/pages/team.tsx
 msgid "Absent without excuse {unexcused}× this season. You can change this in the respective event under <0>Events → Past</0>."
 msgstr "In dieser Saison {unexcused}× unentschuldigt gefehlt. Ändern lässt sich das im jeweiligen Termin unter <0>Termine → Vergangen</0>."
@@ -2503,6 +2717,11 @@ msgstr "Fahrgemeinschaften"
 msgctxt "verb"
 msgid "Correct"
 msgstr "Korrigieren"
+
+# ai
+#: modules/polls/worker/routes.ts
+msgid "There are votes already: “Multiple answers” stays as it is."
+msgstr "Es gibt schon Stimmen: „Mehrere Antworten“ bleibt, wie es ist."
 
 #: src/pages/special.tsx
 msgid "A game that is not on handball4all, e.g. a friendly or a tournament. With squad, meeting point and helper duties like every game."
@@ -2550,6 +2769,11 @@ msgid "It cannot be deleted while it is in {places}. Archiving hides it for new 
 msgstr "Löschen geht nicht, solange sie in {places} vorkommt. Archivieren blendet sie für Neues aus."
 
 # ai
+#: modules/polls/app/pages.tsx
+msgid "Only after the end"
+msgstr "Erst nach dem Ende"
+
+# ai
 #: src/pages/club-settings.tsx
 #: src/pages/club-settings.tsx
 msgid "{teams, plural, one {# team takes its games from this source. Its games stay, but they are no longer synced.} other {# teams take their games from this source. Their games stay, but they are no longer synced.}}"
@@ -2588,6 +2812,12 @@ msgstr "die Verknüpfung zu den Eltern"
 #: src/pages/admin.tsx
 msgid "Edit venue"
 msgstr "Ort bearbeiten"
+
+# ai
+#: modules/polls/app/pages.tsx
+#: modules/polls/app/pages.tsx
+msgid "Item {n}"
+msgstr "Artikel {n}"
 
 #: modules/duties/worker/routes.ts
 msgid "Who are you signing up for?"
@@ -2632,6 +2862,11 @@ msgstr "Verantwortliche hinzufügen"
 #: src/pages/stats.tsx
 msgid "{unexcused} unexc."
 msgstr "{unexcused} unentsch."
+
+# ai
+#: modules/polls/worker/routes.ts
+msgid "This item does not exist."
+msgstr "Diesen Artikel gibt es nicht."
 
 #: src/pages/home.tsx
 msgid "Attending"
@@ -2762,6 +2997,11 @@ msgstr "Jetzt laden"
 msgid "Address missing"
 msgstr "Adresse fehlt"
 
+# ai
+#: modules/polls/app/pages.tsx
+msgid "Price"
+msgstr "Preis"
+
 #: src/pages/profile.tsx
 msgctxt "role"
 msgid "Player"
@@ -2774,6 +3014,11 @@ msgstr "Bitte einmal neu laden, dann geht es weiter."
 #: src/pages/admin.tsx
 msgid "{months} months ago"
 msgstr "vor {months} Monaten"
+
+# ai
+#: modules/polls/app/pages.tsx
+msgid "Your order"
+msgstr "Deine Bestellung"
 
 #: src/export.tsx
 msgid "The file contains personal data of people, including minors. It is only for the club's data backup and must not be passed on. Delete it from your computer after 30 days at the latest. The club's backup belongs encrypted in the storage intended for it. If a storage location, for example your computer, has become accessible to unauthorised persons through a virus or similar, inform the board immediately."
@@ -2847,6 +3092,11 @@ msgstr "Diesmal dabei"
 msgid "Show older entries"
 msgstr "Ältere Einträge zeigen"
 
+# ai
+#: modules/polls/app/pages.tsx
+msgid "Not ordered yet"
+msgstr "Noch nicht bestellt"
+
 #: modules/duties/worker/notify.ts
 msgid "Helper plan: {link}"
 msgstr "Helferplan: {link}"
@@ -2884,6 +3134,12 @@ msgstr "Der Stammkader ist jetzt für alle künftigen Spiele nominiert."
 msgid "Test mail sent to {to}."
 msgstr "Testmail an {to} verschickt."
 
+# ai
+#: modules/polls/app/home.tsx
+#: modules/polls/app/home.tsx
+msgid "{kind}: {title}"
+msgstr "{kind}: {title}"
+
 #: src/pages/admin.tsx
 msgid "Coaches add stand-ins in their own team."
 msgstr "Aushilfen tragen die Trainer in ihrer Mannschaft ein."
@@ -2903,9 +3159,19 @@ msgid "another game"
 msgstr "ein anderes Spiel"
 
 # ai
+#: modules/polls/app/pages.tsx
+msgid "{total, plural, one {{voted} of # family voted} other {{voted} of # families voted}}"
+msgstr "{total, plural, one {{voted} von # Familie abgestimmt} other {{voted} von # Familien abgestimmt}}"
+
+# ai
 #: modules/duties/worker/routes.ts
 msgid "Remove the duty type from the templates first."
 msgstr "Nimm die Dienstart zuerst aus den Vorlagen."
+
+# ai
+#: modules/polls/worker/routes.ts
+msgid "Only one answer is possible here."
+msgstr "Hier gibt es nur eine Antwort."
 
 #: src/pages/admin.tsx
 msgid "{groupCount, plural, one {# group} other {# groups}}"
@@ -2918,6 +3184,11 @@ msgstr "Gruppenchat"
 #: src/pages/admin.tsx
 msgid "Born to"
 msgstr "Jg. bis"
+
+# ai
+#: modules/polls/app/pages.tsx
+msgid "No payment details yet. Add them under <0>Administration → Polls</0>."
+msgstr "Noch keine Bezahlangaben hinterlegt. Das geht unter <0>Verwaltung → Umfragen</0>."
 
 #: src/update.tsx
 msgid "There is a new version of the app."
@@ -2954,6 +3225,10 @@ msgstr "Die Begründung ist zu lang (höchstens 200 Zeichen)."
 msgid "Assign as {roleName}"
 msgstr "Als {roleName} zuordnen"
 
+#: modules/polls/app/common.tsx
+#: modules/polls/app/pages.tsx
+#: modules/polls/app/pages.tsx
+#: modules/polls/app/pages.tsx
 #: src/extra-events.tsx
 #: src/pages/special.tsx
 msgid "Whole club"
@@ -2962,6 +3237,11 @@ msgstr "Ganzer Verein"
 #: src/email.tsx
 msgid "Do you use the app from the Home Screen? Then you are not signed in there automatically. Request a code there and enter it directly in the app."
 msgstr "Nutzt du die App vom Home-Bildschirm? Dann bist du dort nicht automatisch angemeldet. Fordere dort einen Code an und gib ihn direkt in der App ein."
+
+# ai
+#: modules/polls/module.ts
+msgid "Coaches ask their team, admins the whole club: choose an answer, find a date, or collect orders with payment."
+msgstr "Trainer fragen ihre Mannschaft, Admins den ganzen Verein: eine Antwort wählen, einen Termin finden oder Bestellungen mit Bezahlung sammeln."
 
 #: src/pages/team.tsx
 msgid "Remove stand-in?"
@@ -3050,6 +3330,11 @@ msgstr "<0>Treffpunkt:</0> {point}"
 #: src/pages/profile.tsx
 msgid "Add another passkey"
 msgstr "Weiteren Passkey hinzufügen"
+
+# ai
+#: modules/polls/app/pages.tsx
+msgid "Date {n}: day"
+msgstr "Termin {n}: Datum"
 
 # ai
 #: worker/routes/chat.ts
@@ -3252,6 +3537,11 @@ msgid "New person"
 msgstr "Neue Person"
 
 # ai
+#: modules/polls/app/settings.tsx
+msgid "e.g. paypal.me/yourclub"
+msgstr "z. B. paypal.me/deinverein"
+
+# ai
 #: modules/sms/worker/routes.ts
 msgid "There is no phone number on your access."
 msgstr "An deinem Zugang ist keine Handynummer hinterlegt."
@@ -3288,6 +3578,11 @@ msgstr "Bitte wähle die neue Saison."
 #: src/holidays.ts
 msgid "Holidays of the region loaded: {periods} holiday periods, {days} public holidays."
 msgstr "Ferien der Region geladen: {periods} Ferienzeiträume, {days} Feiertage."
+
+# ai
+#: modules/polls/app/pages.tsx
+msgid "Answer {n}"
+msgstr "Antwort {n}"
 
 #: src/pages/special.tsx
 msgid "Game created. The team has been notified."
@@ -3348,9 +3643,19 @@ msgstr "Verwerfen und von Hand eingeben"
 msgid "New in Kabine"
 msgstr "Neu in Kabine"
 
+# ai
+#: modules/polls/app/help.ts
+msgid "Summer party: the Kaiser family with Kim and Ben answers once, not three times."
+msgstr "Sommerfest: Familie Kaiser mit Kim und Ben antwortet einmal, nicht dreimal."
+
 #: src/pages/help.tsx
 msgid "Attach screenshot or image (optional)"
 msgstr "Screenshot oder Bild anhängen (optional)"
+
+# ai
+#: modules/polls/app/pages.tsx
+msgid "Question"
+msgstr "Frage"
 
 # ai
 #: src/help-texts.ts
@@ -3604,9 +3909,19 @@ msgstr "z. B. Sam leitet das Training"
 msgid "{nominatedYes} nominated"
 msgstr "{nominatedYes} nominiert"
 
+# ai
+#: modules/polls/app/pages.tsx
+msgid "Reference copied."
+msgstr "Verwendungszweck kopiert."
+
 #: src/respond.tsx
 msgid "I'm in after all"
 msgstr "Bin doch dabei"
+
+# ai
+#: modules/polls/worker/routes.ts
+msgid "Please enter at least two answers."
+msgstr "Bitte gib mindestens zwei Antworten an."
 
 # ai
 #: worker/lib/server-errors.ts
@@ -3631,6 +3946,11 @@ msgstr "Noch ohne Dienst"
 #: src/pages/team.tsx
 msgid "No one found"
 msgstr "Niemand gefunden"
+
+# ai
+#: modules/polls/app/pages.tsx
+msgid "Items"
+msgstr "Artikel"
 
 # ai
 #: modules/duties/worker/routes.ts
@@ -3706,6 +4026,12 @@ msgid "{title} on {date}"
 msgstr "{title} am {date}"
 
 # ai
+#: modules/polls/worker/routes.ts
+#: modules/polls/worker/routes.ts
+msgid "This order does not exist."
+msgstr "Diese Bestellung gibt es nicht."
+
+# ai
 #: src/pages/stats.tsx
 msgid "by name"
 msgstr "nach Name"
@@ -3771,6 +4097,16 @@ msgstr "{who} hat {person} als {role} zu {team} hinzugefügt"
 msgid "Export file (.json)"
 msgstr "Export-Datei (.json)"
 
+# ai
+#: modules/polls/app/help.ts
+msgid "Parents, children and siblings linked in the app vote together, once. Anyone of the family can cast or change the vote. Good for finding a date and for orders. When off, everyone votes for themselves, and parents also for their children when players are asked."
+msgstr "Eltern, Kinder und Geschwister, die in der App miteinander verknüpft sind, stimmen gemeinsam einmal ab. Jeder aus der Familie kann die Stimme abgeben oder ändern. Gut für Terminfindung und Bestellungen. Aus, stimmt jede Person für sich ab, Eltern zusätzlich für ihre Kinder, wenn Spieler gefragt sind."
+
+# ai
+#: modules/polls/worker/routes.ts
+msgid "There are votes already: an anonymous poll stays anonymous."
+msgstr "Es gibt schon Stimmen: Eine anonyme Umfrage bleibt anonym."
+
 #: modules/duties/app/helpers.tsx
 #: src/list-import.tsx
 #: src/pages/admin.tsx
@@ -3800,6 +4136,11 @@ msgstr "Familien mit Diensten"
 #: modules/duties/worker/routes.ts
 msgid "More people are already signed up. Please remove someone first."
 msgstr "Es sind schon mehr Personen eingetragen. Bitte zuerst jemanden austragen."
+
+# ai
+#: modules/polls/worker/routes.ts
+msgid "Please choose an answer."
+msgstr "Bitte wähle eine Antwort."
 
 # ai
 #: src/pages/admin.tsx
@@ -3857,6 +4198,11 @@ msgstr "Bei „Unentschuldigt“ bekommen eingebundene Eltern sofort einen Hinwe
 msgid "The most secure way to sign in is with a passkey (Face ID, fingerprint or device lock). You can set one up in the app under Profile, Passkeys and devices."
 msgstr "Am sichersten meldest du dich mit einem Passkey an (Face ID, Fingerabdruck oder Gerätesperre). Einrichten kannst du ihn in der App unter Profil, Passkeys und Geräte."
 
+# ai
+#: modules/polls/worker/routes.ts
+msgid "This order is paid already. Change it instead."
+msgstr "Diese Bestellung ist schon bezahlt. Ändere sie stattdessen."
+
 #: worker/routes/feedback.ts
 msgid "wanted, but no confirmed e-mail address on the access"
 msgstr "erwünscht, aber keine bestätigte E-Mail-Adresse am Zugang"
@@ -3873,6 +4219,11 @@ msgstr "{present} von {total} waren da"
 #: src/pages/home.tsx
 msgid "Stand-in request"
 msgstr "Aushilfe-Anfrage"
+
+# ai
+#: modules/polls/app/pages.tsx
+msgid "e.g. Club kit autumn"
+msgstr "z. B. Vereinsausrüstung Herbst"
 
 #: src/pages/join.tsx
 msgid "Without passkey: code by e-mail"
@@ -3904,6 +4255,11 @@ msgstr "Wie die App E-Mails verschickt"
 #: worker/routes/events.ts
 msgid "{name} accepted training on {when}."
 msgstr "{name} hat für das Training am {when} zugesagt."
+
+# ai
+#: modules/polls/worker/domain.ts
+msgid "Former member"
+msgstr "Ehemalige"
 
 # ai
 #: src/pages/setup-wizard.tsx
@@ -3956,6 +4312,7 @@ msgstr "Neue Mannschaftseinstellung „Ganze Mannschaft bei Spielen dabei“: Al
 
 #: modules/duties/app/admin.tsx
 #: modules/duties/app/admin.tsx
+#: modules/polls/app/pages.tsx
 #: src/pages/admin.tsx
 #: src/pages/admin.tsx
 #: src/pages/admin.tsx
@@ -3984,6 +4341,11 @@ msgstr "Im Browsermenü <0>Zum Startbildschirm hinzufügen</0> bzw. <1>App insta
 #: src/player-import.tsx
 msgid "already in the team, skipped"
 msgstr "schon in der Mannschaft, wird übersprungen"
+
+# ai
+#: modules/polls/app/home.tsx
+msgid "If you change your mind: under Profile → Polls you find the order again and can order until the poll ends."
+msgstr "Falls du es dir anders überlegst: Unter Profil → Umfragen findest du die Bestellung wieder und kannst bis zum Ende der Umfrage bestellen."
 
 #: src/pages/admin.tsx
 msgid "Delete team?"
@@ -4108,6 +4470,11 @@ msgid "Entered as driver"
 msgstr "Als Fahrer eingetragen"
 
 # ai
+#: modules/polls/app/pages.tsx
+msgid "Copy IBAN"
+msgstr "IBAN kopieren"
+
+# ai
 #: worker/routes/events.ts
 msgid "This is no longer possible for this event."
 msgstr "Das ist bei diesem Termin nicht mehr möglich."
@@ -4178,6 +4545,8 @@ msgid "{firstName} is now {roleName} in {teamName}."
 msgstr "{firstName} ist jetzt {roleName} in {teamName}."
 
 #: modules/duties/app/helpers.tsx
+#: modules/polls/app/home.tsx
+#: modules/polls/app/pages.tsx
 msgid "Hidden"
 msgstr "Ausgeblendet"
 
@@ -4259,6 +4628,12 @@ msgstr "{who} hat den Spielplan von {team} entfernt ({source})"
 msgid "Meet at {meetAt} · {point}"
 msgstr "Treffen {meetAt} Uhr · {point}"
 
+# ai
+#: modules/polls/app/help.ts
+#: modules/polls/app/pages.tsx
+msgid "Anonymous"
+msgstr "Anonym"
+
 #: src/pages/plans.tsx
 #: src/pages/team.tsx
 msgid "Team <0>{teamName}</0>"
@@ -4333,6 +4708,7 @@ msgstr "die Verknüpfung zu den Kindern"
 msgid "Admin roles are only taken over when everything is restored."
 msgstr "Admin-Rollen werden nur übernommen, wenn alles wiederhergestellt wird."
 
+#: modules/polls/app/pages.tsx
 #: src/list-import.tsx
 #: src/pages/admin.tsx
 #: src/pages/admin.tsx
@@ -4462,6 +4838,11 @@ msgstr "Kommende Sondertermine und Spiele ohne handball4all aller Mannschaften. 
 msgid "to"
 msgstr "bis"
 
+# ai
+#: modules/polls/app/help.ts
+msgid "Nobody sees who voted what, not even you as the creator. You only see how many voted. The app still remembers the vote, so it can be changed and only those who are missing get reminded. Orders cannot be anonymous."
+msgstr "Niemand sieht, wer wie abgestimmt hat, auch du als Ersteller nicht. Du siehst nur, wie viele abgestimmt haben. Die App merkt sich die Stimme trotzdem, damit man sie ändern kann und nur die erinnert werden, die noch fehlen. Bestellungen können nicht anonym sein."
+
 #: modules/carpools/worker/routes.ts
 msgid "Carpools only exist for away games."
 msgstr "Fahrgemeinschaften gibt es nur bei Auswärtsspielen."
@@ -4566,6 +4947,11 @@ msgstr "Du bist für dieses Spiel nicht nominiert."
 msgid "The holiday calendar could not be reached. Please try again later."
 msgstr "Der Ferienkalender war nicht erreichbar. Bitte versuch es später noch einmal."
 
+# ai
+#: modules/polls/app/pages.tsx
+msgid "Payment details (PayPal, bank account) are set by an admin for the club. There are none yet."
+msgstr "Bezahlangaben (PayPal, Konto) legt ein Admin für den Verein fest. Bisher gibt es keine."
+
 #: src/pages/join.tsx
 msgid "Already have a parent access?"
 msgstr "Schon einen Elternzugang?"
@@ -4573,6 +4959,11 @@ msgstr "Schon einen Elternzugang?"
 #: modules/duties/app/helpers.tsx
 msgid "Hide in helper plan"
 msgstr "Im Helferplan ausblenden"
+
+# ai
+#: modules/polls/app/pages.tsx
+msgid "Order saved."
+msgstr "Bestellung gespeichert."
 
 #: src/pages/team.tsx
 msgid "{firstName} does not have their own access yet."
@@ -4623,6 +5014,11 @@ msgid "Take over data from an export of Kabine (Administration → Export), for 
 msgstr "Übernimm Daten aus einem Kabine-Export (Verwaltung → Export), etwa beim Umzug auf eine neue Installation. Kreuze an, was übernommen werden soll. Alles angekreuzt auf einer neuen Installation stellt sie vollständig wieder her."
 
 # ai
+#: modules/polls/app/pages.tsx
+msgid "By {by}"
+msgstr "Von {by}"
+
+# ai
 #: src/restore.tsx
 msgid "Season, age groups and holidays"
 msgstr "Saison, Altersklassen und Ferien"
@@ -4663,6 +5059,11 @@ msgstr "Sportart"
 #: modules/duties/app/helpers.tsx
 msgid "full"
 msgstr "voll"
+
+# ai
+#: modules/polls/app/pages.tsx
+msgid "Sizes, separated by commas (optional)"
+msgstr "Größen, mit Komma getrennt (optional)"
 
 #: modules/carpools/app/card.tsx
 msgid "One companion"
@@ -4712,6 +5113,11 @@ msgstr "Kein Dienst braucht eine Freigabe"
 #: modules/carpools/worker/routes.ts
 msgid "Lift booked"
 msgstr "Mitfahrt eingetragen"
+
+# ai
+#: modules/polls/worker/routes.ts
+msgid "Please answer every date."
+msgstr "Bitte beantworte jeden Termin."
 
 #: modules/duties/worker/routes.ts
 #: worker/routes/manual-games.ts
@@ -4815,9 +5221,19 @@ msgid "Age groups saved."
 msgstr "Altersklassen gespeichert."
 
 # ai
+#: modules/polls/app/pages.tsx
+msgid "Date {n}: time (optional)"
+msgstr "Termin {n}: Uhrzeit (optional)"
+
+# ai
 #: src/pages/audit.tsx
 msgid "{who} downloaded the export of all data"
 msgstr "{who} hat den Export aller Daten heruntergeladen"
+
+# ai
+#: modules/polls/app/pages.tsx
+msgid "Delete poll"
+msgstr "Umfrage löschen"
 
 #: src/email.tsx
 msgid "Code from the e-mail"
@@ -5023,6 +5439,16 @@ msgstr "Keine eigenen Termine"
 msgid "The image could not be converted."
 msgstr "Das Bild konnte nicht umgewandelt werden."
 
+# ai
+#: modules/polls/app/pages.tsx
+msgid "Not voted yet"
+msgstr "Noch nicht abgestimmt"
+
+# ai
+#: modules/polls/app/index.tsx
+msgid "Your polls and orders"
+msgstr "Deine Umfragen und Bestellungen"
+
 #: src/pages/team.tsx
 msgid "Stand-in from {homeTeam}"
 msgstr "Aushilfe aus der {homeTeam}"
@@ -5035,6 +5461,11 @@ msgstr "ohne Eltern"
 #: src/pages/stats.tsx
 msgid "Whoever was away long-term or inactive for the whole time span is only listed here. Stand-ins from other teams do not count."
 msgstr "Wer im ganzen Zeitraum dauerhaft abwesend oder inaktiv war, steht nur hier. Aushilfen aus anderen Teams zählen nicht mit."
+
+# ai
+#: modules/polls/worker/routes.ts
+msgid "Please enter at least two dates."
+msgstr "Bitte gib mindestens zwei Termine an."
 
 #: src/pages/squad.tsx
 msgid "Anyway"
@@ -5081,6 +5512,11 @@ msgid "Write a message"
 msgstr "Nachricht schreiben"
 
 # ai
+#: modules/polls/app/pages.tsx
+msgid "Report taken back."
+msgstr "Meldung zurückgenommen."
+
+# ai
 #: src/restore.tsx
 msgid "needed by other ticked parts"
 msgstr "wird von anderen angekreuzten Teilen gebraucht"
@@ -5123,6 +5559,11 @@ msgid "Each team takes its games from one of the switched-on sources (Team → S
 msgstr "Jede Mannschaft übernimmt ihre Spiele aus einer der eingeschalteten Quellen (Team → Einstellungen). Mannschaften ohne Quelle tragen Spiele von Hand oder aus einer Tabelle ein."
 
 # ai
+#: modules/polls/worker/routes.ts
+msgid "Please enter the PayPal.me name, e.g. paypal.me/yourclub."
+msgstr "Bitte gib den PayPal.me-Namen an, z. B. paypal.me/deinverein."
+
+# ai
 #: src/pages/admin.tsx
 msgid "Load holidays of the region"
 msgstr "Ferien der Region laden"
@@ -5148,6 +5589,11 @@ msgstr "Du kannst nur für dich oder deine Kinder eine Mitfahrgelegenheit suchen
 #: worker/routes/club.ts
 msgid "The link must start with https://."
 msgstr "Der Link muss mit https:// beginnen."
+
+# ai
+#: modules/polls/app/pages.tsx
+msgid "Photo: {item}"
+msgstr "Foto: {item}"
 
 #: worker/domain/invites.ts
 msgid "This link has already been used. Please ask for a new link."
@@ -5238,6 +5684,16 @@ msgid "Template for away games"
 msgstr "Vorlage für Auswärtsspiele"
 
 # ai
+#: modules/polls/app/pages.tsx
+msgid "Payment by {list}, as set for the club. The reference is the title with the order number."
+msgstr "Bezahlt wird per {list}, wie für den Verein hinterlegt. Der Verwendungszweck ist der Titel mit der Bestellnummer."
+
+# ai
+#: modules/polls/app/pages.tsx
+msgid "Choice"
+msgstr "Auswahl"
+
+# ai
 #: src/news.tsx
 msgid "For coaches"
 msgstr "Für Trainer"
@@ -5275,6 +5731,11 @@ msgstr "Häufige Fragen, Anleitungen, Rückmeldung zur App"
 #: src/pages/home.tsx
 msgid "Not taking place"
 msgstr "Findet nicht statt"
+
+# ai
+#: modules/polls/app/pages.tsx
+msgid "If you change your mind: under Profile → Polls you find the order again and can change it until the poll ends."
+msgstr "Falls du es dir anders überlegst: Unter Profil → Umfragen findest du die Bestellung wieder und kannst sie bis zum Ende der Umfrage ändern."
 
 # ai
 #: src/pages/club-settings.tsx
@@ -5355,6 +5816,11 @@ msgstr "Ø im Kader"
 msgid "Include parents"
 msgstr "Eltern einbinden"
 
+# ai
+#: modules/polls/app/pages.tsx
+msgid "No order yet."
+msgstr "Noch keine Bestellung."
+
 #: src/duty-blocks.tsx
 msgid "– Choose duty –"
 msgstr "– Dienst wählen –"
@@ -5373,6 +5839,11 @@ msgstr "Grund der Absage"
 #: src/pages/help.tsx
 msgid "Your browser cannot open this image format. Please choose a photo or screenshot as JPEG or PNG."
 msgstr "Dieses Bildformat kann dein Browser nicht öffnen. Bitte ein Foto oder einen Screenshot als JPEG oder PNG wählen."
+
+# ai
+#: modules/polls/app/pages.tsx
+msgid "Ends at"
+msgstr "Ende um"
 
 #: src/pages/team.tsx
 msgid "How it works: open the link, select your own name and set up a passkey (Face ID, fingerprint or screen lock)."
@@ -5413,6 +5884,11 @@ msgstr "Beispiel:"
 #: src/pages/event.tsx
 msgid "Search by name"
 msgstr "Name suchen"
+
+# ai
+#: modules/polls/app/pages.tsx
+msgid "Please enter a price for every item, e.g. 8.50."
+msgstr "Bitte gib zu jedem Artikel einen Preis an, z. B. 8,50."
 
 #: src/pages/chat.tsx
 msgid "You no longer have access to this chat."
@@ -5458,6 +5934,11 @@ msgstr "Jahrgang {year}"
 #: worker/routes/feedback.ts
 msgid "From: {name}"
 msgstr "Von: {name}"
+
+# ai
+#: modules/polls/app/pages.tsx
+msgid "Description (optional)"
+msgstr "Beschreibung (optional)"
 
 #: src/pages/squad.tsx
 msgid "No core squad set yet. You can do that under <0>Team → Squad</0>."
@@ -5565,6 +6046,11 @@ msgstr "Themen pro Person einstellen"
 msgid "Organisers manage the helper duties of this event."
 msgstr "Organisatoren verwalten die Helferdienste dieses Termins."
 
+# ai
+#: modules/polls/app/pages.tsx
+msgid "Vote withdrawn."
+msgstr "Stimme zurückgezogen."
+
 #: worker/routes/squad.ts
 msgctxt "squad"
 msgid "Helper"
@@ -5596,6 +6082,11 @@ msgstr "Diese Saison gibt es schon."
 msgid "In progress · Game"
 msgstr "Läuft gerade · Spiel"
 
+# ai
+#: modules/polls/worker/routes.ts
+msgid "A date is listed twice."
+msgstr "Ein Termin steht doppelt drin."
+
 #: src/avatar.tsx
 msgid "Remove picture"
 msgstr "Bild entfernen"
@@ -5605,11 +6096,17 @@ msgctxt "coach"
 msgid "My teams"
 msgstr "Meine Mannschaften"
 
+# ai
+#: modules/polls/app/home.tsx
+msgid "(open poll)"
+msgstr "(offene Umfrage)"
+
 #: modules/carpools/app/card.tsx
 msgid "{ownTaken} of {ownSeats} taken"
 msgstr "{ownTaken} von {ownSeats} belegt"
 
 # ai
+#: modules/polls/app/home.tsx
 #: src/list-import.tsx
 msgid "Ignore"
 msgstr "Ignorieren"
@@ -5621,6 +6118,11 @@ msgstr "{label} (für {child})"
 #: src/pages/special.tsx
 msgid "Home or away"
 msgstr "Heim oder auswärts"
+
+# ai
+#: modules/polls/worker/routes.ts
+msgid "Orders cannot be anonymous."
+msgstr "Bestellungen können nicht anonym sein."
 
 #: src/pages/group.tsx
 msgid "Add members"
@@ -5726,6 +6228,11 @@ msgstr "Diese E-Mail-Adresse ist schon vergeben."
 msgid "No connection. The message was not sent."
 msgstr "Keine Verbindung. Die Nachricht wurde nicht gesendet."
 
+# ai
+#: modules/polls/app/pages.tsx
+msgid "No. {no} paid"
+msgstr "Nr. {no} bezahlt"
+
 #: worker/routes/push.ts
 #: worker/routes/push.ts
 msgid "Invalid key"
@@ -5744,6 +6251,16 @@ msgstr "Stammkader gespeichert ({count})."
 #: src/pages/event.tsx
 msgid "{venue, select, hall {Hall unavailable} pitch {Pitch unavailable} other {Venue unavailable}}"
 msgstr "{venue, select, hall {Halle belegt} pitch {Platz belegt} other {Spielstätte belegt}}"
+
+# ai
+#: modules/polls/app/pages.tsx
+msgid "PayPal (paypal.me/{paypal})"
+msgstr "PayPal (paypal.me/{paypal})"
+
+# ai
+#: modules/polls/app/pages.tsx
+msgid "Note copied."
+msgstr "Mitteilung kopiert."
 
 # ai
 #: src/pages/games.tsx
@@ -5766,6 +6283,11 @@ msgstr "Jahrgang {birthYear} ist zu alt für die {ageClass}"
 #: src/faq.tsx
 msgid "Inactive or away long-term: what is the difference?"
 msgstr "Inaktiv oder dauerhaft abwesend: Was ist der Unterschied?"
+
+# ai
+#: modules/polls/app/pages.tsx
+msgid "If you change an answer, its votes still count, even if it then means something else. If you remove an answer, its votes are lost; whoever had chosen only that one votes again."
+msgstr "Änderst du eine Antwort, zählen die Stimmen dafür weiter, auch wenn sie dann etwas anderes bedeutet. Entfernst du eine Antwort, gehen ihre Stimmen verloren; wer nur sie gewählt hatte, stimmt neu ab."
 
 #: modules/carpools/worker/routes.ts
 msgid "Looking for a lift"
@@ -5934,6 +6456,11 @@ msgstr "Zum Beispiel „SV Musterstadt 1900 Handball“"
 msgid "No one yet."
 msgstr "Noch niemand."
 
+# ai
+#: modules/polls/app/pages.tsx
+msgid "Change photo"
+msgstr "Foto ändern"
+
 #: src/pages/profile.tsx
 msgid "Mails go to the confirmed address you sign in with. You don't have one yet, add it under <0>Profile → Sign-in</0>."
 msgstr "Mails gehen an die bestätigte Adresse deiner Anmeldung. Du hast noch keine, trage sie unter <0>Profil → Anmeldung</0> ein."
@@ -5986,6 +6513,11 @@ msgstr "Du arbeitest jetzt als Trainer."
 msgid "Help and feedback"
 msgstr "Hilfe und Feedback"
 
+# ai
+#: modules/polls/worker/routes.ts
+msgid "The kind and team of a poll stay as they are."
+msgstr "Art und Mannschaft einer Umfrage bleiben, wie sie sind."
+
 #: modules/duties/app/approvals.tsx
 #: src/pages/admin.tsx
 #: src/pages/profile.tsx
@@ -5999,6 +6531,11 @@ msgstr "Kopieren"
 #: worker/routes/stats.ts
 msgid "This time span does not exist."
 msgstr "Diesen Zeitraum gibt es nicht."
+
+# ai
+#: modules/polls/app/pages.tsx
+msgid "Amount"
+msgstr "Betrag"
 
 #: src/pages/event.tsx
 #: src/pages/home.tsx
@@ -6146,6 +6683,11 @@ msgid "Skip for now"
 msgstr "Erst einmal überspringen"
 
 # ai
+#: modules/polls/app/pages.tsx
+msgid "nothing ordered"
+msgstr "nichts bestellt"
+
+# ai
 #: src/pages/stats.tsx
 msgid "Statistics of {child}"
 msgstr "Statistik von {child}"
@@ -6164,6 +6706,11 @@ msgid "Not your child's name! {clashName} is also the name of a child in the {te
 msgstr "Nicht der Name deines Kindes! {clashName} heißt auch ein Kind in der {teamName}. Trag hier deinen eigenen Namen ein, damit Trainer und andere Eltern wissen, wer du bist."
 
 # ai
+#: modules/polls/app/settings.tsx
+msgid "Applies to every order in the club, including the coaches' ones. Whoever ordered sees the amount, a PayPal button with the amount and, for a bank transfer, the IBAN and reference with a QR code (euros only). The reference is the title with the order number, e.g. “Club kit No. 17”, without names. For PayPal the app copies a note with the order number and the players' names."
+msgstr "Gilt für alle Bestellungen im Verein, auch die der Trainer. Wer bestellt hat, sieht den Betrag, einen PayPal-Knopf mit Betrag und für die Überweisung IBAN und Verwendungszweck mit GiroCode (nur in Euro). Der Verwendungszweck ist der Titel mit der Bestellnummer, z. B. „Vereinsausrüstung Nr. 17“, ohne Namen. Für PayPal kopiert die App eine Mitteilung mit Bestellnummer und den Namen der Spieler."
+
+# ai
 #: modules/duties/app/admin.tsx
 msgid "People of the team"
 msgstr "Leute der Mannschaft"
@@ -6176,6 +6723,13 @@ msgstr "Abonniere deine Termine in der Kalender-App deines Handys."
 #: src/pages/profile.tsx
 msgid "<0>Set up a passkey.</0> It is the safest way to sign in: Face ID, fingerprint or screen lock, without a password and without a code by e-mail."
 msgstr "<0>Richte einen Passkey ein.</0> Er ist die sicherste Anmeldung: Face ID, Fingerabdruck oder Gerätesperre, ohne Passwort und ohne Code per E-Mail."
+
+# ai
+#: modules/polls/app/shrink.ts
+#: modules/polls/worker/routes.ts
+#: modules/polls/worker/routes.ts
+msgid "The photo is too large."
+msgstr "Das Foto ist zu groß."
 
 # ai
 #: modules/sms/module.ts
@@ -6209,6 +6763,11 @@ msgstr "Einstellungen erklären sich hinter einem kleinen „i“, mit Beispiel.
 msgid "Import from lists instead"
 msgstr "Stattdessen aus Listen übernehmen"
 
+# ai
+#: modules/polls/app/pages.tsx
+msgid "All votes are lost."
+msgstr "Alle Stimmen gehen verloren."
+
 #: modules/handball4all/app/live.tsx
 msgid "The window was blocked. Please allow pop-ups for the app."
 msgstr "Das Fenster wurde blockiert. Bitte Pop-ups für die App erlauben."
@@ -6240,6 +6799,16 @@ msgstr "Ankündigung wurde entfernt"
 #: src/pages/chat.tsx
 msgid "Mute {selAuthor}"
 msgstr "{selAuthor} stummschalten"
+
+# ai
+#: modules/polls/app/pages.tsx
+msgid "Not paid yet after all"
+msgstr "Doch noch nicht bezahlt"
+
+# ai
+#: modules/polls/app/pages.tsx
+msgid "e.g. When shall we have the summer party?"
+msgstr "z. B. Wann machen wir das Sommerfest?"
 
 #: src/faq.tsx
 msgid "How do I nominate the squad for a game?"
@@ -6320,6 +6889,11 @@ msgstr "Das Bild ist zu groß."
 msgid "Parents: {names}"
 msgstr "Eltern: {names}"
 
+# ai
+#: modules/polls/app/pages.tsx
+msgid "Reported as paid."
+msgstr "Als bezahlt gemeldet."
+
 #: src/pages/event.tsx
 msgid "Meet at"
 msgstr "Treffen um"
@@ -6342,6 +6916,19 @@ msgid "If the new phone is signed in with the same Apple or Google account, your
 msgstr "Ist das neue Handy mit demselben Apple- bzw. Google-Konto angemeldet, ist dein Passkey meist schon da: einfach <0>Mit Passkey anmelden</0>."
 
 # ai
+#: modules/polls/worker/domain.ts
+#: modules/polls/worker/routes.ts
+msgid "{title} · until {ends}"
+msgstr "{title} · bis {ends}"
+
+# ai
+#: modules/polls/worker/routes.ts
+#: modules/polls/worker/routes.ts
+#: modules/polls/worker/routes.ts
+msgid "Invalid answer."
+msgstr "Ungültige Antwort."
+
+# ai
 #: worker/routes/squad.ts
 msgid "The game is over or not taking place."
 msgstr "Das Spiel ist vorbei oder findet nicht statt."
@@ -6349,6 +6936,11 @@ msgstr "Das Spiel ist vorbei oder findet nicht statt."
 #: src/pages/event.tsx
 msgid "Venue (optional)"
 msgstr "Ort (optional)"
+
+# ai
+#: modules/polls/app/pages.tsx
+msgid "Recipient"
+msgstr "Empfänger"
 
 #: modules/duties/worker/routes.ts
 msgid "You are already signed up for this duty."
@@ -6391,6 +6983,11 @@ msgstr "Benachrichtigungen sind aktiv."
 msgid "{present} of {expected}"
 msgstr "{present} von {expected}"
 
+# ai
+#: modules/polls/worker/routes.ts
+msgid "This IBAN is not valid."
+msgstr "Diese IBAN stimmt nicht."
+
 #: src/pages/event.tsx
 msgid "Move event"
 msgstr "Termin verschieben"
@@ -6431,6 +7028,12 @@ msgstr "Bitte gib einen Grund an."
 msgid "Close reactions"
 msgstr "Reaktionen schließen"
 
+# ai
+#: modules/polls/worker/routes.ts
+#: modules/polls/worker/routes.ts
+msgid "The end must lie in the future."
+msgstr "Das Ende muss in der Zukunft liegen."
+
 #: worker/routes/events.ts
 msgid "Going ahead: {label}"
 msgstr "Findet statt: {label}"
@@ -6456,6 +7059,7 @@ msgstr "Trainer erinnern nach"
 msgid "{who} took back the cancellation of {label} ({team})"
 msgstr "{who} hat die Absage von {label} zurückgenommen ({team})"
 
+#: modules/polls/app/pages.tsx
 #: modules/sms/app/settings.tsx
 #: src/pages/club-settings.tsx
 #: src/pages/club-settings.tsx
@@ -6480,6 +7084,11 @@ msgid "On since {since}. Only admins can use the app; reminders and other automa
 msgstr "An seit {since}. Nur Admins können die App nutzen, Erinnerungen und andere automatische Nachrichten pausieren."
 
 # ai
+#: modules/polls/app/pages.tsx
+msgid "Voted"
+msgstr "Abgestimmt"
+
+# ai
 #: worker/routes/list-import.ts
 msgid "Please choose an age class for \"{name}\"."
 msgstr "Bitte wähle eine Altersklasse für „{name}“."
@@ -6502,6 +7111,7 @@ msgstr "kein Zugang"
 msgid "Remove passkey"
 msgstr "Passkey entfernen"
 
+#: modules/polls/app/pages.tsx
 #: src/faq.tsx
 msgid "Players"
 msgstr "Spielerinnen und Spieler"
@@ -6567,6 +7177,11 @@ msgstr "Von Spielerinnen, Spielern und Eltern nur Vorname, Nachname und (bei Spi
 msgid "If subscribing does not work, copy the link and paste it in the calendar app under “Add subscribed calendar” or “Add by URL”."
 msgstr "Klappt das Abonnieren nicht, den Link kopieren und in der Kalender-App unter „Kalender abonnieren“ bzw. „Per URL hinzufügen“ einfügen."
 
+# ai
+#: modules/polls/app/pages.tsx
+msgid "paid"
+msgstr "bezahlt"
+
 #: worker/chat/room.ts
 msgctxt "chat author"
 msgid "In charge"
@@ -6580,10 +7195,20 @@ msgstr "+ Neuen Ort anlegen"
 msgid "First add the players."
 msgstr "Lege zuerst die Spielerinnen und Spieler an."
 
+# ai
+#: modules/polls/app/pages.tsx
+msgid "For you as admin"
+msgstr "Für dich als Admin"
+
 #: src/pages/admin.tsx
 #: src/pages/setup-wizard.tsx
 msgid "e.g. wC1, wC2, Damen 2"
 msgstr "z. B. wC1, wC2, Damen 2"
+
+# ai
+#: modules/polls/app/pages.tsx
+msgid "one vote per family"
+msgstr "eine Stimme je Familie"
 
 #: src/pages/admin.tsx
 msgctxt "filter"
@@ -6743,6 +7368,11 @@ msgstr "mit {names} · ohne App"
 msgid "Not nominated"
 msgstr "Nicht nominiert"
 
+# ai
+#: modules/polls/app/pages.tsx
+msgid "Not ordered yet ({pendingCount})"
+msgstr "Noch nicht bestellt ({pendingCount})"
+
 #: src/app.tsx
 msgctxt "navigation"
 msgid "Admin"
@@ -6758,6 +7388,11 @@ msgctxt "feedback"
 msgid "Player"
 msgstr "Spieler/in"
 
+# ai
+#: modules/polls/app/pages.tsx
+msgid "End saved."
+msgstr "Ende gespeichert."
+
 #: modules/carpools/worker/domain.ts
 msgid "{list} and {last}"
 msgstr "{list} und {last}"
@@ -6767,9 +7402,19 @@ msgstr "{list} und {last}"
 msgid "For everyone who has not chosen a language, and for messages outside the app."
 msgstr "Für alle, die keine Sprache gewählt haben, und für Nachrichten außerhalb der App."
 
+# ai
+#: modules/polls/worker/routes.ts
+msgid "Only orders are paid."
+msgstr "Nur Bestellungen werden bezahlt."
+
 #: src/pages/team.tsx
 msgid "Set core squad"
 msgstr "Stammkader festlegen"
+
+# ai
+#: modules/polls/app/pages.tsx
+msgid "“One vote per family” can no longer be switched."
+msgstr "„Eine Stimme je Familie“ lässt sich nicht mehr umstellen."
 
 #: src/pages/home.tsx
 msgid "attending"
@@ -6815,6 +7460,11 @@ msgstr "Absagen"
 #: src/pages/admin.tsx
 msgid "Training venues"
 msgstr "Trainingsorte"
+
+# ai
+#: modules/polls/app/pages.tsx
+msgid "Start poll"
+msgstr "Umfrage starten"
 
 #: src/pages/team.tsx
 msgid "More actions"
@@ -6921,6 +7571,11 @@ msgstr "Wenn sie im Profil entfernt wird oder die Person den Verein verlässt."
 msgid "As soon as you belong to a team, you will find its chat here."
 msgstr "Sobald du zu einer Mannschaft gehörst, findest du hier ihren Chat."
 
+# ai
+#: modules/polls/app/pages.tsx
+msgid "{voted} of {total} voted"
+msgstr "{voted} von {total} abgestimmt"
+
 #: src/pages/plans.tsx
 msgid "No upcoming holidays entered."
 msgstr "Keine kommenden Ferien eingetragen."
@@ -7016,6 +7671,16 @@ msgid "Please enter the sender address."
 msgstr "Bitte gib die Absenderadresse ein."
 
 # ai
+#: modules/polls/app/pages.tsx
+msgid "Payment open"
+msgstr "Zahlung offen"
+
+# ai
+#: modules/polls/app/pages.tsx
+msgid "The photo could not be read."
+msgstr "Das Foto konnte nicht gelesen werden."
+
+# ai
 #: src/player-import.tsx
 msgid "One player per line: first name, last name, birth year. Copy the columns from a spreadsheet or separate them with a semicolon."
 msgstr "Ein Spieler pro Zeile: Vorname, Nachname, Jahrgang. Kopiere die Spalten aus einer Tabelle oder trenne sie mit Semikolon."
@@ -7084,6 +7749,11 @@ msgstr "Treffpunkt"
 msgid "Remove profile picture?"
 msgstr "Profilbild entfernen?"
 
+# ai
+#: modules/polls/app/pages.tsx
+msgid "Your vote"
+msgstr "Deine Stimme"
+
 #: src/respond.tsx
 msgid "Send decline"
 msgstr "Absage senden"
@@ -7104,6 +7774,11 @@ msgstr "Du richtest deinen eigenen Zugang für die {teamName} ein."
 #: src/pages/admin.tsx
 msgid "{firstName} is now an admin."
 msgstr "{firstName} ist jetzt Admin."
+
+# ai
+#: modules/polls/app/pages.tsx
+msgid "Poll started. Everyone who votes has been notified."
+msgstr "Umfrage gestartet. Alle, die abstimmen, wurden benachrichtigt."
 
 #: src/pages/event.tsx
 #: src/pages/home.tsx
@@ -7190,6 +7865,11 @@ msgstr "Ältere Nachrichten laden"
 msgctxt "training"
 msgid "Optional"
 msgstr "Optional"
+
+# ai
+#: modules/polls/app/pages.tsx
+msgid "Reported as paid ({reported}), waiting for confirmation."
+msgstr "Als bezahlt gemeldet ({reported}), wartet auf Bestätigung."
 
 #: src/email.tsx
 #: src/pages/join.tsx
@@ -7324,9 +8004,24 @@ msgstr "Beides ist möglich, es gilt die letzte Rückmeldung. Ihr seht jeweils, 
 msgid "Parents are not involved in your child's teams."
 msgstr "In den Mannschaften deines Kindes sind keine Eltern eingebunden."
 
+# ai
+#: modules/polls/app/help.ts
+msgid "“Visible right away”: whoever may vote sees the interim result at once. “Only after the end”: only when the poll is over. You as the creator, the coaches and admins always see it. Participants see names only when finding a date, if the poll is not anonymous."
+msgstr "„Gleich sichtbar“: Wer abstimmen darf, sieht das Zwischenergebnis sofort. „Erst nach dem Ende“: erst, wenn die Umfrage vorbei ist. Du als Ersteller, die Trainer und Admins sehen es immer. Namen sehen Teilnehmende nur bei der Terminfindung, wenn sie nicht anonym ist."
+
+# ai
+#: modules/polls/app/pages.tsx
+msgid "Poll deleted."
+msgstr "Umfrage gelöscht."
+
 #: worker/routes/parents.ts
 msgid "Permission changed"
 msgstr "Freigabe geändert"
+
+# ai
+#: modules/polls/app/pages.tsx
+msgid "Preview only, nothing saved."
+msgstr "Nur Vorschau, nichts gespeichert."
 
 #: src/pages/join.tsx
 msgid "Your name is missing or already taken? Let your coach know."
@@ -7480,9 +8175,19 @@ msgstr "Helferplan"
 msgid "no duties"
 msgstr "keine Dienste"
 
+# ai
+#: modules/polls/app/pages.tsx
+msgid "Paid, thank you!"
+msgstr "Bezahlt, danke!"
+
 #: src/pages/admin.tsx
 msgid "All upcoming special events and games are in your event overview."
 msgstr "Alle kommenden Sondertermine und Spiele stehen in deiner Terminübersicht."
+
+# ai
+#: modules/polls/app/pages.tsx
+msgid "Anonymous: nobody sees who voted what, not even you."
+msgstr "Anonym: Wer wie abgestimmt hat, sieht niemand, auch du nicht."
 
 # ai
 #: shared/changelog.ts
@@ -7501,6 +8206,16 @@ msgstr "Diese Trainingszeit gibt es nicht."
 #: worker/domain/email-login.ts
 msgid "The code is wrong or has expired. Please request a new one."
 msgstr "Der Code stimmt nicht oder ist abgelaufen. Bitte fordere einen neuen an."
+
+# ai
+#: modules/polls/app/pages.tsx
+msgid "QR code with recipient, IBAN, amount and reference"
+msgstr "GiroCode mit Empfänger, IBAN, Betrag und Verwendungszweck"
+
+# ai
+#: modules/polls/worker/routes.ts
+msgid "A date is not valid."
+msgstr "Ein Termin ist ungültig."
 
 # ai
 #: modules/duties/app/approvals.tsx
@@ -7548,6 +8263,11 @@ msgstr "Es gibt keine laufende Saison."
 msgid "Switch on under Administration → Club"
 msgstr "Einschalten unter Verwaltung → Verein"
 
+# ai
+#: modules/polls/app/pages.tsx
+msgid "{name}: choose photo"
+msgstr "{name}: Foto wählen"
+
 #: modules/carpools/app/card.tsx
 #: src/pages/event.tsx
 #: src/respond.tsx
@@ -7570,6 +8290,11 @@ msgstr "Dieser Link ist abgelaufen. Bitte frag nach einem neuen Link."
 #: src/pages/admin.tsx
 msgid "Team chats in which you are not a coach or parent"
 msgstr "Mannschaftschats, in denen du nicht Trainer oder Elternteil bist"
+
+# ai
+#: modules/polls/module.ts
+msgid "Answers: the creator, the team's coaches and admins, unless the poll is anonymous; in scheduling polls also the participants (first name and initial). Orders: each family sees only its own, the creator, coaches and admins see all. Payment details: everyone who ordered."
+msgstr "Antworten: wer die Umfrage angelegt hat, die Trainer der Mannschaft und Admins, außer bei anonymen Umfragen; bei der Terminfindung auch die Teilnehmenden (Vorname und Initial). Bestellungen: jede Familie sieht nur ihre eigene, Ersteller, Trainer und Admins sehen alle. Bezahlangaben: alle, die bestellt haben."
 
 # ai
 #: src/pages/mail-settings.tsx
@@ -7633,6 +8358,11 @@ msgstr "Spieler"
 msgid "Choose a team"
 msgstr "Mannschaft wählen"
 
+# ai
+#: modules/polls/worker/routes.ts
+msgid "Every item needs a name and a price."
+msgstr "Jeder Artikel braucht einen Namen und einen Preis."
+
 #: src/pages/club-settings.tsx
 msgid "Please choose two colours."
 msgstr "Bitte wähle zwei Farben."
@@ -7642,9 +8372,19 @@ msgstr "Bitte wähle zwei Farben."
 msgid "Suggestions from lower-ranked teams of the same age class and the next younger youth team. The request goes to the person or their parents, and the coaches of their home team are informed."
 msgstr "Vorschläge aus nachrangigen Mannschaften derselben Altersklasse und der nächstjüngeren Jugend. Die Anfrage geht an die Person bzw. ihre Eltern, die Trainer der Stammmannschaft werden informiert."
 
+# ai
+#: modules/polls/app/pages.tsx
+msgid "{paid} paid, {rest} open"
+msgstr "{paid} bezahlt, {rest} offen"
+
 #: src/pages/plans.tsx
 msgid "{occurrences} events will be created for the next {weeks} weeks."
 msgstr "Für die nächsten {weeks} Wochen werden {occurrences} Termine erzeugt."
+
+# ai
+#: modules/polls/app/pages.tsx
+msgid "Yes"
+msgstr "Ja"
 
 #: src/pages/chat.tsx
 msgid "as admin · last message {when}"
@@ -7698,6 +8438,11 @@ msgstr "vor über einem Jahr aktiv"
 #: modules/duties/app/admin.tsx
 msgid "Add template"
 msgstr "Vorlage hinzufügen"
+
+# ai
+#: modules/polls/worker/routes.ts
+msgid "There are votes already: “One vote per family” stays as it is."
+msgstr "Es gibt schon Stimmen: „Eine Stimme je Familie“ bleibt, wie es ist."
 
 #: src/pages/team.tsx
 msgid "Parents enter their name, select their child (or several) and set up a passkey. The link takes effect immediately."
@@ -7777,6 +8522,7 @@ msgstr "Termin absagen"
 msgid "Stored encrypted. Leave empty to keep it."
 msgstr "Wird verschlüsselt gespeichert. Leer lassen, um es zu behalten."
 
+#: modules/polls/app/pages.tsx
 #: src/pages/group.tsx
 #: src/pages/group.tsx
 msgid "Leads"
@@ -7926,6 +8672,12 @@ msgstr "Klappt das nicht und du hast eine E-Mail-Adresse hinterlegt, nimm <0>Cod
 #: worker/domain/holidays.ts
 msgid "OpenHolidays API (openholidaysapi.org), licence ODbL"
 msgstr "OpenHolidays API (openholidaysapi.org), Lizenz ODbL"
+
+# ai
+#: modules/polls/app/home.tsx
+#: modules/polls/app/pages.tsx
+msgid "Vote"
+msgstr "Abstimmen"
 
 # ai
 #: worker/routes/events.ts
@@ -8127,6 +8879,11 @@ msgstr "Profilbild freigeben"
 msgid "Next season"
 msgstr "Kommende Saison"
 
+# ai
+#: modules/polls/app/pages.tsx
+msgid "Reopen"
+msgstr "Wieder öffnen"
+
 #: src/pages/group.tsx
 #: src/pages/team.tsx
 msgid "Switch"
@@ -8142,6 +8899,11 @@ msgid "This duty does not exist for this event."
 msgstr "Für diesen Termin gibt es diesen Dienst nicht."
 
 # ai
+#: modules/polls/app/pages.tsx
+msgid "Note (copied when tapped, paste it in PayPal): <0>{note}</0>"
+msgstr "Mitteilung (beim Antippen kopiert, in PayPal einfügen): <0>{note}</0>"
+
+# ai
 #: modules/duties/worker/routes.ts
 msgid "This person is not approved for {duty}."
 msgstr "Diese Person ist nicht für {duty} freigegeben."
@@ -8151,10 +8913,23 @@ msgstr "Diese Person ist nicht für {duty} freigegeben."
 msgid "Stand-in requests"
 msgstr "Aushilfe-Anfragen"
 
+# ai
+#: modules/polls/app/pages.tsx
+msgid "Item {n}: price"
+msgstr "Artikel {n}: Preis"
+
 #: worker/domain/duties.ts
 #: worker/routes/events.ts
 msgid "This event does not exist."
 msgstr "Diesen Termin gibt es nicht."
+
+# ai
+#: modules/polls/app/pages.tsx
+#: modules/polls/app/pages.tsx
+#: modules/polls/app/pages.tsx
+#: modules/polls/app/pages.tsx
+msgid "Edit poll"
+msgstr "Umfrage bearbeiten"
 
 #: modules/carpools/app/card.tsx
 msgid "Wait until someone offers seats"
@@ -8251,6 +9026,7 @@ msgstr "Feiertage"
 msgid "React to message from {author}"
 msgstr "Auf Nachricht von {author} reagieren"
 
+#: modules/polls/app/pages.tsx
 #: src/pages/event.tsx
 #: src/pages/special.tsx
 msgid "Title"
@@ -8302,6 +9078,11 @@ msgstr "Schalte ein, was dein Verein braucht. Ändern kannst du das jederzeit un
 msgid "A link already exists the other way round: the child is registered as a parent of this person."
 msgstr "Umgekehrt besteht schon eine Verknüpfung: Das Kind ist als Elternteil dieser Person eingetragen."
 
+# ai
+#: modules/polls/worker/domain.ts
+msgid "Poll ends soon · {team}"
+msgstr "Umfrage endet bald · {team}"
+
 #: src/pages/admin.tsx
 #: src/pages/admin.tsx
 msgid "https link, e.g. to OpenStreetMap"
@@ -8338,6 +9119,11 @@ msgstr "Kein Ort"
 msgid "{duty} is still needed for the game {game}."
 msgstr "Für das Spiel {game} wird noch {duty} gebraucht."
 
+# ai
+#: modules/polls/app/pages.tsx
+msgid "A photo could not be saved. Try again with “Edit poll”."
+msgstr "Ein Foto konnte nicht gespeichert werden. Versuch es über „Umfrage bearbeiten“ noch einmal."
+
 #: modules/duties/app/admin.tsx
 #: src/pages/admin.tsx
 #: src/pages/admin.tsx
@@ -8365,6 +9151,11 @@ msgstr "Spiel löschen"
 #: src/pages/stats.tsx
 msgid "{0, plural, one {Away long-term at # training} other {Away long-term at # trainings}}"
 msgstr "{0, plural, one {Dauerhaft abwesend bei # Training} other {Dauerhaft abwesend bei # Trainings}}"
+
+# ai
+#: modules/polls/app/pages.tsx
+msgid "paid {paid}"
+msgstr "bezahlt {paid}"
 
 #: src/pages/team.tsx
 msgid "Stand-in from {homeTeam}. Their coach maintains the personal data."
@@ -8453,6 +9244,13 @@ msgstr "Hallo {firstName}"
 msgid "{hours} hrs ago"
 msgstr "vor {hours} Std."
 
+# ai
+#: modules/polls/worker/routes.ts
+#: modules/polls/worker/routes.ts
+#: modules/polls/worker/routes.ts
+msgid "Only who manages the poll may do this."
+msgstr "Das darf nur, wer die Umfrage verwaltet."
+
 #: src/faq.tsx
 msgid "Do I have to accept every training?"
 msgstr "Muss ich jedem Training zusagen?"
@@ -8501,9 +9299,21 @@ msgstr "Zeitzone"
 msgid "{name} will then no longer be a lead in the group {teamName}. The person is kept."
 msgstr "{name} ist danach nicht mehr Verantwortlich in der Gruppe {teamName}. Die Person bleibt erhalten."
 
+# ai
+#: modules/polls/app/pages.tsx
+msgid "Order nothing"
+msgstr "Nichts bestellen"
+
 #: worker/auth/webauthn.ts
 msgid "The passkey could not be verified."
 msgstr "Der Passkey konnte nicht bestätigt werden."
+
+# ai
+#: modules/polls/app/pages.tsx
+#: modules/polls/app/pages.tsx
+#: modules/polls/app/pages.tsx
+msgid "Ordered"
+msgstr "Bestellt"
 
 # ai
 #: src/pages/setup-wizard.tsx
@@ -8519,6 +9329,11 @@ msgstr "{who} hat die Gruppe {team} gelöscht"
 #: src/help-texts.ts
 msgid "Before training Lena sees: 11 accepted, Mia and Paul declined. She does not see why."
 msgstr "Lena sieht vor dem Training: 11 zugesagt, Mia und Paul haben abgesagt. Warum, sieht sie nicht."
+
+# ai
+#: modules/polls/app/pages.tsx
+msgid "In the banking app choose “Scan” or “Photo transfer”. On the phone itself: take a screenshot and open it there."
+msgstr "In der Banking-App „Scannen“ oder „Foto-Überweisung“ wählen. Auf dem Handy selbst: Bildschirmfoto machen und dort öffnen."
 
 #: src/pages/event.tsx
 #: src/pages/special.tsx
@@ -8539,6 +9354,11 @@ msgstr "Kein Trainer ist da. Sag den Termin für alle ab oder kläre im Mannscha
 #: src/pages/team.tsx
 msgid "Create a new link?"
 msgstr "Neuen Link erzeugen?"
+
+# ai
+#: modules/polls/app/pages.tsx
+msgid "Reference"
+msgstr "Verwendungszweck"
 
 #: worker/domain/calendar.ts
 msgid "Task {label} · {game}"
@@ -8676,6 +9496,11 @@ msgstr "Im Spiel auf <0>Kader nominieren</0> tippen, auswählen und veröffentli
 msgid "Sign out?"
 msgstr "Abmelden?"
 
+# ai
+#: modules/polls/app/index.tsx
+msgid "Polls of the whole club, payment for orders"
+msgstr "Umfragen für den ganzen Verein, Bezahlung bei Bestellungen"
+
 #: src/duty-blocks.tsx
 #: src/pages/special.tsx
 msgid "{slots, plural, one {# slot} other {# slots}}"
@@ -8773,6 +9598,12 @@ msgstr "Auf diesem Gerät gibt es schon einen Passkey für diesen Zugang. Melde 
 msgid "On the iPhone, tap <0>Share</0> at the bottom in Safari and then <1>Add to Home Screen</1>; on Android, choose <2>Install app</2> in the browser menu. The guides further down explain it step by step."
 msgstr "Auf dem iPhone in Safari unten auf <0>Teilen</0> und <1>Zum Home-Bildschirm</1> tippen, auf Android im Browsermenü <2>App installieren</2>. Weiter unten unter Anleitungen steht es Schritt für Schritt."
 
+# ai
+#: modules/polls/worker/routes.ts
+#: modules/polls/worker/routes.ts
+msgid "This answer does not exist."
+msgstr "Diese Antwort gibt es nicht."
+
 #: modules/duties/app/admin.tsx
 msgid "Task: done before or after the event, for example washing the shirts."
 msgstr "Aufgabe: wird vor oder nach dem Termin erledigt, etwa Trikots waschen."
@@ -8827,6 +9658,11 @@ msgstr "{venue, select, hall {Lege zuerst die Hallen des Vereins an, mit Adresse
 msgid "{rider} is not riding with you: {game}."
 msgstr "{rider} fährt nicht mit dir mit: {game}."
 
+# ai
+#: modules/polls/app/pages.tsx
+msgid "Add item"
+msgstr "Artikel hinzufügen"
+
 #: src/pages/admin.tsx
 msgid "the child"
 msgstr "das Kind"
@@ -8842,6 +9678,11 @@ msgstr "Auf dem Startbildschirm und in Benachrichtigungen"
 #: src/pages/event.tsx
 msgid "Venue"
 msgstr "Ort"
+
+# ai
+#: modules/polls/app/pages.tsx
+msgid "Participants see who answered what (first name and initial)."
+msgstr "Die Teilnehmenden sehen, wer was geantwortet hat (Vorname und Initial)."
 
 #: src/pages/admin.tsx
 msgid "{days, plural, one {# day} other {# days}}"
@@ -8922,6 +9763,14 @@ msgstr "Sag deinem Trainer Bescheid. Er ergänzt dich oder prüft, wer sich mit 
 msgid "Game schedule sources"
 msgstr "Spielplan-Quellen"
 
+# ai
+#: modules/polls/app/pages.tsx
+#: modules/polls/worker/routes.ts
+#: modules/polls/worker/routes.ts
+#: modules/polls/worker/routes.ts
+msgid "The poll has ended."
+msgstr "Die Umfrage ist beendet."
+
 #: src/pages/team.tsx
 msgid "Automatic squad switched off. Squads already nominated remain."
 msgstr "Automatischer Kader ausgeschaltet. Bereits nominierte Kader bleiben."
@@ -8997,6 +9846,7 @@ msgstr "Freigegebene, alle Mannschaften"
 
 #: modules/carpools/app/card.tsx
 #: modules/carpools/app/card.tsx
+#: modules/polls/app/pages.tsx
 #: src/pages/event.tsx
 #: src/pages/profile.tsx
 #: src/pages/profile.tsx
@@ -9222,6 +10072,11 @@ msgid "Admin access for"
 msgstr "Admin-Zugang für"
 
 # ai
+#: modules/polls/module.ts
+msgid "With the poll, at the latest at the season change. Someone who leaves the club is removed from running polls."
+msgstr "Mit der Umfrage, spätestens beim Saisonwechsel. Wer den Verein verlässt, wird aus laufenden Umfragen entfernt."
+
+# ai
 #: src/pages/team.tsx
 msgid "Staff · {staffCount}"
 msgstr "Betreuer · {staffCount}"
@@ -9282,7 +10137,14 @@ msgstr "Zu- und Absagen"
 msgid "{driver} is not driving: {game}. The search for a lift for {rider} continues."
 msgstr "{driver} fährt nicht: {game}. Die Suche nach einer Mitfahrgelegenheit für {rider} läuft weiter."
 
+# ai
+#: modules/polls/app/pages.tsx
+msgid "Maybe: {maybeNames}"
+msgstr "Vielleicht: {maybeNames}"
+
 #: modules/carpools/app/card.tsx
+#: modules/polls/app/pages.tsx
+#: modules/polls/app/pages.tsx
 #: src/pages/team.tsx
 #: src/pages/team.tsx
 #: src/respond.tsx
@@ -9302,6 +10164,11 @@ msgstr "Du bist gerade offline. Du siehst den zuletzt geladenen Stand."
 msgid "On site: present during a time span, for example at the counter."
 msgstr "Vor Ort: anwesend in einem Zeitraum, etwa an der Theke."
 
+# ai
+#: modules/polls/worker/routes.ts
+msgid "This size does not exist."
+msgstr "Diese Größe gibt es nicht."
+
 #: src/pages/profile.tsx
 msgid "{firstName} gets their own access with a passkey. Only give the link to {firstName} or open it directly on their phone."
 msgstr "{firstName} bekommt einen eigenen Zugang mit Passkey. Den Link nur {firstName} geben oder direkt auf dem Handy öffnen."
@@ -9318,6 +10185,11 @@ msgstr "Mitglied"
 #: worker/routes/join.ts
 msgid "Please enter your e-mail address. It is required for admins."
 msgstr "Bitte gib deine E-Mail-Adresse an. Für Admins ist sie Pflicht."
+
+# ai
+#: modules/polls/worker/routes.ts
+msgid "{firstName} started a poll: {title}"
+msgstr "{firstName} hat eine Umfrage gestartet: {title}"
 
 #: modules/duties/app/helpers.tsx
 msgid "“{note}”"
@@ -9353,6 +10225,11 @@ msgstr "Bitte schreib kurz, worum es geht."
 msgid "Restore point from just before the database changes. If something is wrong after the update: roll back the Worker in the Cloudflare dashboard (Workers & Pages → this Worker → Deployments), then restore the database with this command in your copy:"
 msgstr "Wiederherstellungspunkt von kurz vor den Datenbankänderungen. Falls nach dem Update etwas nicht stimmt: Rolle den Worker im Cloudflare-Dashboard zurück (Workers & Pages → dieser Worker → Deployments) und stelle danach mit diesem Befehl in deiner Kopie die Datenbank wieder her:"
 
+# ai
+#: modules/polls/app/pages.tsx
+msgid "For {name}"
+msgstr "Für {name}"
+
 #: src/pages/stats.tsx
 #: src/pages/team.tsx
 #: src/pages/team.tsx
@@ -9373,6 +10250,11 @@ msgstr "Team {name}"
 #: src/list-import.tsx
 msgid "{name} is in no team."
 msgstr "{name} ist in keiner Mannschaft."
+
+# ai
+#: modules/polls/app/settings.tsx
+msgid "Save payment details"
+msgstr "Bezahlangaben speichern"
 
 #: src/pages/plans.tsx
 #: src/pages/plans.tsx
@@ -9435,6 +10317,11 @@ msgstr "{name} antwortet mit Status {status}"
 msgid "Personal data"
 msgstr "Stammdaten"
 
+# ai
+#: modules/polls/worker/routes.ts
+msgid "New poll"
+msgstr "Neue Umfrage"
+
 #: modules/carpools/app/index.tsx
 msgid "{waiting, plural, one {# is still looking} other {# are still looking}}"
 msgstr "{waiting, plural, one {# sucht noch} other {# suchen noch}}"
@@ -9485,6 +10372,11 @@ msgstr "Gerät"
 #: modules/handball4all/app/live.tsx
 msgid "Game report on handball4all"
 msgstr "Spielbericht bei handball4all"
+
+# ai
+#: modules/polls/app/pages.tsx
+msgid "Yes: {yesNames}"
+msgstr "Ja: {yesNames}"
 
 #: worker/routes/squad.ts
 msgid "Declined training {day}"
@@ -9571,9 +10463,19 @@ msgstr "Hier gibt es noch nichts zu zählen. Die Statistik gibt es für Spieler 
 msgid "This device"
 msgstr "Dieses Gerät"
 
+# ai
+#: modules/polls/app/pages.tsx
+msgid "Visible right away"
+msgstr "Gleich sichtbar"
+
 #: modules/duties/worker/routes.ts
 msgid "This template is empty or does not exist."
 msgstr "Diese Vorlage ist leer oder gibt es nicht."
+
+# ai
+#: modules/polls/app/settings.tsx
+msgid "PayPal.me name"
+msgstr "PayPal.me-Name"
 
 # ai
 #: src/child-limits.tsx
@@ -9594,6 +10496,11 @@ msgstr "Braucht Vorkenntnisse"
 #: src/faq.tsx
 msgid "Under <0>Team → Settings → Schedule</0>, tap <1>Sync now</1>. The app only fetches the schedule from handball4all at the push of a button, never automatically. Moved games are then announced to everyone."
 msgstr "Unter <0>Team → Einstellungen → Spielplan</0> auf <1>Jetzt abgleichen</1> tippen. Die App holt den Spielplan nur auf Knopfdruck von handball4all, nie automatisch. Verlegte Spiele melden sich dann bei allen."
+
+# ai
+#: modules/polls/app/pages.tsx
+msgid "{over} paid too much"
+msgstr "{over} zu viel bezahlt"
 
 #: src/pages/profile.tsx
 msgid "Notifications for {firstName}"
@@ -9773,6 +10680,11 @@ msgid "Crop picture"
 msgstr "Bild zuschneiden"
 
 # ai
+#: modules/polls/app/settings.tsx
+msgid "Currency"
+msgstr "Währung"
+
+# ai
 #: src/pages/event.tsx
 msgid "present"
 msgstr "anwesend"
@@ -9821,6 +10733,11 @@ msgstr "Ende"
 #: src/pages/join.tsx
 msgid "You are signed in as {loggedInAs}. Select the child you want to link in addition."
 msgstr "Du bist als {loggedInAs} angemeldet. Wähle das Kind aus, das du zusätzlich verknüpfen möchtest."
+
+# ai
+#: modules/polls/app/pages.tsx
+msgid "Photo"
+msgstr "Foto"
 
 # ai
 #: src/pages/event.tsx
@@ -9888,6 +10805,12 @@ msgstr "Link zur Datenschutzerklärung"
 msgid "Message to {teamName}"
 msgstr "Nachricht an {teamName}"
 
+# ai
+#: modules/polls/app/common.tsx
+#: modules/polls/app/pages.tsx
+msgid "Find a date"
+msgstr "Termin finden"
+
 #: modules/duties/worker/routes.ts
 msgid "This team has no helper plan, or you are not part of it."
 msgstr "Für diese Mannschaft gibt es keinen Helferplan, oder du gehörst nicht dazu."
@@ -9899,6 +10822,13 @@ msgstr "Gelöschte Person"
 #: modules/duties/app/helpers.tsx
 msgid "for {child}"
 msgstr "für {child}"
+
+# ai
+#: modules/polls/app/pages.tsx
+#: modules/polls/app/pages.tsx
+#: modules/polls/app/pages.tsx
+msgid "Create poll"
+msgstr "Umfrage anlegen"
 
 #: src/pages/season.tsx
 msgid "Current season: {name} ({from} – {to})"
@@ -9936,6 +10866,11 @@ msgid "already linked to you"
 msgstr "bereits mit dir verknüpft"
 
 # ai
+#: modules/polls/app/pages.tsx
+msgid "anonymous"
+msgstr "anonym"
+
+# ai
 #: src/pages/privacy.tsx
 msgid "Team staff such as a physio or team manager see who accepted or declined, without reasons. If a team switches on “responses visible to everyone”, its players and parents see the same for trainings and special events."
 msgstr "Betreuer wie Physio oder Teammanager sehen, wer zu- oder abgesagt hat, ohne Gründe. Schaltet eine Mannschaft „Zu- und Absagen für alle sichtbar“ ein, sehen ihre Spieler und Eltern dasselbe bei Training und Sonderterminen."
@@ -9947,6 +10882,11 @@ msgstr "{drivers, plural, one {# Fahrer · {freeSeats} frei} other {# Fahrer · 
 #: src/pages/games.tsx
 msgid "The game schedule was only just synced. Please try again in a few minutes."
 msgstr "Der Spielplan wurde gerade erst abgeglichen. Bitte in ein paar Minuten noch einmal."
+
+# ai
+#: modules/polls/app/pages.tsx
+msgid "Afterwards nobody can vote any more."
+msgstr "Danach kann niemand mehr abstimmen."
 
 #: modules/carpools/app/card.tsx
 msgid "For whom?"
@@ -10055,6 +10995,11 @@ msgstr "{rider} fährt doch nicht mit dir mit: {game}."
 msgid "I need a ride"
 msgstr "Ich brauche eine Mitfahrgelegenheit"
 
+# ai
+#: modules/polls/app/pages.tsx
+msgid "Whole club: all teams, without groups"
+msgstr "Ganzer Verein: alle Mannschaften, ohne Gruppen"
+
 #: src/pages/admin.tsx
 msgid "No role"
 msgstr "Ohne Rolle"
@@ -10117,6 +11062,11 @@ msgstr "vor {months} Monaten aktiv"
 msgid "Age groups"
 msgstr "Altersklassen"
 
+# ai
+#: modules/polls/app/pages.tsx
+msgid "End the poll now?"
+msgstr "Umfrage jetzt beenden?"
+
 #: src/pages/profile.tsx
 msgid "Signed in since {since}"
 msgstr "Angemeldet seit {since}"
@@ -10153,6 +11103,7 @@ msgstr "Deine nächsten Termine"
 
 #: modules/duties/app/admin.tsx
 #: modules/duties/app/admin.tsx
+#: modules/polls/app/pages.tsx
 #: src/faq.tsx
 #: src/pages/admin.tsx
 #: src/pages/admin.tsx
@@ -10183,6 +11134,11 @@ msgstr "Kein Helferplan"
 #: src/respond.tsx
 msgid "Quick selection"
 msgstr "Schnellauswahl"
+
+# ai
+#: modules/polls/app/pages.tsx
+msgid "Note copied, paste it in PayPal."
+msgstr "Mitteilung kopiert, in PayPal einfügen."
 
 # ai
 #: modules/duties/app/stats.tsx
@@ -10234,6 +11190,11 @@ msgid "For example when it may not be the person's own. A new one can be entered
 msgstr "Zum Beispiel, wenn sie vielleicht nicht die eigene der Person ist. Beim Öffnen des Links kann eine neue eingetragen werden."
 
 # ai
+#: modules/polls/app/pages.tsx
+msgid "Vote saved."
+msgstr "Stimme gespeichert."
+
+# ai
 #: worker/lib/server-errors.ts
 msgid "{club}: {count} server errors on {day}"
 msgstr "{club}: {count} Serverfehler am {day}"
@@ -10255,6 +11216,11 @@ msgstr "Mannschaften wählen"
 #: modules/duties/app/admin.tsx
 msgid "Delete template {templateName}?"
 msgstr "Vorlage {templateName} löschen?"
+
+# ai
+#: modules/polls/app/settings.tsx
+msgid "Account holder"
+msgstr "Kontoinhaber"
 
 #: src/pages/join.tsx
 msgid "Link child"
@@ -10284,6 +11250,16 @@ msgid "A family is a child of the team with its parents; siblings in the same te
 msgstr "Eine Familie ist ein Kind der Mannschaft mit seinen Eltern; Geschwister in derselben Mannschaft zählen als eine Familie. Gezählt werden erledigte Dienste und die, für die sich jemand schon eingetragen hat. Mit „Diese Familien erinnern“ bekommen alle ohne Dienst eine Benachrichtigung, einmal am Tag und nur, wenn noch Plätze frei sind."
 
 # ai
+#: modules/polls/app/pages.tsx
+msgid "Delete poll?"
+msgstr "Umfrage löschen?"
+
+# ai
+#: modules/polls/app/help.ts
+#: modules/polls/app/pages.tsx
+#: modules/polls/app/pages.tsx
+#: modules/polls/app/pages.tsx
+#: modules/polls/app/pages.tsx
 #: src/restore.tsx
 msgid "Result"
 msgstr "Ergebnis"
@@ -10299,6 +11275,8 @@ msgstr "Einrichtung"
 msgid "Invitation links are for setting up only; opened again, they lead straight to the app."
 msgstr "Einladungslinks sind nur zum Einrichten da; erneut geöffnet führen sie direkt zur App."
 
+#: modules/polls/app/pages.tsx
+#: modules/polls/app/pages.tsx
 #: src/game-import.tsx
 #: src/pages/plans.tsx
 #: src/player-import.tsx
@@ -10322,6 +11300,11 @@ msgstr "Der Stammkader ist automatisch für alle Spiele nominiert. Änderungen g
 #: src/pages/profile.tsx
 msgid "Notifications for this app are blocked in your device settings. Allow them there, then you can turn them on here."
 msgstr "Benachrichtigungen sind für diese App in den Einstellungen deines Geräts blockiert. Erlaube sie dort, dann kannst du sie hier aktivieren."
+
+# ai
+#: modules/polls/app/settings.tsx
+msgid "Ask all teams at once, create and manage"
+msgstr "Alle Mannschaften auf einmal fragen, anlegen und verwalten"
 
 #: src/pages/plans.tsx
 msgid "Remove training time"
@@ -10372,6 +11355,11 @@ msgid "All players of all teams"
 msgstr "Alle Spielerinnen und Spieler aller Mannschaften"
 
 # ai
+#: modules/polls/app/pages.tsx
+msgid "Running"
+msgstr "Laufend"
+
+# ai
 #: src/pages/team.tsx
 msgid "Permanent stand-ins from the next younger youth team or a lower-ranked team of the same age class see your games and can accept and decline."
 msgstr "Dauerhafte Aushilfen aus der nächstjüngeren Jugend oder einer nachrangigen Mannschaft derselben Altersklasse sehen eure Spiele und können zu- und absagen."
@@ -10412,6 +11400,11 @@ msgstr "Noch kein Bild. Bis dahin steht hier der Anfangsbuchstabe."
 #: src/pages/event.tsx
 msgid "Organisers"
 msgstr "Organisatoren"
+
+# ai
+#: modules/polls/app/pages.tsx
+msgid "IBAN copied."
+msgstr "IBAN kopiert."
 
 #: worker/routes/persons.ts
 msgid "Please enter a valid e-mail address."
@@ -10495,6 +11488,11 @@ msgstr "Danach steht wieder der Anfangsbuchstabe da."
 msgid "Season since {from}"
 msgstr "Saison seit {from}"
 
+# ai
+#: modules/polls/app/home.tsx
+msgid "Order hidden. You find it under Profile → Polls."
+msgstr "Bestellung ausgeblendet. Du findest sie unter Profil → Umfragen."
+
 #: src/howto.tsx
 msgid "You can find the guide at any time under help."
 msgstr "Die Anleitung findest du jederzeit unter Hilfe."
@@ -10519,6 +11517,11 @@ msgstr "Zur Bestätigung „{name}“ eintippen"
 #: src/pages/login.tsx
 msgid "If you have no access yet or have changed your device, your coach will give you a new invitation link."
 msgstr "Falls du noch keinen Zugang hast oder dein Gerät gewechselt hast, bekommst du von deinem Trainer einen neuen Einladungslink."
+
+# ai
+#: modules/polls/module.ts
+msgid "Polls (new poll, reminder before the end)"
+msgstr "Umfragen (neue Umfrage, Erinnerung vor dem Ende)"
 
 #: src/pages/squad.tsx
 msgid "Publish an empty squad?"
@@ -10555,6 +11558,11 @@ msgstr " und "
 #: worker/routes/feedback.ts
 msgid "unknown"
 msgstr "unbekannt"
+
+# ai
+#: modules/polls/app/pages.tsx
+msgid "End of the poll"
+msgstr "Ende der Umfrage"
 
 #: src/respond.tsx
 msgid "Declined. The coach has been informed."
@@ -10631,6 +11639,11 @@ msgstr "Weiteres Kind verknüpfen, z. B. ein Geschwisterkind"
 #: src/pages/games.tsx
 msgid "Last synced on {importedDate}."
 msgstr "Zuletzt abgeglichen am {importedDate}."
+
+# ai
+#: modules/polls/app/pages.tsx
+msgid "Created on {created}."
+msgstr "Erstellt am {created}."
 
 #: src/ui.tsx
 msgctxt "participation"
@@ -10750,6 +11763,11 @@ msgid "These details are kept even when the fixture list is synced again."
 msgstr "Diese Angaben bleiben auch erhalten, wenn der Spielplan neu abgeglichen wird."
 
 # ai
+#: modules/polls/app/settings.tsx
+msgid "Payment details saved."
+msgstr "Bezahlangaben gespeichert."
+
+# ai
 #: src/pages/setup-wizard.tsx
 #: src/pages/setup-wizard.tsx
 msgid "Coach of"
@@ -10803,6 +11821,7 @@ msgstr "Vorname von {name}"
 msgid "Please choose 15, 30 or 60 days, or off."
 msgstr "Bitte 15, 30 oder 60 Tage oder „Aus“ wählen."
 
+#: modules/polls/app/shrink.ts
 #: src/avatar.tsx
 msgid "The picture could not be opened. Please choose a photo in JPEG, PNG, WebP or HEIC format."
 msgstr "Das Bild konnte nicht geöffnet werden. Bitte ein Foto im Format JPEG, PNG, WebP oder HEIC wählen."
@@ -10893,6 +11912,11 @@ msgstr "Mitfahrt entfällt"
 #: src/pages/event.tsx
 msgid "Cancel game"
 msgstr "Spiel absagen"
+
+# ai
+#: modules/polls/app/pages.tsx
+msgid "Kind of poll"
+msgstr "Art der Umfrage"
 
 #: modules/carpools/worker/routes.ts
 msgid "Someone has booked in the meantime. Please try again."
@@ -10988,6 +12012,11 @@ msgstr "Weitere Termine ließen sich nicht laden."
 msgid "Location (optional)"
 msgstr "Ort (optional)"
 
+# ai
+#: modules/polls/app/pages.tsx
+msgid "End now"
+msgstr "Jetzt beenden"
+
 #: src/pages/profile.tsx
 msgid "Remove passkey?"
 msgstr "Passkey entfernen?"
@@ -11022,6 +12051,7 @@ msgstr "Push-Benachrichtigungen"
 #: modules/duties/app/approvals.tsx
 #: modules/duties/app/helpers.tsx
 #: modules/duties/app/helpers.tsx
+#: modules/polls/app/pages.tsx
 #: src/avatar.tsx
 #: src/avatar.tsx
 #: src/avatar.tsx
@@ -11044,6 +12074,11 @@ msgstr "Push-Benachrichtigungen"
 msgid "Remove"
 msgstr "Entfernen"
 
+# ai
+#: modules/polls/app/pages.tsx
+msgid "Items with price and sizes, everyone says how many they want."
+msgstr "Artikel mit Preis und Größen, jeder gibt an, wie viel er möchte."
+
 #: src/email.tsx
 #: src/pages/join.tsx
 #: src/pages/setup-wizard.tsx
@@ -11054,6 +12089,11 @@ msgstr "Zur App"
 #: src/pages/chat.tsx
 msgid "Chat settings"
 msgstr "Chat-Einstellungen"
+
+# ai
+#: modules/polls/app/pages.tsx
+msgid "Last changed by {lastBy}"
+msgstr "Zuletzt geändert von {lastBy}"
 
 # ai
 #: src/pages/team.tsx
@@ -11100,6 +12140,11 @@ msgstr "Zugeordnet."
 msgid "Current season: none"
 msgstr "Laufende Saison: keine"
 
+# ai
+#: modules/polls/app/pages.tsx
+msgid "Poll ended."
+msgstr "Umfrage beendet."
+
 #: src/format.ts
 msgid "tomorrow"
 msgstr "morgen"
@@ -11129,6 +12174,11 @@ msgstr "Bitte sage rechtzeitig bis {deadline} ({hours} Std. vorher) ab, damit de
 #: worker/routes/squad.ts
 msgid "Permanently absent from training {day}"
 msgstr "Training {day} dauerhaft abwesend"
+
+# ai
+#: modules/polls/app/pages.tsx
+msgid "{yes} yes"
+msgstr "{yes} Ja"
 
 #: modules/carpools/worker/routes.ts
 msgid "You cannot ride with yourself."
@@ -11184,6 +12234,9 @@ msgstr "Spielerlinks, die auf einem angemeldeten Gerät geöffnet werden, führe
 #: modules/carpools/app/card.tsx
 #: modules/duties/app/admin.tsx
 #: modules/duties/app/admin.tsx
+#: modules/polls/app/pages.tsx
+#: modules/polls/app/pages.tsx
+#: modules/polls/app/pages.tsx
 #: modules/sms/app/settings.tsx
 #: src/duty-blocks.tsx
 #: src/pages/admin.tsx
@@ -11208,6 +12261,11 @@ msgid "Format 2027/28"
 msgstr "Format 2027/28"
 
 # ai
+#: modules/polls/app/home.tsx
+msgid "Vote missing"
+msgstr "Stimme fehlt"
+
+# ai
 #: src/pages/privacy.tsx
 msgid "Functions of this club"
 msgstr "Funktionen dieses Vereins"
@@ -11227,9 +12285,19 @@ msgstr "Neue Versionen kommen als Pull Request in die Kopie deines Vereins auf G
 msgid "You have been muted in this chat."
 msgstr "Du wurdest in diesem Chat stummgeschaltet."
 
+# ai
+#: modules/polls/app/pages.tsx
+msgid "Poll saved."
+msgstr "Umfrage gespeichert."
+
 #: modules/duties/worker/routes.ts
 msgid "This duty has no note."
 msgstr "Bei diesem Dienst gibt es keine Notiz."
+
+# ai
+#: modules/polls/worker/routes.ts
+msgid "An answer is listed twice."
+msgstr "Eine Antwort steht doppelt drin."
 
 # ai
 #: src/pages/admin.tsx
@@ -11243,6 +12311,11 @@ msgstr "Du bist wieder im Chat angemeldet."
 #: src/pages/profile.tsx
 msgid "What should I receive?"
 msgstr "Was soll ich bekommen?"
+
+# ai
+#: modules/polls/app/pages.tsx
+msgid "e.g. Where shall the trip go?"
+msgstr "z. B. Wohin geht die Abschlussfahrt?"
 
 # ai
 #: src/pages/privacy.tsx
@@ -11279,6 +12352,11 @@ msgstr "Aus einer gemeinsamen Trainingszeit entsteht ein Termin, der bei allen M
 msgid "Message was removed by a coach"
 msgstr "Nachricht wurde von einem Trainer entfernt"
 
+# ai
+#: modules/polls/app/pages.tsx
+msgid "No polls"
+msgstr "Keine Umfragen"
+
 #: worker/chat/room.ts
 msgid "To everyone in chat {teamName}"
 msgstr "An alle im Chat {teamName}"
@@ -11307,6 +12385,11 @@ msgstr "Test-SMS von Kabine: SMS funktioniert."
 msgid "already approved"
 msgstr "schon freigegeben"
 
+# ai
+#: modules/polls/app/pages.tsx
+msgid "Nothing ordered"
+msgstr "Nichts bestellt"
+
 #: worker/routes/events.ts
 msgid "Past events cannot be moved."
 msgstr "Vergangene Termine können nicht verschoben werden."
@@ -11334,6 +12417,12 @@ msgstr "Der Termin findet nicht statt."
 #: modules/carpools/app/card.tsx
 msgid "Your offer"
 msgstr "Dein Angebot"
+
+# ai
+#: modules/polls/app/pages.tsx
+#: modules/polls/app/pages.tsx
+msgid "Ends on"
+msgstr "Ende am"
 
 # ai
 #: worker/app.ts
@@ -11378,6 +12467,11 @@ msgstr "Neue Infos zu {label} am {date}: Treffpunkt {point}."
 #: modules/duties/worker/notify.ts
 msgid "Helpers wanted: {team} {opponent}"
 msgstr "Helfer gesucht: {team} {opponent}"
+
+# ai
+#: modules/polls/worker/routes.ts
+msgid "Only who created the poll and admins may change photos."
+msgstr "Fotos ändern dürfen, wer die Umfrage angelegt hat, und Admins."
 
 #: modules/duties/app/admin.tsx
 msgid "Teams with this template will then use the default again."
@@ -11517,6 +12611,11 @@ msgstr "Aushilfen · {helperCount}"
 msgid "{name} declined training on {when} at short notice."
 msgstr "{name} hat das Training am {when} kurzfristig abgesagt."
 
+# ai
+#: modules/polls/app/pages.tsx
+msgid "Back to editing"
+msgstr "Zurück zum Bearbeiten"
+
 #: src/pages/group.tsx
 #: src/pages/group.tsx
 msgid "{coaches, plural, one {# lead} other {# leads}}"
@@ -11594,6 +12693,12 @@ msgid "This event does not exist or you cannot see it."
 msgstr "Diesen Termin gibt es nicht oder du kannst ihn nicht sehen."
 
 # ai
+#: modules/polls/app/pages.tsx
+#: modules/polls/app/pages.tsx
+msgid "Who votes?"
+msgstr "Wer stimmt ab?"
+
+# ai
 #: modules/duties/worker/qualifications.ts
 msgid "This list does not exist."
 msgstr "Diese Liste gibt es nicht."
@@ -11639,6 +12744,11 @@ msgstr "Vorlage gelöscht."
 #: src/pages/team.tsx
 msgid "No parents linked yet. Parents link themselves via the parent link."
 msgstr "Noch keine Eltern verknüpft. Eltern verknüpfen sich selbst über den Elternlink."
+
+# ai
+#: modules/polls/app/pages.tsx
+msgid "Dates"
+msgstr "Termine"
 
 #: modules/duties/worker/notify.ts
 msgid "{club} {team} {opponent} on {date} at {time}"
@@ -11751,6 +12861,11 @@ msgstr "Chatnachrichten"
 msgid "Applies to all trainings in this training slot. Accepting individual sessions remains possible."
 msgstr "Gilt für alle Trainings dieser Trainingszeit. Einzelne Zusagen bleiben möglich."
 
+# ai
+#: modules/polls/app/pages.tsx
+msgid "QR code for the banking app"
+msgstr "GiroCode für die Banking-App"
+
 #: src/pages/team.tsx
 msgid "Record leaving"
 msgstr "Austritt eintragen"
@@ -11771,6 +12886,11 @@ msgstr "bei {homeTeam}"
 #: src/pages/event.tsx
 msgid "Last response: {when}"
 msgstr "Letzte Rückmeldung: {when}"
+
+# ai
+#: modules/polls/app/pages.tsx
+msgid "Copy note"
+msgstr "Mitteilung kopieren"
 
 #: src/pages/admin.tsx
 msgid "e.g. carnival holidays"
@@ -11840,6 +12960,11 @@ msgstr "Ohne Eltern"
 msgid "uses the app"
 msgstr "nutzt die App"
 
+# ai
+#: modules/polls/app/pages.tsx
+msgid "“Multiple answers” and “One vote per family” can no longer be switched."
+msgstr "„Mehrere Antworten“ und „Eine Stimme je Familie“ lassen sich nicht mehr umstellen."
+
 #: src/pages/event.tsx
 msgid "changed"
 msgstr "geändert"
@@ -11860,6 +12985,16 @@ msgstr "Abgelehnt."
 #: src/pages/privacy.tsx
 msgid "School holidays: <0>OpenHolidays API</0>, data under the <1>Open Database License (ODbL)</1>."
 msgstr "Ferientermine: <0>OpenHolidays API</0>, Daten unter der <1>Open Database License (ODbL)</1>."
+
+# ai
+#: modules/polls/app/pages.tsx
+msgid "The poll stays anonymous."
+msgstr "Die Umfrage bleibt anonym."
+
+# ai
+#: modules/polls/app/pages.tsx
+msgid "Photos: product photos only, no people. They are made smaller before the upload."
+msgstr "Fotos: nur Produktfotos, keine Personen. Sie werden vor dem Hochladen verkleinert."
 
 #: modules/duties/worker/routes.ts
 msgid "You can take on {duty} once you switch it on in your profile under “I can do this”."
@@ -11891,6 +13026,11 @@ msgstr "Wer übernimmt"
 msgid "New start of play: {date}, {time}."
 msgstr "Neuer Spielbeginn: {date}, {time} Uhr."
 
+# ai
+#: modules/polls/app/pages.tsx
+msgid "Photo: {name}"
+msgstr "Foto: {name}"
+
 #: src/pages/team.tsx
 msgid "From another team"
 msgstr "Aus anderer Mannschaft"
@@ -11898,6 +13038,11 @@ msgstr "Aus anderer Mannschaft"
 #: src/pages/squad.tsx
 msgid "Squad updated ({added} new, {removed} removed)."
 msgstr "Kader aktualisiert ({added} neu, {removed} entfernt)."
+
+# ai
+#: modules/polls/app/pages.tsx
+msgid "{reported} reported as paid"
+msgstr "{reported} als bezahlt gemeldet"
 
 #: src/pages/admin.tsx
 msgid "{plans, plural, one {One holiday plan is linked to this period and takes over new dates automatically.} other {# holiday plans are linked to this period and take over new dates automatically.}}"
@@ -11912,6 +13057,14 @@ msgstr "Das Logo darf höchstens 256 KB groß sein."
 msgid "Events of the {team} for {kids}"
 msgstr "Termine der {team} für {kids}"
 
+# ai
+#: modules/polls/app/common.tsx
+#: modules/polls/app/home.tsx
+#: modules/polls/app/pages.tsx
+#: modules/polls/app/pages.tsx
+msgid "Order"
+msgstr "Bestellung"
+
 #: src/pages/profile.tsx
 msgid "Mail"
 msgstr "Mail"
@@ -11919,6 +13072,11 @@ msgstr "Mail"
 #: src/pages/squad.tsx
 msgid "The core squad is preselected. Players and parents only see the nomination after publishing."
 msgstr "Vorausgewählt ist der Stammkader. Spieler und Eltern sehen die Nominierung erst nach dem Veröffentlichen."
+
+# ai
+#: modules/polls/app/pages.tsx
+msgid "Item, e.g. socks"
+msgstr "Artikel, z. B. Socken"
 
 #: src/pages/profile.tsx
 #: src/pages/profile.tsx
@@ -11970,6 +13128,11 @@ msgstr "{count, plural, one {# kommendes Spiel aus {old} bleibt in der App, wird
 #: src/pages/team.tsx
 msgid "{count} without year of birth"
 msgstr "{count} ohne Geburtsjahr"
+
+# ai
+#: modules/polls/app/pages.tsx
+msgid "Ordered {ordered}"
+msgstr "Bestellt {ordered}"
 
 # ai
 #: src/pages/setup-wizard.tsx
@@ -12076,6 +13239,11 @@ msgstr "Kein Spielplan verknüpft"
 msgid "please confirm your e-mail address for {app} with this code:"
 msgstr "bitte bestätige deine E-Mail-Adresse für {app} mit diesem Code:"
 
+# ai
+#: modules/polls/app/pages.tsx
+msgid "After ordering, the payment details from Administration → Polls appear here."
+msgstr "Nach der Bestellung stehen hier die Bezahlangaben aus Verwaltung → Umfragen."
+
 #: src/pages/event.tsx
 msgid "Reminded. Without push notifications switched on, nothing arrives."
 msgstr "Erinnert. Ohne aktivierte Push-Benachrichtigung kommt nichts an."
@@ -12120,6 +13288,8 @@ msgstr "Ein Admin"
 msgid "{date}, {time}, {place}. The coach will announce the squad."
 msgstr "{date}, {time}, {place}. Den Kader gibt der Trainer bekannt."
 
+#: modules/polls/worker/routes.ts
+#: modules/polls/worker/routes.ts
 #: worker/routes/plans.ts
 msgid "Unknown team."
 msgstr "Unbekannte Mannschaft."
@@ -12142,6 +13312,16 @@ msgstr "Noch kein Trainer zugeordnet."
 #: src/pages/stats.tsx
 msgid "Away"
 msgstr "Auswärts"
+
+# ai
+#: modules/polls/app/pages.tsx
+msgid "at"
+msgstr "um"
+
+# ai
+#: modules/polls/app/pages.tsx
+msgid "{maybe} maybe"
+msgstr "{maybe} Vielleicht"
 
 #: src/pages/season.tsx
 msgid "To confirm, please enter <0>{nextName}</0>."
@@ -12291,6 +13471,11 @@ msgstr "Nein. Du bist automatisch dabei. Nur wenn du nicht kommen kannst, sagst 
 msgid "Player"
 msgstr "Spieler"
 
+# ai
+#: modules/polls/app/pages.tsx
+msgid "Several dates to choose from, everyone answers yes, maybe or no."
+msgstr "Mehrere Termine zur Wahl, jeder antwortet mit Ja, Vielleicht oder Nein."
+
 #: src/pages/join.tsx
 msgid "The passkey is the safest way to sign in: Face ID, fingerprint or screen lock, without a password. The app never gets to see any biometric data."
 msgstr "Der Passkey ist die sicherste Anmeldung: Face ID, Fingerabdruck oder Gerätesperre, ohne Passwort. Die App bekommt dabei nie biometrische Daten zu sehen."
@@ -12347,6 +13532,11 @@ msgid "With this link you set up a new passkey on this device for your existing 
 msgstr "Mit diesem Link richtest du auf diesem Gerät einen neuen Passkey für deinen bestehenden Zugang ein."
 
 # ai
+#: modules/polls/app/pages.tsx
+msgid "Polls of your teams appear here."
+msgstr "Hier erscheinen Umfragen deiner Mannschaften."
+
+# ai
 #: src/pages/games.tsx
 msgid "Change the game schedule source?"
 msgstr "Spielplan-Quelle wechseln?"
@@ -12363,6 +13553,11 @@ msgstr "Geräteverlust oder neuer Passkey: In der Kaderübersicht die Person öf
 #: src/pages/games.tsx
 msgid "Each team takes its games from one source."
 msgstr "Jede Mannschaft übernimmt ihre Spiele aus einer Quelle."
+
+# ai
+#: modules/polls/app/pages.tsx
+msgid "For you as coach"
+msgstr "Für dich als Trainer"
 
 #: src/calendar.tsx
 #: src/pages/team.tsx
@@ -12441,6 +13636,11 @@ msgstr "Dieser Teil des Exports lässt sich nicht wiederherstellen."
 msgid "{who} deleted the team {team}"
 msgstr "{who} hat die Mannschaft {team} gelöscht"
 
+# ai
+#: modules/polls/app/settings.tsx
+msgid "Polls of the whole club"
+msgstr "Umfragen für den ganzen Verein"
+
 #: modules/carpools/app/card.tsx
 msgid "Offer withdrawn."
 msgstr "Angebot zurückgezogen."
@@ -12476,6 +13676,12 @@ msgstr "Liveticker bei handball4all"
 #: modules/duties/app/admin.tsx
 msgid "{name} deleted."
 msgstr "{name} gelöscht."
+
+# ai
+#: modules/polls/app/common.tsx
+msgctxt "poll status"
+msgid "Open"
+msgstr "Offen"
 
 #: src/pages/chat.tsx
 msgid "Remove message"
@@ -12582,6 +13788,12 @@ msgstr "Aushilfe-Anfrage"
 msgid "{name} declined training on {when}."
 msgstr "{name} hat für das Training am {when} abgesagt."
 
+# ai
+#: modules/polls/app/settings.tsx
+#: modules/polls/app/settings.tsx
+msgid "Payment for orders"
+msgstr "Bezahlung bei Bestellungen"
+
 #: src/pages/special.tsx
 msgid "Opponent or tournament"
 msgstr "Gegner oder Turnier"
@@ -12598,6 +13810,7 @@ msgid "{what} on {when}."
 msgstr "{what} am {when}."
 
 #: modules/duties/app/helpers.tsx
+#: modules/polls/app/pages.tsx
 msgid "Manage"
 msgstr "Verwalten"
 
@@ -12709,6 +13922,11 @@ msgstr "Ort"
 msgid "Parents will then no longer see this team's events and chat and can no longer respond for their child. Open parent links become invalid. The links between parents and children are kept and apply again if you turn parents on later."
 msgstr "Eltern sehen die Termine und den Chat dieser Mannschaft dann nicht mehr und können nicht mehr für ihr Kind antworten. Offene Elternlinks werden ungültig. Die Verknüpfungen bleiben erhalten und gelten wieder, wenn du Eltern später einschaltest."
 
+# ai
+#: modules/polls/app/pages.tsx
+msgid "Add date"
+msgstr "Termin hinzufügen"
+
 #: src/extra-events.tsx
 #: src/pages/admin.tsx
 #: src/pages/admin.tsx
@@ -12724,8 +13942,14 @@ msgstr "<0>Aushilfe-Anfrage:</0> Die {team} fragt, ob du bei diesem Spiel aushel
 msgid "<0>No access yet?</0> Your coach sends you an invitation link, for example in the team's WhatsApp group."
 msgstr "<0>Noch kein Zugang?</0> Deine Trainerin oder dein Trainer schickt dir einen Einladungslink, zum Beispiel in der WhatsApp-Gruppe der Mannschaft."
 
+# ai
+#: modules/polls/app/pages.tsx
+msgid "Not voted yet ({pendingCount})"
+msgstr "Noch nicht abgestimmt ({pendingCount})"
+
 #: modules/duties/app/admin.tsx
 #: modules/duties/app/admin.tsx
+#: modules/polls/app/pages.tsx
 #: src/pages/group.tsx
 #: src/pages/group.tsx
 #: src/pages/group.tsx
@@ -12736,6 +13960,17 @@ msgstr "Mitglieder"
 #: modules/sms/app/index.tsx
 msgid "Provider for codes and reminders by SMS"
 msgstr "Anbieter für Codes und Erinnerungen per SMS"
+
+# ai
+#: modules/polls/app/index.tsx
+#: modules/polls/app/index.tsx
+#: modules/polls/app/pages.tsx
+#: modules/polls/app/pages.tsx
+#: modules/polls/app/settings.tsx
+#: modules/polls/app/settings.tsx
+#: modules/polls/module.ts
+msgid "Polls"
+msgstr "Umfragen"
 
 #: worker/domain/calendar.ts
 msgid "Meeting point {teams} · {what}"
@@ -12772,6 +14007,11 @@ msgid "Synced {when}"
 msgstr "Abgeglichen {when}"
 
 # ai
+#: modules/polls/app/pages.tsx
+msgid "A question with fixed answers, e.g. “Where shall the end-of-season trip go?”"
+msgstr "Eine Frage mit festen Antworten, z. B. „Wohin geht die Abschlussfahrt?“"
+
+# ai
 #: modules/duties/app/stats.tsx
 msgid "Remind families?"
 msgstr "Familien erinnern?"
@@ -12798,6 +14038,11 @@ msgstr "Demo · erfundener Verein, die Daten werden jede Nacht um 3:00 Uhr zurü
 #: modules/duties/app/admin.tsx
 msgid "Who helps: {who}"
 msgstr "Wer hilft: {who}"
+
+# ai
+#: modules/polls/worker/routes.ts
+msgid "This poll does not exist."
+msgstr "Diese Umfrage gibt es nicht."
 
 #: src/pages/admin.tsx
 msgid "{name} (group)"
@@ -12830,6 +14075,7 @@ msgstr "Deinen Namen korrigiert dein Trainer oder ein Admin."
 msgid "Saved. As soon as someone offers seats, you will get a notification."
 msgstr "Gespeichert. Sobald jemand Plätze anbietet, gibt es eine Benachrichtigung."
 
+#: modules/polls/app/pages.tsx
 #: src/faq.tsx
 msgid "Coaches"
 msgstr "Trainerinnen und Trainer"
@@ -12838,6 +14084,11 @@ msgstr "Trainerinnen und Trainer"
 #: shared/changelog.ts
 msgid "Coach buttons: what only coaches and other leads can do is marked in the club's main colour with a whistle, in views players and parents see too."
 msgstr "Trainerknöpfe: Was nur Trainer und andere Verantwortliche tun können, ist in der Hauptfarbe des Vereins mit einer Pfeife markiert, auch in Ansichten, die Spieler und Eltern sehen."
+
+# ai
+#: modules/polls/module.ts
+msgid "Who may vote in a poll and what each person or family answered or ordered; for orders an order number, the amount and whether it was reported or confirmed as paid; product photos of the items. The club's PayPal.me name, account holder and IBAN for payments."
+msgstr "Wer in einer Umfrage abstimmen darf und was jede Person oder Familie geantwortet oder bestellt hat; bei Bestellungen eine Bestellnummer, der Betrag und ob er als bezahlt gemeldet oder bestätigt ist; Produktfotos der Artikel. Der PayPal.me-Name, Kontoinhaber und IBAN des Vereins für die Bezahlung."
 
 #: src/pages/admin.tsx
 msgid "E-mail (admins only)"
@@ -12886,6 +14137,11 @@ msgstr "Die Aushilfe-Anfrage der {teamName} für {date} wurde zurückgezogen."
 #: modules/duties/worker/notify.ts
 msgid "Reminder: {label} tomorrow"
 msgstr "Erinnerung: {label} morgen"
+
+# ai
+#: modules/polls/app/pages.tsx
+msgid "Item {n}: sizes (optional)"
+msgstr "Artikel {n}: Größen (optional)"
 
 #: worker/auth/owner.ts
 msgid "This access is protected and can only be changed by its owner."
@@ -12948,6 +14204,11 @@ msgid "Accept again"
 msgstr "Wieder zusagen"
 
 # ai
+#: modules/polls/app/pages.tsx
+msgid "Maybe"
+msgstr "Vielleicht"
+
+# ai
 #: src/pages/setup-wizard.tsx
 msgid "Trainings are created up to the end of the season. The season change at the end prepares the next one."
 msgstr "Trainings werden bis zum Saisonende angelegt. Der Saisonwechsel am Ende bereitet die nächste Saison vor."
@@ -13007,9 +14268,15 @@ msgstr "Nachricht"
 msgid "{name}: missed without excuse"
 msgstr "{name}: unentschuldigt gefehlt"
 
+#: modules/polls/app/pages.tsx
 #: src/view-as.tsx
 msgid "End"
 msgstr "Beenden"
+
+# ai
+#: modules/polls/worker/routes.ts
+msgid "You cannot vote here."
+msgstr "Hier kannst du nicht abstimmen."
 
 # ai
 #: src/pages/privacy.tsx
@@ -13042,6 +14309,11 @@ msgstr "Regulär"
 msgid "Help request from {team}: turned down"
 msgstr "Aushilfe-Anfrage der {team}: abgelehnt"
 
+# ai
+#: modules/polls/worker/routes.ts
+msgid "You cannot order here."
+msgstr "Hier kannst du nicht bestellen."
+
 #: src/pages/team.tsx
 msgid "Same names in the squad: <0>{names}</0>. Please add the last names before you share the player link, otherwise the selection is ambiguous."
 msgstr "Gleiche Namen im Kader: <0>{names}</0>. Bitte ergänze die Nachnamen, bevor du den Spielerlink teilst, sonst ist die Auswahl nicht eindeutig."
@@ -13052,6 +14324,16 @@ msgstr "Gleiche Namen im Kader: <0>{names}</0>. Bitte ergänze die Nachnamen, be
 #: src/pages/setup-wizard.tsx
 msgid "Continue"
 msgstr "Weiter"
+
+# ai
+#: modules/polls/app/common.tsx
+msgid "runs until {date}, {at}"
+msgstr "läuft bis {date}, {at} Uhr"
+
+# ai
+#: modules/polls/app/pages.tsx
+msgid "{name}: remove photo"
+msgstr "{name}: Foto entfernen"
 
 #: worker/routes/avatars.ts
 msgid "{name} has approved your new profile picture."
@@ -13373,6 +14655,11 @@ msgid "check"
 msgstr "prüfen"
 
 # ai
+#: modules/polls/worker/routes.ts
+msgid "A size is listed twice."
+msgstr "Eine Größe steht doppelt drin."
+
+# ai
 #: src/pages/setup-wizard.tsx
 msgid "{name} is created. Now send the personal link."
 msgstr "{name} ist angelegt. Jetzt den persönlichen Link verschicken."
@@ -13466,6 +14753,11 @@ msgid "{playerCount, plural, one {# player} other {# players}}"
 msgstr "{playerCount, plural, one {# Spieler} other {# Spieler}}"
 
 # ai
+#: modules/polls/app/pages.tsx
+msgid "For"
+msgstr "Für"
+
+# ai
 #: src/pages/profile.tsx
 msgid "The other parent will be notified."
 msgstr "Der andere Elternteil wird benachrichtigt."
@@ -13517,6 +14809,11 @@ msgstr "Zu-/Absagen"
 #: src/pages/audit.tsx
 msgid "The app"
 msgstr "Die App"
+
+# ai
+#: modules/polls/app/pages.tsx
+msgid "Everyone has voted."
+msgstr "Alle haben abgestimmt."
 
 # ai
 #: worker/chat/room.ts
@@ -13663,6 +14960,16 @@ msgstr "Um ein weiteres Kind zu verknüpfen, z. B. ein Geschwisterkind, bitte de
 msgid "Tap an event to edit, cancel or delete it."
 msgstr "Antippen öffnet den Termin zum Bearbeiten, Absagen oder Löschen."
 
+# ai
+#: modules/polls/worker/routes.ts
+msgid "Only orders can be ignored."
+msgstr "Nur Bestellungen lassen sich ignorieren."
+
+# ai
+#: modules/polls/app/pages.tsx
+msgid "{total, plural, one {{voted} of # person voted} other {{voted} of # people voted}}"
+msgstr "{total, plural, one {{voted} von # Person abgestimmt} other {{voted} von # Personen abgestimmt}}"
+
 #: src/pages/plans.tsx
 msgid "joint training"
 msgstr "gemeinsames Training"
@@ -13692,6 +14999,11 @@ msgstr "Angefragt"
 #: worker/routes/events.ts
 msgid "Info: {label}"
 msgstr "Info: {label}"
+
+# ai
+#: modules/polls/worker/domain.ts
+msgid "top-up"
+msgstr "Nachzahlung"
 
 #: src/pages/profile.tsx
 msgid "Only for signing in. Neither coaches nor admins see the address."
@@ -13846,6 +15158,11 @@ msgid "Sign in by e-mail"
 msgstr "Anmeldung per E-Mail"
 
 # ai
+#: modules/polls/app/pages.tsx
+msgid "reported as paid {reported}"
+msgstr "als bezahlt gemeldet {reported}"
+
+# ai
 #: src/game-import.tsx
 msgid "Game schedule as a table"
 msgstr "Spielplan als Tabelle"
@@ -13853,6 +15170,11 @@ msgstr "Spielplan als Tabelle"
 #: worker/routes/games.ts
 msgid "The schedule could not be processed."
 msgstr "Der Spielplan konnte nicht verarbeitet werden."
+
+# ai
+#: modules/polls/worker/routes.ts
+msgid "Only who created the order may do this."
+msgstr "Das darf nur, wer die Bestellung angelegt hat."
 
 #: src/respond.tsx
 msgid "Your parents take care of declining."
@@ -13880,6 +15202,11 @@ msgstr "Ungültiges Datum"
 #: modules/carpools/worker/routes.ts
 msgid "This person is not riding here."
 msgstr "Diese Person fährt hier nicht mit."
+
+# ai
+#: modules/polls/worker/routes.ts
+msgid "Please choose who votes."
+msgstr "Bitte wähle aus, wer abstimmt."
 
 #: src/pages/plans.tsx
 msgid "Until"
@@ -13913,6 +15240,11 @@ msgstr "Beim Saisonwechsel bleiben die Mitglieder einer Gruppe erhalten."
 #: src/news.tsx
 msgid "What is new"
 msgstr "Neuigkeiten"
+
+# ai
+#: modules/polls/app/pages.tsx
+msgid "Paid too much: {over}. Whoever created the order will sort it out."
+msgstr "Zu viel bezahlt: {over}. Das klärt, wer die Bestellung angelegt hat."
 
 # ai
 #: src/restore.tsx
@@ -13986,6 +15318,11 @@ msgid "Template saved."
 msgstr "Vorlage gespeichert."
 
 # ai
+#: modules/polls/app/pages.tsx
+msgid "Pay with PayPal"
+msgstr "Mit PayPal bezahlen"
+
+# ai
 #: src/player-import.tsx
 msgid "{created, plural, one {# player added} other {# players added}}"
 msgstr "{created, plural, one {# Spieler angelegt} other {# Spieler angelegt}}"
@@ -14004,6 +15341,11 @@ msgstr "suchst eine Mitfahrgelegenheit ({seats})"
 msgctxt "abbreviated"
 msgid "Born {year}"
 msgstr "Jg. {year}"
+
+# ai
+#: modules/polls/app/pages.tsx
+msgid "You see the result after the end."
+msgstr "Das Ergebnis siehst du nach dem Ende."
 
 #: src/pages/season.tsx
 msgid "Carry out season change"
@@ -14031,6 +15373,11 @@ msgstr "Gib der App zuerst die Adresse des Vereins"
 #: modules/handballnet/module.ts
 msgid "Coaches sync the games of their team from handball.net."
 msgstr "Trainer übernehmen die Spiele ihrer Mannschaft aus handball.net."
+
+# ai
+#: modules/polls/app/pages.tsx
+msgid "Making it smaller …"
+msgstr "Wird verkleinert …"
 
 #: src/pages/chat.tsx
 msgid "as admin"
@@ -14103,6 +15450,11 @@ msgstr "Angelegt. Ordne die Person unter Mannschaften als Trainer zu."
 #: worker/routes/events.ts
 msgid "Unknown location."
 msgstr "Unbekannter Ort."
+
+# ai
+#: modules/polls/app/pages.tsx
+msgid "For your family"
+msgstr "Für deine Familie"
 
 #: src/pages/event.tsx
 #: src/pages/event.tsx
@@ -14199,6 +15551,11 @@ msgstr "Passkeys und Anmeldungen sind nicht Teil eines Exports. Alle melden sich
 #: modules/duties/app/stats.tsx
 msgid "To the helper plan"
 msgstr "Zum Helferplan"
+
+# ai
+#: modules/polls/app/pages.tsx
+msgid "Fewer"
+msgstr "Weniger"
 
 #: src/pages/admin.tsx
 #: src/pages/special.tsx

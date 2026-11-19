@@ -81,6 +81,7 @@ Explanations of a module's settings go behind an info button (docs/dev/design.md
 | `handball4all` | Game schedule from handball4all | on | `modules/handball4all/` (fixture connector, see [connectors.md](connectors.md)) |
 | `sms` | SMS | off | `modules/sms/` (text channel for the core, see its README) |
 | `handballnet` | Game schedule from handball.net | off (beta) | `modules/handballnet/` |
+| `polls` | Polls | off (beta) | `modules/polls/` |
 
 ## Adding a module
 
