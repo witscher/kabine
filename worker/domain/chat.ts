@@ -31,8 +31,8 @@ async function callRoom(env: Env, teamId: number, path: string, body: unknown): 
 }
 
 /** System message in the team chat, e.g. when an event is cancelled. */
-export async function postSystemMessage(env: Env, teamIds: number[], text: string): Promise<void> {
-  await Promise.all(teamIds.map((teamId) => callRoom(env, teamId, "/system", { text })));
+export async function postSystemMessage(env: Env, teamIds: number[], text: string, link?: string): Promise<void> {
+  await Promise.all(teamIds.map((teamId) => callRoom(env, teamId, "/system", { text, link })));
 }
 
 /** Announcement by an admin to several chats. notify: notify everyone at once, as with @all. */

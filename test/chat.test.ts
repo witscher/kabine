@@ -1,4 +1,5 @@
-import { exports } from "cloudflare:workers";
+import { env, exports } from "cloudflare:workers";
+import { postSystemMessage } from "../worker/domain/chat";
 import { beforeEach, describe, expect, it } from "vitest";
 import { api, eventIn, exec, freshDb, guardian, loginAs, member, person, rows, season, team } from "./helpers";
 
@@ -83,6 +84,18 @@ describe("Mannschaftschat", () => {
     expect((await a.next("message")).message.text).toMatch(/^Coachy hat das Training am .+ abgesagt\.$/);
     expect((await api(`/events/${ev}/uncancel`, { cookie: coachCookie, body: {} })).status).toBe(200);
     expect((await a.next("message")).message.text).toMatch(/^Coachy hat die Absage zurückgenommen: Das Training am .+ findet doch statt\.$/);
+    a.ws.close();
+  });
+
+  it("Hinweise können auf eine Seite der App verlinken, nie nach außen", async () => {
+    const a = (await connect(wd, await loginAs(alma))) as any;
+    await a.next("hello");
+    await postSystemMessage(env, [wd], "Neue Umfrage: Sommerfest", "/umfragen/12");
+    expect((await a.next("message")).message).toMatchObject({ kind: "system", text: "Neue Umfrage: Sommerfest", link: "/umfragen/12" });
+    for (const bad of ["https://example.org/x", "//example.org", "/umfragen/12?x=1", "javascript:alert(1)"]) {
+      await postSystemMessage(env, [wd], "Hinweis", bad);
+      expect((await a.next("message")).message.link).toBeNull();
+    }
     a.ws.close();
   });
 

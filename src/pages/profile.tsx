@@ -3,6 +3,7 @@ import { Trans } from "@lingui/react/macro";
 import { clubName, useModule } from "../club";
 import { MyCalendar } from "../calendar";
 import { useEffect, useState } from "preact/hooks";
+import { useActiveModules } from "../modules";
 import { useLocation } from "preact-iso";
 import type { ChildLimits, ChildPermission, ChildPermissions, NotificationTopic, PersonRef } from "../../shared/types";
 import { describeLimits } from "../child-limits";
@@ -218,6 +219,8 @@ function AdminModeSwitch({ coachMode }: { coachMode: boolean }) {
 export function ProfilePage() {
   useDocumentTitle(t`Profile`);
   const me = useMe();
+  // Pages of the switched-on modules (modules/<id>/app, profileMenu), e.g. the own polls
+  const moduleLinks = useActiveModules().flatMap((m) => m.profileMenu?.(me) ?? []);
   const { logout } = useSession();
   const { route } = useLocation();
   const [nameOpen, setNameOpen] = useState(false);
@@ -301,6 +304,23 @@ export function ProfilePage() {
                 <Icon name="chevron" size={18} />
               </a>
             </li>
+          </ul>
+        ) : null}
+
+        {moduleLinks.length ? (
+          <ul class="list">
+            {moduleLinks.map((item) => (
+              <li>
+                <a class="list-row" href={item.href}>
+                  <Icon name={item.icon} size={22} />
+                  <span class="main">
+                    <span class="title">{item.title}</span>
+                    <span class="sub">{item.sub}</span>
+                  </span>
+                  <Icon name="chevron" size={18} />
+                </a>
+              </li>
+            ))}
           </ul>
         ) : null}
 

@@ -1,8 +1,10 @@
 // Number on the app icon: what is waiting for a reaction? Unread @-mentions in
 // the chat and open helper requests, each for the own person and for children
-// the parents are in charge of. Deliberately no ordinary chat messages,
-// otherwise a high number would be shown all the time.
+// the parents are in charge of, and what switched-on modules count (an open
+// poll). Deliberately no ordinary chat messages, otherwise a high number would
+// be shown all the time.
 import { first } from "../lib/db";
+import { moduleBadgeCount } from "../modules";
 import { CHILD_CHAT_OFF_SQL, LIMITED_TEAMS_SQL } from "./child-limits";
 import { nowLocal } from "../lib/time";
 
@@ -10,6 +12,8 @@ export interface BadgeCount {
   count: number;
   mentions: number;
   requests: number;
+  /** Counted by modules (worker/module-api.ts, badgeCount). */
+  modules: number;
 }
 
 /** Persons for whom an account sees mentions and requests (?1 account). */
@@ -53,5 +57,6 @@ export async function badgeCount(db: D1Database, accountId: number, now = Date.n
   );
   const mentions = row?.mentions ?? 0;
   const requests = row?.requests ?? 0;
-  return { count: mentions + requests, mentions, requests };
+  const modules = await moduleBadgeCount(db, accountId, nowLocal(now));
+  return { count: mentions + requests + modules, mentions, requests, modules };
 }

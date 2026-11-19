@@ -44,6 +44,7 @@ const paths = {
   helping: <><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" /><path d="M12 5 9.04 7.96a2.17 2.17 0 0 0 0 3.08c.82.82 2.13.85 3 .07l2.07-1.9a2.82 2.82 0 0 1 3.79 0l2.96 2.66" /><path d="m18 15-2-2M15 18l-2-2" /></>,
   whistle: <><circle cx="8" cy="14" r="5" /><path d="M12 11l8-4v4l-6 3" /></>,
   car: <><path d="M3 16v-4l2.2-5h13.6l2.2 5v4H3z" /><path d="M3 12h18" /><circle cx="7.5" cy="16.5" r="1.8" /><circle cx="16.5" cy="16.5" r="1.8" /></>,
+  poll: <><path d="M4 6h9M4 12h16M4 18h6" /><circle cx="17" cy="6" r="2" /></>,
 } satisfies Record<string, JSX.Element>;
 
 export type IconName = keyof typeof paths;

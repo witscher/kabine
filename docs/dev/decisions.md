@@ -2,6 +2,15 @@
 
 Decisions not covered by `docs/dev/roadmap.md`, with reasons. Newest first.
 
+## Module hooks for the polls module (November 2026)
+
+Polls (`modules/polls/`) need places in the core screens a module could not reach yet. Each hook is generic and as small as the first user needs:
+
+- **App:** `homeCards` (cards at the very top of the start page, for something that waits for the person: an open poll), `eventsTabDot` (the dot on the Events tab while such a card is there; a component, so it can load data without breaking the hook order of the tab bar), `profileMenu` (entries on the profile page, like `adminMenu`, for the person's own polls). No hook for the team page: coaches pick the team in the poll form.
+- **Worker:** `badgeCount` (adds to the number on the app icon; runs for every push, so one cheap query), `seasonChange` (cleanup in the season change batch: polls are gone with the season), `exportExcluded` (tables a module leaves out of the export on purpose; polls are short-lived and their ids would need a mapping on restore).
+- **Chat:** system messages may carry a link to a page of the app (`postSystemMessage(…, link)`), only a plain path such as `/umfragen/12`, checked in the chat room. So the chat note about a new poll opens it.
+- **Notification topics:** the CHECK on `notification_settings.topic` listed the core topics and `carpool`. A module topic (`polls`) would have needed a core migration rebuilding the table every time. Migration `202611200100_core_notification-topics.sql` rebuilds it once without that list; the code checks topics (`worker/routes/parents.ts`).
+
 ## Coach hints in the core, without a module hook (November 2026)
 
 Coaches see at the top of the events list what is left to do in their own teams: a game schedule not synced for 15 days (adjustable, see below), a game in the next 3 days without a meeting point (`worker/domain/coach-hints.ts`, `src/coach-hints.tsx`). The club app's note proposed a module hook for the schedule hint, because there the sync belongs to the handball4all code. In Kabine linking and syncing are already the same core code for every connector (`worker/routes/games.ts`, `syncGames`), and every sync is manual, so the hint works for every source from `teams.fixture_synced_at` without a new interface. A hook for home hints can still come when a module has a hint of its own.

@@ -56,3 +56,16 @@ export function modulePersonLeaves(...args: Parameters<NonNullable<WorkerModule[
 }
 
 export const MODULE_EXPORT_TABLES: readonly string[] = WORKER_MODULES.flatMap((m) => m.exportTables ?? []);
+
+export const MODULE_EXPORT_EXCLUDED: readonly string[] = WORKER_MODULES.flatMap((m) => m.exportExcluded ?? []);
+
+/** Cleanup of every module when a new season starts (also of switched-off ones: their data may still exist). */
+export function moduleSeasonChange(db: D1Database): D1PreparedStatement[] {
+  return WORKER_MODULES.flatMap((m) => m.seasonChange?.(db) ?? []);
+}
+
+/** What the active modules count for the app icon of this account. */
+export async function moduleBadgeCount(db: D1Database, accountId: number, nowLocal: string): Promise<number> {
+  const counts = await Promise.all(activeWorkerModules().map((m) => m.badgeCount?.(db, accountId, nowLocal) ?? 0));
+  return counts.reduce((sum, n) => sum + n, 0);
+}
