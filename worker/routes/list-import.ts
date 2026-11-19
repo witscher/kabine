@@ -121,7 +121,8 @@ listImportRoutes.post("/admin/import/commit", async (c) => {
   const touched = [...new Set(memberships.map((m) => m.teamId))];
   const res = await batch(db, [
     ...yearUpdates,
-    ...memberships.map((m) => stmt(db, "INSERT OR IGNORE INTO team_memberships (person_id, team_id, role) VALUES (?, ?, ?)", m.personId, m.teamId, m.role)),
+    // RETURNING counts the inserted rows only; meta.changes also counts what triggers write (cache_versions)
+    ...memberships.map((m) => stmt(db, "INSERT OR IGNORE INTO team_memberships (person_id, team_id, role) VALUES (?, ?, ?) RETURNING 1", m.personId, m.teamId, m.role)),
     ...touched.map((teamId) =>
       clubMemberStmt(
         db,
@@ -130,7 +131,7 @@ listImportRoutes.post("/admin/import/commit", async (c) => {
       ),
     ),
   ]);
-  const added = res.slice(yearUpdates.length, yearUpdates.length + memberships.length).reduce((n, r) => n + (r.meta.changes ?? 0), 0);
+  const added = res.slice(yearUpdates.length, yearUpdates.length + memberships.length).reduce((n, r) => n + r.results.length, 0);
   if (touched.length) await syncAutoSquads(db, touched);
   return c.json({ teamsCreated: toCreate.length, personsCreated: fresh.length, personsFound: input.persons.length - fresh.length, membershipsAdded: added });
 });

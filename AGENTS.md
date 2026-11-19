@@ -91,5 +91,6 @@ Node.js 22 or newer.
 | End-to-end tests (Playwright) | `npm run e2e` |
 | A club from zero: empty database, setup, wizard, every role (Playwright) | `npm run journey` |
 | Screenshots of the demo club | `npm run screenshots` |
+| Database read load (D1 insights, read-only) | `npm run d1:stats` / `npm run d1:stats -- 7d` |
 
 The first admin of a local installation signs in at `/einrichtung#<ADMIN_BOOTSTRAP_TOKEN>` (see `.dev.vars`).

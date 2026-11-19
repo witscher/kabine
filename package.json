@@ -35,6 +35,7 @@
     "maintenance:on": "node scripts/maintenance.mjs on",
     "maintenance:off": "node scripts/maintenance.mjs off",
     "maintenance:status": "node scripts/maintenance.mjs status",
+    "d1:stats": "node scripts/d1-stats.mjs",
     "i18n": "lingui extract --clean && node tools/i18n-fill.mjs",
     "i18n:check": "lingui extract --clean && node tools/i18n-fill.mjs --check"
   },

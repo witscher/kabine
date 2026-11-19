@@ -471,6 +471,8 @@ export const EXPORT_EXCLUDED = [
   "instance_secrets",
   // The protocol stays in the installation (docs/privacy.md)
   "audit_log",
+  // Version numbers of the cache (worker/lib/cache.ts), no data
+  "cache_versions",
 ];
 
 function base64(bytes: ArrayBuffer | Uint8Array | number[]): string {

@@ -8,6 +8,7 @@ import { isCoachOf, isCoachOfAny } from "../auth/actor";
 import type { MyDuty } from "../../shared/types";
 import { badRequest, forbidden, notFound } from "../lib/http";
 import { all, first, stmt } from "../lib/db";
+import { cached, cacheVersions } from "../lib/cache";
 import { addMinutesLocal, localToInstant } from "../lib/time";
 import { CURRENT_AGE_CLASS_JOIN } from "./events";
 import { isModuleOn } from "./club";
@@ -55,6 +56,7 @@ interface DutyTypeRow {
   skill_grant: "self" | "admin";
   event_id: number | null;
   archived: number;
+  sort: number;
 }
 
 export function toDutyType(r: DutyTypeRow): DutyType {
@@ -79,11 +81,14 @@ export function toDutyType(r: DutyTypeRow): DutyType {
 
 /** Club-wide duty types (without special duties) and optionally the special duties of the given events. */
 export async function loadDutyTypes(db: D1Database, eventIds: number[] = []): Promise<Map<number, DutyType>> {
-  const rows = await all<DutyTypeRow>(
-    db,
-    "SELECT * FROM duty_types WHERE event_id IS NULL OR event_id IN (SELECT value FROM json_each(?)) ORDER BY sort, id",
-    JSON.stringify(eventIds),
-  );
+  // Club-wide duty types rarely change: from the cache (worker/lib/cache.ts); special duties of single events fresh
+  const [global, special] = await Promise.all([
+    cached(db, "ref", "duty-types", () => all<DutyTypeRow>(db, "SELECT * FROM duty_types WHERE event_id IS NULL ORDER BY sort, id")),
+    eventIds.length
+      ? all<DutyTypeRow>(db, "SELECT * FROM duty_types WHERE event_id IN (SELECT value FROM json_each(?)) ORDER BY sort, id", JSON.stringify(eventIds))
+      : Promise.resolve([] as DutyTypeRow[]),
+  ]);
+  const rows = special.length ? [...global, ...special].sort((a, b) => a.sort - b.sort || a.id - b.id) : global;
   return new Map(rows.map((r) => [r.id, toDutyType(r)]));
 }
 
@@ -390,8 +395,38 @@ function minutesBetween(from: string, to: string): number {
  * - if the throw-off time changed, all blocks move by the same amount.
  * Without eventIds: all games from today minus 90 days.
  */
+/**
+ * Games for which there was nothing to generate last time, per version "duties" (triggers on games, teams of events,
+ * templates, required duties, age groups, seasons, duty types): as long as none of that changes it stays so, and the
+ * query is skipped. Keyed by the start of the time span; an earlier start covers a later one.
+ */
+const dutiesClean = { version: -1, byFrom: new Map<string, { all: boolean; ids: Set<number> }>() };
+
+function dutiesKnownClean(version: number, eventIds: number[] | null, from: string): boolean {
+  if (version < 0 || dutiesClean.version !== version) return false;
+  for (const [f, c] of dutiesClean.byFrom) {
+    if (f > from) continue;
+    if (c.all || (eventIds && eventIds.every((id) => c.ids.has(id)))) return true;
+  }
+  return false;
+}
+
+function markDutiesClean(version: number, eventIds: number[] | null, from: string) {
+  if (version < 0) return;
+  if (dutiesClean.version !== version) {
+    dutiesClean.version = version;
+    dutiesClean.byFrom.clear();
+  }
+  const c = dutiesClean.byFrom.get(from) ?? { all: false, ids: new Set<number>() };
+  if (eventIds) for (const id of eventIds) c.ids.add(id);
+  else c.all = true;
+  dutiesClean.byFrom.set(from, c);
+}
+
 export async function ensureEventDuties(db: D1Database, eventIds: number[] | null, from: string): Promise<void> {
   if ((eventIds && !eventIds.length) || !isModuleOn("duties")) return;
+  const { duties: version } = await cacheVersions(db);
+  if (dutiesKnownClean(version, eventIds, from)) return;
   const games = await all<{
     id: number;
     starts_at: string;
@@ -421,7 +456,10 @@ export async function ensureEventDuties(db: D1Database, eventIds: number[] | nul
     from,
     ...(eventIds ? [JSON.stringify(eventIds)] : []),
   );
-  if (!games.length) return;
+  if (!games.length) {
+    markDutiesClean(version, eventIds, from);
+    return;
+  }
   const classIds = [...new Set(games.filter((g) => g.is_home === 1 && g.age_class_id != null).map((g) => g.age_class_id!))];
   const [types, defaults, required] = await Promise.all([
     loadDutyTypes(db),

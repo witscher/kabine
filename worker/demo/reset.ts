@@ -33,11 +33,12 @@ export function demoLocalHour(time: number): number {
   return Number(new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/Berlin", hour: "2-digit", hourCycle: "h23" }).format(time));
 }
 
+// cache_versions stays: deleting the rows of the other tables bumps the versions (worker/lib/cache.ts)
 async function wipe(env: Env): Promise<void> {
   const tables = await all<{ name: string }>(
     env.DB,
     `SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite\\_%' ESCAPE '\\'
-        AND name NOT LIKE '\\_cf\\_%' ESCAPE '\\' AND name NOT LIKE 'd1\\_%' ESCAPE '\\' AND name <> 'instance_secrets'`,
+        AND name NOT LIKE '\\_cf\\_%' ESCAPE '\\' AND name NOT LIKE 'd1\\_%' ESCAPE '\\' AND name NOT IN ('instance_secrets', 'cache_versions')`,
   );
   // One transaction: foreign keys are checked at the end, so the order of the tables does not matter
   await env.DB.batch([

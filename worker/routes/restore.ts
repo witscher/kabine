@@ -270,10 +270,13 @@ restoreRoutes.post("/admin/restore/fixups", async (c) => {
     if (id == null || !schema.fks.some((fk) => fk.from === f.column && fk.table === f.refTable && !fk.notnull)) continue;
     const keys = Object.keys(f.where).filter((k) => schema.names.has(k));
     if (!keys.length) continue;
-    statements.push(stmt(db, `UPDATE ${f.table} SET ${f.column} = ? WHERE ${f.column} IS NULL AND ${keys.map((k) => `${k} IS ?`).join(" AND ")}`, id, ...keys.map((k) => f.where[k]!)));
+    // RETURNING counts the rows of the statement itself; meta.changes also counts what triggers write (cache_versions)
+    statements.push(
+      stmt(db, `UPDATE ${f.table} SET ${f.column} = ? WHERE ${f.column} IS NULL AND ${keys.map((k) => `${k} IS ?`).join(" AND ")} RETURNING 1`, id, ...keys.map((k) => f.where[k]!)),
+    );
   }
   const res = await batch(db, statements);
-  return c.json({ updated: res.reduce((n, r) => n + (r.meta.changes ?? 0), 0) });
+  return c.json({ updated: res.reduce((n, r) => n + r.results.length, 0) });
 });
 
 const chatSchema = z.object({

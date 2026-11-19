@@ -16,6 +16,7 @@ import type {
 import { CHILD_LIMITED } from "./child-limits";
 import { type Actor, childLimitAllows, isCoachOfAny, isStaffOfAny, mayActFor, PARENTS_HANDLE_IT, parentsInCharge, parentsInChargeSql, scopePersonIds } from "../auth/actor";
 import { all, list } from "../lib/db";
+import { CACHE_VERSIONS_SQL, fromCache, toVersions } from "../lib/cache";
 import { ownClubAbbr } from "./club";
 import { addDays, localToInstant, toLocal } from "../lib/time";
 import type { AttendanceMark } from "../../shared/attendance";
@@ -208,17 +209,8 @@ export async function loadEventContext(db: D1Database, events: EventRow[]): Prom
   const ruleIds = [...new Set(events.map((e) => e.rule_id).filter((r): r is number => r != null))];
   const hasClubWide = events.some((e) => e.club_wide === 1);
 
-  const [teamRows, responses, nominations, helps, markRows, absenceRows] = await db.batch([
-    db
-      .prepare(
-        `SELECT et.event_id, et.optional AS et_optional, t.id, t.name, t.age_class_code, COALESCE(ac.game_minutes, 120) AS game_minutes, t.decline_hours_training,
-                t.decline_hours_game, t.max_squad, t.auto_squad, t.fixture_connector, t.fixture_source, t.show_responses,
-                t.game_all_players
-           FROM event_teams et JOIN teams t ON t.id = et.team_id
-           ${CURRENT_AGE_CLASS_JOIN("t", "ac")}
-          WHERE et.event_id IN (SELECT value FROM json_each(?)) ORDER BY t.name`,
-      )
-      .bind(list(ids)),
+  const [eventTeamRows, responses, nominations, helps, markRows, absenceRows, versionRows] = await db.batch([
+    db.prepare("SELECT event_id, team_id, optional FROM event_teams WHERE event_id IN (SELECT value FROM json_each(?))").bind(list(ids)),
     db
       .prepare(
         `SELECT r.event_id, r.person_id, r.status, r.reason, r.is_late, r.by_person, bp.first_name AS by_first, r.responded_at
@@ -242,6 +234,32 @@ export async function loadEventContext(db: D1Database, events: EventRow[]): Prom
       .bind(list(ids)),
     db.prepare("SELECT event_id, person_id, status FROM attendance_marks WHERE event_id IN (SELECT value FROM json_each(?))").bind(list(ids)),
     db.prepare("SELECT event_id, person_id, note, team_informed FROM leader_absences WHERE event_id IN (SELECT value FROM json_each(?))").bind(list(ids)),
+    db.prepare(CACHE_VERSIONS_SQL),
+  ]);
+  // Teams, memberships and parent links rarely change: from the cache (worker/lib/cache.ts), loaded from D1 only when
+  // their version changed. Before, every event list read the memberships of all its teams again.
+  const versions = toVersions(versionRows!.results as { name: string; version: number }[]);
+  const [allTeams, roster, guardianships] = await Promise.all([
+    fromCache(versions, "ref", "team-info", () =>
+      all<TeamInfo>(
+        db,
+        `SELECT t.id, t.name, t.age_class_code, COALESCE(ac.game_minutes, 120) AS game_minutes, t.decline_hours_training,
+                t.decline_hours_game, t.max_squad, t.auto_squad, t.fixture_connector, t.fixture_source, t.show_responses,
+                t.game_all_players
+           FROM teams t ${CURRENT_AGE_CLASS_JOIN("t", "ac")}
+          ORDER BY t.name`,
+      ),
+    ),
+    fromCache(versions, "roster", "members", () =>
+      all<MemberRow>(
+        db,
+        `SELECT tm.team_id, tm.person_id, tm.role, tm.helper_trainings, p.first_name, p.last_name, p.is_active
+           FROM team_memberships tm JOIN persons p ON p.id = tm.person_id
+          WHERE tm.role IN ('player', 'helper') AND p.is_former = 0
+          ORDER BY p.first_name, p.last_name, p.id`,
+      ),
+    ),
+    fromCache(versions, "roster", "guardianships", () => all<{ guardian_id: number; child_id: number }>(db, "SELECT guardian_id, child_id FROM guardianships")),
   ]);
   const leaderAbsences = new Map<string, LeaderAbsence>();
   for (const a of absenceRows!.results as { event_id: number; person_id: number; note: string | null; team_informed: number }[]) {
@@ -254,40 +272,25 @@ export async function loadEventContext(db: D1Database, events: EventRow[]): Prom
   const teams = new Map<number, TeamInfo>();
   const eventTeams = new Map<number, number[]>();
   const optional = new Set<string>();
-  for (const { et_optional, ...r } of teamRows!.results as (TeamInfo & { event_id: number; et_optional: number })[]) {
-    teams.set(r.id, r);
-    push(eventTeams, r.event_id, r.id);
-    if (et_optional === 1) optional.add(`${r.event_id}:${r.id}`);
+  // Teams of an event sorted by name, as before in SQL
+  const teamById = new Map(allTeams.map((tm) => [tm.id, tm]));
+  const teamOrder = new Map(allTeams.map((tm, i) => [tm.id, i]));
+  const etRows = (eventTeamRows!.results as { event_id: number; team_id: number; optional: number }[])
+    .filter((r) => teamById.has(r.team_id))
+    .sort((a, b) => teamOrder.get(a.team_id)! - teamOrder.get(b.team_id)!);
+  for (const r of etRows) {
+    teams.set(r.team_id, teamById.get(r.team_id)!);
+    push(eventTeams, r.event_id, r.team_id);
+    if (r.optional === 1) optional.add(`${r.event_id}:${r.team_id}`);
   }
-  const teamIds = [...teams.keys()];
+  const teamIdSet = new Set(teams.keys());
 
-  const [members, allPlayers, standing] = await db.batch([
-    db
-      .prepare(
-        `SELECT tm.team_id, tm.person_id, tm.role, tm.helper_trainings, p.first_name, p.last_name, p.is_active
-           FROM team_memberships tm JOIN persons p ON p.id = tm.person_id
-          WHERE tm.team_id IN (SELECT value FROM json_each(?)) AND tm.role IN ('player', 'helper') AND p.is_former = 0
-          ORDER BY p.first_name, p.last_name, p.id`,
-      )
-      .bind(list(teamIds)),
-    db
-      .prepare(
-        `SELECT tm.team_id, tm.person_id, tm.role, tm.helper_trainings, p.first_name, p.last_name, p.is_active
-           FROM team_memberships tm JOIN persons p ON p.id = tm.person_id
-          WHERE ? = 1 AND tm.role = 'player' AND p.is_former = 0
-          ORDER BY p.first_name, p.last_name, p.id`,
-      )
-      .bind(hasClubWide ? 1 : 0),
-    db
-      .prepare(
-        `SELECT person_id, rule_id, valid_from, valid_to FROM standing_absences
-          WHERE rule_id IN (SELECT value FROM json_each(?))`,
-      )
-      .bind(list(ruleIds)),
-  ]);
+  const standing = ruleIds.length
+    ? await all<StandingRow>(db, "SELECT person_id, rule_id, valid_from, valid_to FROM standing_absences WHERE rule_id IN (SELECT value FROM json_each(?))", list(ruleIds))
+    : [];
 
-  const memberRows = members!.results as MemberRow[];
-  const allPlayerRows = allPlayers!.results as MemberRow[];
+  const memberRows = roster.filter((m) => teamIdSet.has(m.team_id));
+  const allPlayerRows = hasClubWide ? roster.filter((m) => m.role === "player") : [];
   const responsesByEvent = new Map<number, Map<number, ResponseRow>>();
   for (const r of responses!.results as ResponseRow[]) {
     if (!responsesByEvent.has(r.event_id)) responsesByEvent.set(r.event_id, new Map());
@@ -301,7 +304,7 @@ export async function loadEventContext(db: D1Database, events: EventRow[]): Prom
   const helpByEvent = new Map<number, HelpRow[]>();
   for (const h of helps!.results as HelpRow[]) push(helpByEvent, h.event_id, h);
   const standingByRule = new Map<number, StandingRow[]>();
-  for (const s of standing!.results as StandingRow[]) push(standingByRule, s.rule_id, s);
+  for (const s of standing) push(standingByRule, s.rule_id, s);
 
   const participants = new Map<number, Participant[]>();
   const membersByEvent = new Map<number, Map<number, MemberRow>>();
@@ -382,13 +385,7 @@ export async function loadEventContext(db: D1Database, events: EventRow[]): Prom
   }
 
   // Who is a parent of whom? For "declined by parent".
-  const guardianRows = personIds.size
-    ? await all<{ guardian_id: number; child_id: number }>(
-        db,
-        "SELECT guardian_id, child_id FROM guardianships WHERE child_id IN (SELECT value FROM json_each(?))",
-        list([...personIds]),
-      )
-    : [];
+  const guardianRows = guardianships.filter((g) => personIds.has(g.child_id));
 
   return {
     teams,

@@ -1,6 +1,8 @@
 import { t } from "@lingui/core/macro";
 import type { ChildLimits, ChildPermission, ChildPermissions, PersonRef, Role } from "../../shared/types";
 import { CHILD_LIMITED, LIMITED_TEAMS_SQL, type LimitRow, toLimits } from "../domain/child-limits";
+import { CACHE_VERSIONS_SQL, fromCache, toVersions } from "../lib/cache";
+import { all } from "../lib/db";
 import { forbidden } from "../lib/http";
 import { utcIso } from "../lib/time";
 import type { SessionRow } from "./session";
@@ -91,7 +93,7 @@ export async function loadActor(db: D1Database, session: SessionRow): Promise<Ac
 
 /** Actor for a person; the admin views use this with another person. */
 export async function buildActor(db: D1Database, session: SessionRow, row: ActorRow): Promise<Actor> {
-  const [children, perms, memberships, limits] = await db.batch([
+  const [children, perms, memberships, versionRows] = await db.batch([
     db
       .prepare(
         `SELECT p.id, p.first_name, p.last_name FROM guardianships g JOIN persons p ON p.id = g.child_id
@@ -114,8 +116,11 @@ export async function buildActor(db: D1Database, session: SessionRow, row: Actor
                                   WHERE g.guardian_id = ?1 AND p.is_former = 0)`,
       )
       .bind(row.person_id),
-    db.prepare(LIMITED_TEAMS_SQL),
+    // The limits of age groups rarely change: from the cache (worker/lib/cache.ts), the versions come in the same batch
+    db.prepare(CACHE_VERSIONS_SQL),
   ]);
+  const versions = toVersions(versionRows!.results as { name: string; version: number }[]);
+  const limits = await fromCache(versions, "ref", "team-limits", () => all<LimitRow & { team_id: number }>(db, LIMITED_TEAMS_SQL));
 
   const p = (perms!.results[0] as PermRow | undefined) ?? null;
   const hasGuardians = (p?.guardians ?? 0) > 0;
@@ -153,7 +158,7 @@ export async function buildActor(db: D1Database, session: SessionRow, row: Actor
     permissions,
     memberships: ms,
     childMemberships,
-    teamLimits: new Map((limits!.results as (LimitRow & { team_id: number })[]).map((r) => [r.team_id, toLimits(r)])),
+    teamLimits: new Map(limits.map((r) => [r.team_id, toLimits(r)])),
     coachTeamIds: ms.filter((m) => m.role === "coach").map((m) => m.teamId),
   };
 }
