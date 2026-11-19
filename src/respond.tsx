@@ -122,7 +122,8 @@ export function DeclineSheet(props: { event: EventSummary; person: MyParticipati
 export function ResponseButtons(props: { event: EventSummary; p: MyParticipation; onDecline: (p: MyParticipation) => void; compact?: boolean }) {
   const { event, p } = props;
   const { me } = useSession();
-  if (!p.participant) return null;
+  // Registration per family: no yes/no per person, the family registers on the event page (src/special-attendance.tsx)
+  if (!p.participant || event.familyAttendance) return null;
   const isSelf = me?.person.id === p.person.id;
   const status = p.status;
   const hint = !p.canAccept && !p.canDecline ? p.blockedReason : null;
@@ -139,7 +140,8 @@ export function ResponseButtons(props: { event: EventSummary; p: MyParticipation
               disabled={!p.canDecline}
               onClick={async () => {
                 await sendResponse(event, p.person.id, "no");
-                toast(t`Not joining.`);
+                const name = p.person.firstName;
+                toast(isSelf ? t`You did not say yes.` : t`${name} did not say yes.`);
               }}
             >
               {isSelf ? t`Not joining after all` : t`Withdraw`}
@@ -159,15 +161,18 @@ export function ResponseButtons(props: { event: EventSummary; p: MyParticipation
             </Button>
           )}
         </div>
-        <p class="small muted">
-          <Trans>Optional training: accept if you want to join. Nobody counts as missing.</Trans>
-        </p>
+        {/* Special event with optional attendance: the notice is at the top of the event already */}
+        {event.kind === "training" ? (
+          <p class="small muted">
+            <Trans>Optional training: accept if you want to join. Nobody counts as missing.</Trans>
+          </p>
+        ) : null}
       </div>
     );
   }
   const showAccept = status !== "yes";
   const acceptLabel =
-    status === "no" ? (isSelf ? t`I'm in after all` : t`Accept again`) : status === "standing" ? t`In this time` : isSelf ? t`I'm in` : t`Accept`;
+    status === "no" ? (isSelf ? t`I'm in after all` : t`Accept again`) : status === "standing" ? t`Back in` : isSelf ? t`I'm in` : t`Accept`;
   const restricted = isSelf && me?.hasGuardians && !p.blockedReason && ((showAccept && !p.canAccept) || !p.canDecline);
   return (
     <div class="stack-sm">

@@ -15,6 +15,7 @@ import { useMe, useSession } from "../session";
 import { invalidate, useQuery, useSearch } from "../store";
 import { Button, CoachMark, confirmDialog, copyText, ErrorBox, Field, Notice, Segmented, Sheet, Spinner, SquadPill, StatusPill, SwitchRow, TextField, toast, useDocumentTitle } from "../ui";
 import { useVenue } from "../club";
+import { type AttendanceModes, AttendanceModeNotice, AttendanceModeSwitches, FamilyCard, FamilyOverviewCard, OptionalYesCard } from "../special-attendance";
 
 const kindLabel = (kind: EventDetail["kind"]) => ({ training: t`Training`, game: t`Game`, special: t`Event` })[kind];
 
@@ -143,6 +144,7 @@ export function EventPage({ id }: { id: string }) {
         ) : null}
 
         {event.kind === "game" && event.game ? <GameInfo event={event} /> : null}
+        <AttendanceModeNotice event={event} />
         {event.kind === "special" && !event.isPast && !event.cancelled && event.teams.length ? <SpecialHelpers event={event} onChanged={reload} /> : null}
         {event.notes ? (
           <div class="card card-pad">
@@ -153,7 +155,10 @@ export function EventPage({ id }: { id: string }) {
           </div>
         ) : null}
 
-        {mine.length ? (
+        {event.familyAttendance && event.myFamily ? (
+          <FamilyCard key={`${event.myFamily.count}-${event.myFamily.updatedAt}`} event={event} family={event.myFamily} onChanged={reload} />
+        ) : null}
+        {mine.length && !event.familyAttendance ? (
           <section class="card card-body" aria-label={t`Your response`}>
             <h2 class="section-title" style={{ margin: 0 }}>
               {single ? t`Your response` : t`Responses`}
@@ -185,7 +190,7 @@ export function EventPage({ id }: { id: string }) {
             ) : (
               mine.map((m) => <PersonResponseRow key={m.person.id} event={event} p={m} onDecline={setDeclineFor} />)
             )}
-            {event.deadline && !event.isPast && !event.cancelled && mine.some((m) => m.participant && m.canDecline) ? (
+            {event.deadline && !event.isPast && !event.cancelled && mine.some((m) => m.participant && m.canDecline && !m.optional && (m.status === "yes" || m.status === "open")) ? (
               <p class="small muted">
                 <Trans>Please decline in good time, by {deadline} ({hours} hrs before), so your coaches can plan better.</Trans>
               </p>
@@ -224,6 +229,8 @@ export function EventPage({ id }: { id: string }) {
         ) : null}
 
         {event.canManage ? <CoachView event={event} onChanged={reload} onAbsence={() => setAbsenceOpen(true)} /> : null}
+        {!event.canManage && event.families ? <FamilyOverviewCard families={event.families} /> : null}
+        {!event.canManage && event.optionalYes ? <OptionalYesCard event={event} /> : null}
       {event.roster ? <RosterList roster={event.roster} /> : null}
       </div>
       {declineFor ? <DeclineSheet event={event} person={declineFor} onClose={() => setDeclineFor(null)} /> : null}
@@ -327,6 +334,8 @@ function CoachView({ event, onChanged, onAbsence }: { event: EventDetail; onChan
   const editable = !event.isPast;
   // After the start: attendance instead of responses
   const recording = event.isPast && !event.cancelled && parts.length > 0;
+  // Special events where nobody is reminded: without attendance, optional attendance, registration per family
+  const noRemind = event.noAttendance || event.optionalAttendance || event.familyAttendance;
   const deadline = deadlineText(event);
   const hours = event.deadlineHours;
 
@@ -351,8 +360,37 @@ function CoachView({ event, onChanged, onAbsence }: { event: EventDetail; onChan
 
   return (
     <>
+      {event.familyAttendance && event.families ? <FamilyOverviewCard families={event.families} /> : null}
       {recording ? (
         <AttendanceList event={event} onChanged={refresh} onPerson={setPerson} />
+      ) : event.noAttendance || event.familyAttendance ? null : event.optionalAttendance ? (
+        // Optional attendance: whoever did not say yes is not expected (no list of names, often hundreds at club events)
+        <div class="stat-tiles" role="group" aria-label={t`Overview`}>
+          <div class="stat-tile yellow">
+            <div class="n">{yes.length}</div>
+            <div class="l">
+              <Trans>taking part</Trans>
+            </div>
+          </div>
+          <div class="stat-tile">
+            <div class="n">{parts.filter((p) => p.status === "no").length}</div>
+            <div class="l">
+              <Trans>declined</Trans>
+            </div>
+          </div>
+          <div class="stat-tile">
+            <div class="n">{parts.filter((p) => p.status === "open").length}</div>
+            <div class="l">
+              <Trans>not said yes</Trans>
+            </div>
+          </div>
+          <div class="stat-tile dark">
+            <div class="n">{parts.filter((p) => p.status === "inactive").length}</div>
+            <div class="l">
+              <Trans>inactive</Trans>
+            </div>
+          </div>
+        </div>
       ) : (
         <div class="stat-tiles" role="group" aria-label={t`Overview`}>
           <div class="stat-tile yellow">
@@ -383,7 +421,7 @@ function CoachView({ event, onChanged, onAbsence }: { event: EventDetail; onChan
       )}
 
       {editable && !event.cancelled ? (
-        <div class="grid-2" style={{ gridTemplateColumns: event.kind === "game" ? "repeat(2, minmax(0, 1fr))" : "repeat(3, minmax(0, 1fr))" }}>
+        <div class="grid-2" style={{ gridTemplateColumns: event.kind === "game" || noRemind ? "repeat(2, minmax(0, 1fr))" : "repeat(3, minmax(0, 1fr))" }}>
           {event.kind === "game" ? (
             <>
               <a class="btn btn-coach" href={`/spiele/${event.id}/kader`}>
@@ -396,9 +434,11 @@ function CoachView({ event, onChanged, onAbsence }: { event: EventDetail; onChan
             </>
           ) : (
             <>
-              <Button variant="coach" disabled={!open.length} onClick={() => remind()}>
-                <Trans>Remind</Trans>
-              </Button>
+              {noRemind ? null : (
+                <Button variant="coach" disabled={!open.length} onClick={() => remind()}>
+                  <Trans>Remind</Trans>
+                </Button>
+              )}
               {event.kind === "special" ? (
                 <Button variant="coach" onClick={() => setEditOpen(true)}>
                   <Trans>Edit</Trans>
@@ -450,7 +490,7 @@ function CoachView({ event, onChanged, onAbsence }: { event: EventDetail; onChan
             </section>
           ) : null}
 
-          {yes.length ? (
+          {yes.length && !event.familyAttendance ? (
             <section class="card card-body" aria-label={t`Accepted`}>
               <h2 class="section-title" style={{ margin: 0 }}>
                 <Trans>Accepted</Trans> · {yes.length}
@@ -561,10 +601,10 @@ function CoachView({ event, onChanged, onAbsence }: { event: EventDetail; onChan
             </section>
           ) : null}
 
-          {optionalOut.length ? (
-            <section class="card card-body" aria-label={t`Optional, not joining`}>
+          {optionalOut.length && !event.optionalAttendance && !event.familyAttendance ? (
+            <section class="card card-body" aria-label={t`Optional, not said yes`}>
               <h2 class="section-title" style={{ margin: 0 }}>
-                <Trans>Optional, not joining</Trans> · {optionalOut.length}
+                <Trans>Optional, not said yes</Trans> · {optionalOut.length}
               </h2>
               <p class="small muted">
                 <Trans>They may join this training if they want to. Nobody counts as missing.</Trans>
@@ -583,14 +623,16 @@ function CoachView({ event, onChanged, onAbsence }: { event: EventDetail; onChan
 
       {event.kind === "training" && grouped && editable && !event.cancelled ? <JoiningTeams event={event} onChanged={refresh} /> : null}
 
-      {!parts.length ? (
+      {!parts.length && !event.noAttendance ? (
         <Notice>{event.kind === "game" ? t`Nobody nominated yet.` : t`There are no participants for this event.`}</Notice>
       ) : null}
 
-      <p class="small muted">
-        <Trans>Decline deadline: {hours} hours before the start ({deadline}).</Trans>
-        {event.ruleId == null && event.kind === "training" ? ` ${t`One-off event.`}` : ""}
-      </p>
+      {noRemind ? null : (
+        <p class="small muted">
+          <Trans>Decline deadline: {hours} hours before the start ({deadline}).</Trans>
+          {event.ruleId == null && event.kind === "training" ? ` ${t`One-off event.`}` : ""}
+        </p>
+      )}
       {event.kind === "special" && editable ? (
         <Button
           variant="ghost"
@@ -819,6 +861,14 @@ function EditSheet({ event, onClose, onDone }: { event: EventDetail; onClose: ()
   const [end, setEnd] = useState(event.endsAt ? time(event.endsAt) : "");
   const [locationId, setLocationId] = useState<number | null>(event.location?.id ?? null);
   const [notes, setNotes] = useState(event.notes ?? "");
+  const [modes, setModes] = useState<AttendanceModes>({
+    noAttendance: event.noAttendance,
+    optionalAttendance: event.optionalAttendance,
+    familyAttendance: event.familyAttendance,
+  });
+  // Switching to registration per family: responses given so far no longer count (they stay stored)
+  const answered = (event.participants ?? []).filter((p) => p.respondedAt).length;
+  const accepted = (event.participants ?? []).filter((p) => p.respondedAt && p.status === "yes").length;
   const past = event.isPast;
   const moved = `${date}T${start}` !== event.startsAt || (end ? `${date}T${end}` : null) !== (event.endsAt ?? null) || locationId !== (event.location?.id ?? null);
   return (
@@ -850,6 +900,15 @@ function EditSheet({ event, onClose, onDone }: { event: EventDetail; onClose: ()
       <Field label={t`Info (optional)`}>
         {(id) => <textarea id={id} class="textarea" value={notes} maxLength={1000} onInput={(e) => setNotes((e.target as HTMLTextAreaElement).value)} />}
       </Field>
+      <ul class="list" aria-label={t`Responses`}>
+        <AttendanceModeSwitches value={modes} onChange={setModes} />
+      </ul>
+      {modes.familyAttendance && !event.familyAttendance && !past ? (
+        <Notice kind="warn" icon="alert">
+          {answered ? `${plural(answered, { one: `# response is not carried over (yes: ${accepted}).`, other: `# responses are not carried over (yes: ${accepted}).` })} ` : ""}
+          <Trans>Everyone invited gets a notification on saving to register their family.</Trans>
+        </Notice>
+      ) : null}
       <p class="small muted">
         {moved ? t`Date, time or venue change: everyone involved will be notified.` : t`Title and info are saved quietly, without notification.`}
       </p>
@@ -862,7 +921,7 @@ function EditSheet({ event, onClose, onDone }: { event: EventDetail; onClose: ()
             toast(t`The end must be after the start.`, "error");
             return;
           }
-          const body: Record<string, unknown> = { title: title.trim(), notes: notes.trim() || null };
+          const body: Record<string, unknown> = { title: title.trim(), notes: notes.trim() || null, ...modes };
           if (!past) Object.assign(body, { startsAt: `${date}T${start}`, endsAt: end ? `${date}T${end}` : null, locationId });
           await api.patch(`/events/${event.id}`, body);
           toast(moved ? t`Saved, everyone has been informed.` : t`Saved.`);

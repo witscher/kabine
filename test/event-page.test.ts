@@ -2,8 +2,8 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { isRelevantEvent } from "../shared/relevance";
 import type { EventPage, EventSummary } from "../shared/types";
-import { addDays, todayLocal } from "../worker/lib/time";
-import { api, eventIn, exec, freshDb, guardian, loginAs, member, person, season, team } from "./helpers";
+import { addDays, addMinutesLocal, nowLocal, todayLocal } from "../worker/lib/time";
+import { api, eventIn, exec, freshDb, guardian, loginAs, member, one, person, season, team } from "./helpers";
 
 let wd: number;
 let wc: number;
@@ -26,6 +26,17 @@ const page = async (cookie: string, query: string) => {
   return res.body;
 };
 const ids = (list: EventSummary[]) => list.map((e) => e.id);
+
+/** A minute ago, but not before today (the list starts at midnight). */
+const startedJustNow = () => {
+  const start = addMinutesLocal(nowLocal(), -1);
+  return start < `${todayLocal()}T00:00` ? `${todayLocal()}T00:00` : start;
+};
+const insertAt = async (kind: string, start: string, end: string | null) => {
+  const { id } = await one<{ id: number }>("INSERT INTO events (kind, starts_at, ends_at) VALUES (?, ?, ?) RETURNING id", kind, start, end);
+  await exec("INSERT INTO event_teams (event_id, team_id) VALUES (?, ?)", id, wd);
+  return id;
+};
 
 describe("Terminübersicht seitenweise", () => {
   it("20 Termine pro Seite, „Mehr Termine“ beginnt mit derselben Liste", async () => {
@@ -119,15 +130,33 @@ describe("Terminübersicht seitenweise", () => {
     expect(first.openHelp[0]!.mine.some((m) => m.helpRequest?.status === "open")).toBe(true);
   });
 
-  it("heute schon angepfiffene Spiele kommen als live, nicht in die Liste", async () => {
-    const started = await eventIn(wd, 0, { kind: "game", time: "00:01" });
-    const training = await eventIn(wd, 0, { time: "00:02" });
+  it("heute schon angepfiffene Spiele kommen als live; vorbei ist erst, was zu Ende ist", async () => {
+    // Running game (no end: the playing time of the age class), training already over
+    const started = await insertAt("game", startedJustNow(), null);
+    const training = await insertAt("training", addMinutesLocal(nowLocal(), -180), addMinutesLocal(nowLocal(), -60));
     const next = await eventIn(wd, 1);
     const first = await page(linaCookie, "limit=20");
     expect(ids(first.live)).toEqual([started]);
-    expect(ids(first.events)).toEqual([next]);
+    // The running game is in the list too; the app shows it only as the live card
+    expect(ids(first.events)).toEqual([started, next]);
     expect(ids(first.events)).not.toContain(training);
     expect(first.trainingsUntil).toBe(addDays(todayLocal(), 70));
+  });
+
+  it("a running event stays under “Upcoming” until it ends", async () => {
+    const running = await insertAt("training", startedJustNow(), addMinutesLocal(nowLocal(), 60));
+    const over = await insertAt("training", addMinutesLocal(nowLocal(), -180), addMinutesLocal(nowLocal(), -60));
+    // Special event without an end: running for 2 hours
+    const special = await insertAt("special", startedJustNow(), null);
+    const upcoming = await page(linaCookie, "limit=20");
+    expect(upcoming.events.find((e) => e.id === running)).toMatchObject({ isPast: true, isRunning: true });
+    expect(upcoming.events.find((e) => e.id === special)).toMatchObject({ isRunning: true });
+    expect(ids(upcoming.events)).not.toContain(over);
+    expect(ids(upcoming.live)).toEqual([]);
+    const past = await page(linaCookie, "limit=20&past=1");
+    expect(ids(past.events)).not.toContain(running);
+    expect(ids(past.events)).not.toContain(special);
+    expect(ids(past.events)).toContain(over);
   });
 
   it("vergangene Termine neueste zuerst, seitenweise", async () => {

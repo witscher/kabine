@@ -61,7 +61,7 @@ describe("Team → Termine", () => {
 });
 
 describe("Verwaltung → Sondertermine und Spiele", () => {
-  it("zeigt kommende Sondertermine und Spiele ohne handball4all anderer Mannschaften", async () => {
+  it("zeigt alle kommenden Sondertermine und Spiele ohne handball4all", async () => {
     const special = await eventIn(wd, 3, { kind: "special", title: "Fotoshooting" });
     const manual = await eventIn(wd, 6, { kind: "game" });
     await exec("UPDATE events SET is_home = 1, home_team = 'SV Musterstadt', guest_team = 'HSG Musterstadt' WHERE id = ?", manual);
@@ -74,8 +74,8 @@ describe("Verwaltung → Sondertermine und Spiele", () => {
     const res = await api("/admin/extra-events", { cookie: await loginAs(admin) });
     expect(res.status).toBe(200);
     const ids = res.body.events.map((e: { id: number }) => e.id);
-    expect(ids).toEqual([special, manual]);
-    expect(ids).not.toContain(own);
+    // Also those the admin sees under Events anyway
+    expect(ids).toEqual([special, own, manual]);
     expect(res.body.events[0]).toMatchObject({ kind: "special", title: "Fotoshooting", teams: [{ id: wd, name: "wD" }] });
 
     expect((await api("/admin/extra-events", { cookie: await loginAs(coach) })).status).toBe(403);
