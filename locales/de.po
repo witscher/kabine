@@ -5007,10 +5007,6 @@ msgstr "Dieselbe Person?"
 msgid "No team"
 msgstr "Keine Mannschaft"
 
-#: worker/routes/auth.ts
-msgid "The switch is only available to admins who are also coaches."
-msgstr "Den Umschalter gibt es nur für Admins, die auch Trainer sind."
-
 #: src/pages/squad.tsx
 msgid "Suggested replacement: {replacementNames}."
 msgstr "Ersatzvorschlag: {replacementNames}."
@@ -5939,11 +5935,6 @@ msgid "Mails go to the confirmed address you sign in with. You don't have one ye
 msgstr "Mails gehen an die bestätigte Adresse deiner Anmeldung. Du hast noch keine, trage sie unter <0>Profil → Anmeldung</0> ein."
 
 # ai
-#: src/help-texts.ts
-msgid "Off: you see the app like a coach, only with your teams and without administration. On: you see all teams and the administration. This applies on all your devices."
-msgstr "Aus: Du siehst die App wie ein Trainer, nur mit deinen Mannschaften und ohne Verwaltung. An: Du siehst alle Mannschaften und die Verwaltung. Das gilt auf all deinen Geräten."
-
-# ai
 #: src/list-import.tsx
 msgid "Team for {name}"
 msgstr "Mannschaft für {name}"
@@ -6783,6 +6774,11 @@ msgstr "Deine Rückmeldung"
 #: worker/domain/duties.ts
 msgid "Helpers only exist for events of teams."
 msgstr "Helfer gibt es nur bei Terminen von Mannschaften."
+
+# ai
+#: worker/routes/auth.ts
+msgid "The switch is only available to admins who are also coaches or parents."
+msgstr "Den Schalter gibt es nur für Admins, die auch Trainer oder Eltern sind."
 
 # ai
 #: src/restore.tsx
@@ -9148,6 +9144,11 @@ msgstr "Abgesagt."
 #: worker/app.ts
 msgid "Nothing can be changed in this view."
 msgstr "In dieser Ansicht kann nichts geändert werden."
+
+# ai
+#: src/help-texts.ts
+msgid "Off: you see the app like a coach or parent, only with your teams and children and without administration. On: you see all teams and the administration. This applies on all your devices."
+msgstr "Aus: Du siehst die App wie ein Trainer oder Elternteil, nur mit deinen Mannschaften und Kindern und ohne Verwaltung. An: Du siehst alle Mannschaften und die Verwaltung. Das gilt auf all deinen Geräten."
 
 #: src/faq.tsx
 msgid "Frequently asked questions: {title}"
@@ -13319,6 +13320,11 @@ msgstr "Winken"
 msgid "A holiday plan takes precedence in its period. After that this plan applies again."
 msgstr "Ein Ferienplan hat in seinem Zeitraum Vorrang. Danach gilt wieder dieser Plan."
 
+# ai
+#: src/pages/profile.tsx
+msgid "You now see the app like other parents."
+msgstr "Du siehst die App jetzt wie andere Eltern."
+
 #: modules/duties/app/approvals.tsx
 msgid "Valid until {createdUntil}, can be used several times."
 msgstr "Gültig bis {createdUntil}, mehrfach verwendbar."
@@ -14245,3 +14251,4 @@ msgstr "Chat schreiben"
 #: worker/routes/events.ts
 msgid "In one time block the end is before the start."
 msgstr "Bei einem Zeitblock liegt das Ende vor dem Beginn."
+

@@ -64,9 +64,9 @@ export async function buildMe(env: Env, actor: Actor): Promise<Me> {
     referee: lists.some((q) => q.mine),
     qualifiedLists: lists,
     groupIds: groups.map((g) => g.id),
-    // Admin/coach switch in the profile: only admins with an own coach role
+    // "Work as admin" switch in the profile: only admins who also coach or are a parent
     adminSwitch:
-      (actor.isAdmin || actor.adminSuspended) && !actor.viewAs && actor.memberships.some((m) => m.role === "coach")
+      (actor.isAdmin || actor.adminSuspended) && !actor.viewAs && (actor.memberships.some((m) => m.role === "coach") || actor.children.length > 0)
         ? { coachMode: !!actor.adminSuspended }
         : null,
     // Language chosen on the account (null: app or club default)
@@ -295,17 +295,18 @@ export async function insertPasskey(
 
 const adminModeSchema = z.object({ coachMode: z.boolean() });
 
-/** Admin who is also a coach: work as a coach or as an admin. Checks the person, not the actor (in coach mode the admin rights are suspended). */
+/** Admin who is also a coach or a parent: work as such or as an admin. Checks the person, not the actor (in coach mode the admin rights are suspended). */
 authRoutes.put("/profile/admin-mode", async (c) => {
   const actor = requireActor(c);
   const { coachMode } = parse(adminModeSchema, await readJson(c.req.raw));
   const ok = await first<{ ok: number }>(
     c.env.DB,
     `SELECT 1 AS ok FROM persons p WHERE p.id = ? AND p.is_admin = 1
-       AND EXISTS (SELECT 1 FROM team_memberships tm WHERE tm.person_id = p.id AND tm.role = 'coach')`,
+       AND (EXISTS (SELECT 1 FROM team_memberships tm WHERE tm.person_id = p.id AND tm.role = 'coach')
+         OR EXISTS (SELECT 1 FROM guardianships g WHERE g.guardian_id = p.id))`,
     actor.personId,
   );
-  if (!ok || actor.viewAs) throw forbidden(t`The switch is only available to admins who are also coaches.`);
+  if (!ok || actor.viewAs) throw forbidden(t`The switch is only available to admins who are also coaches or parents.`);
   await run(c.env.DB, "UPDATE accounts SET coach_mode = ? WHERE id = ?", coachMode ? 1 : 0, actor.accountId);
   return c.json({ ok: true });
 });

@@ -191,8 +191,8 @@ function NameSheet({ onClose }: { onClose: () => void }) {
   );
 }
 
-/** Admin who is also a coach: suspend admin rights and work as a coach (applies to all devices). */
-function AdminModeSwitch({ coachMode }: { coachMode: boolean }) {
+/** Admin who is also a coach or a parent: suspend admin rights and work as such (applies to all devices). */
+function AdminModeSwitch({ coachMode, coach }: { coachMode: boolean; coach: boolean }) {
   const { refresh } = useSession();
   const { route } = useLocation();
   return (
@@ -206,7 +206,7 @@ function AdminModeSwitch({ coachMode }: { coachMode: boolean }) {
             await api.put("/profile/admin-mode", { coachMode: !admin });
             invalidate("/");
             await refresh();
-            toast(admin ? t`Admin view on.` : t`You are now working as a coach.`);
+            toast(admin ? t`Admin view on.` : coach ? t`You are now working as a coach.` : t`You now see the app like other parents.`);
             route("/profil", true);
           }}
         />
@@ -252,7 +252,7 @@ export function ProfilePage() {
 
         <AvatarEditor personId={me.person.id} name={personName(me.person)} view="self" />
 
-        {me.adminSwitch ? <AdminModeSwitch coachMode={me.adminSwitch.coachMode} /> : null}
+        {me.adminSwitch ? <AdminModeSwitch coachMode={me.adminSwitch.coachMode} coach={me.memberships.some((m) => m.role === "coach")} /> : null}
 
         {me.children.length ? (
           <section class="stack-sm" aria-label={t`My children`}>

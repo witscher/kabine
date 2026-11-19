@@ -12,6 +12,7 @@ Changes that are merged but not released yet go under *Unreleased*, one line eac
 - Pushes about a person now address the recipient: parents read "Mia is in the squad" or "Is Mia coming?" instead of "You are in the squad"; with several children or when they play themselves, all of them are named in one push.
 - Setup wizard: the chosen sport could jump back to handball when the step reloaded its data in the background; the choice now stays.
 - New module (beta, off by default): game schedules from handball.net for clubs whose association runs its games in Handball360. It works like handball4all: the coach pastes the team's link from handball.net (or its calendar link) under *Team → Settings* and syncs with "Sync now"; the device fetches the team's public calendar. Games link to their page on handball.net.
+- Admins who are parents (without coaching a team) now also get *Work as admin* in their profile; switched off, they see the app like other parents.
 
 ## v0.8.0
 

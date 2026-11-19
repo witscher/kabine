@@ -4651,10 +4651,6 @@ msgstr "The same person?"
 msgid "No team"
 msgstr "No team"
 
-#: worker/routes/auth.ts
-msgid "The switch is only available to admins who are also coaches."
-msgstr "The switch is only available to admins who are also coaches."
-
 #: src/pages/squad.tsx
 msgid "Suggested replacement: {replacementNames}."
 msgstr "Suggested replacement: {replacementNames}."
@@ -5513,10 +5509,6 @@ msgstr "No one yet."
 msgid "Mails go to the confirmed address you sign in with. You don't have one yet, add it under <0>Profile → Sign-in</0>."
 msgstr "Mails go to the confirmed address you sign in with. You don't have one yet, add it under <0>Profile → Sign-in</0>."
 
-#: src/help-texts.ts
-msgid "Off: you see the app like a coach, only with your teams and without administration. On: you see all teams and the administration. This applies on all your devices."
-msgstr "Off: you see the app like a coach, only with your teams and without administration. On: you see all teams and the administration. This applies on all your devices."
-
 #: src/list-import.tsx
 msgid "Team for {name}"
 msgstr "Team for {name}"
@@ -6292,6 +6284,10 @@ msgstr "Your response"
 #: worker/domain/duties.ts
 msgid "Helpers only exist for events of teams."
 msgstr "Helpers only exist for events of teams."
+
+#: worker/routes/auth.ts
+msgid "The switch is only available to admins who are also coaches or parents."
+msgstr "The switch is only available to admins who are also coaches or parents."
 
 #: src/restore.tsx
 msgid "Training venues and training plans"
@@ -8501,6 +8497,10 @@ msgstr "Declined."
 #: worker/app.ts
 msgid "Nothing can be changed in this view."
 msgstr "Nothing can be changed in this view."
+
+#: src/help-texts.ts
+msgid "Off: you see the app like a coach or parent, only with your teams and children and without administration. On: you see all teams and the administration. This applies on all your devices."
+msgstr "Off: you see the app like a coach or parent, only with your teams and children and without administration. On: you see all teams and the administration. This applies on all your devices."
 
 #: src/faq.tsx
 msgid "Frequently asked questions: {title}"
@@ -12390,6 +12390,10 @@ msgstr "Waving"
 #: src/pages/plans.tsx
 msgid "A holiday plan takes precedence in its period. After that this plan applies again."
 msgstr "A holiday plan takes precedence in its period. After that this plan applies again."
+
+#: src/pages/profile.tsx
+msgid "You now see the app like other parents."
+msgstr "You now see the app like other parents."
 
 #: modules/duties/app/approvals.tsx
 msgid "Valid until {createdUntil}, can be used several times."

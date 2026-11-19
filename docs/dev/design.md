@@ -372,9 +372,9 @@ A link from the parents does not block existing passkeys; the old one keeps work
 
 ## Admin/coach switch
 
-Admins who also coach mostly work as coaches. In the profile they switch "Work as admin" off and see the app like a coach.
+Admins who also coach mostly work as coaches. In the profile they switch "Work as admin" off and see the app like a coach. Admins who are parents (with or without a coach role) get the same switch; without a coach role they then see the app like other parents.
 
-The choice is stored on the account (`accounts.coach_mode`) and applies on all devices. In coach mode the server builds the actor without admin rights, and the admin views are off too. The way back is only the switch, which checks the person in the database, not the actor. The owner protection is not affected. Coach mode only takes effect while the person coaches a team (`loadActor`): an admin who lost their last coach role in coach mode would otherwise have no switch to come back.
+The choice is stored on the account (`accounts.coach_mode`) and applies on all devices. In coach mode the server builds the actor without admin rights, and the admin views are off too. The way back is only the switch, which checks the person in the database, not the actor. The owner protection is not affected. Coach mode only takes effect while the person coaches a team or has a linked child (`loadActor`): an admin who lost their last coach role or child in coach mode would otherwise have no switch to come back.
 
 ## Responses visible to the team
 
