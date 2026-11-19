@@ -2919,6 +2919,11 @@ msgstr "Gruppenchat"
 msgid "Born to"
 msgstr "Jg. bis"
 
+# ai
+#: src/howto.tsx
+msgid "Turn on notifications?"
+msgstr "Benachrichtigungen einschalten?"
+
 #: src/update.tsx
 msgid "There is a new version of the app."
 msgstr "Es gibt eine neue Version der App."
@@ -3811,8 +3816,6 @@ msgstr "Spiel (Min.)"
 msgid "{name} (no access)"
 msgstr "{name} (ohne Zugang)"
 
-#: src/howto.tsx
-#: src/howto.tsx
 #: src/pages/help.tsx
 msgid "Set up notifications"
 msgstr "Benachrichtigungen einrichten"
@@ -4167,7 +4170,6 @@ msgstr "Die Standardvorlage lässt sich nicht löschen."
 msgid "{count, plural, one {The announcement appears in one team chat.} other {The announcement appears in # team chats.}}"
 msgstr "{count, plural, one {Die Ankündigung erscheint in einem Mannschaftschat.} other {Die Ankündigung erscheint in # Mannschaftschats.}}"
 
-#: src/howto.tsx
 #: src/howto.tsx
 #: src/howto.tsx
 msgid "Hide hint"
@@ -5319,6 +5321,11 @@ msgid "Delete {name}?"
 msgstr "{name} löschen?"
 
 # ai
+#: src/howto.tsx
+msgid "Later"
+msgstr "Später"
+
+# ai
 #: src/list-import.tsx
 msgid "Answer the questions above first."
 msgstr "Beantworte zuerst die Fragen oben."
@@ -6372,6 +6379,7 @@ msgstr "Krank"
 msgid "Download a complete export before resetting. In addition, the database can be reset up to 30 days back via D1 Time Travel."
 msgstr "Lade vor dem Zurücksetzen einen vollständigen Export herunter. Zusätzlich lässt sich die Datenbank über D1 Time Travel 30 Tage zurücksetzen."
 
+#: src/howto.tsx
 #: src/pages/profile.tsx
 msgid "Notifications are on."
 msgstr "Benachrichtigungen sind aktiv."
@@ -6566,6 +6574,11 @@ msgstr "Verantwortlich"
 #: src/pages/plans.tsx
 msgid "+ Create new location"
 msgstr "+ Neuen Ort anlegen"
+
+# ai
+#: src/howto.tsx
+msgid "Turn on"
+msgstr "Einschalten"
 
 #: src/pages/team.tsx
 msgid "First add the players."
@@ -7338,10 +7351,6 @@ msgstr "Zugang lösen"
 msgid "Player list"
 msgstr "Spielerliste"
 
-#: src/howto.tsx
-msgid "Go to notifications"
-msgstr "Zu den Benachrichtigungen"
-
 # ai
 #: src/child-limits.tsx
 msgid "stand-in requests"
@@ -7551,7 +7560,7 @@ msgstr "Einschalten unter Verwaltung → Verein"
 msgid "You"
 msgstr "Du"
 
-#: src/pages/profile.tsx
+#: src/push.ts
 msgid "Push is not set up on the server yet."
 msgstr "Push ist auf dem Server noch nicht eingerichtet."
 
@@ -10829,6 +10838,11 @@ msgstr "Zur Person"
 msgid "There are no suitable stand-ins for {teamName}."
 msgstr "Für die {teamName} gibt es keine passenden Aushilfen."
 
+# ai
+#: src/howto.tsx
+msgid "Notifications are blocked. You can allow them in the settings of your device."
+msgstr "Benachrichtigungen sind blockiert. Erlauben kannst du sie in den Einstellungen deines Geräts."
+
 #: src/pages/profile.tsx
 #: src/pages/profile.tsx
 #: src/pages/profile.tsx
@@ -11073,6 +11087,11 @@ msgstr "Bitte wähle, wer helfen kann."
 #: modules/duties/app/admin.tsx
 msgid "Delete duty type"
 msgstr "Dienstart löschen"
+
+# ai
+#: src/howto.tsx
+msgid "You choose what you get at any time in your profile under notifications. You can also turn them on there later."
+msgstr "Was genau du bekommst, stellst du jederzeit im Profil unter „Benachrichtigungen“ ein. Dort kannst du sie auch später einschalten."
 
 #: src/pages/event.tsx
 #: src/pages/event.tsx

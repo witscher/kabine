@@ -59,7 +59,7 @@ async function pageAs(browser: Browser, personId: number | null): Promise<{ cont
   const context = await browser.newContext();
   // Hints that every new device shows once stay out of the pictures
   await context.addInitScript(() => {
-    for (const key of ["kabine-hint-install", "kabine-hint-push", "kabine-hint-first-steps"]) localStorage.setItem(key, "1");
+    for (const key of ["kabine-hint-install", "kabine-push-asked", "kabine-hint-first-steps"]) localStorage.setItem(key, "1");
   });
   const page = await context.newPage();
   if (personId != null) {

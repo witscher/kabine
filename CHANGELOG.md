@@ -13,6 +13,7 @@ Changes that are merged but not released yet go under *Unreleased*, one line eac
 - Setup wizard: the chosen sport could jump back to handball when the step reloaded its data in the background; the choice now stays.
 - New module (beta, off by default): game schedules from handball.net for clubs whose association runs its games in Handball360. It works like handball4all: the coach pastes the team's link from handball.net (or its calendar link) under *Team → Settings* and syncs with "Sync now"; the device fetches the team's public calendar. Games link to their page on handball.net.
 - Admins who are parents (without coaching a team) now also get *Work as admin* in their profile; switched off, they see the app like other parents.
+- Notifications: instead of the hint card in the installed app, the home screen now asks once per device "Turn on notifications?", with a button that opens the system prompt directly. It only asks where push works (on the iPhone only in the installed app) and where it is not on or blocked yet; "Later" never asks again on that device. The demo privacy policy lists the new browser entry `kabine-push-asked`.
 
 ## v0.8.0
 

@@ -9,11 +9,13 @@ import { clubName } from "./club";
 import { Icon, type IconName } from "./icons";
 import { activeMotd, MOTD, motdStorageKey } from "../shared/motd";
 import { isIos, isStandalone, useMe } from "./session";
+import { enablePush, pushHandled } from "./push";
+import { Button, Sheet, toast } from "./ui";
+import { splashRemaining } from "./splash";
 import { LOCALE_NAMES } from "../shared/i18n";
 import { currentLocale } from "./i18n";
 
 const INSTALL_DISMISSED = "kabine-hint-install";
-const PUSH_DISMISSED = "kabine-hint-push";
 const FIRST_STEPS_DISMISSED = "kabine-hint-first-steps";
 
 function read(key: string): boolean {
@@ -120,49 +122,67 @@ export function InstallBanner() {
   );
 }
 
-/** Push already set up or refused on this device? Then no hint is needed. */
-async function pushHandled(): Promise<boolean> {
-  if (!("serviceWorker" in navigator) || !("PushManager" in window) || !("Notification" in window)) return true;
-  if (Notification.permission !== "default") return true;
-  const reg = await navigator.serviceWorker.getRegistration();
-  return !!(await reg?.pushManager.getSubscription());
-}
+/** Asked once per device. A new key, so people who closed the earlier hint card are asked once too. */
+const PUSH_ASKED = "kabine-push-asked";
 
-/** Start page in app mode: on first start a hint on how to set up notifications. */
-export function PushSetupBanner() {
+/**
+ * Home screen: asks once per device to turn on notifications, when this device can do push but has no subscription yet.
+ * Browsers show their own permission prompt only after a tap, hence this sheet first. Never again afterwards, also not
+ * after "Later"; turning them on stays possible in the profile. On the iPhone push works only in the installed app, so
+ * a browser tab there is never asked (the install hint covers it).
+ */
+export function PushPrompt() {
+  const me = useMe();
   const [show, setShow] = useState(false);
   useEffect(() => {
-    if (!isStandalone() || read(PUSH_DISMISSED)) return;
-    void pushHandled().then((handled) => {
-      if (handled) remember(PUSH_DISMISSED);
-      else setShow(true);
-    });
+    if (read(PUSH_ASKED) || me.viewAs || !me.vapidPublicKey) return;
+    let alive = true;
+    const timer = window.setTimeout(() => {
+      void pushHandled().then((handled) => {
+        if (!alive) return;
+        if (handled) remember(PUSH_ASKED);
+        else setShow(true);
+      });
+    }, 1500 + splashRemaining());
+    return () => {
+      alive = false;
+      window.clearTimeout(timer);
+    };
   }, []);
   if (!show) return null;
   const close = () => {
-    remember(PUSH_DISMISSED);
+    remember(PUSH_ASKED);
     setShow(false);
   };
   return (
-    <section class="card card-body howto" aria-label={t`Set up notifications`}>
-      <div class="row-gap">
-        <Icon name="bell" size={22} />
-        <h2 class="section-title" style={{ margin: 0, flex: 1 }}>
-          <Trans>Set up notifications</Trans>
-        </h2>
-        <button type="button" class="icon-btn" aria-label={t`Hide hint`} onClick={close}>
-          <Icon name="x" size={20} />
-        </button>
-      </div>
+    <Sheet open onClose={close} title={t`Turn on notifications?`}>
       <p>
         <Trans>This way you learn right away about new events, cancellations, nominations and chat messages.</Trans>
       </p>
-      <PushSteps />
-      <a class="btn btn-primary" href="/profil" onClick={close}>
-        <Icon name="bell" size={18} />
-        <Trans>Go to notifications</Trans>
-      </a>
-    </section>
+      <p class="small muted">
+        <Trans>You choose what you get at any time in your profile under notifications. You can also turn them on there later.</Trans>
+      </p>
+      <Button
+        variant="primary"
+        size="lg"
+        block
+        icon="bell"
+        onClick={async () => {
+          try {
+            const permission = await enablePush(me.vapidPublicKey);
+            if (permission === "granted") toast(t`Notifications are on.`);
+            else if (permission === "denied") toast(t`Notifications are blocked. You can allow them in the settings of your device.`, "error");
+          } finally {
+            close();
+          }
+        }}
+      >
+        <Trans>Turn on</Trans>
+      </Button>
+      <Button variant="ghost" block onClick={close}>
+        <Trans>Later</Trans>
+      </Button>
+    </Sheet>
   );
 }
 
@@ -179,7 +199,7 @@ export function FirstStepsCard() {
       setShow(read(INSTALL_DISMISSED));
       return;
     }
-    void pushHandled().then((handled) => setShow(handled || read(PUSH_DISMISSED)));
+    void pushHandled().then((handled) => setShow(handled || read(PUSH_ASKED)));
   }, []);
   if (!show) return null;
   const close = () => {

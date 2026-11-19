@@ -55,7 +55,7 @@ Only admins change their own name; players, parents and coaches ask their coach 
 | Personal calendar link | Who creates one | Calendar subscription | The person | When reset, when leaving |
 | "Full member" marker | Adults | Who may organise events and take certain duties | Admins | When leaving |
 
-Content cached on devices for offline use is deleted when the person signs out.
+Content cached on devices for offline use is deleted when the person signs out. The app also keeps a few markers without personal data in the browser of the device (localStorage): the language, closed hints, and whether this device was already asked once to turn on notifications (`kabine-push-asked`). They stay until they are deleted in the browser.
 
 ## Legal notice and privacy policy of the club
 

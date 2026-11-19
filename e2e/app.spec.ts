@@ -14,6 +14,10 @@ interface User {
 
 async function newUser(browser: import("@playwright/test").Browser): Promise<User> {
   const context = await browser.newContext();
+  // The one-time push prompt only in its own test
+  await context.addInitScript(() => {
+    if (!sessionStorage.getItem("e2e-push")) localStorage.setItem("kabine-push-asked", "1");
+  });
   const page = await context.newPage();
   const cdp = await context.newCDPSession(page);
   await cdp.send("WebAuthn.enable");
@@ -1988,4 +1992,44 @@ test("Statistik: Trainer über die Teamseite, Spielerin im Profil", async () => 
   await expect(player.page.getByRole("region", { name: "Training" })).toBeVisible();
   // The team statistics stay with the coaches
   expect((await player.page.request.get("/api/teams/1/stats")).status()).toBe(403);
+});
+
+test("Einmalige Push-Abfrage: erscheint auf der Startseite, nach „Später“ nicht wieder", async () => {
+  const p = player.page;
+  // Headless Chromium lehnt Benachrichtigungen sonst ab
+  await player.context.grantPermissions(["notifications"]);
+  await p.goto("/");
+  await p.evaluate(() => {
+    sessionStorage.setItem("e2e-push", "1");
+    localStorage.removeItem("kabine-push-asked");
+  });
+  await p.reload();
+  const sheet = p.getByRole("dialog", { name: "Benachrichtigungen einschalten?" });
+  await expect(sheet).toBeVisible();
+  await expect(sheet.getByRole("button", { name: "Einschalten" })).toBeVisible();
+  await sheet.getByRole("button", { name: "Später" }).click();
+  await expect(sheet).toHaveCount(0);
+  expect(await p.evaluate(() => localStorage.getItem("kabine-push-asked"))).toBe("1");
+  await p.reload();
+  await p.waitForTimeout(2500);
+  await expect(p.getByRole("dialog", { name: "Benachrichtigungen einschalten?" })).toHaveCount(0);
+  await p.evaluate(() => sessionStorage.removeItem("e2e-push"));
+  await player.context.clearPermissions();
+});
+
+test("Einmalige Push-Abfrage: nicht, wenn Benachrichtigungen blockiert sind", async () => {
+  // Own tab, so the blocked permission stays there
+  const p = await coach.context.newPage();
+  await p.addInitScript(() => {
+    sessionStorage.setItem("e2e-push", "1");
+    // Blocked on this device: nothing to ask, the device counts as asked
+    Object.defineProperty((globalThis as unknown as { Notification: object }).Notification, "permission", { get: () => "denied" });
+  });
+  await p.goto("/");
+  await p.evaluate(() => localStorage.removeItem("kabine-push-asked"));
+  await p.reload();
+  await p.waitForTimeout(2500);
+  await expect(p.getByRole("dialog", { name: "Benachrichtigungen einschalten?" })).toHaveCount(0);
+  expect(await p.evaluate(() => localStorage.getItem("kabine-push-asked"))).toBe("1");
+  await p.close();
 });

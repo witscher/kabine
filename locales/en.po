@@ -2721,6 +2721,10 @@ msgstr "Group chat"
 msgid "Born to"
 msgstr "Born to"
 
+#: src/howto.tsx
+msgid "Turn on notifications?"
+msgstr "Turn on notifications?"
+
 #: src/update.tsx
 msgid "There is a new version of the app."
 msgstr "There is a new version of the app."
@@ -3545,8 +3549,6 @@ msgstr "Game (min.)"
 msgid "{name} (no access)"
 msgstr "{name} (no access)"
 
-#: src/howto.tsx
-#: src/howto.tsx
 #: src/pages/help.tsx
 msgid "Set up notifications"
 msgstr "Set up notifications"
@@ -3870,7 +3872,6 @@ msgstr "The default template cannot be deleted."
 msgid "{count, plural, one {The announcement appears in one team chat.} other {The announcement appears in # team chats.}}"
 msgstr "{count, plural, one {The announcement appears in one team chat.} other {The announcement appears in # team chats.}}"
 
-#: src/howto.tsx
 #: src/howto.tsx
 #: src/howto.tsx
 msgid "Hide hint"
@@ -4935,6 +4936,10 @@ msgstr "INFO"
 msgid "Delete {name}?"
 msgstr "Delete {name}?"
 
+#: src/howto.tsx
+msgid "Later"
+msgstr "Later"
+
 #: src/list-import.tsx
 msgid "Answer the questions above first."
 msgstr "Answer the questions above first."
@@ -5907,6 +5912,7 @@ msgstr "Ill"
 msgid "Download a complete export before resetting. In addition, the database can be reset up to 30 days back via D1 Time Travel."
 msgstr "Download a complete export before resetting. In addition, the database can be reset up to 30 days back via D1 Time Travel."
 
+#: src/howto.tsx
 #: src/pages/profile.tsx
 msgid "Notifications are on."
 msgstr "Notifications are on."
@@ -6089,6 +6095,10 @@ msgstr "In charge"
 #: src/pages/plans.tsx
 msgid "+ Create new location"
 msgstr "+ Create new location"
+
+#: src/howto.tsx
+msgid "Turn on"
+msgstr "Turn on"
 
 #: src/pages/team.tsx
 msgid "First add the players."
@@ -6802,10 +6812,6 @@ msgstr "Remove access"
 msgid "Player list"
 msgstr "Player list"
 
-#: src/howto.tsx
-msgid "Go to notifications"
-msgstr "Go to notifications"
-
 #: src/child-limits.tsx
 msgid "stand-in requests"
 msgstr "stand-in requests"
@@ -7003,7 +7009,7 @@ msgstr "Switch on under Administration → Club"
 msgid "You"
 msgstr "You"
 
-#: src/pages/profile.tsx
+#: src/push.ts
 msgid "Push is not set up on the server yet."
 msgstr "Push is not set up on the server yet."
 
@@ -10059,6 +10065,10 @@ msgstr "Go to person"
 msgid "There are no suitable stand-ins for {teamName}."
 msgstr "There are no suitable stand-ins for {teamName}."
 
+#: src/howto.tsx
+msgid "Notifications are blocked. You can allow them in the settings of your device."
+msgstr "Notifications are blocked. You can allow them in the settings of your device."
+
 #: src/pages/profile.tsx
 #: src/pages/profile.tsx
 #: src/pages/profile.tsx
@@ -10287,6 +10297,10 @@ msgstr "Please choose who can help."
 #: modules/duties/app/admin.tsx
 msgid "Delete duty type"
 msgstr "Delete duty type"
+
+#: src/howto.tsx
+msgid "You choose what you get at any time in your profile under notifications. You can also turn them on there later."
+msgstr "You choose what you get at any time in your profile under notifications. You can also turn them on there later."
 
 #: src/pages/event.tsx
 #: src/pages/event.tsx

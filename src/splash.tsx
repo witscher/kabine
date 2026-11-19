@@ -29,8 +29,20 @@ function markShown() {
   }
 }
 
+/** End of the running animation (ms timestamp), so sheets on the home screen wait for it. */
+let endsAt = 0;
+
+/** Milliseconds until the start animation is gone (0 if none runs). */
+export function splashRemaining(): number {
+  return Math.max(0, endsAt - Date.now());
+}
+
 export function Splash() {
-  const [run, setRun] = useState(due);
+  const [run, setRun] = useState(() => {
+    const show = due();
+    if (show) endsAt = Date.now() + TOTAL_MS;
+    return show;
+  });
   const club = useClub();
 
   useEffect(() => {
@@ -43,7 +55,11 @@ export function Splash() {
   }, []);
 
   useEffect(() => {
-    if (!run) return;
+    if (!run) {
+      endsAt = 0;
+      return;
+    }
+    endsAt = Math.max(endsAt, Date.now() + TOTAL_MS);
     markShown();
     const t = window.setTimeout(() => setRun(false), TOTAL_MS);
     return () => window.clearTimeout(t);
