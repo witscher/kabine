@@ -709,6 +709,15 @@ test("Hilfe und Feedback: Spielerin im eigenen Reiter, Admin unter Verwaltung", 
   await faq.getByText("Ich habe ein neues Handy und komme nicht mehr in die App.").click();
   await expect(faq.getByText(/persönlichen Link \(7 Tage/)).toBeVisible();
   await expect(page.getByText(/Kabine ist freie Software/)).toBeVisible();
+  // Was ist neu: Hinweise für Spieler und Eltern aus den Versionshinweisen; Start des Vereins noch unbekannt, also alle
+  await page.getByRole("link", { name: /Was ist neu/ }).click();
+  await expect(page.getByRole("heading", { name: "Was ist neu" })).toBeVisible();
+  await expect(page.getByText("Erste Version von Kabine.")).toBeVisible();
+  await expect(page.getByText(/Für alle abgesagte Termine heißen jetzt/)).toBeVisible();
+  await expect(page.getByText(/Verwaltung → Protokoll/)).toHaveCount(0);
+  await expect(page.getByRole("region", { name: "Start der App" })).toHaveCount(0);
+  await page.goBack();
+  await expect(page.getByRole("heading", { name: "Hilfe und Feedback" })).toBeVisible();
   // Versand abfangen: E2E verschickt keine Mails
   let sent = "";
   await page.route("**/api/feedback", async (route) => {
@@ -1539,6 +1548,12 @@ test("Einrichtungsassistent: Admin geht alle Schritte durch", async () => {
   await expect(page.getByRole("heading", { name: "Die App ist eingerichtet" })).toBeVisible();
   await page.goto("/verwaltung");
   await expect(page.getByText("Einrichtung nicht abgeschlossen")).toHaveCount(0);
+  // Mit dem Abschluss startet der Verein: Was ist neu zählt ab heute und endet mit der Geburtsanzeige
+  await page.goto("/hilfe/neu");
+  await expect(page.getByRole("region", { name: "Start der App" })).toContainText("Die App ist geboren");
+  await expect(page.getByText("Erste Version von Kabine.")).toHaveCount(0);
+  if (process.env.E2E_SHOTS) await page.screenshot({ path: `${process.env.E2E_SHOTS}/was-ist-neu.png`, fullPage: true });
+  await page.goto("/verwaltung");
   // Opened again after the last step: from the start, and the last step offers to start over
   await page.getByRole("link", { name: /Einrichtungsassistent/ }).click();
   await expect(page.getByText("Einrichtung · Schritt 1 von 9")).toBeVisible();

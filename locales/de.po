@@ -993,6 +993,11 @@ msgstr "Mitfahren können nominierte Spieler, die nicht abgesagt haben, und die 
 msgid "Carpools (passengers, free seats)"
 msgstr "Fahrgemeinschaften (Mitfahrer, freie Plätze)"
 
+# ai
+#: src/pages/whats-new.tsx
+msgid "Events, responses, squads and team chat in one app, signing in with a passkey instead of a password."
+msgstr "Termine, Zu- und Absagen, Kader und Mannschaftschat in einer App, Anmeldung per Passkey statt Passwort."
+
 #: worker/domain/email-login.ts
 msgid "The e-mail address is too long."
 msgstr "Die E-Mail-Adresse ist zu lang."
@@ -1143,6 +1148,12 @@ msgstr "{who} hat {person} gelöscht, als Elternteil von {child}"
 #: src/avatar.tsx
 msgid "Take photo"
 msgstr "Foto machen"
+
+# ai
+#: src/pages/help.tsx
+#: src/pages/whats-new.tsx
+msgid "What's new"
+msgstr "Was ist neu"
 
 #: modules/duties/app/helpers.tsx
 msgid "{label}: one slot more"
@@ -1582,6 +1593,11 @@ msgstr "weiblich"
 #: modules/carpools/worker/routes.ts
 msgid "The driver does not have enough free seats. Please cancel the lift and book again."
 msgstr "Beim Fahrer ist nicht genug Platz frei. Bitte die Mitfahrt absagen und neu buchen."
+
+# ai
+#: src/pages/whats-new.tsx
+msgid "The app is born"
+msgstr "Die App ist geboren"
 
 #: src/pages/home.tsx
 msgctxt "help request"
@@ -3697,6 +3713,7 @@ msgstr "Höchstens 11 Buchstaben und Ziffern, z. B. der Kurzname des Vereins."
 
 #: src/app.tsx
 #: src/pages/help.tsx
+#: src/pages/whats-new.tsx
 msgid "Help"
 msgstr "Hilfe"
 
@@ -4988,6 +5005,11 @@ msgstr "Angaben gespeichert."
 msgid "Questions"
 msgstr "Fragen"
 
+# ai
+#: src/pages/whats-new.tsx
+msgid "What has come to the app since your club started with it on {started}."
+msgstr "Was seit dem Start eures Vereins mit der App am {started} dazugekommen ist."
+
 #: src/pages/admin.tsx
 #: src/pages/event.tsx
 #: src/pages/plans.tsx
@@ -5086,6 +5108,11 @@ msgstr "wird von anderen angekreuzten Teilen gebraucht"
 #: worker/auth/webauthn.ts
 msgid "Signing in took too long. Please try again."
 msgstr "Die Anmeldung hat zu lange gedauert. Bitte versuche es noch einmal."
+
+# ai
+#: src/pages/whats-new.tsx
+msgid "What has come to the app, newest first."
+msgstr "Was in der App dazugekommen ist, das Neueste oben."
 
 #: src/pages/join.tsx
 msgid "<0>Already registered in the app? Then open this link on the device where the app is installed!</0> Or sign in here and then link this child to your access. Otherwise a second access will be created for you."
@@ -7015,6 +7042,11 @@ msgid "Country"
 msgstr "Land"
 
 # ai
+#: src/pages/whats-new.tsx
+msgid "Start of the app"
+msgstr "Start der App"
+
+# ai
 #: src/pages/club-settings.tsx
 msgid "Without both links the app has no legal notice and no privacy policy."
 msgstr "Ohne beide Links hat die App kein Impressum und keine Datenschutzerklärung."
@@ -7908,6 +7940,11 @@ msgstr "Du kannst dich nicht selbst stummschalten."
 msgid "Other venue"
 msgstr "Anderer Ort"
 
+# ai
+#: src/pages/whats-new.tsx
+msgid "Born on {date}"
+msgstr "Geboren am {date}"
+
 #: worker/auth/webauthn.ts
 #: worker/routes/auth.ts
 #: worker/routes/feedback.ts
@@ -8798,6 +8835,11 @@ msgstr "<0>Als App installieren:</0> In Safari unten auf <1>Teilen</1> tippen, d
 msgid "Test"
 msgstr "Testen"
 
+# ai
+#: src/pages/whats-new.tsx
+msgid "Size: fits on every phone"
+msgstr "Größe: passt auf jedes Handy"
+
 #: modules/carpools/worker/routes.ts
 msgid "At most {max} companions."
 msgstr "Höchstens {max} Begleitpersonen."
@@ -9067,6 +9109,11 @@ msgstr "Mitfahren"
 #: src/api.ts
 msgid "The operation was cancelled."
 msgstr "Der Vorgang wurde abgebrochen."
+
+# ai
+#: src/pages/whats-new.tsx
+msgid "Weight: lighter than a sports bag"
+msgstr "Gewicht: leichter als eine Sporttasche"
 
 #: src/faq.tsx
 msgid "Which duties are there at our games, and how does a special event get helpers?"
@@ -11978,6 +12025,11 @@ msgstr "War da"
 msgid "First name"
 msgstr "Vorname"
 
+# ai
+#: src/pages/help.tsx
+msgid "Changes in the app for players and parents"
+msgstr "Neues in der App für Spieler und Eltern"
+
 #: src/pages/admin.tsx
 msgid "Coaches of {teamName}"
 msgstr "Trainer {teamName}"
@@ -12544,6 +12596,11 @@ msgstr "{from} bis {to} · aktuell"
 #: src/pages/season.tsx
 msgid "{assigned} players assigned, {deletedPersons} former persons and {deletedParents} parent accesses without a child deleted."
 msgstr "{assigned} Spieler zugeordnet, {deletedPersons} ehemalige Personen und {deletedParents} Elternzugänge ohne Kind gelöscht."
+
+# ai
+#: src/pages/whats-new.tsx
+msgid "Nothing new since the start yet. After updates you find here what changed for players and parents."
+msgstr "Seit dem Start gibt es noch nichts Neues. Nach Updates steht hier, was sich für Spieler und Eltern geändert hat."
 
 # ai
 #: src/pages/admin.tsx
@@ -14270,4 +14327,3 @@ msgstr "Chat schreiben"
 #: worker/routes/events.ts
 msgid "In one time block the end is before the start."
 msgstr "Bei einem Zeitblock liegt das Ende vor dem Beginn."
-

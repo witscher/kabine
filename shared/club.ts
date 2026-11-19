@@ -52,6 +52,12 @@ export interface ClubProfile {
   scheduleReminderDays: ScheduleReminderDays;
   /** The installation wizard has been completed. */
   setupDone: boolean;
+  /**
+   * Day the club started with the app (YYYY-MM-DD, club time zone): set when the setup wizard is completed;
+   * installations from before 0.9 got the day of their first access. Help → What's new lists only releases
+   * after it. Null: not known, all releases.
+   */
+  startedOn: string | null;
 }
 
 /** Choices for the reminder to sync the game schedule; 0 = off. */
@@ -81,6 +87,7 @@ export const DEFAULT_CLUB: ClubProfile = {
   modules: DEFAULT_MODULES,
   scheduleReminderDays: 15,
   setupDone: false,
+  startedOn: null,
 };
 
 /** Are the club's legal notice or privacy policy still missing? (admins see a warning) */

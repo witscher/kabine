@@ -2,7 +2,7 @@
 // (shared/changelog.ts), for admins also the modules they were not told about yet. Coaches see only the
 // coach notes. Seen per account; an account without a mark starts with everything seen, so a new club or a
 // new coach gets no backlog, only later updates count as news.
-import { type ChangelogEntry, entriesSince, KABINE_VERSION } from "../../shared/changelog";
+import { type ChangelogEntry, entriesSince, itemText, KABINE_VERSION } from "../../shared/changelog";
 import type { ModuleManifest } from "../../shared/module-api";
 import { MODULES, moduleOffered } from "../../shared/modules";
 import type { AdminNews } from "../../shared/types";
@@ -14,7 +14,7 @@ const offered = (sport: string) => (MODULES as readonly ModuleManifest[]).filter
 /** Release notes for this reader: admins everything, coaches only versions with coach notes. */
 export function newsEntries(entries: readonly ChangelogEntry[], admin: boolean): AdminNews["entries"] {
   return entries
-    .map((e) => ({ version: e.version, date: e.date, items: admin ? e.items() : [], coachItems: e.coaches?.() ?? [] }))
+    .map((e) => ({ version: e.version, date: e.date, items: admin ? e.items().map(itemText) : [], coachItems: e.coaches?.() ?? [] }))
     .filter((e) => e.items.length || e.coachItems.length);
 }
 
