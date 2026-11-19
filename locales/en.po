@@ -4725,6 +4725,7 @@ msgid "needed by other ticked parts"
 msgstr "needed by other ticked parts"
 
 #: worker/auth/webauthn.ts
+#: worker/auth/webauthn.ts
 msgid "Signing in took too long. Please try again."
 msgstr "Signing in took too long. Please try again."
 
@@ -7331,6 +7332,7 @@ msgstr "You cannot mute yourself."
 msgid "Other venue"
 msgstr "Other venue"
 
+#: worker/auth/webauthn.ts
 #: worker/auth/webauthn.ts
 #: worker/routes/auth.ts
 #: worker/routes/feedback.ts

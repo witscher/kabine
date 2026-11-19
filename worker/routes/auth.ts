@@ -9,7 +9,7 @@ import type { Me, Role, SessionResponse, TeamRef } from "../../shared/types";
 import { type AppEnv, requireActor } from "../app";
 import { type Actor, parentsInCharge } from "../auth/actor";
 import { clearedSessionCookie, createSession, deleteSession, deviceLabel, sessionCookie } from "../auth/session";
-import { finishLogin, finishRegistration, startLogin, startRegistration, type StoredPasskey } from "../auth/webauthn";
+import { finishLogin, finishRegistration, openLoginChallenge, startLogin, startRegistration, type StoredPasskey } from "../auth/webauthn";
 import { all, first, run } from "../lib/db";
 import { badRequest, conflict, forbidden, notFound, parse, readJson } from "../lib/http";
 import { utcIso } from "../lib/time";
@@ -107,6 +107,8 @@ const verifySchema = z.object({ challengeId: z.string().min(1), response: z.reco
 
 authRoutes.post("/auth/login/verify", async (c) => {
   const { challengeId, response } = parse(verifySchema, await readJson(c.req.raw));
+  // MAC and expiry first: a made-up request costs no database read
+  const challenge = await openLoginChallenge(c.env, challengeId);
   const auth = response as unknown as AuthenticationResponseJSON;
   if (typeof auth.id !== "string") throw badRequest(t`Invalid response.`);
   const passkey = await first<StoredPasskey & { disabled_at: string | null; is_former: number }>(
@@ -122,7 +124,7 @@ authRoutes.post("/auth/login/verify", async (c) => {
       "unknown_passkey",
     );
   }
-  const { newCounter } = await finishLogin(c.env, c.req.raw, challengeId, auth, passkey);
+  const { newCounter } = await finishLogin(c.env, c.req.raw, challenge, auth, passkey);
   await run(
     c.env.DB,
     "UPDATE passkeys SET counter = ?, last_used_at = ? WHERE id = ?",

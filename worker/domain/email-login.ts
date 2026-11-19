@@ -86,15 +86,20 @@ async function codeHash(env: Env, requestId: string, code: string): Promise<stri
 const rateLimited = () => conflict(t`Many e-mails have just been sent. Please try again in an hour.`, "rate_limited");
 
 /**
- * At most a few codes per sender IP per hour, kept in KV as an extra brake. KV is read, then written, so it is
- * not exact under parallel requests; the limit per address is enforced in the database (issueEmailCode).
+ * Network address for the limit per sender: a keyed hash, so the database never holds the address itself. IPv6 by
+ * its /64 prefix, because one connection usually gets a whole /64 and could otherwise use a new address per request.
  */
-async function rateLimitIp(env: Env, ip: string | null): Promise<void> {
-  if (!ip) return;
-  const key = `mail:ip:${await sha256Hex(ip)}`;
-  const count = Number((await env.KV.get(key)) ?? 0);
-  if (count >= SENDS_PER_IP_PER_HOUR) throw rateLimited();
-  await env.KV.put(key, String(count + 1), { expirationTtl: 3600 });
+export async function ipHash(env: Env, ip: string | null): Promise<string | null> {
+  if (!ip) return null;
+  let net = ip.trim().toLowerCase();
+  if (net.includes(":") && !net.includes(".")) {
+    const [head = "", tail] = net.split("::");
+    const left = head ? head.split(":") : [];
+    const right = tail ? tail.split(":") : [];
+    const groups = tail === undefined ? left : [...left, ...Array(Math.max(0, 8 - left.length - right.length)).fill("0"), ...right];
+    net = `${groups.slice(0, 4).map((g) => g.replace(/^0+(?=.)/, "")).join(":")}::/64`;
+  }
+  return (await hmacB64url(env.APP_SECRET, `code-ip:${net}`)).slice(0, 22);
 }
 
 const texts = (): Record<EmailPurpose, { subject: (code: string, app: string) => string; intro: (app: string) => string }> => ({
@@ -126,8 +131,9 @@ function mailText(purpose: EmailPurpose, code: string, link: string, club: strin
 }
 
 /**
- * Stores a code if the limits allow it, else throws "rate_limited". The limit per address is checked in the same
- * statement that creates the row, so parallel requests cannot get past it (a read, then a write, would let them).
+ * Stores a code if the limits allow it, else throws "rate_limited". The limits per address and per sender are checked
+ * in the same statement that creates the row, so parallel requests cannot get past them (a read, then a write, would
+ * let them). No KV: a counter there would be a KV write per anonymous request (docs/dev/security.md, rule 19).
  */
 async function bookCode(
   env: Env,
@@ -145,13 +151,13 @@ async function bookCode(
     now: number;
   },
 ): Promise<void> {
-  await rateLimitIp(env, row.ip);
   const created = await run(
     env.DB,
-    `INSERT INTO email_codes (request_id, purpose, channel, email, account_id, context, token_hash, code_hash, expires_at)
-     SELECT ?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9
+    `INSERT INTO email_codes (request_id, purpose, channel, email, account_id, context, token_hash, code_hash, expires_at, ip_hash)
+     SELECT ?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?14
       WHERE (SELECT count(*) FROM email_codes WHERE email = ?4 AND channel = ?3 AND created_at > ?10) < ?11
-        AND (SELECT count(*) FROM email_codes WHERE email = ?4 AND channel = ?3 AND created_at > ?12) < ?13`,
+        AND (SELECT count(*) FROM email_codes WHERE email = ?4 AND channel = ?3 AND created_at > ?12) < ?13
+        AND (?14 IS NULL OR (SELECT count(*) FROM email_codes WHERE ip_hash = ?14 AND created_at > ?10) < ?15)`,
     row.requestId,
     row.purpose,
     row.channel,
@@ -165,6 +171,8 @@ async function bookCode(
     SENDS_PER_ADDRESS_PER_HOUR,
     utcIso(row.now - 86_400_000),
     SENDS_PER_ADDRESS_PER_DAY,
+    await ipHash(env, row.ip),
+    SENDS_PER_IP_PER_HOUR,
   );
   if (!created.meta.changes) throw rateLimited();
 }
