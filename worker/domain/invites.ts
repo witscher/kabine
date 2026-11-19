@@ -1,7 +1,7 @@
 import { t } from "@lingui/core/macro";
 import { hmacB64url, randomToken, sha256Hex } from "../lib/crypto";
-import { first, run } from "../lib/db";
-import { badRequest } from "../lib/http";
+import { all, first, list, run } from "../lib/db";
+import { badRequest, conflict } from "../lib/http";
 import { utcIso } from "../lib/time";
 
 export const TEAM_INVITE_DAYS = 14;
@@ -44,10 +44,12 @@ export async function createInvite(
 ): Promise<{ id: number; token: string; expiresAt: string }> {
   const nonce = randomToken(18);
   const token = await tokenForNonce(env, nonce);
-  const days = input.kind === "personal" ? PERSONAL_INVITE_DAYS : TEAM_INVITE_DAYS;
+  // A parent link for one child (person_id set) is a one-time link like a personal link
+  const forOne = input.kind === "personal" || (input.kind === "parent" && input.personId != null);
+  const days = forOne ? PERSONAL_INVITE_DAYS : TEAM_INVITE_DAYS;
   const expiresAt = utcIso(now + days * 86_400_000);
   // Per team there is only one valid link of each kind; for personal links,
-  // one per person.
+  // one per person, and for parent links of one child, one per child and team.
   if (input.kind === "personal") {
     await run(
       env.DB,
@@ -55,10 +57,18 @@ export async function createInvite(
       utcIso(now),
       input.personId,
     );
+  } else if (forOne) {
+    await run(
+      env.DB,
+      "UPDATE invites SET revoked_at = ? WHERE kind = 'parent' AND team_id = ? AND person_id = ? AND revoked_at IS NULL AND used_at IS NULL",
+      utcIso(now),
+      input.teamId,
+      input.personId,
+    );
   } else {
     await run(
       env.DB,
-      "UPDATE invites SET revoked_at = ? WHERE kind = ? AND team_id = ? AND revoked_at IS NULL",
+      "UPDATE invites SET revoked_at = ? WHERE kind = ? AND team_id = ? AND person_id IS NULL AND revoked_at IS NULL",
       utcIso(now),
       input.kind,
       input.teamId,
@@ -97,4 +107,25 @@ export async function findValidInvite(env: Env, token: string, now = Date.now())
   if (row.used_at) throw badRequest(t`This link has already been used. Please ask for a new link.`, "invite_used");
   if (Date.parse(row.expires_at) <= now) throw badRequest(t`This invitation link has expired. Please ask for a new link.`, "invite_expired");
   return row;
+}
+
+/** At most two parents per child via parent links (admins can link more). */
+export const MAX_GUARDIANS = 2;
+
+export async function assertGuardianCapacity(db: D1Database, childIds: number[], guardianId: number | null): Promise<void> {
+  const full = await all<{ first_name: string }>(
+    db,
+    `SELECT p.first_name FROM persons p
+      WHERE p.id IN (SELECT value FROM json_each(?1))
+        AND (SELECT count(*) FROM guardianships g WHERE g.child_id = p.id AND g.guardian_id IS NOT ?2) >= ?3
+        AND NOT EXISTS (SELECT 1 FROM guardianships g WHERE g.child_id = p.id AND g.guardian_id IS ?2)`,
+    list(childIds),
+    guardianId,
+    MAX_GUARDIANS,
+  );
+  if (full.length) {
+    const and = t`and`;
+    const names = full.map((f) => f.first_name).join(` ${and} `);
+    throw conflict(t`Two parents are already registered for ${names}. Please contact the coaches.`, "child_full");
+  }
 }

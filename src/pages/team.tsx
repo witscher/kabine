@@ -5,6 +5,7 @@ import { useLocation } from "preact-iso";
 import { useEffect, useState } from "preact/hooks";
 import { renderSVG } from "uqr";
 import type { ChildLimits, PersonRef } from "../../shared/types";
+import { teamSetUp } from "../../shared/invites";
 import { ChildLimitControls } from "../child-limits";
 import { api, errorMessage } from "../api";
 import type { DutyTypeInfo, TemplateInfo } from "../duty-blocks";
@@ -78,6 +79,8 @@ export interface TeamDetail {
   }[];
   helpers: { person: PersonRef; homeTeam: string | null; trainings: boolean; isActive: boolean; isCore: boolean; unexcused: number }[];
   invites: { player: InviteView | null; parent: InviteView | null };
+  /** People of each link's kind who already have an access (players; parents of the team's players) */
+  withAccess: { player: number; parent: number };
   /** Children in the app: what players of this team may do themselves (age class and team together). */
   childLimits: ChildLimits;
   /** The age class's limit; null for adult classes and groups, which are never limited. */
@@ -833,6 +836,52 @@ export function inviteMessage(kind: "player" | "parent", teamName: string, url: 
   ].join("\n\n");
 }
 
+/** Accompanying text for a parent link of one child: sent to one parent directly, not to the group. */
+export function childParentMessage(childName: string, teamName: string, url: string, expires: string): string {
+  const club = clubName();
+  return [
+    t`Hello! ${teamName} uses the ${club} app for events, responses, helper duties and the team chat.`,
+    t`With this link you set up your parent access for ${childName}: open it, enter your own name and set up a passkey (Face ID, fingerprint or screen lock).`,
+    t`The link works once and only for you. Already in the app, e.g. for a sibling? Then open it on the phone where the app is installed.`,
+    t`Then get the app onto your phone: on iPhone in Safari via "Share" → "Add to Home Screen", on Android via "Install app" in the browser menu.`,
+    t`The link is valid until ${expires}:`,
+    url,
+  ].join("\n\n");
+}
+
+/** Shown before a team link is created in a team that is mostly set up. */
+function SetUpHint({ team, kind, replaces }: { team: TeamDetail; kind: "player" | "parent"; replaces: boolean }) {
+  const teamName = team.name;
+  const count = team.withAccess[kind];
+  return (
+    <div class="stack-sm">
+      <p>
+        {kind === "player"
+          ? plural(count, { one: `# player of ${teamName} already has an access.`, other: `# players of ${teamName} already have an access.` })
+          : plural(count, { one: `# parent in ${teamName} already has an access.`, other: `# parents in ${teamName} already have an access.` })}
+      </p>
+      <p>
+        {kind === "player" ? (
+          <Trans>
+            For the few still missing, a personal link is safer: open the player in the squad and send it to them directly. It works once and only for
+            that person, while anyone holding the team link can pick a free name.
+          </Trans>
+        ) : (
+          <Trans>
+            For the few still missing, a parent link for one child is safer: open the child in the squad and send it to the parent directly. It works
+            once and links only that child, while anyone holding the team link can pick any child of the team.
+          </Trans>
+        )}
+      </p>
+      {replaces ? (
+        <p>
+          <Trans>The previous team link will then stop working.</Trans>
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
 function InviteCard(props: { team: TeamDetail; kind: "player" | "parent"; invite: InviteView | null; onChanged: () => void }) {
   const { team, kind, invite } = props;
   const title = kind === "player" ? t`Player link` : t`Parent link`;
@@ -843,7 +892,10 @@ function InviteCard(props: { team: TeamDetail; kind: "player" | "parent"; invite
   const expires = invite ? fullDate(isoToLocalDate(invite.expiresAt)) : "";
   const message = invite ? inviteMessage(kind, team.name, invite.url, expires) : "";
   const create = async () => {
-    if (invite && !(await confirmDialog({ title: t`Create a new link?`, message: t`The previous link will then stop working.`, confirmLabel: t`New link` }))) return;
+    // Most of the team is set up: the few still missing are better off with a link of their own
+    if (teamSetUp(team.withAccess[kind])) {
+      if (!(await confirmDialog({ title: t`Team already set up`, message: <SetUpHint team={team} kind={kind} replaces={!!invite} />, confirmLabel: t`Create team link anyway` }))) return;
+    } else if (invite && !(await confirmDialog({ title: t`Create a new link?`, message: t`The previous link will then stop working.`, confirmLabel: t`New link` }))) return;
     await api.post(`/teams/${team.id}/invites`, { kind });
     toast(t`New link created.`);
     props.onChanged();
@@ -1169,7 +1221,8 @@ export function PersonPage({ id, personId }: { id: string; personId: string }) {
   const [first, setFirst] = useState("");
   const [last, setLast] = useState("");
   const [year, setYear] = useState("");
-  const [link, setLink] = useState<{ url: string; expiresAt: string; for: string } | null>(null);
+  /** parentOf: a parent link for this child instead of a personal link */
+  const [link, setLink] = useState<{ url: string; expiresAt: string; for: string; parentOf?: boolean } | null>(null);
   const [renaming, setRenaming] = useState<{ id: number; firstName: string; lastName: string | null } | null>(null);
 
   useEffect(() => {
@@ -1203,6 +1256,10 @@ export function PersonPage({ id, personId }: { id: string; personId: string }) {
   const createLink = async (targetId: number, label: string) => {
     const res = await api.post<{ url: string; expiresAt: string }>(`/persons/${targetId}/personal-link`, {});
     setLink({ ...res, for: label });
+  };
+  const createParentLink = async () => {
+    const res = await api.post<{ url: string; expiresAt: string }>(`/teams/${team.id}/invites`, { kind: "parent", personId: person.id });
+    setLink({ ...res, for: person.firstName, parentOf: true });
   };
   const firstName = person.firstName;
   const fullName = personName(person);
@@ -1399,6 +1456,16 @@ export function PersonPage({ id, personId }: { id: string; personId: string }) {
                 </div>
               </div>
             ))}
+            {team.parentsEnabled && player.guardians.length < 2 ? (
+              <div class="stack-sm" style={{ borderTop: player.guardians.length ? "1px solid var(--line)" : undefined, paddingTop: player.guardians.length ? "10px" : undefined }}>
+                <p class="small muted">
+                  <Trans>A one-time link for a parent of {firstName} only, to send directly instead of the team's parent link.</Trans>
+                </p>
+                <Button icon="link" onClick={createParentLink}>
+                  <Trans>Parent link for {firstName}</Trans>
+                </Button>
+              </div>
+            ) : null}
           </section>
         ) : null}
 
@@ -1441,29 +1508,48 @@ export function PersonPage({ id, personId }: { id: string; personId: string }) {
         </section>
       </div>
       {link ? (
-        <Sheet open onClose={() => setLink(null)} title={t`Link for ${linkFor}`}>
+        <Sheet open onClose={() => setLink(null)} title={link.parentOf ? t`Parent link for ${linkFor}` : t`Link for ${linkFor}`}>
           <p class="muted">
-            <Trans>
-              Personal one-time link, valid until {linkExpires}. Please pass it on directly to {linkFor} only.
-            </Trans>
+            {link.parentOf ? (
+              <Trans>One-time link for one parent of {linkFor}, valid until {linkExpires}. It links only {linkFor}. Please send it to that parent directly.</Trans>
+            ) : (
+              <Trans>
+                Personal one-time link, valid until {linkExpires}. Please pass it on directly to {linkFor} only.
+              </Trans>
+            )}
           </p>
           <QrLink url={link.url} />
           <div class="url-box">{link.url}</div>
-          <div class="btn-row">
-            <Button
-              variant="primary"
-              icon="share"
-              onClick={() => {
-                const club = clubName();
-                return shareLink(club, t`Your personal access to the ${club} app`, link.url);
-              }}
-            >
-              <Trans>Share</Trans>
-            </Button>
-            <Button icon="copy" onClick={() => copyText(link.url)}>
-              <Trans>Copy</Trans>
-            </Button>
-          </div>
+          {link.parentOf ? (
+            <div class="btn-row">
+              <Button
+                variant="primary"
+                icon="share"
+                onClick={() => shareLink(t`Parent link for ${linkFor}`, childParentMessage(linkFor, teamName, link.url, linkExpires), "")}
+              >
+                <Trans>Share with text</Trans>
+              </Button>
+              <Button icon="copy" onClick={() => copyText(childParentMessage(linkFor, teamName, link.url, linkExpires), t`Text with link copied.`)}>
+                <Trans>Copy text</Trans>
+              </Button>
+            </div>
+          ) : (
+            <div class="btn-row">
+              <Button
+                variant="primary"
+                icon="share"
+                onClick={() => {
+                  const club = clubName();
+                  return shareLink(club, t`Your personal access to the ${club} app`, link.url);
+                }}
+              >
+                <Trans>Share</Trans>
+              </Button>
+              <Button icon="copy" onClick={() => copyText(link.url)}>
+                <Trans>Copy</Trans>
+              </Button>
+            </div>
+          )}
         </Sheet>
       ) : null}
       {renaming ? <RenameSheet person={renaming} onClose={() => setRenaming(null)} onDone={refresh} /> : null}

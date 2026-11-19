@@ -467,6 +467,7 @@ msgid "Enter meeting point · {teamName}"
 msgstr "Enter meeting point · {teamName}"
 
 #: src/pages/team.tsx
+#: src/pages/team.tsx
 msgid "Text with link copied."
 msgstr "Text with link copied."
 
@@ -739,6 +740,10 @@ msgstr "New duty type"
 #: src/pages/team.tsx
 msgid "Important: each parent uses the link only once, for themselves. This is not a link for players!"
 msgstr "Important: each parent uses the link only once, for themselves. This is not a link for players!"
+
+#: src/pages/team.tsx
+msgid "One-time link for one parent of {linkFor}, valid until {linkExpires}. It links only {linkFor}. Please send it to that parent directly."
+msgstr "One-time link for one parent of {linkFor}, valid until {linkExpires}. It links only {linkFor}. Please send it to that parent directly."
 
 #: src/help-texts.ts
 msgid "Christmas party: the Berg family registers 4 people, an adult player 2 with her partner."
@@ -1127,6 +1132,10 @@ msgstr "{who} deleted {person}, as parent of {child}"
 msgid "Take photo"
 msgstr "Take photo"
 
+#: src/pages/team.tsx
+msgid "A one-time link for a parent of {firstName} only, to send directly instead of the team's parent link."
+msgstr "A one-time link for a parent of {firstName} only, to send directly instead of the team's parent link."
+
 #: src/pages/help.tsx
 #: src/pages/whats-new.tsx
 msgid "What's new"
@@ -1451,6 +1460,10 @@ msgstr "Done this season"
 msgid "Everyone an admin approved for it takes this duty, from all teams, for example youth referees for the home games of the youngest age groups. Approve people under Admin → Approvals; under Admin → Age groups you choose which home games get it."
 msgstr "Everyone an admin approved for it takes this duty, from all teams, for example youth referees for the home games of the youngest age groups. Approve people under Admin → Approvals; under Admin → Age groups you choose which home games get it."
 
+#: src/pages/team.tsx
+msgid "The link works once and only for you. Already in the app, e.g. for a sibling? Then open it on the phone where the app is installed."
+msgstr "The link works once and only for you. Already in the app, e.g. for a sibling? Then open it on the phone where the app is installed."
+
 #: modules/duties/app/helpers.tsx
 msgid "{created, plural, one {# time slot applied.} other {# time slots applied.}}"
 msgstr "{created, plural, one {# time slot applied.} other {# time slots applied.}}"
@@ -1483,6 +1496,10 @@ msgstr "Training and games, last 4 weeks and season"
 #: modules/duties/worker/routes.ts
 msgid "This entry does not exist."
 msgstr "This entry does not exist."
+
+#: worker/routes/join.ts
+msgid "This child no longer belongs to the team. Please ask the coach for a new link."
+msgstr "This child no longer belongs to the team. Please ask the coach for a new link."
 
 #: src/list-import.tsx
 msgid "Pasted table {n}"
@@ -1682,6 +1699,10 @@ msgstr "View accompanying text"
 #: modules/carpools/app/card.tsx
 msgid "One seat fewer"
 msgstr "One seat fewer"
+
+#: src/pages/join.tsx
+msgid "Your child"
+msgstr "Your child"
 
 #: src/list-import.tsx
 msgid "Two people"
@@ -1895,6 +1916,10 @@ msgstr "all done"
 msgid "New event: {title}"
 msgstr "New event: {title}"
 
+#: src/pages/team.tsx
+msgid "{count, plural, one {# parent in {teamName} already has an access.} other {# parents in {teamName} already have an access.}}"
+msgstr "{count, plural, one {# parent in {teamName} already has an access.} other {# parents in {teamName} already have an access.}}"
+
 #: modules/duties/app/admin.tsx
 #: modules/duties/app/admin.tsx
 #: src/pages/admin.tsx
@@ -1970,6 +1995,10 @@ msgstr "Got it"
 #: src/respond.tsx
 msgid "School"
 msgstr "School"
+
+#: src/pages/team.tsx
+msgid "Team already set up"
+msgstr "Team already set up"
 
 #: src/pages/profile.tsx
 msgid "The settings apply to all your devices. Whether a device gets notifications at all is set in your profile."
@@ -2481,6 +2510,10 @@ msgstr "{teams, plural, one {# team takes its games from this source. Its games 
 msgid "Only special events have a title."
 msgstr "Only special events have a title."
 
+#: src/pages/team.tsx
+msgid "The previous team link will then stop working."
+msgstr "The previous team link will then stop working."
+
 #: modules/duties/worker/routes.ts
 msgid "{name} is still in use. Archive the duty type instead."
 msgstr "{name} is still in use. Archive the duty type instead."
@@ -2816,6 +2849,10 @@ msgstr "There is a new version of the app."
 #: src/pages/login.tsx
 msgid "We send a code to the e-mail address or mobile number you confirmed for your access."
 msgstr "We send a code to the e-mail address or mobile number you confirmed for your access."
+
+#: src/pages/team.tsx
+msgid "Hello! {teamName} uses the {club} app for events, responses, helper duties and the team chat."
+msgstr "Hello! {teamName} uses the {club} app for events, responses, helper duties and the team chat."
 
 #: modules/duties/app/index.tsx
 msgid "{who} took back the approval of {person} for {duty}"
@@ -3361,6 +3398,7 @@ msgid "Add address"
 msgstr "Add address"
 
 #: worker/routes/join.ts
+#: worker/routes/teams.ts
 msgid "This person does not belong to this team."
 msgstr "This person does not belong to this team."
 
@@ -4545,6 +4583,10 @@ msgstr "Test message sent."
 msgid "the chat"
 msgstr "the chat"
 
+#: worker/routes/teams.ts
+msgid "Only a parent link can be made for one player."
+msgstr "Only a parent link can be made for one player."
+
 #: modules/duties/app/helpers.tsx
 #: modules/duties/app/helpers.tsx
 #: modules/duties/app/helpers.tsx
@@ -4834,7 +4876,6 @@ msgstr "Write a message"
 msgid "needed by other ticked parts"
 msgstr "needed by other ticked parts"
 
-#: worker/auth/webauthn.ts
 #: worker/auth/webauthn.ts
 msgid "Signing in took too long. Please try again."
 msgstr "Signing in took too long. Please try again."
@@ -5200,6 +5241,7 @@ msgid "No core squad set yet. You can do that under <0>Team → Squad</0>."
 msgstr "No core squad set yet. You can do that under <0>Team → Squad</0>."
 
 #: worker/routes/join.ts
+#: worker/routes/join.ts
 msgid "This invitation link is no longer valid. Please ask for a new link."
 msgstr "This invitation link is no longer valid. Please ask for a new link."
 
@@ -5220,7 +5262,7 @@ msgstr "Parents are not involved in this team. The parent link is therefore not 
 msgid "Code by e-mail"
 msgstr "Code by e-mail"
 
-#: worker/routes/join.ts
+#: worker/domain/invites.ts
 msgid "Two parents are already registered for {names}. Please contact the coaches."
 msgstr "Two parents are already registered for {names}. Please contact the coaches."
 
@@ -5277,6 +5319,10 @@ msgstr "The training session is off for everyone and everyone involved will be n
 #: src/pages/season.tsx
 msgid "Taken over from the previous season and shifted by one year. Please check against the association's implementing regulations."
 msgstr "Taken over from the previous season and shifted by one year. Please check against the association's implementing regulations."
+
+#: src/pages/join.tsx
+msgid "You are signed in as {loggedInAs}. This link adds {fixedChild} to your access."
+msgstr "You are signed in as {loggedInAs}. This link adds {fixedChild} to your access."
 
 #: worker/routes/join.ts
 #: worker/routes/join.ts
@@ -5353,6 +5399,10 @@ msgstr "{label} (for {child})"
 #: src/pages/special.tsx
 msgid "Home or away"
 msgstr "Home or away"
+
+#: src/pages/team.tsx
+msgid "Create team link anyway"
+msgstr "Create team link anyway"
 
 #: src/pages/group.tsx
 msgid "Add members"
@@ -5537,6 +5587,10 @@ msgstr "Next event: {kind}"
 msgid "You are signed in."
 msgstr "You are signed in."
 
+#: src/pages/team.tsx
+msgid "With this link you set up your parent access for {childName}: open it, enter your own name and set up a passkey (Face ID, fingerprint or screen lock)."
+msgstr "With this link you set up your parent access for {childName}: open it, enter your own name and set up a passkey (Face ID, fingerprint or screen lock)."
+
 #: src/respond.tsx
 msgid "Decline for {firstName}"
 msgstr "Decline for {firstName}"
@@ -5610,6 +5664,7 @@ msgstr "Chat messages remain and appear as “Deleted person”. If someone is o
 msgid "Under <0>Profile</0>, at <1>Notifications</1>, tap <2>Enable on this device</2> and allow the request. With <3>Test</3> you check that everything arrives. Under <4>What should I receive?</4> you choose the topics."
 msgstr "Under <0>Profile</0>, at <1>Notifications</1>, tap <2>Enable on this device</2> and allow the request. With <3>Test</3> you check that everything arrives. Under <4>What should I receive?</4> you choose the topics."
 
+#: src/pages/team.tsx
 #: src/pages/team.tsx
 #: src/pages/team.tsx
 msgid "The link is valid until {expires}:"
@@ -5990,7 +6045,7 @@ msgstr "The squad follows the core squad again."
 msgid "Port"
 msgstr "Port"
 
-#: worker/routes/join.ts
+#: worker/domain/invites.ts
 msgid "and"
 msgstr "and"
 
@@ -6321,6 +6376,7 @@ msgid "I am injured for a longer time or can never make it on a certain weekday.
 msgstr "I am injured for a longer time or can never make it on a certain weekday."
 
 #: src/pages/team.tsx
+#: src/pages/team.tsx
 msgid "Then get the app onto your phone: on iPhone in Safari via \"Share\" → \"Add to Home Screen\", on Android via \"Install app\" in the browser menu."
 msgstr "Then get the app onto your phone: on iPhone in Safari via \"Share\" → \"Add to Home Screen\", on Android via \"Install app\" in the browser menu."
 
@@ -6365,6 +6421,10 @@ msgstr "Before sharing, please add the last names where first names are the same
 #: src/pages/help.tsx
 msgid "What did you notice?"
 msgstr "What did you notice?"
+
+#: src/pages/team.tsx
+msgid "For the few still missing, a personal link is safer: open the player in the squad and send it to them directly. It works once and only for that person, while anyone holding the team link can pick a free name."
+msgstr "For the few still missing, a personal link is safer: open the player in the squad and send it to them directly. It works once and only for that person, while anyone holding the team link can pick a free name."
 
 #: src/pages/season.tsx
 msgid "3 · Check assignment"
@@ -6815,6 +6875,10 @@ msgstr "{firstName} would like to use this picture. Others only see it after you
 #: src/faq.tsx
 msgid "Decline for a player or record who was there."
 msgstr "Decline for a player or record who was there."
+
+#: src/pages/team.tsx
+msgid "For the few still missing, a parent link for one child is safer: open the child in the squad and send it to the parent directly. It works once and links only that child, while anyone holding the team link can pick any child of the team."
+msgstr "For the few still missing, a parent link for one child is safer: open the child in the squad and send it to the parent directly. It works once and links only that child, while anyone holding the team link can pick any child of the team."
 
 #: src/pages/group.tsx
 msgid "New group"
@@ -7354,6 +7418,8 @@ msgstr "Training break"
 #: worker/routes/email.ts
 #: worker/routes/join.ts
 #: worker/routes/join.ts
+#: worker/routes/join.ts
+#: worker/routes/join.ts
 msgid "Invalid selection."
 msgstr "Invalid selection."
 
@@ -7389,6 +7455,11 @@ msgstr "This chat does not exist or you have no access."
 #: src/pages/event.tsx
 msgid "Cancel event"
 msgstr "Cancel event"
+
+#: src/pages/team.tsx
+#: src/pages/team.tsx
+msgid "Parent link for {linkFor}"
+msgstr "Parent link for {linkFor}"
 
 #: modules/sms/app/settings.tsx
 #: src/pages/mail-settings.tsx
@@ -9190,6 +9261,10 @@ msgstr "{label} on {date}, {time}. You can still decline until {untilDate}, {unt
 msgid "All events"
 msgstr "All events"
 
+#: src/pages/team.tsx
+msgid "Parent link for {firstName}"
+msgstr "Parent link for {firstName}"
+
 #: worker/routes/squad.ts
 msgid "Accepted training {day}"
 msgstr "Accepted training {day}"
@@ -9265,6 +9340,10 @@ msgstr "Legal notice and privacy policy: enter both links of your club under Adm
 #: src/pages/event.tsx
 msgid "Applies to this training only. The training plan sets it for all trainings."
 msgstr "Applies to this training only. The training plan sets it for all trainings."
+
+#: src/pages/join.tsx
+msgid "You are setting up a parent access for {fixedChild} in the {teamName}."
+msgstr "You are setting up a parent access for {fixedChild} in the {teamName}."
 
 #: src/pages/event.tsx
 msgid "Undo cancellation"
@@ -11736,6 +11815,7 @@ msgid "Only an admin removes the e-mail address of an access."
 msgstr "Only an admin removes the e-mail address of an access."
 
 #: src/pages/team.tsx
+#: src/pages/team.tsx
 msgid "Copy text"
 msgstr "Copy text"
 
@@ -11743,6 +11823,7 @@ msgstr "Copy text"
 msgid "Fetch failed: {error}"
 msgstr "Fetch failed: {error}"
 
+#: src/pages/team.tsx
 #: src/pages/team.tsx
 msgid "Share with text"
 msgstr "Share with text"
@@ -12856,6 +12937,10 @@ msgstr "My events"
 #: src/pages/event.tsx
 msgid "Too few acceptances"
 msgstr "Too few acceptances"
+
+#: src/pages/team.tsx
+msgid "{count, plural, one {# player of {teamName} already has an access.} other {# players of {teamName} already have an access.}}"
+msgstr "{count, plural, one {# player of {teamName} already has an access.} other {# players of {teamName} already have an access.}}"
 
 #: src/ui.tsx
 msgid "Copying not possible. Please select the text."

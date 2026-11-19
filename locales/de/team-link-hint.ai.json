@@ -1,0 +1,9 @@
+{
+  "{count, plural, one {# parent in {teamName} already has an access.} other {# parents in {teamName} already have an access.}}": "{count, plural, one {# Elternteil in der {teamName} hat schon einen Zugang.} other {# Eltern in der {teamName} haben schon einen Zugang.}}",
+  "{count, plural, one {# player of {teamName} already has an access.} other {# players of {teamName} already have an access.}}": "{count, plural, one {# Spielerin oder Spieler der {teamName} hat schon einen Zugang.} other {# Spielerinnen und Spieler der {teamName} haben schon einen Zugang.}}",
+  "Team already set up": "Mannschaft schon eingerichtet",
+  "The previous team link will then stop working.": "Der bisherige Mannschaftslink funktioniert dann nicht mehr.",
+  "Create team link anyway": "Trotzdem Mannschaftslink erstellen",
+  "For the few still missing, a personal link is safer: open the player in the squad and send it to them directly. It works once and only for that person, while anyone holding the team link can pick a free name.": "Für die wenigen, die noch fehlen, ist ein persönlicher Link sicherer: Öffne die Person im Kader und schick ihn ihr direkt. Er funktioniert einmal und nur für diese Person, während mit dem Mannschaftslink jeder einen freien Namen wählen kann.",
+  "For the few still missing, a parent link for one child is safer: open the child in the squad and send it to the parent directly. It works once and links only that child, while anyone holding the team link can pick any child of the team.": "Für die wenigen, die noch fehlen, ist ein Elternlink für ein Kind sicherer: Öffne das Kind im Kader und schick ihn dem Elternteil direkt. Er funktioniert einmal und verknüpft nur dieses Kind, während mit dem Mannschaftslink jeder ein beliebiges Kind der Mannschaft wählen kann."
+}

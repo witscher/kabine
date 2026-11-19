@@ -9,7 +9,7 @@ import { createSession, sessionCookie } from "../auth/session";
 import { finishRegistration, newWebauthnUserId, relyingParty, startRegistration } from "../auth/webauthn";
 import { loadClub, rememberOrigin, saveClub } from "../domain/club";
 import { emailSchema, issueEmailCode, mailer } from "../domain/email-login";
-import { findValidInvite, type InviteRow } from "../domain/invites";
+import { assertGuardianCapacity, findValidInvite, type InviteRow } from "../domain/invites";
 import { NO_CHILD_ACCOUNT, teamLimits } from "../domain/child-limits";
 import { safeEqual } from "../lib/crypto";
 import { all, first, list, run, stmt } from "../lib/db";
@@ -81,17 +81,25 @@ joinRoutes.post("/join/info", async (c) => {
       : new Set<number>();
     // Anyone holding the link sees this list, also without login: short names only
     const names = distinctShortNames(players);
+    const persons = players.map((p, i) => ({
+      id: p.id,
+      name: names[i]!,
+      taken: invite.kind === "player" ? p.has_account === 1 : false,
+      linkedToMe: linked.has(p.id),
+    }));
+    // A parent link for one child shows only that child, and says early when two parents are already linked
+    const child = forOneChild(invite);
+    if (child != null) {
+      if (!persons.some((p) => p.id === child)) throw gone(CHILD_GONE(), "child_gone");
+      await assertGuardianCapacity(c.env.DB, [child], actor?.personId ?? null);
+    }
     return c.json({
       kind: invite.kind,
       team: { id: invite.team_id, name: await teamName(c.env.DB, invite.team_id!) },
       expiresAt: invite.expires_at,
       loggedInAs,
-      persons: players.map((p, i) => ({
-        id: p.id,
-        name: names[i]!,
-        taken: invite.kind === "player" ? p.has_account === 1 : false,
-        linkedToMe: linked.has(p.id),
-      })),
+      forChild: child != null,
+      persons: child != null ? persons.filter((p) => p.id === child) : persons,
     });
   }
 
@@ -164,7 +172,8 @@ async function buildJoinContext(
 
   if (invite.kind === "parent") {
     if (!input.firstName || !input.lastName) throw badRequest(t`Please enter your first and last name.`);
-    const childIds = [...new Set(input.childIds ?? [])];
+    // A parent link for one child links that child and no other (rule 20)
+    const childIds = oneChildSelection(invite, input.childIds) ?? [...new Set(input.childIds ?? [])];
     if (!childIds.length) throw badRequest(t`Please select at least one child.`);
     const players = await teamPlayers(env.DB, invite.team_id!);
     if (!childIds.every((id) => players.some((p) => p.id === id))) throw badRequest(t`Invalid selection.`);
@@ -250,6 +259,27 @@ joinRoutes.post("/join/email", async (c) => {
   });
   return c.json({ requestId });
 });
+
+/** The child of a parent link for one child, null for the team's parent link. */
+function forOneChild(invite: InviteRow): number | null {
+  return invite.kind === "parent" && invite.person_id != null ? invite.person_id : null;
+}
+
+/** The selection a parent link for one child allows: that child, whatever was sent (null for the team's parent link). */
+function oneChildSelection(invite: InviteRow, childIds: number[] | undefined): number[] | null {
+  const child = forOneChild(invite);
+  if (child == null) return null;
+  if (childIds?.some((id) => id !== child)) throw badRequest(t`Invalid selection.`);
+  return [child];
+}
+
+const CHILD_GONE = () => t`This child no longer belongs to the team. Please ask the coach for a new link.`;
+
+/** Marks a one-time link as used, in one statement: of two uses at the same time only one gets through. */
+async function claimInvite(db: D1Database, inviteId: number): Promise<void> {
+  const res = await run(db, "UPDATE invites SET used_at = ? WHERE id = ? AND used_at IS NULL AND revoked_at IS NULL", utcIso(), inviteId);
+  if (!res.meta.changes) throw gone(t`This invitation link is no longer valid. Please ask for a new link.`, "invite_used");
+}
 
 async function stillValid(env: Env, inviteId: number): Promise<InviteRow> {
   const invite = await first<InviteRow>(env.DB, "SELECT * FROM invites WHERE id = ?", inviteId);
@@ -395,13 +425,23 @@ async function createJoinAccount(env: Env, request: Request, context: JoinContex
       list(context.childIds),
     );
     if (valid.length !== context.childIds.length) throw badRequest(t`The selection of children is no longer valid.`);
+    if (forOneChild(invite) != null && !context.childIds.every((id) => id === invite.person_id)) throw badRequest(t`Invalid selection.`);
     await assertGuardianCapacity(db, context.childIds, null);
-    const person = await first<{ id: number }>(
-      db,
-      "INSERT INTO persons (first_name, last_name) VALUES (?, ?) RETURNING id",
-      context.firstName,
-      context.lastName,
-    );
+    // A parent link for one child works once: claim it before anything is created, so a second use in parallel fails
+    const once = forOneChild(invite) != null;
+    if (once) await claimInvite(db, invite.id);
+    let person: { id: number } | null;
+    try {
+      person = await first<{ id: number }>(
+        db,
+        "INSERT INTO persons (first_name, last_name) VALUES (?, ?) RETURNING id",
+        context.firstName,
+        context.lastName,
+      );
+    } catch (err) {
+      if (once) await run(db, "UPDATE invites SET used_at = NULL WHERE id = ?", invite.id);
+      throw err;
+    }
     try {
       const account = await first<{ id: number }>(
         db,
@@ -418,6 +458,7 @@ async function createJoinAccount(env: Env, request: Request, context: JoinContex
       return account!.id;
     } catch (err) {
       await run(db, "DELETE FROM persons WHERE id = ?", person!.id);
+      if (once) await run(db, "UPDATE invites SET used_at = NULL WHERE id = ?", invite.id);
       throw err;
     }
   }
@@ -504,27 +545,6 @@ joinRoutes.post("/join/verify", async (c) => {
   return c.json({ ok: true, kind: context.kind });
 });
 
-/** At most two parents per child via parent links (admins can link more). */
-export const MAX_GUARDIANS = 2;
-
-async function assertGuardianCapacity(db: D1Database, childIds: number[], guardianId: number | null): Promise<void> {
-  const full = await all<{ first_name: string }>(
-    db,
-    `SELECT p.first_name FROM persons p
-      WHERE p.id IN (SELECT value FROM json_each(?1))
-        AND (SELECT count(*) FROM guardianships g WHERE g.child_id = p.id AND g.guardian_id IS NOT ?2) >= ?3
-        AND NOT EXISTS (SELECT 1 FROM guardianships g WHERE g.child_id = p.id AND g.guardian_id IS ?2)`,
-    list(childIds),
-    guardianId,
-    MAX_GUARDIANS,
-  );
-  if (full.length) {
-    const and = t`and`;
-    const names = full.map((f) => f.first_name).join(` ${and} `);
-    throw conflict(t`Two parents are already registered for ${names}. Please contact the coaches.`, "child_full");
-  }
-}
-
 const linkSchema = z.object({ token: z.string().min(1), childIds: z.array(z.number().int().positive()).min(1).max(10) });
 
 /** Signed-in parents link another child via a parent link. */
@@ -534,9 +554,12 @@ joinRoutes.post("/join/link-children", async (c) => {
   const invite = await findValidInvite(c.env, token);
   if (invite.kind !== "parent") throw badRequest(t`This is not a parent link.`);
   if (childIds.includes(actor.personId)) throw badRequest(t`You cannot link yourself as a child.`);
+  // A parent link for one child links that child and no other, once (rule 20)
+  oneChildSelection(invite, childIds);
   const players = await teamPlayers(c.env.DB, invite.team_id!);
   if (!childIds.every((id) => players.some((p) => p.id === id))) throw badRequest(t`Invalid selection.`);
   await assertGuardianCapacity(c.env.DB, childIds, actor.personId);
+  if (forOneChild(invite) != null) await claimInvite(c.env.DB, invite.id);
   await c.env.DB.batch(
     childIds.map((childId) =>
       stmt(c.env.DB, "INSERT OR IGNORE INTO guardianships (guardian_id, child_id) VALUES (?, ?)", actor.personId, childId),
