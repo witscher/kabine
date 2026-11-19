@@ -1,4 +1,5 @@
 import { badgeCount } from "./domain/badge";
+import { enterClubContext } from "./domain/club";
 import { ensureInstanceSecrets } from "./lib/instance-secrets";
 import { type PushJob, pushConfigured } from "./domain/notify";
 import { all, first, list, run } from "./lib/db";
@@ -24,6 +25,8 @@ export async function handleQueue(batch: MessageBatch<PushJob>, env: Env): Promi
     return;
   }
   const vapid = await loadVapid(env.VAPID_PUBLIC_KEY!, env.VAPID_PRIVATE_KEY!, subject);
+  // The badge counts need the club's time zone and switched-on modules (worker/module-api.ts, badgeCount)
+  await enterClubContext(env.DB);
 
   for (const message of batch.messages) {
     const job = message.body;
