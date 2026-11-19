@@ -443,6 +443,7 @@ const CORE_EXPORT_TABLES = [
   "chat_mentions",
   "event_organizers",
   "leader_absences",
+  "event_family_responses",
   "club_members",
 ];
 
