@@ -78,6 +78,12 @@ export interface FixtureConnector {
   format?: "json" | "text";
   /** At least this long between two syncs of a team. */
   minIntervalMs: number;
+  /**
+   * Sync by itself after this many days: when a coach of the team opens the app and the last sync is at least
+   * this old, the coach's device syncs once in the background, the same way as "Sync now". Missing: only at
+   * the press of a button (worker/domain/coach-hints.ts, src/coach-hints.tsx).
+   */
+  autoSyncDays?: number;
   /** Texts for the link field in Team → Settings, in the language of the request. */
   linkField(): { label: string; hint: string; placeholder: string };
   /** The team's settings from a link the coach pastes; null if it is not a link of this source. */

@@ -5,7 +5,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { DEFAULT_MODULES } from "../../../shared/modules";
 import { saveClub } from "../../../worker/domain/club";
 import { importGames } from "../../../worker/domain/fixtures";
-import { addDays, todayLocal } from "../../../worker/lib/time";
+import { addDays, todayLocal, utcIso } from "../../../worker/lib/time";
 import { api, exec, freshDb, loginAs, member, one, person, rows, season, team } from "../../../test/helpers";
 import schedule from "../samples/schedule.json";
 import { connector, parseCalendar, parseTeamLink } from "../worker/connector";
@@ -120,8 +120,32 @@ describe("handball.net", () => {
       const imported = await api(`/teams/${wd}/games/import`, { cookie, body: { data } });
       expect(imported.status).toBe(200);
       expect(imported.body).toMatchObject({ created: 1 });
+      // Just synced: not due by itself
       const auto = await api(`/teams/${wd}/games/claim`, { cookie, body: { manual: false } });
-      expect(auto.body).toMatchObject({ claimed: false, reason: "manual_only" });
+      expect(auto.body).toMatchObject({ claimed: false, reason: "not_due" });
+    });
+
+    it("syncs by itself once the last sync is 7 days old, never twice at the same time", async () => {
+      const coach = await person("Coach");
+      await member(coach, wd, "coach");
+      const cookie = await loginAs(coach);
+      const claimAuto = async () => (await api(`/teams/${wd}/games/claim`, { cookie, body: { manual: false } })).body;
+      const syncedDaysAgo = (n: number) => exec("UPDATE teams SET fixture_synced_at = ? WHERE id = ?", utcIso(Date.now() - n * 86_400_000), wd);
+      await syncedDaysAgo(6);
+      expect(await claimAuto()).toEqual({ claimed: false, reason: "not_due" });
+      await syncedDaysAgo(7);
+      expect(await claimAuto()).toEqual({ claimed: true, fetchUrl: "https://www.handball.net/kalender/team/999.ics", fetchFormat: "text" });
+      // A second device (or a button) while the first one fetches
+      expect(await claimAuto()).toMatchObject({ claimed: false, reason: "busy" });
+      expect((await api(`/teams/${wd}/games/claim`, { cookie, body: { manual: true } })).body).toMatchObject({ claimed: false, reason: "busy" });
+      // The fetch failed: the error stays on the team, the next app start tries again
+      await api(`/teams/${wd}/games/release`, { cookie, body: { error: "HTTP 503" } });
+      expect(await teamRow()).toMatchObject({ fixture_error: expect.stringContaining("HTTP 503"), fixture_claimed_at: null });
+      expect(await claimAuto()).toMatchObject({ claimed: true });
+      const data = calendar("TV Heimverein", [{ id: "31", date: addDays(todayLocal(), 4), time: "11:00", summary: "SG Gast - TV Heimverein" }]);
+      expect((await api(`/teams/${wd}/games/import`, { cookie, body: { data } })).body).toMatchObject({ created: 1 });
+      expect(await teamRow()).toMatchObject({ fixture_error: null, fixture_claimed_at: null });
+      expect(await claimAuto()).toEqual({ claimed: false, reason: "not_due" });
     });
   });
 });

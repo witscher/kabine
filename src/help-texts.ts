@@ -82,9 +82,24 @@ export const HELP = {
     text: t`Only events where someone was expected count. Away long-term or inactive never counts as missing. Cancelled events do not count at all. At short notice means declined after the decline deadline. In games an appearance is: nominated and there. Stand-ins from other teams do not count.`,
     example: t`Lukas was injured for two weeks and entered as away long-term. Of the other 6 trainings he came to 6: he is at 100 %, not at 75 %.`,
   }),
+  noAttendance: () => ({
+    title: t`Without attendance`,
+    text: t`For events the club holds that nobody has to accept or decline. There are no responses, no reminders and no attendance, and the event does not count in the statistics. Helpers may still be needed: whoever signed up for a helper duty comes, of course. For everyone else it is up to them.`,
+    example: t`Sticker album kick-off: everyone is invited, nobody has to answer, but cake and set-up need helpers.`,
+  }),
+  optionalAttendance: () => ({
+    title: t`Optional attendance`,
+    text: t`For events people may join but do not have to. Nobody counts as accepted automatically: whoever wants to join says yes, and the organisers see who is coming. Whoever does not say yes is not missing, gets no reminder and gives no reason.`,
+    example: t`Club trip to the climbing park: all teams are invited, the organisers book for everyone who said yes.`,
+  }),
+  familyAttendance: () => ({
+    title: t`Registration per family`,
+    text: t`For parties and outings whole families come to. Instead of yes or no per person, each family says how many people are coming. Families come from the links between parents and children; siblings count together. Whoever has no links registers on their own. Anyone in the family can change the number, it counts once. The organisers see which family comes with how many.`,
+    example: t`Christmas party: the Berg family registers 4 people, an adult player 2 with her partner.`,
+  }),
   scheduleReminder: () => ({
     title: t`Reminder to sync`,
-    text: t`When a team's game schedule has not been synced for this long, its coaches see a hint with "Sync now" at the top of their events list. The hint disappears after the sync. A coach or admin always syncs by hand.`,
+    text: t`When a team's game schedule has not been synced for this long, its coaches see a hint with "Sync now" at the top of their events list. The hint disappears after the sync. Coaches and admins sync by hand; schedules from handball.net also sync once a week by themselves when a coach opens the app.`,
     example: t`With 15 days: if the schedule of a team was last synced on the 1st, the hint shows on the 16th.`,
   }),
 } satisfies Record<string, () => HelpText>;

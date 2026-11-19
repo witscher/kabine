@@ -20,6 +20,7 @@ import {
   useDocumentTitle,
 } from "../ui";
 import { useLocations } from "./event";
+import { AttendanceModeSwitches, NO_MODE } from "../special-attendance";
 import { useVenue } from "../club";
 
 type NewKind = "game" | "special";
@@ -40,6 +41,7 @@ export function SpecialEventPage({ id }: { id?: string }) {
   const [end, setEnd] = useState("");
   const [locationId, setLocationId] = useState<number | null>(null);
   const [notes, setNotes] = useState("");
+  const [modes, setModes] = useState(NO_MODE);
   const teams = me.manageableTeams;
   // From within a team it is preselected, likewise if there is only one
   const [teamIds, setTeamIds] = useState<number[]>(
@@ -164,6 +166,9 @@ export function SpecialEventPage({ id }: { id?: string }) {
                 />
               )}
             </Field>
+            <ul class="list" aria-label={t`Responses`}>
+              <AttendanceModeSwitches value={modes} onChange={setModes} />
+            </ul>
             {me.isAdmin ? (
               <ul class="list">
                 <li>
@@ -222,6 +227,7 @@ export function SpecialEventPage({ id }: { id?: string }) {
                   endsAt: end ? `${date}T${end}` : null,
                   locationId,
                   notes: notes.trim() || null,
+                  ...modes,
                   teamIds: clubWide ? [] : teamIds,
                   clubWide,
                   // Time slots follow the date of the event (the date may have been changed after the slots were created)

@@ -3,7 +3,7 @@ import { Hono } from "hono";
 import { z } from "zod";
 import type { EventSummary, MyDuty, TeamRef } from "../../shared/types";
 import { type AppEnv, intParam, requireActor } from "../app";
-import { type Actor, isCoachOfAny, PARENTS_HANDLE_IT, requireActFor, requireAdmin } from "../auth/actor";
+import { type Actor, isCoachOfAny, mayActFor, PARENTS_HANDLE_IT, requireActFor, requireAdmin } from "../auth/actor";
 import { postSystemMessage } from "../domain/chat";
 import {
   attendanceEditable,
@@ -11,10 +11,13 @@ import {
   type EventRow,
   eventTeams,
   eventTitle,
+  familyOf,
+  familyOverview,
   listVisibleEvents,
   loadEvent,
   loadEventContext,
   loadVisibleEvent,
+  optionalYesNames,
   type Participant,
   toDetail,
   toSummary,
@@ -100,10 +103,10 @@ async function visibleEventOr404(db: D1Database, actor: Actor, eventId: number):
   return event;
 }
 
-/** What coaches still have to do in their own teams (hints at the top of the events list). */
+/** What coaches still have to do in their own teams (hints at the top of the events list), and schedules due for a sync by itself. */
 eventRoutes.get("/coach-hints", async (c) => {
   const actor = requireActor(c);
-  return c.json({ hints: await loadCoachHints(c.env.DB, actor) });
+  return c.json(await loadCoachHints(c.env.DB, actor));
 });
 
 eventRoutes.get("/events/:id", async (c) => {
@@ -123,7 +126,12 @@ eventRoutes.get("/events/:id", async (c) => {
     loadLeaders(c.env.DB, event, detail.teams.map((t) => t.id)),
   ]);
   const organizing = !!info.organizers && (info.organizers.creator?.id === actor.personId || info.organizers.people.some((p) => p.id === actor.personId));
-  return c.json({ ...detail, ...info, organizing, modules, leaders: leaderEntries(leaders, event, ctx, actor, detail.canManage, now) });
+  // Organisers without coach rights see who comes: with optional attendance who said yes, with registration per family the
+  // families with their number (docs/dev/decisions.md, Special events: attendance modes). Never reasons.
+  const forOrganizer = organizing && !detail.canManage;
+  const families = detail.families ?? (forOrganizer ? familyOverview(ctx.families.get(event.id)) : null);
+  const optionalYes = forOrganizer && detail.optionalAttendance ? optionalYesNames(event, ctx) : null;
+  return c.json({ ...detail, families, optionalYes, ...info, organizing, modules, leaders: leaderEntries(leaders, event, ctx, actor, detail.canManage, now) });
 });
 
 /** Creator and organisers of a special event; they manage the helper duties. */
@@ -342,6 +350,8 @@ export async function respond(
   if (!asCoach) requireActFor(actor, personId, status === "yes" ? "may_accept" : "may_decline", teamIds);
   if (event.cancelled_at) throw conflict(t`The event is not taking place.`);
   if (localToInstant(event.starts_at) <= now) throw conflict(t`The event has already started.`);
+  if (event.kind === "special" && event.no_attendance === 1) throw conflict(t`Nobody needs to accept or decline this event.`, "no_attendance");
+  if (ctx.families.has(event.id)) throw conflict(t`For this event each family says how many people are coming.`, "family_attendance");
 
   const participant = (ctx.participants.get(event.id) ?? []).find((p) => p.person.id === personId);
   if (!participant) {
@@ -456,7 +466,8 @@ async function affectedPersons(db: D1Database, event: EventRow, ctx: Awaited<Ret
   const parts = ctx.participants.get(event.id) ?? [];
   // Optional participants only once they accepted
   const ids = new Set(parts.filter((p) => p.status !== "inactive" && p.status !== "standing" && (!p.optional || p.status === "yes")).map((p) => p.person.id));
-  if (event.kind === "game") {
+  // Games: the whole team; special events without attendance have no participants, their teams' members are told
+  if (event.kind === "game" || (event.kind === "special" && event.no_attendance === 1)) {
     for (const m of ctx.members.get(event.id)?.values() ?? []) if (m.is_active === 1) ids.add(m.person_id);
   }
   const teamIds = (await all<{ team_id: number }>(db, "SELECT team_id FROM event_teams WHERE event_id = ?", event.id)).map((r) => r.team_id);
@@ -658,6 +669,69 @@ const updateSchema = z.object({
   meetingTime: z.string().refine(isTime, { error: () => t`Invalid time` }).nullable().optional(),
   coachNotes: z.string().trim().max(1000).nullable().optional(),
   declineHours: z.number().int().min(0).max(168).nullable().optional(),
+  /** Special events only: how people respond (at most one of the three) */
+  noAttendance: z.boolean().optional(),
+  optionalAttendance: z.boolean().optional(),
+  familyAttendance: z.boolean().optional(),
+});
+
+interface AttendanceModes {
+  noAttendance: boolean;
+  optionalAttendance: boolean;
+  familyAttendance: boolean;
+}
+
+/**
+ * How people respond to a special event, from the input and the stored state: at most one of "without attendance",
+ * "optional attendance" and "registration per family". Turning one on turns the others off; two at once: 400.
+ */
+function attendanceModes(input: Partial<AttendanceModes>, current: Pick<EventRow, "no_attendance" | "optional_attendance" | "family_attendance">): AttendanceModes {
+  const on = [input.noAttendance, input.optionalAttendance, input.familyAttendance].filter((v) => v === true).length;
+  if (on > 1) throw badRequest(t`Only one is possible: without attendance, optional attendance or registration per family.`, "attendance_conflict");
+  const keep = (value: boolean | undefined, stored: number) => value ?? (on ? false : stored === 1);
+  return {
+    noAttendance: keep(input.noAttendance, current.no_attendance),
+    optionalAttendance: keep(input.optionalAttendance, current.optional_attendance),
+    familyAttendance: keep(input.familyAttendance, current.family_attendance),
+  };
+}
+
+/**
+ * Registration per family: the number of people of one's own family (0: not coming). Every family member with an
+ * account may set it, children within what their parents allow; it counts once per family. No notification.
+ */
+eventRoutes.put("/events/:id/family", async (c) => {
+  const actor = requireActor(c);
+  const event = await visibleEventOr404(c.env.DB, actor, intParam(c, "id"));
+  const { count } = parse(
+    z.object({ count: z.number().int().min(0).max(30, { error: () => t`At most 30 people per family.` }) }),
+    await readJson(c.req.raw),
+  );
+  if (event.kind !== "special" || event.family_attendance !== 1 || event.no_attendance === 1) {
+    throw badRequest(t`This event has no registration per family.`, "not_family_attendance");
+  }
+  if (event.cancelled_at) throw conflict(t`The event is not taking place.`);
+  if (localToInstant(event.starts_at) <= Date.now()) throw conflict(t`The event has already started.`);
+  const ctx = await loadEventContext(c.env.DB, [event]);
+  const unit = familyOf(ctx, event.id, actor);
+  if (!unit) throw forbidden(t`Your family is not invited to this event.`, "not_invited");
+  // A participant without a parent of theirs in the family: their parents' permissions apply (as for responses)
+  const teamIds = ctx.eventTeams.get(event.id) ?? [];
+  const asParent = actor.children.some((ch) => unit.members.some((m) => m.id === ch.id));
+  if (!asParent && !mayActFor(actor, actor.personId, count > 0 ? "may_accept" : "may_decline", teamIds)) throw forbidden(PARENTS_HANDLE_IT(), "parents_handle_it");
+  await c.env.DB.batch([
+    stmt(c.env.DB, "DELETE FROM event_family_responses WHERE event_id = ? AND anchor_id IN (SELECT value FROM json_each(?))", event.id, list(unit.members.map((m) => m.id))),
+    stmt(
+      c.env.DB,
+      "INSERT INTO event_family_responses (event_id, anchor_id, count, updated_by, updated_at) VALUES (?, ?, ?, ?, ?)",
+      event.id,
+      unit.key,
+      count,
+      actor.personId,
+      utcIso(),
+    ),
+  ]);
+  return c.json(toDetail(event, await loadEventContext(c.env.DB, [event]), actor, Date.now()));
 });
 
 eventRoutes.patch("/events/:id", async (c) => {
@@ -668,6 +742,11 @@ eventRoutes.patch("/events/:id", async (c) => {
   const endsAt = input.endsAt === undefined ? event.ends_at : input.endsAt;
   if (endsAt && endsAt <= startsAt) throw badRequest(t`The end must be after the start.`);
   if (input.title && event.kind !== "special") throw badRequest(t`Only special events have a title.`);
+  const modeInput = { noAttendance: input.noAttendance, optionalAttendance: input.optionalAttendance, familyAttendance: input.familyAttendance };
+  if (event.kind !== "special" && Object.values(modeInput).some((v) => v !== undefined)) {
+    throw badRequest(t`Only special events can change how people respond.`, "not_special");
+  }
+  const modes = attendanceModes(modeInput, event);
   if (event.kind === "game" && (input.startsAt || input.locationId !== undefined)) {
     throw badRequest(t`Start of play and venue come from the game schedule and cannot be changed here.`);
   }
@@ -682,7 +761,8 @@ eventRoutes.patch("/events/:id", async (c) => {
   await run(
     c.env.DB,
     `UPDATE events SET title = ?, starts_at = ?, ends_at = ?, location_id = ?, notes = ?, meeting_point = ?, meeting_time = ?,
-       coach_notes = ?, decline_hours = ?, is_detached = ?, updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
+       coach_notes = ?, decline_hours = ?, is_detached = ?, no_attendance = ?, optional_attendance = ?, family_attendance = ?,
+       updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
      WHERE id = ?`,
     input.title ?? event.title,
     startsAt,
@@ -694,6 +774,9 @@ eventRoutes.patch("/events/:id", async (c) => {
     input.coachNotes === undefined ? event.coach_notes : input.coachNotes,
     input.declineHours === undefined ? event.decline_hours : input.declineHours,
     moved ? 1 : event.is_detached,
+    modes.noAttendance ? 1 : 0,
+    modes.optionalAttendance ? 1 : 0,
+    modes.familyAttendance ? 1 : 0,
     event.id,
   );
 
@@ -728,6 +811,26 @@ eventRoutes.patch("/events/:id", async (c) => {
     );
   }
   const fresh = (await loadEvent(c.env.DB, event.id))!;
+  // Switched to registration per family: earlier responses no longer count (they stay stored), everyone invited learns
+  // to register their family. Only for upcoming events that take place.
+  if (modes.familyAttendance && event.family_attendance !== 1 && !event.cancelled_at && localToInstant(fresh.starts_at) > Date.now()) {
+    await notifyPersons(
+      c.env,
+      (ctx.participants.get(event.id) ?? []).filter((p) => p.isActive).map((p) => p.person.id),
+      "events",
+      () => {
+        const title = eventTitle(fresh, teams);
+        const date = shortDate(fresh.starts_at);
+        const time = shortTime(fresh.starts_at);
+        return {
+          title: t`Registration per family: ${title}`,
+          body: t`${date}, ${time}. Please register how many of your family are coming. Earlier acceptances no longer count.`,
+          url: `/termine/${event.id}`,
+        };
+      },
+      { teamIds: teams.map((tm) => tm.id), exclude: [actor.accountId] },
+    );
+  }
   return c.json(toDetail(fresh, await loadEventContext(c.env.DB, [fresh]), actor, Date.now()));
 });
 
@@ -776,6 +879,10 @@ const specialSchema = z.object({
   teamIds: z.array(z.number().int().positive()).max(30).default([]),
   clubWide: z.boolean().default(false),
   declineHours: z.number().int().min(0).max(168).nullable().optional(),
+  /** How people respond (at most one): nobody, whoever wants to, or one number per family */
+  noAttendance: z.boolean().default(false),
+  optionalAttendance: z.boolean().default(false),
+  familyAttendance: z.boolean().default(false),
   /** Helper duties as time blocks; newTypeName creates a special duty for this event only. */
   duties: z
     .array(
@@ -805,11 +912,13 @@ eventRoutes.post("/events", async (c) => {
   if (!actor.isAdmin && !teamIds.every((t) => actor.coachTeamIds.includes(t))) throw forbidden(t`Only coaches of this team may do this.`);
   if (input.startsAt <= nowLocal()) throw badRequest(t`The event must be in the future.`);
   if (input.endsAt && input.endsAt <= input.startsAt) throw badRequest(t`The end must be after the start.`);
+  const modes = attendanceModes(input, { no_attendance: 0, optional_attendance: 0, family_attendance: 0 });
 
   const row = await first<{ id: number }>(
     c.env.DB,
-    `INSERT INTO events (kind, title, starts_at, ends_at, location_id, notes, club_wide, decline_hours, created_by)
-     VALUES ('special', ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id`,
+    `INSERT INTO events (kind, title, starts_at, ends_at, location_id, notes, club_wide, decline_hours, created_by,
+                         no_attendance, optional_attendance, family_attendance)
+     VALUES ('special', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id`,
     input.title,
     input.startsAt,
     input.endsAt ?? null,
@@ -818,6 +927,9 @@ eventRoutes.post("/events", async (c) => {
     input.clubWide ? 1 : 0,
     input.declineHours ?? null,
     actor.personId,
+    modes.noAttendance ? 1 : 0,
+    modes.optionalAttendance ? 1 : 0,
+    modes.familyAttendance ? 1 : 0,
   );
   if (teamIds.length) {
     await c.env.DB.batch(teamIds.map((t) => stmt(c.env.DB, "INSERT INTO event_teams (event_id, team_id) VALUES (?, ?)", row!.id, t)));
@@ -827,21 +939,35 @@ eventRoutes.post("/events", async (c) => {
   const ctx = await loadEventContext(c.env.DB, [event]);
   const title = input.title;
   const location = event.loc_name;
+  // Without attendance nobody takes part: the members of the teams are told, without a request
+  const invited = modes.noAttendance
+    ? [...(ctx.members.get(event.id)?.values() ?? [])].filter((m) => m.is_active === 1).map((m) => m.person_id)
+    : (ctx.participants.get(event.id) ?? []).filter((p) => p.isActive).map((p) => p.person.id);
   await notifyPersons(
     c.env,
-    // Games: nominated only (no push to everyone with "whole team at games")
-    (ctx.participants.get(event.id) ?? []).filter((p) => p.isActive && (event.kind !== "game" || p.nominated)).map((p) => p.person.id),
+    invited,
     "events",
     (who) => {
       const when = `${shortDate(input.startsAt)}, ${shortTime(input.startsAt)}`;
       const form = pushForm(who);
       const names = whoNames(who);
-      const ask = select(form, {
-        you: "Please let us know if you are coming.",
-        one: `Please let us know if ${names} is coming.`,
-        youAnd: `Please let us know if ${names} are coming.`,
-        other: `Please let us know if ${names} are coming.`,
-      });
+      const ask = modes.noAttendance
+        ? t`No need to accept or decline.`
+        : modes.familyAttendance
+          ? t`Please register how many of your family are coming.`
+          : modes.optionalAttendance
+            ? select(form, {
+                you: "If you want to join, please say yes.",
+                one: `If ${names} wants to join, please say yes.`,
+                youAnd: `If ${names} want to join, please say yes.`,
+                other: `If ${names} want to join, please say yes.`,
+              })
+            : select(form, {
+                you: "Please let us know if you are coming.",
+                one: `Please let us know if ${names} is coming.`,
+                youAnd: `Please let us know if ${names} are coming.`,
+                other: `Please let us know if ${names} are coming.`,
+              });
       return {
         title: t`New event: ${title}`,
         body: location ? t`${when}, ${location}. ${ask}` : t`${when}. ${ask}`,

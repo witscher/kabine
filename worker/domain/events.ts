@@ -4,7 +4,9 @@ import type {
   EventCounts,
   EventDetail,
   EventSummary,
+  FamilyOverview,
   GameInfo,
+  MyFamily,
   MyParticipation,
   ParticipantDetail,
   ParticipationStatus,
@@ -18,7 +20,8 @@ import { type Actor, childLimitAllows, isCoachOfAny, isStaffOfAny, mayActFor, PA
 import { all, list } from "../lib/db";
 import { CACHE_VERSIONS_SQL, fromCache, toVersions } from "../lib/cache";
 import { ownClubAbbr } from "./club";
-import { addDays, localToInstant, toLocal } from "../lib/time";
+import { addDays, addMinutesLocal, localToInstant, toLocal } from "../lib/time";
+import { currentLocale } from "../i18n";
 import type { AttendanceMark } from "../../shared/attendance";
 
 export interface EventRow {
@@ -33,6 +36,12 @@ export interface EventRow {
   rule_date: string | null;
   is_detached: number;
   club_wide: number;
+  /** Special event: nobody responds, no reminders, counts or attendance (helper duties stay) */
+  no_attendance: number;
+  /** Special event: everyone is optional, whoever wants to join says yes */
+  optional_attendance: number;
+  /** Special event: each family says how many people come (event_family_responses) */
+  family_attendance: number;
   decline_hours: number | null;
   cancelled_at: string | null;
   cancelled_by: number | null;
@@ -91,6 +100,8 @@ export interface TeamInfo {
   show_responses: number;
   /** Whole team at games: every player takes part, the nomination only decides who plays */
   game_all_players: number;
+  /** Parents respond for their children (registration per family: parents belong to the family) */
+  parents_enabled: number;
 }
 
 interface MemberRow {
@@ -158,6 +169,22 @@ export interface Participant {
   hasStandingAbsence: boolean;
 }
 
+/** Registration per family: a family (joined through parent links) or a person without links. */
+export interface FamilyUnit {
+  /** Smallest person id of the family; answers are saved under it */
+  key: number;
+  /** Participants first, then their parents */
+  members: PersonRef[];
+  count: number | null;
+  updatedBy: string | null;
+  updatedAt: string | null;
+}
+
+export interface EventFamilies {
+  units: FamilyUnit[];
+  unitOf: Map<number, FamilyUnit>;
+}
+
 export interface EventContext {
   teams: Map<number, TeamInfo>;
   eventTeams: Map<number, number[]>;
@@ -173,6 +200,8 @@ export interface EventContext {
   optional: Set<string>;
   /** Leaders who said "I'm not there": `${eventId}:${personId}` (worker/domain/leaders.ts) */
   leaderAbsences: Map<string, LeaderAbsence>;
+  /** Registration per family: the families per event */
+  families: Map<number, EventFamilies>;
 }
 
 export interface LeaderAbsence {
@@ -245,7 +274,7 @@ export async function loadEventContext(db: D1Database, events: EventRow[]): Prom
         db,
         `SELECT t.id, t.name, t.age_class_code, COALESCE(ac.game_minutes, 120) AS game_minutes, t.decline_hours_training,
                 t.decline_hours_game, t.max_squad, t.auto_squad, t.fixture_connector, t.fixture_source, t.show_responses,
-                t.game_all_players
+                t.game_all_players, t.parents_enabled
            FROM teams t ${CURRENT_AGE_CLASS_JOIN("t", "ac")}
           ORDER BY t.name`,
       ),
@@ -330,6 +359,11 @@ export async function loadEventContext(db: D1Database, events: EventRow[]): Prom
       }
     }
     membersByEvent.set(e.id, evMembers);
+    // Without attendance: nobody takes part, so no responses, reminders, attendance or counts
+    if (isNoAttendance(e)) {
+      participants.set(e.id, []);
+      continue;
+    }
 
     const resp = responsesByEvent.get(e.id) ?? new Map<number, ResponseRow>();
     const standingRows = e.kind === "training" && e.rule_id != null ? (standingByRule.get(e.rule_id) ?? []) : [];
@@ -338,9 +372,12 @@ export async function loadEventContext(db: D1Database, events: EventRow[]): Prom
     const add = (personId: number, first: string, last: string | null, isActive: number, teamId: number, isHelper: boolean, nominated = false) => {
       const response = resp.get(personId) ?? null;
       const hasStanding = standingRows.some((s) => s.person_id === personId && standingApplies(s, e));
-      // Optional only if every team of the person at this training joins optionally
+      // Optional only if every team of the person at this training joins optionally. Special events with optional
+      // attendance or registration per family: optional for everyone.
       const ownTeams = memberTeams.get(personId) ?? [teamId];
-      const isOptional = e.kind === "training" && ownTeams.every((t) => optional.has(`${e.id}:${t}`));
+      const isOptional =
+        (e.kind === "special" && (e.optional_attendance === 1 || e.family_attendance === 1)) ||
+        (e.kind === "training" && ownTeams.every((t) => optional.has(`${e.id}:${t}`)));
       let status: ParticipationStatus;
       if (isActive !== 1) status = "inactive";
       else if (response) status = response.status;
@@ -386,6 +423,7 @@ export async function loadEventContext(db: D1Database, events: EventRow[]): Prom
 
   // Who is a parent of whom? For "declined by parent".
   const guardianRows = guardianships.filter((g) => personIds.has(g.child_id));
+  const families = await loadFamilies(db, events, participants, guardianRows, teamById);
 
   return {
     teams,
@@ -398,7 +436,148 @@ export async function loadEventContext(db: D1Database, events: EventRow[]): Prom
     marks,
     optional,
     leaderAbsences,
+    families,
   };
+}
+
+function isNoAttendance(e: EventRow): boolean {
+  return e.kind === "special" && e.no_attendance === 1;
+}
+
+function isFamilyAttendance(e: EventRow): boolean {
+  return e.kind === "special" && e.family_attendance === 1 && e.no_attendance !== 1;
+}
+
+/** "First name L." */
+function shortPersonName(first: string, last: string | null): string {
+  return last ? `${first} ${last.charAt(0)}.` : first;
+}
+
+/**
+ * Registration per family: participants and their parents, joined through the parent links (siblings, patchwork);
+ * whoever has no links is a unit of their own. Parents belong to the family only where parents are in charge of the
+ * child (as for responses). Answers are saved under one person of the family; on reading, they belong to the family
+ * that person is in now (with two, the newer wins). The participants' status follows the answer.
+ */
+async function loadFamilies(
+  db: D1Database,
+  events: EventRow[],
+  participants: Map<number, Participant[]>,
+  guardianRows: { guardian_id: number; child_id: number }[],
+  teamById: Map<number, TeamInfo>,
+): Promise<Map<number, EventFamilies>> {
+  const out = new Map<number, EventFamilies>();
+  const familyEvents = events.filter(isFamilyAttendance);
+  if (!familyEvents.length) return out;
+  const guardianIds = [...new Set(guardianRows.map((g) => g.guardian_id))];
+  const [people, answers] = await db.batch([
+    db.prepare("SELECT id, first_name, last_name FROM persons WHERE id IN (SELECT value FROM json_each(?)) AND is_former = 0").bind(list(guardianIds)),
+    db
+      .prepare(
+        `SELECT f.event_id, f.anchor_id, f.count, f.updated_at, p.first_name, p.last_name
+           FROM event_family_responses f LEFT JOIN persons p ON p.id = f.updated_by
+          WHERE f.event_id IN (SELECT value FROM json_each(?))`,
+      )
+      .bind(list(familyEvents.map((e) => e.id))),
+  ]);
+  const guardianRef = new Map(
+    (people!.results as { id: number; first_name: string; last_name: string | null }[]).map((p) => [p.id, { id: p.id, firstName: p.first_name, lastName: p.last_name }]),
+  );
+  const answerRows = answers!.results as { event_id: number; anchor_id: number; count: number; updated_at: string; first_name: string | null; last_name: string | null }[];
+
+  for (const e of familyEvents) {
+    const parts = participants.get(e.id) ?? [];
+    const partIds = new Set(parts.map((p) => p.person.id));
+    const inCharge = new Set(parts.filter((p) => p.teamIds.some((id) => teamById.get(id)?.parents_enabled === 1)).map((p) => p.person.id));
+    // Union-find over the parent links of the participants
+    const root = new Map<number, number>();
+    const find = (x: number): number => {
+      let r = x;
+      while (root.has(r) && root.get(r) !== r) r = root.get(r)!;
+      return r;
+    };
+    const edges = guardianRows.filter((g) => inCharge.has(g.child_id) && guardianRef.has(g.guardian_id));
+    for (const g of edges) {
+      const a = find(g.guardian_id);
+      const b = find(g.child_id);
+      if (a !== b) root.set(a, b);
+    }
+    const byRoot = new Map<number, { participants: PersonRef[]; guardians: PersonRef[] }>();
+    const entry = (r: number) => {
+      if (!byRoot.has(r)) byRoot.set(r, { participants: [], guardians: [] });
+      return byRoot.get(r)!;
+    };
+    for (const p of parts) entry(find(p.person.id)).participants.push(p.person);
+    for (const id of new Set(edges.map((g) => g.guardian_id))) if (!partIds.has(id)) entry(find(id)).guardians.push(guardianRef.get(id)!);
+
+    const units: FamilyUnit[] = [];
+    const unitOf = new Map<number, FamilyUnit>();
+    for (const f of byRoot.values()) {
+      const members = [...f.participants, ...f.guardians];
+      const unit: FamilyUnit = { key: Math.min(...members.map((m) => m.id)), members, count: null, updatedBy: null, updatedAt: null };
+      units.push(unit);
+      for (const m of members) unitOf.set(m.id, unit);
+    }
+    for (const a of answerRows.filter((r) => r.event_id === e.id)) {
+      const unit = unitOf.get(a.anchor_id);
+      if (!unit || (unit.updatedAt && unit.updatedAt > a.updated_at)) continue;
+      unit.count = a.count;
+      unit.updatedAt = a.updated_at;
+      unit.updatedBy = a.first_name ? shortPersonName(a.first_name, a.last_name) : null;
+    }
+    // Status of the participants follows their family's answer (counts, cancel and move notices)
+    for (const p of parts) {
+      if (!p.isActive) continue;
+      const count = unitOf.get(p.person.id)?.count;
+      p.status = count == null ? "open" : count > 0 ? "yes" : "no";
+    }
+    out.set(e.id, { units, unitOf });
+  }
+  return out;
+}
+
+/** "Kim, Lea and Mona K." with one family name, else "Kim K., Tom B. and Paul B.", in the current language. */
+export function familyLabel(members: PersonRef[]): string {
+  const initials = new Set(members.map((m) => m.lastName?.charAt(0) ?? ""));
+  const initial = initials.size === 1 ? [...initials][0] : "";
+  const names = initials.size === 1 ? members.map((m) => m.firstName) : members.map((m) => shortPersonName(m.firstName, m.lastName));
+  const joined = new Intl.ListFormat(currentLocale(), { type: "conjunction" }).format(names);
+  return initial ? `${joined} ${initial}.` : joined;
+}
+
+function myFamily(f: EventFamilies | undefined, actor: Actor): MyFamily | null {
+  const unit = f?.unitOf.get(actor.personId);
+  return unit ? { label: familyLabel(unit.members), members: unit.members.length, count: unit.count, updatedBy: unit.updatedBy, updatedAt: unit.updatedAt } : null;
+}
+
+/** The family of the actor at a family event (as a participant or a parent in charge), else undefined. */
+export function familyOf(ctx: EventContext, eventId: number, actor: Actor): FamilyUnit | undefined {
+  return ctx.families.get(eventId)?.unitOf.get(actor.personId);
+}
+
+/** Overview of the registration per family for coaches, admins and organisers. */
+export function familyOverview(f: EventFamilies | undefined): FamilyOverview | null {
+  if (!f) return null;
+  const registered = f.units.filter((u) => (u.count ?? 0) > 0);
+  const locale = currentLocale();
+  return {
+    persons: registered.reduce((n, u) => n + (u.count ?? 0), 0),
+    registered: registered.length,
+    declined: f.units.filter((u) => u.count === 0).length,
+    open: f.units.filter((u) => u.count == null).length,
+    units: registered
+      .map((u) => ({ label: familyLabel(u.members), count: u.count ?? 0 }))
+      .sort((a, b) => b.count - a.count || a.label.localeCompare(b.label, locale)),
+  };
+}
+
+/** Optional attendance: who said yes, as "First name L." (organisers without coach rights plan with it). */
+export function optionalYesNames(e: EventRow, ctx: EventContext): string[] {
+  const locale = currentLocale();
+  return (ctx.participants.get(e.id) ?? [])
+    .filter((p) => p.status === "yes")
+    .map((p) => shortPersonName(p.person.firstName, p.person.lastName))
+    .sort((a, b) => a.localeCompare(b, locale));
 }
 
 /** Imported game: the connector, the game's id at the source and what the team's connector fetches. */
@@ -481,6 +660,16 @@ export function countsOf(list: Participant[], marks?: (p: Participant) => Attend
 
 export function isPast(e: EventRow, now: number): boolean {
   return localToInstant(e.starts_at) <= now;
+}
+
+/** Without an end: how long a training or special event counts as running. */
+const RUNNING_MINUTES = 120;
+
+/** Running: started, not cancelled and before its end (without an end: the playing time of the age class for games, else 2 hours). */
+export function isRunning(e: EventRow, teams: TeamInfo[], now: number): boolean {
+  if (e.cancelled_at || !isPast(e, now)) return false;
+  const end = e.ends_at ?? addMinutesLocal(e.starts_at, e.kind === "game" ? gameLiveMinutes(teams.map((t) => t.game_minutes)) : RUNNING_MINUTES);
+  return localToInstant(end) > now;
 }
 
 /** Coaches record attendance until the end of the day after the event (local time); admins the whole season (null). */
@@ -586,6 +775,10 @@ export function toSummary(e: EventRow, ctx: EventContext, actor: Actor, now: num
     teams: teamRefs,
     optionalTeamIds: teamRefs.filter((tm) => ctx.optional.has(`${e.id}:${tm.id}`)).map((tm) => tm.id),
     clubWide: e.club_wide === 1,
+    noAttendance: isNoAttendance(e),
+    optionalAttendance: e.kind === "special" && e.optional_attendance === 1 && e.no_attendance !== 1,
+    familyAttendance: ctx.families.has(e.id),
+    myFamily: myFamily(ctx.families.get(e.id), actor),
     cancelled: e.cancelled_at
       ? {
           at: e.cancelled_at,
@@ -597,7 +790,9 @@ export function toSummary(e: EventRow, ctx: EventContext, actor: Actor, now: num
     deadline: toLocal(localToInstant(e.starts_at) - hours * 3_600_000),
     deadlineHours: hours,
     isPast: isPast(e, now),
-    counts: showCounts ? countsOf(parts, isPast(e, now) && !e.cancelled_at ? (p) => ctx.marks.get(`${e.id}:${p.person.id}`) ?? null : undefined) : null,
+    isRunning: isRunning(e, teams, now),
+    // Registration per family: numbers per family instead of per person (FamilyOverview)
+    counts: showCounts && !isNoAttendance(e) && !ctx.families.has(e.id) ? countsOf(parts, isPast(e, now) && !e.cancelled_at ? (p) => ctx.marks.get(`${e.id}:${p.person.id}`) ?? null : undefined) : null,
     mine: myParticipations(e, ctx, actor, now),
     canManage,
     unexcusedCount: canManage ? parts.filter((p) => ctx.marks.get(`${e.id}:${p.person.id}`) === "unexcused").length : 0,
@@ -680,6 +875,8 @@ export function toDetail(e: EventRow, ctx: EventContext, actor: Actor, now: numb
   return {
     ...summary,
     participants,
+    families: summary.canManage ? familyOverview(ctx.families.get(e.id)) : null,
+    optionalYes: null,
     roster,
     dutyManage: false,
     organizers: null,
@@ -841,6 +1038,7 @@ export function mergeContexts(a: EventContext, b: EventContext): EventContext {
     marks: new Map([...a.marks, ...b.marks]),
     optional: new Set([...a.optional, ...b.optional]),
     leaderAbsences: new Map([...a.leaderAbsences, ...b.leaderAbsences]),
+    families: new Map([...a.families, ...b.families]),
   };
 }
 

@@ -174,6 +174,9 @@ export async function cleanup(db: D1Database, now = Date.now()): Promise<void> {
     db.prepare("DELETE FROM sessions WHERE expires_at < ?").bind(utcIso(now)),
     db.prepare("DELETE FROM invites WHERE expires_at < ?").bind(utcIso(now - 30 * 86_400_000)),
     db.prepare("DELETE FROM email_codes WHERE expires_at < ?").bind(utcIso(now - 86_400_000)),
+    // The sender's hash is needed for the limit of one hour only
+    db.prepare("UPDATE email_codes SET ip_hash = NULL WHERE ip_hash IS NOT NULL AND created_at < ?").bind(utcIso(now - 3_600_000)),
+    db.prepare("DELETE FROM webauthn_used_challenges WHERE expires_at < ?").bind(utcIso(now)),
     db.prepare("UPDATE responses SET reason = NULL WHERE reason IS NOT NULL AND event_id IN (SELECT id FROM events WHERE starts_at < ?)").bind(cutoff),
     // The note of an "I'm not there" goes like a decline reason
     db.prepare("UPDATE leader_absences SET note = NULL WHERE note IS NOT NULL AND event_id IN (SELECT id FROM events WHERE starts_at < ?)").bind(cutoff),

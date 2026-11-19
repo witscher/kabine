@@ -25,7 +25,7 @@ export interface Source {
   connectors: { id: string; name: string; link: { label: string; hint: string; placeholder: string } }[];
 }
 
-interface ImportSummary {
+export interface ImportSummary {
   created: number;
   updated: number;
   moved: number;
@@ -35,11 +35,12 @@ interface ImportSummary {
 }
 
 /**
- * Sync the game schedule, only when a coach or admin presses the button (Team → Settings), never
- * automatically. The server hands out a reservation first so that several devices never query at the same
- * time. Sources that block servers are fetched here in the browser, the others by the server.
+ * Sync the game schedule when a coach or admin presses the button (Team → Settings, hint on the events list),
+ * or by itself (`auto`) for sources that sync weekly (src/coach-hints.tsx); the server decides whether that is
+ * due. The server hands out a reservation first so that several devices never query at the same time. Sources
+ * that block servers are fetched here in the browser, the others by the server.
  */
-export async function syncGames(teamId: number, name: string): Promise<ImportSummary | null> {
+export async function syncGames(teamId: number, name: string, opts: { auto?: boolean } = {}): Promise<ImportSummary | null> {
   const claim = await api.post<{
     claimed: boolean;
     reason?: string;
@@ -48,8 +49,10 @@ export async function syncGames(teamId: number, name: string): Promise<ImportSum
     retryAt?: string;
     summary?: ImportSummary;
   }>(`/teams/${teamId}/games/claim`, {
-    manual: true,
+    manual: !opts.auto,
   });
+  // By itself: not due, or another device is at it; nothing to tell
+  if (!claim.claimed && opts.auto) return null;
   if (!claim.claimed) {
     if (claim.reason === "recent") throw new Error(t`The game schedule was only just synced. Please try again in a few minutes.`);
     if (claim.reason === "busy") throw new Error(t`Another device is syncing the game schedule right now.`);

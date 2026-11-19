@@ -3004,3 +3004,108 @@ button.announcement-head {
   font-size: 13px;
   color: var(--warn);
 }
+
+/* Head of the big event card as a link (home): keeps the colours */
+a.card-head-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* Next event today: a calm light sweep over the head every six seconds, "today" as a dark pill with a pulsing dot and a
+   soft glow. Off with reduced motion. */
+.card-head.is-today {
+  position: relative;
+  overflow: hidden;
+}
+.card-head.is-today::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 35%, rgba(255, 255, 255, 0.5) 50%, transparent 65%);
+  transform: translateX(-100%);
+  animation: today-shine 6s ease-in-out 1s infinite;
+  pointer-events: none;
+}
+.today-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-weight: 600;
+  font-size: 14px;
+  background: var(--black);
+  color: var(--yellow);
+  border-radius: 999px;
+  padding: 3px 11px;
+  position: relative;
+  z-index: 1;
+  white-space: nowrap;
+  animation: today-glow 2.6s ease-in-out infinite;
+}
+.today-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: today-pulse 2.4s ease-in-out infinite;
+}
+@keyframes today-shine {
+  0% {
+    transform: translateX(-100%);
+  }
+  25%,
+  100% {
+    transform: translateX(100%);
+  }
+}
+@keyframes today-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+  50% {
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--yellow) 55%, #fff);
+  }
+}
+@keyframes today-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.35;
+    transform: scale(0.65);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .card-head.is-today::after,
+  .today-tag,
+  .today-dot {
+    animation: none;
+  }
+  .card-head.is-today::after {
+    display: none;
+  }
+}
+
+/* Number stepper (registration per family) */
+.stepper {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: 1.5px solid var(--line-2);
+  border-radius: 999px;
+  padding: 2px;
+}
+.stepper .icon-btn {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1;
+}
+.stepper-value {
+  min-width: 2ch;
+  text-align: center;
+  font-weight: 700;
+  font-size: 18px;
+  font-variant-numeric: tabular-nums;
+}

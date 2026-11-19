@@ -1,6 +1,7 @@
 // Game schedule of a team from a fixture connector (modules of kind "fixtures"): link the team's page at
-// the source, then sync at the press of a button. Sources that block servers are fetched by the coach's
-// device (fetchFrom "device"), the others by the server. The sync itself is in domain/fixtures.ts.
+// the source, then sync at the press of a button (some sources also by themselves, see the claim). Sources
+// that block servers are fetched by the coach's device (fetchFrom "device"), the others by the server. The
+// sync itself is in domain/fixtures.ts.
 import { t } from "@lingui/core/macro";
 import { Hono } from "hono";
 import { z } from "zod";
@@ -165,8 +166,10 @@ gameRoutes.get("/admin/fixture-sync", async (c) => {
 });
 
 /**
- * One device reserves the fetch, so several devices never query the source at the same time. Only at the
- * push of a button (`manual`), never automatically. Sources fetched by the server are synced right away.
+ * One device reserves the fetch, so several devices never query the source at the same time. At the push of a
+ * button (`manual`), or by itself from a coach's device when the source syncs by itself (`autoSyncDays`) and the
+ * last sync is that old (the same rule as `autoSync` in GET /api/coach-hints). Sources fetched by the server are
+ * synced right away.
  */
 gameRoutes.post("/teams/:id/games/claim", async (c) => {
   const actor = requireActor(c);
@@ -177,7 +180,11 @@ gameRoutes.post("/teams/:id/games/claim", async (c) => {
   const link = linked(team);
   if (!link) throw conflict(t`No game schedule is linked for this team.`);
   const now = Date.now();
-  if (!manual) return c.json({ claimed: false, reason: "manual_only" });
+  if (!manual) {
+    const days = link.connector.autoSyncDays;
+    if (!days) return c.json({ claimed: false, reason: "manual_only" });
+    if (!scheduleStale(team.fixture_synced_at, days, now)) return c.json({ claimed: false, reason: "not_due" });
+  }
   if (team.fixture_synced_at && now - Date.parse(team.fixture_synced_at) < link.connector.minIntervalMs) {
     return c.json({ claimed: false, reason: "recent", retryAt: utcIso(Date.parse(team.fixture_synced_at) + link.connector.minIntervalMs) });
   }
