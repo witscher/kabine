@@ -172,7 +172,7 @@ async function buildJoinContext(
 
   if (invite.kind === "parent") {
     if (!input.firstName || !input.lastName) throw badRequest(t`Please enter your first and last name.`);
-    // A parent link for one child links that child and no other (rule 19)
+    // A parent link for one child links that child and no other (rule 20)
     const childIds = oneChildSelection(invite, input.childIds) ?? [...new Set(input.childIds ?? [])];
     if (!childIds.length) throw badRequest(t`Please select at least one child.`);
     const players = await teamPlayers(env.DB, invite.team_id!);
@@ -554,7 +554,7 @@ joinRoutes.post("/join/link-children", async (c) => {
   const invite = await findValidInvite(c.env, token);
   if (invite.kind !== "parent") throw badRequest(t`This is not a parent link.`);
   if (childIds.includes(actor.personId)) throw badRequest(t`You cannot link yourself as a child.`);
-  // A parent link for one child links that child and no other, once (rule 19)
+  // A parent link for one child links that child and no other, once (rule 20)
   oneChildSelection(invite, childIds);
   const players = await teamPlayers(c.env.DB, invite.team_id!);
   if (!childIds.every((id) => players.some((p) => p.id === id))) throw badRequest(t`Invalid selection.`);

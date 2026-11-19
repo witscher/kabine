@@ -1,5 +1,5 @@
 // Parent link for one child: created by a coach of the child's team (or an admin), links only that child, once.
-// Security rule 19 (docs/dev/security.md). Names and addresses are invented.
+// Security rule 20 (docs/dev/security.md). Names and addresses are invented.
 import { exports } from "cloudflare:workers";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { type MailMessage, mailer } from "../worker/domain/email-login";

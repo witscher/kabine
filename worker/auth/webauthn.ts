@@ -14,9 +14,14 @@ import type {
 } from "@simplewebauthn/server";
 import { b64url, fromB64url, randomToken } from "../lib/crypto";
 import { loadClub } from "../domain/club";
+import { run } from "../lib/db";
 import { badRequest, gone } from "../lib/http";
+import { utcIso } from "../lib/time";
 
-/** Challenges live briefly in KV and can be used only once. */
+/**
+ * Registration challenges live briefly in KV and can be used only once. Every route that starts a registration
+ * needs a session, a valid invitation link or the setup password, so nobody can fill KV anonymously.
+ */
 const CHALLENGE_TTL_SECONDS = 300;
 
 export interface RelyingParty {
@@ -39,7 +44,7 @@ export function relyingParty(env: Env, request: Request): RelyingParty {
 
 interface StoredChallenge<C> {
   challenge: string;
-  purpose: "register" | "login";
+  purpose: "register";
   context: C;
 }
 
@@ -136,13 +141,77 @@ export async function finishRegistration<C>(
   };
 }
 
+/**
+ * Sign-in challenges are stateless: the sign-in page asks for one on every visit, without a login, and a KV write per
+ * request would let anyone use up the account's daily KV writes (about 1,000 on the free plan). The challenge ID
+ * carries the challenge, its expiry and a MAC with a key derived from APP_SECRET; only a valid passkey signature
+ * books the challenge as used (D1, finishLogin).
+ */
+const LOGIN_CHALLENGE_VERSION = "l1";
+const encoder = new TextEncoder();
+const loginKeys = new Map<string, Promise<CryptoKey>>();
+
+function loginKey(appSecret: string): Promise<CryptoKey> {
+  if (!appSecret || appSecret.length < 16) throw new Error("APP_SECRET missing or too short");
+  let key = loginKeys.get(appSecret);
+  if (!key) {
+    key = crypto.subtle
+      .importKey("raw", encoder.encode(appSecret), "HKDF", false, ["deriveKey"])
+      .then((base) =>
+        crypto.subtle.deriveKey(
+          { name: "HKDF", hash: "SHA-256", salt: new Uint8Array(0), info: encoder.encode("kabine-webauthn-login-v1") },
+          base,
+          { name: "HMAC", hash: "SHA-256", length: 256 },
+          false,
+          ["sign", "verify"],
+        ),
+      );
+    loginKeys.set(appSecret, key);
+  }
+  return key;
+}
+
+/** "l1.<challenge>.<expiry in seconds>.<mac>" */
+async function sealLoginChallenge(env: Env, challenge: string, expiresAt: number): Promise<string> {
+  const body = `${LOGIN_CHALLENGE_VERSION}.${challenge}.${Math.floor(expiresAt / 1000)}`;
+  const mac = await crypto.subtle.sign("HMAC", await loginKey(env.APP_SECRET), encoder.encode(body));
+  return `${body}.${b64url(mac)}`;
+}
+
+export interface LoginChallenge {
+  challenge: string;
+  /** ms */
+  expiresAt: number;
+}
+
+const tookTooLong = () => gone(t`Signing in took too long. Please try again.`, "challenge_expired");
+
+/** Checks MAC and expiry, before anything else of a sign-in is looked at. */
+export async function openLoginChallenge(env: Env, challengeId: string, now = Date.now()): Promise<LoginChallenge> {
+  const match = /^(l1)\.([\w-]{16,128})\.(\d{1,12})\.([\w-]{43})$/.exec(challengeId);
+  // Also an ID from before the update (KV): the app fetches a new challenge with the next tap
+  if (!match) throw tookTooLong();
+  const [, version, challenge, expiry, mac] = match as unknown as [string, string, string, string, string];
+  const valid = await crypto.subtle.verify(
+    "HMAC",
+    await loginKey(env.APP_SECRET),
+    fromB64url(mac),
+    encoder.encode(`${version}.${challenge}.${expiry}`),
+  );
+  if (!valid) throw badRequest(t`Invalid request.`);
+  const expiresAt = Number(expiry) * 1000;
+  if (expiresAt <= now) throw tookTooLong();
+  return { challenge, expiresAt };
+}
+
 export async function startLogin(
   env: Env,
   request: Request,
+  now = Date.now(),
 ): Promise<{ challengeId: string; options: PublicKeyCredentialRequestOptionsJSON }> {
   const { rpID } = relyingParty(env, request);
   const options = await generateAuthenticationOptions({ rpID, userVerification: "preferred", timeout: 120_000 });
-  const challengeId = await storeChallenge(env.KV, { challenge: options.challenge, purpose: "login", context: null });
+  const challengeId = await sealLoginChallenge(env, options.challenge, now + CHALLENGE_TTL_SECONDS * 1000);
   return { challengeId, options };
 }
 
@@ -157,11 +226,10 @@ export interface StoredPasskey {
 export async function finishLogin(
   env: Env,
   request: Request,
-  challengeId: string,
+  stored: LoginChallenge,
   response: AuthenticationResponseJSON,
   passkey: StoredPasskey,
 ): Promise<{ newCounter: number }> {
-  const stored = await takeChallenge<null>(env.KV, challengeId, "login");
   const { rpID, origin } = relyingParty(env, request);
   let verification;
   try {
@@ -183,6 +251,15 @@ export async function finishLogin(
     throw badRequest(t`The sign-in could not be verified.`, "webauthn_failed");
   }
   if (!verification.verified) throw badRequest(t`The sign-in could not be verified.`, "webauthn_failed");
+  // Only now, after a valid signature, a write: the challenge counts as used until it expires (no replay). One
+  // statement, so two parallel requests with the same assertion cannot both pass.
+  const booked = await run(
+    env.DB,
+    "INSERT INTO webauthn_used_challenges (challenge, expires_at) VALUES (?, ?) ON CONFLICT (challenge) DO NOTHING",
+    stored.challenge,
+    utcIso(stored.expiresAt),
+  );
+  if (!booked.meta.changes) throw tookTooLong();
   return { newCounter: verification.authenticationInfo.newCounter };
 }
 

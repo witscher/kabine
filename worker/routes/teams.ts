@@ -813,7 +813,7 @@ teamRoutes.post("/teams/:id/invites", async (c) => {
     if (team?.parents_enabled !== 1) throw conflict(t`Parents are not involved in this team. An admin can change that.`);
   }
   if (personId != null) {
-    // A parent link for one child: only for a player of this team, whose parents may still link (rule 19)
+    // A parent link for one child: only for a player of this team, whose parents may still link (rule 20)
     if (kind !== "parent") throw badRequest(t`Only a parent link can be made for one player.`);
     const player = await first(
       c.env.DB,

@@ -1,11 +1,12 @@
 {
   "Game schedule from handball.net": "Spielplan aus handball.net",
-  "Coaches sync the games of their team from handball.net.": "Trainer übernehmen die Spiele ihrer Mannschaft aus handball.net.",
   "Link to the team at {vendor}": "Link zur Mannschaft bei {vendor}",
   "Open the team at {vendor} and paste the link from the address bar, or the link of \"Subscribe to calendar\".": "Öffne die Mannschaft bei {vendor} und füge den Link aus der Adresszeile ein oder den Link von „Kalender abonnieren“.",
   "Team {id}": "Mannschaft {id}",
   "Response is not a calendar": "Die Antwort ist kein Kalender",
   "The calendar names no team": "Der Kalender nennt keine Mannschaft",
   "The calendar contains games of another team": "Der Kalender enthält Spiele einer anderen Mannschaft",
-  "Game on handball.net": "Spiel auf handball.net"
+  "Game on handball.net": "Spiel auf handball.net",
+  "Coaches sync the games of their team from handball.net, and the app syncs them once a week when a coach opens it.": "Trainer übernehmen die Spiele ihrer Mannschaft aus handball.net, und die App gleicht sie einmal pro Woche ab, wenn ein Trainer sie öffnet.",
+  "Game schedule of {team} synced.": "Spielplan von {team} abgeglichen."
 }

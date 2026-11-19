@@ -25,6 +25,7 @@ export const RESTORE_TABLES: Record<Exclude<RestoreCategory, "club">, readonly s
     "attendance",
     "season_stats",
     "leader_absences",
+    "event_family_responses",
     "duty_types",
     "duty_templates",
     "duty_template_items",
