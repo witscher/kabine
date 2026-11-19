@@ -224,3 +224,7 @@ Where Kabine differs from the club app:
 ## Running events stay under "Upcoming" (November 2026)
 
 An event moved to "Past" as soon as it started, so a training in progress disappeared from the top of the list. `EventSummary.isRunning`: started, not cancelled and before its end; without an end, games run for the playing time of the age class (sport profile, as the live card) and everything else for 2 hours. Running events stay in the upcoming page and are left out of the past list; running games also come as `live`, and the app shows them only once. The day mark of the big card says "right now" while the event runs.
+
+## Release candidates (November 2026)
+
+A release is first tried on the maintainer's test installation as a release candidate. Up to v0.8.x the update workflow of a club's copy takes the highest `v*` tag, so a public tag such as `v0.9.0-rc.1` would open an update pull request with the test version in every club's copy. Therefore a release candidate gets no public tag: it is deployed by hand from a commit of `main` to the test installation (with `package.json` set to the candidate's version only in that working copy). From v0.9.0 on the update workflow takes only tags of the form `vX.Y.Z`; once clubs have that workflow (they replace workflow files by hand after an update), release candidates can be tagged.

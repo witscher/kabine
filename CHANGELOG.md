@@ -6,6 +6,7 @@ Changes that are merged but not released yet go under *Unreleased*, one line eac
 
 ## Unreleased
 
+- Update workflow (`.github/workflows/update.yml`): only releases (`vX.Y.Z`) become update pull requests, never test versions such as `v0.9.0-rc.1`. Replace the file in your copy after the update, as the pull request describes.
 - Invitations: setting up an access with an invitation link no longer writes to KV either. The passkey registration now carries its data encrypted in the request instead of storing it for five minutes, so a shared team link cannot be used to exhaust the account's daily KV writes.
 - Team links: once more than 5 players (or parents) of a team have an access, creating a new player or parent link shows a hint to send the few still missing a personal link or a parent link for their child instead. Creating the team link stays possible.
 - Helper duties: a time slot can take 2.5 hours.

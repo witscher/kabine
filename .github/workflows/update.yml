@@ -35,7 +35,8 @@ jobs:
         run: |
           git remote add upstream "$UPSTREAM"
           git fetch --quiet upstream 'refs/tags/v*:refs/tags/upstream/v*' --no-tags
-          latest=$(git tag --list 'upstream/v*' --sort=-v:refname | head -n1)
+          # Only releases (vX.Y.Z), never test versions such as v0.9.0-rc.1
+          latest=$(git tag --list 'upstream/v*' --sort=-v:refname | grep -E '^upstream/v[0-9]+\.[0-9]+\.[0-9]+$' | head -n1 || true)
           if [ -z "$latest" ]; then echo "No release yet"; exit 0; fi
           version=${latest#upstream/}
           echo "version=$version" >> "$GITHUB_OUTPUT"
