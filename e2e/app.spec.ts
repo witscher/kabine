@@ -1124,6 +1124,40 @@ test("Liveticker und Spielbericht: erst beim Antippen ein Abruf, Seite öffnet i
   await page.request.put("/api/teams/1/games/source", { data: { link: null } });
 });
 
+test("handball.net: Spielplan gleicht sich beim Öffnen der App von selbst ab, höchstens einmal pro Woche", async () => {
+  const { page } = coach;
+  const ctx = page.context();
+  // In 45 Tagen, damit das Spiel den anderen Tests nicht in die Quere kommt (Namen erfunden)
+  const day = new Date(Date.now() + 45 * 86_400_000).toLocaleDateString("sv-SE", { timeZone: "Europe/Berlin" }).replaceAll("-", "");
+  const ics = [
+    "BEGIN:VCALENDAR", "VERSION:2.0", "X-WR-CALNAME:SV Musterstadt",
+    "BEGIN:VEVENT", "UID:spiel-880001@mmcc-news", `DTSTART:${day}T150000`, "SUMMARY:SV Musterstadt - TSV Testdorf",
+    "DESCRIPTION:Spieltag 1\\nSpielnummer 2627E2E0001", "STATUS:CONFIRMED", "LOCATION:TESTHALLE\\, HALLENWEG 1\\, 76000 MUSTERSTADT", "END:VEVENT",
+    "END:VCALENDAR", "",
+  ].join("\r\n");
+  const fetched: string[] = [];
+  await ctx.route("https://www.handball.net/kalender/team/*", (route) => {
+    fetched.push(route.request().url());
+    return route.fulfill({ status: 200, contentType: "text/calendar", headers: { "Access-Control-Allow-Origin": "*" }, body: ics });
+  });
+  const source = await page.request.put("/api/teams/1/games/source", { data: { link: "https://www.handball.net/team/880099", connector: "handballnet" } });
+  expect(source.ok()).toBe(true);
+  // Noch nie abgeglichen: beim Öffnen holt das Gerät des Trainers den Kalender, ohne dass er etwas antippt
+  await page.goto("/");
+  await expect(page.getByText("Spielplan von wT abgeglichen.", { exact: false })).toBeVisible();
+  expect(fetched).toEqual(["https://www.handball.net/kalender/team/880099.ics"]);
+  expect((await (await page.request.get("/api/teams/1/games/source")).json()).importedAt).toBeTruthy();
+  // Gerade abgeglichen: beim nächsten Öffnen kein Abruf, erst wieder nach 7 Tagen
+  const hints = page.waitForResponse((r) => r.url().endsWith("/api/coach-hints"));
+  await page.reload();
+  expect((await (await hints).json()).autoSync).toEqual([]);
+  await expect(page.getByRole("heading", { name: /Hallo/ })).toBeVisible();
+  expect(fetched).toHaveLength(1);
+  await ctx.unroute("https://www.handball.net/kalender/team/*");
+  // Aufräumen: Spielplan-Link wieder entfernen (das Spiel bleibt, wird nur nicht mehr abgeglichen)
+  await page.request.put("/api/teams/1/games/source", { data: { link: null } });
+});
+
 test("Spiele der eigenen Mannschaft auch ohne Nominierung sichtbar, mit Marke „Nominiert“", async () => {
   // In 10 Tagen, damit das Spiel in der Terminübersicht liegt
   const date = new Date(Date.now() + 10 * 86_400_000).toLocaleDateString("sv-SE", { timeZone: "Europe/Berlin" });
@@ -1798,14 +1832,15 @@ test("Hinweise für Trainer: Treffpunkt fehlt, Eintragen öffnet das Spiel mit d
   await expect(page.getByRole("region", { name: "Zu tun für deine Mannschaften" })).toHaveCount(0);
 });
 
-test("Verwaltung → handball4all: Erinnerung einstellen, Stand aller Mannschaften", async () => {
+test("Verwaltung → Spielpläne: Erinnerung einstellen, Stand aller Mannschaften", async () => {
   const { page } = admin;
   const link = "https://www.handball4all.de/home/portal/baden-wuerttembergischer-hv#/league?ogId=216&lId=555&tId=999";
   expect((await page.request.put("/api/teams/1/games/source", { data: { link } })).ok()).toBe(true);
   await page.goto("/verwaltung");
-  await page.getByRole("link", { name: /handball4all.*Spielplanabgleich und Erinnerung/ }).click();
+  // handball4all and handball.net are both on: the page is about every source
+  await page.getByRole("link", { name: /Spielpläne.*Spielplanabgleich und Erinnerung/ }).click();
   await expect(page).toHaveURL(/\/verwaltung\/spielplan$/);
-  await expect(page.getByRole("heading", { name: "handball4all", level: 1 })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Spielpläne", level: 1 })).toBeVisible();
   const reminder = page.getByRole("group", { name: "Trainer erinnern nach" });
   await expect(reminder.getByRole("button", { name: "15 Tage" })).toHaveAttribute("aria-pressed", "true");
   await reminder.getByRole("button", { name: "Aus" }).click();

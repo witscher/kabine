@@ -18,6 +18,16 @@ export type CoachHint =
   /** A game in the next days has no meeting time yet. */
   | { kind: "meeting"; eventId: number; team: string; startsAt: string; opponent: string | null };
 
+/**
+ * A team whose schedule the coach's device syncs now, in the background, because its source syncs by itself
+ * (`autoSyncDays` of the connector, handball.net: weekly) and the last sync is that old (GET /api/coach-hints).
+ */
+export interface ScheduleAutoSync {
+  teamId: number;
+  team: string;
+  source: string;
+}
+
 export interface PersonRef {
   id: number;
   firstName: string;

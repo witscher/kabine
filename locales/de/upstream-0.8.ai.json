@@ -33,7 +33,6 @@
   "My events in your calendar": "Meine Termine im Kalender",
   "Your events show up in your phone's calendar and stay up to date by themselves. You choose what it should contain. The link is personal, do not pass it on.": "Deine Termine erscheinen im Kalender deines Handys und bleiben von selbst aktuell. Du wählst, was drinstehen soll. Der Link ist persönlich, gib ihn nicht weiter.",
   "You subscribe to trainings and games. If a training is cancelled, it is struck through in your calendar shortly after.": "Du abonnierst Training und Spiele. Wird ein Training abgesagt, ist es kurz darauf auch in deinem Kalender durchgestrichen.",
-  "When a team's game schedule has not been synced for this long, its coaches see a hint with \"Sync now\" at the top of their events list. The hint disappears after the sync. A coach or admin always syncs by hand.": "Trainer sehen oben auf der Terminübersicht einen Hinweis mit „Jetzt abgleichen“, wenn ihr Spielplan so lange nicht abgeglichen wurde. Nach dem Abgleich verschwindet er. Abgleichen muss immer ein Trainer oder Admin von Hand.",
   "With 15 days: if the schedule of a team was last synced on the 1st, the hint shows on the 16th.": "Bei 15 Tagen: Wurde der Spielplan einer Mannschaft zuletzt am 1. abgeglichen, erscheint der Hinweis am 16.",
   "The duty is only offered to those who can do it: they switch it on in their profile under “I can do this”. Coaches and admins can still enter anyone.": "Den Dienst bekommt nur angeboten, wer ihn kann: Die Person schaltet das selbst im Profil unter „Das kann ich“ ein. Trainer und Admins können trotzdem jeden eintragen.",
   "Timekeeper: whoever can do it switches it on in their profile and then sees the free places.": "Zeitnehmer: Wer es kann, schaltet es im Profil ein und sieht dann die freien Plätze.",
@@ -54,5 +53,6 @@
   "The duty type is used nowhere and disappears completely.": "Die Dienstart wird nirgends verwendet und verschwindet ganz.",
   "{name} deleted.": "{name} gelöscht.",
   "Delete duty type": "Dienstart löschen",
-  "It cannot be deleted while it is in {places}. Archiving hides it for new things.": "Löschen geht nicht, solange sie in {places} vorkommt. Archivieren blendet sie für Neues aus."
+  "It cannot be deleted while it is in {places}. Archiving hides it for new things.": "Löschen geht nicht, solange sie in {places} vorkommt. Archivieren blendet sie für Neues aus.",
+  "When a team's game schedule has not been synced for this long, its coaches see a hint with \"Sync now\" at the top of their events list. The hint disappears after the sync. Coaches and admins sync by hand; schedules from handball.net also sync once a week by themselves when a coach opens the app.": "Trainer sehen oben auf der Terminübersicht einen Hinweis mit „Jetzt abgleichen“, wenn ihr Spielplan so lange nicht abgeglichen wurde. Nach dem Abgleich verschwindet er. Abgeglichen wird von Hand durch Trainer und Admins; Spielpläne von handball.net gleichen sich außerdem einmal pro Woche von selbst ab, wenn ein Trainer die App öffnet."
 }

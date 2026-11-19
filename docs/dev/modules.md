@@ -74,7 +74,7 @@ Explanations of a module's settings go behind an info button (docs/dev/design.md
 | `carpools` | Carpools | on | `modules/carpools/` |
 | `handball4all` | Game schedule from handball4all | on | `modules/handball4all/` (fixture connector, see [connectors.md](connectors.md)) |
 | `sms` | SMS | off | `modules/sms/` (text channel for the core, see its README) |
-| `handballnet` | Game schedule from handball.net | off (beta) | `modules/handballnet/` |
+| `handballnet` | Game schedule from handball.net | on | `modules/handballnet/` (fixture connector, syncs weekly by itself) |
 
 ## Adding a module
 
