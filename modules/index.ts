@@ -5,11 +5,13 @@ import carpools from "./carpools/module";
 import duties from "./duties/module";
 import handball4all from "./handball4all/module";
 import sms from "./sms/module";
+import handballnet from "./handballnet/module";
 
 export const MODULES = [
   duties,
   carpools,
   handball4all,
   sms,
+  handballnet,
   // new modules: above this line
 ] as const;

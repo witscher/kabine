@@ -188,7 +188,9 @@ gameRoutes.post("/teams/:id/games/claim", async (c) => {
     utcIso(now - CLAIM_MS),
   );
   if (!res.meta.changes) return c.json({ claimed: false, reason: "busy" });
-  if (link.connector.fetchFrom === "device") return c.json({ claimed: true, fetchUrl: link.connector.request(link.source).url });
+  if (link.connector.fetchFrom === "device") {
+    return c.json({ claimed: true, fetchUrl: link.connector.request(link.source).url, fetchFormat: link.connector.format ?? "json" });
+  }
 
   // Fetched by the server
   const { url, headers } = link.connector.request(link.source);
@@ -196,7 +198,7 @@ gameRoutes.post("/teams/:id/games/claim", async (c) => {
   try {
     const fetched = await fetch(url, { headers, cf: { cacheTtl: 0 } } as RequestInit);
     if (!fetched.ok) throw new Error(`HTTP ${fetched.status}`);
-    data = await fetched.json();
+    data = link.connector.format === "text" ? await fetched.text() : await fetched.json();
   } catch (err) {
     const detail = err instanceof Error ? err.message : String(err);
     await run(c.env.DB, "UPDATE teams SET fixture_claimed_at = NULL, fixture_error = ? WHERE id = ?", t`Fetch failed: ${detail}`, teamId);

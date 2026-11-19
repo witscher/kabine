@@ -66,6 +66,7 @@ The club is the provider of its installation (legal notice, in Germany § 5 DDG)
 - **SMS (optional):** the provider the club chooses (currently seven.io).
 - **OpenHolidays API:** the app fetches school and public holidays for the club's region. No personal data is sent.
 - **handball4all (optional):** a coach's or admin's device fetches the game schedule directly from the association's service. No personal data is sent.
+- **handball.net (optional):** a coach's or admin's device fetches the team's public game calendar directly from handball.net. No personal data is sent.
 
 ## Template for the club's privacy policy
 

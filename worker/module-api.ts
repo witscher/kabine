@@ -74,6 +74,8 @@ export interface FixtureConnector {
    * server fetches. Either way the server parses and stores.
    */
   fetchFrom: "device" | "worker";
+  /** How the response is read before `parse`: JSON (default) or plain text, e.g. an iCal calendar. */
+  format?: "json" | "text";
   /** At least this long between two syncs of a team. */
   minIntervalMs: number;
   /** Texts for the link field in Team → Settings, in the language of the request. */
@@ -84,7 +86,7 @@ export interface FixtureConnector {
   describe(source: FixtureSource): string;
   /** What to fetch. */
   request(source: FixtureSource): { url: string; headers?: Record<string, string> };
-  /** Reads the fetched JSON; throws FixtureFormatError with a readable reason. */
+  /** Reads the fetched JSON (or text, see `format`); throws FixtureFormatError with a readable reason. */
   parse(data: unknown, source: FixtureSource): FixtureSchedule;
   /** League table for the game view, if the source has one. */
   tableUrl?(source: FixtureSource): string | null;

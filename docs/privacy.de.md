@@ -66,6 +66,7 @@ Der Verein ist Anbieter seiner Installation (Impressum nach § 5 DDG) und Verant
 - **SMS (optional):** der Anbieter, den der Verein wählt (derzeit seven.io).
 - **OpenHolidays API:** Die App holt Schulferien und Feiertage der Region. Es werden keine personenbezogenen Daten übertragen.
 - **handball4all (optional):** Das Gerät eines Trainers oder Admins holt den Spielplan direkt beim Verband. Es werden keine personenbezogenen Daten übertragen.
+- **handball.net (optional):** Das Gerät eines Trainers oder Admins holt den öffentlichen Spielkalender der Mannschaft direkt bei handball.net. Es werden keine personenbezogenen Daten übertragen.
 
 ## Vorlage für die Datenschutzerklärung des Vereins
 
