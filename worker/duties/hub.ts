@@ -52,6 +52,9 @@ export function dutyHubStub(env: Env, teamId: number) {
   }
 }
 
+/** Live channel of the club events (as CLUB_KEY in worker/domain/duties.ts; team ids are > 0, lists of approved people < 0). */
+const CLUB_KEY = 0;
+
 /** Tell everyone who has the team's helper plan open to reload. */
 export async function notifyDutyChange(env: Env, teamId: number): Promise<void> {
   try {
@@ -59,4 +62,9 @@ export async function notifyDutyChange(env: Env, teamId: number): Promise<void> 
   } catch (err) {
     console.warn("Helper plan live", err);
   }
+}
+
+/** All live channels of an event: its teams, for club events (no team) the club. */
+export function notifyDutyHubs(env: Env, teamIds: readonly number[], waitUntil: (p: Promise<unknown>) => void): void {
+  for (const t of teamIds.length ? teamIds : [CLUB_KEY]) waitUntil(notifyDutyChange(env, t));
 }

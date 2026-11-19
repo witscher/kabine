@@ -3029,6 +3029,18 @@ button.announcement-head {
   .birth-star { animation: none; opacity: 0.8; }
 }
 
+/* "Helpers from" on a duty: the teams, and a hint for managers when the team in charge has an event of its own */
+.duty-from {
+  display: block;
+  font-size: 13px;
+  color: var(--text-2);
+}
+.duty-conflict {
+  display: block;
+  font-size: 13px;
+  color: var(--warn);
+}
+
 /* Head of the big event card as a link (home): keeps the colours */
 a.card-head-link {
   text-decoration: none;

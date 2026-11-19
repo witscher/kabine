@@ -14,14 +14,16 @@ export function dutyLines(duties: MyDuty[]): string[] {
 }
 
 /**
- * Link into the Helpers tab, straight to the team and the event: the event's first team with a helper plan,
- * else the first list of approved people one is in (e.g. youth referees).
+ * Link into the Helpers tab, straight to the team and the event: club events to the club list, else the event's first
+ * team with a helper plan, else the first list of approved people one is in (e.g. youth referees) or help out.
  */
-export function helperPath(event: { id: number; teams: TeamRef[] }, me: Pick<Me, "helperTeams" | "qualifiedLists">): string {
+export function helperPath(event: { id: number; teams: TeamRef[] }, me: Pick<Me, "helperTeams" | "qualifiedLists" | "helpOut" | "clubDuties">): string {
+  if (!event.teams.length && me.clubDuties) return `/helfer?verein&spiel=${event.id}`;
   const team = event.teams.find((t) => me.helperTeams.some((h) => h.id === t.id));
   if (team) return `/helfer?mannschaft=${team.id}&spiel=${event.id}`;
   const list = me.qualifiedLists.find((l) => l.mine);
-  return list ? `/helfer?liste=${list.id}&spiel=${event.id}` : "/helfer";
+  if (list) return `/helfer?liste=${list.id}&spiel=${event.id}`;
+  return me.helpOut ? `/helfer?aushelfen&spiel=${event.id}` : "/helfer";
 }
 
 /** "Helpers needed · 2 spots free" */

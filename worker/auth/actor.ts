@@ -25,6 +25,9 @@ export interface Actor {
   isAdmin: boolean;
   /** Linked children. The teams the parents are in charge for are in childMemberships. */
   children: PersonRef[];
+  /** Birth years of oneself and the children (helper duties "adults only"); null when not known. */
+  birthYear: number | null;
+  childBirthYears: Map<number, number | null>;
   /** This person is a child with at least one linked parent. */
   hasGuardians: boolean;
   /** Permissions granted by the parents. They apply only in teams where parents are involved. */
@@ -67,6 +70,7 @@ export interface ActorRow {
 
 interface PermRow {
   guardians: number;
+  birth_year: number | null;
   may_accept: number | null;
   may_decline: number | null;
   may_read_chat: number | null;
@@ -97,13 +101,13 @@ export async function buildActor(db: D1Database, session: SessionRow, row: Actor
   const [children, perms, memberships, versionRows] = await db.batch([
     db
       .prepare(
-        `SELECT p.id, p.first_name, p.last_name FROM guardianships g JOIN persons p ON p.id = g.child_id
+        `SELECT p.id, p.first_name, p.last_name, p.birth_year FROM guardianships g JOIN persons p ON p.id = g.child_id
           WHERE g.guardian_id = ? AND p.is_former = 0 ORDER BY p.first_name, p.id`,
       )
       .bind(row.person_id),
     db
       .prepare(
-        `SELECT (SELECT count(*) FROM guardianships WHERE child_id = ?1) AS guardians,
+        `SELECT (SELECT count(*) FROM guardianships WHERE child_id = ?1) AS guardians, (SELECT birth_year FROM persons WHERE id = ?1) AS birth_year,
                 cp.may_accept, cp.may_decline, cp.may_read_chat, cp.may_write_chat, cp.may_answer_help
            FROM (SELECT 1) LEFT JOIN child_permissions cp ON cp.child_id = ?1`,
       )
@@ -143,6 +147,7 @@ export async function buildActor(db: D1Database, session: SessionRow, row: Actor
     else childMemberships.set(m.person_id, [...(childMemberships.get(m.person_id) ?? []), membership]);
   }
 
+  const childRows = children!.results as { id: number; first_name: string; last_name: string | null; birth_year: number | null }[];
   return {
     session,
     accountId: row.account_id,
@@ -150,11 +155,13 @@ export async function buildActor(db: D1Database, session: SessionRow, row: Actor
     firstName: row.first_name,
     lastName: row.last_name,
     isAdmin: row.is_admin === 1,
-    children: (children!.results as { id: number; first_name: string; last_name: string | null }[]).map((c) => ({
+    children: childRows.map((c) => ({
       id: c.id,
       firstName: c.first_name,
       lastName: c.last_name,
     })),
+    birthYear: p?.birth_year ?? null,
+    childBirthYears: new Map(childRows.map((c) => [c.id, c.birth_year])),
     hasGuardians,
     permissions,
     memberships: ms,

@@ -7,90 +7,24 @@ import { dayOfMonth, monthShort, shortDate, time, todayLocal, weekdayShort } fro
 import { Icon } from "../../../src/icons";
 import { useMe } from "../../../src/session";
 import { useQuery, useSearch } from "../../../src/store";
-import { BlockEditSheet, BlockSheet, blockTime, type TemplateInfo } from "../../../src/duty-blocks";
-import { Button, confirmDialog, Empty, ErrorBox, Field, Segmented, Sheet, Spinner, SwitchRow, TextField, toast, TopBar, useDocumentTitle } from "../../../src/ui";
+import { blockTime, helperFromText } from "../../../src/duty-blocks";
+import { type DutyBlock, type DutyGame, type DutyRole, eventLine, forChild, ManageSheet, opponent } from "../../../src/duty-manage";
+import { Button, Empty, ErrorBox, Segmented, Sheet, Spinner, TextField, toast, TopBar, useDocumentTitle } from "../../../src/ui";
 
-interface Entry {
-  id: number;
-  name: string;
-  child: string | null;
-  note: string | null;
-  mine: boolean;
-  forMyChild: boolean;
-}
-
-interface Role {
-  childId: number | null;
-  childName: string | null;
-}
-
-/** Time slot of a duty at an event */
-interface Block {
-  id: number;
-  dutyTypeId: number;
-  label: string;
-  mode: "onsite" | "task";
-  /** Taken by approved people from all teams (e.g. youth referee): signed up in that list */
-  referee: boolean;
-  special: boolean;
-  startsAt: string;
-  endsAt: string;
-  total: number;
-  noteAllowed: boolean;
-  needsSkill: boolean;
-  /** Prior knowledge approved by an admin */
-  skillByAdmin?: boolean;
-  skillMissing: boolean;
-  /** As whom one can sign up (empty: not at all) */
-  roles: Role[];
-  entries: Entry[];
-}
-
-interface Game {
-  id: number;
-  kind: "game" | "special";
-  startsAt: string;
-  endsAt: string | null;
-  isPast: boolean;
-  isHome: boolean | null;
-  homeTeam: string | null;
-  guestTeam: string | null;
-  title: string | null;
-  location: string | null;
-  cancelled: boolean;
-  hidden: boolean;
-  manual: boolean;
-  blocks: Block[];
-  /** Team of the event (youth referee view and several teams) */
-  teamName?: string;
-  teamId?: number;
-  canManage?: boolean;
-}
+type Game = DutyGame;
+type Block = DutyBlock;
 
 interface HelperTeam {
-  teamId: number;
+  teamId: number | null;
   teamName: string;
   canManage: boolean;
-  roles: Role[];
+  roles: DutyRole[];
 }
 
 interface DutyList {
   /** Only for a single team; null for "all" */
   team: HelperTeam | null;
   games: Game[];
-}
-
-function opponent(g: Game): string {
-  if (g.kind === "special") return g.title ?? t`Event`;
-  if (g.isHome === true) {
-    const guest = g.guestTeam ?? t`Opponent`;
-    return t`vs ${guest}`;
-  }
-  if (g.isHome === false) {
-    const home = g.homeTeam ?? t`Opponent`;
-    return t`at ${home}`;
-  }
-  return g.title ?? `${g.homeTeam ?? "?"} – ${g.guestTeam ?? "?"}`;
 }
 
 function eventTime(g: Game): string {
@@ -104,29 +38,34 @@ function quoted(note: string): string {
   return t`“${note}”`;
 }
 
-/** "for Anna": entry made for a child */
-function forChild(child: string): string {
-  return t`for ${child}`;
-}
-
 /**
- * Lists of duties taken by approved people from all teams (e.g. youth referees) are virtual "teams" with the
- * negative duty type id (team ids are always > 0), as in the live channel.
+ * What the Helpers tab shows: a team (id > 0), a list of approved people from all teams (e.g. youth referees, negative
+ * duty type id as in the live channel), the club events ("club") or help out at other teams ("help").
  */
+type ListKey = number | "club" | "help";
+
+/** Lists of approved people are keyed by the negative duty type id (team ids are always > 0). */
 const listChip = (dutyTypeId: number) => -dutyTypeId;
 
-/** Live connection to one team (one per team for "all"); only one of them also polls every 5 minutes. */
-function LiveReload(props: { teamId: number; reload: () => void; poll: boolean }) {
-  useLiveReload(props.teamId, props.reload, props.poll);
+/** Live channel of a list; help out has none (events of many teams), it reloads when the page is opened. */
+function livePath(key: ListKey): string | null {
+  if (key === "help") return null;
+  if (key === "club") return "/api/duties/club/live";
+  return key < 0 ? `/api/duties/qualified/${-key}/live` : `/api/duties/teams/${key}/live`;
+}
+
+/** Live connection to one list (one per team for "all"); only one of them also polls every 5 minutes. */
+function LiveReload(props: { path: string; reload: () => void; poll: boolean }) {
+  useLiveReload(props.path, props.reload, props.poll);
   return null;
 }
 
 /** Live: reload on every change (debounced), fallback: every 5 minutes. */
-function useLiveReload(teamId: number | null, reload: () => void, poll = true) {
+function useLiveReload(path: string | null, reload: () => void, poll = true) {
   const reloadRef = useRef(reload);
   reloadRef.current = reload;
   useEffect(() => {
-    if (teamId == null) return;
+    if (path == null) return;
     let ws: WebSocket | null = null;
     let alive = true;
     let retry = 0;
@@ -134,7 +73,6 @@ function useLiveReload(teamId: number | null, reload: () => void, poll = true) {
     let debounce: number | undefined;
     let ping: number | undefined;
     const connect = () => {
-      const path = teamId < 0 ? `/api/duties/qualified/${-teamId}/live` : `/api/duties/teams/${teamId}/live`;
       ws = new WebSocket(`${location.protocol === "https:" ? "wss" : "ws"}://${location.host}${path}`);
       ws.onopen = () => {
         retry = 0;
@@ -174,7 +112,7 @@ function useLiveReload(teamId: number | null, reload: () => void, poll = true) {
       document.removeEventListener("visibilitychange", onVisible);
       ws?.close();
     };
-  }, [teamId, poll]);
+  }, [path, poll]);
 }
 
 export function HelpersPage() {
@@ -188,40 +126,83 @@ export function HelpersPage() {
     const q = new URLSearchParams(location.search);
     // ?liste=<duty type>: a list of approved people; ?kihasl from before 0.8.0: the first of one's own lists
     const list = Number(q.get("liste")) || (q.has("kihasl") ? (me.qualifiedLists.find((l) => l.mine)?.id ?? null) : null);
-    return { team: Number(q.get("mannschaft")) || null, game: Number(q.get("spiel")) || null, list };
+    return { team: Number(q.get("mannschaft")) || null, game: Number(q.get("spiel")) || null, list, club: q.has("verein"), helpOut: q.has("aushelfen") };
   });
   const [scope, setScope] = useState<"own" | "all">(() => (target.team && me.helperTeams.some((ht) => ht.id === target.team && !ht.own) ? "all" : "own"));
   const helperTeams = hasOwn && hasOthers && scope === "own" ? me.helperTeams.filter((ht) => ht.own) : me.helperTeams;
   // Lists of approved people (e.g. youth referees): first for the approved, last for coaches and admins
-  const listChips = me.qualifiedLists.map((l) => ({ id: listChip(l.id), name: l.name, own: true, mine: l.mine }));
-  const teams = [...listChips.filter((l) => l.mine), ...helperTeams, ...listChips.filter((l) => !l.mine)];
+  const listChips = me.qualifiedLists.map((l) => ({ id: listChip(l.id) as ListKey, name: l.name, mine: l.mine }));
+  // Whole club in front (everyone is invited), help out at the end
+  const teams: { id: ListKey; name: string }[] = [
+    ...(me.clubDuties ? [{ id: "club" as const, name: t`Whole club` }] : []),
+    ...listChips.filter((l) => l.mine),
+    ...helperTeams,
+    ...listChips.filter((l) => !l.mine),
+    ...(me.helpOut ? [{ id: "help" as const, name: t`Help out` }] : []),
+  ];
   // Like the team filter of the events list: without a selection all teams together, a tap filters, a second
-  // tap clears the filter. A list of approved people is a list of its own and not part of "all".
-  const [selected, setSelected] = useState<number | null>(() =>
-    target.list && teams.some((ht) => ht.id === listChip(target.list!)) ? listChip(target.list) : teams.some((ht) => ht.id === target.team) ? target.team : null,
-  );
-  const isReferee = selected != null && selected < 0;
+  // tap clears the filter. A list of approved people and help out are lists of their own and not part of "all".
+  const [selected, setSelected] = useState<ListKey | null>(() => {
+    if (target.list && teams.some((ht) => ht.id === listChip(target.list!))) return listChip(target.list);
+    if (target.club && me.clubDuties) return "club";
+    if (target.helpOut && me.helpOut) return "help";
+    if (teams.some((ht) => ht.id === target.team)) return target.team;
+    // Nothing of one's own teams: the first list there is
+    if (!helperTeams.length && !me.qualifiedLists.some((l) => l.mine)) return me.clubDuties ? "club" : me.helpOut ? "help" : null;
+    return null;
+  });
+  const isReferee = typeof selected === "number" && selected < 0;
+  const isClub = selected === "club";
+  const isHelpOut = selected === "help";
+  const ownList = isReferee || isHelpOut;
   const allIds = helperTeams.map((ht) => ht.id);
   // A single team: top helpers as before
-  const teamId = isReferee ? selected : (selected ?? (allIds.length === 1 ? allIds[0]! : null));
-  const listPath = isReferee ? `/duties/qualified/${-selected!}` : selected != null ? `/duties?teamId=${selected}` : allIds.length ? `/duties?teamIds=${allIds.join(",")}` : null;
+  const teamId = typeof selected === "number" && selected > 0 ? selected : selected == null && allIds.length === 1 ? allIds[0]! : null;
+  const listPath = isReferee
+    ? `/duties/qualified/${-(selected as number)}`
+    : isClub
+      ? "/duties/club"
+      : isHelpOut
+        ? "/duties/help-out"
+        : selected != null
+          ? `/duties?teamId=${selected}`
+          : allIds.length
+            ? `/duties?teamIds=${allIds.join(",")}`
+            : null;
   const list = useQuery<DutyList>(listPath);
-  const liveIds = isReferee ? [selected!] : selected != null ? [selected] : allIds;
+  // Without a filter the club events belong to the overall view (everyone is invited); the chip filters to them alone
+  const withClub = selected == null && me.clubDuties;
+  const clubList = useQuery<DutyList>(withClub ? "/duties/club" : null);
+  const reload = () => {
+    void list.reload();
+    if (withClub) void clubList.reload();
+  };
+  const liveKeys: ListKey[] = selected != null ? [selected] : withClub ? [...allIds, "club"] : allIds;
+  const livePaths = liveKeys.map(livePath).filter((p): p is string => p != null);
   const [signup, setSignup] = useState<{ game: Game; block: Block } | null>(null);
   const [manage, setManage] = useState<number | null>(null);
   const [showTop, setShowTop] = useState(false);
   const [onlyOpen, setOnlyOpen] = useState(false);
+  const data: DutyList | undefined = !withClub
+    ? list.data
+    : (list.data || !listPath) && clubList.data
+      ? {
+          team: list.data ? list.data.team : null,
+          games: [...(list.data?.games ?? []), ...clubList.data.games].sort((a, b) => a.startsAt.localeCompare(b.startsAt)),
+        }
+      : undefined;
+  const listError = list.error ?? (withClub ? clubList.error : undefined);
   // Scroll to the event from the link once and highlight it briefly
   const scrolled = useRef(false);
   useEffect(() => {
-    if (scrolled.current || !target.game || !list.data) return;
+    if (scrolled.current || !target.game || !data) return;
     scrolled.current = true;
     const el = document.getElementById(`termin-${target.game}`);
     if (!el) return;
     el.scrollIntoView({ block: "center" });
     el.classList.add("duty-game-target");
     setTimeout(() => el.classList.remove("duty-game-target"), 2500);
-  }, [list.data]);
+  }, [list.data, clubList.data]);
 
   if (!teams.length) {
     return (
@@ -236,8 +217,6 @@ export function HelpersPage() {
     );
   }
 
-  const data = list.data;
-  const team = data?.team;
   // In the team view the slots of lists of approved people do not count (separate list)
   const openSlots = (g: Game) => g.blocks.reduce((n, b) => n + (b.referee && !isReferee ? 0 : free(b)), 0);
   const allUpcoming = (data?.games ?? []).filter((g) => !g.isPast);
@@ -260,18 +239,18 @@ export function HelpersPage() {
             ]}
             onChange={(v) => {
               setScope(v);
-              if (v === "own" && !isReferee && !me.helperTeams.some((ht) => ht.own && ht.id === selected)) setSelected(null);
+              if (v === "own" && typeof selected === "number" && selected > 0 && !me.helperTeams.some((ht) => ht.own && ht.id === selected)) setSelected(null);
             }}
           />
         ) : null}
-        {liveIds.map((id, i) => (
-          <LiveReload key={id} teamId={id} poll={i === 0} reload={() => void list.reload()} />
+        {livePaths.map((path, i) => (
+          <LiveReload key={path} path={path} poll={i === 0} reload={reload} />
         ))}
-        {teams.length > 1 || isReferee || (hasOwn && hasOthers) ? (
+        {teams.length > 1 || ownList || isClub || (hasOwn && hasOthers) ? (
           <div class="chips" role="group" aria-label={t`Filter by team`}>
             {teams.map((tm) => {
               // Without a filter all teams are on (not the lists of approved people, those are lists of their own)
-              const on = selected == null ? tm.id > 0 : selected === tm.id;
+              const on = selected == null ? tm.id === "club" || (typeof tm.id === "number" && tm.id > 0) : selected === tm.id;
               return (
                 <button type="button" class={`chip ${on ? "selected" : ""}`} aria-pressed={on ? "true" : "false"} onClick={() => setSelected(selected === tm.id ? null : tm.id)}>
                   {tm.name}
@@ -280,8 +259,8 @@ export function HelpersPage() {
             })}
           </div>
         ) : null}
-        {list.error ? <ErrorBox error={list.error} onRetry={list.reload} /> : null}
-        {!data && !list.error ? <Spinner /> : null}
+        {listError ? <ErrorBox error={listError} onRetry={reload} /> : null}
+        {!data && !listError ? <Spinner /> : null}
 
         {data ? (
           <section class="duty-mine" aria-label={t`My duties`}>
@@ -329,7 +308,9 @@ export function HelpersPage() {
           <Empty title={t`No upcoming events`} icon="ball">
             {isReferee
               ? t`As soon as games need this duty, they appear here.`
-              : t`The games come from the team's fixture list. Special events appear here as soon as helpers are needed for them.`}
+              : isHelpOut
+                ? t`As soon as another team needs helpers from your team, the events appear here.`
+                : t`The games come from the team's fixture list. Special events appear here as soon as helpers are needed for them.`}
           </Empty>
         ) : null}
 
@@ -349,7 +330,7 @@ export function HelpersPage() {
                 </div>
                 <div class="main">
                   <div class="title">
-                    {g.teamName && (isReferee || teamId == null) ? <span class="team-badge duty-team">{g.teamName}</span> : null}
+                    {g.teamName && (ownList || teamId == null || g.club) ? <span class="team-badge duty-team">{g.teamName}</span> : null}
                     {opponent(g)}
                   </div>
                   <div class="sub">
@@ -391,6 +372,8 @@ export function HelpersPage() {
                       <span class="duty-time">
                         {blockTime(b, g.startsAt)} · {b.entries.length}/{b.total}
                       </span>
+                      {b.helperFrom ? <span class="duty-from">{helperFromText(b.helperFrom)}</span> : null}
+                      {b.helperFrom?.conflict ? <span class="duty-conflict">{b.helperFrom.conflict}</span> : null}
                     </span>
                     <span class="duty-who">
                       {b.entries.map((e) => (
@@ -409,7 +392,7 @@ export function HelpersPage() {
                                 try {
                                   await api.del(`/duties/${e.id}`);
                                   toast(t`Withdrawn.`);
-                                  void list.reload();
+                                  reload();
                                 } catch (err) {
                                   toast(errorMessage(err), "error");
                                 }
@@ -432,6 +415,10 @@ export function HelpersPage() {
                           <Trans>To the list</Trans>
                         </button>
                       ) : null
+                    ) : b.assignOnly && free(b) > 0 && !g.cancelled && !b.roles.length ? (
+                      <span class="small muted">
+                        <Trans>assigned by the coach</Trans>
+                      </span>
                     ) : free(b) > 0 && !g.cancelled && !already && b.skillByAdmin && b.skillMissing ? (
                       // Approved by an admin: shown only to the approved people, managers and those with an entry
                       <span class="small muted">
@@ -470,7 +457,7 @@ export function HelpersPage() {
           </p>
         ) : null}
 
-        {teamId && !isReferee ? (
+        {teamId ? (
           showTop ? (
             <TopHelpers teamId={teamId} />
           ) : (
@@ -481,37 +468,28 @@ export function HelpersPage() {
         ) : null}
       </div>
 
-      {signup ? <SignupSheet game={signup.game} block={signup.block} onClose={() => setSignup(null)} onDone={() => void list.reload()} /> : null}
-      {managed && (managed.teamId ?? team?.teamId) != null ? (
-        <ManageSheet teamId={(managed.teamId ?? team?.teamId)!} game={managed} refereeView={isReferee} onClose={() => setManage(null)} onDone={() => void list.reload()} />
-      ) : null}
+      {signup ? <SignupSheet game={signup.game} block={signup.block} onClose={() => setSignup(null)} onDone={reload} /> : null}
+      {managed ? <ManageSheet game={managed} refereeView={isReferee} onClose={() => setManage(null)} onDone={reload} /> : null}
     </main>
   );
 }
 
-function eventLine(g: Game) {
-  const title = opponent(g);
-  const weekday = weekdayShort(g.startsAt);
-  const day = dayOfMonth(g.startsAt);
-  const clock = time(g.startsAt);
-  return t`${title}, ${weekday} ${day} at ${clock}`;
-}
-
 function SignupSheet({ game, block, onClose, onDone }: { game: Game; block: Block; onClose: () => void; onDone: () => void }) {
   const roles = block.roles;
-  // youth referee: whoever referees is the person in the entry (oneself or the child). Otherwise one is always signed up
-  // oneself; the server links a child of the team automatically so the other parent sees it.
+  // youth referee and help out: whoever does the duty is the person in the entry (oneself or the child). Otherwise one
+  // is always signed up oneself; the server links a child of the team automatically so the other parent sees it.
   const [role, setRole] = useState(String(roles.find((r) => r.childId != null)?.childId ?? roles[0]?.childId ?? "self"));
-  const linkedChild = block.referee ? null : (roles.find((r) => r.childId != null)?.childName ?? null);
+  const childDoes = block.referee || roles.some((r) => r.doer);
+  const linkedChild = childDoes ? null : (roles.find((r) => r.childId != null)?.childName ?? null);
   const [note, setNote] = useState("");
   const range = blockTime(block, game.startsAt);
   return (
     <Sheet open onClose={onClose} title={block.label}>
       <p class="muted">{eventLine(game)}</p>
       <p class="duty-preview">{block.mode === "task" ? range : t`Duty ${range}`}</p>
-      {block.referee && roles.length > 1 ? (
+      {childDoes && roles.length > 1 ? (
         <Segmented
-          label={t`Who referees?`}
+          label={block.referee ? t`Who referees?` : t`Who helps?`}
           value={role}
           onChange={setRole}
           options={roles.map((r) => ({
@@ -533,7 +511,7 @@ function SignupSheet({ game, block, onClose, onDone }: { game: Game; block: Bloc
         onClick={async () => {
           await api.post("/duties", {
             blockId: block.id,
-            ...(block.referee ? { childId: role === "self" ? null : Number(role) } : {}),
+            ...(childDoes ? { childId: role === "self" ? null : Number(role) } : {}),
             note: block.noteAllowed ? note.trim() || null : null,
           });
           const label = block.label;
@@ -544,319 +522,6 @@ function SignupSheet({ game, block, onClose, onDone }: { game: Game; block: Bloc
       >
         <Trans>Sign up</Trans>
       </Button>
-    </Sheet>
-  );
-}
-
-interface PersonOption {
-  personId: number;
-  name: string;
-  childId: number | null;
-  childName: string | null;
-  teams?: string | null;
-}
-
-/** Sign someone up: without a search the team's people, from 2 characters the whole club. Otherwise a name without access. */
-function OnBehalfPicker({ game, blocks, onDone }: { game: Game; blocks: Block[]; onDone: () => void }) {
-  const [blockId, setBlockId] = useState(String(blocks[0]?.id ?? ""));
-  const selected = blocks.find((b) => String(b.id) === blockId) ?? blocks[0];
-  const [search, setSearch] = useState("");
-  const [q, setQ] = useState("");
-  useEffect(() => {
-    const timer = window.setTimeout(() => setQ(search.trim()), 250);
-    return () => window.clearTimeout(timer);
-  }, [search]);
-  const referee = !!selected?.referee;
-  const team = useQuery<{ people: PersonOption[] }>(referee ? `/duties/qualified/${selected!.dutyTypeId}/people` : `/duties/events/${game.id}/people`);
-  const club = useSearch<{ people: PersonOption[] }>(`/duties/events/${game.id}/people/search`, !referee && q.length >= 2 ? { q } : null);
-  const needle = search.trim().toLowerCase();
-  const name = search.trim();
-  const list: PersonOption[] =
-    !referee && q.length >= 2 ? (club.data?.people ?? []) : (team.data?.people ?? []).filter((p) => !needle || `${p.name} ${p.childName ?? ""}`.toLowerCase().includes(needle));
-  const add = async (body: Record<string, unknown>) => {
-    try {
-      await api.post("/duties", { blockId: selected!.id, ...body });
-      toast(t`Signed up.`);
-      setSearch("");
-      onDone();
-    } catch (err) {
-      toast(errorMessage(err), "error");
-    }
-  };
-  return (
-    <section class="stack-sm" aria-label={t`Sign someone up`}>
-      <strong>
-        <Trans>Sign someone up</Trans>
-      </strong>
-      <Field label={t`Duty`}>
-        {(id) => (
-          <select id={id} class="select" value={String(selected?.id ?? "")} onChange={(e) => setBlockId((e.target as HTMLSelectElement).value)}>
-            {blocks.map((b) => (
-              <option value={String(b.id)}>
-                {b.label} · {blockTime(b, game.startsAt)}
-              </option>
-            ))}
-          </select>
-        )}
-      </Field>
-      <TextField
-        label={referee ? t`Search approved people` : t`Search name`}
-        value={search}
-        onInput={setSearch}
-        maxLength={60}
-        hint={referee ? t`Only people approved for this duty.` : t`Without input: people of the team. From 2 letters: everyone in the club.`}
-      />
-      <ul class="list" aria-label={t`People`}>
-        {list.slice(0, 30).map((p) => (
-          <li>
-            <button type="button" class="list-row" onClick={() => add({ onBehalfPersonId: p.personId, childId: p.childId })}>
-              <span class="main">
-                <span class="title">{p.name}</span>
-                {p.childName || p.teams ? <span class="sub">{p.childName ? forChild(p.childName) : p.teams}</span> : null}
-              </span>
-              <Icon name="plus" size={18} />
-            </button>
-          </li>
-        ))}
-      </ul>
-      {needle && !list.length && !(club.data == null && q.length >= 2) ? (
-        <p class="small muted">
-          <Trans>No one found.</Trans>
-        </p>
-      ) : null}
-      {!referee && search.trim() ? (
-        <Button size="sm" variant="ghost" onClick={() => add({ manualName: search.trim() })}>
-          <Trans>Add “{name}” as a name without access</Trans>
-        </Button>
-      ) : null}
-    </section>
-  );
-}
-
-function ManageSheet({ teamId, game, refereeView, onClose, onDone }: { teamId: number; game: Game; refereeView: boolean; onClose: () => void; onDone: () => void }) {
-  const [sub, setSub] = useState<"main" | "add" | { edit: Block }>("main");
-  const templates = useQuery<{ templates: TemplateInfo[] }>(game.kind === "special" ? "/duty-templates" : null);
-  const [templateId, setTemplateId] = useState("");
-  const date = game.startsAt.slice(0, 10);
-
-  const patchBlock = async (b: Block, body: Record<string, unknown>) => {
-    try {
-      await api.patch(`/duties/blocks/${b.id}`, body);
-      onDone();
-    } catch (err) {
-      toast(errorMessage(err), "error");
-    }
-  };
-
-  if (sub === "add") {
-    // Suggestion: right after the last on-site block, otherwise at the start of the event
-    const lastEnd = game.blocks.filter((b) => b.mode === "onsite" && !b.referee).reduce<string | null>((m, b) => (m == null || b.endsAt > m ? b.endsAt : m), null);
-    const start = (lastEnd && lastEnd.slice(0, 10) === date ? lastEnd : game.startsAt).slice(11, 16);
-    return (
-      <BlockSheet
-        date={date}
-        start={start}
-        eventEnd={game.endsAt}
-        allowNewType={game.kind === "special"}
-        onClose={() => setSub("main")}
-        onSave={async (nb) => {
-          await api.post(`/duties/events/${game.id}/blocks`, {
-            ...(nb.newTypeName ? { newTypeName: nb.newTypeName } : { dutyTypeId: nb.dutyTypeId }),
-            startsAt: nb.startsAt,
-            endsAt: nb.endsAt,
-            slots: nb.slots,
-          });
-          const label = nb.label;
-          toast(t`Time slot ${label} added.`);
-          onDone();
-        }}
-      />
-    );
-  }
-  if (typeof sub === "object") {
-    return (
-      <BlockEditSheet
-        block={sub.edit}
-        onClose={() => setSub("main")}
-        onSave={async (v) => {
-          await api.patch(`/duties/blocks/${sub.edit.id}`, v);
-          onDone();
-        }}
-      />
-    );
-  }
-
-  const blocks = refereeView ? game.blocks.filter((b) => b.referee) : game.blocks;
-  return (
-    <Sheet open onClose={onClose} title={t`Manage duties`}>
-      <p class="muted">{eventLine(game)}</p>
-      <section class="stack-sm" aria-label={t`Time slots`}>
-        {blocks.map((b) => {
-          const label = b.label;
-          return (
-            <div class="duty-block-row">
-              <button type="button" class="duty-block-label" aria-label={t`${label}: change time`} disabled={b.referee} onClick={() => setSub({ edit: b })}>
-                <strong>{b.label}</strong>
-                <span class="small muted">{blockTime(b, game.startsAt)}</span>
-              </button>
-              <div class="duty-stepper-inline">
-                <button
-                  type="button"
-                  class="icon-btn icon-btn-sm"
-                  aria-label={t`${label}: one slot fewer`}
-                  disabled={b.total <= 0}
-                  onClick={() => patchBlock(b, { slots: b.total - 1 })}
-                >
-                  −
-                </button>
-                <strong aria-live="polite">{b.total}</strong>
-                <button
-                  type="button"
-                  class="icon-btn icon-btn-sm"
-                  aria-label={t`${label}: one slot more`}
-                  disabled={b.total >= 20}
-                  onClick={() => patchBlock(b, { slots: b.total + 1 })}
-                >
-                  +
-                </button>
-              </div>
-              {!b.referee ? (
-                <button
-                  type="button"
-                  class="icon-btn icon-btn-sm"
-                  aria-label={t`Remove ${label}`}
-                  disabled={b.entries.length > 0}
-                  title={b.entries.length ? t`Remove all entries first` : undefined}
-                  onClick={async () => {
-                    if (
-                      !(await confirmDialog({
-                        title: t`Remove ${label}?`,
-                        message: t`The time slot is only removed from this event.`,
-                        confirmLabel: t`Remove`,
-                        danger: true,
-                      }))
-                    )
-                      return;
-                    try {
-                      await api.del(`/duties/blocks/${b.id}`);
-                      onDone();
-                    } catch (err) {
-                      toast(errorMessage(err), "error");
-                    }
-                  }}
-                >
-                  <Icon name="trash" size={16} />
-                </button>
-              ) : (
-                <span />
-              )}
-            </div>
-          );
-        })}
-        {!blocks.length ? (
-          <p class="small muted">
-            <Trans>No duties yet.</Trans>
-          </p>
-        ) : null}
-        {!refereeView ? (
-          <Button variant="dashed" size="sm" icon="plus" onClick={() => setSub("add")}>
-            <Trans>Add time slot</Trans>
-          </Button>
-        ) : null}
-        {game.kind === "special" && templates.data?.templates.length ? (
-          <div class="duty-template-apply">
-            <Field label={t`Apply from template`}>
-              {(id) => (
-                <select id={id} class="select" value={templateId} onChange={(e) => setTemplateId((e.target as HTMLSelectElement).value)}>
-                  <option value="">{t`– Choose template –`}</option>
-                  {templates.data!.templates.map((tpl) => (
-                    <option value={String(tpl.id)}>{tpl.name}</option>
-                  ))}
-                </select>
-              )}
-            </Field>
-            <Button
-              size="sm"
-              disabled={!templateId}
-              onClick={async () => {
-                const res = await api.post<{ created: number }>(`/duties/events/${game.id}/apply-template`, { templateId: Number(templateId) });
-                const created = res.created;
-                toast(
-                  plural(created, {
-                    one: "# time slot applied.",
-                    other: "# time slots applied.",
-                  }),
-                );
-                setTemplateId("");
-                onDone();
-              }}
-            >
-              <Trans>Apply</Trans>
-            </Button>
-          </div>
-        ) : null}
-      </section>
-      <section class="stack-sm" aria-label={t`Entries`}>
-        <strong>
-          <Trans>Entries</Trans>
-        </strong>
-        <ul class="list">
-          {blocks.flatMap((b) =>
-            b.entries.map((e) => (
-              <li class="list-row">
-                <span class="main">
-                  <span class="title">{e.name}</span>
-                  <span class="sub">
-                    {b.label}
-                    {e.child ? ` · ${forChild(e.child)}` : ""}
-                  </span>
-                </span>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={async () => {
-                    await api.del(`/duties/${e.id}`);
-                    onDone();
-                  }}
-                >
-                  <Trans>Remove</Trans>
-                </Button>
-              </li>
-            )),
-          )}
-        </ul>
-        {!blocks.some((b) => b.entries.length) ? (
-          <p class="small muted">
-            <Trans>No one signed up yet.</Trans>
-          </p>
-        ) : null}
-      </section>
-      {blocks.length ? <OnBehalfPicker game={game} blocks={blocks} onDone={onDone} /> : null}
-      {game.kind === "game" && !refereeView ? (
-        <SwitchRow
-          label={t`Hide in helper plan`}
-          sub={t`Parents then don't see the game, e.g. for a game without catering.`}
-          checked={game.hidden}
-          onChange={async (hidden) => {
-            await api.patch(`/duties/games/${game.id}`, { hidden });
-            onDone();
-          }}
-        />
-      ) : null}
-      {game.manual && !refereeView ? (
-        <Button
-          variant="danger"
-          icon="trash"
-          onClick={async () => {
-            await api.del(`/duties/games/${game.id}`);
-            toast(t`Game deleted.`);
-            onClose();
-            onDone();
-          }}
-        >
-          <Trans>Delete game</Trans>
-        </Button>
-      ) : null}
     </Sheet>
   );
 }

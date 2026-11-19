@@ -237,6 +237,12 @@ Whoever creates a special event (`events.created_by`) always manages its helper 
 
 Coaches may create a duty type for a single special event. It disappears with its last block and does not show in the club-wide list, so the admins' list stays clean.
 
+The duty type says *what*, the template line and the time block say *from where* ("Helpers from", `helper_mode`/`helper_teams`): as the duty type ("who helps" relative to the event's team), certain teams, or taking turns (templates only). That way a club has one duty type "Stewards" instead of one per helping team. With certain teams only their players sign up, children through their involved parents, and the child is the person in the entry (as for approved children), so the parents are reminded too. Taking turns stores the team per block (`rotate_team_id`) instead of computing it, so moved or new games do not shuffle what teams already planned; the next game continues after the team of the last block of the same duty type and list. Managers change the team per game and see when it has an event of its own; there is no automatic skip, because a team with a game at 10:00 can still wipe at 14:00. The team in charge is told once in its chat a week before, not every parent by push. Such duties make the other team's event visible to the person doing it, without the participant list (`relatesSql`).
+
+Three switches on a duty type: *assigned by the coach* (nobody signs up themselves; the coach's choice is limited to "who helps" so it stays the same rule as signing up), *send "helpers wanted"* (a duty for four youth teams would message every parent before every adult game), *adults only* (the birth year is the only age Kabine knows; one counts as adult in the year of the 18th birthday, no birth year counts as adult, and the person who does the duty counts).
+
+Club events (special events without a team, `club_wide`) can have helper duties. "Who helps" then applies across all teams (no groups), admins and organisers manage, and there is no "helpers wanted", because it would reach everyone in the club. They have a live channel of their own (`DutyHub` key 0; teams are > 0, lists of approved people < 0).
+
 ## Qualifications
 
 Some duties need prior knowledge. A duty type with "Needs prior knowledge" says who approves it (`duty_types.skill_grant`):

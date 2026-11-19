@@ -3,12 +3,12 @@ import { plural, t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { useState } from "preact/hooks";
 import { api, errorMessage } from "../../../src/api";
-import type { DutyTypeInfo, TemplateInfo } from "../../../src/duty-blocks";
+import { type DutyTypeInfo, HelperSourceField, type TemplateInfo } from "../../../src/duty-blocks";
 import { Icon } from "../../../src/icons";
 import { useMe } from "../../../src/session";
 import { invalidate, useQuery } from "../../../src/store";
 import { Button, confirmDialog, ErrorBox, Field, Notice, Segmented, Sheet, Spinner, SwitchRow, TextField, toast, TopBar, useDocumentTitle } from "../../../src/ui";
-import { needsSkillHelp } from "./help";
+import { adultsOnlyHelp, assignOnlyHelp, needsSkillHelp, notifyOpenHelp } from "./help";
 
 type TemplateItem = TemplateInfo["items"][number];
 
@@ -22,7 +22,7 @@ function whoLabel(type: DutyTypeInfo): string {
     type.whoMembers && t`Members`,
   ]
     .filter(Boolean)
-    .join(", ");
+    .join(", ") || t`only through “Helpers from”`;
 }
 
 function typeSub(type: DutyTypeInfo): string {
@@ -31,6 +31,9 @@ function typeSub(type: DutyTypeInfo): string {
     t`Who helps: ${who}`,
     type.mode === "task" ? t`Task` : null,
     type.noteAllowed ? t`with note` : null,
+    type.assignOnly ? t`assigned by the coach` : null,
+    type.notifyOpen === false && !type.assignOnly ? t`without “helpers wanted”` : null,
+    type.adultsOnly ? t`adults only` : null,
     type.needsSkill ? (type.skillGrant === "admin" ? t`approved by an admin` : t`needs prior knowledge`) : null,
     type.archived ? t`archived` : null,
   ]
@@ -189,6 +192,9 @@ function DutyTypeSheet({ type, onClose, onDone }: { type: DutyTypeInfo | null; o
   const [noteAllowed, setNoteAllowed] = useState(type?.noteAllowed ?? false);
   const [needsSkill, setNeedsSkill] = useState(type?.needsSkill ?? false);
   const [skillGrant, setSkillGrant] = useState<"self" | "admin">(type?.skillGrant ?? "self");
+  const [assignOnly, setAssignOnly] = useState(type?.assignOnly ?? false);
+  const [notifyOpen, setNotifyOpen] = useState(type?.notifyOpen ?? true);
+  const [adultsOnly, setAdultsOnly] = useState(type?.adultsOnly ?? false);
   const [archived, setArchived] = useState(type?.archived ?? false);
   // Taken by approved people from all teams (e.g. youth referees) or by the people of the team
   const [qualified, setQualified] = useState(type?.whoQualified ?? false);
@@ -255,9 +261,14 @@ function DutyTypeSheet({ type, onClose, onDone }: { type: DutyTypeInfo | null; o
               {chip(t`All`, all, () => setWho(all ? { ...who, parents: true, players: false, coaches: false } : { ...who, parents: true, players: true, coaches: true }))}
             </div>
             <span class="small muted">
+              {assignOnly ? (
+                <Trans>Whom the coach can assign to this duty. Parents are assigned for their child, in teams without parents the players themselves.</Trans>
+              ) : (
+                <Trans>Parents sign up for their child. In teams without parents, the players do this themselves.</Trans>
+              )}{" "}
               <Trans>
-                Parents sign up for their child. In teams without parents, the players do this themselves. Members: full members of the club who belong to the team (admins set this
-                under People).
+                Members: full members of the club who belong to the team (admins set this under People). Helpers from certain teams (e.g. wipers from the youth) are
+                set on the template or the time slot under “Helpers from”; then “Who helps” may stay empty.
               </Trans>
             </span>
           </div>
@@ -277,6 +288,17 @@ function DutyTypeSheet({ type, onClose, onDone }: { type: DutyTypeInfo | null; o
             <li>
               <SwitchRow label={t`Note allowed`} sub={t`Whoever signs up can add something, e.g. which cake.`} checked={noteAllowed} onChange={setNoteAllowed} />
             </li>
+            <li>
+              <SwitchRow label={t`Adults only`} info={adultsOnlyHelp()} checked={adultsOnly} onChange={setAdultsOnly} />
+            </li>
+            <li>
+              <SwitchRow label={t`Assigned by the coach`} info={assignOnlyHelp()} checked={assignOnly} onChange={setAssignOnly} />
+            </li>
+            {!assignOnly ? (
+              <li>
+                <SwitchRow label={t`Send “helpers wanted”`} info={notifyOpenHelp()} checked={notifyOpen} onChange={setNotifyOpen} />
+              </li>
+            ) : null}
             <li>
               <SwitchRow
                 label={t`Needs prior knowledge`}
@@ -310,7 +332,7 @@ function DutyTypeSheet({ type, onClose, onDone }: { type: DutyTypeInfo | null; o
         variant="primary"
         size="lg"
         block
-        disabled={!name.trim() || (!qualified && !who.parents && !who.players && !who.coaches && !who.members)}
+        disabled={!name.trim()}
         onClick={async () => {
           const body = {
             name: name.trim(),
@@ -323,6 +345,9 @@ function DutyTypeSheet({ type, onClose, onDone }: { type: DutyTypeInfo | null; o
             needsSkill,
             skillGrant,
             whoQualified: qualified,
+            assignOnly: !qualified && assignOnly,
+            notifyOpen,
+            adultsOnly,
             archived,
           };
           try {
@@ -339,8 +364,71 @@ function DutyTypeSheet({ type, onClose, onDone }: { type: DutyTypeInfo | null; o
       >
         <Trans>Save</Trans>
       </Button>
+      {type && !type.whoQualified ? <MergeDutyType type={type} onDone={onDone} onClose={onClose} /> : null}
       {type ? <DeleteDutyType type={type} onDone={onDone} onClose={onClose} /> : null}
     </Sheet>
+  );
+}
+
+/** Merge: templates, time slots and entries move to the chosen duty type, this one disappears. */
+function MergeDutyType({ type, onDone, onClose }: { type: DutyTypeInfo; onDone: () => void; onClose: () => void }) {
+  const all = useQuery<{ types: DutyTypeInfo[] }>("/duty-types?all=1");
+  const others = (all.data?.types ?? []).filter((ty) => ty.id !== type.id && !ty.whoQualified && ty.mode === type.mode);
+  const [into, setInto] = useState("");
+  if (!others.length) return null;
+  const target = others.find((ty) => String(ty.id) === into);
+  const name = type.name;
+  return (
+    <details class="howto-fold">
+      <summary>
+        <Trans>Merge with another duty type</Trans>
+      </summary>
+      <div class="stack-sm">
+        <p class="small muted">
+          <Trans>
+            For duplicates such as “Stewards W” and “Stewards M”: templates, time slots, entries, prior knowledge and approvals move to the chosen duty type, “{name}”
+            disappears. Where the helpers come from stays on the template and the time slot (“Helpers from”).
+          </Trans>
+        </p>
+        <Field label={t`Merge into`}>
+          {(id) => (
+            <select id={id} class="select" value={into} onChange={(e) => setInto((e.target as HTMLSelectElement).value)}>
+              <option value="">{t`– Choose duty type –`}</option>
+              {others.map((ty) => (
+                <option value={String(ty.id)}>{ty.name}</option>
+              ))}
+            </select>
+          )}
+        </Field>
+        <Button
+          disabled={!target}
+          onClick={async () => {
+            if (!target) return;
+            const intoName = target.name;
+            if (
+              !(await confirmDialog({
+                title: t`Merge ${name} into ${intoName}?`,
+                message: t`Everything of “${name}” then belongs to “${intoName}”. This cannot be undone.`,
+                confirmLabel: t`Merge`,
+                danger: true,
+              }))
+            )
+              return;
+            try {
+              await api.post(`/admin/duty-types/${type.id}/merge`, { intoId: target.id });
+            } catch (err) {
+              toast(errorMessage(err), "error");
+              return;
+            }
+            toast(t`${name} is now ${intoName}.`);
+            onDone();
+            onClose();
+          }}
+        >
+          <Trans>Merge</Trans>
+        </Button>
+      </div>
+    </details>
   );
 }
 
@@ -440,6 +528,7 @@ function TemplateSheet({ template, types, onClose, onDone }: { template: Templat
                 </label>
               </div>
             )}
+            <HelperSourceField mode={it.helperMode ?? "default"} teams={it.helperTeams ?? []} allowRotate onChange={(helperMode, helperTeams) => update(i, { helperMode, helperTeams })} />
             <div class="duty-stepper">
               <span>
                 <Trans>Slots</Trans>
@@ -488,7 +577,7 @@ function TemplateSheet({ template, types, onClose, onDone }: { template: Templat
         variant="primary"
         size="lg"
         block
-        disabled={!name.trim()}
+        disabled={!name.trim() || items.some((it) => (it.helperMode ?? "default") !== "default" && !(it.helperTeams ?? []).length)}
         onClick={async () => {
           const body = { name: name.trim(), items };
           if (template) await api.put(`/admin/duty-templates/${template.id}`, body);

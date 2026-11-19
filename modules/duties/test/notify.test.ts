@@ -156,7 +156,8 @@ describe("Helferplan-Benachrichtigungen", () => {
     await entry(in3, "kuchen", await person("Helga"), null);
     await entry(in3, "trikots", coach, null);
     await sendDutyNotifications(testEnv(), nine());
-    const wanted = pushes.filter((p) => p.payload.title === "Helfer gesucht · wD");
+    // Nur ein Dienst gesucht: er steht in der Überschrift
+    const wanted = pushes.filter((p) => p.payload.title === "Zeitnehmer gesucht · wD");
     // Nur noch Zeitnehmer frei: Mona (mit Freigabe) ja, Max nicht
     expect(wanted.flatMap((p) => p.accountIds)).toEqual([monaAccount]);
     expect(wanted[0]!.payload.body).toContain("Noch frei: Zeitnehmer");
