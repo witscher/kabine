@@ -842,7 +842,7 @@ export function childParentMessage(childName: string, teamName: string, url: str
   return [
     t`Hello! ${teamName} uses the ${club} app for events, responses, helper duties and the team chat.`,
     t`With this link you set up your parent access for ${childName}: open it, enter your own name and set up a passkey (Face ID, fingerprint or screen lock).`,
-    t`The link works once and only for you. Already in the app, e.g. for a sibling? Then open it on the phone where the app is installed.`,
+    t`The link is for both parents of ${childName}: each of you sets up your own access with it. Already in the app, e.g. for a sibling? Then open it on the phone where the app is installed.`,
     t`Then get the app onto your phone: on iPhone in Safari via "Share" → "Add to Home Screen", on Android via "Install app" in the browser menu.`,
     t`The link is valid until ${expires}:`,
     url,
@@ -1459,7 +1459,7 @@ export function PersonPage({ id, personId }: { id: string; personId: string }) {
             {team.parentsEnabled && player.guardians.length < 2 ? (
               <div class="stack-sm" style={{ borderTop: player.guardians.length ? "1px solid var(--line)" : undefined, paddingTop: player.guardians.length ? "10px" : undefined }}>
                 <p class="small muted">
-                  <Trans>A one-time link for a parent of {firstName} only, to send directly instead of the team's parent link.</Trans>
+                  <Trans>A link for the parents of {firstName} only, to send to them directly instead of the team's parent link.</Trans>
                 </p>
                 <Button icon="link" onClick={createParentLink}>
                   <Trans>Parent link for {firstName}</Trans>
@@ -1511,7 +1511,7 @@ export function PersonPage({ id, personId }: { id: string; personId: string }) {
         <Sheet open onClose={() => setLink(null)} title={link.parentOf ? t`Parent link for ${linkFor}` : t`Link for ${linkFor}`}>
           <p class="muted">
             {link.parentOf ? (
-              <Trans>One-time link for one parent of {linkFor}, valid until {linkExpires}. It links only {linkFor}. Please send it to that parent directly.</Trans>
+              <Trans>Link for the parents of {linkFor}, valid until {linkExpires}. It links only {linkFor}; each parent sets up their own access with it. Please send it to the parents directly.</Trans>
             ) : (
               <Trans>
                 Personal one-time link, valid until {linkExpires}. Please pass it on directly to {linkFor} only.

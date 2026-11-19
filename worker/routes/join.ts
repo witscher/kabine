@@ -275,12 +275,6 @@ function oneChildSelection(invite: InviteRow, childIds: number[] | undefined): n
 
 const CHILD_GONE = () => t`This child no longer belongs to the team. Please ask the coach for a new link.`;
 
-/** Marks a one-time link as used, in one statement: of two uses at the same time only one gets through. */
-async function claimInvite(db: D1Database, inviteId: number): Promise<void> {
-  const res = await run(db, "UPDATE invites SET used_at = ? WHERE id = ? AND used_at IS NULL AND revoked_at IS NULL", utcIso(), inviteId);
-  if (!res.meta.changes) throw gone(t`This invitation link is no longer valid. Please ask for a new link.`, "invite_used");
-}
-
 async function stillValid(env: Env, inviteId: number): Promise<InviteRow> {
   const invite = await first<InviteRow>(env.DB, "SELECT * FROM invites WHERE id = ?", inviteId);
   if (!invite || invite.revoked_at || invite.used_at || Date.parse(invite.expires_at) <= Date.now()) {
@@ -427,21 +421,12 @@ async function createJoinAccount(env: Env, request: Request, context: JoinContex
     if (valid.length !== context.childIds.length) throw badRequest(t`The selection of children is no longer valid.`);
     if (forOneChild(invite) != null && !context.childIds.every((id) => id === invite.person_id)) throw badRequest(t`Invalid selection.`);
     await assertGuardianCapacity(db, context.childIds, null);
-    // A parent link for one child works once: claim it before anything is created, so a second use in parallel fails
-    const once = forOneChild(invite) != null;
-    if (once) await claimInvite(db, invite.id);
-    let person: { id: number } | null;
-    try {
-      person = await first<{ id: number }>(
-        db,
-        "INSERT INTO persons (first_name, last_name) VALUES (?, ?) RETURNING id",
-        context.firstName,
-        context.lastName,
-      );
-    } catch (err) {
-      if (once) await run(db, "UPDATE invites SET used_at = NULL WHERE id = ?", invite.id);
-      throw err;
-    }
+    const person = await first<{ id: number }>(
+      db,
+      "INSERT INTO persons (first_name, last_name) VALUES (?, ?) RETURNING id",
+      context.firstName,
+      context.lastName,
+    );
     try {
       const account = await first<{ id: number }>(
         db,
@@ -458,7 +443,6 @@ async function createJoinAccount(env: Env, request: Request, context: JoinContex
       return account!.id;
     } catch (err) {
       await run(db, "DELETE FROM persons WHERE id = ?", person!.id);
-      if (once) await run(db, "UPDATE invites SET used_at = NULL WHERE id = ?", invite.id);
       throw err;
     }
   }
@@ -554,12 +538,11 @@ joinRoutes.post("/join/link-children", async (c) => {
   const invite = await findValidInvite(c.env, token);
   if (invite.kind !== "parent") throw badRequest(t`This is not a parent link.`);
   if (childIds.includes(actor.personId)) throw badRequest(t`You cannot link yourself as a child.`);
-  // A parent link for one child links that child and no other, once (rule 20)
+  // A parent link for one child links that child and no other (rule 20)
   oneChildSelection(invite, childIds);
   const players = await teamPlayers(c.env.DB, invite.team_id!);
   if (!childIds.every((id) => players.some((p) => p.id === id))) throw badRequest(t`Invalid selection.`);
   await assertGuardianCapacity(c.env.DB, childIds, actor.personId);
-  if (forOneChild(invite) != null) await claimInvite(c.env.DB, invite.id);
   await c.env.DB.batch(
     childIds.map((childId) =>
       stmt(c.env.DB, "INSERT OR IGNORE INTO guardianships (guardian_id, child_id) VALUES (?, ?)", actor.personId, childId),

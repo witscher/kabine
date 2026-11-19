@@ -1450,12 +1450,12 @@ test("Elternlink: einmal einrichten, beim erneuten Öffnen direkt zur App", asyn
   await expect(card).toContainText("Den Link braucht es nur einmal zum Einrichten.");
 });
 
-test("Elternlink für ein Kind: Trainer erstellt ihn bei der Person, er verknüpft nur dieses Kind und nur einmal", async ({ browser }) => {
+test("Elternlink für ein Kind: Trainer erstellt ihn bei der Person, er verknüpft nur dieses Kind, für beide Eltern", async ({ browser }) => {
   const { page } = coach;
   await page.goto("/team/1/person/12");
   await page.getByRole("button", { name: "Elternlink für Jana" }).click();
   const sheet = page.getByRole("dialog", { name: "Elternlink für Jana" });
-  await expect(sheet).toContainText("Er verknüpft nur Jana.");
+  await expect(sheet).toContainText("Er verknüpft nur Jana; jedes Elternteil richtet damit seinen eigenen Zugang ein.");
   await expect(sheet.getByRole("button", { name: "Mit Text teilen" })).toBeVisible();
   const url = (await sheet.locator(".url-box").textContent())!.trim();
   expect(url).toContain("/einladung#");
@@ -1473,11 +1473,11 @@ test("Elternlink für ein Kind: Trainer erstellt ihn bei der Person, er verknüp
   await expect(p.getByText("Geschafft!")).toBeVisible();
   await parent.context.close();
 
-  // Used once: the link no longer works, the coach sees the parent at the child
-  const late = await newUser(browser);
-  await late.page.goto(url);
-  await expect(late.page.getByText("Dieser Link wurde bereits verwendet.", { exact: false })).toBeVisible();
-  await late.context.close();
+  // The second parent can use the same link; the coach sees the first parent at the child
+  const second = await newUser(browser);
+  await second.page.goto(url);
+  await expect(second.page.getByText("Du richtest einen Elternzugang für Jana in der wT ein.")).toBeVisible();
+  await second.context.close();
   await page.goto("/team/1/person/12");
   await expect(page.getByRole("region", { name: "Eltern" })).toContainText("Nora Probe");
 });

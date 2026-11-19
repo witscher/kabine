@@ -1,7 +1,4 @@
 {
-  "One-time link for one parent of {linkFor}, valid until {linkExpires}. It links only {linkFor}. Please send it to that parent directly.": "Einmal-Link für ein Elternteil von {linkFor}, gültig bis {linkExpires}. Er verknüpft nur {linkFor}. Bitte direkt an dieses Elternteil schicken.",
-  "A one-time link for a parent of {firstName} only, to send directly instead of the team's parent link.": "Ein Einmal-Link nur für ein Elternteil von {firstName}, zum direkten Verschicken statt des Elternlinks der Mannschaft.",
-  "The link works once and only for you. Already in the app, e.g. for a sibling? Then open it on the phone where the app is installed.": "Der Link funktioniert einmal und nur für dich. Schon in der App, z. B. für ein Geschwisterkind? Dann öffne ihn auf dem Handy, auf dem die App installiert ist.",
   "This child no longer belongs to the team. Please ask the coach for a new link.": "Dieses Kind gehört nicht mehr zur Mannschaft. Bitte frag beim Trainerteam nach einem neuen Link.",
   "Your child": "Dein Kind",
   "Hello! {teamName} uses the {club} app for events, responses, helper duties and the team chat.": "Hallo! Die {teamName} nutzt die App {club} für Termine, Zu- und Absagen, Helferdienste und den Mannschaftschat.",
@@ -11,9 +8,12 @@
   "Parent link for {linkFor}": "Elternlink für {linkFor}",
   "Parent link for {firstName}": "Elternlink für {firstName}",
   "You are setting up a parent access for {fixedChild} in the {teamName}.": "Du richtest einen Elternzugang für {fixedChild} in der {teamName} ein.",
-  "One-time link for one parent of {firstName}, valid until {validUntil}. It links only {firstName}. Please send it to that parent directly.": "Einmal-Link für ein Elternteil von {firstName}, gültig bis {validUntil}. Er verknüpft nur {firstName}. Bitte direkt an dieses Elternteil schicken.",
   "{firstName} already has two parents in the app.": "{firstName} hat schon zwei Eltern in der App.",
   "For a parent link, first add {firstName} as a player to a team (Teams above).": "Für einen Elternlink {firstName} zuerst als Spieler einer Mannschaft hinzufügen (Mannschaften oben).",
   "Parent link for {firstName} ({team})": "Elternlink für {firstName} ({team})",
-  "Parents are switched off in the team of {firstName}. Switch them on under Administration → Teams for a parent link.": "In der Mannschaft von {firstName} sind Eltern ausgeschaltet. Für einen Elternlink unter Verwaltung → Mannschaften einschalten."
+  "Parents are switched off in the team of {firstName}. Switch them on under Administration → Teams for a parent link.": "In der Mannschaft von {firstName} sind Eltern ausgeschaltet. Für einen Elternlink unter Verwaltung → Mannschaften einschalten.",
+  "The link is for both parents of {childName}: each of you sets up your own access with it. Already in the app, e.g. for a sibling? Then open it on the phone where the app is installed.": "Der Link ist für beide Eltern von {childName}: Jeder richtet damit seinen eigenen Zugang ein. Schon in der App, z. B. für ein Geschwisterkind? Dann öffne ihn auf dem Handy, auf dem die App installiert ist.",
+  "A link for the parents of {firstName} only, to send to them directly instead of the team's parent link.": "Ein Link nur für die Eltern von {firstName}, zum direkten Verschicken statt des Elternlinks der Mannschaft.",
+  "Link for the parents of {linkFor}, valid until {linkExpires}. It links only {linkFor}; each parent sets up their own access with it. Please send it to the parents directly.": "Link für die Eltern von {linkFor}, gültig bis {linkExpires}. Er verknüpft nur {linkFor}; jedes Elternteil richtet damit seinen eigenen Zugang ein. Bitte direkt an die Eltern schicken.",
+  "Link for the parents of {firstName}, valid until {validUntil}. It links only {firstName}; each parent sets up their own access with it. Please send it to the parents directly.": "Link für die Eltern von {firstName}, gültig bis {validUntil}. Er verknüpft nur {firstName}; jedes Elternteil richtet damit seinen eigenen Zugang ein. Bitte direkt an die Eltern schicken."
 }

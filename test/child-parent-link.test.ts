@@ -1,4 +1,4 @@
-// Parent link for one child: created by a coach of the child's team (or an admin), links only that child, once.
+// Parent link for one child: created by a coach of the child's team (or an admin), links only that child, for its parents.
 // Security rule 20 (docs/dev/security.md). Names and addresses are invented.
 import { exports } from "cloudflare:workers";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -145,21 +145,23 @@ describe("parent link for one child", () => {
     expect(await rows("SELECT id FROM persons WHERE first_name = 'Paula'")).toEqual([]);
   });
 
-  it("works once, and no longer when withdrawn or the child left the team", async () => {
+  it("works for both parents, not for a third, and no longer when withdrawn or the child left the team", async () => {
     const mara = await loginAs(await person("Mara"));
     const token = tokenOf((await childLink()).body);
-    // Two codes requested at the same time: only the first one redeemed sets up an access
-    const a = await api("/join/email", { body: { token, firstName: "Paula", lastName: "Lauf", email: "paula@example.org" } });
-    const codeA = codeOf();
-    const b = await api("/join/email", { body: { token, firstName: "Peer", lastName: "Lauf", email: "peer@example.org" } });
-    const codeB = codeOf();
     const verify = (requestId: string, code: string) => api("/auth/email/verify", { body: { requestId, code } });
-    expect((await verify(a.body.requestId, codeA)).status).toBe(200);
-    const late = await verify(b.body.requestId, codeB);
-    expect(late.status).toBe(410);
-    expect(await rows("SELECT first_name FROM persons WHERE first_name IN ('Paula', 'Peer')")).toEqual([{ first_name: "Paula" }]);
-    expect((await api("/join/info", { body: { token } })).body.error.code).toBe("invite_used");
-    expect((await api("/join/link-children", { cookie: mara, body: { token, childIds: [lina] } })).body.error.code).toBe("invite_used");
+    // Both parents set up their own access with the same link
+    for (const [firstName, email] of [["Paula", "paula@example.org"], ["Peer", "peer@example.org"]] as const) {
+      const start = await api("/join/email", { body: { token, firstName, lastName: "Lauf", email } });
+      expect(start.status).toBe(200);
+      expect((await verify(start.body.requestId, codeOf())).status).toBe(200);
+    }
+    expect(await rows("SELECT gp.first_name FROM guardianships g JOIN persons gp ON gp.id = g.guardian_id WHERE g.child_id = ? ORDER BY gp.first_name", lina)).toEqual([
+      { first_name: "Paula" },
+      { first_name: "Peer" },
+    ]);
+    // A third person: the link is still valid, but the child has two parents
+    expect((await api("/join/info", { body: { token } })).body.error.code).toBe("child_full");
+    expect((await api("/join/link-children", { cookie: mara, body: { token, childIds: [lina] } })).body.error.code).toBe("child_full");
 
     // Withdrawn by the coach
     const withdrawn = await childLink(coachD, ole);

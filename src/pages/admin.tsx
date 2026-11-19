@@ -1440,7 +1440,7 @@ function ChildParentLinkSection({ p }: { p: AdminPerson }) {
       ) : (
         <>
           <p class="small muted">
-            <Trans>A one-time link for a parent of {firstName} only, to send directly instead of the team's parent link.</Trans>
+            <Trans>A link for the parents of {firstName} only, to send to them directly instead of the team's parent link.</Trans>
           </p>
           <div class="btn-row">
             {eligible.map((m) => {
@@ -1478,7 +1478,7 @@ function ChildParentLinkSection({ p }: { p: AdminPerson }) {
             </Button>
           </div>
           <p class="small muted">
-            <Trans>One-time link for one parent of {firstName}, valid until {validUntil}. It links only {firstName}. Please send it to that parent directly.</Trans>
+            <Trans>Link for the parents of {firstName}, valid until {validUntil}. It links only {firstName}; each parent sets up their own access with it. Please send it to the parents directly.</Trans>
           </p>
         </div>
       ) : null}

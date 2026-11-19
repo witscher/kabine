@@ -908,11 +908,6 @@ msgid "Important: each parent uses the link only once, for themselves. This is n
 msgstr "Wichtig: Jedes Elternteil nutzt den Link nur einmal, für sich selbst. Dies ist kein Link für Spieler!"
 
 # ai
-#: src/pages/team.tsx
-msgid "One-time link for one parent of {linkFor}, valid until {linkExpires}. It links only {linkFor}. Please send it to that parent directly."
-msgstr "Einmal-Link für ein Elternteil von {linkFor}, gültig bis {linkExpires}. Er verknüpft nur {linkFor}. Bitte direkt an dieses Elternteil schicken."
-
-# ai
 #: src/help-texts.ts
 msgid "Christmas party: the Berg family registers 4 people, an adult player 2 with her partner."
 msgstr "Weihnachtsfeier: Familie Berg meldet 4 Personen an, eine erwachsene Spielerin 2 mit Partner."
@@ -1365,12 +1360,6 @@ msgid "Take photo"
 msgstr "Foto machen"
 
 # ai
-#: src/pages/admin.tsx
-#: src/pages/team.tsx
-msgid "A one-time link for a parent of {firstName} only, to send directly instead of the team's parent link."
-msgstr "Ein Einmal-Link nur für ein Elternteil von {firstName}, zum direkten Verschicken statt des Elternlinks der Mannschaft."
-
-# ai
 #: src/pages/help.tsx
 #: src/pages/whats-new.tsx
 msgid "What's new"
@@ -1612,11 +1601,6 @@ msgid "The association sets the birth years per season. Please check them agains
 msgstr "Die Jahrgänge legt der Verband pro Saison fest. Bitte mit den Durchführungsbestimmungen abgleichen. „Rang“ ordnet die Klassen von jung nach alt und bestimmt, welches die nächsthöhere Jugend ist."
 
 # ai
-#: src/pages/admin.tsx
-msgid "One-time link for one parent of {firstName}, valid until {validUntil}. It links only {firstName}. Please send it to that parent directly."
-msgstr "Einmal-Link für ein Elternteil von {firstName}, gültig bis {validUntil}. Er verknüpft nur {firstName}. Bitte direkt an dieses Elternteil schicken."
-
-# ai
 #: src/special-attendance.tsx
 msgid "Last changed by {by}"
 msgstr "Zuletzt geändert von {by}"
@@ -1764,11 +1748,6 @@ msgstr "Erledigt in dieser Saison"
 #: modules/duties/app/admin.tsx
 msgid "Everyone an admin approved for it takes this duty, from all teams, for example youth referees for the home games of the youngest age groups. Approve people under Admin → Approvals; under Admin → Age groups you choose which home games get it."
 msgstr "Diesen Dienst übernehmen alle, die ein Admin dafür freigegeben hat, aus allen Mannschaften, zum Beispiel Jugendschiedsrichter für die Heimspiele der jüngsten Altersklassen. Personen gibst du unter Verwaltung → Freigaben frei; unter Verwaltung → Altersklassen wählst du, welche Heimspiele ihn bekommen."
-
-# ai
-#: src/pages/team.tsx
-msgid "The link works once and only for you. Already in the app, e.g. for a sibling? Then open it on the phone where the app is installed."
-msgstr "Der Link funktioniert einmal und nur für dich. Schon in der App, z. B. für ein Geschwisterkind? Dann öffne ihn auf dem Handy, auf dem die App installiert ist."
 
 #: src/duty-manage.tsx
 msgid "{created, plural, one {# time slot applied.} other {# time slots applied.}}"
@@ -4791,6 +4770,11 @@ msgstr "erlaubt"
 msgid "Only with approval"
 msgstr "Nur mit Freigabe"
 
+# ai
+#: src/pages/team.tsx
+msgid "The link is for both parents of {childName}: each of you sets up your own access with it. Already in the app, e.g. for a sibling? Then open it on the phone where the app is installed."
+msgstr "Der Link ist für beide Eltern von {childName}: Jeder richtet damit seinen eigenen Zugang ein. Schon in der App, z. B. für ein Geschwisterkind? Dann öffne ihn auf dem Handy, auf dem die App installiert ist."
+
 #: modules/handball4all/worker/connector.ts
 msgid "Open the team in the portal and paste the link from the address bar. It contains ogId, lId and tId."
 msgstr "Im Portal die Mannschaft öffnen und den Link aus der Adresszeile einfügen. Er enthält ogId, lId und tId."
@@ -6293,7 +6277,6 @@ msgstr "Beschreibung (optional)"
 msgid "No core squad set yet. You can do that under <0>Team → Squad</0>."
 msgstr "Noch kein Stammkader festgelegt. Das geht unter <0>Team → Kader</0>."
 
-#: worker/routes/join.ts
 #: worker/routes/join.ts
 msgid "This invitation link is no longer valid. Please ask for a new link."
 msgstr "Dieser Einladungslink gilt nicht mehr. Bitte frag nach einem neuen Link."
@@ -8516,6 +8499,11 @@ msgstr "Einladung"
 #: src/duty-manage.tsx
 msgid "The time slot is only removed from this event."
 msgstr "Der Zeitblock wird nur bei diesem Termin entfernt."
+
+# ai
+#: src/pages/admin.tsx
+msgid "Link for the parents of {firstName}, valid until {validUntil}. It links only {firstName}; each parent sets up their own access with it. Please send it to the parents directly."
+msgstr "Link für die Eltern von {firstName}, gültig bis {validUntil}. Er verknüpft nur {firstName}; jedes Elternteil richtet damit seinen eigenen Zugang ein. Bitte direkt an die Eltern schicken."
 
 #: src/duty-manage.tsx
 msgid "vs {guest}"
@@ -12068,6 +12056,12 @@ msgid "Running"
 msgstr "Laufend"
 
 # ai
+#: src/pages/admin.tsx
+#: src/pages/team.tsx
+msgid "A link for the parents of {firstName} only, to send to them directly instead of the team's parent link."
+msgstr "Ein Link nur für die Eltern von {firstName}, zum direkten Verschicken statt des Elternlinks der Mannschaft."
+
+# ai
 #: src/pages/team.tsx
 msgid "Permanent stand-ins from the next younger youth team or a lower-ranked team of the same age class see your games and can accept and decline."
 msgstr "Dauerhafte Aushilfen aus der nächstjüngeren Jugend oder einer nachrangigen Mannschaft derselben Altersklasse sehen eure Spiele und können zu- und absagen."
@@ -12511,6 +12505,11 @@ msgstr "Trainer von"
 #: src/list-import.tsx
 msgid "Files"
 msgstr "Dateien"
+
+# ai
+#: src/pages/team.tsx
+msgid "Link for the parents of {linkFor}, valid until {linkExpires}. It links only {linkFor}; each parent sets up their own access with it. Please send it to the parents directly."
+msgstr "Link für die Eltern von {linkFor}, gültig bis {linkExpires}. Er verknüpft nur {linkFor}; jedes Elternteil richtet damit seinen eigenen Zugang ein. Bitte direkt an die Eltern schicken."
 
 #: src/pages/special.tsx
 msgid "E.g. a photo shoot, a party or a parents' evening. Everyone in the team is invited and accepts or declines."
