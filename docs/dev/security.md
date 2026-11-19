@@ -16,6 +16,7 @@ A club rests on trust, above all in its coaches, and the app reflects that.
 - Highest priority for every security change: people who use the app in good faith notice no difference. Before shipping a new rule, check who it would hit in a real club (for example coaches without an account who joined through their team's player link).
 - Prefer a narrow guard on the risky step plus clear wording ("please agree with the coach of …", "an admin enters this") over removing a feature.
 - Clubs may choose stricter rules for themselves; they are not Kabine defaults. Kabine's own import rule 1 stays.
+- Shared team links (player and parent link of a team) are part of this trust model. Once a team is set up (more than 5 people of the link's kind with an access, `shared/invites.ts`), creating one shows a hint towards personal links and parent links for one child; it does not block (`test/team-link-hint.test.ts`).
 
 | # | Rule | Where | Test |
 | --- | --- | --- | --- |

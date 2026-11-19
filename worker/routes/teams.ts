@@ -266,6 +266,7 @@ teamRoutes.get("/teams/:id", async (c) => {
   const coreIds = new Set(core.map((r) => r.person_id));
   const unexcused = new Map(unexcusedRows.map((r) => [r.person_id, r.n]));
   const players = members.filter((m) => m.role === "player");
+  const playerIds = new Set(players.map((p) => p.person_id));
   const nameCount = new Map<string, { label: string; n: number }>();
   for (const p of players) {
     const label = `${p.first_name} ${p.last_name ?? ""}`.trim();
@@ -322,6 +323,12 @@ teamRoutes.get("/teams/:id", async (c) => {
         unexcused: unexcused.get(m.person_id) ?? 0,
       })),
     invites: { player: await inviteView("player"), parent: await inviteView("parent") },
+    // People of each link's kind who already have an access, from the rows above: a set-up team gets a hint to use
+    // personal links (shared/invites.ts)
+    withAccess: {
+      player: players.filter((p) => p.has_account === 1).length,
+      parent: new Set(guardians.filter((g) => g.has_account === 1 && playerIds.has(g.child_id)).map((g) => g.guardian_id)).size,
+    },
     // Children in the app: effective limits, the age class's and the team's own restriction (null: never limited)
     childLimits: limits,
     ageClassChildLimits: classLimits,

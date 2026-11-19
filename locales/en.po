@@ -1903,6 +1903,10 @@ msgstr "all done"
 msgid "New event: {title}"
 msgstr "New event: {title}"
 
+#: src/pages/team.tsx
+msgid "{count, plural, one {# parent in {teamName} already has an access.} other {# parents in {teamName} already have an access.}}"
+msgstr "{count, plural, one {# parent in {teamName} already has an access.} other {# parents in {teamName} already have an access.}}"
+
 #: modules/duties/app/admin.tsx
 #: modules/duties/app/admin.tsx
 #: src/pages/admin.tsx
@@ -1978,6 +1982,10 @@ msgstr "Got it"
 #: src/respond.tsx
 msgid "School"
 msgstr "School"
+
+#: src/pages/team.tsx
+msgid "Team already set up"
+msgstr "Team already set up"
 
 #: src/pages/profile.tsx
 msgid "The settings apply to all your devices. Whether a device gets notifications at all is set in your profile."
@@ -2488,6 +2496,10 @@ msgstr "{teams, plural, one {# team takes its games from this source. Its games 
 #: worker/routes/events.ts
 msgid "Only special events have a title."
 msgstr "Only special events have a title."
+
+#: src/pages/team.tsx
+msgid "The previous team link will then stop working."
+msgstr "The previous team link will then stop working."
 
 #: modules/duties/worker/routes.ts
 msgid "{name} is still in use. Archive the duty type instead."
@@ -5366,6 +5378,10 @@ msgstr "{label} (for {child})"
 msgid "Home or away"
 msgstr "Home or away"
 
+#: src/pages/team.tsx
+msgid "Create team link anyway"
+msgstr "Create team link anyway"
+
 #: src/pages/group.tsx
 msgid "Add members"
 msgstr "Add members"
@@ -6383,6 +6399,10 @@ msgstr "Before sharing, please add the last names where first names are the same
 msgid "What did you notice?"
 msgstr "What did you notice?"
 
+#: src/pages/team.tsx
+msgid "For the few still missing, a personal link is safer: open the player in the squad and send it to them directly. It works once and only for that person, while anyone holding the team link can pick a free name."
+msgstr "For the few still missing, a personal link is safer: open the player in the squad and send it to them directly. It works once and only for that person, while anyone holding the team link can pick a free name."
+
 #: src/pages/season.tsx
 msgid "3 · Check assignment"
 msgstr "3 · Check assignment"
@@ -6824,6 +6844,10 @@ msgstr "{firstName} would like to use this picture. Others only see it after you
 #: src/faq.tsx
 msgid "Decline for a player or record who was there."
 msgstr "Decline for a player or record who was there."
+
+#: src/pages/team.tsx
+msgid "For the few still missing, a parent link for one child is safer: open the child in the squad and send it to the parent directly. It works once and links only that child, while anyone holding the team link can pick any child of the team."
+msgstr "For the few still missing, a parent link for one child is safer: open the child in the squad and send it to the parent directly. It works once and links only that child, while anyone holding the team link can pick any child of the team."
 
 #: src/pages/group.tsx
 msgid "New group"
@@ -12850,6 +12874,10 @@ msgstr "My events"
 #: src/pages/event.tsx
 msgid "Too few acceptances"
 msgstr "Too few acceptances"
+
+#: src/pages/team.tsx
+msgid "{count, plural, one {# player of {teamName} already has an access.} other {# players of {teamName} already have an access.}}"
+msgstr "{count, plural, one {# player of {teamName} already has an access.} other {# players of {teamName} already have an access.}}"
 
 #: src/ui.tsx
 msgid "Copying not possible. Please select the text."

@@ -5,6 +5,7 @@ import { useLocation } from "preact-iso";
 import { useEffect, useState } from "preact/hooks";
 import { renderSVG } from "uqr";
 import type { ChildLimits, PersonRef } from "../../shared/types";
+import { teamSetUp } from "../../shared/invites";
 import { ChildLimitControls } from "../child-limits";
 import { api, errorMessage } from "../api";
 import type { DutyTypeInfo, TemplateInfo } from "../duty-blocks";
@@ -78,6 +79,8 @@ export interface TeamDetail {
   }[];
   helpers: { person: PersonRef; homeTeam: string | null; trainings: boolean; isActive: boolean; isCore: boolean; unexcused: number }[];
   invites: { player: InviteView | null; parent: InviteView | null };
+  /** People of each link's kind who already have an access (players; parents of the team's players) */
+  withAccess: { player: number; parent: number };
   /** Children in the app: what players of this team may do themselves (age class and team together). */
   childLimits: ChildLimits;
   /** The age class's limit; null for adult classes and groups, which are never limited. */
@@ -846,6 +849,39 @@ export function childParentMessage(childName: string, teamName: string, url: str
   ].join("\n\n");
 }
 
+/** Shown before a team link is created in a team that is mostly set up. */
+function SetUpHint({ team, kind, replaces }: { team: TeamDetail; kind: "player" | "parent"; replaces: boolean }) {
+  const teamName = team.name;
+  const count = team.withAccess[kind];
+  return (
+    <div class="stack-sm">
+      <p>
+        {kind === "player"
+          ? plural(count, { one: `# player of ${teamName} already has an access.`, other: `# players of ${teamName} already have an access.` })
+          : plural(count, { one: `# parent in ${teamName} already has an access.`, other: `# parents in ${teamName} already have an access.` })}
+      </p>
+      <p>
+        {kind === "player" ? (
+          <Trans>
+            For the few still missing, a personal link is safer: open the player in the squad and send it to them directly. It works once and only for
+            that person, while anyone holding the team link can pick a free name.
+          </Trans>
+        ) : (
+          <Trans>
+            For the few still missing, a parent link for one child is safer: open the child in the squad and send it to the parent directly. It works
+            once and links only that child, while anyone holding the team link can pick any child of the team.
+          </Trans>
+        )}
+      </p>
+      {replaces ? (
+        <p>
+          <Trans>The previous team link will then stop working.</Trans>
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
 function InviteCard(props: { team: TeamDetail; kind: "player" | "parent"; invite: InviteView | null; onChanged: () => void }) {
   const { team, kind, invite } = props;
   const title = kind === "player" ? t`Player link` : t`Parent link`;
@@ -856,7 +892,10 @@ function InviteCard(props: { team: TeamDetail; kind: "player" | "parent"; invite
   const expires = invite ? fullDate(isoToLocalDate(invite.expiresAt)) : "";
   const message = invite ? inviteMessage(kind, team.name, invite.url, expires) : "";
   const create = async () => {
-    if (invite && !(await confirmDialog({ title: t`Create a new link?`, message: t`The previous link will then stop working.`, confirmLabel: t`New link` }))) return;
+    // Most of the team is set up: the few still missing are better off with a link of their own
+    if (teamSetUp(team.withAccess[kind])) {
+      if (!(await confirmDialog({ title: t`Team already set up`, message: <SetUpHint team={team} kind={kind} replaces={!!invite} />, confirmLabel: t`Create team link anyway` }))) return;
+    } else if (invite && !(await confirmDialog({ title: t`Create a new link?`, message: t`The previous link will then stop working.`, confirmLabel: t`New link` }))) return;
     await api.post(`/teams/${team.id}/invites`, { kind });
     toast(t`New link created.`);
     props.onChanged();

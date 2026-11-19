@@ -2046,6 +2046,11 @@ msgstr "alle erledigt"
 msgid "New event: {title}"
 msgstr "Neuer Termin: {title}"
 
+# ai
+#: src/pages/team.tsx
+msgid "{count, plural, one {# parent in {teamName} already has an access.} other {# parents in {teamName} already have an access.}}"
+msgstr "{count, plural, one {# Elternteil in der {teamName} hat schon einen Zugang.} other {# Eltern in der {teamName} haben schon einen Zugang.}}"
+
 #: modules/duties/app/admin.tsx
 #: modules/duties/app/admin.tsx
 #: src/pages/admin.tsx
@@ -2124,6 +2129,11 @@ msgstr "Verstanden"
 #: src/respond.tsx
 msgid "School"
 msgstr "Schule"
+
+# ai
+#: src/pages/team.tsx
+msgid "Team already set up"
+msgstr "Mannschaft schon eingerichtet"
 
 #: src/pages/profile.tsx
 msgid "The settings apply to all your devices. Whether a device gets notifications at all is set in your profile."
@@ -2675,6 +2685,11 @@ msgstr "{teams, plural, one {# Mannschaft übernimmt ihre Spiele aus dieser Quel
 #: worker/routes/events.ts
 msgid "Only special events have a title."
 msgstr "Nur Sondertermine haben einen Titel."
+
+# ai
+#: src/pages/team.tsx
+msgid "The previous team link will then stop working."
+msgstr "Der bisherige Mannschaftslink funktioniert dann nicht mehr."
 
 # ai
 #: modules/duties/worker/routes.ts
@@ -5804,6 +5819,11 @@ msgstr "{label} (für {child})"
 msgid "Home or away"
 msgstr "Heim oder auswärts"
 
+# ai
+#: src/pages/team.tsx
+msgid "Create team link anyway"
+msgstr "Trotzdem Mannschaftslink erstellen"
+
 #: src/pages/group.tsx
 msgid "Add members"
 msgstr "Mitglieder hinzufügen"
@@ -6910,6 +6930,11 @@ msgstr "Vor dem Teilen bitte die Nachnamen bei gleichen Vornamen ergänzen ({nam
 msgid "What did you notice?"
 msgstr "Was ist dir aufgefallen?"
 
+# ai
+#: src/pages/team.tsx
+msgid "For the few still missing, a personal link is safer: open the player in the squad and send it to them directly. It works once and only for that person, while anyone holding the team link can pick a free name."
+msgstr "Für die wenigen, die noch fehlen, ist ein persönlicher Link sicherer: Öffne die Person im Kader und schick ihn ihr direkt. Er funktioniert einmal und nur für diese Person, während mit dem Mannschaftslink jeder einen freien Namen wählen kann."
+
 #: src/pages/season.tsx
 msgid "3 · Check assignment"
 msgstr "3 · Zuordnung prüfen"
@@ -7392,6 +7417,11 @@ msgstr "{firstName} möchte dieses Bild verwenden. Erst nach deiner Freigabe seh
 #: src/faq.tsx
 msgid "Decline for a player or record who was there."
 msgstr "Für einen Spieler absagen oder eintragen, wer da war."
+
+# ai
+#: src/pages/team.tsx
+msgid "For the few still missing, a parent link for one child is safer: open the child in the squad and send it to the parent directly. It works once and links only that child, while anyone holding the team link can pick any child of the team."
+msgstr "Für die wenigen, die noch fehlen, ist ein Elternlink für ein Kind sicherer: Öffne das Kind im Kader und schick ihn dem Elternteil direkt. Er funktioniert einmal und verknüpft nur dieses Kind, während mit dem Mannschaftslink jeder ein beliebiges Kind der Mannschaft wählen kann."
 
 #: src/pages/group.tsx
 msgid "New group"
@@ -13862,6 +13892,11 @@ msgstr "Meine Termine"
 #: src/pages/event.tsx
 msgid "Too few acceptances"
 msgstr "Zu wenige Zusagen"
+
+# ai
+#: src/pages/team.tsx
+msgid "{count, plural, one {# player of {teamName} already has an access.} other {# players of {teamName} already have an access.}}"
+msgstr "{count, plural, one {# Spielerin oder Spieler der {teamName} hat schon einen Zugang.} other {# Spielerinnen und Spieler der {teamName} haben schon einen Zugang.}}"
 
 #: src/ui.tsx
 msgid "Copying not possible. Please select the text."
