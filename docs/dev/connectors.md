@@ -9,7 +9,7 @@ A club may switch on several sources (they form the group "Game schedule sources
 ## Rules for sources
 
 - **Only permitted access:** an official API, a public export (JSON, iCal, CSV) or written permission of the association. No reading of HTML pages against the terms of use, no getting around protection against automated access. Name the access and link the terms in the module's `README.md`.
-- **Fair use:** syncs happen at the press of a button by a coach or admin, never automatically, at most every `minIntervalMs` per team. After 15 days without a sync (admins choose 15, 30, 60 or never under Administration → game schedule, `scheduleReminderDays` in the club profile), the coaches see a hint with that button at the top of the events list (`worker/domain/coach-hints.ts`), for every source. The same admin page lists every team with its source, last sync and error (`GET /api/admin/fixture-sync`).
+- **Fair use:** syncs happen at the press of a button by a coach or admin, at most every `minIntervalMs` per team. A source whose terms allow it, such as a calendar meant for subscription, may also sync by itself every `autoSyncDays` (handball.net: 7): when a coach of the team opens the app and the last sync is that old, the coach's device syncs once in the background (`autoSync` in `GET /api/coach-hints`, `src/coach-hints.tsx`); the server refuses such a claim when it is not due, never fetches or schedules on its own, and a failure only stays as the team's sync error. After 15 days without a sync (admins choose 15, 30, 60 or never under Administration → game schedule, `scheduleReminderDays` in the club profile), the coaches see a hint with that button at the top of the events list (`worker/domain/coach-hints.ts`), for every source. The same admin page lists every team with its source, last sync and error (`GET /api/admin/fixture-sync`).
 - **Where it is fetched:** `fetchFrom: "worker"` when the source allows servers. `fetchFrom: "device"` when it only allows browsers (CORS) and the association agrees to that; the coach's device fetches without cookies or referrer and the server checks the data like anything else from a browser. Add the source's origin to `connect-src` in `public/_headers`, or the app's Content-Security-Policy blocks the fetch.
 - **No personal data:** schedules carry teams, halls and results. If a source also lists players or referees, drop them in `parse`.
 
@@ -32,6 +32,7 @@ modules/<folder>/
 | --- | --- |
 | `name` | brand name of the source, the same as the manifest's `vendor` |
 | `fetchFrom`, `minIntervalMs` | see the rules above |
+| `autoSyncDays` | optional: sync by itself from a coach's device once the last sync is this many days old (see the rules above); leave it out for button-only sources |
 | `format` | `"json"` (default) or `"text"`, how the response is read before `parse`, e.g. an iCal calendar (`modules/handballnet/`) |
 | `linkField()` | label, hint and placeholder of the link field in *Team → Settings* (Lingui) |
 | `parseLink(input)` | the team's settings at the source from a pasted link, or null; the first switched-on connector that recognises a link takes it |

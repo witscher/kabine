@@ -444,6 +444,7 @@ const CORE_EXPORT_TABLES = [
   "chat_mentions",
   "event_organizers",
   "leader_absences",
+  "event_family_responses",
   "club_members",
 ];
 
@@ -462,6 +463,8 @@ export const EXPORT_EXCLUDED = [
   "passkeys",
   "sessions",
   "email_codes",
+  // Used passkey challenges, a few minutes long (worker/auth/webauthn.ts)
+  "webauthn_used_challenges",
   "invites",
   "push_subscriptions",
   "calendar_tokens",

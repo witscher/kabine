@@ -161,8 +161,10 @@ export const connector: FixtureConnector = {
   // The calendar allows browsers (CORS); the coach's device fetches it like a calendar app
   fetchFrom: "device",
   format: "text",
-  // Fair use: at the push of a button, at most every 10 minutes per team (as handball4all)
+  // Fair use: at the push of a button, at most every 10 minutes per team (as handball4all), and once a week
+  // by itself when a coach opens the app; a subscribed calendar app fetches it every 6 hours
   minIntervalMs: 10 * 60_000,
+  autoSyncDays: 7,
   linkField: () => ({
     label: t`Link to the team at ${vendor}`,
     hint: t`Open the team at ${vendor} and paste the link from the address bar, or the link of "Subscribe to calendar".`,

@@ -33,6 +33,8 @@ Only admins change their own name; players, parents and coaches ask their coach 
 | Parent–child link, child permissions with log | Parents, minors | Parents act for their children | The parent, coaches and admins | When leaving |
 | Responses (yes/no, late) | Players | Planning trainings and games | Coaches, admins; team staff and, if the team switches it on, the team (without reasons) | At the season change |
 | Decline reasons | Players | Planning | Coaches, admins | 60 days after the event |
+| Special events with optional attendance: who said yes | Players, parents | Organisers book for those who come | As responses; also the event's organisers ("First name L.", never reasons) | With the event at the season change |
+| Special events with registration per family: how many people a family brings, who changed it last | Players, parents | Organisers plan the number of guests | The family itself; coaches, admins and the event's organisers (families as "Kim, Lea and Mona K." with their number) | With the event at the season change |
 | "I'm not there" of coaches, leads, staff and organisers, with an optional note | Leaders of the event | Planning, stand-ins | That someone is not there: everyone who sees the event. The note: coaches and admins of the event | Note 60 days after the event, the entry with the event at the season change |
 | Attendance after an event (present, excused, unexcused), attendance statistics | Players | Overview for coaches | Coaches, admins (team statistics with names); the player and their parents see their own entry and their own counts (*My statistics*), never other people's; parents in charge get a push at once when their child is marked unexcused | Event data at the season change; season totals stay with the person until they leave |
 | Squad nominations | Players | Games | Team | At the season change |
@@ -46,7 +48,7 @@ Only admins change their own name; players, parents and coaches ask their coach 
 | E-mail address | Everyone who enters one | Sign-in codes, access links; helper plan mails and feedback replies only if chosen | Nobody in the app; admins only in the data export | When leaving |
 | Requests for a sign-in code with an address or number that belongs to no access: a keyed hash of it, no code, nothing is sent | Whoever types such an address on the sign-in page | The same limit of requests for every address, so the limit does not show who is in the club | Nobody | After one day |
 | Feedback (*Help and feedback*): the text, an optional picture, name and roles of the sender, and the e-mail address if a reply is wanted; sent by e-mail, not stored in the app | Who sends feedback | Improving the app, answering questions | The recipient of the mail: the owner of the installation, or the address set as `FEEDBACK_TO` | In the app: not stored; a count per access (at most 10 a day) in KV for one day. The mail: as the recipient keeps it |
-| Requests for sign-in codes per network address: a hash of the IP address and a count, at most 20 an hour | Whoever requests a sign-in code | Slowing down mass requests | Nobody | After one hour |
+| Requests for sign-in codes per network address: a keyed hash of the IP address (IPv6: of its first half, the /64 prefix) with the request in the database, at most 20 an hour | Whoever requests a sign-in code | Slowing down mass requests | Nobody | The hash after one to two hours (hourly clean-up), the request itself one day after the code expires |
 | Unexpected server errors: time, kind (overload or error), where (path without ids and tokens, or the name of the background task) and the first 300 characters of the error message, no personal data on purpose; stored in KV, at most 20 a day | Nobody in particular | Noticing problems; from the third error of a day one e-mail to the owner of the installation | The owner (by e-mail, to the confirmed address of their access) | After 14 days |
 | Mobile number (SMS module) | Everyone who enters one | Sign-in codes and reminders by SMS | Nobody | On request in the profile, when leaving |
 | Profile picture | Who uploads one | Recognising each other | Signed-in members; for minors after parental approval | On request, when leaving |
@@ -71,7 +73,7 @@ The club is the provider of its installation (legal notice, in Germany § 5 DDG)
 - **SMS (optional):** the provider the club chooses (currently seven.io).
 - **OpenHolidays API:** the app fetches school and public holidays for the club's region. No personal data is sent.
 - **handball4all (optional):** a coach's or admin's device fetches the game schedule directly from the association's service. No personal data is sent.
-- **handball.net (optional):** a coach's or admin's device fetches the team's public game calendar directly from handball.net. No personal data is sent.
+- **handball.net (optional):** a coach's or admin's device fetches the team's public game calendar directly from handball.net, at the press of a button and once a week when a coach of the team opens the app. No personal data is sent.
 
 ## Template for the club's privacy policy
 

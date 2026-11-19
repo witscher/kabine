@@ -1124,6 +1124,40 @@ test("Liveticker und Spielbericht: erst beim Antippen ein Abruf, Seite öffnet i
   await page.request.put("/api/teams/1/games/source", { data: { link: null } });
 });
 
+test("handball.net: Spielplan gleicht sich beim Öffnen der App von selbst ab, höchstens einmal pro Woche", async () => {
+  const { page } = coach;
+  const ctx = page.context();
+  // In 45 Tagen, damit das Spiel den anderen Tests nicht in die Quere kommt (Namen erfunden)
+  const day = new Date(Date.now() + 45 * 86_400_000).toLocaleDateString("sv-SE", { timeZone: "Europe/Berlin" }).replaceAll("-", "");
+  const ics = [
+    "BEGIN:VCALENDAR", "VERSION:2.0", "X-WR-CALNAME:SV Musterstadt",
+    "BEGIN:VEVENT", "UID:spiel-880001@mmcc-news", `DTSTART:${day}T150000`, "SUMMARY:SV Musterstadt - TSV Testdorf",
+    "DESCRIPTION:Spieltag 1\\nSpielnummer 2627E2E0001", "STATUS:CONFIRMED", "LOCATION:TESTHALLE\\, HALLENWEG 1\\, 76000 MUSTERSTADT", "END:VEVENT",
+    "END:VCALENDAR", "",
+  ].join("\r\n");
+  const fetched: string[] = [];
+  await ctx.route("https://www.handball.net/kalender/team/*", (route) => {
+    fetched.push(route.request().url());
+    return route.fulfill({ status: 200, contentType: "text/calendar", headers: { "Access-Control-Allow-Origin": "*" }, body: ics });
+  });
+  const source = await page.request.put("/api/teams/1/games/source", { data: { link: "https://www.handball.net/team/880099", connector: "handballnet" } });
+  expect(source.ok()).toBe(true);
+  // Noch nie abgeglichen: beim Öffnen holt das Gerät des Trainers den Kalender, ohne dass er etwas antippt
+  await page.goto("/");
+  await expect(page.getByText("Spielplan von wT abgeglichen.", { exact: false })).toBeVisible();
+  expect(fetched).toEqual(["https://www.handball.net/kalender/team/880099.ics"]);
+  expect((await (await page.request.get("/api/teams/1/games/source")).json()).importedAt).toBeTruthy();
+  // Gerade abgeglichen: beim nächsten Öffnen kein Abruf, erst wieder nach 7 Tagen
+  const hints = page.waitForResponse((r) => r.url().endsWith("/api/coach-hints"));
+  await page.reload();
+  expect((await (await hints).json()).autoSync).toEqual([]);
+  await expect(page.getByRole("heading", { name: /Hallo/ })).toBeVisible();
+  expect(fetched).toHaveLength(1);
+  await ctx.unroute("https://www.handball.net/kalender/team/*");
+  // Aufräumen: Spielplan-Link wieder entfernen (das Spiel bleibt, wird nur nicht mehr abgeglichen)
+  await page.request.put("/api/teams/1/games/source", { data: { link: null } });
+});
+
 test("Spiele der eigenen Mannschaft auch ohne Nominierung sichtbar, mit Marke „Nominiert“", async () => {
   // In 10 Tagen, damit das Spiel in der Terminübersicht liegt
   const date = new Date(Date.now() + 10 * 86_400_000).toLocaleDateString("sv-SE", { timeZone: "Europe/Berlin" });
@@ -1625,7 +1659,7 @@ test("Optionales Mittrainieren: Spielerin macht freiwillig mit, Trainer stellt d
   const eventUrl = page.url();
 
   await coach.page.goto(eventUrl);
-  await expect(coach.page.getByRole("region", { name: "Optional, nicht dabei" })).toContainText("Ida");
+  await expect(coach.page.getByRole("region", { name: "Optional, nicht zugesagt" })).toContainText("Ida");
   const teams = coach.page.getByRole("region", { name: "Mannschaften bei diesem Training" });
   await teams.getByRole("group", { name: "Teilnahme für wT" }).getByRole("button", { name: "Pflicht" }).click();
   await expect(coach.page.getByRole("region", { name: "Abgesagt" })).toContainText("Ida");
@@ -1798,14 +1832,15 @@ test("Hinweise für Trainer: Treffpunkt fehlt, Eintragen öffnet das Spiel mit d
   await expect(page.getByRole("region", { name: "Zu tun für deine Mannschaften" })).toHaveCount(0);
 });
 
-test("Verwaltung → handball4all: Erinnerung einstellen, Stand aller Mannschaften", async () => {
+test("Verwaltung → Spielpläne: Erinnerung einstellen, Stand aller Mannschaften", async () => {
   const { page } = admin;
   const link = "https://www.handball4all.de/home/portal/baden-wuerttembergischer-hv#/league?ogId=216&lId=555&tId=999";
   expect((await page.request.put("/api/teams/1/games/source", { data: { link } })).ok()).toBe(true);
   await page.goto("/verwaltung");
-  await page.getByRole("link", { name: /handball4all.*Spielplanabgleich und Erinnerung/ }).click();
+  // handball4all and handball.net are both on: the page is about every source
+  await page.getByRole("link", { name: /Spielpläne.*Spielplanabgleich und Erinnerung/ }).click();
   await expect(page).toHaveURL(/\/verwaltung\/spielplan$/);
-  await expect(page.getByRole("heading", { name: "handball4all", level: 1 })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Spielpläne", level: 1 })).toBeVisible();
   const reminder = page.getByRole("group", { name: "Trainer erinnern nach" });
   await expect(reminder.getByRole("button", { name: "15 Tage" })).toHaveAttribute("aria-pressed", "true");
   await reminder.getByRole("button", { name: "Aus" }).click();
@@ -1988,6 +2023,96 @@ test("Statistik: Trainer über die Teamseite, Spielerin im Profil", async () => 
   await expect(player.page.getByRole("region", { name: "Training" })).toBeVisible();
   // The team statistics stay with the coaches
   expect((await player.page.request.get("/api/teams/1/stats")).status()).toBe(403);
+});
+
+test("Startseite: nächster Termin heute mit ruhiger Animation, der gelbe Kopf öffnet den Termin", async () => {
+  const { page } = player;
+  await page.goto("/");
+  // Fixtures: training every day at 23:30, so the next own event is today (unless the test runs after 23:30)
+  const head = page.locator("a.card-head-link").first();
+  await expect(head).toBeVisible();
+  if ((await head.getAttribute("class"))?.includes("is-today")) {
+    await expect(head.locator(".today-tag")).toContainText("heute");
+    // Reduced motion: no light sweep, no pulsing
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await expect(head.locator(".today-dot")).toHaveCSS("animation-name", "none");
+    await page.emulateMedia({ reducedMotion: null });
+  }
+  await head.click();
+  await expect(page).toHaveURL(/\/termine\/\d+/);
+});
+
+test("Sondertermine: ohne Anwesenheit, freiwillige Teilnahme und Anmeldung je Familie schließen sich aus", async () => {
+  const c = coach.page;
+  await c.goto("/team/1/termin-neu");
+  await c.getByLabel("Titel").fill("Kick-off Sammelalbum");
+  await c.getByLabel("Datum").fill("2099-08-01");
+  await c.getByRole("button", { name: "Erklärung: Ohne Anwesenheit" }).click();
+  const info = c.getByRole("dialog", { name: "Ohne Anwesenheit" });
+  await expect(info).toContainText("nicht zu- oder absagen");
+  await info.getByRole("button", { name: "Verstanden" }).click();
+  await c.getByRole("switch", { name: /Freiwillige Teilnahme/ }).click();
+  await c.getByRole("switch", { name: /Ohne Anwesenheit/ }).click();
+  await expect(c.getByRole("switch", { name: /Freiwillige Teilnahme/ })).toHaveAttribute("aria-checked", "false");
+  await c.getByRole("button", { name: "Termin anlegen" }).click();
+  await expect(c).toHaveURL(/\/termine\/\d+/);
+  await expect(c.getByText("Ohne Zu- und Absage: Wer mag, kommt einfach vorbei.")).toBeVisible();
+  await expect(c.getByRole("button", { name: "Erinnern" })).toHaveCount(0);
+  await expect(c.getByText(/^Absagefrist:/)).toHaveCount(0);
+  const p = player.page;
+  await p.goto(c.url().replace(/^https?:\/\/[^/]+/, ""));
+  await expect(p.getByText("Ohne Zu- und Absage")).toBeVisible();
+  await expect(p.getByRole("button", { name: "Absagen" })).toHaveCount(0);
+
+  // Switching to optional attendance in the edit sheet
+  await c.getByRole("button", { name: "Bearbeiten", exact: true }).click();
+  const sheet = c.getByRole("dialog", { name: "Termin bearbeiten" });
+  await sheet.getByRole("switch", { name: /Freiwillige Teilnahme/ }).click();
+  await expect(sheet.getByRole("switch", { name: /Ohne Anwesenheit/ })).toHaveAttribute("aria-checked", "false");
+  await sheet.getByRole("button", { name: "Speichern", exact: true }).click();
+  await expect(c.getByText("Freiwillige Teilnahme: Wer mitmachen möchte, sagt bitte zu.")).toBeVisible();
+  await expect(c.getByRole("group", { name: "Übersicht" })).toContainText("ohne Zusage");
+  await p.reload();
+  await p.getByRole("button", { name: "Ich mache mit" }).click();
+  await expect(p.getByText("Zugesagt").first()).toBeVisible();
+  // Withdrawing needs no reason
+  await p.getByRole("button", { name: "Doch nicht" }).click();
+  await expect(p.getByText("Du hast nicht zugesagt.")).toBeVisible();
+});
+
+test("Sondertermin mit Anmeldung je Familie: Zahl je Familie statt Zusage, Warnung beim Umstellen, Trainer sieht Familien", async () => {
+  const c = coach.page;
+  await c.goto("/team/1/termin-neu");
+  await c.getByLabel("Titel").fill("Weihnachtsfeier");
+  await c.getByLabel("Datum").fill("2099-08-03");
+  await c.getByRole("button", { name: "Termin anlegen" }).click();
+  await expect(c).toHaveURL(/\/termine\/\d+/);
+  // Switching an existing event: warning in the edit sheet
+  await c.getByRole("button", { name: "Bearbeiten", exact: true }).click();
+  const sheet = c.getByRole("dialog", { name: "Termin bearbeiten" });
+  await sheet.getByRole("switch", { name: /Anmeldung je Familie/ }).click();
+  await expect(sheet).toContainText("Alle Eingeladenen bekommen beim Speichern eine Benachrichtigung");
+  await sheet.getByRole("button", { name: "Speichern", exact: true }).click();
+  await expect(c.getByText("Anmeldung je Familie: Gebt bitte an, wie viele aus eurer Familie kommen.")).toBeVisible();
+  await expect(c.getByRole("group", { name: "Anmeldungen" })).toContainText("ohne Angabe");
+  await expect(c.getByRole("button", { name: "Erinnern" })).toHaveCount(0);
+
+  // The player registers (her family) with 3 people, without yes/no buttons
+  const p = player.page;
+  await p.goto(c.url().replace(/^https?:\/\/[^/]+/, ""));
+  const card = p.getByRole("region", { name: /Deine Anmeldung|Eure Familie/ });
+  await expect(card).toContainText("Noch nicht angemeldet");
+  await expect(p.getByRole("button", { name: "Absagen" })).toHaveCount(0);
+  const value = Number(await card.locator(".stepper-value").innerText());
+  for (let i = value; i < 3; i++) await card.getByRole("button", { name: "Mehr" }).click();
+  for (let i = value; i > 3; i--) await card.getByRole("button", { name: "Weniger" }).click();
+  await card.getByRole("button", { name: "Anmelden: 3 Personen" }).click();
+  await expect(card).toContainText("Angemeldet · 3 Personen");
+  if (process.env.E2E_SHOTS) await p.screenshot({ path: `${process.env.E2E_SHOTS}/family-registration.png`, fullPage: true });
+
+  await c.reload();
+  await expect(c.getByRole("group", { name: "Anmeldungen" }).locator(".stat-tile").first()).toContainText("3");
+  await expect(c.getByRole("region", { name: "Angemeldete Familien" })).toContainText("Ida");
 });
 
 test("Umfragen: Admin schaltet das Modul ein, Trainer legt eine Umfrage mit Vorschau an, Spielerin stimmt ab", async () => {

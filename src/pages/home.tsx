@@ -1,6 +1,7 @@
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { clubName } from "../club";
+import type { ComponentChildren } from "preact";
 import { useLocation } from "preact-iso";
 import { useRef, useState } from "preact/hooks";
 import type { EventPage, EventSummary, MyParticipation, TrainingBreak } from "../../shared/types";
@@ -18,6 +19,7 @@ import { useQuery } from "../store";
 import { Button, CoachMark, Empty, ErrorBox, Segmented, SquadPill, StatusPill, useDocumentTitle } from "../ui";
 import { isLiveWindow, LiveCard } from "../live";
 import { isRelevantEvent } from "../../shared/relevance";
+import { FamilyShort } from "../special-attendance";
 
 const kindLabel = () => ({ training: t`Training`, game: t`Game`, special: t`Event` }) as const;
 
@@ -71,6 +73,33 @@ function useTeamLabel(): (e: EventSummary) => string {
 }
 
 
+const isToday = (startsAt: string) => startsAt.slice(0, 10) === todayLocal();
+
+/** "today", "tomorrow" …; today as a pill with a calmly pulsing dot so the event stands out; while it runs "right now". */
+function DayTag({ event }: { event: EventSummary }) {
+  const label = event.isRunning ? t`right now` : relativeDay(event.startsAt);
+  if (!event.isRunning && !isToday(event.startsAt)) return <span style={{ fontWeight: 600, fontSize: "14px" }}>{label}</span>;
+  return (
+    <span class="today-tag">
+      <span class="today-dot" aria-hidden="true" />
+      {label}
+    </span>
+  );
+}
+
+/**
+ * Yellow head of the big event card: the whole head opens the event, not only the date. tabIndex -1: the date link stays
+ * the keyboard target, no second tab stop. Today with a soft light sweep (off with reduced motion).
+ */
+function CardHead({ event, children }: { event: EventSummary; children: ComponentChildren }) {
+  return (
+    <a class={`card-head card-head-link ${isToday(event.startsAt) ? "is-today" : ""}`} href={`/termine/${event.id}`} tabIndex={-1}>
+      {children}
+      <DayTag event={event} />
+    </a>
+  );
+}
+
 /** later: a further event on the same day as the next one, also as a big card ("Then: game"). */
 function NextCard({ event, onDecline, later = false }: { event: EventSummary; onDecline: (p: MyParticipation) => void; later?: boolean }) {
   const me = useMe();
@@ -83,13 +112,12 @@ function NextCard({ event, onDecline, later = false }: { event: EventSummary; on
   const deadline = deadlineText(event);
   return (
     <section class="card" aria-label={t`Next event: ${kind}`}>
-      <div class="card-head">
+      <CardHead event={event}>
         <span class="label">
           {nextHeading(event.kind, later)}
           {teamLabel(event) ? ` · ${teamLabel(event)}` : ""}
         </span>
-        <span style={{ fontWeight: 600, fontSize: "14px" }}>{relativeDay(event.startsAt)}</span>
-      </div>
+      </CardHead>
       <div class={`card-body ${event.kind === "game" ? "has-ball" : ""}`}>
         {event.kind === "game" ? <Ball class="next-ball" /> : null}
         <a href={`/termine/${event.id}`} style={{ textDecoration: "none" }} class="stack-sm">
@@ -134,7 +162,9 @@ function NextCard({ event, onDecline, later = false }: { event: EventSummary; on
             </div>
           </div>
         ) : null}
-        {single ? (
+        {event.familyAttendance ? (
+          <FamilyShort event={event} />
+        ) : single ? (
           <>
             {mine[0]!.participant ? (
               <div class="row-gap">
@@ -151,7 +181,7 @@ function NextCard({ event, onDecline, later = false }: { event: EventSummary; on
         ) : (
           mine.map((m) => <PersonResponseRow key={m.person.id} event={event} p={m} onDecline={onDecline} />)
         )}
-        {event.deadline && mine.some((m) => m.participant && m.canDecline) ? (
+        {event.deadline && mine.some((m) => m.participant && m.canDecline && !m.optional && (m.status === "yes" || m.status === "open")) ? (
           <p class="small muted">
             <Trans>Please decline in good time by {deadline} so that your coaches can plan better.</Trans>
           </p>
@@ -192,13 +222,12 @@ function CoachNextCard({ event, later = false }: { event: EventSummary; later?: 
   const c = event.counts!;
   return (
     <section class="card" aria-label={t`Your team's next event`}>
-      <div class="card-head">
+      <CardHead event={event}>
         <span class="label">
           {nextHeading(event.kind, later)} ·{" "}
           <span class="nocaps">{event.teams.map((t) => t.name).join(" + ")}</span>
         </span>
-        <span style={{ fontWeight: 600, fontSize: "14px" }}>{relativeDay(event.startsAt)}</span>
-      </div>
+      </CardHead>
       <div class={`card-body ${event.kind === "game" ? "has-ball" : ""}`}>
         {event.kind === "game" ? <Ball class="next-ball" /> : null}
         <div class="big-date">{longDate(event.startsAt)}</div>
@@ -449,10 +478,12 @@ export function HomePage() {
 
   const teamOk = (e: EventSummary) => !team || e.teams.some((t) => t.name === team);
   const events = (shown?.events ?? []).filter(isRelevantEvent).filter(teamOk);
-  const past = when === "past" ? events.filter((e) => e.isPast) : [];
-  const upcoming = when === "upcoming" ? events.filter((e) => !e.isPast) : [];
+  const past = when === "past" ? events.filter((e) => e.isPast && !e.isRunning) : [];
   // Games that have started with a handball4all score stay at the top until 3 hours after throw-off
   const liveGames = when === "upcoming" ? (shown?.live ?? []).filter(teamOk).filter((e) => isLiveWindow(e)) : [];
+  // Running events stay under "Upcoming" until they end (games with a live card only there)
+  const liveIds = new Set(liveGames.map((e) => e.id));
+  const upcoming = when === "upcoming" ? events.filter((e) => (!e.isPast || e.isRunning) && !liveIds.has(e.id)) : [];
   // Events with an open stand-in request and your own next event, even if they lie beyond the page
   const helpRequests = when === "upcoming" ? (shown?.openHelp ?? []).filter(teamOk) : [];
   const pool = byStart([...upcoming, ...(when === "upcoming" ? (shown?.next ?? []).filter(teamOk) : []), ...helpRequests]);

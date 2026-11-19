@@ -262,6 +262,10 @@ msgstr "Place {place}"
 msgid "Link from the handball4all portal"
 msgstr "Link from the handball4all portal"
 
+#: src/respond.tsx
+msgid "Back in"
+msgstr "Back in"
+
 #: src/pages/event.tsx
 msgid "Event moved."
 msgstr "Event moved."
@@ -291,6 +295,10 @@ msgstr "{0, plural, one {# template} other {# templates}}"
 #: worker/domain/calendar.ts
 msgid "Not taking place: {entry}"
 msgstr "Not taking place: {entry}"
+
+#: worker/routes/events.ts
+msgid "Nobody needs to accept or decline this event."
+msgstr "Nobody needs to accept or decline this event."
 
 #: src/list-import.tsx
 msgid "Back to the lists"
@@ -442,6 +450,10 @@ msgstr "{who} cancelled {label}"
 msgid "Mark as read"
 msgstr "Mark as read"
 
+#: src/special-attendance.tsx
+msgid "You count yourself, e.g. 2 with your partner."
+msgstr "You count yourself, e.g. 2 with your partner."
+
 #: src/howto.tsx
 msgid "Hide news"
 msgstr "Hide news"
@@ -456,7 +468,9 @@ msgid "Please enter a title."
 msgstr "Please enter a title."
 
 #: src/pages/event.tsx
+#: src/pages/event.tsx
 #: src/pages/group.tsx
+#: src/pages/special.tsx
 #: src/pages/team.tsx
 #: src/pages/team.tsx
 msgid "Responses"
@@ -543,6 +557,11 @@ msgstr "For everyone"
 msgctxt "age group"
 msgid "Code"
 msgstr "Code"
+
+#: src/special-attendance.tsx
+#: src/special-attendance.tsx
+msgid "Your registration"
+msgstr "Your registration"
 
 #: modules/polls/app/pages.tsx
 #: modules/polls/app/pages.tsx
@@ -711,6 +730,10 @@ msgstr "Join"
 msgid "The address has been changed in the meantime. Please confirm the new address."
 msgstr "The address has been changed in the meantime. Please confirm the new address."
 
+#: src/special-attendance.tsx
+msgid "How many are coming, including you?"
+msgstr "How many are coming, including you?"
+
 #: modules/carpools/worker/domain.ts
 msgid "{seats, plural, one {{driver} has one free seat: {game}. Book it in the app.} other {{driver} has # free seats: {game}. Book it in the app.}}"
 msgstr "{seats, plural, one {{driver} has one free seat: {game}. Book it in the app.} other {{driver} has # free seats: {game}. Book it in the app.}}"
@@ -801,11 +824,16 @@ msgstr "New duty type"
 msgid "Important: each parent uses the link only once, for themselves. This is not a link for players!"
 msgstr "Important: each parent uses the link only once, for themselves. This is not a link for players!"
 
+#: src/help-texts.ts
+msgid "Christmas party: the Berg family registers 4 people, an adult player 2 with her partner."
+msgstr "Christmas party: the Berg family registers 4 people, an adult player 2 with her partner."
+
 #: worker/auth/owner.ts
 #: worker/routes/persons.ts
 msgid "Access of coaches and admins is managed by an admin."
 msgstr "Access of coaches and admins is managed by an admin."
 
+#: src/coach-hints.tsx
 #: src/pages/games.tsx
 msgid "{created} new, {moved} moved, {cancelled} cancelled."
 msgstr "{created} new, {moved} moved, {cancelled} cancelled."
@@ -821,6 +849,10 @@ msgstr "Order saved"
 #: src/pages/event.tsx
 msgid "Cancel this event for everyone?"
 msgstr "Cancel this event for everyone?"
+
+#: src/special-attendance.tsx
+msgid "Not registered yet"
+msgstr "Not registered yet"
 
 #: src/pages/team.tsx
 msgid "Helper plan switched on."
@@ -884,6 +916,7 @@ msgstr "Nominate squad"
 #: src/pages/admin.tsx
 #: src/pages/admin.tsx
 #: src/pages/event.tsx
+#: src/special-attendance.tsx
 msgid "People"
 msgstr "People"
 
@@ -935,6 +968,10 @@ msgstr "Access removed."
 #: src/pages/plans.tsx
 msgid "Custom period"
 msgstr "Custom period"
+
+#: src/special-attendance.tsx
+msgid "No need to accept or decline: whoever wants to, just comes along. Whoever signed up for a helper duty comes at their time, of course."
+msgstr "No need to accept or decline: whoever wants to, just comes along. Whoever signed up for a helper duty comes at their time, of course."
 
 #: src/list-import.tsx
 msgid "Column {h}"
@@ -999,6 +1036,7 @@ msgid "Carpools ({taken}/{seats})"
 msgstr "Carpools ({taken}/{seats})"
 
 #: modules/polls/app/pages.tsx
+#: src/special-attendance.tsx
 msgid "More"
 msgstr "More"
 
@@ -1029,6 +1067,10 @@ msgstr "This way you learn right away about new events, cancellations, nominatio
 #: src/pages/team.tsx
 msgid "Stand-ins"
 msgstr "Stand-ins"
+
+#: src/help-texts.ts
+msgid "Sticker album kick-off: everyone is invited, nobody has to answer, but cake and set-up need helpers."
+msgstr "Sticker album kick-off: everyone is invited, nobody has to answer, but cake and set-up need helpers."
 
 #: src/pages/season.tsx
 msgid "Start season {nextName}?"
@@ -1224,6 +1266,10 @@ msgstr "Attached image"
 msgid "We have sent a six-digit code to <0>{email}</0> if an access belongs to this address. It is valid for 15 minutes. Please also check your spam folder."
 msgstr "We have sent a six-digit code to <0>{email}</0> if an access belongs to this address. It is valid for 15 minutes. Please also check your spam folder."
 
+#: src/help-texts.ts
+msgid "For events people may join but do not have to. Nobody counts as accepted automatically: whoever wants to join says yes, and the organisers see who is coming. Whoever does not say yes is not missing, gets no reminder and gives no reason."
+msgstr "For events people may join but do not have to. Nobody counts as accepted automatically: whoever wants to join says yes, and the organisers see who is coming. Whoever does not say yes is not missing, gets no reminder and gives no reason."
+
 #: src/view-as.tsx
 msgid "View as {mode}: {name} · read only"
 msgstr "View as {mode}: {name} · read only"
@@ -1308,6 +1354,10 @@ msgstr "Add players and training plans"
 msgid "Age group"
 msgstr "Age group"
 
+#: src/special-attendance.tsx
+msgid "No family has registered yet."
+msgstr "No family has registered yet."
+
 #: worker/domain/calendar.ts
 msgctxt "calendar"
 msgid "you"
@@ -1390,6 +1440,10 @@ msgstr "Training, games and your family's helper duties"
 #: src/pages/admin.tsx
 msgid "The association sets the birth years per season. Please check them against the competition rules. “Rank” orders the classes from young to old and determines which is the next higher youth class."
 msgstr "The association sets the birth years per season. Please check them against the competition rules. “Rank” orders the classes from young to old and determines which is the next higher youth class."
+
+#: src/special-attendance.tsx
+msgid "Last changed by {by}"
+msgstr "Last changed by {by}"
 
 #: worker/routes/plans.ts
 msgid "You can only add or remove other teams if you coach them too."
@@ -1726,6 +1780,7 @@ msgid "{duty} wanted · {team}"
 msgstr "{duty} wanted · {team}"
 
 #: src/pages/event.tsx
+#: src/pages/event.tsx
 msgid "Overview"
 msgstr "Overview"
 
@@ -1755,10 +1810,6 @@ msgstr "One seat fewer"
 #: src/list-import.tsx
 msgid "Two people"
 msgstr "Two people"
-
-#: src/respond.tsx
-msgid "Not joining."
-msgstr "Not joining."
 
 #: worker/routes/season.ts
 msgid "The school holidays could not be loaded just now. You can enter them after the change under Administration → Holidays or try again later."
@@ -1920,6 +1971,10 @@ msgstr "Help declined"
 #: src/pages/home.tsx
 msgid "Parents are not involved in your children's teams. Your children respond there themselves."
 msgstr "Parents are not involved in your children's teams. Your children respond there themselves."
+
+#: src/special-attendance.tsx
+msgid "Register: {draftPersons}"
+msgstr "Register: {draftPersons}"
 
 #: src/pages/admin.tsx
 msgid "{parentNames} (parent without another child)"
@@ -2097,6 +2152,10 @@ msgstr "Map link (optional)"
 msgid "How does my child get their own access?"
 msgstr "How does my child get their own access?"
 
+#: src/respond.tsx
+msgid "You did not say yes."
+msgstr "You did not say yes."
+
 #: src/pages/event.tsx
 msgid "themselves"
 msgstr "themselves"
@@ -2221,6 +2280,10 @@ msgstr "There have been no events for the {team} this season yet."
 msgid "This person may take the duty and sees it in the Helpers tab. Without the approval they do not see it at all. Coaches and admins can still enter anyone. For duties taken across teams, such as youth referee, the Helpers tab lists all games that still need someone."
 msgstr "This person may take the duty and sees it in the Helpers tab. Without the approval they do not see it at all. Coaches and admins can still enter anyone. For duties taken across teams, such as youth referee, the Helpers tab lists all games that still need someone."
 
+#: src/special-attendance.tsx
+msgid "Your family is not coming"
+msgstr "Your family is not coming"
+
 #: worker/routes/chat.ts
 msgid "Your parents have not allowed the chat for you yet."
 msgstr "Your parents have not allowed the chat for you yet."
@@ -2307,6 +2370,10 @@ msgstr "{names} is a group. Groups only have chat and special events."
 msgid "What the players of this team may do themselves. The club sets the limit per age group; here you can only restrict further. Within this, the parents decide for their child."
 msgstr "What the players of this team may do themselves. The club sets the limit per age group; here you can only restrict further. Within this, the parents decide for their child."
 
+#: src/help-texts.ts
+msgid "When a team's game schedule has not been synced for this long, its coaches see a hint with \"Sync now\" at the top of their events list. The hint disappears after the sync. Coaches and admins sync by hand; schedules from handball.net also sync once a week by themselves when a coach opens the app."
+msgstr "When a team's game schedule has not been synced for this long, its coaches see a hint with \"Sync now\" at the top of their events list. The hint disappears after the sync. Coaches and admins sync by hand; schedules from handball.net also sync once a week by themselves when a coach opens the app."
+
 #: src/calendar.tsx
 msgid "Remove calendar link?"
 msgstr "Remove calendar link?"
@@ -2335,6 +2402,10 @@ msgstr "The team \"{name}\" is missing in the import."
 #: src/news.tsx
 msgid "Add driver"
 msgstr "Add driver"
+
+#: src/special-attendance.tsx
+msgid "How many are coming?"
+msgstr "How many are coming?"
 
 #: modules/duties/app/approvals.tsx
 msgid "After that it can no longer be redeemed."
@@ -2717,6 +2788,7 @@ msgstr "The live ticker opens in a new window on handball4all."
 #: worker/domain/events.ts
 #: worker/routes/events.ts
 #: worker/routes/events.ts
+#: worker/routes/events.ts
 msgid "The event has already started."
 msgstr "The event has already started."
 
@@ -2845,10 +2917,6 @@ msgstr "Outgrown the A youth. Assign to the adults or mark as former."
 #: shared/changelog.ts
 msgid "Chat: the chat list shows how many messages are unread and puts chats with news on top; a chat opens at the first unread message."
 msgstr "Chat: the chat list shows how many messages are unread and puts chats with news on top; a chat opens at the first unread message."
-
-#: src/respond.tsx
-msgid "In this time"
-msgstr "In this time"
 
 #: src/pages/audit.tsx
 msgid "Show older entries"
@@ -3524,6 +3592,10 @@ msgstr "Add address"
 msgid "This person does not belong to this team."
 msgstr "This person does not belong to this team."
 
+#: src/special-attendance.tsx
+msgid "no answer"
+msgstr "no answer"
+
 #: src/pages/event.tsx
 #: src/pages/event.tsx
 msgid "In charge"
@@ -3555,6 +3627,10 @@ msgstr "You can only read in this chat."
 #: src/pages/team.tsx
 msgid "valid until {expires}"
 msgstr "valid until {expires}"
+
+#: src/help-texts.ts
+msgid "For parties and outings whole families come to. Instead of yes or no per person, each family says how many people are coming. Families come from the links between parents and children; siblings count together. Whoever has no links registers on their own. Anyone in the family can change the number, it counts once. The organisers see which family comes with how many."
+msgstr "For parties and outings whole families come to. Instead of yes or no per person, each family says how many people are coming. Families come from the links between parents and children; siblings count together. Whoever has no links registers on their own. Anyone in the family can change the number, it counts once. The organisers see which family comes with how many."
 
 #: src/avatar.tsx
 msgid "Profile picture preview"
@@ -3648,6 +3724,8 @@ msgstr "Only people approved for {duty} can sign up."
 #: src/pages/event.tsx
 #: src/pages/squad.tsx
 #: src/pages/squad.tsx
+#: src/special-attendance.tsx
+#: src/special-attendance.tsx
 #: src/ui.tsx
 msgid "Accepted"
 msgstr "Accepted"
@@ -3736,6 +3814,10 @@ msgstr "Played"
 #: modules/handball4all/app/live.tsx
 msgid "Opening {title} …"
 msgstr "Opening {title} …"
+
+#: worker/routes/events.ts
+msgid "Registration per family: {title}"
+msgstr "Registration per family: {title}"
 
 #: modules/handball4all/app/live.tsx
 msgid "The game report has not been published yet. handball4all usually puts it online 20 to 30 minutes after the final whistle. Please try again later."
@@ -4032,6 +4114,10 @@ msgstr "Season change completed."
 #: worker/routes/teams.ts
 msgid "This team does not exist."
 msgstr "This team does not exist."
+
+#: src/special-attendance.tsx
+msgid "{registered, plural, one {family} other {families}}"
+msgstr "{registered, plural, one {family} other {families}}"
 
 #: src/pages/admin.tsx
 msgid "New holiday period"
@@ -4446,10 +4532,6 @@ msgstr "Calendar link removed."
 msgid "Not specified"
 msgstr "Not specified"
 
-#: src/pages/admin.tsx
-msgid "Upcoming special events and games without handball4all of all teams. Events you already see under Events are not listed here. Tap to open the event, where you can edit, cancel or delete it."
-msgstr "Upcoming special events and games without handball4all of all teams. Events you already see under Events are not listed here. Tap to open the event, where you can edit, cancel or delete it."
-
 #: modules/duties/app/admin.tsx
 msgid "to"
 msgstr "to"
@@ -4597,6 +4679,7 @@ msgstr "The code is valid for {minutes} minutes. Instead of entering the code, y
 msgid "Messages can be at most {max} characters long."
 msgstr "Messages can be at most {max} characters long."
 
+#: src/pages/event.tsx
 #: src/pages/event.tsx
 #: src/pages/home.tsx
 msgid "declined"
@@ -4869,6 +4952,11 @@ msgstr "Linked holiday plans keep their dates but no longer follow changes."
 msgid "Without notifications people only see changes when they open the app. The guide under help shows how to switch them on. Parents count for their child."
 msgstr "Without notifications people only see changes when they open the app. The guide under help shows how to switch them on. Parents count for their child."
 
+#: src/help-texts.ts
+#: src/special-attendance.tsx
+msgid "Without attendance"
+msgstr "Without attendance"
+
 #: src/pages/audit.tsx
 msgid "{who} recorded that {person} left the club, as parent without a remaining child"
 msgstr "{who} recorded that {person} left the club, as parent without a remaining child"
@@ -5062,6 +5150,10 @@ msgstr "Read and write"
 msgid "None of these families can be reached through the app. Best talk to them directly."
 msgstr "None of these families can be reached through the app. Best talk to them directly."
 
+#: src/pages/admin.tsx
+msgid "All upcoming special events and games without handball4all of all teams. Tap to open the event, where you can edit, cancel or delete it."
+msgstr "All upcoming special events and games without handball4all of all teams. Tap to open the event, where you can edit, cancel or delete it."
+
 #: src/pages/help.tsx
 msgid "Contact for the app: {contact}"
 msgstr "Contact for the app: {contact}"
@@ -5078,6 +5170,7 @@ msgstr "Report taken back."
 msgid "needed by other ticked parts"
 msgstr "needed by other ticked parts"
 
+#: worker/auth/webauthn.ts
 #: worker/auth/webauthn.ts
 msgid "Signing in took too long. Please try again."
 msgstr "Signing in took too long. Please try again."
@@ -5301,9 +5394,17 @@ msgstr "{count, plural, one {admin role taken from {names}} other {admin role ta
 msgid "Attendance"
 msgstr "Attendance"
 
+#: src/special-attendance.tsx
+msgid "Register"
+msgstr "Register"
+
 #: src/pages/profile.tsx
 msgid "Passkey"
 msgstr "Passkey"
+
+#: src/special-attendance.tsx
+msgid "Saved: your family is not coming."
+msgstr "Saved: your family is not coming."
 
 #: src/pages/event.tsx
 msgid "INFO"
@@ -5373,6 +5474,10 @@ msgstr "Ends at"
 #: src/pages/team.tsx
 msgid "How it works: open the link, select your own name and set up a passkey (Face ID, fingerprint or screen lock)."
 msgstr "How it works: open the link, select your own name and set up a passkey (Face ID, fingerprint or screen lock)."
+
+#: modules/handballnet/module.ts
+msgid "Coaches sync the games of their team from handball.net, and the app syncs them once a week when a coach opens it."
+msgstr "Coaches sync the games of their team from handball.net, and the app syncs them once a week when a coach opens it."
 
 #: src/pages/event.tsx
 msgid "Activate"
@@ -5584,6 +5689,10 @@ msgstr "What only you as a coach can do is now marked in the club's colour with 
 msgid "This season already exists."
 msgstr "This season already exists."
 
+#: src/pages/event.tsx
+msgid "Everyone invited gets a notification on saving to register their family."
+msgstr "Everyone invited gets a notification on saving to register their family."
+
 #: src/live.tsx
 msgid "In progress · Game"
 msgstr "In progress · Game"
@@ -5652,6 +5761,11 @@ msgstr "Mandatory"
 #: src/pages/join.tsx
 msgid "All done!"
 msgstr "All done!"
+
+#: src/help-texts.ts
+#: src/special-attendance.tsx
+msgid "Registration per family"
+msgstr "Registration per family"
 
 #: src/pages/home.tsx
 msgid "Past events of the {team} this season"
@@ -5768,6 +5882,10 @@ msgstr "You subscribe to trainings and games. If a training is cancelled, it is 
 msgid "Born {birthYear}: too old for {ageClass}"
 msgstr "Born {birthYear}: too old for {ageClass}"
 
+#: src/special-attendance.tsx
+msgid "people"
+msgstr "people"
+
 #: src/faq.tsx
 msgid "Inactive or away long-term: what is the difference?"
 msgstr "Inactive or away long-term: what is the difference?"
@@ -5779,6 +5897,11 @@ msgstr "If you change an answer, its votes still count, even if it then means so
 #: modules/carpools/worker/routes.ts
 msgid "Looking for a lift"
 msgstr "Looking for a lift"
+
+#: src/pages/event.tsx
+#: src/pages/event.tsx
+msgid "Optional, not said yes"
+msgstr "Optional, not said yes"
 
 #: src/howto.tsx
 #: src/pages/help.tsx
@@ -6003,6 +6126,7 @@ msgid "Amount"
 msgstr "Amount"
 
 #: src/pages/event.tsx
+#: src/pages/event.tsx
 #: src/pages/home.tsx
 #: src/pages/team.tsx
 msgid "inactive"
@@ -6146,6 +6270,10 @@ msgstr "Statistics of {child}"
 msgid "Remove {teamName}"
 msgstr "Remove {teamName}"
 
+#: src/special-attendance.tsx
+msgid "I'm not coming"
+msgstr "I'm not coming"
+
 #: src/update.tsx
 msgid "Reload"
 msgstr "Reload"
@@ -6235,6 +6363,10 @@ msgstr "(stand-in)"
 msgid "Announcement was removed"
 msgstr "Announcement was removed"
 
+#: src/special-attendance.tsx
+msgid "{registered, plural, one {Registered · # family} other {Registered · # families}}"
+msgstr "{registered, plural, one {Registered · # family} other {Registered · # families}}"
+
 #: src/pages/chat.tsx
 msgid "Mute {selAuthor}"
 msgstr "Mute {selAuthor}"
@@ -6266,6 +6398,10 @@ msgstr "Your children: {children}"
 #: src/pages/event.tsx
 msgid "{date}, {clock}. Everyone involved will be notified, and a note appears in the team chat."
 msgstr "{date}, {clock}. Everyone involved will be notified, and a note appears in the team chat."
+
+#: src/special-attendance.tsx
+msgid "You are not coming."
+msgstr "You are not coming."
 
 #: worker/routes/join.ts
 msgid "New device for your access to {app}"
@@ -6503,6 +6639,10 @@ msgstr "Voted"
 #: worker/routes/list-import.ts
 msgid "Please choose an age class for \"{name}\"."
 msgstr "Please choose an age class for \"{name}\"."
+
+#: src/special-attendance.tsx
+msgid "You are not coming"
+msgstr "You are not coming"
 
 #: src/pages/stats.tsx
 msgid "Season, data since {since} (start of the app)"
@@ -7300,6 +7440,10 @@ msgstr "Meeting point & info"
 msgid "absent"
 msgstr "absent"
 
+#: src/special-attendance.tsx
+msgid "not coming"
+msgstr "not coming"
+
 #: src/pages/admin.tsx
 msgid "Birth years of the current season"
 msgstr "Birth years of the current season"
@@ -7505,10 +7649,6 @@ msgstr "no duties"
 msgid "Paid, thank you!"
 msgstr "Paid, thank you!"
 
-#: src/pages/admin.tsx
-msgid "All upcoming special events and games are in your event overview."
-msgstr "All upcoming special events and games are in your event overview."
-
 #: modules/polls/app/pages.tsx
 msgid "Anonymous: nobody sees who voted what, not even you."
 msgstr "Anonymous: nobody sees who voted what, not even you."
@@ -7529,6 +7669,10 @@ msgstr "This training time does not exist."
 #: worker/domain/email-login.ts
 msgid "The code is wrong or has expired. Please request a new one."
 msgstr "The code is wrong or has expired. Please request a new one."
+
+#: src/pages/event.tsx
+msgid "not said yes"
+msgstr "not said yes"
 
 #: modules/polls/app/pages.tsx
 msgid "QR code with recipient, IBAN, amount and reference"
@@ -7642,6 +7786,10 @@ msgstr "Ride request deleted."
 #: worker/routes/teams.ts
 msgid "Players of other teams of the same or the next younger age class can be taken in."
 msgstr "Players of other teams of the same or the next younger age class can be taken in."
+
+#: src/special-attendance.tsx
+msgid "Nobody has said yes yet."
+msgstr "Nobody has said yes yet."
 
 #: src/pages/join.tsx
 #: worker/routes/join.ts
@@ -7780,6 +7928,10 @@ msgstr "Training break"
 #: worker/routes/join.ts
 msgid "Invalid selection."
 msgstr "Invalid selection."
+
+#: src/special-attendance.tsx
+msgid "Registration per family: please say how many of your family are coming."
+msgstr "Registration per family: please say how many of your family are coming."
 
 #: modules/sms/app/settings.tsx
 msgid "Sender name"
@@ -7936,6 +8088,7 @@ msgid "Other venue"
 msgstr "Other venue"
 
 #: worker/auth/webauthn.ts
+#: worker/auth/webauthn.ts
 #: worker/routes/auth.ts
 #: worker/routes/feedback.ts
 #: worker/routes/join.ts
@@ -7975,6 +8128,10 @@ msgstr "are riding with {driver} ({seats})"
 #: shared/changelog.ts
 msgid "E-mail stays off until you set it up under Administration → E-mail: with your club's mail server, or Cloudflare Email Sending on the Workers Paid plan."
 msgstr "E-mail stays off until you set it up under Administration → E-mail: with your club's mail server, or Cloudflare Email Sending on the Workers Paid plan."
+
+#: src/special-attendance.tsx
+msgid "Registered: {persons}."
+msgstr "Registered: {persons}."
 
 #: modules/duties/app/helpers.tsx
 msgid "Myself"
@@ -8306,6 +8463,10 @@ msgstr "The sport brings suitable age groups, playing times and helper duties. Y
 msgid "Mobile number confirmed."
 msgstr "Mobile number confirmed."
 
+#: worker/routes/events.ts
+msgid "No need to accept or decline."
+msgstr "No need to accept or decline."
+
 #: src/pages/event.tsx
 msgid "Delete event"
 msgstr "Delete event"
@@ -8539,6 +8700,10 @@ msgstr "Valid for 7 days, can be used once."
 msgid "Time zone"
 msgstr "Time zone"
 
+#: worker/routes/events.ts
+msgid "{form, select, you {If you want to join, please say yes.} one {If {names} wants to join, please say yes.} youAnd {If {names} want to join, please say yes.} other {If {names} want to join, please say yes.}}"
+msgstr "{form, select, you {If you want to join, please say yes.} one {If {names} wants to join, please say yes.} youAnd {If {names} want to join, please say yes.} other {If {names} want to join, please say yes.}}"
+
 #: src/pages/group.tsx
 msgid "{name} will then no longer be a lead in the group {teamName}. The person is kept."
 msgstr "{name} will then no longer be a lead in the group {teamName}. The person is kept."
@@ -8616,6 +8781,10 @@ msgstr "All"
 #: src/restore.tsx
 msgid "Team chats: {name}"
 msgstr "Team chats: {name}"
+
+#: src/special-attendance.tsx
+msgid "Optional attendance: whoever wants to join, please say yes."
+msgstr "Optional attendance: whoever wants to join, please say yes."
 
 #: src/pages/home.tsx
 msgid "Details and reminders"
@@ -9052,6 +9221,7 @@ msgstr "Approved people, all teams"
 #: src/pages/event.tsx
 #: src/pages/profile.tsx
 #: src/pages/profile.tsx
+#: src/special-attendance.tsx
 msgid "Change"
 msgstr "Change"
 
@@ -9072,9 +9242,17 @@ msgstr "Last update"
 msgid "Additional team for {name}"
 msgstr "Additional team for {name}"
 
+#: src/special-attendance.tsx
+msgid "Registered families"
+msgstr "Registered families"
+
 #: src/pages/admin.tsx
 msgid "Name, colours, logo, region, modules"
 msgstr "Name, colours, logo, region, modules"
+
+#: src/coach-hints.tsx
+msgid "Game schedule of {team} synced."
+msgstr "Game schedule of {team} synced."
 
 #: worker/domain/events.ts
 #: worker/routes/events.ts
@@ -9109,6 +9287,10 @@ msgstr "Ride along"
 #: src/api.ts
 msgid "The operation was cancelled."
 msgstr "The operation was cancelled."
+
+#: src/special-attendance.tsx
+msgid "Change to {draft}"
+msgstr "Change to {draft}"
 
 #: src/faq.tsx
 msgid "Which duties are there at our games, and how does a special event get helpers?"
@@ -9545,6 +9727,10 @@ msgstr "Declined training {day}"
 msgid "Template for home games"
 msgstr "Template for home games"
 
+#: worker/routes/events.ts
+msgid "For this event each family says how many people are coming."
+msgstr "For this event each family says how many people are coming."
+
 #: src/pages/join.tsx
 #: src/pages/login.tsx
 #: src/pages/profile.tsx
@@ -9565,9 +9751,17 @@ msgstr "Syncing only happens at the press of a button, on a coach's or admin's d
 msgid "Delete group {teamName}?"
 msgstr "Delete group {teamName}?"
 
+#: worker/routes/events.ts
+msgid "Only one is possible: without attendance, optional attendance or registration per family."
+msgstr "Only one is possible: without attendance, optional attendance or registration per family."
+
 #: src/restore.tsx
 msgid "{skipped, plural, one {# could not be restored} other {# could not be restored}}"
 msgstr "{skipped, plural, one {# could not be restored} other {# could not be restored}}"
+
+#: src/help-texts.ts
+msgid "Club trip to the climbing park: all teams are invited, the organisers book for everyone who said yes."
+msgstr "Club trip to the climbing park: all teams are invited, the organisers book for everyone who said yes."
 
 #: modules/duties/app/stats.tsx
 msgid "Already reminded today"
@@ -9787,6 +9981,10 @@ msgstr "The app can send e-mails for sign-in codes, access links and helper plan
 #: src/pages/admin.tsx
 msgid "Go through the setup step by step again"
 msgstr "Go through the setup step by step again"
+
+#: src/special-attendance.tsx
+msgid "We're not coming"
+msgstr "We're not coming"
 
 #: modules/handball4all/worker/connector.ts
 msgid "No game lists found"
@@ -10048,6 +10246,11 @@ msgstr "the profile picture"
 #: src/pages/profile.tsx
 msgid "Your access to the {club} app"
 msgstr "Your access to the {club} app"
+
+#: src/special-attendance.tsx
+#: src/special-attendance.tsx
+msgid "Your family"
+msgstr "Your family"
 
 #: modules/duties/app/helpers.tsx
 msgid "First place"
@@ -10493,6 +10696,10 @@ msgstr "no own access"
 msgid "Continue here anyway (only for trying out)"
 msgstr "Continue here anyway (only for trying out)"
 
+#: src/special-attendance.tsx
+msgid "You see this as an organiser."
+msgstr "You see this as an organiser."
+
 #: modules/duties/app/stats.tsx
 msgid "Families involved"
 msgstr "Families involved"
@@ -10612,6 +10819,11 @@ msgstr "You respond for them and see their events here."
 #: src/pages/admin.tsx
 msgid "Edit periods (e.g. carnival)"
 msgstr "Edit periods (e.g. carnival)"
+
+#: src/help-texts.ts
+#: src/special-attendance.tsx
+msgid "Optional attendance"
+msgstr "Optional attendance"
 
 #: modules/duties/app/admin.tsx
 msgid " and "
@@ -10744,6 +10956,10 @@ msgstr "The picture could not be converted."
 msgid "The offer will be deleted."
 msgstr "The offer will be deleted."
 
+#: src/help-texts.ts
+msgid "For events the club holds that nobody has to accept or decline. There are no responses, no reminders and no attendance, and the event does not count in the statistics. Helpers may still be needed: whoever signed up for a helper duty comes, of course. For everyone else it is up to them."
+msgstr "For events the club holds that nobody has to accept or decline. There are no responses, no reminders and no attendance, and the event does not count in the statistics. Helpers may still be needed: whoever signed up for a helper duty comes, of course. For everyone else it is up to them."
+
 #: worker/routes/persons.ts
 msgid "You cannot unlink your own access here."
 msgstr "You cannot unlink your own access here."
@@ -10776,6 +10992,10 @@ msgstr "Sources"
 #: src/pages/setup-wizard.tsx
 msgid "Enter by hand"
 msgstr "Enter by hand"
+
+#: src/pages/home.tsx
+msgid "right now"
+msgstr "right now"
 
 #: modules/duties/app/admin.tsx
 msgid "All, members"
@@ -11049,6 +11269,7 @@ msgid "Remove passkey?"
 msgstr "Remove passkey?"
 
 #: src/pages/event.tsx
+#: src/pages/event.tsx
 msgid "taking part"
 msgstr "taking part"
 
@@ -11292,6 +11513,10 @@ msgstr "New versions arrive as a pull request in your club's copy on GitHub. Mer
 msgid "You have been muted in this chat."
 msgstr "You have been muted in this chat."
 
+#: worker/routes/events.ts
+msgid "{date}, {time}. Please register how many of your family are coming. Earlier acceptances no longer count."
+msgstr "{date}, {time}. Please register how many of your family are coming. Earlier acceptances no longer count."
+
 #: modules/polls/app/pages.tsx
 msgid "Poll saved."
 msgstr "Poll saved."
@@ -11362,10 +11587,6 @@ msgstr "No polls"
 msgid "To everyone in chat {teamName}"
 msgstr "To everyone in chat {teamName}"
 
-#: src/help-texts.ts
-msgid "When a team's game schedule has not been synced for this long, its coaches see a hint with \"Sync now\" at the top of their events list. The hint disappears after the sync. A coach or admin always syncs by hand."
-msgstr "When a team's game schedule has not been synced for this long, its coaches see a hint with \"Sync now\" at the top of their events list. The hint disappears after the sync. A coach or admin always syncs by hand."
-
 #: src/pages/home.tsx
 msgid "Create a training plan in the Team section, then the events will appear here."
 msgstr "Create a training plan in the Team section, then the events will appear here."
@@ -11403,6 +11624,7 @@ msgid "Reactions: {list}. Who reacted?"
 msgstr "Reactions: {list}. Who reacted?"
 
 #: worker/domain/events.ts
+#: worker/routes/events.ts
 #: worker/routes/events.ts
 #: worker/routes/events.ts
 #: worker/routes/events.ts
@@ -11898,6 +12120,10 @@ msgstr "Who is driving?"
 msgid "New page under Administration for the game schedule sync: all teams at a glance, and when coaches are reminded to sync (15, 30 or 60 days, or never)."
 msgstr "New page under Administration for the game schedule sync: all teams at a glance, and when coaches are reminded to sync (15, 30 or 60 days, or never)."
 
+#: src/special-attendance.tsx
+msgid "Registrations"
+msgstr "Registrations"
+
 #: src/pages/games.tsx
 msgid "None (games from a table or by hand)"
 msgstr "None (games from a table or by hand)"
@@ -11923,6 +12149,10 @@ msgstr "uses the app"
 #: modules/polls/app/pages.tsx
 msgid "“Multiple answers” and “One vote per family” can no longer be switched."
 msgstr "“Multiple answers” and “One vote per family” can no longer be switched."
+
+#: worker/routes/events.ts
+msgid "At most 30 people per family."
+msgstr "At most 30 people per family."
 
 #: src/pages/event.tsx
 msgid "changed"
@@ -12043,6 +12273,10 @@ msgstr "The full messages are in the logs of the Worker (Cloudflare dashboard �
 #: src/pages/setup-wizard.tsx
 msgid "More coaches and admins"
 msgstr "More coaches and admins"
+
+#: src/respond.tsx
+msgid "{name} did not say yes."
+msgstr "{name} did not say yes."
 
 #: src/respond.tsx
 msgid "Was there"
@@ -12505,6 +12739,10 @@ msgctxt "feedback"
 msgid "Send"
 msgstr "Send"
 
+#: worker/routes/events.ts
+msgid "Please register how many of your family are coming."
+msgstr "Please register how many of your family are coming."
+
 #: src/calendar.tsx
 #: src/pages/stats.tsx
 #: src/pages/stats.tsx
@@ -12657,6 +12895,10 @@ msgstr "This person does not (or no longer) belong to this team."
 #: modules/sms/app/settings.tsx
 msgid "SMS go through seven.io (a German provider with servers in the EU). Create an account there, top up credit and copy the API key. Each message costs a few cents, paid by the club."
 msgstr "SMS go through seven.io (a German provider with servers in the EU). Create an account there, top up credit and copy the API key. Each message costs a few cents, paid by the club."
+
+#: src/pages/event.tsx
+msgid "{answered, plural, one {# response is not carried over (yes: {accepted}).} other {# responses are not carried over (yes: {accepted}).}}"
+msgstr "{answered, plural, one {# response is not carried over (yes: {accepted}).} other {# responses are not carried over (yes: {accepted}).}}"
 
 #: shared/changelog.ts
 msgid "Children in the app: under Administration → Age groups you set per youth class what children may do themselves; coaches can restrict it further for their team."
@@ -13291,6 +13533,10 @@ msgstr "{candidate} (me)"
 msgid "Hello {playerName}! You now see your events and can accept or decline."
 msgstr "Hello {playerName}! You now see your events and can accept or decline."
 
+#: src/pages/admin.tsx
+msgid "No upcoming special events or games without handball4all."
+msgstr "No upcoming special events or games without handball4all."
+
 #: src/pages/privacy.tsx
 msgid "Responsible"
 msgstr "Responsible"
@@ -13306,6 +13552,10 @@ msgstr "Up next: event"
 #: src/pages/profile.tsx
 msgid "Additional passkey set up."
 msgstr "Additional passkey set up."
+
+#: src/special-attendance.tsx
+msgid "Counts once for the whole family. Anyone in the family can change the number."
+msgstr "Counts once for the whole family. Anyone in the family can change the number."
 
 #: modules/duties/app/admin.tsx
 msgid "needs prior knowledge"
@@ -13672,11 +13922,6 @@ msgstr "Profile picture and permissions"
 msgid "Remove {label} {at}"
 msgstr "Remove {label} {at}"
 
-#: src/pages/event.tsx
-#: src/pages/event.tsx
-msgid "Optional, not joining"
-msgstr "Optional, not joining"
-
 #: src/pages/plans.tsx
 msgctxt "training"
 msgid "optional"
@@ -13784,6 +14029,10 @@ msgstr "{reassigned} players will be reassigned, {deleted} persons deleted. Even
 #: src/pages/admin.tsx
 msgid "{count, plural, one {The announcement appears in one team chat and everyone is notified immediately.} other {The announcement appears in # team chats and everyone is notified immediately.}}"
 msgstr "{count, plural, one {The announcement appears in one team chat and everyone is notified immediately.} other {The announcement appears in # team chats and everyone is notified immediately.}}"
+
+#: worker/routes/events.ts
+msgid "This event has no registration per family."
+msgstr "This event has no registration per family."
 
 #: src/help-texts.ts
 msgid "Sets what the children of an age group may do in the app themselves. Without an own access, the parents do everything. Coaches can restrict this further for their team, and parents within that for their child. Adult classes are never limited."
@@ -14046,6 +14295,10 @@ msgstr "{name} is not there for {what} on {when}. It takes place as planned."
 msgid "The app belongs to our club only and runs on its own address. If it were in the App Store, the whole world would have access to the app. That is unnecessary and we do not want it either."
 msgstr "The app belongs to our club only and runs on its own address. If it were in the App Store, the whole world would have access to the app. That is unnecessary and we do not want it either."
 
+#: worker/routes/events.ts
+msgid "Only special events can change how people respond."
+msgstr "Only special events can change how people respond."
+
 #: modules/carpools/app/card.tsx
 msgid "Second parent"
 msgstr "Second parent"
@@ -14079,6 +14332,10 @@ msgstr "{name} has allowed “{label}” for {childName}."
 #: src/pages/special.tsx
 msgid "Time slots appear in the Helpers tab, where parents or players sign up."
 msgstr "Time slots appear in the Helpers tab, where parents or players sign up."
+
+#: src/special-attendance.tsx
+msgid "Registered · {persons}"
+msgstr "Registered · {persons}"
 
 #: src/coach-hints.tsx
 msgid "{days, plural, one {Schedule of {team} not synced for # day} other {Schedule of {team} not synced for # days}}"
@@ -14139,13 +14396,13 @@ msgstr "Withdraw offer"
 msgid "First give the app the club's address"
 msgstr "First give the app the club's address"
 
-#: modules/handballnet/module.ts
-msgid "Coaches sync the games of their team from handball.net."
-msgstr "Coaches sync the games of their team from handball.net."
-
 #: modules/polls/app/pages.tsx
 msgid "Making it smaller …"
 msgstr "Making it smaller …"
+
+#: src/special-attendance.tsx
+msgid "{n, plural, one {# person} other {# people}}"
+msgstr "{n, plural, one {# person} other {# people}}"
 
 #: src/pages/chat.tsx
 msgid "as admin"
@@ -14174,6 +14431,10 @@ msgstr "Installed version"
 #: src/pages/fixture-sync.tsx
 msgid "{name}: {created} new, {moved} moved, {cancelled} cancelled."
 msgstr "{name}: {created} new, {moved} moved, {cancelled} cancelled."
+
+#: worker/routes/events.ts
+msgid "Your family is not invited to this event."
+msgstr "Your family is not invited to this event."
 
 #: src/pages/group.tsx
 msgid "Upcoming special events"
@@ -14307,6 +14568,7 @@ msgid "To the helper plan"
 msgstr "To the helper plan"
 
 #: modules/polls/app/pages.tsx
+#: src/special-attendance.tsx
 msgid "Fewer"
 msgstr "Fewer"
 

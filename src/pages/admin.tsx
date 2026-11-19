@@ -1970,8 +1970,7 @@ export function AdminExtraEventsPage() {
         <div class="content">
           <p class="small muted">
             <Trans>
-              Upcoming special events and games without handball4all of all teams. Events you already see under Events are not listed here. Tap to open the event,
-              where you can edit, cancel or delete it.
+              All upcoming special events and games without handball4all of all teams. Tap to open the event, where you can edit, cancel or delete it.
             </Trans>
           </p>
           <a class="btn btn-primary" href="/verwaltung/termin-neu">
@@ -1981,7 +1980,7 @@ export function AdminExtraEventsPage() {
           <p class="small muted">
             <Trans>You create games without handball4all in the team (Team → Create event).</Trans>
           </p>
-          <ExtraEventList path="/admin/extra-events" empty={t`All upcoming special events and games are in your event overview.`} />
+          <ExtraEventList path="/admin/extra-events" empty={t`No upcoming special events or games without handball4all.`} />
         </div>
       </main>
     </AdminOnly>
