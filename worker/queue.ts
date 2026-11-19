@@ -2,6 +2,7 @@ import { badgeCount } from "./domain/badge";
 import { ensureInstanceSecrets } from "./lib/instance-secrets";
 import { type PushJob, pushConfigured } from "./domain/notify";
 import { all, first, list, run } from "./lib/db";
+import { recordServerError } from "./lib/server-errors";
 import { loadVapid, type PushSubscriptionRow, sendWebPush } from "./lib/webpush";
 import { utcIso } from "./lib/time";
 
@@ -56,6 +57,7 @@ export async function handleQueue(batch: MessageBatch<PushJob>, env: Env): Promi
       else message.ack();
     } catch (err) {
       console.error("Push job failed", err);
+      await recordServerError(env, "Push queue", err);
       message.retry({ delaySeconds: 60 });
     }
   }

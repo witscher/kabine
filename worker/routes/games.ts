@@ -12,6 +12,7 @@ import { scheduleStale } from "../domain/coach-hints";
 import { requireTeam } from "../domain/groups";
 import { all, first, run } from "../lib/db";
 import { ApiError, badRequest, conflict, notFound, parse, readJson } from "../lib/http";
+import { recordServerError } from "../lib/server-errors";
 import { nowLocal, utcIso } from "../lib/time";
 import { FixtureFormatError } from "../module-api";
 import { audit } from "../domain/audit";
@@ -245,7 +246,10 @@ async function runImport(env: Env, team: TeamFixtures, data: unknown, actor: Act
     const message =
       err instanceof FixtureFormatError ? t`Unexpected format from ${name}: ${detail}` : err instanceof ApiError ? err.message : t`The schedule could not be processed.`;
     await run(env.DB, "UPDATE teams SET fixture_error = ?, fixture_claimed_at = NULL WHERE id = ?", message, team.id);
-    if (!(err instanceof FixtureFormatError) && !(err instanceof ApiError)) console.error("Schedule import", err);
+    if (!(err instanceof FixtureFormatError) && !(err instanceof ApiError)) {
+      console.error("Schedule import", err);
+      await recordServerError(env, "Schedule import", err);
+    }
     throw new ApiError(422, "import_failed", message);
   }
 }

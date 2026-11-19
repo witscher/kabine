@@ -9,6 +9,8 @@ import { bookUnknownAddress, checkEmailCode, type EmailCodeRow, emailSchema, iss
 import { randomToken } from "../lib/crypto";
 import { all, first, run } from "../lib/db";
 import { ApiError, badRequest, conflict, gone, parse, readJson } from "../lib/http";
+import { recordServerError } from "../lib/server-errors";
+import { MailNotConfigured } from "../domain/mail";
 import { utcIso } from "../lib/time";
 import { finishJoin, type JoinContext, PLAYER_JOIN_SIGNED_IN } from "./join";
 
@@ -38,6 +40,8 @@ emailRoutes.post("/auth/email/start", async (c) => {
   } catch (err) {
     if (err instanceof ApiError) throw err;
     console.error("Sign-in e-mail not sent", err);
+    // Sending that is not set up is a setting of the club, not a server error
+    if (!(err instanceof MailNotConfigured)) await recordServerError(c.env, "Sign-in e-mail", err);
     return c.json({ requestId: randomToken(18) });
   }
 });

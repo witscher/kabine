@@ -12,6 +12,7 @@ import { holidayDays, type HolidayInput, holidaySource, holidaySourceLabel } fro
 import { loadClub } from "../domain/club";
 import { all, first, list, run, stmt } from "../lib/db";
 import { badRequest, conflict, forbidden, notFound, parse, readJson } from "../lib/http";
+import { recordServerError } from "../lib/server-errors";
 import { isDate, nowLocal, utcIso } from "../lib/time";
 import { type AgeClassDbRow, ageClassJson, ageClassSchema, requiredDuties, writeAgeClasses } from "./admin";
 import { canManagePerson } from "./persons";
@@ -289,6 +290,7 @@ seasonRoutes.get("/season-change/preview", async (c) => {
     ]);
   } catch (err) {
     console.error("Holiday import failed", err);
+    await recordServerError(c.env, "Holiday import", err);
     holidaysError = t`The school holidays could not be loaded just now. You can enter them after the change under Administration → Holidays or try again later.`;
   }
   return c.json({ ...preview, holidays, publicHolidays, holidaysError, holidaySource: holidaySourceLabel(), region });

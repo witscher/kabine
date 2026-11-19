@@ -9,6 +9,7 @@ import { ensureGenerated } from "./domain/generate";
 import { syncAutoGroups } from "./domain/groups";
 import { areYouComing, ifYouCannot, notifyCoaches, notifyPersons, pushForm, shortDate, shortTime, whoNames } from "./domain/notify";
 import { all, run } from "./lib/db";
+import { recordServerError } from "./lib/server-errors";
 import { maintenanceState } from "./lib/maintenance";
 import { activeWorkerModules } from "./modules";
 import { addDays, addMinutesLocal, localToInstant, nowLocal, todayLocal, toLocal, utcIso } from "./lib/time";
@@ -53,6 +54,7 @@ export async function handleScheduled(baseEnv: Env, scheduledTime: number): Prom
       await task();
     } catch (err) {
       console.error(`Cron: ${name} failed`, err);
+      await recordServerError(env, `Cron: ${name}`, err);
     }
   }
 }

@@ -5,6 +5,7 @@ import { readViewMode, viewAsActor } from "./auth/view-as";
 import { clearedSessionCookie, extendSessionIfDue, findSession, readSessionToken, sessionCookie } from "./auth/session";
 import { maintenanceAllowed, maintenanceState } from "./lib/maintenance";
 import { ApiError, forbidden, unauthorized } from "./lib/http";
+import { errorKind, genericMessage, overloadMessage, recordServerError, routeLabel } from "./lib/server-errors";
 import { enterClubContext, isModuleOn, updateInProgress } from "./domain/club";
 import { ensureInstanceSecrets } from "./lib/instance-secrets";
 import { moduleOfPath } from "./lib/modules";
@@ -40,7 +41,16 @@ export function createBaseApp(): Hono<AppEnv> {
       return c.json({ error: { code: err.code, message: err.message } }, err.status);
     }
     console.error("Unexpected error", err);
-    return c.json({ error: { code: "internal", message: t`Something went wrong. Please try again later.` } }, 500);
+    // Recorded, and from the third error of a day the owner is told, without holding up the answer
+    const recorded = recordServerError(c.env, routeLabel(c.req.method, c.req.path), err);
+    try {
+      c.executionCtx.waitUntil(recorded);
+    } catch {
+      // without an ExecutionContext (some tests) it simply runs to the end
+    }
+    // Never the error text; under overload (e.g. D1 "too much load") a hint to try again shortly
+    if (errorKind(err) === "overload") return c.json({ error: { code: "overloaded", message: overloadMessage() } }, 503);
+    return c.json({ error: { code: "internal", message: genericMessage() } }, 500);
   });
 
   app.notFound((c) => c.json({ error: { code: "not_found", message: t`Unknown endpoint.` } }, 404));

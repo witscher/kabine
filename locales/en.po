@@ -3358,6 +3358,10 @@ msgstr "{nominatedYes} nominated"
 msgid "I'm in after all"
 msgstr "I'm in after all"
 
+#: worker/lib/server-errors.ts
+msgid "Today ({day}) {count} unexpected server errors occurred in {club} so far. People only saw a general message."
+msgstr "Today ({day}) {count} unexpected server errors occurred in {club} so far. People only saw a general message."
+
 #: worker/routes/squad.ts
 msgid "This person has already been requested."
 msgstr "This person has already been requested."
@@ -3826,6 +3830,10 @@ msgstr "This browser does not support passkeys. Please use a current smartphone 
 msgid "no access yet"
 msgstr "no access yet"
 
+#: worker/lib/server-errors.ts
+msgid "Today ({day}) {count} unexpected server errors occurred in {club} so far, {overload} of them from overload (e.g. of the database). People only saw a general message."
+msgstr "Today ({day}) {count} unexpected server errors occurred in {club} so far, {overload} of them from overload (e.g. of the database). People only saw a general message."
+
 #: modules/duties/worker/routes.ts
 msgid "You cannot sign up for this team."
 msgstr "You cannot sign up for this team."
@@ -4218,6 +4226,10 @@ msgstr "Your child (one or more)"
 #: src/pages/audit.tsx
 msgid "{who} set {person} active again"
 msgstr "{who} set {person} active again"
+
+#: worker/lib/server-errors.ts
+msgid "Overload"
+msgstr "Overload"
 
 #: worker/routes/teams.ts
 msgid "{playerName} now also plays in the {teamName} (added by {by})."
@@ -7255,7 +7267,7 @@ msgstr "Short, shown like a team name, e.g. JT"
 msgid "{name} is there for {what} on {when} after all."
 msgstr "{name} is there for {what} on {when} after all."
 
-#: worker/app.ts
+#: worker/lib/server-errors.ts
 msgid "Something went wrong. Please try again later."
 msgstr "Something went wrong. Please try again later."
 
@@ -7570,6 +7582,10 @@ msgstr "{driver} can no longer take {rider}: {game}. The search continues."
 #: src/pages/team.tsx
 msgid "Reachability"
 msgstr "Reachability"
+
+#: worker/lib/server-errors.ts
+msgid "This e-mail comes at most once a day. Further errors of today are only counted (at most {max})."
+msgstr "This e-mail comes at most once a day. Further errors of today are only counted (at most {max})."
 
 #: worker/routes/squad.ts
 msgid "This request has already been answered."
@@ -9493,6 +9509,10 @@ msgstr "{who} deleted {label}"
 msgid "For example when it may not be the person's own. A new one can be entered when the link is opened."
 msgstr "For example when it may not be the person's own. A new one can be entered when the link is opened."
 
+#: worker/lib/server-errors.ts
+msgid "{club}: {count} server errors on {day}"
+msgstr "{club}: {count} server errors on {day}"
+
 #: worker/routes/events.ts
 msgid "{name} is missing from “{title}”"
 msgstr "{name} is missing from “{title}”"
@@ -10057,6 +10077,10 @@ msgstr "Edit team"
 msgid "Drivers can be nominated players, their parents and the coaches."
 msgstr "Drivers can be nominated players, their parents and the coaches."
 
+#: worker/lib/server-errors.ts
+msgid "Error"
+msgstr "Error"
+
 #: src/pages/team.tsx
 msgid "Coaches · {coachCount}"
 msgstr "Coaches · {coachCount}"
@@ -10608,6 +10632,10 @@ msgstr "Please choose at least one team."
 msgid "Children in the app"
 msgstr "Children in the app"
 
+#: worker/lib/server-errors.ts
+msgid "Things are very busy right now. Please try again in a few minutes."
+msgstr "Things are very busy right now. Please try again in a few minutes."
+
 #: src/respond.tsx
 msgid "Please give a short reason."
 msgstr "Please give a short reason."
@@ -11066,6 +11094,10 @@ msgstr "Passkeys"
 #: worker/routes/squad.ts
 msgid "At most {max} players can be nominated."
 msgstr "At most {max} players can be nominated."
+
+#: worker/lib/server-errors.ts
+msgid "The full messages are in the logs of the Worker (Cloudflare dashboard → Workers & Pages → this Worker → Logs)."
+msgstr "The full messages are in the logs of the Worker (Cloudflare dashboard → Workers & Pages → this Worker → Logs)."
 
 #: src/pages/setup-wizard.tsx
 msgid "More coaches and admins"

@@ -67,7 +67,7 @@
 <tbody>
 <tr><td>Database (Cloudflare D1)</td><td>Everything entered in the demo: responses with reasons, events, helper duties, carpools, settings; sign-ins with device type (from the browser identification) and times; push subscriptions (address at the push service and keys).</td><td>Until the next reset</td></tr>
 <tr><td>Durable Objects</td><td>Team chat messages and read markers; devices connected live to chat and helper plans.</td><td>Messages until the next reset; connections while the page is open</td></tr>
-<tr><td>KV storage</td><td>Maintenance switch, a lock against repeated reminders for one event (event number).</td><td>Lock 15 minutes, otherwise until the next reset</td></tr>
+<tr><td>KV storage</td><td>Maintenance switch, a lock against repeated reminders for one event (event number); unexpected server errors of a day (time, kind, address called without numbers, start of the error message, no names), at most 20 a day, so I notice problems.</td><td>Lock 15 minutes, otherwise until the next reset</td></tr>
 <tr><td>Queues</td><td>Jobs for push notifications (recipients, text of the notification).</td><td>Until delivered, usually seconds</td></tr>
 <tr><td>Workers Logs</td><td>One log entry per request: time, requested address, method, status code, technical properties of the request (including browser identification and country, possibly the IP address) and error messages of the app. The app does not write names, messages or form contents to the log.</td><td>At most 7 days</td></tr>
 </tbody>
@@ -84,7 +84,7 @@
 <p>You may object at any time, on grounds relating to your particular situation, to the processing of your data based on Art. 6(1)(f) GDPR (Art. 21(1) GDPR). I will then no longer process it unless I can demonstrate compelling legitimate grounds which override your interests, rights and freedoms, or the processing serves the establishment, exercise or defence of legal claims. An informal objection to the email address above is enough.</p>
 </div>
 
-<p>Last updated: October 2026</p>
+<p>Last updated: November 2026</p>
 <p><a href="/en/legal/">Legal notice</a></p>
 </main>
 {{FOOTER}}

@@ -6,6 +6,7 @@ Changes that are merged but not released yet go under *Unreleased*, one line eac
 
 ## Unreleased
 
+- Server errors: people never see the technical error text any more. When Cloudflare is overloaded (e.g. the database limit of the account) the app says that things are busy and to try again in a few minutes. Errors are counted per day, and from the third error of a day the owner of the installation gets one e-mail with the list (needs a confirmed e-mail address in the owner's profile).
 - Fewer database reads: teams, memberships, parent links and duty types stay in memory per Worker instance and are reloaded only after a change, and the helper duties of games are checked only when something changed. This keeps clubs further below the daily limit of the free plan. `npm run d1:stats` shows the read load of an installation.
 - Pushes about a person now address the recipient: parents read "Mia is in the squad" or "Is Mia coming?" instead of "You are in the squad"; with several children or when they play themselves, all of them are named in one push.
 - Setup wizard: the chosen sport could jump back to handball when the step reloaded its data in the background; the choice now stays.

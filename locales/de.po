@@ -3608,6 +3608,11 @@ msgstr "{nominatedYes} nominiert"
 msgid "I'm in after all"
 msgstr "Bin doch dabei"
 
+# ai
+#: worker/lib/server-errors.ts
+msgid "Today ({day}) {count} unexpected server errors occurred in {club} so far. People only saw a general message."
+msgstr "Heute ({day}) sind in {club} bisher {count} unerwartete Serverfehler aufgetreten. Nutzer haben dabei nur eine allgemeine Meldung gesehen."
+
 #: worker/routes/squad.ts
 msgid "This person has already been requested."
 msgstr "Diese Person wurde bereits angefragt."
@@ -4117,6 +4122,11 @@ msgstr "Dieser Browser unterstützt keine Passkeys. Bitte nutze ein aktuelles Sm
 msgid "no access yet"
 msgstr "noch kein Zugang"
 
+# ai
+#: worker/lib/server-errors.ts
+msgid "Today ({day}) {count} unexpected server errors occurred in {club} so far, {overload} of them from overload (e.g. of the database). People only saw a general message."
+msgstr "Heute ({day}) sind in {club} bisher {count} unerwartete Serverfehler aufgetreten, davon {overload} durch Überlast (z. B. der Datenbank). Nutzer haben dabei nur eine allgemeine Meldung gesehen."
+
 #: modules/duties/worker/routes.ts
 msgid "You cannot sign up for this team."
 msgstr "Für diese Mannschaft kannst du dich nicht eintragen."
@@ -4537,6 +4547,11 @@ msgstr "Dein Kind (eins oder mehrere)"
 #: src/pages/audit.tsx
 msgid "{who} set {person} active again"
 msgstr "{who} hat {person} wieder aktiv gesetzt"
+
+# ai
+#: worker/lib/server-errors.ts
+msgid "Overload"
+msgstr "Überlast"
 
 #: worker/routes/teams.ts
 msgid "{playerName} now also plays in the {teamName} (added by {by})."
@@ -7820,7 +7835,7 @@ msgstr "Kurz, erscheint wie ein Mannschaftsname, z. B. JT"
 msgid "{name} is there for {what} on {when} after all."
 msgstr "{name} ist bei {what} am {when} doch da."
 
-#: worker/app.ts
+#: worker/lib/server-errors.ts
 msgid "Something went wrong. Please try again later."
 msgstr "Es ist ein Fehler aufgetreten. Bitte versuche es später erneut."
 
@@ -8153,6 +8168,11 @@ msgstr "{driver} kann {rider} nicht mehr mitnehmen: {game}. Die Suche läuft wei
 #: src/pages/team.tsx
 msgid "Reachability"
 msgstr "Erreichbarkeit"
+
+# ai
+#: worker/lib/server-errors.ts
+msgid "This e-mail comes at most once a day. Further errors of today are only counted (at most {max})."
+msgstr "Diese E-Mail kommt höchstens einmal am Tag. Weitere Fehler von heute werden nur gezählt (höchstens {max})."
 
 #: worker/routes/squad.ts
 msgid "This request has already been answered."
@@ -10214,6 +10234,11 @@ msgid "For example when it may not be the person's own. A new one can be entered
 msgstr "Zum Beispiel, wenn sie vielleicht nicht die eigene der Person ist. Beim Öffnen des Links kann eine neue eingetragen werden."
 
 # ai
+#: worker/lib/server-errors.ts
+msgid "{club}: {count} server errors on {day}"
+msgstr "{club}: {count} Serverfehler am {day}"
+
+# ai
 #: worker/routes/events.ts
 msgid "{name} is missing from “{title}”"
 msgstr "{name} fehlt bei „{title}“"
@@ -10822,6 +10847,11 @@ msgstr "Mannschaft bearbeiten"
 msgid "Drivers can be nominated players, their parents and the coaches."
 msgstr "Fahrer können Nominierte, ihre Eltern und die Trainer sein."
 
+# ai
+#: worker/lib/server-errors.ts
+msgid "Error"
+msgstr "Fehler"
+
 #: src/pages/team.tsx
 msgid "Coaches · {coachCount}"
 msgstr "Trainer · {coachCount}"
@@ -11410,6 +11440,11 @@ msgstr "Bitte wähle mindestens eine Mannschaft."
 msgid "Children in the app"
 msgstr "Kinder in der App"
 
+# ai
+#: worker/lib/server-errors.ts
+msgid "Things are very busy right now. Please try again in a few minutes."
+msgstr "Gerade ist sehr viel los. Bitte versuche es in ein paar Minuten noch einmal."
+
 #: src/respond.tsx
 msgid "Please give a short reason."
 msgstr "Bitte gib kurz einen Grund an."
@@ -11893,6 +11928,11 @@ msgstr "Passkeys"
 #: worker/routes/squad.ts
 msgid "At most {max} players can be nominated."
 msgstr "Höchstens {max} Spieler können nominiert werden."
+
+# ai
+#: worker/lib/server-errors.ts
+msgid "The full messages are in the logs of the Worker (Cloudflare dashboard → Workers & Pages → this Worker → Logs)."
+msgstr "Die vollständigen Meldungen stehen in den Logs des Workers (Cloudflare-Dashboard → Workers & Pages → dieser Worker → Logs)."
 
 # ai
 #: src/pages/setup-wizard.tsx

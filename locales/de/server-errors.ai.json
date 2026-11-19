@@ -1,0 +1,10 @@
+{
+  "Today ({day}) {count} unexpected server errors occurred in {club} so far. People only saw a general message.": "Heute ({day}) sind in {club} bisher {count} unerwartete Serverfehler aufgetreten. Nutzer haben dabei nur eine allgemeine Meldung gesehen.",
+  "Today ({day}) {count} unexpected server errors occurred in {club} so far, {overload} of them from overload (e.g. of the database). People only saw a general message.": "Heute ({day}) sind in {club} bisher {count} unerwartete Serverfehler aufgetreten, davon {overload} durch Überlast (z. B. der Datenbank). Nutzer haben dabei nur eine allgemeine Meldung gesehen.",
+  "Overload": "Überlast",
+  "Error": "Fehler",
+  "This e-mail comes at most once a day. Further errors of today are only counted (at most {max}).": "Diese E-Mail kommt höchstens einmal am Tag. Weitere Fehler von heute werden nur gezählt (höchstens {max}).",
+  "{club}: {count} server errors on {day}": "{club}: {count} Serverfehler am {day}",
+  "Things are very busy right now. Please try again in a few minutes.": "Gerade ist sehr viel los. Bitte versuche es in ein paar Minuten noch einmal.",
+  "The full messages are in the logs of the Worker (Cloudflare dashboard → Workers & Pages → this Worker → Logs).": "Die vollständigen Meldungen stehen in den Logs des Workers (Cloudflare-Dashboard → Workers & Pages → dieser Worker → Logs)."
+}

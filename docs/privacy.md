@@ -43,6 +43,7 @@ Only admins change their own name; players, parents and coaches ask their coach 
 | Chat messages, reactions | Members | Team communication | Team chat members | At the season change |
 | E-mail address | Everyone who enters one | Sign-in codes, access links; helper plan mails and feedback replies only if chosen | Nobody in the app; admins only in the data export | When leaving |
 | Requests for a sign-in code with an address or number that belongs to no access: a keyed hash of it, no code, nothing is sent | Whoever types such an address on the sign-in page | The same limit of requests for every address, so the limit does not show who is in the club | Nobody | After one day |
+| Unexpected server errors: time, kind (overload or error), where (path without ids and tokens, or the name of the background task) and the first 300 characters of the error message, no personal data on purpose; stored in KV, at most 20 a day | Nobody in particular | Noticing problems; from the third error of a day one e-mail to the owner of the installation | The owner (by e-mail, to the confirmed address of their access) | After 14 days |
 | Mobile number (SMS module) | Everyone who enters one | Sign-in codes and reminders by SMS | Nobody | On request in the profile, when leaving |
 | Profile picture | Who uploads one | Recognising each other | Signed-in members; for minors after parental approval | On request, when leaving |
 | Passkeys | Everyone with access | Sign-in (public key only, no biometrics) | Nobody | When removed in the profile, when leaving |

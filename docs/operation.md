@@ -85,6 +85,8 @@ For the first update from a copy older than v0.2.0, switch maintenance mode on b
 
 `npx wrangler tail` shows requests and errors live. With `observability` enabled in `wrangler.jsonc`, the dashboard keeps logs for a few days (*Workers & Pages → kabine → Observability*).
 
+**Error e-mail.** People never see the text of an unexpected server error, only a general message; when Cloudflare reports overload (for example D1's "too much load", a limit that applies to the whole Cloudflare account), they read that things are busy and to try again in a few minutes. Kabine counts these errors per day in KV (at most 20, kept 14 days) and from the third error of a day sends one e-mail to the **owner** of the installation (*Administration → Club*), to the confirmed e-mail address of their access, with time, place and the start of each message. Add a confirmed e-mail address to the owner's profile to get it; without one, or without e-mail sending set up, nothing is sent. The full messages stay in the logs.
+
 ## Secrets
 
 | Secret | Purpose | Changing it |
