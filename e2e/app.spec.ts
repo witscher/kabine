@@ -1995,26 +1995,26 @@ test("Statistik: Trainer über die Teamseite, Spielerin im Profil", async () => 
 });
 
 test("Einmalige Push-Abfrage: erscheint auf der Startseite, nach „Später“ nicht wieder", async () => {
-  const p = player.page;
-  // Headless Chromium lehnt Benachrichtigungen sonst ab
-  await player.context.grantPermissions(["notifications"]);
-  await p.goto("/");
-  await p.evaluate(() => {
+  // Own tab: headless Chromium reports notifications as blocked, here they are still undecided
+  const p = await player.context.newPage();
+  await p.addInitScript(() => {
     sessionStorage.setItem("e2e-push", "1");
-    localStorage.removeItem("kabine-push-asked");
+    Object.defineProperty((globalThis as unknown as { Notification: object }).Notification, "permission", { get: () => "default" });
   });
+  await p.goto("/");
+  await p.evaluate(() => localStorage.removeItem("kabine-push-asked"));
   await p.reload();
   const sheet = p.getByRole("dialog", { name: "Benachrichtigungen einschalten?" });
   await expect(sheet).toBeVisible();
   await expect(sheet.getByRole("button", { name: "Einschalten" })).toBeVisible();
+  if (process.env.E2E_SHOTS) await p.screenshot({ path: `${process.env.E2E_SHOTS}/push-abfrage.png` });
   await sheet.getByRole("button", { name: "Später" }).click();
   await expect(sheet).toHaveCount(0);
   expect(await p.evaluate(() => localStorage.getItem("kabine-push-asked"))).toBe("1");
   await p.reload();
   await p.waitForTimeout(2500);
   await expect(p.getByRole("dialog", { name: "Benachrichtigungen einschalten?" })).toHaveCount(0);
-  await p.evaluate(() => sessionStorage.removeItem("e2e-push"));
-  await player.context.clearPermissions();
+  await p.close();
 });
 
 test("Einmalige Push-Abfrage: nicht, wenn Benachrichtigungen blockiert sind", async () => {

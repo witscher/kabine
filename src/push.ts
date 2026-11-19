@@ -1,7 +1,7 @@
 // Push on this device: supported, already set up, turn on. Used by the profile and by the one-time prompt on the home screen.
 import { t } from "@lingui/core/macro";
 import { api, ApiError } from "./api";
-import { isIos, isStandalone } from "./session";
+import { isStandalone } from "./session";
 
 function urlBase64ToUint8Array(base64: string): Uint8Array<ArrayBuffer> {
   const padding = "=".repeat((4 - (base64.length % 4)) % 4);
@@ -11,9 +11,13 @@ function urlBase64ToUint8Array(base64: string): Uint8Array<ArrayBuffer> {
   return out;
 }
 
-/** Can this browser do push? On the iPhone only the app installed on the Home Screen can. */
+/**
+ * Can this browser do push? On the iPhone and iPad only the app installed on the Home Screen can; a browser tab there
+ * has no Push API either (an iPad that reports itself as a Mac is caught by that). Not `isIos()`: its iPad guess also
+ * matches a Mac browser with touch emulation.
+ */
 export function pushSupported(): boolean {
-  if (isIos() && !isStandalone()) return false;
+  if (/iPhone|iPad|iPod/.test(navigator.userAgent) && !isStandalone()) return false;
   return "serviceWorker" in navigator && "PushManager" in window && "Notification" in window;
 }
 
