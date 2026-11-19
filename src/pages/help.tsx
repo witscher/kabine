@@ -96,6 +96,22 @@ export function HelpPage() {
     <main class="page">
       <TopBar title={t`Help and feedback`} kicker={t`Help`} back={me.isAdmin ? "/verwaltung" : me.manageableTeams.length ? "/profil" : undefined} />
       <div class="content">
+        <ul class="list">
+          <li>
+            <a class="list-row" href="/hilfe/neu">
+              <Icon name="star" size={22} />
+              <span class="main">
+                <span class="title">
+                  <Trans>What's new</Trans>
+                </span>
+                <span class="sub">
+                  <Trans>Changes in the app for players and parents</Trans>
+                </span>
+              </span>
+              <Icon name="chevron" size={18} />
+            </a>
+          </li>
+        </ul>
         <FaqList />
         <section class="stack-sm" aria-label={t`Guides`}>
           <h2 class="section-title">

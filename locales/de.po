@@ -1048,6 +1048,11 @@ msgstr "Mitfahren können nominierte Spieler, die nicht abgesagt haben, und die 
 msgid "Carpools (passengers, free seats)"
 msgstr "Fahrgemeinschaften (Mitfahrer, freie Plätze)"
 
+# ai
+#: src/pages/whats-new.tsx
+msgid "Events, responses, squads and team chat in one app, signing in with a passkey instead of a password."
+msgstr "Termine, Zu- und Absagen, Kader und Mannschaftschat in einer App, Anmeldung per Passkey statt Passwort."
+
 #: worker/domain/email-login.ts
 msgid "The e-mail address is too long."
 msgstr "Die E-Mail-Adresse ist zu lang."
@@ -1198,6 +1203,12 @@ msgstr "{who} hat {person} gelöscht, als Elternteil von {child}"
 #: src/avatar.tsx
 msgid "Take photo"
 msgstr "Foto machen"
+
+# ai
+#: src/pages/help.tsx
+#: src/pages/whats-new.tsx
+msgid "What's new"
+msgstr "Was ist neu"
 
 #: modules/duties/app/helpers.tsx
 msgid "{label}: one slot more"
@@ -1652,6 +1663,11 @@ msgstr "weiblich"
 #: modules/carpools/worker/routes.ts
 msgid "The driver does not have enough free seats. Please cancel the lift and book again."
 msgstr "Beim Fahrer ist nicht genug Platz frei. Bitte die Mitfahrt absagen und neu buchen."
+
+# ai
+#: src/pages/whats-new.tsx
+msgid "The app is born"
+msgstr "Die App ist geboren"
 
 #: src/pages/home.tsx
 msgctxt "help request"
@@ -3007,6 +3023,11 @@ msgstr "Gruppenchat"
 msgid "Born to"
 msgstr "Jg. bis"
 
+# ai
+#: src/howto.tsx
+msgid "Turn on notifications?"
+msgstr "Benachrichtigungen einschalten?"
+
 #: src/update.tsx
 msgid "There is a new version of the app."
 msgstr "Es gibt eine neue Version der App."
@@ -3792,6 +3813,7 @@ msgstr "Höchstens 11 Buchstaben und Ziffern, z. B. der Kurzname des Vereins."
 
 #: src/app.tsx
 #: src/pages/help.tsx
+#: src/pages/whats-new.tsx
 msgid "Help"
 msgstr "Hilfe"
 
@@ -3916,8 +3938,6 @@ msgstr "Spiel (Min.)"
 msgid "{name} (no access)"
 msgstr "{name} (ohne Zugang)"
 
-#: src/howto.tsx
-#: src/howto.tsx
 #: src/pages/help.tsx
 msgid "Set up notifications"
 msgstr "Benachrichtigungen einrichten"
@@ -4277,7 +4297,6 @@ msgstr "Die Standardvorlage lässt sich nicht löschen."
 msgid "{count, plural, one {The announcement appears in one team chat.} other {The announcement appears in # team chats.}}"
 msgstr "{count, plural, one {Die Ankündigung erscheint in einem Mannschaftschat.} other {Die Ankündigung erscheint in # Mannschaftschats.}}"
 
-#: src/howto.tsx
 #: src/howto.tsx
 #: src/howto.tsx
 msgid "Hide hint"
@@ -5099,6 +5118,11 @@ msgstr "Angaben gespeichert."
 msgid "Questions"
 msgstr "Fragen"
 
+# ai
+#: src/pages/whats-new.tsx
+msgid "What has come to the app since your club started with it on {started}."
+msgstr "Was seit dem Start eures Vereins mit der App am {started} dazugekommen ist."
+
 #: src/pages/admin.tsx
 #: src/pages/event.tsx
 #: src/pages/plans.tsx
@@ -5119,10 +5143,6 @@ msgstr "Dieselbe Person?"
 #: src/pages/team.tsx
 msgid "No team"
 msgstr "Keine Mannschaft"
-
-#: worker/routes/auth.ts
-msgid "The switch is only available to admins who are also coaches."
-msgstr "Den Umschalter gibt es nur für Admins, die auch Trainer sind."
 
 #: src/pages/squad.tsx
 msgid "Suggested replacement: {replacementNames}."
@@ -5207,6 +5227,11 @@ msgstr "wird von anderen angekreuzten Teilen gebraucht"
 #: worker/auth/webauthn.ts
 msgid "Signing in took too long. Please try again."
 msgstr "Die Anmeldung hat zu lange gedauert. Bitte versuche es noch einmal."
+
+# ai
+#: src/pages/whats-new.tsx
+msgid "What has come to the app, newest first."
+msgstr "Was in der App dazugekommen ist, das Neueste oben."
 
 #: src/pages/join.tsx
 msgid "<0>Already registered in the app? Then open this link on the device where the app is installed!</0> Or sign in here and then link this child to your access. Otherwise a second access will be created for you."
@@ -5450,6 +5475,11 @@ msgstr "INFO"
 #: modules/duties/app/admin.tsx
 msgid "Delete {name}?"
 msgstr "{name} löschen?"
+
+# ai
+#: src/howto.tsx
+msgid "Later"
+msgstr "Später"
 
 # ai
 #: src/list-import.tsx
@@ -6095,11 +6125,6 @@ msgid "Mails go to the confirmed address you sign in with. You don't have one ye
 msgstr "Mails gehen an die bestätigte Adresse deiner Anmeldung. Du hast noch keine, trage sie unter <0>Profil → Anmeldung</0> ein."
 
 # ai
-#: src/help-texts.ts
-msgid "Off: you see the app like a coach, only with your teams and without administration. On: you see all teams and the administration. This applies on all your devices."
-msgstr "Aus: Du siehst die App wie ein Trainer, nur mit deinen Mannschaften und ohne Verwaltung. An: Du siehst alle Mannschaften und die Verwaltung. Das gilt auf all deinen Geräten."
-
-# ai
 #: src/list-import.tsx
 msgid "Team for {name}"
 msgstr "Mannschaft für {name}"
@@ -6553,6 +6578,7 @@ msgstr "Krank"
 msgid "Download a complete export before resetting. In addition, the database can be reset up to 30 days back via D1 Time Travel."
 msgstr "Lade vor dem Zurücksetzen einen vollständigen Export herunter. Zusätzlich lässt sich die Datenbank über D1 Time Travel 30 Tage zurücksetzen."
 
+#: src/howto.tsx
 #: src/pages/profile.tsx
 msgid "Notifications are on."
 msgstr "Benachrichtigungen sind aktiv."
@@ -6752,6 +6778,11 @@ msgstr "Verantwortlich"
 #: src/pages/plans.tsx
 msgid "+ Create new location"
 msgstr "+ Neuen Ort anlegen"
+
+# ai
+#: src/howto.tsx
+msgid "Turn on"
+msgstr "Einschalten"
 
 #: src/pages/team.tsx
 msgid "First add the players."
@@ -6960,6 +6991,11 @@ msgstr "Deine Rückmeldung"
 #: worker/domain/duties.ts
 msgid "Helpers only exist for events of teams."
 msgstr "Helfer gibt es nur bei Terminen von Mannschaften."
+
+# ai
+#: worker/routes/auth.ts
+msgid "The switch is only available to admins who are also coaches or parents."
+msgstr "Den Schalter gibt es nur für Admins, die auch Trainer oder Eltern sind."
 
 # ai
 #: src/restore.tsx
@@ -7181,6 +7217,11 @@ msgstr "Der Link ist unvollständig. Bitte öffne ihn noch einmal vollständig o
 #: src/pages/club-settings.tsx
 msgid "Country"
 msgstr "Land"
+
+# ai
+#: src/pages/whats-new.tsx
+msgid "Start of the app"
+msgstr "Start der App"
 
 # ai
 #: src/pages/club-settings.tsx
@@ -7524,10 +7565,6 @@ msgstr "Zugang lösen"
 msgid "Player list"
 msgstr "Spielerliste"
 
-#: src/howto.tsx
-msgid "Go to notifications"
-msgstr "Zu den Benachrichtigungen"
-
 # ai
 #: src/child-limits.tsx
 msgid "stand-in requests"
@@ -7738,7 +7775,7 @@ msgstr "Einschalten unter Verwaltung → Verein"
 msgid "You"
 msgstr "Du"
 
-#: src/pages/profile.tsx
+#: src/push.ts
 msgid "Push is not set up on the server yet."
 msgstr "Push ist auf dem Server noch nicht eingerichtet."
 
@@ -8095,6 +8132,11 @@ msgstr "Du kannst dich nicht selbst stummschalten."
 #: src/pages/admin.tsx
 msgid "Other venue"
 msgstr "Anderer Ort"
+
+# ai
+#: src/pages/whats-new.tsx
+msgid "Born on {date}"
+msgstr "Geboren am {date}"
 
 #: worker/auth/webauthn.ts
 #: worker/auth/webauthn.ts
@@ -9007,6 +9049,11 @@ msgstr "<0>Als App installieren:</0> In Safari unten auf <1>Teilen</1> tippen, d
 msgid "Test"
 msgstr "Testen"
 
+# ai
+#: src/pages/whats-new.tsx
+msgid "Size: fits on every phone"
+msgstr "Größe: passt auf jedes Handy"
+
 #: modules/carpools/worker/routes.ts
 msgid "At most {max} companions."
 msgstr "Höchstens {max} Begleitpersonen."
@@ -9289,6 +9336,11 @@ msgid "The operation was cancelled."
 msgstr "Der Vorgang wurde abgebrochen."
 
 # ai
+#: src/pages/whats-new.tsx
+msgid "Weight: lighter than a sports bag"
+msgstr "Gewicht: leichter als eine Sporttasche"
+
+# ai
 #: src/special-attendance.tsx
 msgid "Change to {draft}"
 msgstr "Auf {draft} ändern"
@@ -9378,6 +9430,11 @@ msgstr "Abgesagt."
 #: worker/app.ts
 msgid "Nothing can be changed in this view."
 msgstr "In dieser Ansicht kann nichts geändert werden."
+
+# ai
+#: src/help-texts.ts
+msgid "Off: you see the app like a coach or parent, only with your teams and children and without administration. On: you see all teams and the administration. This applies on all your devices."
+msgstr "Aus: Du siehst die App wie ein Trainer oder Elternteil, nur mit deinen Mannschaften und Kindern und ohne Verwaltung. An: Du siehst alle Mannschaften und die Verwaltung. Das gilt auf all deinen Geräten."
 
 #: src/faq.tsx
 msgid "Frequently asked questions: {title}"
@@ -11105,6 +11162,11 @@ msgstr "Zur Person"
 msgid "There are no suitable stand-ins for {teamName}."
 msgstr "Für die {teamName} gibt es keine passenden Aushilfen."
 
+# ai
+#: src/howto.tsx
+msgid "Notifications are blocked. You can allow them in the settings of your device."
+msgstr "Benachrichtigungen sind blockiert. Erlauben kannst du sie in den Einstellungen deines Geräts."
+
 #: src/pages/profile.tsx
 #: src/pages/profile.tsx
 #: src/pages/profile.tsx
@@ -11350,6 +11412,11 @@ msgstr "Bitte wähle, wer helfen kann."
 #: modules/duties/app/admin.tsx
 msgid "Delete duty type"
 msgstr "Dienstart löschen"
+
+# ai
+#: src/howto.tsx
+msgid "You choose what you get at any time in your profile under notifications. You can also turn them on there later."
+msgstr "Was genau du bekommst, stellst du jederzeit im Profil unter „Benachrichtigungen“ ein. Dort kannst du sie auch später einschalten."
 
 #: src/pages/event.tsx
 #: src/pages/event.tsx
@@ -12252,6 +12319,11 @@ msgstr "War da"
 msgid "First name"
 msgstr "Vorname"
 
+# ai
+#: src/pages/help.tsx
+msgid "Changes in the app for players and parents"
+msgstr "Neues in der App für Spieler und Eltern"
+
 #: src/pages/admin.tsx
 msgid "Coaches of {teamName}"
 msgstr "Trainer {teamName}"
@@ -12823,6 +12895,11 @@ msgstr "{from} bis {to} · aktuell"
 #: src/pages/season.tsx
 msgid "{assigned} players assigned, {deletedPersons} former persons and {deletedParents} parent accesses without a child deleted."
 msgstr "{assigned} Spieler zugeordnet, {deletedPersons} ehemalige Personen und {deletedParents} Elternzugänge ohne Kind gelöscht."
+
+# ai
+#: src/pages/whats-new.tsx
+msgid "Nothing new since the start yet. After updates you find here what changed for players and parents."
+msgstr "Seit dem Start gibt es noch nichts Neues. Nach Updates steht hier, was sich für Spieler und Eltern geändert hat."
 
 # ai
 #: src/pages/admin.tsx
@@ -13632,6 +13709,11 @@ msgstr "Winken"
 #: src/pages/plans.tsx
 msgid "A holiday plan takes precedence in its period. After that this plan applies again."
 msgstr "Ein Ferienplan hat in seinem Zeitraum Vorrang. Danach gilt wieder dieser Plan."
+
+# ai
+#: src/pages/profile.tsx
+msgid "You now see the app like other parents."
+msgstr "Du siehst die App jetzt wie andere Eltern."
 
 #: modules/duties/app/approvals.tsx
 msgid "Valid until {createdUntil}, can be used several times."

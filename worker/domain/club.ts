@@ -4,7 +4,7 @@ import type { ClubProfile } from "../../shared/club";
 import { clubAbbr, type ClubModules, DEFAULT_CLUB, DEFAULT_MODULES, isScheduleReminderDays, type ModuleId, moduleOn, type ScheduleReminderDays } from "../../shared/club";
 import { venueOf, type VenueKind } from "../../shared/sports";
 import { setClubDefaultLocale } from "../i18n";
-import { setTimeZone } from "../lib/time";
+import { setTimeZone, todayLocal } from "../lib/time";
 import { all, first, run } from "../lib/db";
 import { randomToken } from "../lib/crypto";
 
@@ -63,7 +63,10 @@ function parseUpdate(value: string | undefined): UpdateInProgress | null {
 }
 
 export async function saveClub(db: D1Database, patch: Partial<ClubSettings>): Promise<ClubSettings> {
-  const next = { ...(await loadClub(db)), ...patch };
+  const current = await loadClub(db);
+  const next = { ...current, ...patch };
+  // The club starts with the app when the setup is completed (Help → What's new counts from this day)
+  if (next.setupDone && !current.setupDone && !next.startedOn) next.startedOn = todayLocal();
   await run(
     db,
     "INSERT INTO app_meta (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value",

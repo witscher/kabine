@@ -57,7 +57,7 @@ Den eigenen Namen ändern nur Admins; Spieler, Eltern und Trainer wenden sich an
 | Persönlicher Kalenderlink | Wer einen anlegt | Kalender-Abo | Die Person selbst | Beim Zurücksetzen, beim Austritt |
 | Merkmal „Ordentliches Mitglied“ | Erwachsene | Wer Veranstaltungen organisieren und bestimmte Dienste übernehmen darf | Admins | Beim Austritt |
 
-Für die Nutzung ohne Netz zwischengespeicherte Inhalte auf dem Gerät werden beim Abmelden gelöscht.
+Für die Nutzung ohne Netz zwischengespeicherte Inhalte auf dem Gerät werden beim Abmelden gelöscht. Außerdem behält die App einige Merker ohne personenbezogene Daten im Browser des Geräts (localStorage): die Sprache, geschlossene Hinweise und ob dieses Gerät schon einmal gefragt wurde, Benachrichtigungen einzuschalten (`kabine-push-asked`). Sie bleiben, bis sie im Browser gelöscht werden.
 
 ## Impressum und Datenschutzerklärung des Vereins
 

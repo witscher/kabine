@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { saveClub } from "../worker/domain/club";
 import { holidaySource } from "../worker/domain/holidays";
 import { seasonAround } from "../shared/sports";
-import { api, freshDb, loginAs, person, rows } from "./helpers";
+import { api, exec, freshDb, loginAs, person, rows } from "./helpers";
 
 afterEach(() => vi.restoreAllMocks());
 
@@ -62,6 +62,11 @@ describe("Einrichtungsassistent", () => {
     }
     expect((await api("/admin/setup/done", { cookie, body: {} })).status).toBe(200);
     expect((await api("/club")).body.setupDone).toBe(true);
+    // Der Verein startet mit dem Abschluss (Hilfe → Was ist neu zählt ab diesem Tag); ein zweiter Abschluss ändert ihn nicht
+    expect((await api("/club")).body.startedOn).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    await exec("UPDATE app_meta SET value = json_set(value, '$.startedOn', '2026-10-01') WHERE key = 'club'");
+    expect((await api("/admin/setup/done", { cookie, body: {} })).status).toBe(200);
+    expect((await api("/club")).body.startedOn).toBe("2026-10-01");
     expect(await rows("SELECT t.name, d.name AS template FROM teams t LEFT JOIN duty_templates d ON d.id = t.home_template_id ORDER BY t.name")).toEqual([
       { name: "D-Jugend", template: null },
       { name: "Herren 1", template: "Heimspiel Erwachsene" },

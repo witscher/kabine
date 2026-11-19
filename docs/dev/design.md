@@ -88,6 +88,8 @@ After a deployment the lazily loaded pages of the old version no longer exist. I
 
 After an update a card on the events list says what is new (`src/news.tsx`, `worker/domain/news.ts`), until it is marked as read; each account keeps the last version it saw (`accounts.changelog_seen`). Admins see the release notes of `shared/changelog.ts` and the modules they were not told about. Coaches learn about coach features the same way, not through a banner written by hand: an entry can carry `coaches` notes, optionally with an example (`example: "coach-buttons"` shows a coach button next to an ordinary one). Coaches see only versions with coach notes; admins see both. An account without a mark starts with everything seen, so a new club or a new coach gets no backlog; `202611071900_core_coach-news.sql` gave the accounts that existed before it the mark 0.6.0, so existing coaches see the coach notes of the next release.
 
+Players and parents get no card; they find *Help → What's new* (`/hilfe/neu`, `src/pages/whats-new.tsx`). It lists the admin items marked `everyone(…)` in `shared/changelog.ts`, per release, newest first, only releases after the club's start (`startedOn` in the club profile: the day the setup wizard was completed; `202611200400_core_club-started-on.sql` gave existing installations the day of their first access). Unknown start: all releases. When the start is known, the list ends with the app's birth announcement (club short name, day, twinkling stars that stand still with reduced motion). Mark an item `everyone` when players or parents notice it, and write it so that they understand it.
+
 ## Offline
 
 The service worker always tries the network first for API data (at most 6 seconds) and remembers the last answer. Without a network it returns that answer with the marker `x-kabine-offline`, and the app shows "You are offline. You are seeing the last loaded state." Sign-in, invitations, e-mail codes, the export and the connection check `/api/health` are never cached.
@@ -164,6 +166,8 @@ Without the module, games are entered by hand or imported from a table (CSV).
 ## Push and chat
 
 Web Push is an own implementation of VAPID (RFC 8292) and aes128gcm (RFC 8291) on Web Crypto, checked against the test vector of RFC 8291. Push jobs are created only for accounts with a registered device, and devices that answer 404 or 410 are deleted. The VAPID contact is the app's address, never a personal e-mail. Without `ORIGIN` the app remembers the address under which a device registered for push.
+
+Many parents never turn push on and never open their profile. So the home screen asks once per device, in a sheet "Turn on notifications?" about 1.5 s after start (after the start animation, if it runs), when this device can do push, has not blocked it and has no subscription yet (also "allowed but not subscribed"), and the server has a VAPID key; never in the admin views. Its button calls the browser's permission prompt directly (browsers show it only after a tap) and subscribes. "Later" or closing never asks again on that device; the profile keeps the switch. The marker is `kabine-push-asked` in localStorage, nothing on the server. On the iPhone only the installed app can do push, so a Safari tab is never asked; the install hint covers it. `PushPrompt` in `src/howto.tsx`, shared helpers in `src/push.ts`.
 
 Chat pushes are bundled: after the first message the chat room waits 20 seconds and then notifies everyone who is not connected and has not read yet.
 
@@ -372,9 +376,9 @@ A link from the parents does not block existing passkeys; the old one keeps work
 
 ## Admin/coach switch
 
-Admins who also coach mostly work as coaches. In the profile they switch "Work as admin" off and see the app like a coach.
+Admins who also coach mostly work as coaches. In the profile they switch "Work as admin" off and see the app like a coach. Admins who are parents (with or without a coach role) get the same switch; without a coach role they then see the app like other parents.
 
-The choice is stored on the account (`accounts.coach_mode`) and applies on all devices. In coach mode the server builds the actor without admin rights, and the admin views are off too. The way back is only the switch, which checks the person in the database, not the actor. The owner protection is not affected. Coach mode only takes effect while the person coaches a team (`loadActor`): an admin who lost their last coach role in coach mode would otherwise have no switch to come back.
+The choice is stored on the account (`accounts.coach_mode`) and applies on all devices. In coach mode the server builds the actor without admin rights, and the admin views are off too. The way back is only the switch, which checks the person in the database, not the actor. The owner protection is not affected. Coach mode only takes effect while the person coaches a team or has a linked child (`loadActor`): an admin who lost their last coach role or child in coach mode would otherwise have no switch to come back.
 
 ## Responses visible to the team
 

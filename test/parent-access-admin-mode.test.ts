@@ -68,7 +68,37 @@ describe("Admin/Trainer-Umschalter", () => {
     expect(me).toMatchObject({ isAdmin: true, adminSwitch: null });
   });
 
-  it("nur für Admins mit Trainerrolle", async () => {
+  it("Admin, der nur Elternteil ist: ausgeschaltet wie andere Eltern, eingeschaltet Admin", async () => {
+    const ada = await person("Ada", { admin: true });
+    await guardian(ada, mia);
+    const cookie = await loginAs(ada);
+    expect((await api("/session", { cookie })).body.me).toMatchObject({ isAdmin: true, adminSwitch: { coachMode: false } });
+    expect((await api("/admin/extra-events", { cookie })).status).toBe(200);
+
+    expect((await api("/profile/admin-mode", { method: "PUT", cookie, body: { coachMode: true } })).status).toBe(200);
+    const me = (await api("/session", { cookie })).body.me;
+    const parent = (await api("/session", { cookie: await loginAs(paula) })).body.me;
+    expect(me).toMatchObject({ isAdmin: false, adminSwitch: { coachMode: true }, manageableTeams: [], memberships: [] });
+    // Same view as another parent of the same child
+    for (const key of ["isAdmin", "children", "memberships", "manageableTeams", "helperTeams", "news"]) expect(me[key]).toEqual(parent[key]);
+    expect((await api("/admin/extra-events", { cookie })).status).toBe(403);
+
+    expect((await api("/profile/admin-mode", { method: "PUT", cookie, body: { coachMode: false } })).status).toBe(200);
+    expect((await api("/session", { cookie })).body.me).toMatchObject({ isAdmin: true, adminSwitch: { coachMode: false } });
+    expect((await api("/admin/extra-events", { cookie })).status).toBe(200);
+  });
+
+  it("wer im Eltern-Modus das letzte Kind verliert, ist wieder Admin statt ausgesperrt", async () => {
+    const ada = await person("Ada", { admin: true });
+    await guardian(ada, mia);
+    const cookie = await loginAs(ada);
+    await api("/profile/admin-mode", { method: "PUT", cookie, body: { coachMode: true } });
+    expect((await api("/session", { cookie })).body.me.isAdmin).toBe(false);
+    await exec("DELETE FROM guardianships WHERE guardian_id = ?", ada);
+    expect((await api("/session", { cookie })).body.me).toMatchObject({ isAdmin: true, adminSwitch: null });
+  });
+
+  it("nur für Admins mit Trainerrolle oder Kind", async () => {
     expect((await api("/profile/admin-mode", { method: "PUT", cookie: await loginAs(coach), body: { coachMode: true } })).status).toBe(403);
     const ada = await person("Ada", { admin: true });
     const cookie = await loginAs(ada);

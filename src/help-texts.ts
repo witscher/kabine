@@ -70,7 +70,7 @@ export const HELP = {
   }),
   adminMode: () => ({
     title: t`Work as admin`,
-    text: t`Off: you see the app like a coach, only with your teams and without administration. On: you see all teams and the administration. This applies on all your devices.`,
+    text: t`Off: you see the app like a coach or parent, only with your teams and children and without administration. On: you see all teams and the administration. This applies on all your devices.`,
   }),
   calendar: () => ({
     title: t`My events in your calendar`,

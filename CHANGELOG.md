@@ -2,7 +2,7 @@
 
 Release notes per version. The update workflow of a club's copy (`.github/workflows/update.yml`) shows the section of the new version in its pull request.
 
-Changes that are merged but not released yet go under *Unreleased*, one line each, written for the people who run a club's installation. On a release the section becomes `## vX.Y.Z`, with an entry in `shared/changelog.ts` for the app (`test/changelog.test.ts`).
+Changes that are merged but not released yet go under *Unreleased*, one line each, written for the people who run a club's installation. On a release the section becomes `## vX.Y.Z`, with an entry in `shared/changelog.ts` for the app (`test/changelog.test.ts`); items players and parents notice go in `everyone(…)` so that they also appear under *Help → What's new*.
 
 ## Unreleased
 
@@ -17,6 +17,9 @@ Changes that are merged but not released yet go under *Unreleased*, one line eac
 - Pushes about a person now address the recipient: parents read "Mia is in the squad" or "Is Mia coming?" instead of "You are in the squad"; with several children or when they play themselves, all of them are named in one push.
 - Setup wizard: the chosen sport could jump back to handball when the step reloaded its data in the background; the choice now stays.
 - New module, on by default for handball clubs like handball4all: game schedules from handball.net for clubs whose association runs its games in Handball360. The coach pastes the team's link from handball.net (or its calendar link) under *Team → Settings* and syncs with "Sync now"; the device fetches the team's public calendar. The schedule also syncs once a week by itself: when a coach opens the app and the last sync is 7 days or more ago, the coach's device syncs it in the background. Games link to their page on handball.net.
+- Admins who are parents (without coaching a team) now also get *Work as admin* in their profile; switched off, they see the app like other parents.
+- Notifications: instead of the hint card in the installed app, the home screen now asks once per device "Turn on notifications?", with a button that opens the system prompt directly. It only asks where push works (on the iPhone only in the installed app) and where it is not on or blocked yet; "Later" never asks again on that device. The demo privacy policy lists the new browser entry `kabine-push-asked`.
+- New page *Help → What's new* for players and parents: what changed for them in each release since the club started with the app, built from the release notes, with the app's birth announcement at the end. The start is the day the setup wizard was completed; existing installations take the day of their first access (database update).
 
 ## v0.8.0
 

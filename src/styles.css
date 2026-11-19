@@ -2993,6 +2993,42 @@ button.announcement-head {
   color: var(--text-2);
 }
 
+/* Help → What's new */
+.whats-new-items {
+  padding-left: 34px;
+}
+.whats-new-birth {
+  position: relative;
+  overflow: hidden;
+  text-align: center;
+  border: 2px dashed var(--yellow);
+  padding-top: 28px;
+  padding-bottom: 24px;
+}
+.whats-new-birth .birth-title {
+  font-family: var(--font-cond);
+  font-size: 28px;
+  margin: 4px 0 8px;
+}
+.whats-new-birth .birth-facts {
+  font-weight: 600;
+  line-height: 1.6;
+  margin: 0 0 10px;
+}
+.birth-star {
+  position: absolute;
+  color: var(--yellow);
+  animation: birth-twinkle 3s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes birth-twinkle {
+  0%, 100% { opacity: 0.35; transform: scale(0.8) rotate(0deg); }
+  50% { opacity: 1; transform: scale(1.15) rotate(20deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .birth-star { animation: none; opacity: 0.8; }
+}
+
 /* Head of the big event card as a link (home): keeps the colours */
 a.card-head-link {
   text-decoration: none;

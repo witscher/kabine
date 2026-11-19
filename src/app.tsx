@@ -26,6 +26,7 @@ import { ConfirmHost, Spinner, Toasts } from "./ui";
 const TeamStatsPage = lazyPage(() => import("./pages/stats").then((m) => m.TeamStatsPage));
 const MyStatsPage = lazyPage(() => import("./pages/stats").then((m) => m.MyStatsPage));
 const HelpPage = lazyPage(() => import("./pages/help").then((m) => m.HelpPage));
+const WhatsNewPage = lazyPage(() => import("./pages/whats-new").then((m) => m.WhatsNewPage));
 const SquadPage = lazyPage(() => import("./pages/squad").then((m) => m.SquadPage));
 const ChatListPage = lazyPage(() => import("./pages/chat").then((m) => m.ChatListPage));
 const ChatRoomPage = lazyPage(() => import("./pages/chat").then((m) => m.ChatRoomPage));
@@ -282,6 +283,7 @@ export function App() {
               <Route path="/team/:id/plaene/:planId" component={PlanEditorPage} />
               <Route path="/team/:id/termin-neu" component={SpecialEventPage} />
               <Route path="/hilfe" component={HelpPage} />
+              <Route path="/hilfe/neu" component={WhatsNewPage} />
               <Route path="/verwaltung" component={AdminPage} />
               <Route path="/verwaltung/personen" component={AdminPersonsPage} />
               <Route path="/verwaltung/rundnachricht" component={AdminBroadcastPage} />

@@ -1,7 +1,8 @@
 // Release notes the app shows to admins after an update (src/news.tsx), translated like every text.
 // CHANGELOG.md has the full notes for GitHub and the update pull requests; every version there needs an
 // entry here and the other way round, newest first (test/changelog.test.ts). The first entry is the
-// installed version (package.json).
+// installed version (package.json). Items players and parents notice too are wrapped in `everyone(…)`;
+// Help → What's new (src/pages/whats-new.tsx) lists only those.
 import { t } from "@lingui/core/macro";
 
 export interface ChangelogEntry {
@@ -9,14 +10,22 @@ export interface ChangelogEntry {
   version: string;
   /** Release day, YYYY-MM-DD */
   date: string;
-  /** A few short lines for admins: what changes for the club. */
-  items: () => string[];
+  /** A few short lines for admins: what changes for the club. Wrap the ones players and parents notice in `everyone(…)`. */
+  items: () => ChangelogItem[];
   /**
    * Lines for coaches (and admins) about coach features, shown to them in the news card after an update
    * (worker/domain/news.ts). Optional; most releases have none.
    */
   coaches?: () => CoachNote[];
 }
+
+/** A release note for admins; `everyone` marks one that players and parents notice too (Help → What's new). */
+export type ChangelogItem = string | { text: string; everyone: true };
+
+/** Marks a release note that players and parents notice too: written so that they understand it. */
+export const everyone = (text: string): ChangelogItem => ({ text, everyone: true });
+
+export const itemText = (item: ChangelogItem): string => (typeof item === "string" ? item : item.text);
 
 /** A release note for coaches; `example` shows a sample under the text (src/news.tsx). */
 export interface CoachNote {
@@ -29,12 +38,12 @@ export const CHANGELOG: readonly ChangelogEntry[] = [
     version: "0.8.0",
     date: "2026-11-10",
     items: () => [
-      t`Statistics: coaches find them on the team page (training, games, helpers), players and parents under Profile → My statistics.`,
+      everyone(t`Statistics: coaches find them on the team page (training, games, helpers), players and parents under Profile → My statistics.`),
       t`Duties that need prior knowledge can now be approved by an admin, under Administration → Approvals. Youth referees are such an approval now; existing youth referees were taken over.`,
       t`New team setting "Whole team at games": every player comes along, the nomination only decides who plays.`,
       t`Settings explain themselves behind a small "i", with an example.`,
-      t`Helpers tab: all your teams together, a tap on a team filters.`,
-      t`When a child is marked unexcused after an event, the parents get a push at once.`,
+      everyone(t`Helpers tab: all your teams together, a tap on a team filters.`),
+      everyone(t`When a child is marked unexcused after an event, the parents get a push at once.`),
       t`New: Administration → Protocol shows who removed an access, changed admin rights, members or game schedules, and when.`,
       t`Several security fixes for sign-in codes, personal links, restoring an export and the chat.`,
     ],
@@ -52,7 +61,7 @@ export const CHANGELOG: readonly ChangelogEntry[] = [
     date: "2026-11-07",
     items: () => [
       t`Coach buttons: what only coaches and other leads can do is marked in the club's main colour with a whistle, in views players and parents see too.`,
-      t`Chat: the chat list shows how many messages are unread and puts chats with news on top; a chat opens at the first unread message.`,
+      everyone(t`Chat: the chat list shows how many messages are unread and puts chats with news on top; a chat opens at the first unread message.`),
       t`Coaches now also see what is new for them after an update, in this card.`,
     ],
     coaches: () => [
@@ -103,7 +112,7 @@ export const CHANGELOG: readonly ChangelogEntry[] = [
     items: () => [
       t`Import: teams, coaches and players from your club's Excel or CSV lists, checked before anything is created. Under Administration → Import and in the setup wizard.`,
       t`The same page takes back an export of Kabine, for example when moving to a new installation. You choose what to take over; nothing is deleted.`,
-      t`Only admins change their own name; everyone else asks their coach or an admin.`,
+      everyone(t`Only admins change their own name; everyone else asks their coach or an admin.`),
     ],
   },
   {
@@ -127,7 +136,7 @@ export const CHANGELOG: readonly ChangelogEntry[] = [
     version: "0.2.1",
     date: "2026-10-20",
     items: () => [
-      t`Player invitation links opened on a signed-in device lead straight to the app; nobody can pick a teammate's name there.`,
+      everyone(t`Player invitation links opened on a signed-in device lead straight to the app; nobody can pick a teammate's name there.`),
       t`Update pull requests on GitHub now open reliably. If your copy is on 0.2.0, replace the update workflow once, as the pull request says.`,
     ],
   },
@@ -138,14 +147,14 @@ export const CHANGELOG: readonly ChangelogEntry[] = [
       t`Updates with database changes pause the app for about a minute and note a restore point. See Administration → Updates and maintenance, with the maintenance switch.`,
       t`Coaches, leads, staff and organisers can say “I'm not there” without cancelling the event.`,
       t`After an event coaches record attendance: present, excused or unexcused.`,
-      t`Events cancelled for everyone now read “Not taking place”.`,
-      t`Invitation links are for setting up only; opened again, they lead straight to the app.`,
+      everyone(t`Events cancelled for everyone now read “Not taking place”.`),
+      everyone(t`Invitation links are for setting up only; opened again, they lead straight to the app.`),
     ],
   },
   {
     version: "0.1.0",
     date: "2026-10-18",
-    items: () => [t`First release of Kabine.`],
+    items: () => [everyone(t`First release of Kabine.`)],
   },
 ];
 
@@ -160,6 +169,17 @@ export function compareVersions(a: string, b: string): number {
     if (d) return d;
   }
   return 0;
+}
+
+/**
+ * Help → What's new: the versions with notes for players and parents, released after the club started with the
+ * app (club profile `startedOn`, YYYY-MM-DD; null: all of them), newest first.
+ */
+export function everyoneEntries(startedOn: string | null, entries: readonly ChangelogEntry[] = CHANGELOG): { version: string; date: string; items: string[] }[] {
+  return entries
+    .filter((e) => !startedOn || e.date > startedOn)
+    .map((e) => ({ version: e.version, date: e.date, items: e.items().flatMap((i) => (typeof i === "string" ? [] : [i.text])) }))
+    .filter((e) => e.items.length > 0);
 }
 
 /** Entries newer than the version someone has seen. */

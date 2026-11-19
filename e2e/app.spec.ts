@@ -14,6 +14,10 @@ interface User {
 
 async function newUser(browser: import("@playwright/test").Browser): Promise<User> {
   const context = await browser.newContext();
+  // The one-time push prompt only in its own test
+  await context.addInitScript(() => {
+    if (!sessionStorage.getItem("e2e-push")) localStorage.setItem("kabine-push-asked", "1");
+  });
   const page = await context.newPage();
   const cdp = await context.newCDPSession(page);
   await cdp.send("WebAuthn.enable");
@@ -705,6 +709,15 @@ test("Hilfe und Feedback: Spielerin im eigenen Reiter, Admin unter Verwaltung", 
   await faq.getByText("Ich habe ein neues Handy und komme nicht mehr in die App.").click();
   await expect(faq.getByText(/persönlichen Link \(7 Tage/)).toBeVisible();
   await expect(page.getByText(/Kabine ist freie Software/)).toBeVisible();
+  // Was ist neu: Hinweise für Spieler und Eltern aus den Versionshinweisen; Start des Vereins noch unbekannt, also alle
+  await page.getByRole("link", { name: /Was ist neu/ }).click();
+  await expect(page.getByRole("heading", { name: "Was ist neu" })).toBeVisible();
+  await expect(page.getByText("Erste Version von Kabine.")).toBeVisible();
+  await expect(page.getByText(/Für alle abgesagte Termine heißen jetzt/)).toBeVisible();
+  await expect(page.getByText(/Verwaltung → Protokoll/)).toHaveCount(0);
+  await expect(page.getByRole("region", { name: "Start der App" })).toHaveCount(0);
+  await page.goBack();
+  await expect(page.getByRole("heading", { name: "Hilfe und Feedback" })).toBeVisible();
   // Versand abfangen: E2E verschickt keine Mails
   let sent = "";
   await page.route("**/api/feedback", async (route) => {
@@ -1569,6 +1582,12 @@ test("Einrichtungsassistent: Admin geht alle Schritte durch", async () => {
   await expect(page.getByRole("heading", { name: "Die App ist eingerichtet" })).toBeVisible();
   await page.goto("/verwaltung");
   await expect(page.getByText("Einrichtung nicht abgeschlossen")).toHaveCount(0);
+  // Mit dem Abschluss startet der Verein: Was ist neu zählt ab heute und endet mit der Geburtsanzeige
+  await page.goto("/hilfe/neu");
+  await expect(page.getByRole("region", { name: "Start der App" })).toContainText("Die App ist geboren");
+  await expect(page.getByText("Erste Version von Kabine.")).toHaveCount(0);
+  if (process.env.E2E_SHOTS) await page.screenshot({ path: `${process.env.E2E_SHOTS}/was-ist-neu.png`, fullPage: true });
+  await page.goto("/verwaltung");
   // Opened again after the last step: from the start, and the last step offers to start over
   await page.getByRole("link", { name: /Einrichtungsassistent/ }).click();
   await expect(page.getByText("Einrichtung · Schritt 1 von 9")).toBeVisible();
@@ -2023,6 +2042,46 @@ test("Statistik: Trainer über die Teamseite, Spielerin im Profil", async () => 
   await expect(player.page.getByRole("region", { name: "Training" })).toBeVisible();
   // The team statistics stay with the coaches
   expect((await player.page.request.get("/api/teams/1/stats")).status()).toBe(403);
+});
+
+test("Einmalige Push-Abfrage: erscheint auf der Startseite, nach „Später“ nicht wieder", async () => {
+  // Own tab: headless Chromium reports notifications as blocked, here they are still undecided
+  const p = await player.context.newPage();
+  await p.addInitScript(() => {
+    sessionStorage.setItem("e2e-push", "1");
+    Object.defineProperty((globalThis as unknown as { Notification: object }).Notification, "permission", { get: () => "default" });
+  });
+  await p.goto("/");
+  await p.evaluate(() => localStorage.removeItem("kabine-push-asked"));
+  await p.reload();
+  const sheet = p.getByRole("dialog", { name: "Benachrichtigungen einschalten?" });
+  await expect(sheet).toBeVisible();
+  await expect(sheet.getByRole("button", { name: "Einschalten" })).toBeVisible();
+  if (process.env.E2E_SHOTS) await p.screenshot({ path: `${process.env.E2E_SHOTS}/push-abfrage.png` });
+  await sheet.getByRole("button", { name: "Später" }).click();
+  await expect(sheet).toHaveCount(0);
+  expect(await p.evaluate(() => localStorage.getItem("kabine-push-asked"))).toBe("1");
+  await p.reload();
+  await p.waitForTimeout(2500);
+  await expect(p.getByRole("dialog", { name: "Benachrichtigungen einschalten?" })).toHaveCount(0);
+  await p.close();
+});
+
+test("Einmalige Push-Abfrage: nicht, wenn Benachrichtigungen blockiert sind", async () => {
+  // Own tab, so the blocked permission stays there
+  const p = await coach.context.newPage();
+  await p.addInitScript(() => {
+    sessionStorage.setItem("e2e-push", "1");
+    // Blocked on this device: nothing to ask, the device counts as asked
+    Object.defineProperty((globalThis as unknown as { Notification: object }).Notification, "permission", { get: () => "denied" });
+  });
+  await p.goto("/");
+  await p.evaluate(() => localStorage.removeItem("kabine-push-asked"));
+  await p.reload();
+  await p.waitForTimeout(2500);
+  await expect(p.getByRole("dialog", { name: "Benachrichtigungen einschalten?" })).toHaveCount(0);
+  expect(await p.evaluate(() => localStorage.getItem("kabine-push-asked"))).toBe("1");
+  await p.close();
 });
 
 test("Startseite: nächster Termin heute mit ruhiger Animation, der gelbe Kopf öffnet den Termin", async () => {

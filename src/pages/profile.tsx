@@ -7,7 +7,7 @@ import { useLocation } from "preact-iso";
 import type { ChildLimits, ChildPermission, ChildPermissions, NotificationTopic, PersonRef } from "../../shared/types";
 import { describeLimits } from "../child-limits";
 import { childPermissionLabels, notificationTopicLabels } from "../../shared/types";
-import { api, ApiError, errorMessage } from "../api";
+import { api, errorMessage } from "../api";
 import { personName, stamp, joinNames } from "../format";
 import { AvatarEditor, PersonAvatar } from "../avatar";
 import { EmailCodeForm, isEmail } from "../email";
@@ -18,20 +18,13 @@ import { invalidate, useQuery } from "../store";
 import { Button, confirmDialog, copyText, ErrorBox, Notice, SavedNote, shareLink, Sheet, Spinner, SwitchRow, TextField, toast, TopBar, useDocumentTitle, useSaving } from "../ui";
 import { renderSVG } from "uqr";
 import { InstallHint } from "./login";
+import { enablePush, pushSupported } from "../push";
 
 const roleLabels = (): Record<string, string> => ({
   player: t({ message: "Player", context: "role" }),
   coach: t({ message: "Coach", context: "role" }),
   helper: t({ message: "Stand-in", context: "role" }),
 });
-
-function urlBase64ToUint8Array(base64: string): Uint8Array<ArrayBuffer> {
-  const padding = "=".repeat((4 - (base64.length % 4)) % 4);
-  const raw = atob((base64 + padding).replace(/-/g, "+").replace(/_/g, "/"));
-  const out = new Uint8Array(raw.length);
-  for (let i = 0; i < raw.length; i++) out[i] = raw.charCodeAt(i);
-  return out;
-}
 
 type PushState = "loading" | "unsupported" | "needs-install" | "denied" | "off" | "on";
 
@@ -40,7 +33,7 @@ function PushCard() {
   const [state, setState] = useState<PushState>("loading");
 
   const check = async () => {
-    if (!("serviceWorker" in navigator) || !("PushManager" in window) || !("Notification" in window)) {
+    if (!pushSupported()) {
       setState(isIos() && !isStandalone() ? "needs-install" : "unsupported");
       return;
     }
@@ -58,23 +51,10 @@ function PushCard() {
   }, []);
 
   const enable = async () => {
-    if (!me.vapidPublicKey) throw new Error(t`Push is not set up on the server yet.`);
-    const permission = await Notification.requestPermission();
+    const permission = await enablePush(me.vapidPublicKey);
     if (permission !== "granted") {
       setState(permission === "denied" ? "denied" : "off");
       return;
-    }
-    const reg = await navigator.serviceWorker.ready;
-    const key = urlBase64ToUint8Array(me.vapidPublicKey);
-    let sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: key });
-    try {
-      await api.post("/push/subscriptions", sub.toJSON());
-    } catch (err) {
-      if (!(err instanceof ApiError && err.code === "endpoint_taken")) throw err;
-      // Endpoint known for another account with other keys: a fresh subscription gets a new endpoint
-      await sub.unsubscribe();
-      sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: key });
-      await api.post("/push/subscriptions", sub.toJSON());
     }
     setState("on");
     toast(t`Notifications are on.`);
@@ -191,8 +171,8 @@ function NameSheet({ onClose }: { onClose: () => void }) {
   );
 }
 
-/** Admin who is also a coach: suspend admin rights and work as a coach (applies to all devices). */
-function AdminModeSwitch({ coachMode }: { coachMode: boolean }) {
+/** Admin who is also a coach or a parent: suspend admin rights and work as such (applies to all devices). */
+function AdminModeSwitch({ coachMode, coach }: { coachMode: boolean; coach: boolean }) {
   const { refresh } = useSession();
   const { route } = useLocation();
   return (
@@ -206,7 +186,7 @@ function AdminModeSwitch({ coachMode }: { coachMode: boolean }) {
             await api.put("/profile/admin-mode", { coachMode: !admin });
             invalidate("/");
             await refresh();
-            toast(admin ? t`Admin view on.` : t`You are now working as a coach.`);
+            toast(admin ? t`Admin view on.` : coach ? t`You are now working as a coach.` : t`You now see the app like other parents.`);
             route("/profil", true);
           }}
         />
@@ -252,7 +232,7 @@ export function ProfilePage() {
 
         <AvatarEditor personId={me.person.id} name={personName(me.person)} view="self" />
 
-        {me.adminSwitch ? <AdminModeSwitch coachMode={me.adminSwitch.coachMode} /> : null}
+        {me.adminSwitch ? <AdminModeSwitch coachMode={me.adminSwitch.coachMode} coach={me.memberships.some((m) => m.role === "coach")} /> : null}
 
         {me.children.length ? (
           <section class="stack-sm" aria-label={t`My children`}>
