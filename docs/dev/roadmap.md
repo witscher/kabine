@@ -64,7 +64,7 @@ Each milestone ends with typecheck, unit tests and e2e green, a commit on `main`
 
 ## Release 0.9 (November 2026)
 
-In progress: all open entries of `docs/dev/upstream-tasks.md`, in parallel branches: the polls module (`modules/polls/`, beta), the helper duties block (help out, rotation, duties assigned by the coach, duties at club-wide events), attendance modes of special events and home/events polish, the one-time push prompt, the "Work as admin" switch for parent admins, the "What's new" page for players and parents, and the handball.net module out of beta with a weekly sync from the coach's device. Already on `main`: server errors, lower read load, push texts per recipient, handball.net. Then a release candidate is tested on the test installation, and only then is 0.9.0 released.
+Released as v0.9.0 on 19 November 2026, after two release candidates on the test installation (deployed by hand, without a public tag, see `docs/dev/decisions.md`, "Release candidates"). All open entries of `docs/dev/upstream-tasks.md` are ported: the polls module (`modules/polls/`, beta), the helper duties block, attendance modes of special events, home and events polish, the one-time push prompt, "Work as admin" for parent admins and the "What's new" page; also the handball.net module out of beta with a weekly sync from the coach's device, the parent link for one child, server errors, lower read load, push texts per recipient, and sign-in and invitations without anonymous KV writes.
 
 ## Requested for the end (also for the original club app)
 

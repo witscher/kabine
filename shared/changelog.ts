@@ -35,6 +35,32 @@ export interface CoachNote {
 
 export const CHANGELOG: readonly ChangelogEntry[] = [
   {
+    version: "0.9.0",
+    date: "2026-11-19",
+    items: () => [
+      t`New module (beta): polls. Coaches ask their team, admins the whole club: choose an answer, find a date or collect orders with payment. Switch it on under Administration → Modules.`,
+      t`Game schedules from handball.net for associations on Handball360, like handball4all; the schedule also syncs once a week when a coach opens the app.`,
+      t`Helper duties: helpers from other teams, teams taking turns game by game, duties the coach assigns, and helper duties at club events.`,
+      everyone(t`Special events can be without responses, optional, or with registration per family (each family says how many come).`),
+      everyone(t`An event that has started stays under Upcoming until it ends; when the next event is today, its card is highlighted.`),
+      everyone(t`The app asks once on each device whether to turn on notifications.`),
+      everyone(t`Notifications about your child now name your child, e.g. "Is Mia coming?".`),
+      everyone(t`New: Help → What's new shows what changed for players and parents.`),
+      t`Parent link for one child: coaches create it at the player (admins also under Administration → People); it is valid for both parents of that child.`,
+      t`Admins who are only parents can switch "Work as admin" off in their profile.`,
+      t`Unexpected errors show a general message, under overload a hint to try again later; from the third error of a day the owner gets an e-mail.`,
+      t`Security: opening the sign-in page or an invitation link no longer uses up the account's daily storage writes.`,
+    ],
+    coaches: () => [
+      {
+        text: t`New: a parent link for one child. Open the player in your squad and tap "Parent link for …": you get a link with a text to send to the parents directly, e.g. when they are not in the group chat. It links only this child, works for both parents and is valid for 7 days. Once your team is set up, the team's parent link points you to this instead.`,
+      },
+      {
+        text: t`Helper duties: a duty type can now be assigned by the coach, then nobody signs up themselves and you pick the people. Duties can also come from other teams, e.g. youth teams wiping the floor at adult games; those teams find them in the Helpers tab under "Help out".`,
+      },
+    ],
+  },
+  {
     version: "0.8.0",
     date: "2026-11-10",
     items: () => [

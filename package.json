@@ -1,7 +1,7 @@
 {
   "name": "kabine",
   "private": true,
-  "version": "0.8.0",
+  "version": "0.9.0",
   "type": "module",
   "imports": {
     "#i18n": "./worker/i18n.ts"
@@ -85,7 +85,7 @@
   "cloudflare": {
     "bindings": {
       "ADMIN_BOOTSTRAP_TOKEN": {
-        "description": "A password you choose (at least 16 characters); you need it once to become the first admin. **After the deploy, first give the app the club's address**, e.g. `app.your-club.org` (*Workers & Pages → this Worker → Settings → Domains & Routes → Add → Custom domain*; the club's domain must be managed in Cloudflare), because passkeys are bound to it. Then open that address: the app asks for this password and sets up the first admin. [Step by step](https://github.com/witscher/kabine/blob/main/docs/install.md)"
+        "description": "A password you choose (at least 16 characters); you need it once to become the first admin. **After the deploy, first give the app the club's address**, e.g. `app.your-club.org` (*Workers & Pages \u2192 this Worker \u2192 Settings \u2192 Domains & Routes \u2192 Add \u2192 Custom domain*; the club's domain must be managed in Cloudflare), because passkeys are bound to it. Then open that address: the app asks for this password and sets up the first admin. [Step by step](https://github.com/witscher/kabine/blob/main/docs/install.md)"
       },
       "DB": {
         "description": "The club's data (D1 database)."

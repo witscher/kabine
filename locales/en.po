@@ -508,6 +508,10 @@ msgstr "Enter meeting point · {teamName}"
 msgid "bank transfer to {holder}"
 msgstr "bank transfer to {holder}"
 
+#: shared/changelog.ts
+msgid "Special events can be without responses, optional, or with registration per family (each family says how many come)."
+msgstr "Special events can be without responses, optional, or with registration per family (each family says how many come)."
+
 #: src/pages/admin.tsx
 #: src/pages/team.tsx
 #: src/pages/team.tsx
@@ -4009,6 +4013,10 @@ msgstr "More people are already signed up. Please remove someone first."
 msgid "Please choose an answer."
 msgstr "Please choose an answer."
 
+#: shared/changelog.ts
+msgid "An event that has started stays under Upcoming until it ends; when the next event is today, its card is highlighted."
+msgstr "An event that has started stays under Upcoming until it ends; when the next event is today, its card is highlighted."
+
 #: src/pages/admin.tsx
 msgid "Game (min.)"
 msgstr "Game (min.)"
@@ -4433,6 +4441,10 @@ msgstr "Check what was read. Correct names, birth years and roles where needed; 
 #: worker/routes/plans.ts
 msgid "Training now {weekdays} {startsAt}–{endsAt}, {location}."
 msgstr "Training now {weekdays} {startsAt}–{endsAt}, {location}."
+
+#: shared/changelog.ts
+msgid "Helper duties: helpers from other teams, teams taking turns game by game, duties the coach assigns, and helper duties at club events."
+msgstr "Helper duties: helpers from other teams, teams taking turns game by game, duties the coach assigns, and helper duties at club events."
 
 #: src/app.tsx
 msgid "(unread)"
@@ -5672,6 +5684,10 @@ msgstr "Example:"
 msgid "Search by name"
 msgstr "Search by name"
 
+#: shared/changelog.ts
+msgid "Unexpected errors show a general message, under overload a hint to try again later; from the third error of a day the owner gets an e-mail."
+msgstr "Unexpected errors show a general message, under overload a hint to try again later; from the third error of a day the owner gets an e-mail."
+
 #: modules/polls/app/pages.tsx
 msgid "Please enter a price for every item, e.g. 8.50."
 msgstr "Please enter a price for every item, e.g. 8.50."
@@ -6472,6 +6488,10 @@ msgstr "Statistics of {child}"
 msgid "Remove {teamName}"
 msgstr "Remove {teamName}"
 
+#: shared/changelog.ts
+msgid "Game schedules from handball.net for associations on Handball360, like handball4all; the schedule also syncs once a week when a coach opens the app."
+msgstr "Game schedules from handball.net for associations on Handball360, like handball4all; the schedule also syncs once a week when a coach opens the app."
+
 #: src/special-attendance.tsx
 msgid "I'm not coming"
 msgstr "I'm not coming"
@@ -7170,6 +7190,10 @@ msgstr "“One vote per family” can no longer be switched."
 #: src/pages/home.tsx
 msgid "attending"
 msgstr "attending"
+
+#: shared/changelog.ts
+msgid "The app asks once on each device whether to turn on notifications."
+msgstr "The app asks once on each device whether to turn on notifications."
 
 #: src/pages/event.tsx
 #: src/pages/event.tsx
@@ -8240,6 +8264,10 @@ msgstr "Please enter valid numbers (deadlines 0 to 168 hours)."
 #: src/pages/chat.tsx
 msgid "This chat does not exist or you have no access."
 msgstr "This chat does not exist or you have no access."
+
+#: shared/changelog.ts
+msgid "Admins who are only parents can switch \"Work as admin\" off in their profile."
+msgstr "Admins who are only parents can switch \"Work as admin\" off in their profile."
 
 #: src/pages/event.tsx
 msgid "Cancel event"
@@ -9489,6 +9517,10 @@ msgstr "{name} is missing from the game"
 msgid "Continue the setup wizard"
 msgstr "Continue the setup wizard"
 
+#: shared/changelog.ts
+msgid "New: Help → What's new shows what changed for players and parents."
+msgstr "New: Help → What's new shows what changed for players and parents."
+
 #: src/pages/home.tsx
 msgid "Past events"
 msgstr "Past events"
@@ -9724,6 +9756,10 @@ msgstr "Tell your coach. They will set you inactive or away long-term for this w
 #: src/pages/plans.tsx
 msgid "All future events of this training time and their responses will be deleted."
 msgstr "All future events of this training time and their responses will be deleted."
+
+#: shared/changelog.ts
+msgid "Parent link for one child: coaches create it at the player (admins also under Administration → People); it is valid for both parents of that child."
+msgstr "Parent link for one child: coaches create it at the player (admins also under Administration → People); it is valid for both parents of that child."
 
 #: modules/carpools/worker/routes.ts
 msgid "Looking for a lift for {name}: {game} (entered by {coach})."
@@ -10537,6 +10573,10 @@ msgstr "Team staff such as a physio or team manager see who accepted or declined
 #: modules/carpools/app/card.tsx
 msgid "{drivers, plural, one {# driver · {freeSeats} free} other {# drivers · {freeSeats} free}}"
 msgstr "{drivers, plural, one {# driver · {freeSeats} free} other {# drivers · {freeSeats} free}}"
+
+#: shared/changelog.ts
+msgid "Helper duties: a duty type can now be assigned by the coach, then nobody signs up themselves and you pick the people. Duties can also come from other teams, e.g. youth teams wiping the floor at adult games; those teams find them in the Helpers tab under \"Help out\"."
+msgstr "Helper duties: a duty type can now be assigned by the coach, then nobody signs up themselves and you pick the people. Duties can also come from other teams, e.g. youth teams wiping the floor at adult games; those teams find them in the Helpers tab under \"Help out\"."
 
 #: src/pages/games.tsx
 msgid "The game schedule was only just synced. Please try again in a few minutes."
@@ -11554,6 +11594,10 @@ msgstr "Someone has booked in the meantime. Please try again."
 msgid "Your reason: “{myReason}”"
 msgstr "Your reason: “{myReason}”"
 
+#: shared/changelog.ts
+msgid "Notifications about your child now name your child, e.g. \"Is Mia coming?\"."
+msgstr "Notifications about your child now name your child, e.g. \"Is Mia coming?\"."
+
 #: src/pages/team.tsx
 msgid "Important: everyone uses the link only once, for themselves. Please select only your own name."
 msgstr "Important: everyone uses the link only once, for themselves. Please select only your own name."
@@ -11960,6 +12004,10 @@ msgstr "No polls"
 #: worker/chat/room.ts
 msgid "To everyone in chat {teamName}"
 msgstr "To everyone in chat {teamName}"
+
+#: shared/changelog.ts
+msgid "New module (beta): polls. Coaches ask their team, admins the whole club: choose an answer, find a date or collect orders with payment. Switch it on under Administration → Modules."
+msgstr "New module (beta): polls. Coaches ask their team, admins the whole club: choose an answer, find a date or collect orders with payment. Switch it on under Administration → Modules."
 
 #: src/pages/home.tsx
 msgid "Create a training plan in the Team section, then the events will appear here."
@@ -12427,6 +12475,10 @@ msgstr "Chat messages"
 #: src/pages/event.tsx
 msgid "Applies to all trainings in this training slot. Accepting individual sessions remains possible."
 msgstr "Applies to all trainings in this training slot. Accepting individual sessions remains possible."
+
+#: shared/changelog.ts
+msgid "Security: opening the sign-in page or an invitation link no longer uses up the account's daily storage writes."
+msgstr "Security: opening the sign-in page or an invitation link no longer uses up the account's daily storage writes."
 
 #: modules/polls/app/pages.tsx
 msgid "QR code for the banking app"
@@ -14898,6 +14950,10 @@ msgstr "Enter by hand instead"
 #: src/pages/stats.tsx
 msgid "Appearances"
 msgstr "Appearances"
+
+#: shared/changelog.ts
+msgid "New: a parent link for one child. Open the player in your squad and tap \"Parent link for …\": you get a link with a text to send to the parents directly, e.g. when they are not in the group chat. It links only this child, works for both parents and is valid for 7 days. Once your team is set up, the team's parent link points you to this instead."
+msgstr "New: a parent link for one child. Open the player in your squad and tap \"Parent link for …\": you get a link with a text to send to the parents directly, e.g. when they are not in the group chat. It links only this child, works for both parents and is valid for 7 days. Once your team is set up, the team's parent link points you to this instead."
 
 #: src/pages/plans.tsx
 msgid "Please enter a deadline between 0 and 168 hours."

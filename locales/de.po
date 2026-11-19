@@ -551,6 +551,11 @@ msgstr "Treffpunkt eintragen · {teamName}"
 msgid "bank transfer to {holder}"
 msgstr "Überweisung an {holder}"
 
+# ai
+#: shared/changelog.ts
+msgid "Special events can be without responses, optional, or with registration per family (each family says how many come)."
+msgstr "Sondertermine gibt es jetzt ohne Zusage, mit freiwilliger Teilnahme oder mit Anmeldung je Familie (jede Familie sagt, wie viele kommen)."
+
 #: src/pages/admin.tsx
 #: src/pages/team.tsx
 #: src/pages/team.tsx
@@ -4387,6 +4392,11 @@ msgid "Please choose an answer."
 msgstr "Bitte wähle eine Antwort."
 
 # ai
+#: shared/changelog.ts
+msgid "An event that has started stays under Upcoming until it ends; when the next event is today, its card is highlighted."
+msgstr "Ein begonnener Termin bleibt unter Kommend, bis er endet; ist der nächste Termin heute, wird seine Karte hervorgehoben."
+
+# ai
 #: src/pages/admin.tsx
 msgid "Game (min.)"
 msgstr "Spiel (Min.)"
@@ -4855,6 +4865,11 @@ msgstr "Prüfe, was gelesen wurde. Korrigiere Namen, Jahrgänge und Rollen, wo n
 #: worker/routes/plans.ts
 msgid "Training now {weekdays} {startsAt}–{endsAt}, {location}."
 msgstr "Training jetzt {weekdays} {startsAt}–{endsAt} Uhr, {location}."
+
+# ai
+#: shared/changelog.ts
+msgid "Helper duties: helpers from other teams, teams taking turns game by game, duties the coach assigns, and helper duties at club events."
+msgstr "Helferdienste: Helfer aus anderen Mannschaften, Mannschaften im Wechsel von Spiel zu Spiel, Dienste, die der Trainer einteilt, und Helferdienste bei Vereinsveranstaltungen."
 
 #: src/app.tsx
 msgid "(unread)"
@@ -6219,6 +6234,11 @@ msgid "Search by name"
 msgstr "Name suchen"
 
 # ai
+#: shared/changelog.ts
+msgid "Unexpected errors show a general message, under overload a hint to try again later; from the third error of a day the owner gets an e-mail."
+msgstr "Unerwartete Fehler zeigen eine allgemeine Meldung, bei Überlast den Hinweis, es später noch einmal zu versuchen; ab dem dritten Fehler eines Tages bekommt der Eigentümer eine E-Mail."
+
+# ai
 #: modules/polls/app/pages.tsx
 msgid "Please enter a price for every item, e.g. 8.50."
 msgstr "Bitte gib zu jedem Artikel einen Preis an, z. B. 8,50."
@@ -7104,6 +7124,11 @@ msgid "Remove {teamName}"
 msgstr "{teamName} entfernen"
 
 # ai
+#: shared/changelog.ts
+msgid "Game schedules from handball.net for associations on Handball360, like handball4all; the schedule also syncs once a week when a coach opens the app."
+msgstr "Spielpläne von handball.net für Verbände auf Handball360, wie bei handball4all; der Spielplan gleicht sich außerdem einmal pro Woche ab, wenn ein Trainer die App öffnet."
+
+# ai
 #: src/special-attendance.tsx
 msgid "I'm not coming"
 msgstr "Ich komme nicht"
@@ -7874,6 +7899,11 @@ msgstr "„Eine Stimme je Familie“ lässt sich nicht mehr umstellen."
 #: src/pages/home.tsx
 msgid "attending"
 msgstr "nehmen teil"
+
+# ai
+#: shared/changelog.ts
+msgid "The app asks once on each device whether to turn on notifications."
+msgstr "Die App fragt auf jedem Gerät einmal, ob Benachrichtigungen eingeschaltet werden sollen."
 
 #: src/pages/event.tsx
 #: src/pages/event.tsx
@@ -9056,6 +9086,11 @@ msgstr "Bitte gültige Zahlen eingeben (Fristen 0 bis 168 Stunden)."
 #: src/pages/chat.tsx
 msgid "This chat does not exist or you have no access."
 msgstr "Diesen Chat gibt es nicht oder du hast keinen Zugriff."
+
+# ai
+#: shared/changelog.ts
+msgid "Admins who are only parents can switch \"Work as admin\" off in their profile."
+msgstr "Admins, die nur Eltern sind, können „Als Admin arbeiten“ in ihrem Profil ausschalten."
 
 #: src/pages/event.tsx
 msgid "Cancel event"
@@ -10402,6 +10437,11 @@ msgstr "{name} fehlt beim Spiel"
 msgid "Continue the setup wizard"
 msgstr "Einrichtungsassistent fortsetzen"
 
+# ai
+#: shared/changelog.ts
+msgid "New: Help → What's new shows what changed for players and parents."
+msgstr "Neu: Hilfe → Was ist neu zeigt, was sich für Spieler und Eltern geändert hat."
+
 #: src/pages/home.tsx
 msgid "Past events"
 msgstr "Vergangene Termine"
@@ -10661,6 +10701,11 @@ msgstr "Sag es deinem Trainer. Er setzt dich inaktiv oder für diesen Wochentag 
 #: src/pages/plans.tsx
 msgid "All future events of this training time and their responses will be deleted."
 msgstr "Alle zukünftigen Termine dieser Trainingszeit und ihre Rückmeldungen werden gelöscht."
+
+# ai
+#: shared/changelog.ts
+msgid "Parent link for one child: coaches create it at the player (admins also under Administration → People); it is valid for both parents of that child."
+msgstr "Elternlink für ein Kind: Trainer erstellen ihn beim Spieler (Admins auch unter Verwaltung → Personen); er gilt für beide Eltern dieses Kindes."
 
 #: modules/carpools/worker/routes.ts
 msgid "Looking for a lift for {name}: {game} (entered by {coach})."
@@ -11563,6 +11608,11 @@ msgstr "Betreuer wie Physio oder Teammanager sehen, wer zu- oder abgesagt hat, o
 #: modules/carpools/app/card.tsx
 msgid "{drivers, plural, one {# driver · {freeSeats} free} other {# drivers · {freeSeats} free}}"
 msgstr "{drivers, plural, one {# Fahrer · {freeSeats} frei} other {# Fahrer · {freeSeats} frei}}"
+
+# ai
+#: shared/changelog.ts
+msgid "Helper duties: a duty type can now be assigned by the coach, then nobody signs up themselves and you pick the people. Duties can also come from other teams, e.g. youth teams wiping the floor at adult games; those teams find them in the Helpers tab under \"Help out\"."
+msgstr "Helferdienste: Ein Diensttyp kann jetzt vom Trainer eingeteilt werden, dann trägt sich niemand selbst ein und du wählst die Leute aus. Dienste können auch von anderen Mannschaften kommen, z. B. Jugendmannschaften als Wischer bei Spielen der Erwachsenen; diese Mannschaften finden sie im Helfer-Tab unter „Aushelfen“."
 
 #: src/pages/games.tsx
 msgid "The game schedule was only just synced. Please try again in a few minutes."
@@ -12669,6 +12719,11 @@ msgstr "Inzwischen hat jemand gebucht. Bitte noch einmal versuchen."
 msgid "Your reason: “{myReason}”"
 msgstr "Dein Grund: „{myReason}“"
 
+# ai
+#: shared/changelog.ts
+msgid "Notifications about your child now name your child, e.g. \"Is Mia coming?\"."
+msgstr "Benachrichtigungen über dein Kind nennen jetzt dein Kind, z. B. „Kommt Mia?“."
+
 #: src/pages/team.tsx
 msgid "Important: everyone uses the link only once, for themselves. Please select only your own name."
 msgstr "Wichtig: Jede und jeder nutzt den Link nur einmal, für sich selbst. Bitte nur den eigenen Namen auswählen."
@@ -13110,6 +13165,11 @@ msgstr "Keine Umfragen"
 #: worker/chat/room.ts
 msgid "To everyone in chat {teamName}"
 msgstr "An alle im Chat {teamName}"
+
+# ai
+#: shared/changelog.ts
+msgid "New module (beta): polls. Coaches ask their team, admins the whole club: choose an answer, find a date or collect orders with payment. Switch it on under Administration → Modules."
+msgstr "Neues Modul (Beta): Umfragen. Trainer fragen ihre Mannschaft, Admins den ganzen Verein: eine Antwort wählen, einen Termin finden oder Bestellungen mit Bezahlung sammeln. Einschalten unter Verwaltung → Module."
 
 #: src/pages/home.tsx
 msgid "Create a training plan in the Team section, then the events will appear here."
@@ -13611,6 +13671,11 @@ msgstr "Chatnachrichten"
 #: src/pages/event.tsx
 msgid "Applies to all trainings in this training slot. Accepting individual sessions remains possible."
 msgstr "Gilt für alle Trainings dieser Trainingszeit. Einzelne Zusagen bleiben möglich."
+
+# ai
+#: shared/changelog.ts
+msgid "Security: opening the sign-in page or an invitation link no longer uses up the account's daily storage writes."
+msgstr "Sicherheit: Das Öffnen der Anmeldeseite oder eines Einladungslinks verbraucht nicht mehr die täglichen Speicher-Schreibvorgänge des Kontos."
 
 # ai
 #: modules/polls/app/pages.tsx
@@ -16312,6 +16377,11 @@ msgstr "Stattdessen von Hand eingeben"
 #: src/pages/stats.tsx
 msgid "Appearances"
 msgstr "Einsätze"
+
+# ai
+#: shared/changelog.ts
+msgid "New: a parent link for one child. Open the player in your squad and tap \"Parent link for …\": you get a link with a text to send to the parents directly, e.g. when they are not in the group chat. It links only this child, works for both parents and is valid for 7 days. Once your team is set up, the team's parent link points you to this instead."
+msgstr "Neu: ein Elternlink für ein Kind. Öffne den Spieler in deinem Kader und tippe auf „Elternlink für …“: Du bekommst einen Link mit Text, den du den Eltern direkt schickst, z. B. wenn sie nicht in der Gruppe sind. Er verknüpft nur dieses Kind, gilt für beide Eltern und 7 Tage lang. Ist deine Mannschaft eingerichtet, weist dich der Elternlink der Mannschaft darauf hin."
 
 #: src/pages/plans.tsx
 msgid "Please enter a deadline between 0 and 168 hours."
