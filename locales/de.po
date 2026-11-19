@@ -5086,6 +5086,7 @@ msgid "needed by other ticked parts"
 msgstr "wird von anderen angekreuzten Teilen gebraucht"
 
 #: worker/auth/webauthn.ts
+#: worker/auth/webauthn.ts
 msgid "Signing in took too long. Please try again."
 msgstr "Die Anmeldung hat zu lange gedauert. Bitte versuche es noch einmal."
 
@@ -7903,6 +7904,7 @@ msgstr "Du kannst dich nicht selbst stummschalten."
 msgid "Other venue"
 msgstr "Anderer Ort"
 
+#: worker/auth/webauthn.ts
 #: worker/auth/webauthn.ts
 #: worker/routes/auth.ts
 #: worker/routes/feedback.ts

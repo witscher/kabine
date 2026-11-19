@@ -461,6 +461,8 @@ export const EXPORT_EXCLUDED = [
   "passkeys",
   "sessions",
   "email_codes",
+  // Used passkey challenges, a few minutes long (worker/auth/webauthn.ts)
+  "webauthn_used_challenges",
   "invites",
   "push_subscriptions",
   "calendar_tokens",

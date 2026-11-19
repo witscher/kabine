@@ -6,6 +6,7 @@ Changes that are merged but not released yet go under *Unreleased*, one line eac
 
 ## Unreleased
 
+- Sign-in: opening the sign-in page and requesting sign-in codes no longer write to KV, which allows only about 1,000 writes a day for the whole Cloudflare account on the free plan. The passkey challenge is now signed instead of stored, and is booked in the database only after a successful sign-in, so it cannot be used twice. The limit of code requests per network address now counts in the database (a keyed hash, IPv6 by its /64 prefix, emptied after an hour). The update adds a small table and a column (migration).
 - Privacy: `docs/privacy.md` now also lists feedback (sent by e-mail, a daily count per access) and the hourly count of sign-in code requests per network address (as a hash). Clubs can add both to their privacy policy.
 - Server errors: people never see the technical error text any more. When Cloudflare is overloaded (e.g. the database limit of the account) the app says that things are busy and to try again in a few minutes. Errors are counted per day, and from the third error of a day the owner of the installation gets one e-mail with the list (needs a confirmed e-mail address in the owner's profile).
 - Fewer database reads: teams, memberships, parent links and duty types stay in memory per Worker instance and are reloaded only after a change, and the helper duties of games are checked only when something changed. This keeps clubs further below the daily limit of the free plan. `npm run d1:stats` shows the read load of an installation.
