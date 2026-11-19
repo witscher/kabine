@@ -13,15 +13,13 @@ import type {
   RegistrationResponseJSON,
 } from "@simplewebauthn/server";
 import { b64url, fromB64url, randomToken } from "../lib/crypto";
+import { open, seal } from "../lib/secret-box";
 import { loadClub } from "../domain/club";
 import { run } from "../lib/db";
 import { badRequest, gone } from "../lib/http";
 import { utcIso } from "../lib/time";
 
-/**
- * Registration challenges live briefly in KV and can be used only once. Every route that starts a registration
- * needs a session, a valid invitation link or the setup password, so nobody can fill KV anonymously.
- */
+/** Sign-in and registration challenges are valid this long and, once used, booked in D1 until then. */
 const CHALLENGE_TTL_SECONDS = 300;
 
 export interface RelyingParty {
@@ -42,27 +40,48 @@ export function relyingParty(env: Env, request: Request): RelyingParty {
   };
 }
 
-interface StoredChallenge<C> {
+/**
+ * Registration challenges are stateless like sign-in challenges: an invitation link is often shared in a group chat,
+ * and a KV write per /join/options would let anyone holding one use up the account's daily KV writes. The challenge
+ * ID carries the challenge, its expiry and the context of the access to be created (names, e-mail address, invitation),
+ * encrypted and authenticated (AES-GCM, key derived from APP_SECRET), so the client can neither read nor change it.
+ * Only a verified passkey books the challenge as used (D1, finishRegistration), so a registration cannot be replayed.
+ */
+const REGISTER_CHALLENGE_PURPOSE = "kabine-webauthn-register-v1";
+
+interface SealedRegistration<C> {
   challenge: string;
-  purpose: "register";
+  /** ms */
+  expiresAt: number;
   context: C;
 }
 
-async function storeChallenge<C>(kv: KVNamespace, value: StoredChallenge<C>): Promise<string> {
-  const id = randomToken(18);
-  await kv.put(`webauthn:${id}`, JSON.stringify(value), { expirationTtl: CHALLENGE_TTL_SECONDS });
-  return id;
+async function sealRegistration<C>(env: Env, value: SealedRegistration<C>): Promise<string> {
+  return `r1.${await seal(env.APP_SECRET, JSON.stringify(value), REGISTER_CHALLENGE_PURPOSE)}`;
 }
 
-async function takeChallenge<C>(kv: KVNamespace, id: string, purpose: StoredChallenge<C>["purpose"]): Promise<StoredChallenge<C>> {
-  if (!/^[\w-]{10,64}$/.test(id)) throw badRequest(t`Invalid request.`);
-  const key = `webauthn:${id}`;
-  const value = await kv.get<StoredChallenge<C>>(key, "json");
-  if (!value || value.purpose !== purpose) {
-    throw gone(t`Signing in took too long. Please try again.`, "challenge_expired");
+async function openRegistration<C>(env: Env, challengeId: string, now = Date.now()): Promise<SealedRegistration<C>> {
+  // Also an ID from before the update (KV): the app starts a new registration with the next tap
+  if (!/^r1\.v1\.[\w-]{16}\.[\w-]{20,8000}$/.test(challengeId)) throw tookTooLong();
+  let value: SealedRegistration<C>;
+  try {
+    value = JSON.parse(await open(env.APP_SECRET, challengeId.slice(3), REGISTER_CHALLENGE_PURPOSE)) as SealedRegistration<C>;
+  } catch {
+    throw badRequest(t`Invalid request.`);
   }
-  await kv.delete(key);
+  if (typeof value.challenge !== "string" || !(value.expiresAt > now)) throw tookTooLong();
   return value;
+}
+
+/** After a valid passkey: the challenge counts as used until it expires. One statement, so two parallel uses cannot both pass. */
+async function bookChallenge(env: Env, challenge: string, expiresAt: number): Promise<void> {
+  const booked = await run(
+    env.DB,
+    "INSERT INTO webauthn_used_challenges (challenge, expires_at) VALUES (?, ?) ON CONFLICT (challenge) DO NOTHING",
+    challenge,
+    utcIso(expiresAt),
+  );
+  if (!booked.meta.changes) throw tookTooLong();
 }
 
 export function newWebauthnUserId(): string {
@@ -92,7 +111,7 @@ export async function startRegistration<C>(
     authenticatorSelection: { residentKey: "required", userVerification: "preferred" },
     timeout: 120_000,
   });
-  const challengeId = await storeChallenge(env.KV, { challenge: options.challenge, purpose: "register", context: input.context });
+  const challengeId = await sealRegistration(env, { challenge: options.challenge, expiresAt: Date.now() + CHALLENGE_TTL_SECONDS * 1000, context: input.context });
   return { challengeId, options };
 }
 
@@ -111,7 +130,7 @@ export async function finishRegistration<C>(
   challengeId: string,
   response: RegistrationResponseJSON,
 ): Promise<{ context: C; credential: NewCredential }> {
-  const stored = await takeChallenge<C>(env.KV, challengeId, "register");
+  const stored = await openRegistration<C>(env, challengeId);
   const { rpID, origin } = relyingParty(env, request);
   let verification;
   try {
@@ -127,6 +146,7 @@ export async function finishRegistration<C>(
     throw badRequest(t`The passkey could not be verified. Please try again.`, "webauthn_failed");
   }
   if (!verification.verified) throw badRequest(t`The passkey could not be verified.`, "webauthn_failed");
+  await bookChallenge(env, stored.challenge, stored.expiresAt);
   const info = verification.registrationInfo;
   return {
     context: stored.context,
@@ -253,13 +273,7 @@ export async function finishLogin(
   if (!verification.verified) throw badRequest(t`The sign-in could not be verified.`, "webauthn_failed");
   // Only now, after a valid signature, a write: the challenge counts as used until it expires (no replay). One
   // statement, so two parallel requests with the same assertion cannot both pass.
-  const booked = await run(
-    env.DB,
-    "INSERT INTO webauthn_used_challenges (challenge, expires_at) VALUES (?, ?) ON CONFLICT (challenge) DO NOTHING",
-    stored.challenge,
-    utcIso(stored.expiresAt),
-  );
-  if (!booked.meta.changes) throw tookTooLong();
+  await bookChallenge(env, stored.challenge, stored.expiresAt);
   return { newCounter: verification.authenticationInfo.newCounter };
 }
 

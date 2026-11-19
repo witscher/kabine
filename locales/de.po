@@ -5256,7 +5256,6 @@ msgid "needed by other ticked parts"
 msgstr "wird von anderen angekreuzten Teilen gebraucht"
 
 #: worker/auth/webauthn.ts
-#: worker/auth/webauthn.ts
 msgid "Signing in took too long. Please try again."
 msgstr "Die Anmeldung hat zu lange gedauert. Bitte versuche es noch einmal."
 
@@ -14683,4 +14682,3 @@ msgstr "Chat schreiben"
 #: worker/routes/events.ts
 msgid "In one time block the end is before the start."
 msgstr "Bei einem Zeitblock liegt das Ende vor dem Beginn."
-

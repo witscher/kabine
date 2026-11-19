@@ -4862,7 +4862,6 @@ msgid "needed by other ticked parts"
 msgstr "needed by other ticked parts"
 
 #: worker/auth/webauthn.ts
-#: worker/auth/webauthn.ts
 msgid "Signing in took too long. Please try again."
 msgstr "Signing in took too long. Please try again."
 
