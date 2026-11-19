@@ -551,6 +551,7 @@ msgstr "Treffpunkt eintragen · {teamName}"
 msgid "bank transfer to {holder}"
 msgstr "Überweisung an {holder}"
 
+#: src/pages/admin.tsx
 #: src/pages/team.tsx
 #: src/pages/team.tsx
 msgid "Text with link copied."
@@ -1364,6 +1365,7 @@ msgid "Take photo"
 msgstr "Foto machen"
 
 # ai
+#: src/pages/admin.tsx
 #: src/pages/team.tsx
 msgid "A one-time link for a parent of {firstName} only, to send directly instead of the team's parent link."
 msgstr "Ein Einmal-Link nur für ein Elternteil von {firstName}, zum direkten Verschicken statt des Elternlinks der Mannschaft."
@@ -1608,6 +1610,11 @@ msgstr "Training, Spiele und Helferdienste eurer Familie"
 #: src/pages/admin.tsx
 msgid "The association sets the birth years per season. Please check them against the competition rules. “Rank” orders the classes from young to old and determines which is the next higher youth class."
 msgstr "Die Jahrgänge legt der Verband pro Saison fest. Bitte mit den Durchführungsbestimmungen abgleichen. „Rang“ ordnet die Klassen von jung nach alt und bestimmt, welches die nächsthöhere Jugend ist."
+
+# ai
+#: src/pages/admin.tsx
+msgid "One-time link for one parent of {firstName}, valid until {validUntil}. It links only {firstName}. Please send it to that parent directly."
+msgstr "Einmal-Link für ein Elternteil von {firstName}, gültig bis {validUntil}. Er verknüpft nur {firstName}. Bitte direkt an dieses Elternteil schicken."
 
 # ai
 #: src/special-attendance.tsx
@@ -4513,6 +4520,11 @@ msgid "{name} accepted training on {when}."
 msgstr "{name} hat für das Training am {when} zugesagt."
 
 # ai
+#: src/pages/admin.tsx
+msgid "{firstName} already has two parents in the app."
+msgstr "{firstName} hat schon zwei Eltern in der App."
+
+# ai
 #: modules/polls/worker/domain.ts
 msgid "Former member"
 msgstr "Ehemalige"
@@ -5137,6 +5149,8 @@ msgstr "Fertig"
 msgid "Main colour"
 msgstr "Hauptfarbe"
 
+#: src/pages/admin.tsx
+#: src/pages/admin.tsx
 #: src/pages/team.tsx
 msgid "Parent link"
 msgstr "Elternlink"
@@ -5987,6 +6001,11 @@ msgstr "{venue, select, hall {Vereinshallen und weitere Orte} pitch {Vereinsplä
 #: src/pages/team.tsx
 msgid "Template for away games"
 msgstr "Vorlage für Auswärtsspiele"
+
+# ai
+#: src/pages/admin.tsx
+msgid "For a parent link, first add {firstName} as a player to a team (Teams above)."
+msgstr "Für einen Elternlink {firstName} zuerst als Spieler einer Mannschaft hinzufügen (Mannschaften oben)."
 
 # ai
 #: modules/polls/app/pages.tsx
@@ -7051,6 +7070,11 @@ msgstr "Training {teams}"
 #: src/pages/plans.tsx
 msgid "{from} to {to}"
 msgstr "{from} bis {to}"
+
+# ai
+#: src/pages/admin.tsx
+msgid "Parent link for {firstName} ({team})"
+msgstr "Elternlink für {firstName} ({team})"
 
 #: modules/carpools/app/card.tsx
 #: modules/carpools/app/card.tsx
@@ -11187,6 +11211,8 @@ msgid "All events"
 msgstr "Alle Termine"
 
 # ai
+#: src/pages/admin.tsx
+#: src/pages/admin.tsx
 #: src/pages/team.tsx
 msgid "Parent link for {firstName}"
 msgstr "Elternlink für {firstName}"
@@ -14247,6 +14273,7 @@ msgstr "Wen der Trainer für diesen Dienst einteilen kann. Eltern werden für ih
 msgid "Only an admin removes the e-mail address of an access."
 msgstr "Nur ein Admin entfernt die E-Mail-Adresse eines Zugangs."
 
+#: src/pages/admin.tsx
 #: src/pages/team.tsx
 #: src/pages/team.tsx
 msgid "Copy text"
@@ -14256,6 +14283,7 @@ msgstr "Text kopieren"
 msgid "Fetch failed: {error}"
 msgstr "Abruf fehlgeschlagen: {error}"
 
+#: src/pages/admin.tsx
 #: src/pages/team.tsx
 #: src/pages/team.tsx
 msgid "Share with text"
@@ -15369,6 +15397,11 @@ msgstr "QR-Code des Links"
 msgid "Apply from template"
 msgstr "Aus Vorlage übernehmen"
 
+# ai
+#: src/pages/admin.tsx
+msgid "Parents are switched off in the team of {firstName}. Switch them on under Administration → Teams for a parent link."
+msgstr "In der Mannschaft von {firstName} sind Eltern ausgeschaltet. Für einen Elternlink unter Verwaltung → Mannschaften einschalten."
+
 #: modules/duties/app/admin.tsx
 msgid "On site"
 msgstr "Vor Ort"
@@ -16451,4 +16484,3 @@ msgstr "Chat schreiben"
 #: worker/routes/events.ts
 msgid "In one time block the end is before the start."
 msgstr "Bei einem Zeitblock liegt das Ende vor dem Beginn."
-

@@ -10,5 +10,10 @@
   "With this link you set up your parent access for {childName}: open it, enter your own name and set up a passkey (Face ID, fingerprint or screen lock).": "Mit diesem Link richtest du deinen Elternzugang für {childName} ein: öffnen, deinen eigenen Namen eintragen und einen Passkey einrichten (Face ID, Fingerabdruck oder Displaysperre).",
   "Parent link for {linkFor}": "Elternlink für {linkFor}",
   "Parent link for {firstName}": "Elternlink für {firstName}",
-  "You are setting up a parent access for {fixedChild} in the {teamName}.": "Du richtest einen Elternzugang für {fixedChild} in der {teamName} ein."
+  "You are setting up a parent access for {fixedChild} in the {teamName}.": "Du richtest einen Elternzugang für {fixedChild} in der {teamName} ein.",
+  "One-time link for one parent of {firstName}, valid until {validUntil}. It links only {firstName}. Please send it to that parent directly.": "Einmal-Link für ein Elternteil von {firstName}, gültig bis {validUntil}. Er verknüpft nur {firstName}. Bitte direkt an dieses Elternteil schicken.",
+  "{firstName} already has two parents in the app.": "{firstName} hat schon zwei Eltern in der App.",
+  "For a parent link, first add {firstName} as a player to a team (Teams above).": "Für einen Elternlink {firstName} zuerst als Spieler einer Mannschaft hinzufügen (Mannschaften oben).",
+  "Parent link for {firstName} ({team})": "Elternlink für {firstName} ({team})",
+  "Parents are switched off in the team of {firstName}. Switch them on under Administration → Teams for a parent link.": "In der Mannschaft von {firstName} sind Eltern ausgeschaltet. Für einen Elternlink unter Verwaltung → Mannschaften einschalten."
 }

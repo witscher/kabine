@@ -74,6 +74,21 @@ describe("parent link for one child", () => {
     expect((await childLink()).status).toBe(409);
   });
 
+  it("admins see in the person list which teams allow a parent link", async () => {
+    const admin = await person("Arne", { lastName: "Amt" });
+    await exec("UPDATE persons SET is_admin = 1 WHERE id = ?", admin);
+    await exec("UPDATE teams SET parents_enabled = 0 WHERE id = ?", wc);
+    await member(lina, wc);
+    const cookie = await loginAs(admin);
+    const list = (await api("/admin/persons", { cookie })).body.persons as { person: { id: number }; teams: { id: number; parentsEnabled: boolean; role: string }[] }[];
+    const teams = list.find((x) => x.person.id === lina)!.teams.sort((a, b) => a.id - b.id);
+    expect(teams).toEqual([
+      expect.objectContaining({ id: wd, role: "player", parentsEnabled: true }),
+      expect.objectContaining({ id: wc, role: "player", parentsEnabled: false }),
+    ]);
+    expect((await childLink(cookie, lina, wd)).status).toBe(201);
+  });
+
   it("does not replace the team's parent link and is not shown as it", async () => {
     const teamLink = await api(`/teams/${wd}/invites`, { cookie: coachD, body: { kind: "parent" } });
     const first = await childLink();

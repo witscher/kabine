@@ -245,7 +245,8 @@ personRoutes.get("/admin/persons", async (c) => {
             (SELECT json_group_array(sg.duty_type_id) FROM skill_grants sg WHERE sg.person_id = p.id) AS skill_grants,
             EXISTS (SELECT 1 FROM club_members cm WHERE cm.person_id = p.id) AS is_club_member,
             (SELECT a.last_seen_on FROM accounts a WHERE a.person_id = p.id) AS last_seen_on,
-            (SELECT group_concat(t.name || ':' || tm.role || ':' || t.kind, ',') FROM team_memberships tm JOIN teams t ON t.id = tm.team_id WHERE tm.person_id = p.id) AS teams,
+            (SELECT json_group_array(json_object('id', t.id, 'name', t.name, 'role', tm.role, 'kind', t.kind, 'parents', t.parents_enabled))
+               FROM team_memberships tm JOIN teams t ON t.id = tm.team_id WHERE tm.person_id = p.id) AS teams,
             (SELECT group_concat(cp.first_name, ', ') FROM guardianships g JOIN persons cp ON cp.id = g.child_id WHERE g.guardian_id = p.id) AS children,
             (SELECT group_concat(DISTINCT t.name) FROM guardianships g JOIN team_memberships tm ON tm.person_id = g.child_id
                JOIN teams t ON t.id = tm.team_id WHERE g.guardian_id = p.id) AS child_teams,
@@ -272,13 +273,14 @@ personRoutes.get("/admin/persons", async (c) => {
       isClubMember: r.is_club_member === 1,
       /** Last activity of the access (local date), null = access never used or no access. */
       lastSeenOn: r.last_seen_on,
-      teams: (r.teams ?? "")
-        .split(",")
-        .filter(Boolean)
-        .map((t) => {
-          const [name, role, kind] = t.split(":");
-          return { name: name!, role: role!, isGroup: kind === "group" };
-        }),
+      teams: (JSON.parse(r.teams ?? "[]") as { id: number; name: string; role: string; kind: string; parents: number }[]).map((m) => ({
+        id: m.id,
+        name: m.name,
+        role: m.role,
+        isGroup: m.kind === "group",
+        /** Parents take part in this team (a parent link for one child is possible) */
+        parentsEnabled: m.parents === 1,
+      })),
       children: r.children,
       childTeams: (r.child_teams ?? "").split(",").filter(Boolean),
       childIds: JSON.parse(r.child_list ?? "[]") as number[],

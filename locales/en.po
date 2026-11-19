@@ -508,6 +508,7 @@ msgstr "Enter meeting point · {teamName}"
 msgid "bank transfer to {holder}"
 msgstr "bank transfer to {holder}"
 
+#: src/pages/admin.tsx
 #: src/pages/team.tsx
 #: src/pages/team.tsx
 msgid "Text with link copied."
@@ -1255,6 +1256,7 @@ msgstr "{who} deleted {person}, as parent of {child}"
 msgid "Take photo"
 msgstr "Take photo"
 
+#: src/pages/admin.tsx
 #: src/pages/team.tsx
 msgid "A one-time link for a parent of {firstName} only, to send directly instead of the team's parent link."
 msgstr "A one-time link for a parent of {firstName} only, to send directly instead of the team's parent link."
@@ -1475,6 +1477,10 @@ msgstr "Training, games and your family's helper duties"
 #: src/pages/admin.tsx
 msgid "The association sets the birth years per season. Please check them against the competition rules. “Rank” orders the classes from young to old and determines which is the next higher youth class."
 msgstr "The association sets the birth years per season. Please check them against the competition rules. “Rank” orders the classes from young to old and determines which is the next higher youth class."
+
+#: src/pages/admin.tsx
+msgid "One-time link for one parent of {firstName}, valid until {validUntil}. It links only {firstName}. Please send it to that parent directly."
+msgstr "One-time link for one parent of {firstName}, valid until {validUntil}. It links only {firstName}. Please send it to that parent directly."
 
 #: src/special-attendance.tsx
 msgid "Last changed by {by}"
@@ -4123,6 +4129,10 @@ msgstr "How the app sends e-mails"
 msgid "{name} accepted training on {when}."
 msgstr "{name} accepted training on {when}."
 
+#: src/pages/admin.tsx
+msgid "{firstName} already has two parents in the app."
+msgstr "{firstName} already has two parents in the app."
+
 #: modules/polls/worker/domain.ts
 msgid "Former member"
 msgstr "Former member"
@@ -4696,6 +4706,8 @@ msgstr "Done"
 msgid "Main colour"
 msgstr "Main colour"
 
+#: src/pages/admin.tsx
+#: src/pages/admin.tsx
 #: src/pages/team.tsx
 msgid "Parent link"
 msgstr "Parent link"
@@ -5465,6 +5477,10 @@ msgstr "{venue, select, hall {Club halls and other locations} pitch {Club pitche
 #: src/pages/team.tsx
 msgid "Template for away games"
 msgstr "Template for away games"
+
+#: src/pages/admin.tsx
+msgid "For a parent link, first add {firstName} as a player to a team (Teams above)."
+msgstr "For a parent link, first add {firstName} as a player to a team (Teams above)."
 
 #: modules/polls/app/pages.tsx
 msgid "Payment by {list}, as set for the club. The reference is the title with the order number."
@@ -6427,6 +6443,10 @@ msgstr "Training {teams}"
 #: src/pages/plans.tsx
 msgid "{from} to {to}"
 msgstr "{from} to {to}"
+
+#: src/pages/admin.tsx
+msgid "Parent link for {firstName} ({team})"
+msgstr "Parent link for {firstName} ({team})"
 
 #: modules/carpools/app/card.tsx
 #: modules/carpools/app/card.tsx
@@ -10199,6 +10219,8 @@ msgstr "{label} on {date}, {time}. You can still decline until {untilDate}, {unt
 msgid "All events"
 msgstr "All events"
 
+#: src/pages/admin.tsx
+#: src/pages/admin.tsx
 #: src/pages/team.tsx
 msgid "Parent link for {firstName}"
 msgstr "Parent link for {firstName}"
@@ -13009,6 +13031,7 @@ msgstr "Whom the coach can assign to this duty. Parents are assigned for their c
 msgid "Only an admin removes the e-mail address of an access."
 msgstr "Only an admin removes the e-mail address of an access."
 
+#: src/pages/admin.tsx
 #: src/pages/team.tsx
 #: src/pages/team.tsx
 msgid "Copy text"
@@ -13018,6 +13041,7 @@ msgstr "Copy text"
 msgid "Fetch failed: {error}"
 msgstr "Fetch failed: {error}"
 
+#: src/pages/admin.tsx
 #: src/pages/team.tsx
 #: src/pages/team.tsx
 msgid "Share with text"
@@ -14041,6 +14065,10 @@ msgstr "QR code of the link"
 #: src/pages/special.tsx
 msgid "Apply from template"
 msgstr "Apply from template"
+
+#: src/pages/admin.tsx
+msgid "Parents are switched off in the team of {firstName}. Switch them on under Administration → Teams for a parent link."
+msgstr "Parents are switched off in the team of {firstName}. Switch them on under Administration → Teams for a parent link."
 
 #: modules/duties/app/admin.tsx
 msgid "On site"

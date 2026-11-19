@@ -16,7 +16,7 @@ import { Icon, type IconName } from "../icons";
 import { useMe, useSession } from "../session";
 import { invalidate, useQuery } from "../store";
 import { Button, confirmDialog, copyText, Empty, ErrorBox, Field, InfoButton, Notice, Segmented, shareLink, Sheet, Spinner, SwitchRow, TextField, toast, TopBar, useDocumentTitle } from "../ui";
-import { QrLink } from "./team";
+import { childParentMessage, QrLink } from "./team";
 import { roleLabel } from "./group";
 import { loadRegionHolidays } from "../holidays";
 import { fixtureSyncTitle, useFixtureSources } from "./fixture-sync";
@@ -344,7 +344,7 @@ interface AdminPerson {
   isClubMember: boolean;
   /** Last activity of the account (local date), null = never used or no account. */
   lastSeenOn: string | null;
-  teams: { name: string; role: string; isGroup: boolean }[];
+  teams: { id: number; name: string; role: string; isGroup: boolean; parentsEnabled: boolean }[];
   children: string | null;
   /** Teams of the children (parents). */
   childTeams: string[];
@@ -1337,6 +1337,7 @@ function PersonAdminSheet({ p, all, selfId, onClose, onChanged }: { p: AdminPers
           </div>
         ) : null}
       </section>
+      <ChildParentLinkSection p={p} />
       <AdminAvatar personId={p.person.id} name={personName(p.person)} />
       <section class="stack-sm" aria-label={t`Roles in the club`}>
       <strong>
@@ -1411,6 +1412,77 @@ function PersonAdminSheet({ p, all, selfId, onClose, onChanged }: { p: AdminPers
       </section>
       {p.person.id !== selfId ? <DeletePersonSection p={p} all={all} onDeleted={() => { onClose(); onChanged(); }} /> : null}
     </Sheet>
+  );
+}
+
+/**
+ * Parent link for one child (docs/operation.md, invitations): the same link coaches create in the team, here for
+ * admins in the person sheet. Needs the person as a player of a team with parents; at most two parents per child.
+ */
+function ChildParentLinkSection({ p }: { p: AdminPerson }) {
+  const [link, setLink] = useState<{ url: string; expiresAt: string; teamName: string } | null>(null);
+  const firstName = p.person.firstName;
+  const playing = p.teams.filter((m) => m.role === "player" && !m.isGroup);
+  const eligible = playing.filter((m) => m.parentsEnabled);
+  let hint: string | null = null;
+  if (p.parentIds.length >= 2) hint = playing.length ? t`${firstName} already has two parents in the app.` : null;
+  else if (!playing.length) hint = p.teams.length || p.childIds.length || p.isAdmin ? null : t`For a parent link, first add ${firstName} as a player to a team (Teams above).`;
+  else if (!eligible.length) hint = t`Parents are switched off in the team of ${firstName}. Switch them on under Administration → Teams for a parent link.`;
+  if (!hint && (!eligible.length || p.parentIds.length >= 2)) return null;
+  const validUntil = link ? fullDate(isoToLocalDate(link.expiresAt)) : "";
+  return (
+    <section class="stack-sm" aria-label={t`Parent link`}>
+      <strong>
+        <Trans>Parent link</Trans>
+      </strong>
+      {hint ? (
+        <p class="small muted">{hint}</p>
+      ) : (
+        <>
+          <p class="small muted">
+            <Trans>A one-time link for a parent of {firstName} only, to send directly instead of the team's parent link.</Trans>
+          </p>
+          <div class="btn-row">
+            {eligible.map((m) => {
+              const team = m.name;
+              return (
+                <Button
+                  key={m.id}
+                  icon="link"
+                  onClick={async () => {
+                    const res = await api.post<{ url: string; expiresAt: string }>(`/teams/${m.id}/invites`, { kind: "parent", personId: p.person.id });
+                    setLink({ ...res, teamName: m.name });
+                  }}
+                >
+                  {eligible.length > 1 ? t`Parent link for ${firstName} (${team})` : t`Parent link for ${firstName}`}
+                </Button>
+              );
+            })}
+          </div>
+        </>
+      )}
+      {link ? (
+        <div class="stack-sm">
+          <QrLink url={link.url} />
+          <div class="url-box">{link.url}</div>
+          <div class="btn-row">
+            <Button
+              variant="primary"
+              icon="share"
+              onClick={() => shareLink(t`Parent link for ${firstName}`, childParentMessage(firstName, link.teamName, link.url, validUntil), "")}
+            >
+              <Trans>Share with text</Trans>
+            </Button>
+            <Button icon="copy" onClick={() => copyText(childParentMessage(firstName, link.teamName, link.url, validUntil), t`Text with link copied.`)}>
+              <Trans>Copy text</Trans>
+            </Button>
+          </div>
+          <p class="small muted">
+            <Trans>One-time link for one parent of {firstName}, valid until {validUntil}. It links only {firstName}. Please send it to that parent directly.</Trans>
+          </p>
+        </div>
+      ) : null}
+    </section>
   );
 }
 
