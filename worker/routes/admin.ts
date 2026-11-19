@@ -3,8 +3,6 @@ import { Hono } from "hono";
 import { z } from "zod";
 import { type AppEnv, intParam, requireActor } from "../app";
 import { requireAdmin } from "../auth/actor";
-import { isRelevantEvent } from "../../shared/relevance";
-import { listVisibleEvents, loadEventContext, toSummary } from "../domain/events";
 import { listExtraEvents } from "../domain/extra-events";
 import { generateTrainings } from "../domain/generate";
 import { completeLimits, FULL_LIMITS, type LimitRow, toLimits } from "../domain/child-limits";
@@ -12,7 +10,7 @@ import { holidayPeriods, holidaySourceLabel, importRegionHolidays, MAX_HOLIDAY_D
 import { all, first, run, stmt } from "../lib/db";
 import { reconnectChats } from "../domain/chat";
 import { badRequest, conflict, forbidden, notFound, parse, readJson } from "../lib/http";
-import { eachDay, isDate, nowLocal, todayLocal, utcIso } from "../lib/time";
+import { eachDay, isDate, todayLocal, utcIso } from "../lib/time";
 import { loadClub, ownVenue } from "../domain/club";
 import { birthYears, SPORTS, type SportId } from "../../shared/sports";
 import type { Locale } from "../../shared/i18n";
@@ -388,20 +386,11 @@ adminRoutes.get("/age-classes/from-profile", async (c) => {
 });
 
 /**
- * Administration → special events and games: upcoming, manually created events of all teams
- * (special events and games without handball4all), without those the admin sees under events anyway.
+ * Administration → special events and games: all upcoming, manually created events of all teams (special events and
+ * games without a fixture connector), also those the admin sees under Events anyway (otherwise one seemed missing here).
  */
 adminRoutes.get("/admin/extra-events", async (c) => {
   const actor = requireActor(c);
   requireAdmin(actor);
-  const db = c.env.DB;
-  const events = await listExtraEvents(db, actor);
-  // Own events (as in the event overview) are not in the list
-  const own = await listVisibleEvents(db, actor, { from: nowLocal(), to: "9999-12-31T00:00" });
-  const ownCtx = await loadEventContext(db, own);
-  const now = Date.now();
-  // Self-created events stay in the list so admins find them here again
-  const created = new Set((await all<{ id: number }>(db, "SELECT id FROM events WHERE created_by = ?", actor.personId)).map((r) => r.id));
-  const ownIds = new Set(own.map((e) => toSummary(e, ownCtx, actor, now)).filter(isRelevantEvent).map((e) => e.id).filter((id) => !created.has(id)));
-  return c.json({ events: events.filter((e) => !ownIds.has(e.id)) });
+  return c.json({ events: await listExtraEvents(c.env.DB, actor) });
 });

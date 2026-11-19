@@ -112,14 +112,17 @@ export async function loadEventPage(db: D1Database, actor: Actor, opts: { limit:
       const s = item.summary;
       if (!fits(s)) continue;
       if (opts.past) {
-        if (!s.isPast) continue;
+        // Running events stay under "Upcoming" until they end
+        if (!s.isPast || s.isRunning) continue;
         if (page.length < opts.limit) page.push(item);
         else hasMore = true;
-      } else if (s.isPast) {
+      } else if (s.isPast && !s.isRunning) {
         // Already started today: for the live card; the app checks whether the window is still open
         if (s.kind === "game" && !s.cancelled) live.push(item);
         continue;
       } else {
+        // Running: stays in the list; games also for the live card (the app shows them once)
+        if (s.isRunning && s.kind === "game") live.push(item);
         const last = page.at(-1)?.summary;
         if (page.length < opts.limit || (!!last && day(s) === day(last))) page.push(item);
         else hasMore = true;

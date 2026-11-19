@@ -18,6 +18,16 @@ export type CoachHint =
   /** A game in the next days has no meeting time yet. */
   | { kind: "meeting"; eventId: number; team: string; startsAt: string; opponent: string | null };
 
+/**
+ * A team whose schedule the coach's device syncs now, in the background, because its source syncs by itself
+ * (`autoSyncDays` of the connector, handball.net: weekly) and the last sync is that old (GET /api/coach-hints).
+ */
+export interface ScheduleAutoSync {
+  teamId: number;
+  team: string;
+  source: string;
+}
+
 export interface PersonRef {
   id: number;
   firstName: string;
@@ -212,11 +222,21 @@ export interface EventSummary {
   /** Teams for which this training is optional ("together with"). */
   optionalTeamIds: number[];
   clubWide: boolean;
+  /** Special event "without attendance": nobody responds, no reminders, no counts (helper duties stay) */
+  noAttendance: boolean;
+  /** Special event with "optional attendance": everyone is optional, whoever wants to join says yes */
+  optionalAttendance: boolean;
+  /** Special event with "registration per family": each family says how many people come */
+  familyAttendance: boolean;
+  /** Registration per family: one's own family (or oneself without parent links), else null */
+  myFamily: MyFamily | null;
   cancelled: { at: string; byName: string | null; reason: string | null } | null;
   notes: string | null;
   deadline: string | null; // local time
   deadlineHours: number;
   isPast: boolean;
+  /** Started and not over yet (end, for games the playing time, else 2 hours); stays under "Upcoming" */
+  isRunning: boolean;
   counts: EventCounts | null;
   mine: MyParticipation[];
   canManage: boolean;
@@ -315,9 +335,39 @@ export interface ParticipantDetail {
   attendance: AttendanceMark | null;
 }
 
+export interface MyFamily {
+  /** "Kim, Lea and Mona K." */
+  label: string;
+  /** How many people belong to the family (1: without parent links) */
+  members: number;
+  /** null: no answer yet; 0: not coming */
+  count: number | null;
+  /** "First name L." of who changed it last */
+  updatedBy: string | null;
+  updatedAt: string | null;
+}
+
+/** Registration per family: overview for coaches, admins and organisers. */
+export interface FamilyOverview {
+  /** People registered in all */
+  persons: number;
+  /** Families registered (count > 0) */
+  registered: number;
+  /** Families not coming */
+  declined: number;
+  /** Families without an answer */
+  open: number;
+  /** Registered families, largest first */
+  units: { label: string; count: number }[];
+}
+
 export interface EventDetail extends EventSummary {
   /** Coaches and admins only. */
   participants: ParticipantDetail[] | null;
+  /** Registration per family: for coaches, admins and organisers, else null */
+  families: FamilyOverview | null;
+  /** Optional attendance: who said yes ("First name L."), for organisers without coach rights, else null */
+  optionalYes: string[] | null;
   /** Only if the team has turned on "responses visible to all" (without reasons), otherwise null. */
   roster: RosterEntry[] | null;
   /** May manage this event's helper duties (coaches, admins, creator, organisers). */

@@ -59,7 +59,7 @@ describe("Module", () => {
   });
 
   it("ausgeschaltet: Pfade 404, keine Helfer- und Fahrgemeinschaftsdaten", async () => {
-    await saveClub(env.DB, { modules: { ...DEFAULT_MODULES, duties: false, carpools: false, handball4all: false, sms: false } });
+    await saveClub(env.DB, { modules: { ...DEFAULT_MODULES, duties: false, carpools: false, handball4all: false, handballnet: false, sms: false } });
     const duties = await api(`/duties?teamId=${wd}`, { cookie: coachCookie });
     expect(duties.status).toBe(404);
     expect(duties.body.error.code).toBe("module_off");
