@@ -1,0 +1,16 @@
+{
+  "you": "du",
+  "{form, select, you {You are co-organising “{eventName}”} one {{names} is co-organising “{eventName}”} youAnd {{names} are co-organising “{eventName}”} other {{names} are co-organising “{eventName}”}}": "{form, select, you {Du organisierst „{eventName}“ mit} one {{names} organisiert „{eventName}“ mit} youAnd {{names} organisiert „{eventName}“ mit} other {{names} organisieren „{eventName}“ mit}}",
+  "{form, select, you {Are you coming?} one {Is {names} coming?} youAnd {Are {names} coming?} other {Are {names} coming?}}": "{form, select, you {Bist du dabei?} one {Ist {names} dabei?} youAnd {Seid {names} dabei?} other {Sind {names} dabei?}}",
+  "{form, select, you {You can now manage the helper duties of this event.} one {{names} can now manage the helper duties of this event.} other {{names} can now manage the helper duties of this event.}}": "{form, select, you {Du kannst jetzt die Helferdienste dieses Termins verwalten.} one {{names} kann jetzt die Helferdienste dieses Termins verwalten.} other {{names} können jetzt die Helferdienste dieses Termins verwalten.}}",
+  "{when}, {location}. {ask}": "{when}, {location}. {ask}",
+  "{form, select, you {You are in the squad} one {{names} is in the squad} youAnd {{names} are in the squad} other {{names} are in the squad}}": "{form, select, you {Du bist im Kader} one {{names} ist im Kader} youAnd {{names} seid im Kader} other {{names} sind im Kader}}",
+  "{title} on {date}, {time}. {ifNot}": "{title} am {date}, {time}. {ifNot}",
+  "{label} on {when}: {question}": "{label} am {when}: {question}",
+  "{when}. {ask}": "{when}. {ask}",
+  "{form, select, you {Please let us know if you are coming.} one {Please let us know if {names} is coming.} youAnd {Please let us know if {names} are coming.} other {Please let us know if {names} are coming.}}": "{form, select, you {Bitte gib Bescheid, ob du dabei bist.} one {Bitte gib Bescheid, ob {names} dabei ist.} youAnd {Bitte gebt Bescheid, ob {names} dabei seid.} other {Bitte gib Bescheid, ob {names} dabei sind.}}",
+  "{form, select, you {You have been nominated} one {{names} has been nominated} youAnd {{names} have been nominated} other {{names} have been nominated}}": "{form, select, you {Du bist nominiert} one {{names} ist nominiert} youAnd {{names} seid nominiert} other {{names} sind nominiert}}",
+  "{title} on {when}. {ifNot}": "{title} am {when}. {ifNot}",
+  "{form, select, you {If you can't make it, please decline.} one {If {name} can't make it, please decline.} other {If someone can't make it, please decline.}}": "{form, select, you {Falls du nicht kannst, sag bitte ab.} one {Falls {name} nicht kann, sag bitte ab.} other {Falls jemand nicht kann, sag bitte ab.}}",
+  "{form, select, you {You are no longer in the squad for {title} on {when}.} one {{names} is no longer in the squad for {title} on {when}.} youAnd {For {title} on {when}, {names} are no longer in the squad.} other {{names} are no longer in the squad for {title} on {when}.}}": "{form, select, you {Für {title} am {when} bist du nicht mehr im Kader.} one {Für {title} am {when} ist {names} nicht mehr im Kader.} youAnd {Für {title} am {when} seid {names} nicht mehr im Kader.} other {Für {title} am {when} sind {names} nicht mehr im Kader.}}"
+}

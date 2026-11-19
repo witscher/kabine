@@ -19,7 +19,19 @@ for (const f of readdirSync(dir).filter((f) => f.endsWith(".json")).sort()) {
 const file = new URL("../locales/de.po", import.meta.url);
 const po = PO.parse(readFileSync(file, "utf8"));
 const tokens = (s) => [...s.matchAll(/\{[^{}]+\}|<\/?\d+\/?>/g)].map((m) => m[0].replace(/^\{(\w+)[^}]*\}$/, "{$1}")).sort().join(" ");
-const cases = (s) => [...s.matchAll(/(?:^\{\w+, select,|\}) ?(\w+) \{/g)].map((m) => m[1]).sort().join(" ");
+// The case names of a select at the top level ("{form, select, you {…} other {…}}"), not words between nested
+// placeholders such as "{title} am {when}"
+const cases = (s) => {
+  const found = [];
+  const body = s.replace(/^\{\w+, select,/, "");
+  let depth = 0;
+  for (const m of body.matchAll(/(\w+)\s*\{|\{|\}/g)) {
+    if (m[1] && depth === 0) found.push(m[1]);
+    if (m[0].endsWith("{")) depth++;
+    else depth--;
+  }
+  return found.sort().join(" ");
+};
 let filled = 0;
 const problems = [];
 for (const item of po.items) {

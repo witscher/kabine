@@ -1,4 +1,4 @@
-import { t } from "@lingui/core/macro";
+import { select, t } from "@lingui/core/macro";
 import type { NotificationTopic } from "../../shared/types";
 import { parentsInChargeSql } from "../auth/actor";
 import { isLocale } from "../../shared/i18n";
@@ -39,8 +39,20 @@ export async function recipientsForPersons(
   topic: NotificationTopic,
   teamIds: readonly number[],
 ): Promise<number[]> {
+  return [...new Set((await recipientPairs(db, personIds, topic, teamIds)).map((r) => r.account_id))];
+}
+
+interface RecipientPair {
+  account_id: number;
+  first_name: string;
+  /** 1: the person is the account's own person, 0: a child of the account */
+  self: number;
+}
+
+/** Like recipientsForPersons, with the persons each account gets the push for. */
+async function recipientPairs(db: D1Database, personIds: number[], topic: NotificationTopic, teamIds: readonly number[]): Promise<RecipientPair[]> {
   if (!personIds.length) return [];
-  const rows = await all<{ account_id: number }>(
+  return all<RecipientPair>(
     db,
     `WITH targets(person_id) AS (
         SELECT p.id FROM persons p WHERE p.id IN (SELECT value FROM json_each(?1)) AND p.is_former = 0
@@ -53,7 +65,8 @@ export async function recipientsForPersons(
           JOIN accounts a ON a.person_id = g.guardian_id
          WHERE ${parentsInChargeSql("t.person_id", "SELECT value FROM json_each(?3)")}
       )
-      SELECT DISTINCT pr.account_id FROM pairs pr JOIN accounts a ON a.id = pr.account_id
+      SELECT DISTINCT pr.account_id, p.first_name, a.person_id = pr.person_id AS self
+        FROM pairs pr JOIN accounts a ON a.id = pr.account_id JOIN persons p ON p.id = pr.person_id
        WHERE a.disabled_at IS NULL
          AND NOT EXISTS (
            SELECT 1 FROM notification_settings ns
@@ -63,7 +76,50 @@ export async function recipientsForPersons(
     topic,
     list([...teamIds]),
   );
-  return rows.map((r) => r.account_id);
+}
+
+/**
+ * Whom a push is about, seen from the recipient: themselves and/or their children (first names).
+ * Without it parents read "You are in the squad" when their child is meant.
+ */
+export interface PushFor {
+  self: boolean;
+  others: string[];
+}
+
+/** Content of a push about persons: the same for everyone, or written per recipient (you, your child, several). */
+export type PersonContent = PushContent | ((who: PushFor) => PushPayload);
+
+/** you: only the recipient; one: one child; youAnd: the recipient and children; other: several children */
+export type PushForm = "you" | "one" | "youAnd" | "other";
+
+export function pushForm(w: PushFor): PushForm {
+  return w.self ? (w.others.length ? "youAnd" : "you") : w.others.length === 1 ? "one" : "other";
+}
+
+/** "Mia", "Mia and Ben", "you and Mia" in the current language; capitalised at the start of a sentence. */
+export function whoNames(w: PushFor, start = false): string {
+  const you = start ? t`You` : t`you`;
+  const names = [...(w.self ? [you] : []), ...w.others];
+  return new Intl.ListFormat(currentLocale(), { type: "conjunction" }).format(names.length ? names : [you]);
+}
+
+/** "Are you coming?", "Is Mia coming?", "Are you and Mia coming?" */
+export function areYouComing(w: PushFor): string {
+  const form = pushForm(w);
+  const names = whoNames(w);
+  return select(form, { you: "Are you coming?", one: `Is ${names} coming?`, youAnd: `Are ${names} coming?`, other: `Are ${names} coming?` });
+}
+
+/** "If you can't make it, please decline." for a child by name, for several "someone". */
+export function ifYouCannot(w: PushFor): string {
+  const form = pushForm(w);
+  const name = w.others[0] ?? "";
+  return select(form, {
+    you: "If you can't make it, please decline.",
+    one: `If ${name} can't make it, please decline.`,
+    other: "If someone can't make it, please decline.",
+  });
 }
 
 /** Staff of these teams (physio, manager): they get the event changes of the team without taking part. */
@@ -109,6 +165,24 @@ export async function enqueuePush(
   content: PushContent,
   opts: { exclude?: number[] } = {},
 ): Promise<number> {
+  if (typeof content !== "function") return enqueueEach(env, accountIds, () => content, opts);
+  // One payload per language of the recipients
+  const perLocale = new Map<string, PushPayload>();
+  return enqueueEach(env, accountIds, () => content(), opts, perLocale);
+}
+
+/**
+ * Enqueues a push per account, built in the account's language; accounts with the same text are sent
+ * together. Accounts without a registered device are filtered out first, so no queue operations are wasted.
+ * cache: payloads per language, when the text does not depend on the account.
+ */
+async function enqueueEach(
+  env: Env,
+  accountIds: number[],
+  build: (accountId: number) => PushPayload,
+  opts: { exclude?: number[] },
+  cache?: Map<string, PushPayload>,
+): Promise<number> {
   if (!pushConfigured(env)) return 0;
   const exclude = new Set(opts.exclude ?? []);
   const unique = [...new Set(accountIds)].filter((id) => !exclude.has(id));
@@ -120,15 +194,21 @@ export async function enqueuePush(
     list(unique),
   );
   if (!withDevices.length) return 0;
-  // One payload per language of the recipients
-  const byLocale = new Map<string, number[]>();
+  const groups = new Map<string, { payload: PushPayload; targets: number[] }>();
   for (const r of withDevices) {
-    const key = isLocale(r.locale) ? r.locale : "";
-    byLocale.set(key, [...(byLocale.get(key) ?? []), r.account_id]);
+    const locale = isLocale(r.locale) ? r.locale : "";
+    let payload = cache?.get(locale);
+    if (!payload) {
+      payload = withLocale(locale || null, () => build(r.account_id));
+      cache?.set(locale, payload);
+    }
+    const key = JSON.stringify(payload);
+    const group = groups.get(key) ?? { payload, targets: [] };
+    group.targets.push(r.account_id);
+    groups.set(key, group);
   }
   const jobs: { body: PushJob }[] = [];
-  for (const [locale, targets] of byLocale) {
-    const payload = typeof content === "function" ? withLocale(locale || null, content) : content;
+  for (const { payload, targets } of groups.values()) {
     for (let i = 0; i < targets.length; i += 50) jobs.push({ body: { accountIds: targets.slice(i, i + 50), payload } });
   }
   for (let i = 0; i < jobs.length; i += 100) await env.PUSH_QUEUE.sendBatch(jobs.slice(i, i + 100));
@@ -140,11 +220,22 @@ export async function notifyPersons(
   env: Env,
   personIds: number[],
   topic: NotificationTopic,
-  payload: PushContent,
+  content: PersonContent,
   opts: { teamIds: readonly number[]; exclude?: number[] },
 ): Promise<number> {
   if (!pushConfigured(env)) return 0;
-  return enqueuePush(env, await recipientsForPersons(env.DB, personIds, topic, opts.teamIds), payload, opts);
+  const pairs = await recipientPairs(env.DB, personIds, topic, opts.teamIds);
+  if (typeof content !== "function") return enqueuePush(env, pairs.map((r) => r.account_id), content, opts);
+  // Per account: whom the push is about; accounts with the same text go out together (enqueueEach)
+  const byAccount = new Map<number, PushFor>();
+  for (const r of pairs) {
+    const w = byAccount.get(r.account_id) ?? { self: false, others: [] };
+    if (r.self) w.self = true;
+    else if (!w.others.includes(r.first_name)) w.others.push(r.first_name);
+    byAccount.set(r.account_id, w);
+  }
+  for (const w of byAccount.values()) w.others.sort((a, b) => a.localeCompare(b));
+  return enqueueEach(env, [...byAccount.keys()], (account) => content(byAccount.get(account)!), opts);
 }
 
 export async function notifyCoaches(

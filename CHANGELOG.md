@@ -6,6 +6,7 @@ Changes that are merged but not released yet go under *Unreleased*, one line eac
 
 ## Unreleased
 
+- Pushes about a person now address the recipient: parents read "Mia is in the squad" or "Is Mia coming?" instead of "You are in the squad"; with several children or when they play themselves, all of them are named in one push.
 - Setup wizard: the chosen sport could jump back to handball when the step reloaded its data in the background; the choice now stays.
 
 ## v0.8.0

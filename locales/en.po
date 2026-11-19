@@ -1273,6 +1273,10 @@ msgstr "Send request"
 msgid "Set {name} to inactive?"
 msgstr "Set {name} to inactive?"
 
+#: worker/routes/events.ts
+msgid "{form, select, you {You are co-organising “{eventName}”} one {{names} is co-organising “{eventName}”} youAnd {{names} are co-organising “{eventName}”} other {{names} are co-organising “{eventName}”}}"
+msgstr "{form, select, you {You are co-organising “{eventName}”} one {{names} is co-organising “{eventName}”} youAnd {{names} are co-organising “{eventName}”} other {{names} are co-organising “{eventName}”}}"
+
 #: src/pages/team.tsx
 msgid "Remove connection?"
 msgstr "Remove connection?"
@@ -1330,6 +1334,10 @@ msgstr "Your absence"
 #: src/pages/admin.tsx
 msgid "The parent"
 msgstr "The parent"
+
+#: worker/domain/notify.ts
+msgid "{form, select, you {Are you coming?} one {Is {names} coming?} youAnd {Are {names} coming?} other {Are {names} coming?}}"
+msgstr "{form, select, you {Are you coming?} one {Is {names} coming?} youAnd {Are {names} coming?} other {Are {names} coming?}}"
 
 #: src/pages/chat.tsx
 msgid "{n, plural, one {# new message} other {# new messages}}"
@@ -2533,6 +2541,10 @@ msgstr "Frequently asked questions"
 msgid "Provider of the app: see the club's <0>legal notice</0>."
 msgstr "Provider of the app: see the club's <0>legal notice</0>."
 
+#: worker/routes/events.ts
+msgid "{form, select, you {You can now manage the helper duties of this event.} one {{names} can now manage the helper duties of this event.} other {{names} can now manage the helper duties of this event.}}"
+msgstr "{form, select, you {You can now manage the helper duties of this event.} one {{names} can now manage the helper duties of this event.} other {{names} can now manage the helper duties of this event.}}"
+
 #: modules/sms/worker/routes.ts
 msgid "Please enter a mobile number, e.g. +49 151 23456789."
 msgstr "Please enter a mobile number, e.g. +49 151 23456789."
@@ -2609,6 +2621,10 @@ msgstr "In the under-11s the children have no access of their own; the parents r
 #: modules/duties/app/admin.tsx
 msgid "Add duty type"
 msgstr "Add duty type"
+
+#: worker/routes/squad.ts
+msgid "{form, select, you {You are no longer in the squad for {title} on {when}.} one {{names} is no longer in the squad for {title} on {when}.} youAnd {For {title} on {when}, {names} are no longer in the squad.} other {{names} are no longer in the squad for {title} on {when}.}}"
+msgstr "{form, select, you {You are no longer in the squad for {title} on {when}.} one {{names} is no longer in the squad for {title} on {when}.} youAnd {For {title} on {when}, {names} are no longer in the squad.} other {{names} are no longer in the squad for {title} on {when}.}}"
 
 #: src/pages/season.tsx
 msgid "Outgrown the A youth. Assign to the adults or mark as former."
@@ -2821,6 +2837,10 @@ msgstr "You can read along. In this team the parents write."
 #: src/pages/season.tsx
 msgid "{reassigned} players will be reassigned, {deleted} persons deleted. Events, plans, responses and chats will be reset, the holidays remain unchanged."
 msgstr "{reassigned} players will be reassigned, {deleted} persons deleted. Events, plans, responses and chats will be reset, the holidays remain unchanged."
+
+#: worker/domain/notify.ts
+msgid "you"
+msgstr "you"
 
 #: src/pages/team.tsx
 msgid "Withdraw link?"
@@ -3783,10 +3803,6 @@ msgstr "Entered as driver"
 msgid "This is no longer possible for this event."
 msgstr "This is no longer possible for this event."
 
-#: worker/routes/squad.ts
-msgid "You are no longer in the squad for {title} on {when}."
-msgstr "You are no longer in the squad for {title} on {when}."
-
 #: src/pages/login.tsx
 msgid "This browser does not support passkeys. Please use a current smartphone with Safari or Chrome."
 msgstr "This browser does not support passkeys. Please use a current smartphone with Safari or Chrome."
@@ -3832,10 +3848,6 @@ msgstr "The default template cannot be deleted."
 #: src/pages/admin.tsx
 msgid "{count, plural, one {The announcement appears in one team chat.} other {The announcement appears in # team chats.}}"
 msgstr "{count, plural, one {The announcement appears in one team chat.} other {The announcement appears in # team chats.}}"
-
-#: worker/cron.ts
-msgid "{title} on {date}, {time}. If you can't make it, please decline."
-msgstr "{title} on {date}, {time}. If you can't make it, please decline."
 
 #: src/howto.tsx
 #: src/howto.tsx
@@ -4518,10 +4530,6 @@ msgstr "{title}, {weekday} {day} {month}"
 msgid "E-mail address of your access"
 msgstr "E-mail address of your access"
 
-#: worker/routes/squad.ts
-msgid "{title} on {when}. If you can't make it, please decline."
-msgstr "{title} on {when}. If you can't make it, please decline."
-
 #: src/extra-events.tsx
 #: src/pages/home.tsx
 msgid "No events"
@@ -4871,10 +4879,6 @@ msgstr "Link to the legal notice"
 #: src/pages/home.tsx
 msgid "Past"
 msgstr "Past"
-
-#: worker/routes/events.ts
-msgid "You are co-organising “{eventName}”"
-msgstr "You are co-organising “{eventName}”"
 
 #: worker/routes/squad.ts
 msgid "Squad changed"
@@ -5500,9 +5504,17 @@ msgstr "Missed nothing in this time span."
 msgid "{name} is no longer approved for {duty}."
 msgstr "{name} is no longer approved for {duty}."
 
+#: worker/routes/events.ts
+msgid "{when}, {location}. {ask}"
+msgstr "{when}, {location}. {ask}"
+
 #: src/pages/group.tsx
 msgid "There is already a group for everyone approved for {autoName}."
 msgstr "There is already a group for everyone approved for {autoName}."
+
+#: worker/cron.ts
+msgid "{form, select, you {You are in the squad} one {{names} is in the squad} youAnd {{names} are in the squad} other {{names} are in the squad}}"
+msgstr "{form, select, you {You are in the squad} one {{names} is in the squad} youAnd {{names} are in the squad} other {{names} are in the squad}}"
 
 #: src/pages/profile.tsx
 msgid "You are now working as a coach."
@@ -5573,6 +5585,10 @@ msgstr "Create training plan"
 #: worker/routes/teams.ts
 msgid "The age class already allows less. A team can only restrict further."
 msgstr "The age class already allows less. A team can only restrict further."
+
+#: worker/cron.ts
+msgid "{title} on {date}, {time}. {ifNot}"
+msgstr "{title} on {date}, {time}. {ifNot}"
 
 #: src/list-import.tsx
 msgid "{rowCount, plural, one {Read # row} other {Read # rows}}"
@@ -6659,6 +6675,10 @@ msgstr "Team name"
 msgid "staff"
 msgstr "staff"
 
+#: worker/routes/events.ts
+msgid "{label} on {when}: {question}"
+msgstr "{label} on {when}: {question}"
+
 #: src/pages/admin.tsx
 msgid "For circles without training and games, such as the coaching team, there are <0>groups</0>."
 msgstr "For circles without training and games, such as the coaching team, there are <0>groups</0>."
@@ -6918,6 +6938,10 @@ msgstr "{others, plural, one {Also # duty of coaches, club members and helpers e
 msgid "Your parents are linked to your access. They decide what you can do yourself in the app."
 msgstr "Your parents are linked to your access. They decide what you can do yourself in the app."
 
+#: worker/routes/events.ts
+msgid "{when}. {ask}"
+msgstr "{when}. {ask}"
+
 #: modules/duties/worker/notify.ts
 msgid "You are signed up in {days} days at {game}: {what}."
 msgstr "You are signed up in {days} days at {game}: {what}."
@@ -6935,10 +6959,6 @@ msgstr "On the iPhone, notifications only work if the app is installed on the Ho
 msgid "There is no current season."
 msgstr "There is no current season."
 
-#: worker/cron.ts
-msgid "Are you coming?"
-msgstr "Are you coming?"
-
 #: src/news.tsx
 msgid "Switch on under Administration → Club"
 msgstr "Switch on under Administration → Club"
@@ -6946,6 +6966,7 @@ msgstr "Switch on under Administration → Club"
 #: modules/carpools/app/card.tsx
 #: src/pages/event.tsx
 #: src/respond.tsx
+#: worker/domain/notify.ts
 msgid "You"
 msgstr "You"
 
@@ -7296,6 +7317,10 @@ msgstr "If that does not work and you have stored an e-mail address, use <0>Code
 #: worker/domain/holidays.ts
 msgid "OpenHolidays API (openholidaysapi.org), licence ODbL"
 msgstr "OpenHolidays API (openholidaysapi.org), licence ODbL"
+
+#: worker/routes/events.ts
+msgid "{form, select, you {Please let us know if you are coming.} one {Please let us know if {names} is coming.} youAnd {Please let us know if {names} are coming.} other {Please let us know if {names} are coming.}}"
+msgstr "{form, select, you {Please let us know if you are coming.} one {Please let us know if {names} is coming.} youAnd {Please let us know if {names} are coming.} other {Please let us know if {names} are coming.}}"
 
 #: modules/carpools/app/card.tsx
 msgid "are riding with {driver} ({seats})"
@@ -8061,10 +8086,6 @@ msgid "Who may take duties an admin approves, e.g. youth referees"
 msgstr "Who may take duties an admin approves, e.g. youth referees"
 
 #: worker/routes/events.ts
-msgid "You can now manage the helper duties of this event."
-msgstr "You can now manage the helper duties of this event."
-
-#: worker/routes/events.ts
 msgid "Only special events have organisers."
 msgstr "Only special events have organisers."
 
@@ -8698,10 +8719,6 @@ msgstr "Plan saved. {created} events created."
 msgid "{name} responded with status {status}"
 msgstr "{name} responded with status {status}"
 
-#: worker/routes/squad.ts
-msgid "You have been nominated"
-msgstr "You have been nominated"
-
 #: src/pages/team.tsx
 #: src/pages/team.tsx
 msgid "Personal data"
@@ -8864,6 +8881,10 @@ msgstr "{code} is your sign-in code for {app}"
 #: worker/routes/teams.ts
 msgid "A team or group with this name already exists."
 msgstr "A team or group with this name already exists."
+
+#: worker/routes/squad.ts
+msgid "{form, select, you {You have been nominated} one {{names} has been nominated} youAnd {{names} have been nominated} other {{names} have been nominated}}"
+msgstr "{form, select, you {You have been nominated} one {{names} has been nominated} youAnd {{names} have been nominated} other {{names} have been nominated}}"
 
 #: src/faq.tsx
 msgid "You sign in with Face ID, fingerprint or your screen lock, without a password. This is safer than a password because it cannot be guessed or intercepted. The app never sees any biometric data."
@@ -9146,10 +9167,6 @@ msgstr "Upload logo"
 msgid "Respond themselves {name}"
 msgstr "Respond themselves {name}"
 
-#: worker/cron.ts
-msgid "You are in the squad"
-msgstr "You are in the squad"
-
 #: src/pages/admin.tsx
 msgid "Like a normal chat message: a bundled chat notification for everyone who has turned it on."
 msgstr "Like a normal chat message: a bundled chat notification for everyone who has turned it on."
@@ -9314,10 +9331,6 @@ msgstr "Family"
 #: src/duties.tsx
 msgid "Duty for {child}"
 msgstr "Duty for {child}"
-
-#: worker/routes/events.ts
-msgid "{when}, {location}. Please let us know if you are coming."
-msgstr "{when}, {location}. Please let us know if you are coming."
 
 #: src/pages/group.tsx
 msgid "Remove from group {teamName}?"
@@ -9553,6 +9566,10 @@ msgstr "Only parents can opt out."
 #: src/maintenance.tsx
 msgid "Kabine is being updated"
 msgstr "Kabine is being updated"
+
+#: worker/routes/squad.ts
+msgid "{title} on {when}. {ifNot}"
+msgstr "{title} on {when}. {ifNot}"
 
 #: modules/carpools/app/card.tsx
 msgid "is riding with {driver} ({seats})"
@@ -9929,10 +9946,6 @@ msgstr "Coach of"
 #: src/list-import.tsx
 msgid "Files"
 msgstr "Files"
-
-#: worker/routes/events.ts
-msgid "{label} on {when}: are you coming?"
-msgstr "{label} on {when}: are you coming?"
 
 #: src/pages/special.tsx
 msgid "E.g. a photo shoot, a party or a parents' evening. Everyone in the team is invited and accepts or declines."
@@ -11694,6 +11707,10 @@ msgstr "Stand-in"
 msgid "{name} is riding with {driver}: {game} (entered by {coach})."
 msgstr "{name} is riding with {driver}: {game} (entered by {coach})."
 
+#: worker/domain/notify.ts
+msgid "{form, select, you {If you can't make it, please decline.} one {If {name} can't make it, please decline.} other {If someone can't make it, please decline.}}"
+msgstr "{form, select, you {If you can't make it, please decline.} one {If {name} can't make it, please decline.} other {If someone can't make it, please decline.}}"
+
 #: src/pages/setup-wizard.tsx
 msgid "Sport and season"
 msgstr "Sport and season"
@@ -12014,10 +12031,6 @@ msgstr "Message"
 #: src/pages/home.tsx
 msgid "{name}: missed without excuse"
 msgstr "{name}: missed without excuse"
-
-#: worker/routes/events.ts
-msgid "{when}. Please let us know if you are coming."
-msgstr "{when}. Please let us know if you are coming."
 
 #: src/view-as.tsx
 msgid "End"

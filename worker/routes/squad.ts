@@ -1,4 +1,4 @@
-import { t } from "@lingui/core/macro";
+import { select, t } from "@lingui/core/macro";
 import { Hono } from "hono";
 import { z } from "zod";
 import type { PersonRef } from "../../shared/types";
@@ -6,7 +6,7 @@ import { type AppEnv, intParam, requireActor } from "../app";
 import { type Actor, isCoachOf, isCoachOfAny, requireActFor } from "../auth/actor";
 import { syncAutoSquads } from "../domain/auto-squad";
 import { type EventRow, eventTeams, eventTitle, loadEvent, loadEventContext, toSummary } from "../domain/events";
-import { notifyCoaches, notifyPersons, shortDate, shortTime } from "../domain/notify";
+import { ifYouCannot, notifyCoaches, notifyPersons, pushForm, shortDate, shortTime, whoNames } from "../domain/notify";
 import { all, first, list, run, stmt } from "../lib/db";
 import { moduleParticipantsDropped, moduleParticipantsLeft } from "../modules";
 import { badRequest, conflict, forbidden, notFound, parse, readJson } from "../lib/http";
@@ -269,9 +269,21 @@ squadRoutes.put("/events/:id/squad", async (c) => {
     c.env,
     added,
     "squad",
-    () => {
+    (who) => {
       const { title, when } = texts();
-      return { title: t`You have been nominated`, body: t`${title} on ${when}. If you can't make it, please decline.`, url: `/termine/${event.id}` };
+      const form = pushForm(who);
+      const names = whoNames(who, true);
+      const ifNot = ifYouCannot(who);
+      return {
+        title: select(form, {
+          you: "You have been nominated",
+          one: `${names} has been nominated`,
+          youAnd: `${names} have been nominated`,
+          other: `${names} have been nominated`,
+        }),
+        body: t`${title} on ${when}. ${ifNot}`,
+        url: `/termine/${event.id}`,
+      };
     },
     { teamIds: [team.id], exclude: [actor.accountId] },
   );
@@ -279,9 +291,21 @@ squadRoutes.put("/events/:id/squad", async (c) => {
     c.env,
     removed,
     "squad",
-    () => {
+    (who) => {
       const { title, when } = texts();
-      return { title: t`Squad changed`, body: t`You are no longer in the squad for ${title} on ${when}.`, url: `/termine/${event.id}` };
+      const form = pushForm(who);
+      // Mid-sentence in German ("Für … seid du und Mia …"): lower case
+      const names = whoNames(who);
+      return {
+        title: t`Squad changed`,
+        body: select(form, {
+          you: `You are no longer in the squad for ${title} on ${when}.`,
+          one: `${names} is no longer in the squad for ${title} on ${when}.`,
+          youAnd: `For ${title} on ${when}, ${names} are no longer in the squad.`,
+          other: `${names} are no longer in the squad for ${title} on ${when}.`,
+        }),
+        url: `/termine/${event.id}`,
+      };
     },
     { teamIds: [team.id], exclude: [actor.accountId] },
   );

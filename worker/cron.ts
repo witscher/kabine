@@ -1,4 +1,4 @@
-import { t } from "@lingui/core/macro";
+import { select, t } from "@lingui/core/macro";
 import { appOrigin, enterClubContext, updateInProgress } from "./domain/club";
 import { gameOpponent, MEETING_REMINDER_DAYS } from "./domain/coach-hints";
 import { ensureInstanceSecrets } from "./lib/instance-secrets";
@@ -7,7 +7,7 @@ import { syncAutoSquads } from "./domain/auto-squad";
 import { deadlineInstant, type EventRow, EVENT_SELECT, eventTeams, eventTitle, loadEventContext } from "./domain/events";
 import { ensureGenerated } from "./domain/generate";
 import { syncAutoGroups } from "./domain/groups";
-import { notifyCoaches, notifyPersons, shortDate, shortTime } from "./domain/notify";
+import { areYouComing, ifYouCannot, notifyCoaches, notifyPersons, pushForm, shortDate, shortTime, whoNames } from "./domain/notify";
 import { all, run } from "./lib/db";
 import { maintenanceState } from "./lib/maintenance";
 import { activeWorkerModules } from "./modules";
@@ -82,14 +82,14 @@ export async function sendDeadlineReminders(env: Env, now = Date.now()): Promise
         env,
         open,
         "reminders",
-        () => {
+        (who) => {
           const label = e.kind === "training" ? t`Training` : eventTitle(e, teams);
           const date = shortDate(e.starts_at);
           const time = shortTime(e.starts_at);
           const untilDate = shortDate(deadlineLocal);
           const untilTime = deadlineLocal.slice(11);
           return {
-            title: t`Are you coming?`,
+            title: areYouComing(who),
             body: t`${label} on ${date}, ${time}. You can still decline until ${untilDate}, ${untilTime}.`,
             url: `/termine/${e.id}`,
             tag: `remind-${e.id}`,
@@ -139,13 +139,21 @@ export async function sendGameReminders(env: Env, now = Date.now()): Promise<num
         env,
         persons,
         "squad",
-        () => {
+        (who) => {
           const title = eventTitle(e, teams);
           const date = shortDate(e.starts_at);
           const time = shortTime(e.starts_at);
+          const form = pushForm(who);
+          const names = whoNames(who, true);
+          const ifNot = ifYouCannot(who);
           return {
-            title: t`You are in the squad`,
-            body: t`${title} on ${date}, ${time}. If you can't make it, please decline.`,
+            title: select(form, {
+              you: "You are in the squad",
+              one: `${names} is in the squad`,
+              youAnd: `${names} are in the squad`,
+              other: `${names} are in the squad`,
+            }),
+            body: t`${title} on ${date}, ${time}. ${ifNot}`,
             url: `/termine/${e.id}`,
             tag: `game-${e.id}`,
           };

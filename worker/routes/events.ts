@@ -1,4 +1,4 @@
-import { t } from "@lingui/core/macro";
+import { select, t } from "@lingui/core/macro";
 import { Hono } from "hono";
 import { z } from "zod";
 import type { EventSummary, MyDuty, TeamRef } from "../../shared/types";
@@ -27,7 +27,7 @@ import { loadCoachHints } from "../domain/coach-hints";
 import { loadEventPage } from "../domain/event-page";
 import { absenceChangeable, leaderAccounts, leaderEntries, loadLeaders } from "../domain/leaders";
 import { ensureGenerated } from "../domain/generate";
-import { eventLabel, guardianAccounts, notifyCoaches, notifyPersons, recipientsForPersons, enqueuePush, shortDate, shortTime, staffOf } from "../domain/notify";
+import { areYouComing, eventLabel, guardianAccounts, notifyCoaches, notifyPersons, pushForm, recipientsForPersons, enqueuePush, shortDate, shortTime, staffOf, whoNames } from "../domain/notify";
 import { all, first, list, run, stmt } from "../lib/db";
 import { moduleEventDetail, moduleEventSummaries, moduleParticipantsLeft } from "../modules";
 import { badRequest, conflict, forbidden, notFound, parse, readJson } from "../lib/http";
@@ -177,11 +177,22 @@ eventRoutes.post("/events/:id/organizers", async (c) => {
   const res = await run(db, "INSERT OR IGNORE INTO event_organizers (event_id, person_id, added_by) VALUES (?, ?, ?)", event.id, personId, actor.personId);
   if (res.meta.changes && personId !== actor.personId) {
     c.executionCtx.waitUntil(
-      notifyPersons(c.env, [personId], "events", () => {
+      notifyPersons(c.env, [personId], "events", (who) => {
         const eventName = event.title ?? t`Event`;
+        const form = pushForm(who);
+        const names = whoNames(who, true);
         return {
-          title: t`You are co-organising “${eventName}”`,
-          body: t`You can now manage the helper duties of this event.`,
+          title: select(form, {
+            you: `You are co-organising “${eventName}”`,
+            one: `${names} is co-organising “${eventName}”`,
+            youAnd: `${names} are co-organising “${eventName}”`,
+            other: `${names} are co-organising “${eventName}”`,
+          }),
+          body: select(form, {
+            you: "You can now manage the helper duties of this event.",
+            one: `${names} can now manage the helper duties of this event.`,
+            other: `${names} can now manage the helper duties of this event.`,
+          }),
           url: `/termine/${event.id}`,
         };
       }, { teamIds: event.teamIds }),
@@ -737,12 +748,13 @@ eventRoutes.post("/events/:id/remind", async (c) => {
     c.env,
     targets,
     "reminders",
-    () => {
+    (who) => {
       const label = event.kind === "training" ? t`Training` : eventTitle(event, teams);
       const when = `${shortDate(event.starts_at)}, ${shortTime(event.starts_at)}`;
+      const question = areYouComing(who);
       return {
         title: t`Please let us know`,
-        body: t`${label} on ${when}: are you coming?`,
+        body: t`${label} on ${when}: ${question}`,
         url: `/termine/${event.id}`,
         tag: `remind-${event.id}`,
       };
@@ -817,11 +829,19 @@ eventRoutes.post("/events", async (c) => {
     // Games: nominated only (no push to everyone with "whole team at games")
     (ctx.participants.get(event.id) ?? []).filter((p) => p.isActive && (event.kind !== "game" || p.nominated)).map((p) => p.person.id),
     "events",
-    () => {
+    (who) => {
       const when = `${shortDate(input.startsAt)}, ${shortTime(input.startsAt)}`;
+      const form = pushForm(who);
+      const names = whoNames(who);
+      const ask = select(form, {
+        you: "Please let us know if you are coming.",
+        one: `Please let us know if ${names} is coming.`,
+        youAnd: `Please let us know if ${names} are coming.`,
+        other: `Please let us know if ${names} are coming.`,
+      });
       return {
         title: t`New event: ${title}`,
-        body: location ? t`${when}, ${location}. Please let us know if you are coming.` : t`${when}. Please let us know if you are coming.`,
+        body: location ? t`${when}, ${location}. ${ask}` : t`${when}. ${ask}`,
         url: `/termine/${event.id}`,
       };
     },

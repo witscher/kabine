@@ -1355,6 +1355,11 @@ msgstr "Anfragen"
 msgid "Set {name} to inactive?"
 msgstr "{name} inaktiv setzen?"
 
+# ai
+#: worker/routes/events.ts
+msgid "{form, select, you {You are co-organising “{eventName}”} one {{names} is co-organising “{eventName}”} youAnd {{names} are co-organising “{eventName}”} other {{names} are co-organising “{eventName}”}}"
+msgstr "{form, select, you {Du organisierst „{eventName}“ mit} one {{names} organisiert „{eventName}“ mit} youAnd {{names} organisiert „{eventName}“ mit} other {{names} organisieren „{eventName}“ mit}}"
+
 #: src/pages/team.tsx
 msgid "Remove connection?"
 msgstr "Verknüpfung lösen?"
@@ -1416,6 +1421,11 @@ msgstr "Deine Abmeldung"
 #: src/pages/admin.tsx
 msgid "The parent"
 msgstr "Das Elternteil"
+
+# ai
+#: worker/domain/notify.ts
+msgid "{form, select, you {Are you coming?} one {Is {names} coming?} youAnd {Are {names} coming?} other {Are {names} coming?}}"
+msgstr "{form, select, you {Bist du dabei?} one {Ist {names} dabei?} youAnd {Seid {names} dabei?} other {Sind {names} dabei?}}"
 
 # ai
 #: src/pages/chat.tsx
@@ -2711,6 +2721,11 @@ msgid "Provider of the app: see the club's <0>legal notice</0>."
 msgstr "Anbieter der App: siehe <0>Impressum</0> des Vereins."
 
 # ai
+#: worker/routes/events.ts
+msgid "{form, select, you {You can now manage the helper duties of this event.} one {{names} can now manage the helper duties of this event.} other {{names} can now manage the helper duties of this event.}}"
+msgstr "{form, select, you {Du kannst jetzt die Helferdienste dieses Termins verwalten.} one {{names} kann jetzt die Helferdienste dieses Termins verwalten.} other {{names} können jetzt die Helferdienste dieses Termins verwalten.}}"
+
+# ai
 #: modules/sms/worker/routes.ts
 msgid "Please enter a mobile number, e.g. +49 151 23456789."
 msgstr "Bitte gib eine Handynummer ein, z. B. +49 151 23456789."
@@ -2792,6 +2807,11 @@ msgstr "In der E-Jugend haben die Kinder keinen eigenen Zugang, die Eltern antwo
 #: modules/duties/app/admin.tsx
 msgid "Add duty type"
 msgstr "Dienstart hinzufügen"
+
+# ai
+#: worker/routes/squad.ts
+msgid "{form, select, you {You are no longer in the squad for {title} on {when}.} one {{names} is no longer in the squad for {title} on {when}.} youAnd {For {title} on {when}, {names} are no longer in the squad.} other {{names} are no longer in the squad for {title} on {when}.}}"
+msgstr "{form, select, you {Für {title} am {when} bist du nicht mehr im Kader.} one {Für {title} am {when} ist {names} nicht mehr im Kader.} youAnd {Für {title} am {when} seid {names} nicht mehr im Kader.} other {Für {title} am {when} sind {names} nicht mehr im Kader.}}"
 
 #: src/pages/season.tsx
 msgid "Outgrown the A youth. Assign to the adults or mark as former."
@@ -3023,6 +3043,11 @@ msgstr "Du kannst mitlesen. Schreiben übernehmen in dieser Mannschaft die Elter
 #: src/pages/season.tsx
 msgid "{reassigned} players will be reassigned, {deleted} persons deleted. Events, plans, responses and chats will be reset, the holidays remain unchanged."
 msgstr "{reassigned} Spieler werden neu zugeordnet, {deleted} Personen gelöscht. Termine, Pläne, Rückmeldungen und Chats werden zurückgesetzt, die Ferien bleiben unverändert."
+
+# ai
+#: worker/domain/notify.ts
+msgid "you"
+msgstr "du"
 
 #: src/pages/team.tsx
 msgid "Withdraw link?"
@@ -4066,10 +4091,6 @@ msgstr "Als Fahrer eingetragen"
 msgid "This is no longer possible for this event."
 msgstr "Das ist bei diesem Termin nicht mehr möglich."
 
-#: worker/routes/squad.ts
-msgid "You are no longer in the squad for {title} on {when}."
-msgstr "Für {title} am {when} bist du nicht mehr im Kader."
-
 #: src/pages/login.tsx
 msgid "This browser does not support passkeys. Please use a current smartphone with Safari or Chrome."
 msgstr "Dieser Browser unterstützt keine Passkeys. Bitte nutze ein aktuelles Smartphone mit Safari oder Chrome."
@@ -4119,10 +4140,6 @@ msgstr "Die Standardvorlage lässt sich nicht löschen."
 #: src/pages/admin.tsx
 msgid "{count, plural, one {The announcement appears in one team chat.} other {The announcement appears in # team chats.}}"
 msgstr "{count, plural, one {Die Ankündigung erscheint in einem Mannschaftschat.} other {Die Ankündigung erscheint in # Mannschaftschats.}}"
-
-#: worker/cron.ts
-msgid "{title} on {date}, {time}. If you can't make it, please decline."
-msgstr "{title} am {date}, {time} Uhr. Falls du nicht kannst, sag bitte ab."
 
 #: src/howto.tsx
 #: src/howto.tsx
@@ -4855,10 +4872,6 @@ msgstr "{title}, {weekday} {day}. {month}"
 msgid "E-mail address of your access"
 msgstr "E-Mail-Adresse deines Zugangs"
 
-#: worker/routes/squad.ts
-msgid "{title} on {when}. If you can't make it, please decline."
-msgstr "{title} am {when}. Falls du nicht kannst, sag bitte ab."
-
 #: src/extra-events.tsx
 #: src/pages/home.tsx
 msgid "No events"
@@ -5240,10 +5253,6 @@ msgstr "Link zum Impressum"
 #: src/pages/home.tsx
 msgid "Past"
 msgstr "Vergangen"
-
-#: worker/routes/events.ts
-msgid "You are co-organising “{eventName}”"
-msgstr "Du organisierst „{eventName}“ mit"
 
 #: worker/routes/squad.ts
 msgid "Squad changed"
@@ -5919,9 +5928,19 @@ msgid "{name} is no longer approved for {duty}."
 msgstr "{name} ist nicht mehr für {duty} freigegeben."
 
 # ai
+#: worker/routes/events.ts
+msgid "{when}, {location}. {ask}"
+msgstr "{when}, {location}. {ask}"
+
+# ai
 #: src/pages/group.tsx
 msgid "There is already a group for everyone approved for {autoName}."
 msgstr "Es gibt schon eine Gruppe für alle Freigegebenen für {autoName}."
+
+# ai
+#: worker/cron.ts
+msgid "{form, select, you {You are in the squad} one {{names} is in the squad} youAnd {{names} are in the squad} other {{names} are in the squad}}"
+msgstr "{form, select, you {Du bist im Kader} one {{names} ist im Kader} youAnd {{names} seid im Kader} other {{names} sind im Kader}}"
 
 #: src/pages/profile.tsx
 msgid "You are now working as a coach."
@@ -5997,6 +6016,11 @@ msgstr "Trainingsplan anlegen"
 #: worker/routes/teams.ts
 msgid "The age class already allows less. A team can only restrict further."
 msgstr "Die Altersklasse erlaubt schon weniger. Eine Mannschaft kann nur weiter einschränken."
+
+# ai
+#: worker/cron.ts
+msgid "{title} on {date}, {time}. {ifNot}"
+msgstr "{title} am {date}, {time}. {ifNot}"
 
 # ai
 #: src/list-import.tsx
@@ -7174,6 +7198,11 @@ msgstr "Name der Mannschaft"
 msgid "staff"
 msgstr "Betreuer"
 
+# ai
+#: worker/routes/events.ts
+msgid "{label} on {when}: {question}"
+msgstr "{label} am {when}: {question}"
+
 #: src/pages/admin.tsx
 msgid "For circles without training and games, such as the coaching team, there are <0>groups</0>."
 msgstr "Für Kreise ohne Training und Spiele, etwa das Trainerteam, gibt es <0>Gruppen</0>."
@@ -7446,6 +7475,11 @@ msgstr "{others, plural, one {Außerdem # Dienst von Trainern, Vereinsmitglieder
 msgid "Your parents are linked to your access. They decide what you can do yourself in the app."
 msgstr "Deine Eltern sind mit deinem Zugang verknüpft. Sie legen fest, was du selbst in der App machen kannst."
 
+# ai
+#: worker/routes/events.ts
+msgid "{when}. {ask}"
+msgstr "{when}. {ask}"
+
 #: modules/duties/worker/notify.ts
 msgid "You are signed up in {days} days at {game}: {what}."
 msgstr "du bist in {days} Tagen bei {game} eingetragen: {what}."
@@ -7463,10 +7497,6 @@ msgstr "Auf dem iPhone funktionieren Benachrichtigungen nur, wenn die App auf de
 msgid "There is no current season."
 msgstr "Es gibt keine laufende Saison."
 
-#: worker/cron.ts
-msgid "Are you coming?"
-msgstr "Bist du dabei?"
-
 # ai
 #: src/news.tsx
 msgid "Switch on under Administration → Club"
@@ -7475,6 +7505,7 @@ msgstr "Einschalten unter Verwaltung → Verein"
 #: modules/carpools/app/card.tsx
 #: src/pages/event.tsx
 #: src/respond.tsx
+#: worker/domain/notify.ts
 msgid "You"
 msgstr "Du"
 
@@ -7849,6 +7880,11 @@ msgstr "Klappt das nicht und du hast eine E-Mail-Adresse hinterlegt, nimm <0>Cod
 #: worker/domain/holidays.ts
 msgid "OpenHolidays API (openholidaysapi.org), licence ODbL"
 msgstr "OpenHolidays API (openholidaysapi.org), Lizenz ODbL"
+
+# ai
+#: worker/routes/events.ts
+msgid "{form, select, you {Please let us know if you are coming.} one {Please let us know if {names} is coming.} youAnd {Please let us know if {names} are coming.} other {Please let us know if {names} are coming.}}"
+msgstr "{form, select, you {Bitte gib Bescheid, ob du dabei bist.} one {Bitte gib Bescheid, ob {names} dabei ist.} youAnd {Bitte gebt Bescheid, ob {names} dabei seid.} other {Bitte gib Bescheid, ob {names} dabei sind.}}"
 
 #: modules/carpools/app/card.tsx
 msgid "are riding with {driver} ({seats})"
@@ -8661,10 +8697,6 @@ msgid "Who may take duties an admin approves, e.g. youth referees"
 msgstr "Wer Dienste mit Freigabe übernehmen darf, z. B. Jugendschiedsrichter"
 
 #: worker/routes/events.ts
-msgid "You can now manage the helper duties of this event."
-msgstr "Du kannst jetzt die Helferdienste dieses Termins verwalten."
-
-#: worker/routes/events.ts
 msgid "Only special events have organisers."
 msgstr "Organisatoren gibt es nur bei Sonderterminen."
 
@@ -9347,10 +9379,6 @@ msgstr "Plan gespeichert. {created} Termine erzeugt."
 msgid "{name} responded with status {status}"
 msgstr "{name} antwortet mit Status {status}"
 
-#: worker/routes/squad.ts
-msgid "You have been nominated"
-msgstr "Du bist nominiert"
-
 #: src/pages/team.tsx
 #: src/pages/team.tsx
 msgid "Personal data"
@@ -9527,6 +9555,11 @@ msgstr "{code} ist dein Anmeldecode für {app}"
 #: worker/routes/teams.ts
 msgid "A team or group with this name already exists."
 msgstr "Eine Mannschaft oder Gruppe mit diesem Namen gibt es schon."
+
+# ai
+#: worker/routes/squad.ts
+msgid "{form, select, you {You have been nominated} one {{names} has been nominated} youAnd {{names} have been nominated} other {{names} have been nominated}}"
+msgstr "{form, select, you {Du bist nominiert} one {{names} ist nominiert} youAnd {{names} seid nominiert} other {{names} sind nominiert}}"
 
 #: src/faq.tsx
 msgid "You sign in with Face ID, fingerprint or your screen lock, without a password. This is safer than a password because it cannot be guessed or intercepted. The app never sees any biometric data."
@@ -9834,10 +9867,6 @@ msgstr "Logo hochladen"
 msgid "Respond themselves {name}"
 msgstr "Selbst zu- und absagen {name}"
 
-#: worker/cron.ts
-msgid "You are in the squad"
-msgstr "Du bist im Kader"
-
 #: src/pages/admin.tsx
 msgid "Like a normal chat message: a bundled chat notification for everyone who has turned it on."
 msgstr "Wie eine normale Chatnachricht: gebündelte Chat-Benachrichtigung für alle, die sie eingeschaltet haben."
@@ -10008,10 +10037,6 @@ msgstr "Familie"
 #: src/duties.tsx
 msgid "Duty for {child}"
 msgstr "Dienst für {child}"
-
-#: worker/routes/events.ts
-msgid "{when}, {location}. Please let us know if you are coming."
-msgstr "{when}, {location}. Bitte gib Bescheid, ob du dabei bist."
 
 #: src/pages/group.tsx
 msgid "Remove from group {teamName}?"
@@ -10263,6 +10288,11 @@ msgstr "Abmelden können sich nur Eltern."
 #: src/maintenance.tsx
 msgid "Kabine is being updated"
 msgstr "Kabine wird aktualisiert"
+
+# ai
+#: worker/routes/squad.ts
+msgid "{title} on {when}. {ifNot}"
+msgstr "{title} am {when}. {ifNot}"
 
 #: modules/carpools/app/card.tsx
 msgid "is riding with {driver} ({seats})"
@@ -10668,10 +10698,6 @@ msgstr "Trainer von"
 #: src/list-import.tsx
 msgid "Files"
 msgstr "Dateien"
-
-#: worker/routes/events.ts
-msgid "{label} on {when}: are you coming?"
-msgstr "{label} am {when}: Bist du dabei?"
 
 #: src/pages/special.tsx
 msgid "E.g. a photo shoot, a party or a parents' evening. Everyone in the team is invited and accepts or declines."
@@ -12550,6 +12576,11 @@ msgid "{name} is riding with {driver}: {game} (entered by {coach})."
 msgstr "{name} fährt bei {driver} mit: {game} (eingetragen von {coach})."
 
 # ai
+#: worker/domain/notify.ts
+msgid "{form, select, you {If you can't make it, please decline.} one {If {name} can't make it, please decline.} other {If someone can't make it, please decline.}}"
+msgstr "{form, select, you {Falls du nicht kannst, sag bitte ab.} one {Falls {name} nicht kann, sag bitte ab.} other {Falls jemand nicht kann, sag bitte ab.}}"
+
+# ai
 #: src/pages/setup-wizard.tsx
 msgid "Sport and season"
 msgstr "Sportart und Saison"
@@ -12894,10 +12925,6 @@ msgstr "Nachricht"
 #: src/pages/home.tsx
 msgid "{name}: missed without excuse"
 msgstr "{name}: unentschuldigt gefehlt"
-
-#: worker/routes/events.ts
-msgid "{when}. Please let us know if you are coming."
-msgstr "{when}. Bitte gib Bescheid, ob du dabei bist."
 
 #: src/view-as.tsx
 msgid "End"
