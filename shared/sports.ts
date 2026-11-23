@@ -1,6 +1,6 @@
 // Registry of the sport profiles (one file each in sports/). Types and helpers: shared/sport-api.ts.
 import { SPORT_LIST } from "../sports";
-import type { SportProfile, VenueKind } from "./sport-api";
+import { type SportProfile, teamShort, type VenueKind } from "./sport-api";
 
 export * from "./sport-api";
 export { SPORT_LIST };
@@ -18,4 +18,9 @@ export const SPORTS = Object.fromEntries(SPORT_LIST.map((s): [SportId, SportProf
  */
 export function venueOf(sport: string): VenueKind {
   return SPORTS[sport as SportId]?.venue ?? "venue";
+}
+
+/** Short code of a team for small labels, with the words of the club's sport profile (shared/sport-api.ts, teamShort). */
+export function teamShortFor(name: string, sport: string): string {
+  return teamShort(name, SPORTS[sport as SportId]?.teamShorts ?? SPORTS.other.teamShorts);
 }

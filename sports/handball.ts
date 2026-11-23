@@ -1,9 +1,10 @@
 // Handball, as played in German associations (age classes A–E, youth referees).
-import { ADULTS_HOME_TEMPLATE, CHILD_VIA_PARENTS, defineSport, DUTY_KIOSK, DUTY_SHIRTS } from "../shared/sport-api";
+import { ADULT_TEAM_SHORTS, ADULTS_HOME_TEMPLATE, CHILD_VIA_PARENTS, defineSport, DUTY_KIOSK, DUTY_SHIRTS } from "../shared/sport-api";
 
 export default defineSport({
   id: "handball",
   name: { en: "Handball", de: "Handball" },
+  teamShorts: ADULT_TEAM_SHORTS,
   venue: "hall",
   seasonStart: { month: 7, day: 1 },
   ageClasses: [

@@ -1,9 +1,10 @@
 // Fallback for sports without a profile of their own: three broad age groups, cake and shirts.
-import { defineSport, DUTY_KIOSK, DUTY_SHIRTS } from "../shared/sport-api";
+import { ADULT_TEAM_SHORTS, defineSport, DUTY_KIOSK, DUTY_SHIRTS } from "../shared/sport-api";
 
 export default defineSport({
   id: "other",
   name: { en: "Other sport", de: "Andere Sportart" },
+  teamShorts: ADULT_TEAM_SHORTS,
   venue: "venue",
   seasonStart: { month: 8, day: 1 },
   ageClasses: [

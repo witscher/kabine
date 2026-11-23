@@ -38,6 +38,14 @@ Inactive and away long-term are derived when reading, not stored as responses. O
 
 A reminder goes out 24 hours before the decline deadline to everyone without a response; for games only after the squad is published. Decline reasons are deleted 60 days after the event (cron at 3 am).
 
+## Event list on home
+
+The buttons at the top are the own teams and the children's teams (with parents involved). Each switches its team on and off and the list is the sum; all are on by default and a new team is on, because only the switched-off team ids are stored, per device in localStorage (`kabine-home-list`, with the kind chip). With everything off the list says "Nothing selected", and the line under the greeting always says what is shown. A module can add its own button after the teams (e.g. a star for followed teams) and its own rows, which only need a start time (`ListButton`, `ListRow` in `src/pages/home.tsx`). Under the period switch, always visible, the chips for the kind: all, training, games, other (special events). The server filters both (`GET /events?limit=…&teams=all|none|1,2&show=…`, `loadEventPage`), inside the batch query, so "More events" pages through the selection and a narrow selection does not read the whole season. Club-wide events stay as long as any team is on.
+
+Game rows show the short title "SVM 2 – Opponent" (club abbreviation, the team level from the second team on, `shortGameTitle`) and the team inside a ball on the right (`src/game-ball.tsx`): filled yellow for an own team, outlined for other teams (for modules), grey and struck through when cancelled. A small mark on the ball, drawn as SVG so it sits centred, says what oneself (or the child) has to do: tick for accepted or nominated, red cross for declined, question mark for open or "squad follows", dash for inactive, away or not nominated; with several children or for coaches a count such as "2/3". The team in the ball is a short code from the sport profile (`teamShorts`, e.g. "Men 1" → "M1", "Alte Herren" → "AH"; short names such as "wD" stay, long ones become initials). Home games get a yellow "Home" tag before the title, the same on light and dark rows.
+
+The large card of a game shows the short title, with the team as a label after the date. The hint to decline in good time is only on the event page. Whatever in the list starts before the large card (an unconfirmed optional training in the morning) is shown above it (`splitAtCard` in `shared/home-list.ts`).
+
 ## Parents
 
 Admins link parents and children directly under Administration → People, for example to correct a wrong link. Unlike unlinking by a coach, the parent person always stays, even without a remaining child, so a correction never deletes an access.

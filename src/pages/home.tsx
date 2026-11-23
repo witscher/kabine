@@ -4,19 +4,21 @@ import { clubName } from "../club";
 import type { ComponentChildren } from "preact";
 import { useLocation } from "preact-iso";
 import { useRef, useState } from "preact/hooks";
-import type { EventPage, EventSummary, MyParticipation, TrainingBreak } from "../../shared/types";
+import type { EventPage, EventShow, EventSummary, MyParticipation, TrainingBreak } from "../../shared/types";
+import { byStartTime, splitAtCard } from "../../shared/home-list";
 import { DutyChips } from "../duties";
 import { dayMonth, dayOfMonth, longDate, monthLabel, monthShort, relativeDay, timeRange, time, todayLocal, weekdayShort, joinNames } from "../format";
 import { FirstStepsCard, InstallBanner, MotdBanner, PushPrompt } from "../howto";
 import { Ball, Icon } from "../icons";
-import { DeclineSheet, deadlineText, HelpRequestCard, PersonResponseRow, ResponseButtons } from "../respond";
+import { DeclineSheet, HelpRequestCard, PersonResponseRow, ResponseButtons } from "../respond";
+import { GameBall, gameBallState, HomeTag } from "../game-ball";
 import { useActiveModules } from "../modules";
 import { CoachHints } from "../coach-hints";
 import { NewsCard } from "../news";
 import { useMe } from "../session";
 import { useOffline } from "../offline";
 import { useQuery } from "../store";
-import { Button, CoachMark, Empty, ErrorBox, Segmented, SquadPill, StatusPill, useDocumentTitle } from "../ui";
+import { Button, CoachMark, Empty, ErrorBox, Segmented, StatusPill, useDocumentTitle } from "../ui";
 import { isLiveWindow, LiveCard } from "../live";
 import { isRelevantEvent } from "../../shared/relevance";
 import { FamilyShort } from "../special-attendance";
@@ -109,7 +111,6 @@ function NextCard({ event, onDecline, later = false }: { event: EventSummary; on
   const teamLabel = useTeamLabel();
   const kind = kindLabel()[event.kind];
   const reason = single && mine[0]!.status === "no" ? mine[0]!.reason : null;
-  const deadline = deadlineText(event);
   return (
     <section class="card" aria-label={t`Next event: ${kind}`}>
       <CardHead event={event}>
@@ -121,8 +122,12 @@ function NextCard({ event, onDecline, later = false }: { event: EventSummary; on
       <div class={`card-body ${event.kind === "game" ? "has-ball" : ""}`}>
         {event.kind === "game" ? <Ball class="next-ball" /> : null}
         <a href={`/termine/${event.id}`} style={{ textDecoration: "none" }} class="stack-sm">
-          <div class="big-date">{longDate(event.startsAt)}</div>
-          {event.kind !== "training" ? <div style={{ fontWeight: 700, fontSize: "17px" }}>{event.title}</div> : null}
+          <div class="next-date-line">
+            <div class="big-date">{longDate(event.startsAt)}</div>
+            {/* Games: the team after the date, the title without it (as in the game rows) */}
+            {event.kind === "game" && event.teams.length ? <span class="team-badge next-team">{event.teams.map((t) => t.name).join(" + ")}</span> : null}
+          </div>
+          {event.kind !== "training" ? <div style={{ fontWeight: 700, fontSize: "17px" }}>{event.shortTitle}</div> : null}
         </a>
         <div class="meta-line">
           <span>
@@ -181,11 +186,6 @@ function NextCard({ event, onDecline, later = false }: { event: EventSummary; on
         ) : (
           mine.map((m) => <PersonResponseRow key={m.person.id} event={event} p={m} onDecline={onDecline} />)
         )}
-        {event.deadline && mine.some((m) => m.participant && m.canDecline && !m.optional && (m.status === "yes" || m.status === "open")) ? (
-          <p class="small muted">
-            <Trans>Please decline in good time by {deadline} so that your coaches can plan better.</Trans>
-          </p>
-        ) : null}
       </div>
     </section>
   );
@@ -283,22 +283,16 @@ function CoachNextCard({ event, later = false }: { event: EventSummary; later?: 
 function EventRow({ event }: { event: EventSummary }) {
   const me = useMe();
   const mine = event.mine.filter((m) => m.participant || m.helpRequest || event.kind === "game");
-  const dark = event.kind === "game";
+  const game = event.kind === "game";
   const cancelled = !!event.cancelled;
   const others = mine.filter((m) => m.person.id !== me.person.id);
   const self = mine.find((m) => m.person.id === me.person.id);
   const single = mine.length === 1 ? mine[0]! : null;
   const team = useTeamLabel()(event);
   const at = time(event.startsAt);
-  const title = event.title;
+  // Games: the short title ("SVM 2 – Opponent"), the team sits in the ball
   const label =
-    event.kind === "training"
-      ? team
-        ? t`Training ${team} · ${at}`
-        : t`Training · ${at}`
-      : event.kind === "game"
-        ? t`Game · ${title}`
-        : `${event.title} · ${time(event.startsAt)}`;
+    event.kind === "training" ? (team ? t`Training ${team} · ${at}` : t`Training · ${at}`) : game ? event.shortTitle : `${event.title} · ${time(event.startsAt)}`;
   const byName = event.cancelled?.byName;
   const names = others.map((o) => o.person.firstName).join(", ");
   const counts = event.counts;
@@ -307,14 +301,17 @@ function EventRow({ event }: { event: EventSummary }) {
   const present = counts?.present ?? null;
   const total = counts ? counts.yes + counts.no + counts.open + counts.standing + counts.inactive : 0;
   return (
-    <a href={`/termine/${event.id}`} class={`event-row ${dark && !cancelled ? "dark" : ""} ${cancelled ? "cancelled" : ""}`}>
+    <a href={`/termine/${event.id}`} class={`event-row ${game && !cancelled ? "dark" : ""} ${cancelled ? "cancelled" : ""}`}>
       <div class="date-block">
         <div class="wd">{weekdayShort(event.startsAt)}</div>
         <div class="d">{dayOfMonth(event.startsAt)}</div>
         <div class="mo">{monthShort(event.startsAt)}</div>
       </div>
       <div class="main">
-        <div class="title">{label}</div>
+        <div class="title">
+          {game && event.game?.isHome ? <HomeTag /> : null}
+          {label}
+        </div>
         {cancelled ? (
           <div class="sub">
             <span class="cancel-tag">
@@ -325,9 +322,9 @@ function EventRow({ event }: { event: EventSummary }) {
           </div>
         ) : (
           <div class="sub">
-            {event.kind === "game" ? `${time(event.startsAt)} · ` : ""}
+            {game ? `${time(event.startsAt)} · ` : ""}
             {event.location?.name ?? t`Location to follow`}
-            {event.teams.length > 1 && !team ? ` · ${event.teams.map((t) => t.name).join(" + ")}` : ""}
+            {event.teams.length > 1 && !team && !game ? ` · ${event.teams.map((t) => t.name).join(" + ")}` : ""}
           </div>
         )}
         {!cancelled ? <DutyChips event={event} /> : null}
@@ -339,35 +336,32 @@ function EventRow({ event }: { event: EventSummary }) {
           </div>
         ) : null}
       </div>
-      {!cancelled && single ? (
-        single.helpRequest?.status === "open" ? (
-          <span class="pill pill-nominated">
-            <Trans context="help request">Request</Trans>
-          </span>
-        ) : event.kind === "game" && single.nominated && single.status === "yes" ? (
-          // For games the list counts who is nominated; games without a nomination have no mark
-          <span class="pill pill-nominated">
-            <Trans>Nominated</Trans>
-          </span>
-        ) : event.game?.allPlayers && single.participant && single.status !== "no" && single.status !== "inactive" ? (
-          // Whole team at games: whoever does not play sees "Not nominated" (before the squad "Squad follows")
-          <SquadPill allPlayers published={event.game.squadPublished} participant nominated={single.nominated} status={single.status} />
-        ) : (
-          <StatusPill status={single.status} late={single.isLate} nominated={single.nominated} game={event.kind === "game"} optional={single.optional} />
-        )
-      ) : null}
-      {!cancelled && !single && mine.length > 1 ? (
-        <span class="pill pill-muted">
-          {mine.filter((m) => m.status === "yes").length}/{mine.filter((m) => m.participant).length}
-        </span>
-      ) : null}
-      {!cancelled && !mine.length && event.canManage && event.counts ? (
-        <span class="pill pill-muted" aria-label={present != null ? t`${present} of ${total} were there` : t`${yes} of ${total} accepted`}>
-          <Icon name={present != null ? "users" : "check"} size={13} stroke={3} />
-          {present ?? yes}/{total}
-        </span>
-      ) : null}
-      {event.kind === "game" && !cancelled ? <Ball class="event-ball" /> : null}
+      {game ? (
+        <GameBall teams={event.teams.map((t) => t.name)} own state={gameBallState(event, single, mine)} />
+      ) : (
+        <>
+          {!cancelled && single ? (
+            single.helpRequest?.status === "open" ? (
+              <span class="pill pill-nominated">
+                <Trans context="help request">Request</Trans>
+              </span>
+            ) : (
+              <StatusPill status={single.status} late={single.isLate} nominated={single.nominated} optional={single.optional} />
+            )
+          ) : null}
+          {!cancelled && !single && mine.length > 1 ? (
+            <span class="pill pill-muted">
+              {mine.filter((m) => m.status === "yes").length}/{mine.filter((m) => m.participant).length}
+            </span>
+          ) : null}
+          {!cancelled && !mine.length && event.canManage && event.counts ? (
+            <span class="pill pill-muted" aria-label={present != null ? t`${present} of ${total} were there` : t`${yes} of ${total} accepted`}>
+              <Icon name={present != null ? "users" : "check"} size={13} stroke={3} />
+              {present ?? yes}/{total}
+            </span>
+          ) : null}
+        </>
+      )}
     </a>
   );
 }
@@ -402,31 +396,80 @@ function UnexcusedChips({ event }: { event: EventSummary }) {
 }
 
 type When = "upcoming" | "past";
-const TEAM_FILTER = "kabine-home-team";
 
-function readTeamFilter(): string | null {
+/**
+ * Selection of the list, kept per device (localStorage, no personal data): the team buttons switched off (ids, so a
+ * new team is on) and the kind chip. See docs/dev/decisions.md, "Event list on home".
+ */
+interface ListPick {
+  hidden: number[];
+  show: EventShow;
+}
+const LIST_PICK = "kabine-home-list";
+const DEFAULT_PICK: ListPick = { hidden: [], show: "all" };
+const SHOWS: EventShow[] = ["all", "training", "game", "other"];
+
+function readPick(): ListPick {
   try {
-    return sessionStorage.getItem(TEAM_FILTER);
+    const v = JSON.parse(localStorage.getItem(LIST_PICK) ?? "null") as Partial<ListPick> | null;
+    return {
+      hidden: Array.isArray(v?.hidden) ? v.hidden.filter((id): id is number => typeof id === "number") : [],
+      show: v?.show && SHOWS.includes(v.show) ? v.show : "all",
+    };
   } catch {
-    return null;
+    return DEFAULT_PICK;
   }
 }
 
-function saveTeamFilter(team: string | null) {
+function savePick(pick: ListPick) {
   try {
-    if (team) sessionStorage.setItem(TEAM_FILTER, team);
-    else sessionStorage.removeItem(TEAM_FILTER);
+    localStorage.setItem(LIST_PICK, JSON.stringify(pick));
   } catch {
-    // Private mode: the filter only lasts until the page is reloaded
+    // Private mode: the selection only lasts until the page is reloaded
   }
 }
+
+const showLabels = (): { value: EventShow; label: string }[] => [
+  { value: "all", label: t({ message: "All", context: "event kinds" }) },
+  { value: "training", label: t`Training` },
+  { value: "game", label: t`Games` },
+  { value: "other", label: t({ message: "Other", context: "event kinds" }) },
+];
+
+const kindOk = (show: EventShow, kind: EventSummary["kind"]) => show === "all" || (show === "other" ? kind === "special" : kind === show);
+
+/**
+ * A button in the row at the top of home. The own teams come first; a module can add its own after them (e.g. a star
+ * for the games of teams one follows). Each switches its part of the list on and off, the list is the sum.
+ */
+interface ListButton {
+  key: string;
+  label: ComponentChildren;
+  ariaLabel?: string;
+  class?: string;
+  on: boolean;
+  toggle: () => void;
+}
+
+/**
+ * A row of the list: an event, or a row a module adds (it only needs a time to be sorted in). Rows before the large
+ * card are shown above it (shared/home-list.ts).
+ */
+interface ListRow {
+  key: string;
+  startsAt: string;
+  id: number;
+  node: ComponentChildren;
+}
+
+const eventRow = (e: EventSummary): ListRow => ({ key: `event-${e.id}`, startsAt: e.startsAt, id: e.id, node: <EventRow key={e.id} event={e} /> });
 
 /** Events per section; "More events" loads that many more. */
 const PAGE = 20;
 /** Loaded events per view. Kept when opening an event and going back. */
 const loaded: Record<When, number> = { upcoming: PAGE, past: PAGE };
 
-const byStart = (list: EventSummary[]) => [...new Map(list.map((e) => [e.id, e])).values()].sort((a, b) => a.startsAt.localeCompare(b.startsAt) || a.id - b.id);
+const byStart = (list: EventSummary[]) => byStartTime([...new Map(list.map((e) => [e.id, e])).values()]);
 
 export function HomePage() {
   useDocumentTitle(t`Events`);
@@ -435,58 +478,66 @@ export function HomePage() {
   const offline = useOffline();
   const { query } = useLocation();
   const [when, setWhen] = useState<When>(query.zeit === "vergangen" ? "past" : "upcoming");
-  const [teamFilter, setTeamFilter] = useState<string | null>(readTeamFilter);
+  const [pick, setPickState] = useState<ListPick>(readPick);
   const [limits, setLimits] = useState<Record<When, number>>(() => ({ ...loaded }));
   const setLimit = (view: When, n: number) => {
     loaded[view] = n;
     setLimits({ ...loaded });
+  };
+  const setPick = (next: ListPick) => {
+    savePick(next);
+    setPickState(next);
+    setLimit(when, PAGE);
   };
   const [declineFor, setDeclineFor] = useState<{ event: EventSummary; p: MyParticipation } | null>(null);
 
   // Children only as far as parents are involved in their teams
   const children = me.children.filter((c) => c.parentsInCharge);
   const noTeam = !me.memberships.length && !children.length;
-  const teamNames = [
-    ...new Set([...me.memberships.map((m) => m.name), ...children.flatMap((c) => c.teams.filter((t) => t.parentsEnabled).map((t) => t.name))]),
+  // Own teams and the children's, each once, own first
+  const ownTeams = [
+    ...new Map([...me.memberships, ...children.flatMap((c) => c.teams.filter((t) => t.parentsEnabled))].map((t) => [t.id, { id: t.id, name: t.name }])).values(),
   ];
-  // A remembered filter for a team you no longer belong to does not apply
-  const team = teamFilter && teamNames.includes(teamFilter) ? teamFilter : null;
-  // With a filter set: which children play in this team?
-  const teamKids = team ? children.filter((c) => c.teams.some((t) => t.parentsEnabled && t.name === team)).map((c) => c.firstName) : [];
+  // Team buttons: own teams on by default, a new team is on (only switched-off ones are stored)
+  const onTeams = ownTeams.filter((t) => !pick.hidden.includes(t.id));
+  const onIds = new Set(onTeams.map((t) => t.id));
+  const allOn = onTeams.length === ownTeams.length;
+  const nothing = ownTeams.length > 0 && !onTeams.length;
+  const show = pick.show;
+  const toggleTeam = (id: number) =>
+    setPick({ ...pick, hidden: pick.hidden.includes(id) ? pick.hidden.filter((h) => h !== id) : [...pick.hidden.filter((h) => ownTeams.some((t) => t.id === h)), id] });
+  const buttons: ListButton[] = ownTeams.map((tm) => ({ key: `team-${tm.id}`, label: tm.name, on: onIds.has(tm.id), toggle: () => toggleTeam(tm.id) }));
+  // Which children play in the selected teams?
+  const teamKids = !allOn ? children.filter((c) => c.teams.some((t) => t.parentsEnabled && onIds.has(t.id))).map((c) => c.firstName) : [];
   const kids = joinNames(teamKids);
-  const pickTeam = (name: string) => {
-    const next = team === name ? null : name;
-    saveTeamFilter(next);
-    setTeamFilter(next);
-    setLimit(when, PAGE);
-  };
-  const teamId = team
-    ? ([...me.memberships, ...children.flatMap((c) => c.teams.filter((t) => t.parentsEnabled))].find((t) => t.name === team)?.id ?? null)
-    : null;
+  const team = !allOn ? joinNames(onTeams.map((t) => t.name)) : null;
 
-  // Page by page from the server, which also filters by relevance and team. Offline without a team:
-  // then the last loaded list comes from storage and is filtered here.
+  // Page by page from the server, which also filters by relevance, the team buttons and the kind (so "More events"
+  // stays right). Offline the last full list comes from storage and is filtered here.
   const limit = limits[when];
-  const serverTeam = offline ? null : teamId;
-  const path = `/events?limit=${limit}${serverTeam ? `&team=${serverTeam}` : ""}${when === "past" ? "&past=1" : ""}`;
+  const teamsParam = allOn || offline ? "all" : [...onIds].join(",");
+  const path = nothing
+    ? null
+    : `/events?limit=${limit}&teams=${teamsParam}${show !== "all" && !offline ? `&show=${show}` : ""}${when === "past" ? "&past=1" : ""}`;
   const { data, error, loading, reload } = useQuery<EventPage>(path, { refreshMs: 60_000 });
   // While loading more, the previous list stays instead of briefly disappearing
   const kept = useRef<Partial<Record<When, EventPage>>>({});
   if (data) kept.current[when] = data;
-  const shown = data ?? kept.current[when];
+  const shown = nothing ? undefined : (data ?? kept.current[when]);
   const growing = !data && !!shown;
 
-  const teamOk = (e: EventSummary) => !team || e.teams.some((t) => t.name === team);
-  const events = (shown?.events ?? []).filter(isRelevantEvent).filter(teamOk);
+  // The same rule as on the server, for the kept list while the new one loads and for offline
+  const picked = (e: EventSummary) => kindOk(show, e.kind) && (allOn || e.clubWide || e.teams.some((t) => onIds.has(t.id)));
+  const events = (shown?.events ?? []).filter(isRelevantEvent).filter(picked);
   const past = when === "past" ? events.filter((e) => e.isPast && !e.isRunning) : [];
-  // Games that have started with a handball4all score stay at the top until 3 hours after throw-off
-  const liveGames = when === "upcoming" ? (shown?.live ?? []).filter(teamOk).filter((e) => isLiveWindow(e)) : [];
+  // Games that have started with a live score stay at the top until the end of the live window
+  const liveGames = when === "upcoming" ? (shown?.live ?? []).filter(picked).filter((e) => isLiveWindow(e)) : [];
   // Running events stay under "Upcoming" until they end (games with a live card only there)
   const liveIds = new Set(liveGames.map((e) => e.id));
   const upcoming = when === "upcoming" ? events.filter((e) => (!e.isPast || e.isRunning) && !liveIds.has(e.id)) : [];
   // Events with an open stand-in request and your own next event, even if they lie beyond the page
-  const helpRequests = when === "upcoming" ? (shown?.openHelp ?? []).filter(teamOk) : [];
-  const pool = byStart([...upcoming, ...(when === "upcoming" ? (shown?.next ?? []).filter(teamOk) : []), ...helpRequests]);
+  const helpRequests = when === "upcoming" ? (shown?.openHelp ?? []).filter(picked) : [];
+  const pool = byStart([...upcoming, ...(when === "upcoming" ? (shown?.next ?? []).filter(picked) : []), ...helpRequests]);
   // Big card for the next event and further games on the same day (e.g. two games on a Sunday)
   // The next event always, further ones on the same day only if they are games
   const sameDayAs = (first: EventSummary | undefined, list: EventSummary[]) =>
@@ -503,7 +554,11 @@ export function HomePage() {
         upcoming.filter((e) => !e.cancelled && e.canManage && e.counts),
       )
     : [];
-  const rest = upcoming.filter((e) => !mineIds.has(e.id) && !coachCards.includes(e));
+  // Time order: whatever starts before the large card (an unconfirmed optional training this morning) is above it
+  const listRows: ListRow[] = upcoming.filter((e) => !mineIds.has(e.id) && !coachCards.includes(e)).map(eventRow);
+  const { before, after: rest } = splitAtCard(listRows, mineCards[0] ?? coachCards[0]);
+  const pastRows: ListRow[] = past.map(eventRow);
+  const filtered = show !== "all" || !allOn;
   // Note from when on only games and special events follow (trainings are generated 70 days ahead)
   const trainingsUntil = when === "upcoming" ? (shown?.trainingsUntil ?? null) : null;
   const horizonAt =
@@ -536,49 +591,53 @@ export function HomePage() {
 
   const firstName = me.person.firstName;
   const childNames = joinNames(children.map((c) => c.firstName));
+  // Under the greeting: what the list shows
+  const heroSub = nothing
+    ? t`Nothing selected`
+    : when === "past"
+      ? team
+        ? kids
+          ? t`Past events of the ${team} for ${kids} this season`
+          : t`Past events of the ${team} this season`
+        : t`Past events this season`
+      : team
+        ? kids
+          ? t`Events of the ${team} for ${kids}`
+          : t`Events of the ${team}`
+        : children.length
+          ? me.memberships.length
+            ? t`Events for you and ${childNames}`
+            : t`Events for ${childNames}`
+          : t`Your upcoming events`;
   let lastMonth = "";
   return (
     <main class="page">
       <header class="hero">
         <div class="hero-top">
           <div class="kicker">{clubName()}</div>
-          {teamNames.length > 1 ? (
+          {buttons.length > 1 ? (
             <div class="row-gap team-filter" role="group" aria-label={t`Filter by team`}>
-              {teamNames.map((t) => (
+              {buttons.map((b) => (
                 <button
+                  key={b.key}
                   type="button"
-                  class={`team-badge ${team && team !== t ? "outline" : ""}`}
-                  aria-pressed={team === t ? "true" : "false"}
-                  onClick={() => pickTeam(t)}
+                  class={`team-badge ${b.class ?? ""} ${b.on ? "" : "outline"}`}
+                  aria-pressed={b.on ? "true" : "false"}
+                  aria-label={b.ariaLabel}
+                  onClick={b.toggle}
                 >
-                  {t}
+                  {b.label}
                 </button>
               ))}
             </div>
           ) : (
-            teamNames.map((t) => <span class="team-badge">{t}</span>)
+            ownTeams.map((tm) => <span class="team-badge">{tm.name}</span>)
           )}
         </div>
         <h1>
           <Trans>Hello {firstName}</Trans>
         </h1>
-        <div class="hero-sub">
-          {when === "past"
-            ? team
-              ? kids
-                ? t`Past events of the ${team} for ${kids} this season`
-                : t`Past events of the ${team} this season`
-              : t`Past events this season`
-            : team
-              ? kids
-                ? t`Events of the ${team} for ${kids}`
-                : t`Events of the ${team}`
-              : children.length
-                ? me.memberships.length
-                  ? t`Events for you and ${childNames}`
-                  : t`Events for ${childNames}`
-                : t`Your upcoming events`}
-        </div>
+        <div class="hero-sub">{heroSub}</div>
       </header>
 
       <div class="content">
@@ -587,17 +646,26 @@ export function HomePage() {
         <NewsCard />
         <CoachHints />
         {!noTeam ? <MotdBanner /> : null}
-        <Segmented<When>
-          label={t`Period`}
-          value={when}
-          onChange={setWhen}
-          options={[
-            { value: "upcoming", label: t`Upcoming` },
-            { value: "past", label: t`Past` },
-          ]}
-        />
+        <div class="list-controls">
+          <Segmented<When>
+            label={t`Period`}
+            value={when}
+            onChange={setWhen}
+            options={[
+              { value: "upcoming", label: t`Upcoming` },
+              { value: "past", label: t`Past` },
+            ]}
+          />
+          <div class="kind-chips" role="group" aria-label={t`Kind of events`}>
+            {showLabels().map((o) => (
+              <button type="button" aria-pressed={show === o.value ? "true" : "false"} onClick={() => o.value !== show && setPick({ ...pick, show: o.value })}>
+                {o.label}
+              </button>
+            ))}
+          </div>
+        </div>
         {error && !shown ? <ErrorBox error={error} onRetry={reload} /> : null}
-        {loading && !shown ? (
+        {loading && !shown && !nothing ? (
           <div class="stack">
             <div class="skeleton" style={{ minHeight: "260px" }} />
             <div class="skeleton" />
@@ -634,6 +702,11 @@ export function HomePage() {
         {liveGames.map((e) => (
           <LiveCard key={e.id} event={e} />
         ))}
+        {before.length ? (
+          <section class="stack" aria-label={t`Before your next event`}>
+            {before.map((r) => r.node)}
+          </section>
+        ) : null}
         {mineCards.map((e, i) => (
           <NextCard key={e.id} event={e} later={i > 0} onDecline={(p) => setDeclineFor({ event: e, p })} />
         ))}
@@ -641,32 +714,43 @@ export function HomePage() {
           <CoachNextCard key={e.id} event={e} later={i > 0} />
         ))}
 
-        {shown && when === "past" && !past.length ? (
-          <Empty title={t`No past events`} icon="calendar">
-            {team ? t`There have been no events for the ${team} this season yet.` : t`There have been no events this season yet.`}
+        {nothing ? (
+          <Empty title={t`Nothing selected`} icon="calendar">
+            {t`Tap a team at the top to see its events.`}
           </Empty>
         ) : null}
 
-        {past.length ? (
+        {shown && when === "past" && !pastRows.length ? (
+          <Empty title={t`No past events`} icon="calendar">
+            {filtered
+              ? t`There have been no events for this selection this season yet.`
+              : t`There have been no events this season yet.`}
+          </Empty>
+        ) : null}
+
+        {pastRows.length ? (
           <section class="stack" aria-label={t`Past events`}>
-            {past.map((e) => {
-              const month = monthLabel(e.startsAt);
+            {pastRows.map((r) => {
+              const month = monthLabel(r.startsAt);
               const showMonth = month !== lastMonth;
               lastMonth = month;
               return (
                 <>
                   {showMonth ? <div class="month-label">{month}</div> : null}
-                  <EventRow key={e.id} event={e} />
+                  {r.node}
                 </>
               );
             })}
-            {rest.length ? trailingBreaks : breaks.map((x) => <BreakNote key={`${x.b.name}${x.b.startsOn}`} item={x.b} />)}
           </section>
         ) : null}
         {when === "past" ? moreButton : null}
 
         {shown && when === "upcoming" && !upcoming.length ? (
-          noTeam && me.isAdmin ? (
+          filtered ? (
+            <Empty title={t`No events`} icon="calendar">
+              {t`There are no upcoming events for this selection.`}
+            </Empty>
+          ) : noTeam && me.isAdmin ? (
             <Empty title={t`No events of your own`} icon="calendar">
               <p>
                 <Trans>You are not assigned to any team. You can find the teams and their events in the administration.</Trans>
@@ -691,8 +775,8 @@ export function HomePage() {
             <h2 class="section-title">
               <Trans>Coming up</Trans>
             </h2>
-            {rest.map((e, i) => {
-              const month = monthLabel(e.startsAt);
+            {rest.map((r, i) => {
+              const month = monthLabel(r.startsAt);
               const showMonth = month !== lastMonth && lastMonth !== "";
               lastMonth = month;
               return (
@@ -704,10 +788,11 @@ export function HomePage() {
                     </p>
                   ) : null}
                   {showMonth ? <div class="month-label">{month}</div> : null}
-                  <EventRow key={e.id} event={e} />
+                  {r.node}
                 </>
               );
             })}
+            {rest.length ? trailingBreaks : breaks.map((x) => <BreakNote key={`${x.b.name}${x.b.startsOn}`} item={x.b} />)}
           </section>
         ) : null}
         {when === "upcoming" ? moreButton : null}

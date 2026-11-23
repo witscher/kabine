@@ -48,15 +48,26 @@ const rangeSchema = z.object({
   past: z.literal("1").optional(),
   /** Page by page for the event overview: the next `limit` relevant events (from/to/teamId/kind are dropped) */
   limit: z.coerce.number().int().min(1).max(200).optional(),
-  /** Only with limit: team filter of the event overview, by visibility and relevance */
+  /** Only with limit: one team (older apps; like teams=<id>) */
   team: z.coerce.number().int().positive().optional(),
+  /** Only with limit: team buttons of the event overview, "all", "none" or ids separated by commas */
+  teams: z.string().regex(/^(all|none|\d{1,9}(,\d{1,9}){0,49})$/).optional(),
+  /** Only with limit: kind chip (other = special events) */
+  show: z.enum(["all", "training", "game", "other"]).optional(),
 });
+
+/** teams=all|none|1,2 (and the older team=<id>) as the selection of loadEventPage: null all, [] none. */
+function pickedTeams(q: { teams?: string; team?: number }): number[] | null {
+  if (q.teams === "none") return [];
+  if (q.teams && q.teams !== "all") return [...new Set(q.teams.split(",").map(Number))];
+  return q.team != null ? [q.team] : null;
+}
 
 eventRoutes.get("/events", async (c) => {
   const actor = requireActor(c);
   const q = parse(rangeSchema, c.req.query());
   await ensureGenerated(c.env.DB);
-  if (q.limit) return c.json(await loadEventPage(c.env.DB, actor, { limit: q.limit, past: !!q.past, teamId: q.team ?? null }));
+  if (q.limit) return c.json(await loadEventPage(c.env.DB, actor, { limit: q.limit, past: !!q.past, teamIds: pickedTeams(q), show: q.show }));
   const from = q.from ?? todayLocal();
   const to = q.to ?? addDays(from, 70);
   if (to < from) throw badRequest(t`Invalid period.`);

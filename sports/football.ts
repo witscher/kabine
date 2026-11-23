@@ -1,9 +1,11 @@
 // Football (soccer) with the German youth classes G to A (U7 to U19).
-import { ADULTS_HOME_TEMPLATE, CHILD_VIA_PARENTS, defineSport, DUTY_KIOSK, DUTY_SHIRTS } from "../shared/sport-api";
+import { ADULT_TEAM_SHORTS, ADULTS_HOME_TEMPLATE, CHILD_VIA_PARENTS, defineSport, DUTY_KIOSK, DUTY_SHIRTS } from "../shared/sport-api";
 
 export default defineSport({
   id: "football",
   name: { en: "Football", de: "Fußball" },
+  // Senior teams (Ü32, Ü40 …) are often called "Senioren"
+  teamShorts: [...ADULT_TEAM_SHORTS, { word: "Senioren", short: "S" }, { word: "Seniors", short: "S" }],
   venue: "pitch",
   seasonStart: { month: 7, day: 1 },
   ageClasses: [

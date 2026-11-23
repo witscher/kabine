@@ -780,6 +780,7 @@ msgstr "{helped} of {total} families have helped already. If the others can do i
 msgid "From the plan “{planName}” of the {ownerTeam}."
 msgstr "From the plan “{planName}” of the {ownerTeam}."
 
+#: src/game-ball.tsx
 #: src/pages/stats.tsx
 #: src/ui.tsx
 msgid "Away long-term"
@@ -1403,6 +1404,7 @@ msgstr "View as {mode}: {name}"
 msgid "Appears as a highlighted announcement in the chat of every selected team, with your name."
 msgstr "Appears as a highlighted announcement in the chat of every selected team, with your name."
 
+#: src/game-ball.tsx
 #: src/ui.tsx
 msgid "Squad follows"
 msgstr "Squad follows"
@@ -1720,6 +1722,7 @@ msgstr "The driver does not have enough free seats. Please cancel the lift and b
 msgid "The app is born"
 msgstr "The app is born"
 
+#: src/game-ball.tsx
 #: src/pages/home.tsx
 msgctxt "help request"
 msgid "Request"
@@ -2333,8 +2336,8 @@ msgid "All chats"
 msgstr "All chats"
 
 #: src/pages/home.tsx
-msgid "There have been no events for the {team} this season yet."
-msgstr "There have been no events for the {team} this season yet."
+msgid "Tap a team at the top to see its events."
+msgstr "Tap a team at the top to see its events."
 
 #: src/help-texts.ts
 msgid "This person may take the duty and sees it in the Helpers tab. Without the approval they do not see it at all. Coaches and admins can still enter anyone. For duties taken across teams, such as youth referee, the Helpers tab lists all games that still need someone."
@@ -3554,6 +3557,7 @@ msgstr "A confirmed e-mail address is already stored for this access. Use this a
 msgid "Section"
 msgstr "Section"
 
+#: src/game-ball.tsx
 #: src/pages/stats.tsx
 #: src/ui.tsx
 msgid "Declined at short notice"
@@ -3643,6 +3647,11 @@ msgstr "{name} is now {intoName}."
 #: src/pages/team.tsx
 msgid "Dear parents of {teamName}, we use the {club} app for events, responses, helper duties and the team chat."
 msgstr "Dear parents of {teamName}, we use the {club} app for events, responses, helper duties and the team chat."
+
+#: src/pages/home.tsx
+msgctxt "event kinds"
+msgid "All"
+msgstr "All"
 
 #: src/respond.tsx
 msgid "Accepted {by}"
@@ -3831,6 +3840,7 @@ msgstr "Items"
 msgid "Only people approved for {duty} can sign up."
 msgstr "Only people approved for {duty} can sign up."
 
+#: src/game-ball.tsx
 #: src/pages/event.tsx
 #: src/pages/event.tsx
 #: src/pages/event.tsx
@@ -4043,7 +4053,6 @@ msgid "Who did what to whom, for actions with a large effect: access, leaving, a
 msgstr "Who did what to whom, for actions with a large effect: access, leaving, admin rights, members, game schedules, cancelled events, the season change and the export. Responses, squads, chats and helper duties are not listed. Only admins see this; the season change empties it."
 
 #: src/extra-events.tsx
-#: src/pages/home.tsx
 msgid "Game · {title}"
 msgstr "Game · {title}"
 
@@ -4079,6 +4088,7 @@ msgstr "wanted, but no confirmed e-mail address on the access"
 msgid "There is no one in the matching teams who does not already play here."
 msgstr "There is no one in the matching teams who does not already play here."
 
+#: src/game-ball.tsx
 #: src/pages/home.tsx
 msgid "{present} of {total} were there"
 msgstr "{present} of {total} were there"
@@ -4271,6 +4281,10 @@ msgstr "Time slot {label} added."
 #: src/pages/event.tsx
 msgid "Record who was there, until the end of {until}. Without an entry the response counts."
 msgstr "Record who was there, until the end of {until}. Without an entry the response counts."
+
+#: src/pages/home.tsx
+msgid "There are no upcoming events for this selection."
+msgstr "There are no upcoming events for this selection."
 
 #: shared/changelog.ts
 msgid "The same page takes back an export of Kabine, for example when moving to a new installation. You choose what to take over; nothing is deleted."
@@ -4540,10 +4554,6 @@ msgstr "This link sets up a new passkey for an existing access. You can add an e
 #: src/game-import.tsx
 msgid "Away game at {opponent}"
 msgstr "Away game at {opponent}"
-
-#: src/pages/home.tsx
-msgid "Please decline in good time by {deadline} so that your coaches can plan better."
-msgstr "Please decline in good time by {deadline} so that your coaches can plan better."
 
 #: src/game-import.tsx
 msgid "{created, plural, one {# game created.} other {# games created.}}"
@@ -5137,6 +5147,7 @@ msgstr "E-mail address of your access"
 
 #: src/extra-events.tsx
 #: src/pages/home.tsx
+#: src/pages/home.tsx
 msgid "No events"
 msgstr "No events"
 
@@ -5521,6 +5532,7 @@ msgid "Frequent questions, guides, feedback on the app"
 msgstr "Frequent questions, guides, feedback on the app"
 
 #: modules/duties/app/helpers.tsx
+#: src/game-ball.tsx
 #: src/pages/home.tsx
 msgid "Not taking place"
 msgstr "Not taking place"
@@ -5625,6 +5637,11 @@ msgstr "No order yet."
 #: src/duty-blocks.tsx
 msgid "– Choose duty –"
 msgstr "– Choose duty –"
+
+#: src/pages/home.tsx
+msgctxt "event kinds"
+msgid "Other"
+msgstr "Other"
 
 #: src/list-import.tsx
 #: src/pages/admin.tsx
@@ -6001,6 +6018,11 @@ msgstr "{played} of {expected}"
 #: src/pages/event.tsx
 msgid "Were there"
 msgstr "Were there"
+
+#: src/game-ball.tsx
+msgctxt "home game"
+msgid "Home"
+msgstr "Home"
 
 #: src/pages/home.tsx
 msgid "{name} until {to}: no training for {teams}."
@@ -6947,6 +6969,10 @@ msgstr "“{text}”"
 msgid "Unexpected format from {name}: {detail}"
 msgstr "Unexpected format from {name}: {detail}"
 
+#: src/pages/home.tsx
+msgid "There have been no events for this selection this season yet."
+msgstr "There have been no events for this selection this season yet."
+
 #: src/pages/privacy.tsx
 msgid "Of players and parents only first name, last name and (for players) the year of birth. No phone number, no address. Admins can additionally be identified by their e-mail address."
 msgstr "Of players and parents only first name, last name and (for players) the year of birth. No phone number, no address. Admins can additionally be identified by their e-mail address."
@@ -7021,6 +7047,10 @@ msgstr "{name} is no longer riding with {driver}. The driver will be notified."
 #: src/pages/team.tsx
 msgid "From lower-ranked teams of the same age class and the next younger youth team, here: {sources}."
 msgstr "From lower-ranked teams of the same age class and the next younger youth team, here: {sources}."
+
+#: src/pages/home.tsx
+msgid "Kind of events"
+msgstr "Kind of events"
 
 #: src/pages/team.tsx
 msgid "The previous link will then stop working."
@@ -7141,6 +7171,7 @@ msgstr "Physio, team manager or kit manager: they see the events, who takes part
 msgid "with {names} · without the app"
 msgstr "with {names} · without the app"
 
+#: src/game-ball.tsx
 #: src/ui.tsx
 msgid "Not nominated"
 msgstr "Not nominated"
@@ -7788,6 +7819,10 @@ msgstr "“Visible right away”: whoever may vote sees the interim result at on
 #: modules/polls/app/pages.tsx
 msgid "Poll deleted."
 msgstr "Poll deleted."
+
+#: src/pages/home.tsx
+msgid "Before your next event"
+msgstr "Before your next event"
 
 #: worker/routes/parents.ts
 msgid "Permission changed"
@@ -9119,7 +9154,7 @@ msgstr "Details and reminders"
 msgid "Automatically nominate the core squad for all games"
 msgstr "Automatically nominate the core squad for all games"
 
-#: src/pages/home.tsx
+#: src/game-ball.tsx
 #: src/ui.tsx
 #: src/ui.tsx
 msgid "Nominated"
@@ -9355,6 +9390,7 @@ msgstr "At most {max} companions."
 msgid "{actorName} accepted training on {when} for {name}."
 msgstr "{actorName} accepted training on {when} for {name}."
 
+#: src/game-ball.tsx
 #: src/pages/admin.tsx
 #: src/pages/event.tsx
 #: src/pages/event.tsx
@@ -10255,6 +10291,8 @@ msgstr "Parent link for {firstName}"
 msgid "Accepted training {day}"
 msgstr "Accepted training {day}"
 
+#: src/game-ball.tsx
+#: src/game-ball.tsx
 #: src/pages/home.tsx
 msgid "{yes} of {total} accepted"
 msgstr "{yes} of {total} accepted"
@@ -11313,6 +11351,7 @@ msgstr "Last synced on {importedDate}."
 msgid "Created on {created}."
 msgstr "Created on {created}."
 
+#: src/game-ball.tsx
 #: src/ui.tsx
 msgctxt "participation"
 msgid "Open"
@@ -12449,6 +12488,8 @@ msgstr "Who takes on which duty at which game or event, optional notes (e.g. whi
 #: src/duty-manage.tsx
 #: worker/domain/events.ts
 #: worker/domain/events.ts
+#: worker/domain/events.ts
+#: worker/domain/events.ts
 msgid "Opponent"
 msgstr "Opponent"
 
@@ -13191,6 +13232,7 @@ msgid "Please register how many of your family are coming."
 msgstr "Please register how many of your family are coming."
 
 #: src/calendar.tsx
+#: src/pages/home.tsx
 #: src/pages/stats.tsx
 #: src/pages/stats.tsx
 #: src/pages/stats.tsx
@@ -13535,6 +13577,11 @@ msgstr "Members"
 #: modules/sms/app/index.tsx
 msgid "Provider for codes and reminders by SMS"
 msgstr "Provider for codes and reminders by SMS"
+
+#: src/pages/home.tsx
+#: src/pages/home.tsx
+msgid "Nothing selected"
+msgstr "Nothing selected"
 
 #: modules/polls/app/index.tsx
 #: modules/polls/app/index.tsx
@@ -14171,6 +14218,7 @@ msgstr "no other changes"
 
 #: src/pages/audit.tsx
 #: src/pages/event.tsx
+#: src/pages/home.tsx
 #: src/pages/home.tsx
 #: src/pages/stats.tsx
 #: src/pages/stats.tsx
@@ -14971,6 +15019,7 @@ msgstr "Unknown location."
 msgid "For your family"
 msgstr "For your family"
 
+#: src/game-ball.tsx
 #: src/pages/event.tsx
 #: src/pages/event.tsx
 #: src/pages/event.tsx

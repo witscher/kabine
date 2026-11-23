@@ -3,6 +3,7 @@ import { matchdayHost, splitRef, teamScheduleUrl, teamTableUrl } from "./fixture
 import type {
   EventCounts,
   EventDetail,
+  EventKind,
   EventSummary,
   FamilyOverview,
   GameInfo,
@@ -89,6 +90,8 @@ export interface TeamInfo {
   id: number;
   name: string;
   age_class_code: string;
+  /** 1 = first team; the short game title names the level from the second team on */
+  level: number;
   /** Playing time of the age class (current season), 120 if unknown. */
   game_minutes: number;
   decline_hours_training: number;
@@ -272,7 +275,7 @@ export async function loadEventContext(db: D1Database, events: EventRow[]): Prom
     fromCache(versions, "ref", "team-info", () =>
       all<TeamInfo>(
         db,
-        `SELECT t.id, t.name, t.age_class_code, COALESCE(ac.game_minutes, 120) AS game_minutes, t.decline_hours_training,
+        `SELECT t.id, t.name, t.age_class_code, t.level, COALESCE(ac.game_minutes, 120) AS game_minutes, t.decline_hours_training,
                 t.decline_hours_game, t.max_squad, t.auto_squad, t.fixture_connector, t.fixture_source, t.show_responses,
                 t.game_all_players, t.parents_enabled
            FROM teams t ${CURRENT_AGE_CLASS_JOIN("t", "ac")}
@@ -622,6 +625,18 @@ export function eventTeams(e: EventRow, ctx: EventContext): TeamInfo[] {
   return (ctx.eventTeams.get(e.id) ?? []).map((id) => ctx.teams.get(id)!).filter(Boolean);
 }
 
+/**
+ * Game title without the team name, for lists that show the team next to it: "SVM 2 – HSG Opponent" (club abbreviation,
+ * with the team level from the second team on). Matchdays and games without home/away stay as in eventTitle.
+ */
+export function shortGameTitle(e: EventRow, teams: (TeamRef & { level?: number | null })[]): string {
+  const full = eventTitle(e, teams);
+  if (e.kind !== "game" || e.is_home == null || matchdayHost({ home: e.home_team ?? "", guest: e.guest_team ?? "" }) != null) return full;
+  const level = teams[0]?.level ?? 1;
+  const own = level > 1 ? `${ownClubAbbr()} ${level}`.trim() : ownClubAbbr();
+  return e.is_home === 1 ? `${own} – ${e.guest_team ?? t`Opponent`}` : `${e.home_team ?? t`Opponent`} – ${own}`;
+}
+
 export function eventTitle(e: EventRow, teams: TeamRef[]): string {
   if (e.kind === "game") {
     const own = `${ownClubAbbr()} ${teams[0]?.name ?? ""}`.trim();
@@ -766,6 +781,7 @@ export function toSummary(e: EventRow, ctx: EventContext, actor: Actor, now: num
     id: e.id,
     kind: e.kind,
     title: eventTitle(e, teamRefs),
+    shortTitle: shortGameTitle(e, teams),
     startsAt: e.starts_at,
     endsAt: e.ends_at,
     location:
@@ -981,6 +997,35 @@ export async function listVisibleEvents(
   );
 }
 
+/**
+ * Selection of the event overview: teams (null: all) and kinds (null: all). Club-wide events belong to every team; they
+ * stay unless no team is selected.
+ */
+export interface EventListFilter {
+  teamIds: number[] | null;
+  kinds: EventKind[] | null;
+}
+
+/** SQL conditions on `e` for a filter, its values appended to params. Empty without a filter. */
+export function listFilterSql(filter: EventListFilter | undefined, params: (string | number)[]): string {
+  let sql = "";
+  if (filter?.teamIds) {
+    params.push(list(filter.teamIds));
+    sql += ` AND (e.club_wide = 1 OR EXISTS (SELECT 1 FROM event_teams ft WHERE ft.event_id = e.id AND ft.team_id IN (SELECT value FROM json_each(?${params.length}))))`;
+  }
+  if (filter?.kinds) {
+    params.push(list(filter.kinds));
+    sql += ` AND e.kind IN (SELECT value FROM json_each(?${params.length}))`;
+  }
+  return sql;
+}
+
+/** Does an event fit the filter (the same rule as listFilterSql, for events loaded another way)? */
+export function fitsListFilter(s: { kind: EventKind; clubWide: boolean; teams: { id: number }[] }, filter: EventListFilter | undefined): boolean {
+  if (filter?.kinds && !filter.kinds.includes(s.kind)) return false;
+  return !filter?.teamIds || s.clubWide || s.teams.some((t) => filter.teamIds!.includes(t.id));
+}
+
 export interface EventCursor {
   startsAt: string;
   id: number;
@@ -995,7 +1040,7 @@ export interface EventCursor {
 export async function visibleEventBatch(
   db: D1Database,
   actor: Actor,
-  opts: { from: string; to: string; size: number; desc?: boolean; after?: EventCursor | null },
+  opts: { from: string; to: string; size: number; desc?: boolean; after?: EventCursor | null; filter?: EventListFilter },
 ): Promise<{ rows: EventRow[]; last: EventCursor | null; done: boolean }> {
   const params: (string | number)[] = [...visibilityParams(actor), opts.from, opts.to];
   let cursor = "";
@@ -1003,6 +1048,7 @@ export async function visibleEventBatch(
     params.push(opts.after.startsAt, opts.after.id);
     cursor = ` AND (e.starts_at, e.id) ${opts.desc ? "<" : ">"} (?${params.length - 1}, ?${params.length})`;
   }
+  cursor += listFilterSql(opts.filter, params);
   params.push(opts.size);
   const dir = opts.desc ? " DESC" : "";
   const rows = await all<EventRow & { visible: number }>(

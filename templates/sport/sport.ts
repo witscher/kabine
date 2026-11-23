@@ -1,12 +1,14 @@
 // __NAME__. TODO: describe which association's rules the age classes follow (country, federation).
 // Guide: docs/dev/sports.md. Names are not machine-translated at runtime: write every language here.
-import { defineSport, DUTY_KIOSK, DUTY_SHIRTS } from "../shared/sport-api";
+import { ADULT_TEAM_SHORTS, defineSport, DUTY_KIOSK, DUTY_SHIRTS } from "../shared/sport-api";
 
 export default defineSport({
   id: "__ID__",
   name: { en: "__NAME__", de: "__NAME_DE__" },
   // TODO: where it is played: "hall", "pitch" or "venue" (neutral wording)
   venue: "hall",
+  // Short codes of team names for the ball in the event list ("Men 1" → "M1"); add words your clubs use
+  teamShorts: ADULT_TEAM_SHORTS,
   // TODO: first day of a season in this sport
   seasonStart: { month: 8, day: 1 },
   // TODO: the age classes of the federation. Ages are those reached in the calendar year the season
