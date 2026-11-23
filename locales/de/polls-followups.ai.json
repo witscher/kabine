@@ -1,0 +1,17 @@
+{
+  "Family {last}: {names}": "Familie {last}: {names}",
+  "Quantities": "Mengen",
+  "Lines": "Positionen",
+  "Item": "Artikel",
+  "Size": "Größe",
+  "Quantity": "Menge",
+  "Unit price": "Einzelpreis",
+  "Paid  [context: amount]": "Bezahlt",
+  "Reported  [context: amount]": "Gemeldet",
+  "Open  [context: amount]": "Offen",
+  "{item}: sizes": "{item}: Größen",
+  "Size {size}": "Größe {size}",
+  "{count, plural, one {# piece} other {# pieces}}": "{count, plural, one {# Stück} other {# Stück}}",
+  "Download as Excel": "Als Excel herunterladen",
+  "Nothing ordered yet.": "Noch nichts bestellt."
+}

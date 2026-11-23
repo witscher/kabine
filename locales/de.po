@@ -234,6 +234,7 @@ msgstr "Nachricht von {author}, Optionen"
 
 # ai
 #: modules/polls/worker/domain.ts
+#: modules/polls/worker/domain.ts
 msgid "Family of {names}"
 msgstr "Familie von {names}"
 
@@ -661,6 +662,12 @@ msgid "Turned down."
 msgstr "Abgelehnt."
 
 # ai
+#: modules/polls/shared/order-export.ts
+msgctxt "amount"
+msgid "Open"
+msgstr "Offen"
+
+# ai
 #: src/help-texts.ts
 msgid "Parents (or, in older teams, the players themselves) sign up for duties at games in the Helpers tab, such as cake & bar or washing the shirts. The template decides which duties there are."
 msgstr "Eltern (oder bei älteren Mannschaften die Spieler selbst) tragen sich im Reiter Helfer bei Spielen für Dienste ein, etwa Kuchen & Theke oder Trikots waschen. Welche Dienste es gibt, legt die Vorlage fest."
@@ -887,8 +894,10 @@ msgid "Link your club's privacy policy and legal notice, and name a contact for 
 msgstr "Verlinke Datenschutzerklärung und Impressum deines Vereins und nenne eine Ansprechperson für Fragen zur App."
 
 # ai
+#. Sheet of the order export: one row per person or family
 #: modules/polls/app/pages.tsx
 #: modules/polls/app/pages.tsx
+#: modules/polls/shared/order-export.ts
 msgid "Orders"
 msgstr "Bestellungen"
 
@@ -1702,6 +1711,14 @@ msgid "{form, select, you {Are you coming?} one {Is {names} coming?} youAnd {Are
 msgstr "{form, select, you {Bist du dabei?} one {Ist {names} dabei?} youAnd {Seid {names} dabei?} other {Sind {names} dabei?}}"
 
 # ai
+#. Sheet of the order export: quantities per item and size
+#: modules/polls/app/pages.tsx
+#: modules/polls/app/pages.tsx
+#: modules/polls/shared/order-export.ts
+msgid "Quantities"
+msgstr "Mengen"
+
+# ai
 #: src/pages/chat.tsx
 msgid "{n, plural, one {# new message} other {# new messages}}"
 msgstr "{n, plural, one {# neue Nachricht} other {# neue Nachrichten}}"
@@ -2264,6 +2281,8 @@ msgstr "{count, plural, one {# Elternteil in der {teamName} hat schon einen Zuga
 
 #: modules/duties/app/admin.tsx
 #: modules/duties/app/admin.tsx
+#: modules/polls/shared/order-export.ts
+#: modules/polls/shared/order-export.ts
 #: src/pages/admin.tsx
 #: src/pages/admin.tsx
 #: src/pages/admin.tsx
@@ -2327,6 +2346,7 @@ msgstr "Der Stammkader ist bei jedem neuen Spiel vorausgewählt."
 # ai
 #: modules/polls/app/pages.tsx
 #: modules/polls/app/pages.tsx
+#: modules/polls/shared/order-export.ts
 msgid "Total"
 msgstr "Summe"
 
@@ -2871,7 +2891,9 @@ msgstr "Das geht erst, wenn der Termin begonnen hat."
 
 # ai
 #. Order number in a bank reference, e.g. 'Club kit No. 17'
+#. Order number in a bank reference, e.g. 'Club kit No. 17'
 #: modules/polls/app/pages.tsx
+#: modules/polls/shared/order-export.ts
 #: modules/polls/worker/domain.ts
 msgid "No."
 msgstr "Nr."
@@ -4462,6 +4484,12 @@ msgid "The most secure way to sign in is with a passkey (Face ID, fingerprint or
 msgstr "Am sichersten meldest du dich mit einem Passkey an (Face ID, Fingerabdruck oder Gerätesperre). Einrichten kannst du ihn in der App unter Profil, Passkeys und Geräte."
 
 # ai
+#. Sheet of the order export: one row per item of an order, for filtering
+#: modules/polls/shared/order-export.ts
+msgid "Lines"
+msgstr "Positionen"
+
+# ai
 #: modules/polls/worker/routes.ts
 msgid "This order is paid already. Change it instead."
 msgstr "Diese Bestellung ist schon bezahlt. Ändere sie stattdessen."
@@ -4509,6 +4537,12 @@ msgstr "{label} entfernen?"
 #: worker/domain/duties.ts
 msgid "at {opponent}"
 msgstr "bei {opponent}"
+
+# ai
+#: modules/polls/shared/order-export.ts
+#: modules/polls/shared/order-export.ts
+msgid "Size"
+msgstr "Größe"
 
 # ai
 #: src/pages/admin.tsx
@@ -5033,6 +5067,12 @@ msgid "Coach"
 msgstr "Coach"
 
 # ai
+#: modules/polls/shared/order-export.ts
+msgctxt "amount"
+msgid "Paid"
+msgstr "Bezahlt"
+
+# ai
 #: modules/duties/app/stats.tsx
 msgid "Duties"
 msgstr "Dienste"
@@ -5467,6 +5507,11 @@ msgstr "Auswärtsspiel"
 #: src/pages/team.tsx
 msgid "Parents are not included in this team."
 msgstr "In dieser Mannschaft sind keine Eltern eingebunden."
+
+# ai
+#: modules/polls/app/pages.tsx
+msgid "{item}: sizes"
+msgstr "{item}: Größen"
 
 #: src/update.tsx
 msgid "The page could not be loaded"
@@ -6977,6 +7022,9 @@ msgstr "Diesen Zeitraum gibt es nicht."
 
 # ai
 #: modules/polls/app/pages.tsx
+#: modules/polls/shared/order-export.ts
+#: modules/polls/shared/order-export.ts
+#: modules/polls/shared/order-export.ts
 msgid "Amount"
 msgstr "Betrag"
 
@@ -7218,6 +7266,12 @@ msgid "Parents respond for their child, are in the chat and get the notification
 msgstr "Eltern sagen für ihr Kind zu und ab, sind im Chat dabei und bekommen die Benachrichtigungen. Ausschalten, wenn die Spieler selbst Verantwortung übernehmen, etwa in älteren Jugendmannschaften und bei den Aktiven."
 
 # ai
+#: modules/polls/shared/order-export.ts
+msgctxt "amount"
+msgid "Reported"
+msgstr "Gemeldet"
+
+# ai
 #: shared/changelog.ts
 msgid "Settings explain themselves behind a small \"i\", with an example."
 msgstr "Einstellungen erklären sich hinter einem kleinen „i“, mit Beispiel."
@@ -7292,6 +7346,12 @@ msgstr "Impressum oder Datenschutzerklärung deines Vereins fehlen. Dein Verein 
 #: src/game-import.tsx
 msgid "{venue, select, hall {Date;Time;Opponent;Home;Hall} pitch {Date;Time;Opponent;Home;Pitch} other {Date;Time;Opponent;Home;Venue}}"
 msgstr "{venue, select, hall {Datum;Uhrzeit;Gegner;Heim;Halle} pitch {Datum;Uhrzeit;Gegner;Heim;Platz} other {Datum;Uhrzeit;Gegner;Heim;Ort}}"
+
+# ai
+#: modules/polls/shared/order-export.ts
+#: modules/polls/shared/order-export.ts
+msgid "Item"
+msgstr "Artikel"
 
 # ai
 #: src/howto.tsx
@@ -8883,11 +8943,6 @@ msgid "Team chats in which you are not a coach or parent"
 msgstr "Mannschaftschats, in denen du nicht Trainer oder Elternteil bist"
 
 # ai
-#: modules/polls/module.ts
-msgid "Answers: the creator, the team's coaches and admins, unless the poll is anonymous; in scheduling polls also the participants (first name and initial). Orders: each family sees only its own, the creator, coaches and admins see all. Payment details: everyone who ordered."
-msgstr "Antworten: wer die Umfrage angelegt hat, die Trainer der Mannschaft und Admins, außer bei anonymen Umfragen; bei der Terminfindung auch die Teilnehmenden (Vorname und Initial). Bestellungen: jede Familie sieht nur ihre eigene, Ersteller, Trainer und Admins sehen alle. Bezahlangaben: alle, die bestellt haben."
-
-# ai
 #: src/pages/mail-settings.tsx
 msgid "Cloudflare"
 msgstr "Cloudflare"
@@ -9968,8 +10023,7 @@ msgstr "Der Passkey konnte nicht bestätigt werden."
 
 # ai
 #: modules/polls/app/pages.tsx
-#: modules/polls/app/pages.tsx
-#: modules/polls/app/pages.tsx
+#: modules/polls/shared/order-export.ts
 msgid "Ordered"
 msgstr "Bestellt"
 
@@ -11113,6 +11167,11 @@ msgstr "Ja: {yesNames}"
 msgid "Declined training {day}"
 msgstr "Training {day} abgesagt"
 
+# ai
+#: modules/polls/app/pages.tsx
+msgid "Size {size}"
+msgstr "Größe {size}"
+
 #: src/pages/team.tsx
 msgid "Template for home games"
 msgstr "Vorlage für Heimspiele"
@@ -11162,6 +11221,12 @@ msgstr "Vereinsausflug in den Kletterpark: Alle Mannschaften sind eingeladen, di
 #: modules/duties/app/stats.tsx
 msgid "Already reminded today"
 msgstr "Heute schon erinnert"
+
+# ai
+#: modules/polls/shared/order-export.ts
+#: modules/polls/shared/order-export.ts
+msgid "Unit price"
+msgstr "Einzelpreis"
 
 # ai
 #: src/player-import.tsx
@@ -12551,6 +12616,12 @@ msgstr "Von Hand eingeben"
 msgid "right now"
 msgstr "jetzt gerade"
 
+# ai
+#. Order list for managers: last name, then the children with their teams
+#: modules/polls/worker/domain.ts
+msgid "Family {last}: {names}"
+msgstr "Familie {last}: {names}"
+
 #: modules/duties/app/admin.tsx
 msgid "All, members"
 msgstr "Alle, Mitglieder"
@@ -13187,6 +13258,11 @@ msgstr "Eintragen: {link}"
 msgid "Go to administration"
 msgstr "Zur Verwaltung"
 
+# ai
+#: modules/polls/app/pages.tsx
+msgid "{count, plural, one {# piece} other {# pieces}}"
+msgstr "{count, plural, one {# Stück} other {# Stück}}"
+
 #: src/pages/home.tsx
 msgid "Training {team} · {at}"
 msgstr "Training {team} · {at}"
@@ -13600,6 +13676,11 @@ msgstr "Noch keine Eltern verknüpft. Eltern verknüpfen sich selbst über den E
 
 # ai
 #: modules/polls/app/pages.tsx
+msgid "Download as Excel"
+msgstr "Als Excel herunterladen"
+
+# ai
+#: modules/polls/app/pages.tsx
 msgid "Dates"
 msgstr "Termine"
 
@@ -13703,6 +13784,11 @@ msgstr "Zu viele Fehlversuche. Bitte fordere einen neuen Code an."
 #: modules/carpools/worker/routes.ts
 msgid "{driver} can no longer take {rider}: {game}. The search continues (entered by {coach})."
 msgstr "{driver} kann {rider} nicht mehr mitnehmen: {game}. Die Suche läuft weiter (eingetragen von {coach})."
+
+# ai
+#: modules/polls/module.ts
+msgid "Answers: the creator, the team's coaches and admins, unless the poll is anonymous; in scheduling polls also the participants (first name and initial). Orders: each family sees only its own, the creator, coaches and admins see all, with last names and the players' teams, and can download them as an Excel file built on their device; the club is responsible for that copy. Payment details: everyone who ordered."
+msgstr "Antworten: wer die Umfrage angelegt hat, die Trainer der Mannschaft und Admins, außer bei anonymen Umfragen; bei der Terminfindung auch die Teilnehmenden (Vorname und Initial). Bestellungen: jede Familie sieht nur ihre eigene, Ersteller, Trainer und Admins sehen alle, mit Nachnamen und den Mannschaften der Spieler, und können sie als Excel-Datei herunterladen, die auf ihrem Gerät entsteht; für diese Kopie ist der Verein verantwortlich. Bezahlangaben: alle, die bestellt haben."
 
 #: src/pages/home.tsx
 msgid "There have been no events this season yet."
@@ -13943,6 +14029,7 @@ msgstr "Termine der {team} für {kids}"
 #: modules/polls/app/home.tsx
 #: modules/polls/app/pages.tsx
 #: modules/polls/app/pages.tsx
+#: modules/polls/shared/order-export.ts
 msgid "Order"
 msgstr "Bestellung"
 
@@ -14114,6 +14201,12 @@ msgstr "Angebot geändert."
 #: src/pages/team.tsx
 msgid "{fullName} can then no longer sign in and appears in the chat as \"former player\". Linked parents without another child are deactivated as well. All data is deleted at the next season change."
 msgstr "{fullName} kann sich danach nicht mehr anmelden und erscheint im Chat als „ehemalige/r Spieler/in“. Verknüpfte Eltern ohne weiteres Kind werden ebenfalls deaktiviert. Beim nächsten Saisonwechsel werden alle Daten gelöscht."
+
+# ai
+#: modules/polls/shared/order-export.ts
+#: modules/polls/shared/order-export.ts
+msgid "Quantity"
+msgstr "Menge"
 
 #: src/pages/login.tsx
 #: src/pages/privacy.tsx
@@ -15317,6 +15410,11 @@ msgstr "Inaktiv setzen"
 #: worker/routes/squad.ts
 msgid "This person cannot be requested for this team."
 msgstr "Diese Person kann für diese Mannschaft nicht angefragt werden."
+
+# ai
+#: modules/polls/app/pages.tsx
+msgid "Nothing ordered yet."
+msgstr "Noch nichts bestellt."
 
 #: src/pages/home.tsx
 msgid "Events for you and {childNames}"
@@ -16611,3 +16709,4 @@ msgstr "Chat schreiben"
 #: worker/routes/events.ts
 msgid "In one time block the end is before the start."
 msgstr "Bei einem Zeitblock liegt das Ende vor dem Beginn."
+

@@ -128,7 +128,7 @@ describe("Bezahlung einer Bestellung", () => {
     const cv = (await api(`/polls/${id}`, { cookie: coachCookie })).body;
     expect(cv.orders.map((o: any) => [o.orderNo, o.label])).toEqual([
       [1, "Olga Muster"],
-      [2, "Familie von Kim"],
+      [2, "Familie Kraus: Kim"],
     ]);
   });
 
@@ -208,7 +208,7 @@ describe("Bestellung ignorieren", () => {
     expect(recipients).toContain(await accountOf(paulCookie));
     expect(recipients).not.toContain(await accountOf(monaCookie));
     // For the coach: not ordered yet
-    expect((await api(`/polls/${id}`, { cookie: coachCookie })).body.pending).toContain("Familie von Kim");
+    expect((await api(`/polls/${id}`, { cookie: coachCookie })).body.pending).toContain("Familie Kraus: Kim");
 
     // Show again
     await ignore(id, monaCookie, false);

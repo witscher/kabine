@@ -28,7 +28,7 @@ export interface PollSummary {
   openUnits: number;
   /** Order ignored: no card on the start page, no reminder; still counts as not ordered. */
   ignored: boolean;
-  /** Managers only (orders); 0 for others. */
+  /** Units that voted / all units: managers only (they read every voter of the poll); 0 for others. */
   voted: number;
   total: number;
   canManage: boolean;

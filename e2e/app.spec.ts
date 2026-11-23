@@ -2437,3 +2437,46 @@ test("Umfragen: Admin schaltet das Modul ein, Trainer legt eine Umfrage mit Vors
   await expect(result).toContainText("Freibad");
   await expect(result).toContainText(/Ida P/);
 });
+
+test("Bestellung: Mengen je Artikel und Größe, Export als Excel für den Trainer", async () => {
+  const { page } = coach;
+  const endsAt = `${new Date(Date.now() + 7 * 86_400_000).toISOString().slice(0, 10)}T20:00`;
+  const created = await page.request.post("/api/polls", {
+    data: {
+      teamId: 1,
+      kind: "order",
+      title: "Vereinsausrüstung",
+      whoCoaches: true,
+      endsAt,
+      options: [
+        { label: "Socken", priceCents: 800, sizes: ["31-34", "35-38"] },
+        { label: "Mütze", priceCents: 1500 },
+      ],
+    },
+  });
+  expect(created.ok()).toBe(true);
+  const id = (await created.json()).id as number;
+  const detail = await (await page.request.get(`/api/polls/${id}`)).json();
+  const [socks, hat] = detail.options.map((o: { id: number }) => o.id);
+  const answers = [
+    { optionId: socks, size: "35-38", value: 3 },
+    { optionId: socks, size: "31-34", value: 1 },
+    { optionId: hat, value: 1 },
+  ];
+  expect((await page.request.put(`/api/polls/${id}/ballot`, { data: { unitId: detail.myUnits[0].unitId, answers } })).ok()).toBe(true);
+
+  await page.goto(`/umfragen/${id}`);
+  const amounts = page.getByRole("region", { name: "Mengen" });
+  await expect(amounts.getByRole("heading", { name: "Mengen" })).toBeVisible();
+  await expect(amounts).toContainText("4 Stück");
+  await expect(amounts.getByRole("list", { name: "Socken: Größen" })).toContainText("Größe 35-38");
+  const orders = page.getByRole("region", { name: "Bestellungen" });
+  const [download] = await Promise.all([page.waitForEvent("download"), orders.getByRole("button", { name: "Als Excel herunterladen" }).click()]);
+  expect(download.suggestedFilename()).toMatch(/^Bestellung Vereinsausruestung \d{4}-\d{2}-\d{2}\.xlsx$/);
+  const bytes = readFileSync((await download.path())!);
+  expect([...bytes.subarray(0, 4)]).toEqual([0x50, 0x4b, 0x03, 0x04]);
+  expect(bytes.toString("latin1")).toContain("xl/worksheets/sheet3.xml");
+  if (process.env.E2E_XLSX) await download.saveAs(process.env.E2E_XLSX);
+  if (process.env.E2E_SHOTS) await page.screenshot({ path: `${process.env.E2E_SHOTS}/order-quantities.png`, fullPage: true });
+  await page.request.delete(`/api/polls/${id}`);
+});

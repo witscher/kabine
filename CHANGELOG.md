@@ -7,6 +7,9 @@ Changes that are merged but not released yet go under *Unreleased*, one line eac
 ## Unreleased
 
 - Events on the start page: the team buttons at the top now each switch their team on and off, and the list shows the sum (all on by default, a new team is on; everything off says "Nothing selected"). Chips under *Upcoming/Past* show only trainings, games or other events. The choice is kept on the device (browser entry `kabine-home-list`, listed in the privacy texts). Games show a short title such as "SVM 2 – HSG Opponent" with the team inside a ball on the right, whose small mark shows your own response; home games carry a yellow "Home" tag. The big card names the team after the date, and an event that starts before it (such as an unconfirmed optional training) now appears above it. Sport profiles have short codes for team names (e.g. "Men 1" → "M1").
+- Polls (orders): creator, coaches and admins see *Quantities* per item with the amount and per size, and can download the orders as an Excel file (quantities, orders with payment state, one line per item). The file is built on their device and contains names; the club is responsible for the copy.
+- Polls: creator, coaches and admins read last names and the players' other teams in the order list, "not ordered yet" and results ("Family Kaiser: Ben (U13 boys), Kim"); participants keep first names.
+- Polls: fewer database reads. The list counts votes only for managers, and participants of an order load only their own order.
 - Docs: switch off *Builds for Preview branches* in the Worker's build settings (*Settings → Build → Previews Base*). Left on, every update pull request shows a failed check "Workers Builds", although the deploy after merging works (`docs/install.md`, step 1).
 
 ## v0.9.0

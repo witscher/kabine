@@ -7,6 +7,7 @@ import { t } from "@lingui/core/macro";
 import type { Actor } from "../../../worker/auth/actor";
 import { enqueuePush, shortDate, shortTime } from "../../../worker/domain/notify";
 import { currentLocale } from "../../../worker/i18n";
+import { cachedRoster, cachedTeamInfo } from "../../../worker/domain/events";
 import { cacheVersions } from "../../../worker/lib/cache";
 import { all, batch, first, list, run, stmt } from "../../../worker/lib/db";
 import { addMinutesLocal, nowLocal, utcIso } from "../../../worker/lib/time";
@@ -246,25 +247,61 @@ function joinNames(names: string[]): string {
 
 const compare = (a: string, b: string) => a.localeCompare(b, currentLocale());
 
-/** Name of a unit: the person; for families "Family of" and the children (without children the adults). */
-function unitLabel(members: MemberRow[], perFamily: boolean, full: boolean): string {
-  const name = full ? fullName : shortName;
+/**
+ * Name of a unit: the person; for families "Family of" and the children (without children the adults).
+ * Managers (full) read first and last names and the person's other teams, so they can hand out an order:
+ * "Family Kaiser: Ben (U13 boys), Kim" when the children share a last name, else each child with the full name.
+ */
+function unitLabel(members: MemberRow[], perFamily: boolean, full: boolean, teamsOf?: Map<number, string[]>): string {
+  const teams = (m: MemberRow) => {
+    const names = teamsOf?.get(m.id);
+    return names?.length ? ` (${names.join(", ")})` : "";
+  };
+  const withTeams = (m: MemberRow) => `${fullName(m)}${teams(m)}`;
+  const name = full ? withTeams : shortName;
   if (!members.length) return t`Former member`;
   if (!perFamily) return name(members[0]!);
   const kids = members.filter((m) => m.is_child);
   if (!kids.length) return joinNames(members.map(name));
-  const names = joinNames(kids.map((k) => k.first_name));
+  if (!full) {
+    const names = joinNames(kids.map((k) => k.first_name));
+    return t`Family of ${names}`;
+  }
+  const last = kids[0]!.last_name;
+  if (last && kids.every((k) => k.last_name === last)) {
+    const names = kids.map((k) => `${k.first_name}${teams(k)}`).join(", ");
+    return t({ message: `Family ${last}: ${names}`, comment: "Order list for managers: last name, then the children with their teams" });
+  }
+  const names = joinNames(kids.map(withTeams));
   return t`Family of ${names}`;
 }
 
-async function loadMembers(db: D1Database, pollId: number): Promise<Map<number, MemberRow[]>> {
+/**
+ * For managers: the player teams of each person, without the poll's own team and without groups. From the cache per
+ * Worker instance (worker/lib/cache.ts), which the event list keeps current anyway: no rows read most of the time.
+ */
+async function otherTeams(db: D1Database, pollTeamId: number | null): Promise<Map<number, string[]>> {
+  const versions = await cacheVersions(db);
+  const [teams, roster] = await Promise.all([cachedTeamInfo(db, versions), cachedRoster(db, versions)]);
+  const teamName = new Map(teams.filter((x) => x.kind === "team").map((x) => [x.id, x.name]));
+  const out = new Map<number, string[]>();
+  for (const r of roster) {
+    if (r.role !== "player" || r.team_id === pollTeamId) continue;
+    const name = teamName.get(r.team_id);
+    if (name) out.set(r.person_id, [...(out.get(r.person_id) ?? []), name]);
+  }
+  return out;
+}
+
+/** Members per unit; `units`: only these (see pollDetail). */
+async function loadMembers(db: D1Database, pollId: number, units: number[] | null = null): Promise<Map<number, MemberRow[]>> {
   const rows = await all<MemberRow>(
     db,
     `SELECT pv.unit_id, p.id, p.first_name, p.last_name, EXISTS (SELECT 1 FROM guardianships g WHERE g.child_id = p.id) AS is_child
        FROM poll_voters pv JOIN persons p ON p.id = pv.person_id
-      WHERE pv.poll_id = ? AND pv.is_member = 1
+      WHERE pv.poll_id = ?1 AND pv.is_member = 1${units ? " AND pv.unit_id IN (SELECT value FROM json_each(?2))" : ""}
       ORDER BY p.first_name, p.id`,
-    pollId,
+    ...(units ? [pollId, list(units)] : [pollId]),
   );
   const byUnit = new Map<number, MemberRow[]>();
   for (const r of rows) byUnit.set(r.unit_id, [...(byUnit.get(r.unit_id) ?? []), r]);
@@ -297,9 +334,21 @@ export async function loadOptions(db: D1Database, pollId: number): Promise<PollO
 export async function pollDetail(db: D1Database, actor: Actor, p: PollRow): Promise<PollDetail> {
   const manage = canManagePoll(actor, p);
   const open = isOpen(p);
-  const [options, voters, ballots, answers, members, team, creator, pay] = await Promise.all([
+  // Orders for participants: load only the own units, they see nothing of the others (read load, README). Starts from
+  // the person's voter rows (index poll_voters_person) instead of every voter of the poll.
+  const ownUnits =
+    p.kind === "order" && !manage
+      ? (
+          await all<{ unit_id: number }>(db, "SELECT DISTINCT unit_id FROM poll_voters WHERE person_id = ?1 AND can_vote = 1 AND poll_id = ?2", actor.personId, p.id)
+        ).map((r) => r.unit_id)
+      : null;
+  // A separate SQL fragment instead of "?2 IS NULL OR unit_id IN (…)": with the OR, SQLite uses only the poll_id prefix
+  // of the primary key (poll_id, unit_id, …) and reads every row of the poll
+  const onlyOwn = (column: string) => (ownUnits ? ` AND ${column} IN (SELECT value FROM json_each(?2))` : "");
+  const params = ownUnits ? [p.id, list(ownUnits)] : [p.id];
+  const [options, voters, ballots, answers, members, team, creator, pay, teamsOf] = await Promise.all([
     loadOptions(db, p.id),
-    all<VoterRow>(db, "SELECT unit_id, person_id, is_member, can_vote FROM poll_voters WHERE poll_id = ?", p.id),
+    all<VoterRow>(db, `SELECT unit_id, person_id, is_member, can_vote FROM poll_voters WHERE poll_id = ?1${onlyOwn("unit_id")}`, ...params),
     all<{
       unit_id: number;
       voted_by: number | null;
@@ -311,14 +360,20 @@ export async function pollDetail(db: D1Database, actor: Actor, p: PollRow): Prom
     }>(
       db,
       `SELECT b.unit_id, b.voted_by, b.updated_at, b.paid_cents, b.reported_cents, b.order_no, vp.first_name AS voter_first
-         FROM poll_ballots b LEFT JOIN persons vp ON vp.id = b.voted_by WHERE b.poll_id = ?`,
-      p.id,
+         FROM poll_ballots b LEFT JOIN persons vp ON vp.id = b.voted_by
+        WHERE b.poll_id = ?1${onlyOwn("b.unit_id")}`,
+      ...params,
     ),
-    all<{ unit_id: number; option_id: number; size: string; value: number }>(db, "SELECT unit_id, option_id, size, value FROM poll_answers WHERE poll_id = ?", p.id),
-    loadMembers(db, p.id),
+    all<{ unit_id: number; option_id: number; size: string; value: number }>(
+      db,
+      `SELECT unit_id, option_id, size, value FROM poll_answers WHERE poll_id = ?1${onlyOwn("unit_id")}`,
+      ...params,
+    ),
+    loadMembers(db, p.id, ownUnits),
     p.team_id ? first<{ name: string }>(db, "SELECT name FROM teams WHERE id = ?", p.team_id) : null,
     p.created_by ? first<{ first_name: string; last_name: string | null }>(db, "SELECT first_name, last_name FROM persons WHERE id = ?", p.created_by) : null,
     loadPollPayment(db),
+    manage ? otherTeams(db, p.team_id) : undefined,
   ]);
   const isOrder = p.kind === "order";
   const perFamily = p.per_family === 1;
@@ -328,7 +383,7 @@ export async function pollDetail(db: D1Database, actor: Actor, p: PollRow): Prom
   const answersOf = new Map<number, { optionId: number; size: string; value: number }[]>();
   for (const a of answers) answersOf.set(a.unit_id, [...(answersOf.get(a.unit_id) ?? []), { optionId: a.option_id, size: a.size, value: a.value }]);
   // Former units (e.g. left the team) count with their vote but are no longer in any list
-  const label = (unit: number, full: boolean) => unitLabel(members.get(unit) ?? [], perFamily, full);
+  const label = (unit: number, full: boolean) => unitLabel(members.get(unit) ?? [], perFamily, full, full ? teamsOf : undefined);
   // Orders: amount per unit and payment state (confirmed, reported)
   const priceOf = new Map(options.map((o) => [o.id, o.priceCents ?? 0]));
   const totalOf = (unit: number) => (answersOf.get(unit) ?? []).reduce((sum, a) => sum + (priceOf.get(a.optionId) ?? 0) * a.value, 0);
@@ -447,15 +502,18 @@ export async function pollDetail(db: D1Database, actor: Actor, p: PollRow): Prom
 /** Polls the account sees: as a voter or manager. teamId: only this team (null: the whole club). */
 export async function listPolls(db: D1Database, actor: Actor, filter: { teamId?: number | null } = {}): Promise<PollSummary[]> {
   const now = nowLocal();
-  const rows = await all<PollRow & { team_name: string | null; open_units: number; ignored: number; voted: number; total: number }>(
+  const rows = await all<PollRow & { team_name: string | null; open_units: number; ignored: number; voted: number | null; total: number | null }>(
     db,
     `SELECT p.*, t.name AS team_name,
             EXISTS (SELECT 1 FROM poll_ignores i WHERE i.poll_id = p.id AND i.person_id = ?1) AS ignored,
             (SELECT COUNT(DISTINCT pv.unit_id) FROM poll_voters pv
               WHERE pv.poll_id = p.id AND pv.person_id = ?1 AND pv.can_vote = 1
                 AND NOT EXISTS (SELECT 1 FROM poll_ballots b WHERE b.poll_id = p.id AND b.unit_id = pv.unit_id)) AS open_units,
-            (SELECT COUNT(*) FROM poll_ballots b WHERE b.poll_id = p.id AND b.unit_id IN (SELECT unit_id FROM poll_voters WHERE poll_id = p.id)) AS voted,
-            (SELECT COUNT(DISTINCT unit_id) FROM poll_voters WHERE poll_id = p.id) AS total
+            -- The counts read every voter of the poll: only for managers, only they see them in the list
+            CASE WHEN ?2 = 1 OR p.created_by = ?1 OR p.team_id IN (SELECT value FROM json_each(?3)) THEN
+              (SELECT COUNT(*) FROM poll_ballots b WHERE b.poll_id = p.id AND b.unit_id IN (SELECT unit_id FROM poll_voters WHERE poll_id = p.id)) END AS voted,
+            CASE WHEN ?2 = 1 OR p.created_by = ?1 OR p.team_id IN (SELECT value FROM json_each(?3)) THEN
+              (SELECT COUNT(DISTINCT unit_id) FROM poll_voters WHERE poll_id = p.id) END AS total
        FROM polls p LEFT JOIN teams t ON t.id = p.team_id
       WHERE (?2 = 1 OR p.created_by = ?1
              OR p.team_id IN (SELECT value FROM json_each(?3))
@@ -470,9 +528,8 @@ export async function listPolls(db: D1Database, actor: Actor, filter: { teamId?:
     now,
   );
   return rows.map((p) => {
+    // How many voted: only for the creator, coaches of the team and admins (the list shows it only to them)
     const canManage = canManagePoll(actor, p);
-    // Orders: how many ordered only for the creator, coaches of the team and admins
-    const counts = canManage || p.kind !== "order";
     return {
       id: p.id,
       kind: p.kind,
@@ -483,8 +540,8 @@ export async function listPolls(db: D1Database, actor: Actor, filter: { teamId?:
       open: isOpen(p, now),
       openUnits: p.open_units,
       ignored: !!p.ignored,
-      voted: counts ? p.voted : 0,
-      total: counts ? p.total : 0,
+      voted: canManage ? (p.voted ?? 0) : 0,
+      total: canManage ? (p.total ?? 0) : 0,
       canManage,
     };
   });

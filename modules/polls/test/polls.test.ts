@@ -250,16 +250,43 @@ describe("Bestellung", () => {
     const maxUnit = (await api(`/polls/${id}`, { cookie: maxCookie })).body.myUnits[0].unitId;
     expect((await api(`/polls/${id}/ballot`, { method: "PUT", cookie: maxCookie, body: { unitId: maxUnit, answers: [] } })).status).toBe(200);
 
+    // Managers see last names and the children's other teams (not the poll's own team, no groups)
+    await member(kim, await team("wC", "wC"));
+    const group = await team("Trainerteam", "wC");
+    await exec("UPDATE teams SET kind = 'group' WHERE id = ?", group);
+    await member(kim, group);
     const cv = (await api(`/polls/${id}`, { cookie: coachCookie })).body;
     expect([cv.voted, cv.total]).toEqual([2, 2]);
     expect(cv.orders.map((o: any) => [o.label, o.totalCents, o.paid])).toEqual([
-      ["Familie von Ben und Kim", 3900, false],
-      ["Familie von Lea", 0, false],
+      ["Familie Kaiser: Ben, Kim (wC)", 3900, false],
+      ["Familie Lang: Lea", 0, false],
     ]);
+    // Participants keep first names
+    expect(ordered.body.myUnits[0].name).toBe("Familie von Ben und Kim");
     expect(cv.tallies.find((x: any) => x.optionId === socks && x.size === "35-38").quantity).toBe(2);
     await api(`/polls/${id}/close`, { method: "POST", cookie: coachCookie });
     const closed = (await api(`/polls/${id}`, { cookie: maxCookie })).body;
     expect(closed).toMatchObject({ resultsVisible: false, tallies: null, voted: 0, total: 0 });
+  });
+
+  it("Verwalter sehen volle Namen mit Mannschaft: je Person und Familien mit verschiedenen Nachnamen", async () => {
+    const wc = await team("wC", "wC");
+    await member(lea, wc);
+    // Finn joins Lea's family with another last name
+    const finn = await person("Finn", { lastName: "Berg", birthYear: 2016 });
+    await member(finn, wd);
+    await guardian(max, finn);
+    const options = [{ label: "Beanie", priceCents: 1500 }];
+    const base = { teamId: wd, kind: "order", whoPlayers: true, endsAt: later(), options };
+    const single = (await api("/polls", { cookie: coachCookie, body: { ...base, title: "Trikot" } })).body.id;
+    const cv = (await api(`/polls/${single}`, { cookie: coachCookie })).body;
+    expect(cv.pending).toEqual(["Ben Kaiser", "Finn Berg", "Kim Kaiser", "Lea Lang (wC)"]);
+    const family = (await api("/polls", { cookie: coachCookie, body: { ...base, title: "Mütze", perFamily: true } })).body.id;
+    const fv = (await api(`/polls/${family}`, { cookie: coachCookie })).body;
+    expect(fv.pending).toEqual(["Familie Kaiser: Ben, Kim", "Familie von Finn Berg und Lea Lang (wC)"]);
+    // Max (parent) keeps first names
+    const mine = (await api(`/polls/${family}`, { cookie: await loginAs(max) })).body;
+    expect(mine.myUnits[0].name).toBe("Familie von Finn und Lea");
   });
 });
 
