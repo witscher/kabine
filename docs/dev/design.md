@@ -46,6 +46,8 @@ Game rows show the short title "SVM 2 – Opponent" (club abbreviation, the team
 
 The large card of a game shows the short title, with the team as a label after the date. The hint to decline in good time is only on the event page. Whatever in the list starts before the large card (an unconfirmed optional training in the morning) is shown above it (`splitAtCard` in `shared/home-list.ts`).
 
+Modules add buttons after the team buttons and rows of their own (`homeList`, docs/dev/modules.md). The fans module adds a star for the games of followed teams and, if the person turned it on, a button with the club's abbreviation for all games of the club, which stands in for the selection while it is on (team buttons look off, no chips). Fan games are dark game rows with the team in the outlined ball, linking to the game page instead of the event page; a fan game in progress is a taller dark tile with the slow light sweep of today's events (off with reduced motion), *Game in progress* with a pulsing dot and the live link below the row, because a button may not sit inside a link.
+
 ## Parents
 
 Admins link parents and children directly under Administration → People, for example to correct a wrong link. Unlike unlinking by a coach, the parent person always stays, even without a remaining child, so a correction never deletes an access.

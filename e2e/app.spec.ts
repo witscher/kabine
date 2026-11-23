@@ -2480,3 +2480,61 @@ test("Bestellung: Mengen je Artikel und Größe, Export als Excel für den Train
   if (process.env.E2E_SHOTS) await page.screenshot({ path: `${process.env.E2E_SHOTS}/order-quantities.png`, fullPage: true });
   await page.request.delete(`/api/polls/${id}`);
 });
+
+test("Fans: Spielerin folgt einer anderen Mannschaft, sieht deren Spiel unter dem Stern und öffnet die Spielseite", async () => {
+  await admin.page.goto("/verwaltung/verein");
+  const moduleSwitch = admin.page.getByRole("switch", { name: /^Fans/ });
+  await moduleSwitch.click();
+  await expect(moduleSwitch).toHaveAttribute("aria-checked", "true");
+  const { id: other } = await (await admin.page.request.post("/api/teams", { data: { name: "wF", ageClassCode: "wC" } })).json();
+  const date = new Date(Date.now() + 3 * 86_400_000).toLocaleDateString("sv-SE", { timeZone: "Europe/Berlin" });
+  const created = await admin.page.request.post(`/api/duties/teams/${other}/games`, { data: { opponent: "HSG Sternhausen", isHome: true, date, time: "13:00" } });
+  expect(created.ok()).toBe(true);
+  const { id: gameId } = (await created.json()) as { id: number };
+
+  const { page } = player;
+  await page.goto("/profil");
+  await page.getByRole("link", { name: /Fan von/ }).click();
+  await expect(page).toHaveURL(/\/profil\/fan$/);
+  // Own team fixed, the other one with a star
+  await expect(page.getByRole("button", { name: "wT folgen" })).toHaveCount(0);
+  const star = page.getByRole("button", { name: "wF folgen" });
+  await star.click();
+  await expect(star).toHaveAttribute("aria-pressed", "true");
+
+  await page.goto("/");
+  const filter = page.getByRole("group", { name: "Nach Mannschaft filtern" });
+  const fans = filter.getByRole("button", { name: "Spiele als Fan: wF" });
+  await expect(fans).toHaveAttribute("aria-pressed", "false");
+  const fanRow = page.locator("a.event-row", { hasText: "HSG Sternhausen" });
+  await expect(fanRow).toHaveCount(0);
+  await fans.click();
+  await expect(fans).toHaveAttribute("aria-pressed", "true");
+  await expect(fanRow).toBeVisible();
+  await expect(page.locator(".hero-sub")).toContainText("Spiele als Fan");
+  // Own team off: only the fan games
+  await filter.getByRole("button", { name: "wT" }).click();
+  await expect(page.locator(".hero-sub")).toHaveText("Spiele als Fan");
+  await expect(fanRow).toBeVisible();
+  await expect(fanRow.getByRole("img", { name: /^wF/ })).toBeVisible();
+  if (process.env.E2E_SHOTS) await page.screenshot({ path: `${process.env.E2E_SHOTS}/home-fans.png`, fullPage: true });
+
+  // The game page: game data only
+  await fanRow.click();
+  await expect(page).toHaveURL(new RegExp(`/spiel/${gameId}$`));
+  await expect(page.getByRole("heading", { name: /HSG Sternhausen/ })).toBeVisible();
+  await expect(page.getByText("Heimspiel")).toBeVisible();
+  await expect(page.getByText("Du folgst wF als Fan.")).toBeVisible();
+  if (process.env.E2E_SHOTS) await page.screenshot({ path: `${process.env.E2E_SHOTS}/fan-game.png`, fullPage: true });
+
+  // Back to the usual selection for the tests after this one
+  await page.goto("/");
+  await filter.getByRole("button", { name: "wT" }).click();
+  await fans.click();
+  await expect(fans).toHaveAttribute("aria-pressed", "false");
+  await admin.page.request.delete(`/api/duties/games/${gameId}`);
+  await admin.page.request.delete(`/api/teams/${other}`);
+  await admin.page.goto("/verwaltung/verein");
+  await moduleSwitch.click();
+  await expect(moduleSwitch).toHaveAttribute("aria-checked", "false");
+});
