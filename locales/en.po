@@ -218,6 +218,7 @@ msgid "Message from {author}, options"
 msgstr "Message from {author}, options"
 
 #: modules/polls/worker/domain.ts
+#: modules/polls/worker/domain.ts
 msgid "Family of {names}"
 msgstr "Family of {names}"
 
@@ -11398,6 +11399,11 @@ msgstr "Enter by hand"
 #: src/pages/home.tsx
 msgid "right now"
 msgstr "right now"
+
+#. Order list for managers: last name, then the children with their teams
+#: modules/polls/worker/domain.ts
+msgid "Family {last}: {names}"
+msgstr "Family {last}: {names}"
 
 #: modules/duties/app/admin.tsx
 msgid "All, members"

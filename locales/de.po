@@ -234,6 +234,7 @@ msgstr "Nachricht von {author}, Optionen"
 
 # ai
 #: modules/polls/worker/domain.ts
+#: modules/polls/worker/domain.ts
 msgid "Family of {names}"
 msgstr "Familie von {names}"
 
@@ -12504,6 +12505,12 @@ msgstr "Von Hand eingeben"
 msgid "right now"
 msgstr "jetzt gerade"
 
+# ai
+#. Order list for managers: last name, then the children with their teams
+#: modules/polls/worker/domain.ts
+msgid "Family {last}: {names}"
+msgstr "Familie {last}: {names}"
+
 #: modules/duties/app/admin.tsx
 msgid "All, members"
 msgstr "Alle, Mitglieder"
@@ -16553,3 +16560,4 @@ msgstr "Chat schreiben"
 #: worker/routes/events.ts
 msgid "In one time block the end is before the start."
 msgstr "Bei einem Zeitblock liegt das Ende vor dem Beginn."
+
