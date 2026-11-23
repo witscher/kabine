@@ -3,7 +3,7 @@ import { Hono } from "hono";
 import { z } from "zod";
 import type { ChildPermission, ChildPermissions, NotificationTopic } from "../../shared/types";
 import { childPermissionLabels, CORE_NOTIFICATION_TOPICS } from "../../shared/types";
-import { MODULES, moduleTopics } from "../../shared/modules";
+import { MODULES, moduleTopics, selfOnlyTopics } from "../../shared/modules";
 import { type AppEnv, intParam, requireActor } from "../app";
 import { ALL_PERMISSIONS, type Actor, parentsInCharge } from "../auth/actor";
 import { childAccountAllowed, limitedTeamsOf } from "../domain/child-limits";
@@ -119,6 +119,9 @@ parentRoutes.put("/children/:id/permissions", async (c) => {
 const TOPICS = [...CORE_NOTIFICATION_TOPICS, ...MODULES.flatMap((m) => moduleTopics(m.id))] as NotificationTopic[];
 
 /** Topics shown now: core topics and those of active modules. */
+/** Module topics only for the account's own person (shared/module-api.ts, notificationTopics). */
+const selfOnly = selfOnlyTopics();
+
 const shownTopics = () => [...CORE_NOTIFICATION_TOPICS, ...MODULES.filter((m) => isModuleOn(m.id)).flatMap((m) => moduleTopics(m.id))] as NotificationTopic[];
 
 parentRoutes.get("/me/notifications", async (c) => {
@@ -137,7 +140,11 @@ parentRoutes.get("/me/notifications", async (c) => {
   const selfInCharge = actor.hasGuardians && parentsInCharge(actor, actor.personId);
   return c.json({
     persons: persons.map((p) => {
-      const topics = shownTopics().filter((t) => (t === "coach" ? p.self && isCoach : true)).filter((t) => !(t === "responses" && p.self && !selfInCharge));
+      const topics = shownTopics()
+        .filter((t) => (t === "coach" ? p.self && isCoach : true))
+        .filter((t) => !(t === "responses" && p.self && !selfInCharge))
+        // Module topics about the account itself (games of followed teams) are not offered per child
+        .filter((t) => p.self || !selfOnly.has(t));
       return {
         person: { id: p.id, firstName: p.firstName, lastName: p.lastName },
         self: p.self,

@@ -14,6 +14,7 @@ import { all, first, run } from "../lib/db";
 import { notFound, parse, readJson } from "../lib/http";
 import { addDays, todayLocal } from "../lib/time";
 import { currentLocale, withLocale } from "../i18n";
+import { moduleCalendarItems } from "../modules";
 
 export const calendarRoutes = new Hono<AppEnv>();
 
@@ -170,7 +171,12 @@ async function calendarFeed(env: Env, db: D1Database, row: ActorRow & PrefsRow, 
 
   const origin = env.ORIGIN || requestOrigin;
   const [club, install] = await Promise.all([loadClub(db), installId(db)]);
-  const items = calendarItems(events, duties, prefs, { selfId: row.person_id, coachTeamIds: actor.coachTeamIds, origin, uidHost: `${install}.kabine` });
+  const uidHost = `${install}.kabine`;
+  const items = [
+    ...calendarItems(events, duties, prefs, { selfId: row.person_id, coachTeamIds: actor.coachTeamIds, origin, uidHost }),
+    // Entries the person chose in a module (e.g. games as a fan)
+    ...(await moduleCalendarItems(db, { actor, from, to, origin, uidHost })),
+  ].sort((a, b) => (a.start < b.start ? -1 : a.start > b.start ? 1 : 0));
   return new Response(buildCalendar(club.shortName, items, new Date().toISOString()), {
     headers: {
       "content-type": "text/calendar; charset=utf-8",

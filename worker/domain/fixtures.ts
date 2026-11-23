@@ -8,7 +8,7 @@ import { withLocale } from "../i18n";
 import { all, first, list, stmt } from "../lib/db";
 import { addMinutesLocal, nowLocal, utcIso } from "../lib/time";
 import type { FixtureConnector, FixtureGame, FixtureSource } from "../module-api";
-import { WORKER_MODULES } from "../modules";
+import { moduleEventChanged, WORKER_MODULES } from "../modules";
 import { syncAutoSquads } from "./auto-squad";
 import { isModuleOn, ownVenue } from "./club";
 import { notifyPersons, shortDate, shortTime } from "./notify";
@@ -242,7 +242,7 @@ export async function importGames(
   const nowL = nowLocal(now);
   const statements: D1PreparedStatement[] = [];
   const summary: ImportSummary = { created: 0, updated: 0, moved: 0, cancelled: 0, skipped: schedule.skipped, foreign: 0 };
-  const movedEvents: { id: number; startsAt: string; locationId: number | null }[] = [];
+  const movedEvents: { id: number; before: string; startsAt: string; locationId: number | null; cancelled: boolean }[] = [];
 
   for (const g of schedule.games) {
     const gameRef = ref(g.externalId);
@@ -316,7 +316,7 @@ export async function importGames(
     summary.updated++;
     if (moved && startsAt > nowL) {
       summary.moved++;
-      movedEvents.push({ id: ex.id, startsAt, locationId });
+      movedEvents.push({ id: ex.id, before: ex.starts_at, startsAt, locationId, cancelled: ex.cancelled_at != null && !reopen });
     }
   }
 
@@ -361,6 +361,10 @@ export async function importGames(
         },
         { teamIds: [team.id] },
       );
+      // Others (fans of the game) after the team
+      if (!m.cancelled) {
+        await moduleEventChanged(env, { change: "moved", eventId: m.id, kind: "game", teamIds: [team.id], before: m.before, startsAt: m.startsAt, exclude: [] });
+      }
     }
   }
   return summary;

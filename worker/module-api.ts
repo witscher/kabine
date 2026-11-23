@@ -4,7 +4,9 @@
 import type { Hono } from "hono";
 import type { ModuleManifest } from "../shared/module-api";
 import type { AppEnv } from "./app";
+import type { EventKind } from "../shared/types";
 import type { Actor } from "./auth/actor";
+import type { CalendarItem } from "./domain/calendar";
 import type { EventContext, EventRow } from "./domain/events";
 import type { Param } from "./lib/db";
 
@@ -28,6 +30,52 @@ export interface DroppedPairs {
   /** SELECT returning (event_id, person_id). */
   select: string;
   params: Param[];
+}
+
+/**
+ * A page of the event overview (GET /events?limit=…) as a module sees it, to add rows of its own (hook eventPage).
+ * The module keeps its rows inside the window, so "More events" keeps the time order.
+ */
+export interface EventPageQuery {
+  past: boolean;
+  /** Kinds the kind chip lets through; null: all. */
+  kinds: EventKind[] | null;
+  /** Window of the page, local time: from inclusive, to exclusive. Ends where the core's page ends when it has more. */
+  from: string;
+  to: string;
+  /** Page size the app asked for. */
+  limit: number;
+  /** The module's own query parameters without the prefix (`fans.games=1` → `{ games: "1" }`), set by the app hook homeList. */
+  params: Record<string, string>;
+}
+
+/**
+ * An event was cancelled, its cancellation withdrawn, or it was moved (start or venue), after the core has told its
+ * teams. For people outside the teams, e.g. fans of a game (hook eventChanged).
+ */
+export interface EventChange {
+  change: "cancelled" | "restored" | "moved";
+  eventId: number;
+  kind: EventKind;
+  teamIds: number[];
+  /** Start before the change and now, local time (equal unless the start moved). */
+  before: string;
+  startsAt: string;
+  /** Accounts that caused the change and need no notification about it. */
+  exclude: number[];
+}
+
+/** The personal calendar feed a module adds entries to (hook calendarItems). */
+export interface CalendarFeed {
+  /** The owner of the calendar link, with the same visibility as in the app. */
+  actor: Actor;
+  /** Window of the feed, local time. */
+  from: string;
+  to: string;
+  /** Origin for links back into the app. */
+  origin: string;
+  /** Domain part of the entries' UIDs (`event-<id>@<uidHost>` for an event, as the core writes it). */
+  uidHost: string;
 }
 
 /** A game as a fixture connector delivers it, already checked and normalised. */
@@ -108,6 +156,12 @@ export interface WorkerModule {
   eventSummaries?: (db: D1Database, actor: Actor, rows: EventRow[], ctx: EventContext, now: number) => Promise<Map<number, unknown>>;
   /** Extra data on the event page, under `event.modules[<id>]`; null: nothing to show. */
   eventDetail?: (db: D1Database, actor: Actor, event: EventRow, ctx: EventContext, now: number) => Promise<unknown>;
+  /** Extra data for a page of the event overview, under `page.modules[<id>]` (app hook homeList); null: nothing. */
+  eventPage?: (db: D1Database, actor: Actor, query: EventPageQuery) => Promise<unknown>;
+  /** An event was cancelled, restored or moved; the core has already notified its teams. */
+  eventChanged?: (env: Env, change: EventChange) => Promise<void>;
+  /** Entries for the personal calendar feed of an account (e.g. what the person chose in the module's own settings). */
+  calendarItems?: (db: D1Database, feed: CalendarFeed) => Promise<CalendarItem[]>;
   /** Participants left an event (with notifications if the module sends any). */
   participantsLeft?: (env: Env, change: ParticipantsLeft) => Promise<void>;
   /** Cleanup in the core's batch when participants were dropped without notice (automatic squads, withdrawn stand-ins). */

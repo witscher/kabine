@@ -5,7 +5,7 @@
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { useState } from "preact/hooks";
-import type { EventSummary } from "../../../shared/types";
+import type { GameRef } from "../../../shared/types";
 import { currentLocale } from "../../../src/i18n";
 import { Icon } from "../../../src/icons";
 import { toast } from "../../../src/ui";
@@ -44,7 +44,7 @@ export function reportUrl(g: H4aGame | null): string | null {
 }
 
 /** Fetch the team's fixture list once (from the device, without cookies and referrer) and return the game's entry. */
-async function fetchGame(event: EventSummary): Promise<H4aGame | null> {
+async function fetchGame(event: GameRef): Promise<H4aGame | null> {
   const source = event.game?.source;
   if (!source?.scheduleUrl || source.connector !== "handball4all") return null;
   try {
@@ -77,7 +77,7 @@ function navigate(w: Window, url: string | null, note: string | null) {
 /** Open the window right on tap (otherwise browsers block it as a pop-up), then load the target. */
 function useH4aWindow(title: string, resolve: (g: H4aGame | null) => { url: string | null; note: string | null }) {
   const [busy, setBusy] = useState(false);
-  const open = async (event: EventSummary) => {
+  const open = async (event: GameRef) => {
     const w = window.open("", "_blank");
     if (!w) {
       toast(t`The window was blocked. Please allow pop-ups for the app.`, "error");
@@ -101,7 +101,7 @@ function useH4aWindow(title: string, resolve: (g: H4aGame | null) => { url: stri
 }
 
 /** Button to the live ticker; opens a new window right away and forwards it to the ticker page. */
-export function LiveTickerLink({ event }: { event: EventSummary }) {
+export function LiveTickerLink({ event }: { event: GameRef }) {
   const { busy, open } = useH4aWindow(t`Live ticker`, (g) => {
     const url = tickerUrl(g);
     return url
@@ -117,7 +117,7 @@ export function LiveTickerLink({ event }: { event: EventSummary }) {
 }
 
 /** Button to the game report; handball4all publishes it about 20 to 30 minutes after the final whistle. */
-export function GameReportLink({ event }: { event: EventSummary }) {
+export function GameReportLink({ event }: { event: GameRef }) {
   const { busy, open } = useH4aWindow(t`Game report`, (g) => {
     const url = reportUrl(g);
     return url ? { url, note: null } : { url: null, note: t`The game report has not been published yet. handball4all usually puts it online 20 to 30 minutes after the final whistle. Please try again later.` };

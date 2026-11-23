@@ -72,11 +72,11 @@ export interface EventRow {
   cancelled_by_last: string | null;
 }
 
-const EVENT_COLUMNS = `e.*, l.name AS loc_name, l.address AS loc_address, l.map_url AS loc_map_url, l.kind AS loc_kind,
+export const EVENT_COLUMNS = `e.*, l.name AS loc_name, l.address AS loc_address, l.map_url AS loc_map_url, l.kind AS loc_kind,
          tp.decline_hours AS plan_decline_hours,
          cp.first_name AS cancelled_by_first, cp.last_name AS cancelled_by_last`;
 
-const EVENT_JOINS = `
+export const EVENT_JOINS = `
     LEFT JOIN locations l ON l.id = e.location_id
     LEFT JOIN training_rules tr ON tr.id = e.rule_id
     LEFT JOIN training_plans tp ON tp.id = tr.plan_id
@@ -596,7 +596,7 @@ export function optionalYesNames(e: EventRow, ctx: EventContext): string[] {
 }
 
 /** Imported game: the connector, the game's id at the source and what the team's connector fetches. */
-function gameSource(e: EventRow, teams: TeamInfo[]): GameInfo["source"] {
+export function gameSource(e: EventRow, teams: TeamInfo[]): GameInfo["source"] {
   const ref = splitRef(e.external_ref);
   if (!ref) return null;
   const team = teams.find((x) => x.fixture_connector === ref.connector);
@@ -625,7 +625,7 @@ export function gameLiveMinutes(minutes: number[]): number {
 }
 
 /** League table of the first team with a linked schedule. */
-function gameTable(teams: TeamInfo[]): GameInfo["table"] {
+export function gameTable(teams: TeamInfo[]): GameInfo["table"] {
   for (const team of teams) {
     const table = teamTableUrl(team);
     if (table) return table;

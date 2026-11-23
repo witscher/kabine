@@ -46,3 +46,8 @@ export type ModuleNotificationTopic = TopicsOf<(typeof MODULES)[number]>;
 export function moduleTopics(id: ModuleId): string[] {
   return (moduleManifest(id).notificationTopics ?? []).map((t) => t.id);
 }
+
+/** Topics of modules that are only for the account's own person, not offered per child. */
+export function selfOnlyTopics(): Set<string> {
+  return new Set((MODULES as readonly ModuleManifest[]).flatMap((m) => (m.notificationTopics ?? []).filter((t) => t.self).map((t) => t.id)));
+}

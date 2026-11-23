@@ -422,6 +422,15 @@ msgstr "Aus der Mannschaft entfernen"
 msgid "Start of play and venue come from the game schedule and cannot be changed here."
 msgstr "Spielbeginn und Spielort kommen aus dem Spielplan und lassen sich hier nicht ändern."
 
+# ai
+#: modules/fans/app/pages.tsx
+msgid "Settings as a fan"
+msgstr "Einstellungen als Fan"
+
+#: modules/fans/app/list.tsx
+#: modules/fans/app/list.tsx
+#: modules/fans/app/pages.tsx
+#: modules/fans/app/pages.tsx
 #: src/live.tsx
 msgid "Game in progress"
 msgstr "Spiel läuft gerade"
@@ -927,6 +936,11 @@ msgstr "Wichtig: Jedes Elternteil nutzt den Link nur einmal, für sich selbst. D
 msgid "Christmas party: the Berg family registers 4 people, an adult player 2 with her partner."
 msgstr "Weihnachtsfeier: Familie Berg meldet 4 Personen an, eine erwachsene Spielerin 2 mit Partner."
 
+# ai
+#: modules/fans/app/pages.tsx
+msgid "Follow {name}"
+msgstr "{name} folgen"
+
 #: worker/auth/owner.ts
 #: worker/routes/persons.ts
 msgid "Access of coaches and admins is managed by an admin."
@@ -1200,6 +1214,11 @@ msgstr "Saison {nextName} starten?"
 msgid "Nominated for {games} at the same time"
 msgstr "Zur selben Zeit für {games} nominiert"
 
+# ai
+#: modules/fans/app/calendar.tsx
+msgid "Home games of the teams you follow, game data only"
+msgstr "Heimspiele der Mannschaften, denen du folgst, nur Spieldaten"
+
 #: modules/carpools/worker/routes.ts
 msgid "Passengers can be nominated players who have not declined, and the coaches."
 msgstr "Mitfahren können nominierte Spieler, die nicht abgesagt haben, und die Trainer."
@@ -1276,6 +1295,11 @@ msgstr "Umzug von einer anderen Installation: Mannschaften, Personen, Termine un
 #: modules/duties/app/stats.tsx
 msgid "No family has taken a duty in this time span yet."
 msgstr "Im Zeitraum hat noch keine Familie einen Dienst übernommen."
+
+# ai
+#: modules/fans/app/pages.tsx
+msgid "Only the team's players, parents and coaches see the squad, responses and carpools."
+msgstr "Kader, Zu- und Absagen und Fahrgemeinschaften sehen nur Spieler, Eltern und Trainer der Mannschaft."
 
 #: src/pages/admin.tsx
 msgid "Revoke admin rights?"
@@ -1890,6 +1914,11 @@ msgstr "weiblich"
 #: modules/carpools/worker/routes.ts
 msgid "The driver does not have enough free seats. Please cancel the lift and book again."
 msgstr "Beim Fahrer ist nicht genug Platz frei. Bitte die Mitfahrt absagen und neu buchen."
+
+# ai
+#: modules/fans/app/pages.tsx
+msgid "Button “{short}” in the event list"
+msgstr "Knopf „{short}“ in der Terminübersicht"
 
 # ai
 #: src/pages/whats-new.tsx
@@ -2761,6 +2790,7 @@ msgid "Coaches and players come next. These are the usual steps."
 msgstr "Als Nächstes kommen Trainer und Spieler dazu. Das sind die üblichen Schritte."
 
 # ai
+#: modules/fans/worker/domain.ts
 #: worker/domain/fixtures.ts
 msgid "New start of play: {date}, {time}, {location}."
 msgstr "Neuer Spielbeginn: {date}, {time} Uhr, {location}."
@@ -2843,6 +2873,11 @@ msgstr "Lege hier Mannschaften und Trainer an; Spielerinnen und Spieler kommen s
 #: src/pages/admin.tsx
 msgid "{total, plural, one {# person} other {# people}}"
 msgstr "{total, plural, one {# Personen} other {# Personen}}"
+
+# ai
+#: modules/fans/module.ts
+msgid "Fans"
+msgstr "Fans"
 
 # ai
 #: modules/duties/app/approvals.tsx
@@ -3088,6 +3123,11 @@ msgid "The deadline for declining has passed. You can still decline, the coach w
 msgstr "Die Absagefrist ist abgelaufen. Du kannst trotzdem absagen, der Trainer wird dann sofort informiert."
 
 # ai
+#: modules/fans/app/pages.tsx
+msgid "Follow teams"
+msgstr "Mannschaften folgen"
+
+# ai
 #: src/coach-hints.tsx
 msgid "Enter"
 msgstr "Eintragen"
@@ -3197,6 +3237,11 @@ msgstr "Bitte gib eine Handynummer ein, z. B. +49 151 23456789."
 msgid "How many seats are free? Not counting you and your own passengers."
 msgstr "Wie viele Plätze sind frei? Ohne dich und deine eigenen Mitfahrer gezählt."
 
+# ai
+#: modules/fans/module.ts
+msgid "Games as a fan (moved or cancelled at short notice)"
+msgstr "Spiele als Fan (kurzfristig verlegt oder abgesagt)"
+
 #: src/pages/profile.tsx
 msgid "Changes"
 msgstr "Änderungen"
@@ -3305,6 +3350,11 @@ msgstr "Chat: Die Chatliste zeigt, wie viele Nachrichten ungelesen sind, und ste
 #: src/pages/audit.tsx
 msgid "Show older entries"
 msgstr "Ältere Einträge zeigen"
+
+# ai
+#: modules/fans/app/pages.tsx
+msgid "Games in your event list"
+msgstr "Spiele in deiner Terminübersicht"
 
 # ai
 #: modules/polls/app/pages.tsx
@@ -3753,6 +3803,11 @@ msgstr "Minuten vor Beginn"
 #: modules/carpools/app/card.tsx
 msgid "is looking for a ride ({seats})"
 msgstr "sucht eine Mitfahrgelegenheit ({seats})"
+
+# ai
+#: modules/fans/app/list.tsx
+msgid "{short}: all games of the club"
+msgstr "{short}: alle Spiele des Vereins"
 
 #: src/pages/help.tsx
 msgid "Thank you, your message has arrived."
@@ -4390,6 +4445,7 @@ msgid "There are votes already: an anonymous poll stays anonymous."
 msgstr "Es gibt schon Stimmen: Eine anonyme Umfrage bleibt anonym."
 
 #: modules/duties/app/helpers.tsx
+#: modules/fans/app/pages.tsx
 #: src/duty-blocks.tsx
 #: src/list-import.tsx
 #: src/pages/admin.tsx
@@ -4410,6 +4466,11 @@ msgstr "Mannschaften"
 #: shared/types.ts
 msgid "Coach notes (short-notice declines, stand-ins)"
 msgstr "Trainer-Hinweise (kurzfristige Absagen, Aushilfen)"
+
+# ai
+#: modules/fans/app/index.tsx
+msgid "Follow other teams of the club"
+msgstr "Anderen Mannschaften des Vereins folgen"
 
 # ai
 #: modules/duties/app/stats.tsx
@@ -4685,6 +4746,7 @@ msgstr "Saisonwechsel abgeschlossen."
 
 #: modules/duties/worker/stats.ts
 #: modules/duties/worker/stats.ts
+#: modules/fans/worker/routes.ts
 #: worker/domain/groups.ts
 #: worker/routes/games.ts
 #: worker/routes/restore.ts
@@ -5170,6 +5232,12 @@ msgstr "Kalender-Link entfernt."
 msgid "Not specified"
 msgstr "Ohne Angabe"
 
+# ai
+#: modules/fans/app/calendar.tsx
+#: modules/fans/app/list.tsx
+msgid "Games as a fan"
+msgstr "Spiele als Fan"
+
 #: modules/duties/app/admin.tsx
 msgid "to"
 msgstr "bis"
@@ -5499,6 +5567,7 @@ msgstr "Ein Platz mehr"
 msgid "{label} by push"
 msgstr "{label} per Push"
 
+#: modules/fans/app/pages.tsx
 #: src/pages/event.tsx
 #: worker/routes/setup.ts
 msgid "Away game"
@@ -6110,6 +6179,9 @@ msgstr "Häufige Fragen, Anleitungen, Rückmeldung zur App"
 
 # ai
 #: modules/duties/app/helpers.tsx
+#: modules/fans/app/list.tsx
+#: modules/fans/app/list.tsx
+#: modules/fans/app/pages.tsx
 #: src/game-ball.tsx
 #: src/pages/home.tsx
 msgid "Not taking place"
@@ -6719,6 +6791,11 @@ msgid "{venue, select, hall {Hall unavailable} pitch {Pitch unavailable} other {
 msgstr "{venue, select, hall {Halle belegt} pitch {Platz belegt} other {Spielstätte belegt}}"
 
 # ai
+#: modules/fans/worker/routes.ts
+msgid "This is already your team."
+msgstr "Das ist schon deine Mannschaft."
+
+# ai
 #: modules/polls/app/pages.tsx
 msgid "PayPal (paypal.me/{paypal})"
 msgstr "PayPal (paypal.me/{paypal})"
@@ -6884,6 +6961,11 @@ msgstr "Das kann ich"
 #: src/duty-blocks.tsx
 msgid "Name of the special duty"
 msgstr "Name des Sonderdienstes"
+
+# ai
+#: modules/fans/worker/domain.ts
+msgid "Game moved: {label}"
+msgstr "Spiel verlegt: {label}"
 
 #: src/pages/admin.tsx
 msgid "Chat messages remain and appear as “Deleted person”. If someone is only leaving the club, it is better to remove them via leaving the club in the team."
@@ -7476,6 +7558,11 @@ msgstr "Ort (optional)"
 msgid "Recipient"
 msgstr "Empfänger"
 
+# ai
+#: modules/fans/module.ts
+msgid "Only the person themselves; nobody else sees whom someone follows. Followers see only the game data of those teams (kick-off, venue, opponent, result, cancellation), no squad, responses or names."
+msgstr "Nur die Person selbst; niemand sonst sieht, wem jemand folgt. Wer folgt, sieht nur die Spieldaten dieser Mannschaften (Anwurf, Halle, Gegner, Ergebnis, Absage), keinen Kader, keine Zu- und Absagen und keine Namen."
+
 #: modules/duties/worker/routes.ts
 msgid "You are already signed up for this duty."
 msgstr "Du bist für diesen Dienst schon eingetragen."
@@ -7579,6 +7666,7 @@ msgstr "Das Ende muss in der Zukunft liegen."
 msgid "For duplicates such as “Stewards W” and “Stewards M”: templates, time slots, entries, prior knowledge and approvals move to the chosen duty type, “{name}” disappears. Where the helpers come from stays on the template and the time slot (“Helpers from”)."
 msgstr "Für Doppelungen wie „Ordner D“ und „Ordner H“: Vorlagen, Zeitblöcke, Einträge, Vorkenntnisse und Freigaben wandern zur gewählten Dienstart, „{name}“ verschwindet. Woher die Helfer kommen, bleibt an Vorlage und Zeitblock („Helfer aus“)."
 
+#: modules/fans/worker/domain.ts
 #: worker/routes/events.ts
 msgid "Going ahead: {label}"
 msgstr "Findet statt: {label}"
@@ -7764,6 +7852,11 @@ msgstr "Lege zuerst die Spielerinnen und Spieler an."
 #: modules/polls/app/pages.tsx
 msgid "For you as admin"
 msgstr "Für dich als Admin"
+
+# ai
+#: modules/fans/app/calendar.tsx
+msgid "Games of the teams you follow, game data only"
+msgstr "Spiele der Mannschaften, denen du folgst, nur Spieldaten"
 
 #: src/pages/admin.tsx
 #: src/pages/setup-wizard.tsx
@@ -8054,6 +8147,11 @@ msgstr "Trainingsorte"
 msgid "Start poll"
 msgstr "Umfrage starten"
 
+# ai
+#: modules/fans/app/list.tsx
+msgid "All games of the club"
+msgstr "Alle Spiele des Vereins"
+
 #: src/pages/team.tsx
 msgid "More actions"
 msgstr "Weitere Aktionen"
@@ -8241,6 +8339,7 @@ msgstr "Der Termin findet wieder statt."
 msgid "The code is wrong."
 msgstr "Der Code stimmt nicht."
 
+#: modules/fans/worker/routes.ts
 #: worker/routes/squad.ts
 msgid "This game does not exist."
 msgstr "Dieses Spiel gibt es nicht."
@@ -8439,6 +8538,11 @@ msgid "Yes, via the same parent link of the team with their own access. Two pare
 msgstr "Ja, über denselben Elternlink der Mannschaft mit eigenem Zugang. Pro Kind können zwei Elternteile verknüpft sein."
 
 # ai
+#: modules/fans/app/pages.tsx
+msgid "Of the teams you follow, only the games at home, also for messages and the calendar"
+msgstr "Von den Mannschaften, denen du folgst, nur die Heimspiele, auch bei Benachrichtigungen und im Kalender"
+
+# ai
 #: modules/duties/worker/notify.ts
 msgid "{helped} of {total} in the team have helped already. If the others can do it, so can you! Give yourselves a nudge and sign up for a duty."
 msgstr "{helped} von {total} aus der Mannschaft haben schon geholfen. Was die anderen schaffen, schafft ihr auch! Gebt euch einen Ruck und tragt euch für einen Dienst ein."
@@ -8578,6 +8682,11 @@ msgstr "Für Kreise ohne Training und Spiele, etwa das Trainerteam, gibt es <0>G
 #: src/pages/fixture-sync.tsx
 msgid "Reminder to sync"
 msgstr "Erinnerung an den Abgleich"
+
+# ai
+#: modules/fans/app/list.tsx
+msgid "You follow this team"
+msgstr "Du folgst dieser Mannschaft"
 
 #: src/pages/event.tsx
 msgid "The event and all responses will be deleted."
@@ -9484,6 +9593,9 @@ msgstr "Mitfahrt geändert"
 msgid "Training plans"
 msgstr "Trainingspläne"
 
+#: modules/fans/app/pages.tsx
+#: modules/fans/app/pages.tsx
+#: modules/fans/app/pages.tsx
 #: src/pages/audit.tsx
 #: src/pages/event.tsx
 #: src/pages/event.tsx
@@ -9541,6 +9653,11 @@ msgstr "{playerName} spielt jetzt auch in der anderen Mannschaft (aufgenommen vo
 #: src/pages/team.tsx
 msgid "Add"
 msgstr "Hinzufügen"
+
+# ai
+#: modules/fans/app/pages.tsx
+msgid "{team} · Fan"
+msgstr "{team} · Fan"
 
 #: modules/duties/app/index.tsx
 msgid "Duty types and templates for games and special events"
@@ -10043,10 +10160,16 @@ msgid "Before training Lena sees: 11 accepted, Mia and Paul declined. She does n
 msgstr "Lena sieht vor dem Training: 11 zugesagt, Mia und Paul haben abgesagt. Warum, sieht sie nicht."
 
 # ai
+#: modules/fans/module.ts
+msgid "Per access: which teams it follows, whether only home games, and whether the games go into the personal calendar."
+msgstr "Je Zugang: welchen Mannschaften er folgt, ob nur Heimspiele und ob die Spiele in den persönlichen Kalender kommen."
+
+# ai
 #: modules/polls/app/pages.tsx
 msgid "In the banking app choose “Scan” or “Photo transfer”. On the phone itself: take a screenshot and open it there."
 msgstr "In der Banking-App „Scannen“ oder „Foto-Überweisung“ wählen. Auf dem Handy selbst: Bildschirmfoto machen und dort öffnen."
 
+#: modules/fans/app/pages.tsx
 #: src/pages/event.tsx
 #: src/pages/special.tsx
 #: worker/routes/setup.ts
@@ -10440,6 +10563,7 @@ msgid "Mobile number"
 msgstr "Handynummer"
 
 # ai
+#: modules/fans/worker/domain.ts
 #: src/extra-events.tsx
 #: worker/routes/events.ts
 msgid "Not taking place: {label}"
@@ -10750,6 +10874,11 @@ msgstr "Noch keine Gruppe"
 msgctxt "chat author"
 msgid "Helper"
 msgstr "Aushilfe"
+
+# ai
+#: modules/fans/worker/index.ts
+msgid "Not taking place: {title}"
+msgstr "Findet nicht statt: {title}"
 
 #: src/respond.tsx
 msgid "Declined."
@@ -11234,6 +11363,12 @@ msgid "{fresh, plural, one {Add # player} other {Add # players}}"
 msgstr "{fresh, plural, one {# Spieler anlegen} other {# Spieler anlegen}}"
 
 # ai
+#: modules/fans/app/pages.tsx
+#: modules/fans/worker/index.ts
+msgid "You follow {team} as a fan."
+msgstr "Du folgst {team} als Fan."
+
+# ai
 #: src/pages/join.tsx
 msgid "Someone else wants to set up their access on this device? Sign out in the profile first, then open the link again."
 msgstr "Soll jemand anderes auf diesem Gerät seinen Zugang einrichten? Dann vorher im Profil abmelden und den Link noch einmal öffnen."
@@ -11259,6 +11394,11 @@ msgstr "Für die nächsten Termine werden noch Helfer gesucht. Gebt euch einen R
 #: worker/domain/mail.ts
 msgid "Privacy policy: {privacy}"
 msgstr "Datenschutzerklärung: {privacy}"
+
+# ai
+#: modules/fans/app/list.tsx
+msgid "Games as a fan: {names}"
+msgstr "Spiele als Fan: {names}"
 
 # ai
 #: src/maintenance.tsx
@@ -11303,6 +11443,13 @@ msgstr "Deine Sprache"
 #: modules/duties/app/help.ts
 msgid "Needs prior knowledge"
 msgstr "Braucht Vorkenntnisse"
+
+# ai
+#: modules/fans/app/index.tsx
+#: modules/fans/app/pages.tsx
+#: modules/fans/app/pages.tsx
+msgid "Fan of …"
+msgstr "Fan von …"
 
 #: src/faq.tsx
 msgid "Under <0>Team → Settings → Schedule</0>, tap <1>Sync now</1>. The app only fetches the schedule from handball4all at the push of a button, never automatically. Moved games are then announced to everyone."
@@ -11579,6 +11726,11 @@ msgstr "{team} hat zur selben Zeit einen Termin ({clock})."
 #: modules/polls/app/pages.tsx
 msgid "Photo"
 msgstr "Foto"
+
+# ai
+#: modules/fans/app/pages.tsx
+msgid "You now follow {name}."
+msgstr "Du folgst jetzt {name}."
 
 # ai
 #: src/pages/event.tsx
@@ -11923,6 +12075,7 @@ msgstr "Umfrage jetzt beenden?"
 msgid "Signed in since {since}"
 msgstr "Angemeldet seit {since}"
 
+#: modules/fans/worker/domain.ts
 #: worker/routes/events.ts
 msgid "{label} on {when} is going ahead after all."
 msgstr "{label} am {when} findet doch statt."
@@ -11970,6 +12123,11 @@ msgid "You have opted out of this chat."
 msgstr "Du hast dich von diesem Chat abgemeldet."
 
 # ai
+#: modules/fans/app/pages.tsx
+msgid "You no longer follow {name}."
+msgstr "Du folgst {name} nicht mehr."
+
+# ai
 #: worker/routes/mail.ts
 msgid "Hello, this test shows that the app can send e-mails. Nothing else to do."
 msgstr "Hallo, dieser Test zeigt, dass die App E-Mails verschicken kann. Sonst ist nichts zu tun."
@@ -12006,6 +12164,7 @@ msgstr "Trainer, Leitungen, Betreuer und Organisatoren können sich mit „Ich b
 msgid "Staging · test system with copied data"
 msgstr "Staging · Testsystem mit kopierten Daten"
 
+#: modules/fans/app/pages.tsx
 #: src/live.tsx
 msgid "Kick-off {kickoff}"
 msgstr "Anpfiff {kickoff} Uhr"
@@ -12589,6 +12748,11 @@ msgstr "Mitfahrt abgesagt."
 msgid "This person has no access."
 msgstr "Diese Person hat keinen Zugang."
 
+# ai
+#: modules/fans/app/pages.tsx
+msgid "Follow other teams of the club as a fan. Their games appear in your event list under the star, without responses and without names. If a game is moved or cancelled at short notice, you get a message. Nobody else sees whom you follow."
+msgstr "Folge anderen Mannschaften des Vereins als Fan. Ihre Spiele erscheinen in deiner Terminübersicht unter dem Stern, ohne Zu- und Absagen und ohne Namen. Wird ein Spiel kurzfristig verlegt oder abgesagt, bekommst du Bescheid. Niemand sonst sieht, wem du folgst."
+
 #: src/pages/special.tsx
 msgid "End (optional)"
 msgstr "Ende (optional)"
@@ -12916,6 +13080,11 @@ msgstr "Elternteil"
 msgid "Approved."
 msgstr "Freigegeben."
 
+# ai
+#: modules/fans/module.ts
+msgid "When the person unfollows or switches it off, leaves the club, or the team or access is deleted. Follows stay over the season change."
+msgstr "Wenn die Person nicht mehr folgt oder es ausschaltet, den Verein verlässt oder die Mannschaft oder der Zugang gelöscht wird. Über den Saisonwechsel bleibt das Folgen bestehen."
+
 #: src/pages/team.tsx
 msgid "{firstName} has their own access."
 msgstr "{firstName} hat einen eigenen Zugang."
@@ -12964,6 +13133,11 @@ msgstr "Technisch notwendig sind außerdem: Passkeys (nur ein öffentlicher Schl
 #: src/pages/profile.tsx
 msgid "Push notifications"
 msgstr "Push-Benachrichtigungen"
+
+# ai
+#: modules/fans/app/pages.tsx
+msgid "Shows all games of the club, your own ones as usual. Only on this device."
+msgstr "Zeigt alle Spiele des Vereins, deine eigenen wie gewohnt. Nur auf diesem Gerät."
 
 #: modules/duties/app/approvals.tsx
 #: modules/polls/app/pages.tsx
@@ -13578,6 +13752,11 @@ msgstr "Mitfahrt abgesagt"
 msgid "Admin"
 msgstr "Admin"
 
+# ai
+#: modules/fans/app/pages.tsx
+msgid "Home games only"
+msgstr "Nur Heimspiele"
+
 #: src/pages/join.tsx
 msgid "has access already"
 msgstr "hat schon einen Zugang"
@@ -13826,6 +14005,11 @@ msgstr "Austritt eintragen"
 msgid "{players, plural, one {# member} other {# members}}"
 msgstr "{players, plural, one {# Mitglied} other {# Mitglieder}}"
 
+# ai
+#: modules/fans/module.ts
+msgid "Everyone can follow other teams of the club and sees their games in the event list, with kick-off, venue, opponent and result, but no names or responses. A push when a game is moved or cancelled at short notice."
+msgstr "Alle können anderen Mannschaften des Vereins folgen und sehen deren Spiele in der Terminübersicht, mit Anwurf, Halle, Gegner und Ergebnis, aber ohne Namen und Zu- und Absagen. Eine Push, wenn ein Spiel kurzfristig verlegt oder abgesagt wird."
+
 #: modules/carpools/worker/routes.ts
 msgid "{rider} is riding with you: {game} (entered by {coach})."
 msgstr "{rider} fährt mit dir mit: {game} (eingetragen von {coach})."
@@ -13989,6 +14173,7 @@ msgid "Who takes it"
 msgstr "Wer übernimmt"
 
 # ai
+#: modules/fans/worker/domain.ts
 #: worker/domain/fixtures.ts
 msgid "New start of play: {date}, {time}."
 msgstr "Neuer Spielbeginn: {date}, {time} Uhr."
@@ -14246,6 +14431,7 @@ msgid "There is now an access for this person. Please ask for a new link."
 msgstr "Für diese Person gibt es inzwischen einen Zugang. Bitte frag nach einem neuen Link."
 
 #: modules/duties/app/helpers.tsx
+#: modules/fans/app/pages.tsx
 #: src/app.tsx
 #: src/pages/profile.tsx
 #: src/pages/profile.tsx
@@ -14301,6 +14487,11 @@ msgstr "Noch kein Trainer zugeordnet."
 #: src/pages/stats.tsx
 msgid "Away"
 msgstr "Auswärts"
+
+# ai
+#: modules/fans/app/pages.tsx
+msgid "Your team"
+msgstr "Deine Mannschaft"
 
 # ai
 #: modules/polls/app/pages.tsx
@@ -14967,6 +15158,11 @@ msgid "Members"
 msgstr "Mitglieder"
 
 # ai
+#: modules/fans/worker/domain.ts
+msgid "{label} on {when} is not taking place."
+msgstr "{label} am {when} findet nicht statt."
+
+# ai
 #: modules/sms/app/index.tsx
 msgid "Provider for codes and reminders by SMS"
 msgstr "Anbieter für Codes und Erinnerungen per SMS"
@@ -15128,6 +15324,7 @@ msgstr "Dieser Einladungslink ist abgelaufen. Bitte frag nach einem neuen Link."
 msgid "Tip: a second passkey, e.g. on a tablet, helps if you lose your phone."
 msgstr "Tipp: Ein zweiter Passkey, z. B. auf einem Tablet, hilft, wenn das Handy verloren geht."
 
+#: modules/fans/app/list.tsx
 #: src/pages/home.tsx
 msgid "Location to follow"
 msgstr "Ort folgt"
@@ -15951,6 +16148,7 @@ msgid "The helpers of the team see who takes on which duty as “First name L.�
 msgstr "Die Helfer der Mannschaft sehen als „Vorname N.“, wer welchen Dienst übernimmt; Trainer und Admins vollständig. Der persönliche Kalenderlink enthält nur die eigenen Dienste und die der Kinder. Freigaben: Admins, die Person und ihre Eltern; Trainer, wenn sie jemanden eintragen."
 
 # ai
+#: modules/fans/worker/index.ts
 #: worker/domain/calendar.ts
 #: worker/domain/calendar.ts
 msgid "Start of play {throwOff}"
@@ -16255,6 +16453,11 @@ msgid "Your parents take care of declining."
 msgstr "Deine Eltern kümmern sich um Absagen."
 
 # ai
+#: src/pages/home.tsx
+msgid "Tap a button at the top to see its events."
+msgstr "Tippe oben auf einen Knopf, um seine Termine zu sehen."
+
+# ai
 #: src/pages/updates.tsx
 msgid "{lastAt}, version {lastVersion}"
 msgstr "{lastAt}, Version {lastVersion}"
@@ -16462,6 +16665,11 @@ msgstr "Gib der App zuerst die Adresse des Vereins"
 #: modules/polls/app/pages.tsx
 msgid "Making it smaller …"
 msgstr "Wird verkleinert …"
+
+# ai
+#: modules/fans/app/pages.tsx
+msgid "Result {home}:{guest}"
+msgstr "Ergebnis {home}:{guest}"
 
 # ai
 #: src/special-attendance.tsx
@@ -16709,4 +16917,3 @@ msgstr "Chat schreiben"
 #: worker/routes/events.ts
 msgid "In one time block the end is before the start."
 msgstr "Bei einem Zeitblock liegt das Ende vor dem Beginn."
-

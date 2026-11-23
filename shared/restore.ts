@@ -9,9 +9,20 @@ export type RestoreCategory = (typeof RESTORE_CATEGORIES)[number];
 export const RESTORE_TABLES: Record<Exclude<RestoreCategory, "club">, readonly string[]> = {
   season: ["seasons", "age_classes", "holiday_periods", "public_holidays"],
   teams: ["teams"],
-  people: ["persons", "accounts", "guardianships", "child_permissions", "child_permission_log", "club_members", "notification_settings", "notification_channels", "avatars"],
+  people: [
+    "persons",
+    "accounts",
+    "guardianships",
+    "child_permissions",
+    "child_permission_log",
+    "club_members",
+    "notification_settings",
+    "notification_channels",
+    "avatars",
+    "fan_home_only",
+  ],
   // referees: exports from before 0.8.0 (they become approvals of the youth referee duty)
-  memberships: ["team_memberships", "core_squad", "referees"],
+  memberships: ["team_memberships", "core_squad", "referees", "fan_follows"],
   plans: ["locations", "training_plans", "training_rules", "rule_teams", "standing_absences"],
   events: [
     "events",

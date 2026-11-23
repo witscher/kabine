@@ -13,6 +13,7 @@ import { Ball, Icon } from "../icons";
 import { DeclineSheet, HelpRequestCard, PersonResponseRow, ResponseButtons } from "../respond";
 import { GameBall, gameBallState, HomeTag } from "../game-ball";
 import { useActiveModules } from "../modules";
+import type { HomeListButton, HomeListPart, HomeListRow } from "../module-api";
 import { CoachHints } from "../coach-hints";
 import { NewsCard } from "../news";
 import { useMe } from "../session";
@@ -404,6 +405,8 @@ type When = "upcoming" | "past";
 interface ListPick {
   hidden: number[];
   show: EventShow;
+  /** The modules' parts of the selection (hook homeList), by module id */
+  modules?: Record<string, unknown>;
 }
 const LIST_PICK = "kabine-home-list";
 const DEFAULT_PICK: ListPick = { hidden: [], show: "all" };
@@ -415,6 +418,7 @@ function readPick(): ListPick {
     return {
       hidden: Array.isArray(v?.hidden) ? v.hidden.filter((id): id is number => typeof id === "number") : [],
       show: v?.show && SHOWS.includes(v.show) ? v.show : "all",
+      modules: v?.modules && typeof v.modules === "object" ? v.modules : {},
     };
   } catch {
     return DEFAULT_PICK;
@@ -438,31 +442,8 @@ const showLabels = (): { value: EventShow; label: string }[] => [
 
 const kindOk = (show: EventShow, kind: EventSummary["kind"]) => show === "all" || (show === "other" ? kind === "special" : kind === show);
 
-/**
- * A button in the row at the top of home. The own teams come first; a module can add its own after them (e.g. a star
- * for the games of teams one follows). Each switches its part of the list on and off, the list is the sum.
- */
-interface ListButton {
-  key: string;
-  label: ComponentChildren;
-  ariaLabel?: string;
-  class?: string;
-  on: boolean;
-  toggle: () => void;
-}
-
-/**
- * A row of the list: an event, or a row a module adds (it only needs a time to be sorted in). Rows before the large
- * card are shown above it (shared/home-list.ts).
- */
-interface ListRow {
-  key: string;
-  startsAt: string;
-  id: number;
-  node: ComponentChildren;
-}
-
-const eventRow = (e: EventSummary): ListRow => ({ key: `event-${e.id}`, startsAt: e.startsAt, id: e.id, node: <EventRow key={e.id} event={e} /> });
+/** An event as a row of the list; modules add rows of their own (src/module-api.ts, homeList). */
+const eventRow = (e: EventSummary): HomeListRow => ({ key: `event-${e.id}`, startsAt: e.startsAt, id: e.id, node: <EventRow key={e.id} event={e} /> });
 
 /** Events per section; "More events" loads that many more. */
 const PAGE = 20;
@@ -479,16 +460,22 @@ export function HomePage() {
   const { query } = useLocation();
   const [when, setWhen] = useState<When>(query.zeit === "vergangen" ? "past" : "upcoming");
   const [pick, setPickState] = useState<ListPick>(readPick);
+  // Several changes in one tap (a module gives up its view, then a team goes on) build on each other
+  const latest = useRef(pick);
+  latest.current = pick;
   const [limits, setLimits] = useState<Record<When, number>>(() => ({ ...loaded }));
   const setLimit = (view: When, n: number) => {
     loaded[view] = n;
     setLimits({ ...loaded });
   };
-  const setPick = (next: ListPick) => {
+  const updatePick = (change: (current: ListPick) => ListPick) => {
+    const next = change(latest.current);
+    latest.current = next;
     savePick(next);
     setPickState(next);
     setLimit(when, PAGE);
   };
+  const setPick = (next: Omit<ListPick, "modules">) => updatePick((p) => ({ ...p, ...next }));
   const [declineFor, setDeclineFor] = useState<{ event: EventSummary; p: MyParticipation } | null>(null);
 
   // Children only as far as parents are involved in their teams
@@ -498,15 +485,42 @@ export function HomePage() {
   const ownTeams = [
     ...new Map([...me.memberships, ...children.flatMap((c) => c.teams.filter((t) => t.parentsEnabled))].map((t) => [t.id, { id: t.id, name: t.name }])).values(),
   ];
+  // Parts of the modules (modules/<id>/app, homeList), e.g. the games of teams one follows. Here without data for their
+  // query parameters, their own view and whether they are on; again below with the loaded page for buttons and rows.
+  const listModules = modules.filter((m) => m.homeList);
+  const partsWith = (page: EventPage | undefined) =>
+    listModules
+      .map((m) => {
+        const id = m.manifest.id;
+        const part = m.homeList!({
+          me,
+          when,
+          show: pick.show,
+          pick: pick.modules?.[id],
+          setPick: (next) => updatePick((p) => ({ ...p, modules: { ...p.modules, [id]: next } })),
+          data: page ? (page.modules?.[id] ?? null) : undefined,
+        });
+        return part ? { id, part } : null;
+      })
+      .filter((x): x is { id: string; part: HomeListPart } => !!x);
+  const queryParts = partsWith(undefined);
+  // A module's own view (all games of the club) stands in for the selection while it is on
+  const takeover = queryParts.find((x) => x.part.takeover)?.part.takeover;
+  const moduleOn = queryParts.some((x) => x.part.active);
   // Team buttons: own teams on by default, a new team is on (only switched-off ones are stored)
-  const onTeams = ownTeams.filter((t) => !pick.hidden.includes(t.id));
+  const onTeams = takeover ? [] : ownTeams.filter((t) => !pick.hidden.includes(t.id));
   const onIds = new Set(onTeams.map((t) => t.id));
-  const allOn = onTeams.length === ownTeams.length;
-  const nothing = ownTeams.length > 0 && !onTeams.length;
-  const show = pick.show;
-  const toggleTeam = (id: number) =>
+  const allOn = !takeover && onTeams.length === ownTeams.length;
+  const nothing = ownTeams.length > 0 && !onTeams.length && !moduleOn && !takeover;
+  const show = takeover ? takeover.show : pick.show;
+  const toggleTeam = (id: number) => {
+    // Tapping a team ends a module's own view: the selection from before comes back, with this team on
+    if (takeover) {
+      takeover.release();
+      return updatePick((p) => ({ ...p, hidden: p.hidden.filter((h) => h !== id) }));
+    }
     setPick({ ...pick, hidden: pick.hidden.includes(id) ? pick.hidden.filter((h) => h !== id) : [...pick.hidden.filter((h) => ownTeams.some((t) => t.id === h)), id] });
-  const buttons: ListButton[] = ownTeams.map((tm) => ({ key: `team-${tm.id}`, label: tm.name, on: onIds.has(tm.id), toggle: () => toggleTeam(tm.id) }));
+  };
   // Which children play in the selected teams?
   const teamKids = !allOn ? children.filter((c) => c.teams.some((t) => t.parentsEnabled && onIds.has(t.id))).map((c) => c.firstName) : [];
   const kids = joinNames(teamKids);
@@ -515,19 +529,36 @@ export function HomePage() {
   // Page by page from the server, which also filters by relevance, the team buttons and the kind (so "More events"
   // stays right). Offline the last full list comes from storage and is filtered here.
   const limit = limits[when];
-  const teamsParam = allOn || offline ? "all" : [...onIds].join(",");
+  const teamsParam = takeover || allOn || offline ? "all" : onIds.size ? [...onIds].join(",") : "none";
+  const moduleQuery = queryParts
+    .flatMap((x) => Object.entries(x.part.query ?? {}).map(([k, v]) => `&${x.id}.${encodeURIComponent(k)}=${encodeURIComponent(v)}`))
+    .join("");
   const path = nothing
     ? null
-    : `/events?limit=${limit}&teams=${teamsParam}${show !== "all" && !offline ? `&show=${show}` : ""}${when === "past" ? "&past=1" : ""}`;
+    : `/events?limit=${limit}&teams=${teamsParam}${show !== "all" && !offline ? `&show=${show}` : ""}${when === "past" ? "&past=1" : ""}${moduleQuery}`;
   const { data, error, loading, reload } = useQuery<EventPage>(path, { refreshMs: 60_000 });
   // While loading more, the previous list stays instead of briefly disappearing
   const kept = useRef<Partial<Record<When, EventPage>>>({});
   if (data) kept.current[when] = data;
   const shown = nothing ? undefined : (data ?? kept.current[when]);
   const growing = !data && !!shown;
+  const parts = partsWith(shown);
+  const moduleButtons = parts.flatMap((x) => x.part.buttons ?? []);
+  const buttons: HomeListButton[] = [
+    ...ownTeams.map((tm) => ({ key: `team-${tm.id}`, label: tm.name, on: onIds.has(tm.id), toggle: () => toggleTeam(tm.id) })),
+    ...moduleButtons,
+  ];
+  // Rows of modules about an event the core lists itself (a game one follows and helps at) are shown once, as the event
+  const coreIds = new Set([...(shown?.events ?? []), ...(shown?.next ?? []), ...(shown?.live ?? []), ...(shown?.openHelp ?? [])].map((e) => e.id));
+  const moduleRows = parts.flatMap((x) => x.part.rows ?? []).filter((r) => !r.id || !coreIds.has(r.id));
+  // A module with more rows than it sent: the list stops at its last day until "More events" (whole days)
+  const moduleMore = parts.map((x) => x.part.more?.slice(0, 10)).filter((d): d is string => !!d);
+  const cutDay = moduleMore.length ? (when === "past" ? moduleMore.sort().at(-1)! : moduleMore.sort()[0]!) : null;
+  const withinCut = (r: { startsAt: string }) => !cutDay || (when === "past" ? r.startsAt.slice(0, 10) >= cutDay : r.startsAt.slice(0, 10) <= cutDay);
+  const hasMore = !!shown?.hasMore || moduleMore.length > 0;
 
   // The same rule as on the server, for the kept list while the new one loads and for offline
-  const picked = (e: EventSummary) => kindOk(show, e.kind) && (allOn || e.clubWide || e.teams.some((t) => onIds.has(t.id)));
+  const picked = (e: EventSummary) => kindOk(show, e.kind) && (!!takeover || allOn || e.clubWide || e.teams.some((t) => onIds.has(t.id)));
   const events = (shown?.events ?? []).filter(isRelevantEvent).filter(picked);
   const past = when === "past" ? events.filter((e) => e.isPast && !e.isRunning) : [];
   // Games that have started with a live score stay at the top until the end of the live window
@@ -555,10 +586,13 @@ export function HomePage() {
       )
     : [];
   // Time order: whatever starts before the large card (an unconfirmed optional training this morning) is above it
-  const listRows: ListRow[] = upcoming.filter((e) => !mineIds.has(e.id) && !coachCards.includes(e)).map(eventRow);
+  const listRows: HomeListRow[] = [
+    ...upcoming.filter((e) => !mineIds.has(e.id) && !coachCards.includes(e)).map(eventRow),
+    ...(when === "upcoming" ? moduleRows : []),
+  ].filter(withinCut);
   const { before, after: rest } = splitAtCard(listRows, mineCards[0] ?? coachCards[0]);
-  const pastRows: ListRow[] = past.map(eventRow);
-  const filtered = show !== "all" || !allOn;
+  const pastRows: HomeListRow[] = byStartTime([...past.map(eventRow), ...(when === "past" ? moduleRows : [])].filter(withinCut)).reverse();
+  const filtered = !takeover && (show !== "all" || !allOn);
   // Note from when on only games and special events follow (trainings are generated 70 days ahead)
   const trainingsUntil = when === "upcoming" ? (shown?.trainingsUntil ?? null) : null;
   const horizonAt =
@@ -572,8 +606,8 @@ export function HomePage() {
     at: b.startsOn <= today ? 0 : rest.findIndex((e) => e.startsAt.slice(0, 10) >= b.startsOn),
   }));
   const breaksAt = (i: number) => breaks.filter((x) => x.at === i).map((x) => <BreakNote key={`${x.b.name}${x.b.startsOn}`} item={x.b} />);
-  const trailingBreaks = shown?.hasMore ? [] : breaksAt(-1);
-  const moreButton = shown?.hasMore ? (
+  const trailingBreaks = hasMore ? [] : breaksAt(-1);
+  const moreButton = hasMore ? (
     <div class="stack-sm" style={{ alignItems: "center" }}>
       {growing && error ? (
         <p class="small muted">
@@ -592,8 +626,9 @@ export function HomePage() {
   const firstName = me.person.firstName;
   const childNames = joinNames(children.map((c) => c.firstName));
   // Under the greeting: what the list shows
-  const heroSub = nothing
-    ? t`Nothing selected`
+  // The own part of the list; off when all own teams are switched off (only a module's rows are shown)
+  const ownSub = ownTeams.length && !onTeams.length
+    ? null
     : when === "past"
       ? team
         ? kids
@@ -609,13 +644,15 @@ export function HomePage() {
             ? t`Events for you and ${childNames}`
             : t`Events for ${childNames}`
           : t`Your upcoming events`;
+  const moduleSubs = parts.map((x) => x.part.sub).filter((x): x is string => !!x);
+  const heroSub = nothing ? t`Nothing selected` : takeover ? takeover.sub : [ownSub, ...moduleSubs].filter(Boolean).join(" · ");
   let lastMonth = "";
   return (
     <main class="page">
       <header class="hero">
         <div class="hero-top">
           <div class="kicker">{clubName()}</div>
-          {buttons.length > 1 ? (
+          {buttons.length > 1 || moduleButtons.length ? (
             <div class="row-gap team-filter" role="group" aria-label={t`Filter by team`}>
               {buttons.map((b) => (
                 <button
@@ -656,13 +693,16 @@ export function HomePage() {
               { value: "past", label: t`Past` },
             ]}
           />
-          <div class="kind-chips" role="group" aria-label={t`Kind of events`}>
-            {showLabels().map((o) => (
-              <button type="button" aria-pressed={show === o.value ? "true" : "false"} onClick={() => o.value !== show && setPick({ ...pick, show: o.value })}>
-                {o.label}
-              </button>
-            ))}
-          </div>
+          {/* A module's own view (all games of the club) has no chips */}
+          {!takeover ? (
+            <div class="kind-chips" role="group" aria-label={t`Kind of events`}>
+              {showLabels().map((o) => (
+                <button type="button" aria-pressed={show === o.value ? "true" : "false"} onClick={() => o.value !== show && setPick({ ...pick, show: o.value })}>
+                  {o.label}
+                </button>
+              ))}
+            </div>
+          ) : null}
         </div>
         {error && !shown ? <ErrorBox error={error} onRetry={reload} /> : null}
         {loading && !shown && !nothing ? (
@@ -716,7 +756,7 @@ export function HomePage() {
 
         {nothing ? (
           <Empty title={t`Nothing selected`} icon="calendar">
-            {t`Tap a team at the top to see its events.`}
+            {moduleButtons.length ? t`Tap a button at the top to see its events.` : t`Tap a team at the top to see its events.`}
           </Empty>
         ) : null}
 
@@ -745,7 +785,7 @@ export function HomePage() {
         ) : null}
         {when === "past" ? moreButton : null}
 
-        {shown && when === "upcoming" && !upcoming.length ? (
+        {shown && when === "upcoming" && !upcoming.length && !moduleRows.length ? (
           filtered ? (
             <Empty title={t`No events`} icon="calendar">
               {t`There are no upcoming events for this selection.`}
