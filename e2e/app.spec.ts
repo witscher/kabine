@@ -1087,22 +1087,68 @@ test("Anwesenheit: Trainer trägt im vergangenen Termin ein, die Spielerin sieht
   expect(detail.participants).toBeNull();
 });
 
-test("Terminübersicht: Team-Labels filtern nach Mannschaft", async () => {
+test("Terminübersicht: jedes Team-Label schaltet seine Termine an und aus, Chips nach Art", async () => {
   const { id: second } = await (await admin.page.request.post("/api/teams", { data: { name: "wF2", ageClassCode: "wD", level: 2 } })).json();
   expect((await admin.page.request.post(`/api/teams/${second}/members`, { data: { personId: 2, role: "coach" } })).ok()).toBe(true);
+  const date = new Date(Date.now() + 4 * 86_400_000).toLocaleDateString("sv-SE", { timeZone: "Europe/Berlin" });
+  const game = await coach.page.request.post("/api/duties/teams/1/games", { data: { opponent: "HSG Knopfhausen", isHome: true, date, time: "12:00" } });
+  expect(game.ok()).toBe(true);
+  const { id: gameId } = (await game.json()) as { id: number };
 
   const { page } = coach;
   await page.goto("/");
   const filter = page.getByRole("group", { name: "Nach Mannschaft filtern" });
-  await expect(filter.getByRole("button", { name: "wT" })).toBeVisible();
+  const wt = filter.getByRole("button", { name: "wT" });
+  const wf2 = filter.getByRole("button", { name: "wF2" });
+  // Own teams on by default, a new team too
+  await expect(wt).toHaveAttribute("aria-pressed", "true");
+  await expect(wf2).toHaveAttribute("aria-pressed", "true");
   await expect(page.locator(".event-row").first()).toBeVisible();
-  await filter.getByRole("button", { name: "wF2" }).click();
-  await expect(filter.getByRole("button", { name: "wF2" })).toHaveAttribute("aria-pressed", "true");
-  await expect(page.getByText("Termine der wF2")).toBeVisible();
+  // wT off: only the (empty) wF2
+  await wt.click();
+  await expect(wt).toHaveAttribute("aria-pressed", "false");
+  await expect(page.locator(".hero-sub")).toHaveText("Termine der wF2");
   await expect(page.locator(".event-row")).toHaveCount(0);
-  await filter.getByRole("button", { name: "wF2" }).click();
+  // Everything off: "Nothing selected", also under the greeting
+  await wf2.click();
+  await expect(page.locator(".hero-sub")).toHaveText("Nichts ausgewählt");
+  await expect(page.locator(".empty", { hasText: "Nichts ausgewählt" })).toBeVisible();
+  await expect(page.locator(".event-row")).toHaveCount(0);
+  // Kept on this device
+  await page.reload();
+  await expect(wt).toHaveAttribute("aria-pressed", "false");
+  await expect(page.locator(".hero-sub")).toHaveText("Nichts ausgewählt");
+  await wt.click();
+  await expect(page.locator(".hero-sub")).toHaveText("Termine der wT");
   await expect(page.locator(".event-row").first()).toBeVisible();
+  await wf2.click();
 
+  // Chips for the kind, always visible; the server filters (paging stays right)
+  const kinds = page.getByRole("group", { name: "Art der Termine" });
+  await expect(kinds.getByRole("button", { name: "Alles" })).toHaveAttribute("aria-pressed", "true");
+  const gameRow = page.locator(".event-row", { hasText: "HSG Knopfhausen" });
+  await expect(gameRow).toBeVisible();
+  const games = page.waitForResponse((r) => r.url().includes("/api/events?limit=") && r.url().includes("show=game"));
+  await kinds.getByRole("button", { name: "Spiele" }).click();
+  await games;
+  await expect(gameRow).toBeVisible();
+  // Game row: short title without the team, home tag, the team in the ball
+  await expect(gameRow.locator(".home-tag")).toHaveText("Heim");
+  await expect(gameRow.locator(".title")).toContainText("– HSG Knopfhausen");
+  await expect(gameRow.locator(".title")).not.toContainText("wT");
+  await expect(gameRow.getByRole("img", { name: /^wT/ })).toBeVisible();
+  await expect(page.locator(".event-row", { hasText: "Training" })).toHaveCount(0);
+  if (process.env.E2E_SHOTS) await page.screenshot({ path: `${process.env.E2E_SHOTS}/home-games.png`, fullPage: true });
+  await kinds.getByRole("button", { name: "Training" }).click();
+  await expect(gameRow).toHaveCount(0);
+  await expect(page.locator(".event-row", { hasText: "Training" }).first()).toBeVisible();
+  await kinds.getByRole("button", { name: "Sonstiges" }).click();
+  await expect(page.locator(".event-row", { hasText: "Training" })).toHaveCount(0);
+  await kinds.getByRole("button", { name: "Alles" }).click();
+  await expect(kinds.getByRole("button", { name: "Alles" })).toHaveAttribute("aria-pressed", "true");
+  await expect(gameRow).toBeVisible();
+
+  await coach.page.request.delete(`/api/duties/games/${gameId}`);
   await admin.page.request.delete(`/api/teams/${second}`);
 });
 
@@ -1310,12 +1356,16 @@ test("Spiele der eigenen Mannschaft auch ohne Nominierung sichtbar, mit Marke �
   await page.goto("/");
   const row = page.getByRole("link", { name: /HSG Zuschauerdorf/ });
   await expect(row).toBeVisible();
-  await expect(row.getByText("Nominiert")).toHaveCount(0);
+  // The team sits in the ball, its mark says "Nominated"; home games carry the tag "Heim"
+  await expect(row.getByRole("img", { name: /^wT/ })).toBeVisible();
+  await expect(row.getByRole("img", { name: "wT, Nominiert" })).toHaveCount(0);
+  await expect(row.locator(".home-tag")).toHaveText("Heim");
 
   const { me } = (await (await page.request.get("/api/session")).json()) as { me: { person: { id: number } } };
   expect((await coach.page.request.put(`/api/events/${id}/squad`, { data: { personIds: [me.person.id] } })).ok()).toBe(true);
   await page.reload();
-  await expect(page.getByRole("link", { name: /HSG Zuschauerdorf/ }).getByText("Nominiert")).toBeVisible();
+  await expect(page.getByRole("link", { name: /HSG Zuschauerdorf/ }).getByRole("img", { name: "wT, Nominiert" })).toBeVisible();
+  if (process.env.E2E_SHOTS) await page.screenshot({ path: `${process.env.E2E_SHOTS}/home-nominated.png`, fullPage: true });
 });
 
 test("Meine Termine: Spielerin abonniert den persönlichen Kalender im Profil", async () => {

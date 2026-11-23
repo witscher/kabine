@@ -101,12 +101,20 @@ describe("Abfragepläne ohne Durchsuchen aller Termine", () => {
   it("Seite der Terminübersicht, kommend und vergangen, samt großer Karte und Details", async () => {
     for (const past of [false, true]) {
       const { db, seen } = recording(env.DB);
-      await loadEventPage(db, actor, { limit: 20, past, teamId: null });
+      await loadEventPage(db, actor, { limit: 20, past, teamIds: null });
       expect(seen.length).toBeGreaterThan(3);
+      expect(await fullScans(seen)).toEqual([]);
+    }
+    // Team buttons and kind chips: the filter is part of the batch query
+    {
+      const { db, seen } = recording(env.DB);
+      await loadEventPage(db, actor, { limit: 20, past: false, teamIds: [teamId], show: "game" });
+      expect(seen.some((q) => q.sql.includes("ft.team_id"))).toBe(true);
       expect(await fullScans(seen)).toEqual([]);
     }
     const { db, seen } = recording(env.DB);
     await ownCandidates(db, actor, "2000-01-01T00:00", "2099-01-01T00:00");
+    await ownCandidates(db, actor, "2000-01-01T00:00", "2099-01-01T00:00", { teamIds: [teamId], kinds: ["training"] });
     expect(await fullScans(seen)).toEqual([]);
   });
 

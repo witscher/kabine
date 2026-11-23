@@ -192,6 +192,9 @@ export interface EventCounts {
  * stand-in request, also beyond the page. `trainingsUntil`: trainings are generated up to this
  * day, after that only games and special events follow.
  */
+/** Kind chips of the event overview: everything, trainings, games, or other (special events). */
+export type EventShow = "all" | "training" | "game" | "other";
+
 export interface EventPage {
   events: EventSummary[];
   hasMore: boolean;
@@ -219,6 +222,11 @@ export interface EventSummary {
   id: number;
   kind: EventKind;
   title: string;
+  /**
+   * Games: title without the team name ("SVM 2 – HSG Opponent", the club abbreviation with the team level from the second
+   * team on) for lists that show the team next to it; otherwise like title.
+   */
+  shortTitle: string;
   startsAt: string;
   endsAt: string | null;
   location: LocationRef | null;

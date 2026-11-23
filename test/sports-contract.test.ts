@@ -56,6 +56,16 @@ describe.each(SPORT_LIST.map((s) => [s.id, s] as const))("sport %s", (id, sport)
       expect(item.after).toBeGreaterThanOrEqual(0);
     }
   });
+
+  it("has short team codes of at most 3 characters, each word once", () => {
+    const words = (sport.teamShorts ?? []).map((w) => w.word.toLowerCase());
+    expect(new Set(words).size, "words unique").toBe(words.length);
+    for (const w of sport.teamShorts ?? []) {
+      expect(w.word.trim(), "word").toBeTruthy();
+      expect(w.short.length, `${w.word}: short`).toBeGreaterThan(0);
+      expect(w.short.length, `${w.word}: short`).toBeLessThanOrEqual(3);
+    }
+  });
 });
 
 describe("sport registry", () => {

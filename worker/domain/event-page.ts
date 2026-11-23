@@ -3,7 +3,7 @@
 // and loaded with details, not all events of the season.
 // See docs/dev/design.md, Database read load.
 import { isRelevantEvent } from "../../shared/relevance";
-import type { EventPage, EventSummary, TrainingBreak } from "../../shared/types";
+import type { EventKind, EventPage, EventShow, EventSummary, TrainingBreak } from "../../shared/types";
 import type { Actor } from "../auth/actor";
 import { all, list } from "../lib/db";
 import { addDays, nowLocal, todayLocal } from "../lib/time";
@@ -11,7 +11,10 @@ import { dutyManagers, loadHelpersNeeded, loadMyDuties } from "./duties";
 import {
   type EventContext,
   type EventCursor,
+  type EventListFilter,
   type EventRow,
+  fitsListFilter,
+  listFilterSql,
   loadEventContext,
   loadVisibleEvent,
   mergeContexts,
@@ -65,8 +68,10 @@ const day = (s: EventSummary) => s.startsAt.slice(0, 10);
  * nominee or requested helper: candidates for the large card. IDs only; whether the parents are
  * in charge and whether it really is an own event is decided afterwards by the summary.
  */
-export async function ownCandidates(db: D1Database, actor: Actor, from: string, to: string): Promise<number[]> {
+export async function ownCandidates(db: D1Database, actor: Actor, from: string, to: string, filter?: EventListFilter): Promise<number[]> {
   const people = list([actor.personId, ...actor.children.map((c) => c.id)]);
+  const params: (string | number)[] = [people, from, to];
+  const filterSql = listFilterSql(filter, params);
   const rows = await all<{ id: number }>(
     db,
     `WITH own(id) AS MATERIALIZED (
@@ -76,20 +81,42 @@ export async function ownCandidates(db: D1Database, actor: Actor, from: string, 
        UNION SELECT event_id FROM help_requests WHERE person_id IN (SELECT value FROM json_each(?1)) AND status = 'open'
      )
      SELECT e.id FROM own CROSS JOIN events e ON e.id = own.id
-      WHERE e.starts_at >= ?2 AND e.starts_at < ?3 AND e.cancelled_at IS NULL
+      WHERE e.starts_at >= ?2 AND e.starts_at < ?3 AND e.cancelled_at IS NULL${filterSql}
       ORDER BY e.starts_at, e.id LIMIT 30`,
-    people,
-    from,
-    to,
+    ...params,
   );
   return rows.map((r) => r.id);
 }
 
-export async function loadEventPage(db: D1Database, actor: Actor, opts: { limit: number; past: boolean; teamId: number | null }): Promise<EventPage> {
+/** Kinds of events behind a chip of the event overview; null: all. */
+export function showKinds(show: EventShow): EventKind[] | null {
+  return show === "all" ? null : show === "other" ? ["special"] : [show];
+}
+
+export async function loadEventPage(
+  db: D1Database,
+  actor: Actor,
+  opts: {
+    limit: number;
+    past: boolean;
+    /** Team buttons of the event overview: the selected teams, null for all, [] for none (docs/dev/decisions.md) */
+    teamIds: number[] | null;
+    /** Kind chip; default all */
+    show?: EventShow;
+  },
+): Promise<EventPage> {
   const now = Date.now();
   const nowL = nowLocal();
   const today = todayLocal();
-  const fits = (s: EventSummary) => isRelevantEvent(s) && (opts.teamId == null || s.teams.some((t) => t.id === opts.teamId));
+  const kinds = showKinds(opts.show ?? "all");
+  const trainings = !kinds || kinds.includes("training");
+  // Nothing selected: nothing to read
+  if (opts.teamIds?.length === 0) {
+    return { events: [], hasMore: false, live: [], next: [], openHelp: [], trainingsUntil: null, breaks: [] };
+  }
+  // The selection goes into the queries, so a narrow selection does not walk through the whole season
+  const filter: EventListFilter | undefined = opts.teamIds || kinds ? { teamIds: opts.teamIds, kinds } : undefined;
+  const fits = (s: EventSummary) => isRelevantEvent(s) && fitsListFilter(s, filter);
   // No upper date: events only exist for the current season, the season change deletes the old ones
   const range = opts.past
     ? { from: "0000-01-01T00:00", to: nowL, desc: true }
@@ -103,7 +130,7 @@ export async function loadEventPage(db: D1Database, actor: Actor, opts: { limit:
   let hasMore = false;
   let done = false;
   while (!done && !hasMore) {
-    const batch = await visibleEventBatch(db, actor, { ...range, size: Math.max(opts.limit + 1 - page.length, 0) + MARGIN, after });
+    const batch = await visibleEventBatch(db, actor, { ...range, size: Math.max(opts.limit + 1 - page.length, 0) + MARGIN, after, filter });
     after = batch.last;
     done = batch.done;
     const part = await summarize(db, actor, batch.rows, now);
@@ -136,7 +163,7 @@ export async function loadEventPage(db: D1Database, actor: Actor, opts: { limit:
   if (!opts.past && !page.some((i) => nextCardCandidate(i.summary))) {
     const known = new Set([...page, ...live].map((i) => i.row.id));
     const from = page.at(-1)?.summary.startsAt ?? nowL;
-    const own = (await ownCandidates(db, actor, from, cap)).filter((id) => !known.has(id));
+    const own = (await ownCandidates(db, actor, from, cap, filter)).filter((id) => !known.has(id));
     for (let i = 0; i < own.length && !next.length; i += 6) {
       const rows = (await Promise.all(own.slice(i, i + 6).map((id) => loadVisibleEvent(db, actor, id)))).filter((r): r is EventRow => !!r);
       const part = await summarize(db, actor, rows, now);
@@ -194,8 +221,9 @@ export async function loadEventPage(db: D1Database, actor: Actor, opts: { limit:
     live: live.map(finish),
     next: next.map(finish),
     openHelp: openHelp.map(finish),
-    trainingsUntil: opts.past ? null : addDays(today, HORIZON_DAYS),
-    breaks: opts.past ? [] : await trainingBreaks(db, actor, today, opts.teamId),
+    // Trainings only: the note from when on only games follow, and holiday plans
+    trainingsUntil: opts.past || !trainings ? null : addDays(today, HORIZON_DAYS),
+    breaks: opts.past || !trainings ? [] : await trainingBreaks(db, actor, today, opts.teamIds),
   };
 }
 
@@ -204,9 +232,9 @@ export async function loadEventPage(db: D1Database, actor: Actor, opts: { limit:
  * timeline can say why trainings differ or are missing. Plans with the same name and period
  * are shown once with all their teams.
  */
-export async function trainingBreaks(db: D1Database, actor: Actor, today: string, teamId: number | null): Promise<TrainingBreak[]> {
+export async function trainingBreaks(db: D1Database, actor: Actor, today: string, selected: number[] | null): Promise<TrainingBreak[]> {
   const own = [...actor.memberships.map((m) => m.teamId), ...[...actor.childMemberships.values()].flat().map((m) => m.teamId)];
-  const teamIds = teamId != null ? own.filter((id) => id === teamId) : own;
+  const teamIds = selected != null ? own.filter((id) => selected.includes(id)) : own;
   if (!teamIds.length) return [];
   const rows = await all<{ name: string; valid_from: string; valid_to: string; training: number; team_name: string }>(
     db,

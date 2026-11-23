@@ -852,6 +852,7 @@ msgstr "{helped} von {total} Familien haben schon geholfen. Was die anderen scha
 msgid "From the plan “{planName}” of the {ownerTeam}."
 msgstr "Aus dem Plan „{planName}“ der {ownerTeam}."
 
+#: src/game-ball.tsx
 #: src/pages/stats.tsx
 #: src/ui.tsx
 msgid "Away long-term"
@@ -1527,6 +1528,7 @@ msgid "Appears as a highlighted announcement in the chat of every selected team,
 msgstr "Erscheint als hervorgehobene Ankündigung im Chat jeder gewählten Mannschaft, mit deinem Namen."
 
 # ai
+#: src/game-ball.tsx
 #: src/ui.tsx
 msgid "Squad follows"
 msgstr "Kader folgt"
@@ -1877,6 +1879,7 @@ msgstr "Beim Fahrer ist nicht genug Platz frei. Bitte die Mitfahrt absagen und n
 msgid "The app is born"
 msgstr "Die App ist geboren"
 
+#: src/game-ball.tsx
 #: src/pages/home.tsx
 msgctxt "help request"
 msgid "Request"
@@ -2535,9 +2538,10 @@ msgstr "Helfer aus"
 msgid "All chats"
 msgstr "Alle Chats"
 
+# ai
 #: src/pages/home.tsx
-msgid "There have been no events for the {team} this season yet."
-msgstr "In dieser Saison gab es für die {team} noch keine Termine."
+msgid "Tap a team at the top to see its events."
+msgstr "Tippe oben auf eine Mannschaft, um ihre Termine zu sehen."
 
 # ai
 #: src/help-texts.ts
@@ -3887,6 +3891,7 @@ msgstr "Für diesen Zugang ist schon eine bestätigte E-Mail-Adresse hinterlegt.
 msgid "Section"
 msgstr "Bereich"
 
+#: src/game-ball.tsx
 #: src/pages/stats.tsx
 #: src/ui.tsx
 msgid "Declined at short notice"
@@ -3984,6 +3989,12 @@ msgstr "{name} ist jetzt {intoName}."
 #: src/pages/team.tsx
 msgid "Dear parents of {teamName}, we use the {club} app for events, responses, helper duties and the team chat."
 msgstr "Liebe Eltern der {teamName}, wir nutzen die App {club} für Termine, Zu- und Absagen, Helferdienste und den Mannschaftschat."
+
+# ai
+#: src/pages/home.tsx
+msgctxt "event kinds"
+msgid "All"
+msgstr "Alles"
 
 #: src/respond.tsx
 msgid "Accepted {by}"
@@ -4192,6 +4203,7 @@ msgstr "Artikel"
 msgid "Only people approved for {duty} can sign up."
 msgstr "Eintragen können sich nur Personen, die für {duty} freigegeben sind."
 
+#: src/game-ball.tsx
 #: src/pages/event.tsx
 #: src/pages/event.tsx
 #: src/pages/event.tsx
@@ -4424,7 +4436,6 @@ msgid "Who did what to whom, for actions with a large effect: access, leaving, a
 msgstr "Wer was mit wem gemacht hat, bei folgenreichen Aktionen: Zugänge, Austritte, Admin-Rechte, Mitglieder, Spielpläne, abgesagte Termine, der Saisonwechsel und der Export. Rückmeldungen, Kader, Chats und Helferdienste stehen nicht darin. Nur Admins sehen das; der Saisonwechsel leert es."
 
 #: src/extra-events.tsx
-#: src/pages/home.tsx
 msgid "Game · {title}"
 msgstr "Spiel · {title}"
 
@@ -4464,6 +4475,7 @@ msgid "There is no one in the matching teams who does not already play here."
 msgstr "In den passenden Mannschaften gibt es niemanden, der nicht schon hier spielt."
 
 # ai
+#: src/game-ball.tsx
 #: src/pages/home.tsx
 msgid "{present} of {total} were there"
 msgstr "{present} von {total} waren da"
@@ -4677,6 +4689,11 @@ msgstr "Zeitblock {label} hinzugefügt."
 #: src/pages/event.tsx
 msgid "Record who was there, until the end of {until}. Without an entry the response counts."
 msgstr "Trag bis zum Ende von {until} ein, wer da war. Ohne Eintrag zählt die Rückmeldung."
+
+# ai
+#: src/pages/home.tsx
+msgid "There are no upcoming events for this selection."
+msgstr "Für diese Auswahl gibt es keine kommenden Termine."
 
 # ai
 #: shared/changelog.ts
@@ -4971,10 +4988,6 @@ msgstr "Mit diesem Link richtest du einen neuen Passkey für einen bestehenden Z
 #: src/game-import.tsx
 msgid "Away game at {opponent}"
 msgstr "Auswärtsspiel bei {opponent}"
-
-#: src/pages/home.tsx
-msgid "Please decline in good time by {deadline} so that your coaches can plan better."
-msgstr "Bitte sage rechtzeitig bis {deadline} ab, damit deine Trainer besser planen können."
 
 # ai
 #: src/game-import.tsx
@@ -5623,6 +5636,7 @@ msgstr "E-Mail-Adresse deines Zugangs"
 
 #: src/extra-events.tsx
 #: src/pages/home.tsx
+#: src/pages/home.tsx
 msgid "No events"
 msgstr "Keine Termine"
 
@@ -6051,6 +6065,7 @@ msgstr "Häufige Fragen, Anleitungen, Rückmeldung zur App"
 
 # ai
 #: modules/duties/app/helpers.tsx
+#: src/game-ball.tsx
 #: src/pages/home.tsx
 msgid "Not taking place"
 msgstr "Findet nicht statt"
@@ -6167,6 +6182,12 @@ msgstr "Noch keine Bestellung."
 #: src/duty-blocks.tsx
 msgid "– Choose duty –"
 msgstr "– Dienst wählen –"
+
+# ai
+#: src/pages/home.tsx
+msgctxt "event kinds"
+msgid "Other"
+msgstr "Sonstiges"
 
 # ai
 #: src/list-import.tsx
@@ -6581,6 +6602,12 @@ msgstr "{played} von {expected}"
 #: src/pages/event.tsx
 msgid "Were there"
 msgstr "Waren da"
+
+# ai
+#: src/game-ball.tsx
+msgctxt "home game"
+msgid "Home"
+msgstr "Heim"
 
 # ai
 #: src/pages/home.tsx
@@ -7632,6 +7659,11 @@ msgstr "„{text}“"
 msgid "Unexpected format from {name}: {detail}"
 msgstr "Unerwartetes Format von {name}: {detail}"
 
+# ai
+#: src/pages/home.tsx
+msgid "There have been no events for this selection this season yet."
+msgstr "Für diese Auswahl gab es in dieser Saison noch keine Termine."
+
 #: src/pages/privacy.tsx
 msgid "Of players and parents only first name, last name and (for players) the year of birth. No phone number, no address. Admins can additionally be identified by their e-mail address."
 msgstr "Von Spielerinnen, Spielern und Eltern nur Vorname, Nachname und (bei Spielern) das Geburtsjahr. Keine Telefonnummer, keine Anschrift. Admins sind zusätzlich über ihre E-Mail-Adresse erkennbar."
@@ -7716,6 +7748,11 @@ msgstr "{name} fährt nicht mehr bei {driver} mit. Der Fahrer wird benachrichtig
 #: src/pages/team.tsx
 msgid "From lower-ranked teams of the same age class and the next younger youth team, here: {sources}."
 msgstr "Aus nachrangigen Mannschaften derselben Altersklasse und der nächstjüngeren Jugend, hier: {sources}."
+
+# ai
+#: src/pages/home.tsx
+msgid "Kind of events"
+msgstr "Art der Termine"
 
 #: src/pages/team.tsx
 msgid "The previous link will then stop working."
@@ -7844,6 +7881,7 @@ msgid "with {names} · without the app"
 msgstr "mit {names} · ohne App"
 
 # ai
+#: src/game-ball.tsx
 #: src/ui.tsx
 msgid "Not nominated"
 msgstr "Nicht nominiert"
@@ -8564,6 +8602,11 @@ msgstr "„Gleich sichtbar“: Wer abstimmen darf, sieht das Zwischenergebnis so
 #: modules/polls/app/pages.tsx
 msgid "Poll deleted."
 msgstr "Umfrage gelöscht."
+
+# ai
+#: src/pages/home.tsx
+msgid "Before your next event"
+msgstr "Vor deinem nächsten Termin"
 
 #: worker/routes/parents.ts
 msgid "Permission changed"
@@ -10011,7 +10054,7 @@ msgstr "Details und Erinnern"
 msgid "Automatically nominate the core squad for all games"
 msgstr "Stammkader automatisch für alle Spiele nominieren"
 
-#: src/pages/home.tsx
+#: src/game-ball.tsx
 #: src/ui.tsx
 #: src/ui.tsx
 msgid "Nominated"
@@ -10262,6 +10305,7 @@ msgstr "Höchstens {max} Begleitpersonen."
 msgid "{actorName} accepted training on {when} for {name}."
 msgstr "{actorName} hat für {name} das Training am {when} zugesagt."
 
+#: src/game-ball.tsx
 #: src/pages/admin.tsx
 #: src/pages/event.tsx
 #: src/pages/event.tsx
@@ -11254,6 +11298,8 @@ msgstr "Elternlink für {firstName}"
 msgid "Accepted training {day}"
 msgstr "Training {day} zugesagt"
 
+#: src/game-ball.tsx
+#: src/game-ball.tsx
 #: src/pages/home.tsx
 msgid "{yes} of {total} accepted"
 msgstr "{yes} von {total} zugesagt"
@@ -12413,6 +12459,7 @@ msgstr "Zuletzt abgeglichen am {importedDate}."
 msgid "Created on {created}."
 msgstr "Erstellt am {created}."
 
+#: src/game-ball.tsx
 #: src/ui.tsx
 msgctxt "participation"
 msgid "Open"
@@ -13644,6 +13691,8 @@ msgstr "Wer welchen Dienst bei welchem Spiel oder Termin übernimmt, optionale N
 #: src/duty-manage.tsx
 #: worker/domain/events.ts
 #: worker/domain/events.ts
+#: worker/domain/events.ts
+#: worker/domain/events.ts
 msgid "Opponent"
 msgstr "Gegner"
 
@@ -14454,6 +14503,7 @@ msgid "Please register how many of your family are coming."
 msgstr "Gebt bitte an, wie viele aus eurer Familie kommen."
 
 #: src/calendar.tsx
+#: src/pages/home.tsx
 #: src/pages/stats.tsx
 #: src/pages/stats.tsx
 #: src/pages/stats.tsx
@@ -14827,6 +14877,12 @@ msgstr "Mitglieder"
 #: modules/sms/app/index.tsx
 msgid "Provider for codes and reminders by SMS"
 msgstr "Anbieter für Codes und Erinnerungen per SMS"
+
+# ai
+#: src/pages/home.tsx
+#: src/pages/home.tsx
+msgid "Nothing selected"
+msgstr "Nichts ausgewählt"
 
 # ai
 #: modules/polls/app/index.tsx
@@ -15521,6 +15577,7 @@ msgstr "keine weiteren Änderungen"
 
 #: src/pages/audit.tsx
 #: src/pages/event.tsx
+#: src/pages/home.tsx
 #: src/pages/home.tsx
 #: src/pages/stats.tsx
 #: src/pages/stats.tsx
@@ -16400,6 +16457,7 @@ msgstr "Unbekannter Ort."
 msgid "For your family"
 msgstr "Für deine Familie"
 
+#: src/game-ball.tsx
 #: src/pages/event.tsx
 #: src/pages/event.tsx
 #: src/pages/event.tsx

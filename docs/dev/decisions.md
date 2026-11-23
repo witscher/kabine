@@ -2,6 +2,19 @@
 
 Decisions not covered by `docs/dev/roadmap.md`, with reasons. Newest first.
 
+## Event list on home: team buttons, kind chips, ball (November 2026)
+
+Ported from the original club app into the core (docs/dev/design.md, Event list on home). Where Kabine differs:
+
+- **Filter inside the query:** the team selection and the kind go into the batch query of `visibleEventBatch` and into `ownCandidates` (`listFilterSql`), not only into a check after loading, so a team with few events does not make the page loop through the whole season. `teams=none` reads nothing. The older `team=<id>` stays as an alias for apps still cached on devices.
+- **Club-wide events** stay in the list as long as any team is on; they belong to every team. The club app hides them when not all teams are on.
+- **Stored per device by team id** (`kabine-home-list` in localStorage, with the kind chip), not by name, so renaming a team keeps the selection. The former team filter in sessionStorage is gone; the privacy texts list the new entry.
+- **Short title with the club abbreviation** (`clubAbbr`, as in the full game title) instead of the club's short name, which often carries the sport ("SVM Handball").
+- **Short codes in the ball from the sport profile** (`teamShorts`, words in every language clubs name their teams in, `ADULT_TEAM_SHORTS` for the common adult teams) with initials as the fallback; the club app has them as constants for its own team names.
+- **No club button and no fans yet:** the club app's button for all games of the club is not ported. The module "fans" adds its star button and its rows through hooks later; the row of buttons and the list rows are prepared for it (`ListButton`, `ListRow`), the hooks are not.
+- **Announcements:** Kabine's announcement on home (`shared/motd.ts`, none set) has no audience and no sign-off, and the release notes for coaches (`NewsCard`) have no sign-off either. So only the button link (`link`) is ported; there was no sign-off to remove.
+- **Holiday notes beyond the loaded events** now show at the end of "Coming up" once nothing more follows; the line was in the "Past" section, where it never showed.
+
 ## Polls: names, photos, payment (November 2026)
 
 Ported from the original club app as the module `modules/polls/` (README there).

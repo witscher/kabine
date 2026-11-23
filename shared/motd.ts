@@ -7,6 +7,8 @@ export interface Motd {
   until: string;
   title: string;
   text: string;
+  /** Button to the matching page of the app, e.g. { href: "/profil", label: "Open profile" } */
+  link?: { href: string; label: string };
 }
 
 export const MOTD: Motd | null = null;

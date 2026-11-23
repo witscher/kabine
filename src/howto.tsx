@@ -87,6 +87,11 @@ export function MotdBanner() {
         </button>
       </div>
       <p>{motd.text}</p>
+      {motd.link ? (
+        <a class="btn btn-sm" href={motd.link.href} style={{ alignSelf: "flex-start" }}>
+          {motd.link.label}
+        </a>
+      ) : null}
     </section>
   );
 }

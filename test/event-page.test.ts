@@ -78,8 +78,9 @@ describe("Terminübersicht seitenweise", () => {
     const old = await api<{ events: EventSummary[] }>(`/events?from=${from}&to=${addDays(from, 400)}`, { cookie });
     const expected = old.body.events.filter((e) => isRelevantEvent(e) && !e.isPast);
     expect(ids((await page(cookie, "limit=200")).events)).toEqual(ids(expected));
+    // Club-wide events stay with a team selected (they belong to every team)
     const onlyWc = await page(cookie, `limit=200&team=${wc}`);
-    expect(ids(onlyWc.events)).toEqual(ids(expected.filter((e) => e.teams.some((t) => t.id === wc))));
+    expect(ids(onlyWc.events)).toEqual(ids(expected.filter((e) => e.clubWide || e.teams.some((t) => t.id === wc))));
     expect(onlyWc.events.length).toBeGreaterThan(0);
   });
 

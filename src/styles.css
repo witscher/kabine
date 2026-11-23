@@ -573,27 +573,112 @@ a.list-row:hover {
   color: #fff;
 }
 
-/* Spiele: Handball rechtsbündig als Wasserzeichen, damit sie sich von Trainings abheben */
-.event-row:has(.event-ball) {
+/* Game rows: the team inside a ball on the right (src/game-ball.tsx). Fill = whose team (own filled, other teams
+   outlined), small mark = one's own status, grey and struck through when cancelled */
+.game-ball {
   position: relative;
-  overflow: hidden;
-}
-
-.event-row:has(.event-ball) > :not(.event-ball) {
-  position: relative;
-  z-index: 1;
-}
-
-.event-ball {
-  position: absolute;
-  right: -18px;
-  top: 50%;
-  width: 96px;
-  height: 96px;
-  transform: translateY(-50%) rotate(-12deg);
+  width: 64px;
+  height: 64px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  border: 2.5px solid var(--yellow);
   color: var(--yellow);
-  opacity: 0.7;
+}
+
+.game-ball.is-own {
+  background: var(--yellow);
+  color: var(--black);
+}
+
+.game-ball.is-cancelled {
+  border-color: var(--line-2);
+  color: var(--text-2);
+}
+
+.game-ball-svg {
+  position: absolute;
+  inset: 3px;
+  width: calc(100% - 6px);
+  height: calc(100% - 6px);
+  opacity: 0.2;
   pointer-events: none;
+}
+
+.game-ball-team {
+  position: relative;
+  font-family: var(--font-cond);
+  font-weight: 800;
+  font-size: 22px;
+  line-height: 1;
+  text-align: center;
+  max-width: 56px;
+  overflow-wrap: anywhere;
+}
+
+.game-ball.long .game-ball-team {
+  font-size: 16px;
+}
+
+.game-ball.is-cancelled .game-ball-team {
+  text-decoration: line-through;
+}
+
+.game-ball-mark {
+  position: absolute;
+  right: -6px;
+  bottom: -4px;
+  min-width: 26px;
+  height: 26px;
+  border-radius: 13px;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  font-size: 13px;
+  padding: 0 5px;
+  border: 2px solid var(--black);
+  background: var(--black);
+  color: var(--yellow);
+}
+
+.game-ball-mark.mark-yes {
+  border-color: var(--yellow);
+}
+
+.game-ball-mark.mark-no {
+  background: var(--warn);
+  color: #fff;
+}
+
+.game-ball-mark.mark-open {
+  background: #fff;
+  color: var(--black);
+}
+
+.game-ball-mark.mark-off {
+  background: #6b675e;
+  color: #fff;
+}
+
+.game-ball-mark svg {
+  display: block;
+}
+
+/* Home game: yellow tag before the title, the same on light and dark rows */
+.home-tag {
+  display: inline-block;
+  background: var(--yellow);
+  color: var(--black);
+  font-family: var(--font-cond);
+  font-weight: 800;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 5px;
+  margin-right: 6px;
+  vertical-align: 2px;
 }
 
 .event-row.dark .sub {
@@ -2794,6 +2879,56 @@ button.announcement-head {
   color: var(--ok);
   white-space: nowrap;
 }
+/* Event list on home: period switch and, close under it, the kind chips (always visible) */
+.list-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.kind-chips {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: 6px;
+}
+
+.kind-chips button {
+  min-height: 34px;
+  border: 1.5px solid var(--line-2);
+  border-radius: 9px;
+  background: var(--card);
+  color: var(--text-3);
+  font: inherit;
+  font-weight: 600;
+  font-size: 14px;
+  padding: 0 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+.kind-chips button[aria-pressed="true"] {
+  background: var(--black);
+  border-color: var(--black);
+  color: var(--yellow);
+}
+
+/* Large card of a game: the team after the date, a bit larger than in the header */
+.next-date-line {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+}
+
+.team-badge.next-team {
+  font-size: 20px;
+  padding: 3px 12px;
+  border-radius: 8px;
+}
+
 .segmented-wrap {
   display: flex;
   flex-direction: column;

@@ -65,6 +65,50 @@ export interface SportProfile {
    * hockey on grass) or, for "venue", a neutral word. Texts pick their wording with ICU select (venueOf).
    */
   venue: VenueKind;
+  /**
+   * Short codes for team names in small labels (the ball of a game row in the event list): words at the start of a
+   * team name and their short form, e.g. "Men 1" → "M1". Team names are the club's own text, so list the words of
+   * every language. Without a match teamShort() falls back to initials.
+   */
+  teamShorts?: TeamShortWord[];
+}
+
+/** A word at the start of a team name and its short form (at most 3 characters). */
+export interface TeamShortWord {
+  word: string;
+  short: string;
+}
+
+/** Adult teams in English and German, shared by most sports. */
+export const ADULT_TEAM_SHORTS: TeamShortWord[] = [
+  { word: "Men", short: "M" },
+  { word: "Women", short: "W" },
+  { word: "Veterans", short: "V" },
+  { word: "Herren", short: "H" },
+  { word: "Damen", short: "D" },
+  { word: "Frauen", short: "F" },
+  { word: "Männer", short: "M" },
+  { word: "Alte Herren", short: "AH" },
+];
+
+/**
+ * Short code of a team name for the ball in the event list (at most about 4 characters): a word of the sport profile
+ * at the start ("Men 1" → "M1", "Alte Herren" → "AH"); short names stay ("wD", "mC1"); longer ones become initials,
+ * keeping parts with digits ("Erste Mannschaft" → "EM", "U13 girls" → "U13G").
+ */
+export function teamShort(name: string, words: readonly TeamShortWord[] = []): string {
+  const trimmed = name.trim();
+  const lower = trimmed.toLowerCase();
+  const hit = [...words]
+    .sort((a, b) => b.word.length - a.word.length)
+    .find((w) => lower.startsWith(w.word.toLowerCase()) && /^($|[\s\d.])/.test(trimmed.slice(w.word.length)));
+  const parts = hit ? [hit.short, ...trimmed.slice(hit.word.length).split(/\s+/)] : trimmed.split(/\s+/);
+  const compact = parts.join("");
+  if (compact.length <= 4) return compact;
+  return parts
+    .filter(Boolean)
+    .map((p, i) => (/\d/.test(p) || (hit && i === 0) ? p : p[0]!.toUpperCase()))
+    .join("");
 }
 
 export interface TemplateItem {
