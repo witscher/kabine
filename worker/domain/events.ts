@@ -18,7 +18,7 @@ import type {
 import { CHILD_LIMITED } from "./child-limits";
 import { type Actor, childLimitAllows, isCoachOfAny, isStaffOfAny, mayActFor, PARENTS_HANDLE_IT, parentsInCharge, parentsInChargeSql, scopePersonIds } from "../auth/actor";
 import { all, list } from "../lib/db";
-import { CACHE_VERSIONS_SQL, fromCache, toVersions } from "../lib/cache";
+import { CACHE_VERSIONS_SQL, type CacheVersions, fromCache, toVersions } from "../lib/cache";
 import { ownClubAbbr } from "./club";
 import { addDays, addMinutesLocal, localToInstant, toLocal } from "../lib/time";
 import { currentLocale } from "../i18n";
@@ -102,9 +102,11 @@ export interface TeamInfo {
   game_all_players: number;
   /** Parents respond for their children (registration per family: parents belong to the family) */
   parents_enabled: number;
+  /** A team or a group (coaches' team, referees, …) */
+  kind: "team" | "group";
 }
 
-interface MemberRow {
+export interface MemberRow {
   team_id: number;
   person_id: number;
   role: "player" | "helper";
@@ -232,6 +234,33 @@ function standingApplies(s: StandingRow, e: EventRow): boolean {
   return (!s.valid_from || s.valid_from <= day) && (!s.valid_to || day <= s.valid_to);
 }
 
+/** All teams and groups with their age class, from the cache per Worker instance (worker/lib/cache.ts). */
+export function cachedTeamInfo(db: D1Database, versions: CacheVersions): Promise<TeamInfo[]> {
+  return fromCache(versions, "ref", "team-info", () =>
+    all<TeamInfo>(
+      db,
+      `SELECT t.id, t.name, t.age_class_code, COALESCE(ac.game_minutes, 120) AS game_minutes, t.decline_hours_training,
+              t.decline_hours_game, t.max_squad, t.auto_squad, t.fixture_connector, t.fixture_source, t.show_responses,
+              t.game_all_players, t.parents_enabled, t.kind
+         FROM teams t ${CURRENT_AGE_CLASS_JOIN("t", "ac")}
+        ORDER BY t.name`,
+    ),
+  );
+}
+
+/** Players and helpers of all teams with their names (not former members), from the cache per Worker instance. */
+export function cachedRoster(db: D1Database, versions: CacheVersions): Promise<MemberRow[]> {
+  return fromCache(versions, "roster", "members", () =>
+    all<MemberRow>(
+      db,
+      `SELECT tm.team_id, tm.person_id, tm.role, tm.helper_trainings, p.first_name, p.last_name, p.is_active
+         FROM team_memberships tm JOIN persons p ON p.id = tm.person_id
+        WHERE tm.role IN ('player', 'helper') AND p.is_former = 0
+        ORDER BY p.first_name, p.last_name, p.id`,
+    ),
+  );
+}
+
 /** Loads everything needed for status, counts and permissions of a list of events. */
 export async function loadEventContext(db: D1Database, events: EventRow[]): Promise<EventContext> {
   const ids = events.map((e) => e.id);
@@ -269,25 +298,8 @@ export async function loadEventContext(db: D1Database, events: EventRow[]): Prom
   // their version changed. Before, every event list read the memberships of all its teams again.
   const versions = toVersions(versionRows!.results as { name: string; version: number }[]);
   const [allTeams, roster, guardianships] = await Promise.all([
-    fromCache(versions, "ref", "team-info", () =>
-      all<TeamInfo>(
-        db,
-        `SELECT t.id, t.name, t.age_class_code, COALESCE(ac.game_minutes, 120) AS game_minutes, t.decline_hours_training,
-                t.decline_hours_game, t.max_squad, t.auto_squad, t.fixture_connector, t.fixture_source, t.show_responses,
-                t.game_all_players, t.parents_enabled
-           FROM teams t ${CURRENT_AGE_CLASS_JOIN("t", "ac")}
-          ORDER BY t.name`,
-      ),
-    ),
-    fromCache(versions, "roster", "members", () =>
-      all<MemberRow>(
-        db,
-        `SELECT tm.team_id, tm.person_id, tm.role, tm.helper_trainings, p.first_name, p.last_name, p.is_active
-           FROM team_memberships tm JOIN persons p ON p.id = tm.person_id
-          WHERE tm.role IN ('player', 'helper') AND p.is_former = 0
-          ORDER BY p.first_name, p.last_name, p.id`,
-      ),
-    ),
+    cachedTeamInfo(db, versions),
+    cachedRoster(db, versions),
     fromCache(versions, "roster", "guardianships", () => all<{ guardian_id: number; child_id: number }>(db, "SELECT guardian_id, child_id FROM guardianships")),
   ]);
   const leaderAbsences = new Map<string, LeaderAbsence>();

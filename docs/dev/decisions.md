@@ -2,6 +2,10 @@
 
 Decisions not covered by `docs/dev/roadmap.md`, with reasons. Newest first.
 
+## Cached teams and roster for modules (November 2026)
+
+Managers of an order need last names and teams to hand it out (`modules/polls/`). The teams of every player are already in the cache per Worker instance (`worker/lib/cache.ts`), loaded by `loadEventContext`. `worker/domain/events.ts` now exports those two loaders as `cachedTeamInfo` and `cachedRoster` (with the team kind, so groups can be left out) instead of a module running its own query: same cache entry, no extra rows read once the event list has loaded them. No new hook: modules already import core domain helpers, and these return frozen data, so a module cannot change what the core sees.
+
 ## Polls: names, photos, payment (November 2026)
 
 Ported from the original club app as the module `modules/polls/` (README there).
