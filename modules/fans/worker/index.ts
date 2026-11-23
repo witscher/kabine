@@ -5,7 +5,7 @@ import { stmt } from "../../../worker/lib/db";
 import { defineWorkerModule } from "../../../worker/module-api";
 import manifest from "../module";
 import type { FansPage } from "../types";
-import { clubTeamIds, fanGames, fanSettings, followedTeams, notifyFans } from "./domain";
+import { clubTeamIds, fanGames, fanSettings, followedTeams, followerAccounts, notifyFans } from "./domain";
 import { routes } from "./routes";
 
 export default defineWorkerModule({
@@ -35,6 +35,11 @@ export default defineWorkerModule({
     const lastDay = more ? games.at(-1)?.startsAt.slice(0, 10) : undefined;
     const whole = lastDay && games.some((g) => g.startsAt.slice(0, 10) !== lastDay) ? games.filter((g) => g.startsAt.slice(0, 10) !== lastDay) : games;
     return { teams, games: whole, more: more ? (whole.at(-1)?.startsAt ?? null) : null };
+  },
+  // Followed teams for other modules (the home game day tells fans about the day)
+  follows: {
+    teams: async (db, actor) => (await followedTeams(db, actor)).map((tm) => tm.id),
+    accounts: followerAccounts,
   },
   eventChanged: async (env, change) => {
     await notifyFans(env, change);

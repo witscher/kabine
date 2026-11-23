@@ -43,6 +43,7 @@ modules/carpools/
 | `eventPage` | a page of the event list on home, data lands in `page.modules[<id>]` (rows of its own, see `homeList`) | no |
 | `eventChanged` | an event was cancelled, restored or moved (start or venue), after the core told its teams | no |
 | `calendarItems` | entries in a personal calendar feed (`worker/domain/calendar.ts`, `CalendarItem`) | no |
+| `follows` | teams an account follows without belonging to them (fans), for other modules: `moduleFollowedTeams`, `moduleFollowers` in `worker/modules.ts` | no |
 | `participantsLeft` | someone declined or was removed from the squad | no |
 | `participantsDropped` | SQL cleanup in the core's batch (automatic squads, withdrawn stand-ins) | yes |
 | `personLeaves` | SQL cleanup when someone leaves the club | yes |
@@ -64,7 +65,7 @@ modules/carpools/
 | `homeCards` | cards at the very top of the start page for something that waits for the person |
 | `eventsTabDot` | the dot on the Events tab while such a card is there |
 | `eventCardLine` | a line on event cards on the start page |
-| `homeList` | buttons after the team buttons on home, query parameters for the page, rows sorted into the list, a view of its own (`takeover`); a plain function with the data of the worker hook `eventPage` |
+| `homeList` | buttons after the team buttons on home, query parameters for the page, rows sorted into the list, a view of its own (`takeover`), a large card in time order with the card of the next event (`card`, which can cover rows of other modules); a plain function with the data of the worker hook `eventPage` |
 | `calendarOptions` | rows under *Profile → My events* (the personal calendar), saved by the module |
 | `eventSection` | a section on the event page |
 | `gameLinks` | links of a fixture module for a game (live ticker, game report) on the "In progress" card, the event page and pages of modules (a `GameRef`) |

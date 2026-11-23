@@ -46,6 +46,17 @@ export async function followedTeams(db: D1Database, actor: Actor): Promise<TeamR
   return (await clubTeams(db)).filter((tm) => ids.has(tm.id) && !own.has(tm.id)).map((tm) => ({ id: tm.id, name: tm.name }));
 }
 
+/** Accounts following any of these teams (hook follows, e.g. the home game day): starts at the teams (fan_follows_team). */
+export async function followerAccounts(db: D1Database, teamIds: number[]): Promise<{ accountId: number; teamId: number }[]> {
+  if (!teamIds.length) return [];
+  return all<{ accountId: number; teamId: number }>(
+    db,
+    `SELECT f.account_id AS accountId, f.team_id AS teamId FROM fan_follows f JOIN accounts a ON a.id = f.account_id AND a.disabled_at IS NULL
+      WHERE f.team_id IN (SELECT value FROM json_each(?))`,
+    list(teamIds),
+  );
+}
+
 export async function setFollow(db: D1Database, actor: Actor, teamId: number, follow: boolean): Promise<void> {
   if (follow) await run(db, "INSERT OR IGNORE INTO fan_follows (account_id, team_id) VALUES (?, ?)", actor.accountId, teamId);
   else await run(db, "DELETE FROM fan_follows WHERE account_id = ? AND team_id = ?", actor.accountId, teamId);

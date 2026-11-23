@@ -1,7 +1,7 @@
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { clubName } from "../club";
-import type { ComponentChildren } from "preact";
+import { type ComponentChildren, Fragment } from "preact";
 import { useLocation } from "preact-iso";
 import { useRef, useState } from "preact/hooks";
 import type { EventPage, EventShow, EventSummary, MyParticipation, TrainingBreak } from "../../shared/types";
@@ -550,7 +550,12 @@ export function HomePage() {
   ];
   // Rows of modules about an event the core lists itself (a game one follows and helps at) are shown once, as the event
   const coreIds = new Set([...(shown?.events ?? []), ...(shown?.next ?? []), ...(shown?.live ?? []), ...(shown?.openHelp ?? [])].map((e) => e.id));
-  const moduleRows = parts.flatMap((x) => x.part.rows ?? []).filter((r) => !r.id || !coreIds.has(r.id));
+  // Large cards of modules (the home game day); rows of other modules about the events a card shows are left out
+  const moduleCards = when === "upcoming" ? parts.flatMap((x) => (x.part.card ? [{ id: x.id, card: x.part.card }] : [])).sort((a, b) => a.card.day.localeCompare(b.card.day)) : [];
+  const covered = (r: HomeListRow, id: string) => moduleCards.some((c) => c.id !== id && c.card.covers?.includes(r.id));
+  const moduleRows = parts
+    .flatMap((x) => (x.part.rows ?? []).filter((r) => !r.id || !covered(r, x.id)))
+    .filter((r) => !r.id || !coreIds.has(r.id));
   // A module with more rows than it sent: the list stops at its last day until "More events" (whole days)
   const moduleMore = parts.map((x) => x.part.more?.slice(0, 10)).filter((d): d is string => !!d);
   const cutDay = moduleMore.length ? (when === "past" ? moduleMore.sort().at(-1)! : moduleMore.sort()[0]!) : null;
@@ -590,7 +595,11 @@ export function HomePage() {
     ...upcoming.filter((e) => !mineIds.has(e.id) && !coachCards.includes(e)).map(eventRow),
     ...(when === "upcoming" ? moduleRows : []),
   ].filter(withinCut);
-  const { before, after: rest } = splitAtCard(listRows, mineCards[0] ?? coachCards[0]);
+  const firstCard = mineCards[0] ?? coachCards[0];
+  const { before, after: rest } = splitAtCard(listRows, firstCard);
+  // A module's card on or before the day of the next event's card stands above it
+  const cardsAbove = moduleCards.filter((c) => !firstCard || c.card.day <= firstCard.startsAt.slice(0, 10));
+  const cardsBelow = moduleCards.filter((c) => !cardsAbove.includes(c));
   const pastRows: HomeListRow[] = byStartTime([...past.map(eventRow), ...(when === "past" ? moduleRows : [])].filter(withinCut)).reverse();
   const filtered = !takeover && (show !== "all" || !allOn);
   // Note from when on only games and special events follow (trainings are generated 70 days ahead)
@@ -742,6 +751,9 @@ export function HomePage() {
         {liveGames.map((e) => (
           <LiveCard key={e.id} event={e} />
         ))}
+        {cardsAbove.map((c) => (
+          <Fragment key={c.card.key}>{c.card.node}</Fragment>
+        ))}
         {before.length ? (
           <section class="stack" aria-label={t`Before your next event`}>
             {before.map((r) => r.node)}
@@ -752,6 +764,9 @@ export function HomePage() {
         ))}
         {coachCards.map((e, i) => (
           <CoachNextCard key={e.id} event={e} later={i > 0} />
+        ))}
+        {cardsBelow.map((c) => (
+          <Fragment key={c.card.key}>{c.card.node}</Fragment>
         ))}
 
         {nothing ? (
@@ -785,7 +800,7 @@ export function HomePage() {
         ) : null}
         {when === "past" ? moreButton : null}
 
-        {shown && when === "upcoming" && !upcoming.length && !moduleRows.length ? (
+        {shown && when === "upcoming" && !upcoming.length && !moduleRows.length && !moduleCards.length ? (
           filtered ? (
             <Empty title={t`No events`} icon="calendar">
               {t`There are no upcoming events for this selection.`}
