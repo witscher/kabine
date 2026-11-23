@@ -1,9 +1,74 @@
 // The app side of a module (modules/<id>/app/index.tsx): pages and the places in the core screens where
 // it shows something. Guide: docs/dev/modules.md. Nothing of a module shows while it is switched off.
-import type { ComponentType } from "preact";
+import type { ComponentChildren, ComponentType } from "preact";
 import type { IconName } from "./icons";
 import type { ModuleManifest } from "../shared/module-api";
-import type { AuditEntry, EventDetail, EventSummary, Me, StatsRange, TeamStats } from "../shared/types";
+import type { AuditEntry, EventDetail, EventShow, EventSummary, GameRef, Me, StatsRange, TeamStats } from "../shared/types";
+
+/**
+ * A button in the row at the top of home. The own teams come first, buttons of modules after them (a star for the games
+ * of teams one follows). Each switches its part of the list on and off; the list is the sum.
+ */
+export interface HomeListButton {
+  key: string;
+  label: ComponentChildren;
+  ariaLabel?: string;
+  class?: string;
+  on: boolean;
+  toggle: () => void;
+}
+
+/** A row of the list on home: an event, or a row of a module (it only needs a time to be sorted in, shared/home-list.ts). */
+export interface HomeListRow {
+  key: string;
+  startsAt: string;
+  /** The event's id for a row about an event (left out when the core lists that event itself), else 0. */
+  id: number;
+  node: ComponentChildren;
+}
+
+/** What a module gets to add its part to the list on home (hook homeList). */
+export interface HomeListContext {
+  me: Me;
+  when: "upcoming" | "past";
+  show: EventShow;
+  /** The module's part of the selection kept on this device (localStorage, no personal data); undefined at first. */
+  pick: unknown;
+  setPick: (next: unknown) => void;
+  /**
+   * The module's data of the loaded page (worker hook eventPage); null when the page has none, undefined while no page
+   * is loaded (the first call of a render, for buttons' state and query parameters, always has undefined).
+   */
+  data: unknown;
+}
+
+/** A module's part of the list on home. */
+export interface HomeListPart {
+  /** Buttons after the team buttons. */
+  buttons?: HomeListButton[];
+  /**
+   * Its part of the list is switched on, from the selection alone (also before data arrives): then "Nothing selected"
+   * does not apply while all team buttons are off.
+   */
+  active?: boolean;
+  /** Query parameters for the page (sent as `<module>.<key>`, read by the worker hook eventPage). */
+  query?: Record<string, string>;
+  /**
+   * While set, the module shows a view of its own instead of the selection: the team buttons look off and the chips
+   * are hidden; the core lists all its events of the kind `show`. Tapping a team button calls `release` (the earlier
+   * selection comes back with that team on). `sub` is the line under the greeting.
+   */
+  takeover?: { show: EventShow; release: () => void; sub: string };
+  /** Rows to sort into the list (upcoming or past, as `when`). */
+  rows?: HomeListRow[];
+  /**
+   * The module has more rows than it sent: the start of the last row it sent (whole days). The list stops there until
+   * "More events" loads more, so nothing is missing in between.
+   */
+  more?: string;
+  /** Words for the line under the greeting while its rows are shown, e.g. "games as a fan". */
+  sub?: string;
+}
 
 export interface AppModule {
   manifest: ModuleManifest;
@@ -29,9 +94,17 @@ export interface AppModule {
   eventCardLine?: ComponentType<{ event: EventSummary; data: unknown }>;
   /**
    * Links for a game of a fixture module (live ticker while it is played, report afterwards), on the
-   * "In progress" card and the event page. Show nothing for games of other sources (`event.game.source`).
+   * "In progress" card, the event page and the page of a game one follows. Show nothing for games of other sources
+   * (`event.game.source`).
    */
-  gameLinks?: ComponentType<{ event: EventSummary; phase: "live" | "after" }>;
+  gameLinks?: ComponentType<{ event: GameRef; phase: "live" | "after" }>;
+  /**
+   * Buttons and rows of its own in the event list on home (e.g. games of teams one follows), with data from the worker
+   * hook eventPage. A plain function, called on every render: no hooks inside, components in `node` may use them.
+   */
+  homeList?: (ctx: HomeListContext) => HomeListPart | null;
+  /** Rows (`<li>`) in Profile → My events, the personal calendar, saved by the module itself (worker hook calendarItems). */
+  calendarOptions?: ComponentType;
   /** A section on the event page, from `event.modules[<id>]` (worker hook eventDetail). */
   eventSection?: ComponentType<{ event: EventDetail; data: unknown; reload: () => void }>;
   /**

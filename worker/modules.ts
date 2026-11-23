@@ -1,7 +1,8 @@
 // The worker parts of all modules (modules/<id>/worker/index.ts), found by the build: adding a folder is enough.
 import type { ModuleId } from "../shared/modules";
 import { isModuleOn } from "./domain/club";
-import type { WorkerModule } from "./module-api";
+import type { CalendarItem } from "./domain/calendar";
+import type { CalendarFeed, EventChange, EventPageQuery, WorkerModule } from "./module-api";
 
 const found = import.meta.glob<{ default: WorkerModule }>("../modules/*/worker/index.ts", { eager: true });
 
@@ -68,4 +69,29 @@ export function moduleSeasonChange(db: D1Database): D1PreparedStatement[] {
 export async function moduleBadgeCount(db: D1Database, accountId: number, nowLocal: string): Promise<number> {
   const counts = await Promise.all(activeWorkerModules().map((m) => m.badgeCount?.(db, accountId, nowLocal) ?? 0));
   return counts.reduce((sum, n) => sum + n, 0);
+}
+
+/** Data of the active modules for a page of the event overview; params by module id. */
+export async function moduleEventPage(
+  db: D1Database,
+  actor: Parameters<NonNullable<WorkerModule["eventPage"]>>[1],
+  query: Omit<EventPageQuery, "params">,
+  params: Record<string, Record<string, string>>,
+): Promise<Record<string, unknown>> {
+  const parts = await Promise.all(
+    activeWorkerModules()
+      .filter((m) => m.eventPage)
+      .map(async (m) => [m.manifest.id, await m.eventPage!(db, actor, { ...query, params: params[m.manifest.id] ?? {} })] as const),
+  );
+  return Object.fromEntries(parts.filter(([, v]) => v != null));
+}
+
+/** An event was cancelled, restored or moved: the active modules may tell others (fans). */
+export async function moduleEventChanged(env: Env, change: EventChange): Promise<void> {
+  await Promise.all(activeWorkerModules().map((m) => m.eventChanged?.(env, change)));
+}
+
+/** Entries of the active modules for a personal calendar feed. */
+export async function moduleCalendarItems(db: D1Database, feed: CalendarFeed): Promise<CalendarItem[]> {
+  return (await Promise.all(activeWorkerModules().map((m) => m.calendarItems?.(db, feed) ?? []))).flat();
 }

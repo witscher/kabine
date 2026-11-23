@@ -2,7 +2,7 @@
 // fixture modules offer their links (live ticker, game report; modules/<id>/app, hook gameLinks).
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
-import type { EventSummary } from "../shared/types";
+import type { EventSummary, GameRef } from "../shared/types";
 import { nowLocal, time } from "./format";
 import { Ball } from "./icons";
 import { useActiveModules } from "./modules";
@@ -11,26 +11,26 @@ import { useActiveModules } from "./modules";
 const REPORT_DAYS = 7;
 
 /** Minutes since kick-off (both times local time; read as UTC the difference is right except across a DST change). */
-function minutesSince(e: EventSummary, nowLocalTime: string): number {
+function minutesSince(e: Pick<GameRef, "startsAt">, nowLocalTime: string): number {
   return (Date.parse(`${nowLocalTime}:00Z`) - Date.parse(`${e.startsAt}:00Z`)) / 60_000;
 }
 
 /** Is the game in progress (kicked off, duration by age group) and linked to a game schedule? */
-export function isLiveWindow(e: EventSummary, nowLocalTime = nowLocal()): boolean {
+export function isLiveWindow(e: GameRef, nowLocalTime = nowLocal()): boolean {
   if (e.kind !== "game" || e.cancelled || !(e.game?.source || e.game?.table)) return false;
   const since = minutesSince(e, nowLocalTime);
   return since >= 0 && since < e.game.liveMinutes;
 }
 
 /** After an imported game (up to 7 days), e.g. for the game report. */
-export function isReportWindow(e: EventSummary, nowLocalTime = nowLocal()): boolean {
+export function isReportWindow(e: GameRef, nowLocalTime = nowLocal()): boolean {
   if (e.kind !== "game" || e.cancelled || !e.game?.source) return false;
   const since = minutesSince(e, nowLocalTime);
   return since >= e.game.liveMinutes && since < REPORT_DAYS * 24 * 60;
 }
 
 /** Links of the active fixture modules for this game in this phase. */
-export function GameLinks({ event, phase }: { event: EventSummary; phase: "live" | "after" }) {
+export function GameLinks({ event, phase }: { event: GameRef; phase: "live" | "after" }) {
   const modules = useActiveModules();
   return (
     <>

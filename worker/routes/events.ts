@@ -32,7 +32,8 @@ import { absenceChangeable, leaderAccounts, leaderEntries, loadLeaders } from ".
 import { ensureGenerated } from "../domain/generate";
 import { areYouComing, eventLabel, guardianAccounts, notifyCoaches, notifyPersons, pushForm, recipientsForPersons, enqueuePush, shortDate, shortTime, staffOf, whoNames } from "../domain/notify";
 import { all, first, list, run, stmt } from "../lib/db";
-import { moduleEventDetail, moduleEventSummaries, moduleParticipantsLeft } from "../modules";
+import { moduleEventChanged, moduleEventDetail, moduleEventSummaries, moduleParticipantsLeft } from "../modules";
+import type { EventChange } from "../module-api";
 import { badRequest, conflict, forbidden, notFound, parse, readJson } from "../lib/http";
 import { addDays, isDate, isLocalDateTime, isTime, localToInstant, nowLocal, todayLocal, utcIso } from "../lib/time";
 import { audit, auditEvent, auditStmt } from "../domain/audit";
@@ -63,11 +64,23 @@ function pickedTeams(q: { teams?: string; team?: number }): number[] | null {
   return q.team != null ? [q.team] : null;
 }
 
+/** Query parameters of modules on the event overview, `<module>.<key>=value` (src/module-api.ts, homeList). */
+function moduleParams(query: Record<string, string>): Record<string, Record<string, string>> {
+  const out: Record<string, Record<string, string>> = {};
+  for (const [key, value] of Object.entries(query)) {
+    const m = /^([a-z][a-zA-Z0-9]{0,39})\.([a-zA-Z0-9]{1,40})$/.exec(key);
+    if (m && value.length <= 200) (out[m[1]!] ??= {})[m[2]!] = value;
+  }
+  return out;
+}
+
 eventRoutes.get("/events", async (c) => {
   const actor = requireActor(c);
   const q = parse(rangeSchema, c.req.query());
   await ensureGenerated(c.env.DB);
-  if (q.limit) return c.json(await loadEventPage(c.env.DB, actor, { limit: q.limit, past: !!q.past, teamIds: pickedTeams(q), show: q.show }));
+  if (q.limit) {
+    return c.json(await loadEventPage(c.env.DB, actor, { limit: q.limit, past: !!q.past, teamIds: pickedTeams(q), show: q.show, moduleParams: moduleParams(c.req.query()) }));
+  }
   const from = q.from ?? todayLocal();
   const to = q.to ?? addDays(from, 70);
   if (to < from) throw badRequest(t`Invalid period.`);
@@ -588,6 +601,11 @@ eventRoutes.put("/events/:id/unexcused/:personId", async (c) => {
   return c.json({ ok: true });
 });
 
+/** The change for the modules' hook eventChanged (worker/module-api.ts). */
+function changeOf(change: EventChange["change"], event: EventRow, teams: { id: number }[], startsAt: string, actor: Actor): EventChange {
+  return { change, eventId: event.id, kind: event.kind, teamIds: teams.map((tm) => tm.id), before: event.starts_at, startsAt, exclude: [actor.accountId] };
+}
+
 const cancelSchema = z.object({ reason: z.string().trim().min(1, { error: () => t`Please give a reason.` }).max(200) });
 
 eventRoutes.post("/events/:id/cancel", async (c) => {
@@ -618,6 +636,7 @@ eventRoutes.post("/events/:id/cancel", async (c) => {
     },
     { teamIds: teams.map((tm) => tm.id), exclude: [actor.accountId] },
   );
+  await moduleEventChanged(c.env, changeOf("cancelled", event, teams, event.starts_at, actor));
   const actorName = actor.firstName;
   const label = labelOf();
   const date = shortDate(event.starts_at);
@@ -655,6 +674,7 @@ eventRoutes.post("/events/:id/uncancel", async (c) => {
     },
     { teamIds: teams.map((tm) => tm.id), exclude: [actor.accountId] },
   );
+  await moduleEventChanged(c.env, changeOf("restored", event, teams, event.starts_at, actor));
   const actorName = actor.firstName;
   const label = labelOf();
   const date = shortDate(event.starts_at);
@@ -820,6 +840,10 @@ eventRoutes.patch("/events/:id", async (c) => {
       },
       { teamIds: teams.map((tm) => tm.id), exclude: [actor.accountId] },
     );
+    // Others (fans) only care about the start and the venue, not the end or the meeting point
+    if (!event.cancelled_at && (fresh.starts_at !== event.starts_at || fresh.location_id !== event.location_id)) {
+      await moduleEventChanged(c.env, changeOf("moved", event, teams, fresh.starts_at, actor));
+    }
   }
   const fresh = (await loadEvent(c.env.DB, event.id))!;
   // Switched to registration per family: earlier responses no longer count (they stay stored), everyone invited learns

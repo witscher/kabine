@@ -30,7 +30,7 @@ modules/carpools/
 | `paths` | Regular expressions of its API paths. The core answers 404 for them while the module is off. |
 | `label()`, `description()` | Switch text in administration (Lingui, English with German translation). |
 | `privacy()` | What it stores about people, who sees it, when it is deleted; shown on every installation's privacy page. `null` if it stores no personal data. |
-| `notificationTopics` | Topics people can switch off under *Profile → Notifications*. |
+| `notificationTopics` | Topics people can switch off under *Profile → Notifications*; `self: true` for topics about the account itself, not offered per child. |
 
 ### Worker part (`worker/index.ts`, [`worker/module-api.ts`](../../worker/module-api.ts))
 
@@ -40,6 +40,9 @@ modules/carpools/
 | `cron(env, now)` | every hour (`worker/cron.ts`) | no |
 | `eventSummaries` | event lists, data lands in `event.modules[<id>]` | no |
 | `eventDetail` | event page, data lands in `event.modules[<id>]` | no |
+| `eventPage` | a page of the event list on home, data lands in `page.modules[<id>]` (rows of its own, see `homeList`) | no |
+| `eventChanged` | an event was cancelled, restored or moved (start or venue), after the core told its teams | no |
+| `calendarItems` | entries in a personal calendar feed (`worker/domain/calendar.ts`, `CalendarItem`) | no |
 | `participantsLeft` | someone declined or was removed from the squad | no |
 | `participantsDropped` | SQL cleanup in the core's batch (automatic squads, withdrawn stand-ins) | yes |
 | `personLeaves` | SQL cleanup when someone leaves the club | yes |
@@ -61,8 +64,10 @@ modules/carpools/
 | `homeCards` | cards at the very top of the start page for something that waits for the person |
 | `eventsTabDot` | the dot on the Events tab while such a card is there |
 | `eventCardLine` | a line on event cards on the start page |
+| `homeList` | buttons after the team buttons on home, query parameters for the page, rows sorted into the list, a view of its own (`takeover`); a plain function with the data of the worker hook `eventPage` |
+| `calendarOptions` | rows under *Profile → My events* (the personal calendar), saved by the module |
 | `eventSection` | a section on the event page |
-| `gameLinks` | links of a fixture module for a game (live ticker, game report) on the "In progress" card and the event page |
+| `gameLinks` | links of a fixture module for a game (live ticker, game report) on the "In progress" card, the event page and pages of modules (a `GameRef`) |
 | `teamStats` | a view of its own on a team's statistics page next to Training and Games (the helper duties show helpers per family) |
 | `myStats` | a card per person and team on "My statistics" (the helper duties show the family's duties) |
 | `auditTexts` | sentences for the module's own entries in *Administration → Protocol*, by action code; the worker writes them with `audit()` from `worker/domain/audit.ts`, codes prefixed with the module id (`duties.grant`) |

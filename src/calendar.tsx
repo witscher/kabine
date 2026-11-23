@@ -4,6 +4,7 @@ import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { useState } from "preact/hooks";
 import { api } from "./api";
+import { useActiveModules } from "./modules";
 import { useMe } from "./session";
 import { useQuery } from "./store";
 import { Button, confirmDialog, copyText, InfoButton, Notice, Sheet, SwitchRow, toast } from "./ui";
@@ -20,6 +21,7 @@ interface CalendarState extends CalendarPrefs {
 
 export function MyCalendar() {
   const me = useMe();
+  const modules = useActiveModules();
   const { data, mutate } = useQuery<CalendarState>("/profile/calendar");
   const [open, setOpen] = useState(false);
   if (!data) return null;
@@ -48,6 +50,8 @@ export function MyCalendar() {
             <SwitchRow label={t`Helper duties`} checked={data.duties} onChange={(v) => set("duties", v)} />
           </li>
         ) : null}
+        {/* Entries of modules (modules/<id>/app, calendarOptions), saved by the module */}
+        {modules.map((m) => (m.calendarOptions ? <m.calendarOptions key={m.manifest.id} /> : null))}
       </ul>
       <Button icon="calendar" onClick={() => setOpen(true)}>
         {data.hasCalendar ? t`Calendar link` : t`Subscribe in calendar`}

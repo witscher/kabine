@@ -22,7 +22,7 @@ import {
   visibleEventBatch,
 } from "./events";
 import { HORIZON_DAYS } from "./generate";
-import { moduleEventSummaries } from "../modules";
+import { moduleEventPage, moduleEventSummaries } from "../modules";
 
 /** How far the server looks for the next own event for the large card (like the former 70 days). */
 const NEXT_CARD_DAYS = 70;
@@ -103,6 +103,8 @@ export async function loadEventPage(
     teamIds: number[] | null;
     /** Kind chip; default all */
     show?: EventShow;
+    /** Query parameters of the modules by module id (`fans.games=1`), for their own rows (hook eventPage) */
+    moduleParams?: Record<string, Record<string, string>>;
   },
 ): Promise<EventPage> {
   const now = Date.now();
@@ -110,9 +112,14 @@ export async function loadEventPage(
   const today = todayLocal();
   const kinds = showKinds(opts.show ?? "all");
   const trainings = !kinds || kinds.includes("training");
-  // Nothing selected: nothing to read
+  // Rows of the modules (e.g. games one follows) in the window of the page; to the end of the season while the core has
+  // no more
+  const modulePage = (window: { from: string; to: string }) =>
+    moduleEventPage(db, actor, { past: opts.past, kinds, limit: opts.limit, ...window }, opts.moduleParams ?? {});
+  const fullWindow = opts.past ? { from: "0000-01-01T00:00", to: nowL } : { from: `${today}T00:00`, to: "9999-12-31T00:00" };
+  // No own team selected: nothing of the core to read, only what the modules add
   if (opts.teamIds?.length === 0) {
-    return { events: [], hasMore: false, live: [], next: [], openHelp: [], trainingsUntil: null, breaks: [] };
+    return { events: [], hasMore: false, live: [], next: [], openHelp: [], trainingsUntil: null, breaks: [], modules: await modulePage(fullWindow) };
   }
   // The selection goes into the queries, so a narrow selection does not walk through the whole season
   const filter: EventListFilter | undefined = opts.teamIds || kinds ? { teamIds: opts.teamIds, kinds } : undefined;
@@ -215,6 +222,14 @@ export async function loadEventPage(
     helpersNeeded: summary.myDuties.length ? 0 : (needed.get(row.id) ?? 0),
     modules: extras.get(row.id) ?? {},
   });
+  // With more pages the window ends with the last day of this page (whole days, as the page)
+  const lastDay = page.at(-1)?.summary.startsAt.slice(0, 10);
+  const window =
+    hasMore && lastDay
+      ? opts.past
+        ? { from: `${lastDay}T00:00`, to: nowL }
+        : { from: `${today}T00:00`, to: `${addDays(lastDay, 1)}T00:00` }
+      : fullWindow;
   return {
     events: page.map(finish),
     hasMore,
@@ -224,6 +239,7 @@ export async function loadEventPage(
     // Trainings only: the note from when on only games follow, and holiday plans
     trainingsUntil: opts.past || !trainings ? null : addDays(today, HORIZON_DAYS),
     breaks: opts.past || !trainings ? [] : await trainingBreaks(db, actor, today, opts.teamIds),
+    modules: await modulePage(window),
   };
 }
 

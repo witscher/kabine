@@ -204,6 +204,8 @@ export interface EventPage {
   trainingsUntil: string | null;
   /** Holiday plans and training breaks of the own teams (and the children's) that are not over yet. */
   breaks: TrainingBreak[];
+  /** Data of the active modules for this page, by module id (worker/module-api.ts, eventPage; app hook homeList). */
+  modules: Record<string, unknown>;
 }
 
 /**
@@ -322,6 +324,18 @@ export interface GameInfo {
   source: { connector: string; externalId: string; scheduleUrl: string | null } | null;
   /** For this many minutes after throw-off the game counts as "in progress", after that there is the game report. */
   liveMinutes: number;
+}
+
+/**
+ * What game links (fixture modules, hook gameLinks) and the "in progress" window need of a game: an event, or a game
+ * one only follows (fans module), which has no squad, meeting point or responses.
+ */
+export interface GameRef {
+  id: number;
+  kind: EventKind;
+  startsAt: string;
+  cancelled: object | null;
+  game: Pick<GameInfo, "homeTeam" | "guestTeam" | "isHome" | "homeGoals" | "guestGoals" | "table" | "source" | "liveMinutes"> | null;
 }
 
 export interface ParticipantDetail {

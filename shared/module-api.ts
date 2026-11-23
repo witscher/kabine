@@ -44,7 +44,12 @@ export interface ModuleManifest {
   /** null: the module stores no personal data. */
   privacy(): ModulePrivacy | null;
   /** Topics people can switch off under Profile → Notifications (ids are stored, never rename). */
-  readonly notificationTopics?: readonly { readonly id: string; label(): string }[];
+  readonly notificationTopics?: readonly {
+    readonly id: string;
+    label(): string;
+    /** Only for the account's own person, not per child (e.g. games of teams the account follows). */
+    readonly self?: boolean;
+  }[];
 }
 
 /** Declares a module; keeps the literal types (the id becomes part of ModuleId). */

@@ -81,6 +81,11 @@ export function useClub(): ClubProfile {
   return current;
 }
 
+/** Club abbreviation outside components ("SVM"), e.g. for a button of a module on home. */
+export function clubShort(): string {
+  return clubAbbr(current);
+}
+
 /** Short club name outside components (document title, share texts). */
 export function clubName(): string {
   return current.shortName;
