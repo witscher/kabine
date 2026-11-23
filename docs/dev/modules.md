@@ -8,6 +8,7 @@ Kabine has a small core (events, responses, squads, chat, push) and **modules** 
 modules/carpools/
   module.ts          manifest: id, kind, status, default, dependency, sports, API paths, texts, privacy
   types.ts           API shapes shared by worker and app (optional)
+  shared/*.ts        more code used by worker and app, or by the app and the tests (optional, no DOM, no worker APIs)
   worker/index.ts    worker part: routes and hooks (optional)
   worker/*.ts        the module's own worker code
   app/index.tsx      app part: pages and the places it shows up in core screens (optional)

@@ -2,6 +2,10 @@
 
 Decisions not covered by `docs/dev/roadmap.md`, with reasons. Newest first.
 
+## Module folder `shared/` (November 2026)
+
+The polls module builds its Excel export in the browser and tests the file in Vitest. The app and the worker are separate TypeScript projects: `app/` is only in the app's, `test/` only in the worker's, so a test could not import app code. `tsconfig.app.json` and `tsconfig.worker.json` now both include `modules/*/shared`, the module's own counterpart of the core's `shared/`, for pure code both sides use. Code there must run in both: no DOM, no Workers bindings.
+
 ## Cached teams and roster for modules (November 2026)
 
 Managers of an order need last names and teams to hand it out (`modules/polls/`). The teams of every player are already in the cache per Worker instance (`worker/lib/cache.ts`), loaded by `loadEventContext`. `worker/domain/events.ts` now exports those two loaders as `cachedTeamInfo` and `cachedRoster` (with the team kind, so groups can be left out) instead of a module running its own query: same cache entry, no extra rows read once the event list has loaded them. No new hook: modules already import core domain helpers, and these return frozen data, so a module cannot change what the core sees.
