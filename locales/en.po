@@ -607,6 +607,11 @@ msgstr "Taking part"
 msgid "Turned down."
 msgstr "Turned down."
 
+#: modules/polls/shared/order-export.ts
+msgctxt "amount"
+msgid "Open"
+msgstr "Open"
+
 #: src/help-texts.ts
 msgid "Parents (or, in older teams, the players themselves) sign up for duties at games in the Helpers tab, such as cake & bar or washing the shirts. The template decides which duties there are."
 msgstr "Parents (or, in older teams, the players themselves) sign up for duties at games in the Helpers tab, such as cake & bar or washing the shirts. The template decides which duties there are."
@@ -811,8 +816,10 @@ msgstr "The link signs out the previous devices, for example after losing a devi
 msgid "Link your club's privacy policy and legal notice, and name a contact for questions about the app."
 msgstr "Link your club's privacy policy and legal notice, and name a contact for questions about the app."
 
+#. Sheet of the order export: one row per person or family
 #: modules/polls/app/pages.tsx
 #: modules/polls/app/pages.tsx
+#: modules/polls/shared/order-export.ts
 msgid "Orders"
 msgstr "Orders"
 
@@ -1560,6 +1567,13 @@ msgstr "The parent"
 msgid "{form, select, you {Are you coming?} one {Is {names} coming?} youAnd {Are {names} coming?} other {Are {names} coming?}}"
 msgstr "{form, select, you {Are you coming?} one {Is {names} coming?} youAnd {Are {names} coming?} other {Are {names} coming?}}"
 
+#. Sheet of the order export: quantities per item and size
+#: modules/polls/app/pages.tsx
+#: modules/polls/app/pages.tsx
+#: modules/polls/shared/order-export.ts
+msgid "Quantities"
+msgstr "Quantities"
+
 #: src/pages/chat.tsx
 msgid "{n, plural, one {# new message} other {# new messages}}"
 msgstr "{n, plural, one {# new message} other {# new messages}}"
@@ -2078,6 +2092,8 @@ msgstr "{count, plural, one {# parent in {teamName} already has an access.} othe
 
 #: modules/duties/app/admin.tsx
 #: modules/duties/app/admin.tsx
+#: modules/polls/shared/order-export.ts
+#: modules/polls/shared/order-export.ts
 #: src/pages/admin.tsx
 #: src/pages/admin.tsx
 #: src/pages/admin.tsx
@@ -2137,6 +2153,7 @@ msgstr "The core squad is preselected for every new game."
 
 #: modules/polls/app/pages.tsx
 #: modules/polls/app/pages.tsx
+#: modules/polls/shared/order-export.ts
 msgid "Total"
 msgstr "Total"
 
@@ -2635,7 +2652,9 @@ msgid "This is only possible once the event has started."
 msgstr "This is only possible once the event has started."
 
 #. Order number in a bank reference, e.g. 'Club kit No. 17'
+#. Order number in a bank reference, e.g. 'Club kit No. 17'
 #: modules/polls/app/pages.tsx
+#: modules/polls/shared/order-export.ts
 #: modules/polls/worker/domain.ts
 msgid "No."
 msgstr "No."
@@ -4068,6 +4087,11 @@ msgstr "With \"Unexcused\", linked parents are told at once that their child did
 msgid "The most secure way to sign in is with a passkey (Face ID, fingerprint or device lock). You can set one up in the app under Profile, Passkeys and devices."
 msgstr "The most secure way to sign in is with a passkey (Face ID, fingerprint or device lock). You can set one up in the app under Profile, Passkeys and devices."
 
+#. Sheet of the order export: one row per item of an order, for filtering
+#: modules/polls/shared/order-export.ts
+msgid "Lines"
+msgstr "Lines"
+
 #: modules/polls/worker/routes.ts
 msgid "This order is paid already. Change it instead."
 msgstr "This order is paid already. Change it instead."
@@ -4111,6 +4135,11 @@ msgstr "Remove {label}?"
 #: worker/domain/duties.ts
 msgid "at {opponent}"
 msgstr "at {opponent}"
+
+#: modules/polls/shared/order-export.ts
+#: modules/polls/shared/order-export.ts
+msgid "Size"
+msgstr "Size"
 
 #: src/pages/admin.tsx
 #: src/pages/mail-settings.tsx
@@ -4586,6 +4615,11 @@ msgctxt "chat author"
 msgid "Coach"
 msgstr "Coach"
 
+#: modules/polls/shared/order-export.ts
+msgctxt "amount"
+msgid "Paid"
+msgstr "Paid"
+
 #: modules/duties/app/stats.tsx
 msgid "Duties"
 msgstr "Duties"
@@ -4986,6 +5020,10 @@ msgstr "Away game"
 #: src/pages/team.tsx
 msgid "Parents are not included in this team."
 msgstr "Parents are not included in this team."
+
+#: modules/polls/app/pages.tsx
+msgid "{item}: sizes"
+msgstr "{item}: sizes"
 
 #: src/update.tsx
 msgid "The page could not be loaded"
@@ -6333,6 +6371,9 @@ msgid "This time span does not exist."
 msgstr "This time span does not exist."
 
 #: modules/polls/app/pages.tsx
+#: modules/polls/shared/order-export.ts
+#: modules/polls/shared/order-export.ts
+#: modules/polls/shared/order-export.ts
 msgid "Amount"
 msgstr "Amount"
 
@@ -6547,6 +6588,11 @@ msgstr "Main navigation"
 msgid "Parents respond for their child, are in the chat and get the notifications. Turn it off when the players take responsibility themselves, for example in older youth teams and for adults."
 msgstr "Parents respond for their child, are in the chat and get the notifications. Turn it off when the players take responsibility themselves, for example in older youth teams and for adults."
 
+#: modules/polls/shared/order-export.ts
+msgctxt "amount"
+msgid "Reported"
+msgstr "Reported"
+
 #: shared/changelog.ts
 msgid "Settings explain themselves behind a small \"i\", with an example."
 msgstr "Settings explain themselves behind a small \"i\", with an example."
@@ -6613,6 +6659,11 @@ msgstr "The legal notice or privacy policy of your club is missing. Your club is
 #: src/game-import.tsx
 msgid "{venue, select, hall {Date;Time;Opponent;Home;Hall} pitch {Date;Time;Opponent;Home;Pitch} other {Date;Time;Opponent;Home;Venue}}"
 msgstr "{venue, select, hall {Date;Time;Opponent;Home;Hall} pitch {Date;Time;Opponent;Home;Pitch} other {Date;Time;Opponent;Home;Venue}}"
+
+#: modules/polls/shared/order-export.ts
+#: modules/polls/shared/order-export.ts
+msgid "Item"
+msgstr "Item"
 
 #: src/howto.tsx
 msgid "Your children: {children}"
@@ -8044,10 +8095,6 @@ msgstr "This link has expired. Please ask for a new link."
 msgid "Team chats in which you are not a coach or parent"
 msgstr "Team chats in which you are not a coach or parent"
 
-#: modules/polls/module.ts
-msgid "Answers: the creator, the team's coaches and admins, unless the poll is anonymous; in scheduling polls also the participants (first name and initial). Orders: each family sees only its own, the creator, coaches and admins see all. Payment details: everyone who ordered."
-msgstr "Answers: the creator, the team's coaches and admins, unless the poll is anonymous; in scheduling polls also the participants (first name and initial). Orders: each family sees only its own, the creator, coaches and admins see all. Payment details: everyone who ordered."
-
 #: src/pages/mail-settings.tsx
 msgid "Cloudflare"
 msgstr "Cloudflare"
@@ -9043,8 +9090,7 @@ msgid "The passkey could not be verified."
 msgstr "The passkey could not be verified."
 
 #: modules/polls/app/pages.tsx
-#: modules/polls/app/pages.tsx
-#: modules/polls/app/pages.tsx
+#: modules/polls/shared/order-export.ts
 msgid "Ordered"
 msgstr "Ordered"
 
@@ -10090,6 +10136,10 @@ msgstr "Yes: {yesNames}"
 msgid "Declined training {day}"
 msgstr "Declined training {day}"
 
+#: modules/polls/app/pages.tsx
+msgid "Size {size}"
+msgstr "Size {size}"
+
 #: src/pages/team.tsx
 msgid "Template for home games"
 msgstr "Template for home games"
@@ -10133,6 +10183,11 @@ msgstr "Club trip to the climbing park: all teams are invited, the organisers bo
 #: modules/duties/app/stats.tsx
 msgid "Already reminded today"
 msgstr "Already reminded today"
+
+#: modules/polls/shared/order-export.ts
+#: modules/polls/shared/order-export.ts
+msgid "Unit price"
+msgstr "Unit price"
 
 #: src/player-import.tsx
 msgid "{fresh, plural, one {Add # player} other {Add # players}}"
@@ -11986,6 +12041,10 @@ msgstr "Sign up: {link}"
 msgid "Go to administration"
 msgstr "Go to administration"
 
+#: modules/polls/app/pages.tsx
+msgid "{count, plural, one {# piece} other {# pieces}}"
+msgstr "{count, plural, one {# piece} other {# pieces}}"
+
 #: src/pages/home.tsx
 msgid "Training {team} · {at}"
 msgstr "Training {team} · {at}"
@@ -12370,6 +12429,10 @@ msgid "No parents linked yet. Parents link themselves via the parent link."
 msgstr "No parents linked yet. Parents link themselves via the parent link."
 
 #: modules/polls/app/pages.tsx
+msgid "Download as Excel"
+msgstr "Download as Excel"
+
+#: modules/polls/app/pages.tsx
 msgid "Dates"
 msgstr "Dates"
 
@@ -12465,6 +12528,10 @@ msgstr "Too many failed attempts. Please request a new code."
 #: modules/carpools/worker/routes.ts
 msgid "{driver} can no longer take {rider}: {game}. The search continues (entered by {coach})."
 msgstr "{driver} can no longer take {rider}: {game}. The search continues (entered by {coach})."
+
+#: modules/polls/module.ts
+msgid "Answers: the creator, the team's coaches and admins, unless the poll is anonymous; in scheduling polls also the participants (first name and initial). Orders: each family sees only its own, the creator, coaches and admins see all, with last names and the players' teams, and can download them as an Excel file built on their device; the club is responsible for that copy. Payment details: everyone who ordered."
+msgstr "Answers: the creator, the team's coaches and admins, unless the poll is anonymous; in scheduling polls also the participants (first name and initial). Orders: each family sees only its own, the creator, coaches and admins see all, with last names and the players' teams, and can download them as an Excel file built on their device; the club is responsible for that copy. Payment details: everyone who ordered."
 
 #: src/pages/home.tsx
 msgid "There have been no events this season yet."
@@ -12683,6 +12750,7 @@ msgstr "Events of the {team} for {kids}"
 #: modules/polls/app/home.tsx
 #: modules/polls/app/pages.tsx
 #: modules/polls/app/pages.tsx
+#: modules/polls/shared/order-export.ts
 msgid "Order"
 msgstr "Order"
 
@@ -12835,6 +12903,11 @@ msgstr "Offer changed."
 #: src/pages/team.tsx
 msgid "{fullName} can then no longer sign in and appears in the chat as \"former player\". Linked parents without another child are deactivated as well. All data is deleted at the next season change."
 msgstr "{fullName} can then no longer sign in and appears in the chat as \"former player\". Linked parents without another child are deactivated as well. All data is deleted at the next season change."
+
+#: modules/polls/shared/order-export.ts
+#: modules/polls/shared/order-export.ts
+msgid "Quantity"
+msgstr "Quantity"
 
 #: src/pages/login.tsx
 #: src/pages/privacy.tsx
@@ -13938,6 +14011,10 @@ msgstr "Set inactive"
 #: worker/routes/squad.ts
 msgid "This person cannot be requested for this team."
 msgstr "This person cannot be requested for this team."
+
+#: modules/polls/app/pages.tsx
+msgid "Nothing ordered yet."
+msgstr "Nothing ordered yet."
 
 #: src/pages/home.tsx
 msgid "Events for you and {childNames}"

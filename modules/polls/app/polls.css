@@ -275,3 +275,17 @@
   border-radius: var(--radius-sm);
   background: var(--card);
 }
+
+/* Quantities of an order: per item, the sizes below it */
+.poll-qty-sizes {
+  list-style: none;
+  margin: -4px 0 8px;
+  padding: 0 0 0 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 15px;
+}
+.poll-qty-group + .poll-qty-group {
+  border-top: 1px solid var(--line);
+}

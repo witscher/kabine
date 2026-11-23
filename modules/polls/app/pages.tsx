@@ -5,7 +5,9 @@ import { useLocation } from "preact-iso";
 import { useEffect, useState } from "preact/hooks";
 import { renderSVG } from "uqr";
 import { api } from "../../../src/api";
+import { intlTag } from "../../../shared/dates";
 import { addDays, fullDate, todayLocal } from "../../../src/format";
+import { currentLocale } from "../../../src/i18n";
 import { Icon } from "../../../src/icons";
 import { useMe } from "../../../src/session";
 import { useQuery } from "../../../src/store";
@@ -24,6 +26,8 @@ import {
   epcPayload,
   paymentState,
 } from "../types";
+import { moneyFormat, orderFilename, orderSheets } from "../shared/order-export";
+import { XLSX_MIME, xlsx } from "../shared/xlsx";
 import { endsText, openLabel, formatMoney, hintSeen, kindLabel, ORDER_HINT, optionLabel, pollsChanged, rememberHint, slotLabel, teamText, useInfoSheet } from "./common";
 import { anonymousHelp, familyHelp, resultsHelp } from "./help";
 import { shrinkImage } from "./shrink";
@@ -681,10 +685,10 @@ export function PollPage({ id }: { id: string }) {
 
         {/* Orders: totals only for creator, coaches and admins; participants see only their own order */}
         {poll.kind !== "order" || data.canManage ? (
-          <section class="card card-body stack-sm" aria-label={poll.kind === "order" ? t`Ordered` : t`Result`}>
+          <section class="card card-body stack-sm" aria-label={poll.kind === "order" ? t`Quantities` : t`Result`}>
             <div class="poll-row">
               <h2 class="section-title" style={{ margin: 0 }}>
-                {poll.kind === "order" ? t`Ordered` : t`Result`}
+                {poll.kind === "order" ? t`Quantities` : t`Result`}
               </h2>
               <span class="small muted">{counted}</span>
             </div>
@@ -1025,27 +1029,55 @@ function Results({ detail }: { detail: PollDetail }) {
       </ul>
     );
   }
-  // Orders: totals per item and size
+  // Orders: quantities per item with the amount, below them per size; the creator needs them to order from the supplier
   let sum = 0;
-  const lines = options.flatMap((o) =>
-    (o.sizes.length ? o.sizes : [""]).map((size) => {
-      const q = tallies.find((x) => x.optionId === o.id && x.size === size)?.quantity ?? 0;
+  const groups = options
+    .map((o) => {
+      const sizes = (o.sizes.length ? o.sizes : [""])
+        .map((size) => ({ size, q: tallies.find((x) => x.optionId === o.id && x.size === size)?.quantity ?? 0 }))
+        .filter((x) => x.q > 0);
+      const q = sizes.reduce((n, x) => n + x.q, 0);
       sum += q * (o.priceCents ?? 0);
-      return { label: `${o.label}${size ? ` · ${size}` : ""}`, q };
-    }),
-  );
+      return { option: o, sizes, q };
+    })
+    .filter((g) => g.q > 0);
   return (
-    <ul class="list">
-      {lines
-        .filter((l) => l.q > 0)
-        .map((l) => (
-          <li class="list-row">
-            <span class="main">
-              <span class="title">{l.label}</span>
-            </span>
-            <strong>{l.q}</strong>
+    <ul class="list poll-quantities">
+      {!groups.length ? (
+        <li class="small muted">
+          <Trans>Nothing ordered yet.</Trans>
+        </li>
+      ) : null}
+      {groups.map((g) => {
+        const item = g.option.label;
+        const count = g.q;
+        return (
+          <li class="poll-qty-group">
+            <div class="list-row">
+              <span class="main">
+                <span class="title">{item}</span>
+                <span class="sub">{formatMoney(g.q * (g.option.priceCents ?? 0), poll.currency)}</span>
+              </span>
+              <strong>{plural(count, { one: "# piece", other: "# pieces" })}</strong>
+            </div>
+            {g.option.sizes.length ? (
+              <ul class="poll-qty-sizes" aria-label={t`${item}: sizes`}>
+                {g.sizes.map((x) => {
+                  const size = x.size;
+                  return (
+                    <li class="poll-row">
+                      <span>
+                        <Trans>Size {size}</Trans>
+                      </span>
+                      <strong>{x.q}</strong>
+                    </li>
+                  );
+                })}
+              </ul>
+            ) : null}
           </li>
-        ))}
+        );
+      })}
       <li class="list-row">
         <span class="main">
           <span class="title">
@@ -1138,6 +1170,14 @@ function ManageSection({ detail, onChanged, onDeleted }: { detail: PollDetail; o
                 Paid: {paidSum} of {totalSum}
               </Trans>
             </p>
+          ) : null}
+          {/* Contains names: only managers get the orders, so only they see the button */}
+          {realOrders.some((o) => o.items.length) ? (
+            <div>
+              <Button icon="download" size="sm" onClick={() => downloadOrders(detail)}>
+                <Trans>Download as Excel</Trans>
+              </Button>
+            </div>
           ) : null}
         </section>
       ) : null}
@@ -1394,4 +1434,18 @@ function PaymentBox({ pollId, payment, unit, amounts, onSaved }: { pollId: numbe
       {confirmHint}
     </div>
   );
+}
+
+/** The orders as an Excel file, built here from what the manager already sees; nothing is sent anywhere. */
+function downloadOrders(detail: PollDetail): void {
+  const bytes = xlsx(orderSheets(detail), { moneyFormat: moneyFormat(detail.poll.currency, intlTag(currentLocale())) });
+  const url = URL.createObjectURL(new Blob([bytes as BlobPart], { type: XLSX_MIME }));
+  const a = document.createElement("a");
+  a.href = url;
+  // Not empty: the router intercepts links without a download value
+  a.download = orderFilename(detail.poll.title, todayLocal());
+  document.body.append(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 10_000);
 }
