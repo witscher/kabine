@@ -26,6 +26,8 @@ const BLOCKED: RegExp[] = [
   // No photos: visitors would show real faces to everyone until the next reset
   /^\/api\/persons\/\d+\/avatar/,
   /^\/api\/admin\/club\/logo$/,
+  // The mascot of the home game day module: a picture every visitor would see until the next reset
+  /^\/api\/gameday\/mascot$/,
   // Product photos of orders, and the PayPal name and account of the polls module (would lead every visitor there)
   /^\/api\/polls\/\d+\/options\/\d+\/image$/,
   /^\/api\/polls\/payment$/,

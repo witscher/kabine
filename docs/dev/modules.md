@@ -90,6 +90,7 @@ Explanations of a module's settings go behind an info button (docs/dev/design.md
 | `handballnet` | Game schedule from handball.net | on | `modules/handballnet/` (fixture connector, syncs weekly by itself) |
 | `polls` | Polls | off (beta) | `modules/polls/` |
 | `fans` | Fans | off (beta) | `modules/fans/` |
+| `gameday` | Home game day | off (beta) | `modules/gameday/` |
 
 ## Adding a module
 
