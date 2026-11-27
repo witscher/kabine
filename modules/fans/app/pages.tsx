@@ -6,10 +6,11 @@ import { api } from "../../../src/api";
 import { clubShort } from "../../../src/club";
 import { fullDate, time } from "../../../src/format";
 import { Icon } from "../../../src/icons";
+import { LeagueTableCard } from "../../../src/league-table";
 import { GameLinks, isLiveWindow, isReportWindow } from "../../../src/live";
 import { invalidate, useQuery } from "../../../src/store";
 import { ErrorBox, Notice, Spinner, SwitchRow, toast, TopBar, useDocumentTitle } from "../../../src/ui";
-import type { FanGame, FollowTeam, FollowView } from "../types";
+import type { FanGamePage, FollowTeam, FollowView } from "../types";
 import { clubButtonEnabled, setClubButtonEnabled } from "./list";
 
 const followLabel = (name: string) => t`Follow ${name}`;
@@ -102,7 +103,7 @@ export function FollowPage() {
 
 /** A game of the club as a fan: kick-off, venue, opponent, result, live link. No squad, responses or names. */
 export function FanGamePage({ id }: { id: string }) {
-  const { data: g, error, reload } = useQuery<FanGame>(`/fans/games/${id}`);
+  const { data: g, error, reload } = useQuery<FanGamePage>(`/fans/games/${id}`);
   useDocumentTitle(g ? g.title : t`Game`);
   const team = g ? g.teams.map((tm) => tm.name).join(" + ") : "";
   const kickoff = g ? time(g.startsAt) : "";
@@ -170,6 +171,7 @@ export function FanGamePage({ id }: { id: string }) {
             ) : isReportWindow(g) ? (
               <GameLinks event={g} phase="after" />
             ) : null}
+            {g.standings ? <LeagueTableCard table={g.standings} /> : null}
             <Notice>
               {g.following ? t`You follow ${team} as a fan.` : null}{" "}
               <Trans>Only the team's players, parents and coaches see the squad, responses and carpools.</Trans>

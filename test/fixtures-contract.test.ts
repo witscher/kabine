@@ -3,6 +3,7 @@
 // and any other *.json (responses of the source). A new connector only has to pass it.
 import { describe, expect, it } from "vitest";
 import connectorTemplate from "../templates/connector/module.ts?raw";
+import { cleanTable } from "../worker/domain/fixtures";
 import type { WorkerModule } from "../worker/module-api";
 
 const workers = import.meta.glob<{ default: WorkerModule }>("../modules/*/worker/index.ts", { eager: true });
@@ -59,6 +60,11 @@ describe.each(connectors)("fixture connector $id", ({ folder, id, vendor, connec
       expect(g.guest.trim()).not.toBe("");
       if (g.venue) expect(g.venue.externalId).toMatch(/^[^:\s]+$/);
       for (const goals of [g.homeGoals, g.guestGoals]) if (goals != null) expect(Number.isInteger(goals) && goals >= 0).toBe(true);
+    }
+    // A league table is optional; if there is one, the core stores it as it is and at most one row is the own team
+    if (schedule.table) {
+      expect(cleanTable(schedule.table), "table rows survive the core's check unchanged").toEqual(schedule.table);
+      expect(schedule.table.rows.filter((r) => r.own).length).toBeLessThanOrEqual(1);
     }
     expect(id).toBeTruthy();
   });

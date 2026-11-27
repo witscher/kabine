@@ -8,6 +8,7 @@ import { dutyLines, helperPath, neededText } from "../duties";
 import { EventDutyManager } from "../duty-manage";
 import { longDate, personName, shortName, stamp, time, timeRange, weekdayPlural } from "../format";
 import { Icon } from "../icons";
+import { LeagueTableCard } from "../league-table";
 import { GameLinks, isLiveWindow, isReportWindow } from "../live";
 import { AttendanceBadge, byGuardianText, DeclineSheet, deadlineText, PersonResponseRow, quickReasons, ResponseButtons, respondedByText, sendResponse } from "../respond";
 import { useActiveModules } from "../modules";
@@ -144,6 +145,7 @@ export function EventPage({ id }: { id: string }) {
         ) : null}
 
         {event.kind === "game" && event.game ? <GameInfo event={event} /> : null}
+        {event.kind === "game" && event.standings ? <LeagueTableCard table={event.standings} /> : null}
         <AttendanceModeNotice event={event} />
         {/* Club events have no team, but can have helper duties too */}
         {event.kind === "special" && !event.isPast && !event.cancelled && (event.teams.length || event.clubWide) ? <SpecialHelpers event={event} onChanged={reload} /> : null}

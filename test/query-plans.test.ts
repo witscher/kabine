@@ -138,7 +138,8 @@ describe("Abfragepläne ohne Durchsuchen aller Termine", () => {
     await exec("UPDATE teams SET fixture_connector = 'handball4all', fixture_source = '{\"x\":1}' WHERE id = ?", teamId);
     const { db, seen } = recording(env.DB);
     await loadCoachHints(db, { ...actor, coachTeamIds: [teamId] });
-    expect(seen.length).toBe(3);
+    // Linked teams, games over without a result (sync by itself), upcoming games, meeting points
+    expect(seen.length).toBe(4);
     expect(await fullScans(seen)).toEqual([]);
   });
 

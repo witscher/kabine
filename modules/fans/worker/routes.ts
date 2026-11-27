@@ -5,9 +5,10 @@ import { Hono } from "hono";
 import { z } from "zod";
 import { type AppEnv, intParam, requireActor } from "../../../worker/app";
 import type { Actor } from "../../../worker/auth/actor";
+import { loadLeagueTable } from "../../../worker/domain/league-table";
 import { first } from "../../../worker/lib/db";
 import { badRequest, notFound, parse, readJson } from "../../../worker/lib/http";
-import type { FollowView } from "../types";
+import type { FanGamePage, FollowView } from "../types";
 import { fanGame, fanSettings, followTeams, ownTeamIds, setFanSetting, setFollow } from "./domain";
 
 export const routes = new Hono<AppEnv>();
@@ -44,10 +45,14 @@ routes.put("/fans/settings", async (c) => {
   return c.json(await followView(c.env.DB, actor));
 });
 
-/** A game of the club with its game data only: kick-off, venue, opponent, result, whether it takes place. */
+/**
+ * A game of the club with its game data only: kick-off, venue, opponent, result, whether it takes place, and the
+ * league table from the last sync (public data of the source).
+ */
 routes.get("/fans/games/:id", async (c) => {
   const actor = requireActor(c);
   const game = await fanGame(c.env.DB, actor, intParam(c, "id"));
   if (!game) throw notFound(t`This game does not exist.`);
-  return c.json(game);
+  const page: FanGamePage = { ...game, standings: await loadLeagueTable(c.env.DB, game.teams.map((tm) => tm.id)) };
+  return c.json(page);
 });

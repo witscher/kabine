@@ -33,7 +33,13 @@
             "gHomeTeam": "TV Heimverein", "gGuestTeam": "SG Beispielstadt", "gHomeGoals": " ", "gGuestGoals": " "
           }
         ]
-      }
+      },
+      "score": [
+        { "tabScore": 1, "tabTeamID": "999", "tabTeamname": "TV Heimverein", "numPlayedGames": 1, "numWonGames": 1, "numEqualGames": 0, "numLostGames": 0, "numGoalsShot": 18, "numGoalsGot": 15, "pointsPlus": 2, "pointsMinus": 0 },
+        { "tabScore": 2, "tabTeamID": "997", "tabTeamname": "SG Beispielstadt", "numPlayedGames": 0, "numWonGames": 0, "numEqualGames": 0, "numLostGames": 0, "numGoalsShot": 0, "numGoalsGot": 0, "pointsPlus": 0, "pointsMinus": 0 },
+        { "tabScore": "", "tabTeamID": "998", "tabTeamname": "HSG Nachbarort", "numPlayedGames": "1", "numWonGames": 0, "numEqualGames": 0, "numLostGames": 1, "numGoalsShot": 15, "numGoalsGot": 18, "pointsPlus": 0, "pointsMinus": 2 }
+      ],
+      "scoreComments": ["Platzierung nach Punkten, dann Tordifferenz.<br>Ohne Platzziffer: gleicher Platz."]
     }
   }
 ]

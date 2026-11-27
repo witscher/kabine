@@ -1,7 +1,8 @@
 // What coaches still have to do in their own teams, at the top of the events list (GET /api/coach-hints):
 // a game schedule not synced for a while, a game in the next days without a meeting point. A hint goes
 // away once the job is done and cannot be dismissed. The same response names the schedules that sync by
-// themselves and are due (handball.net: weekly); this device syncs them once in the background.
+// themselves and are due (weekly, or after a game without a result); this device syncs them once in the
+// background (worker/domain/fixtures.ts, "Sync by itself").
 import { plural, t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { useEffect, useState } from "preact/hooks";

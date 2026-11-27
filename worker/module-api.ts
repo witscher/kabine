@@ -4,7 +4,7 @@
 import type { Hono } from "hono";
 import type { ModuleManifest } from "../shared/module-api";
 import type { AppEnv } from "./app";
-import type { EventKind } from "../shared/types";
+import type { EventKind, FixtureTable } from "../shared/types";
 import type { Actor } from "./auth/actor";
 import type { CalendarItem } from "./domain/calendar";
 import type { EventContext, EventRow } from "./domain/events";
@@ -102,6 +102,11 @@ export interface FixtureSchedule {
   ownTeamHint: string | null;
   /** Entries that could not be read. */
   skipped: number;
+  /**
+   * League table from the same response, if the source delivers one; the row of the linked team marked `own`.
+   * Missing or null: the stored table stays as it is (worker/domain/league-table.ts).
+   */
+  table?: FixtureTable | null;
 }
 
 /** A fetched schedule that cannot be read; the message is shown to the coach. */
@@ -132,6 +137,12 @@ export interface FixtureConnector {
    * the press of a button (worker/domain/coach-hints.ts, src/coach-hints.tsx).
    */
   autoSyncDays?: number;
+  /**
+   * Also sync by itself after each game: once kick-off plus the age class's playing time plus an hour have passed
+   * and the game has no result yet, at most twice per game and three hours apart (worker/domain/fixtures.ts,
+   * resultDueGames). Only for sources that deliver results and whose terms allow it.
+   */
+  autoSyncResults?: boolean;
   /** Texts for the link field in Team → Settings, in the language of the request. */
   linkField(): { label: string; hint: string; placeholder: string };
   /** The team's settings from a link the coach pastes; null if it is not a link of this source. */
@@ -142,7 +153,7 @@ export interface FixtureConnector {
   request(source: FixtureSource): { url: string; headers?: Record<string, string> };
   /** Reads the fetched JSON (or text, see `format`); throws FixtureFormatError with a readable reason. */
   parse(data: unknown, source: FixtureSource): FixtureSchedule;
-  /** League table for the game view, if the source has one. */
+  /** Link to the league table at the source, if it has one (shown next to the table from `parse`, or alone). */
   tableUrl?(source: FixtureSource): string | null;
 }
 

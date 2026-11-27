@@ -1,5 +1,6 @@
 // Game schedule of a team from a fixture connector (modules of kind "fixtures"): link the team's page at
-// the source, then sync at the press of a button (some sources also by themselves, see the claim). Sources
+// the source, then sync at the press of a button or, where the source allows it, by itself from a coach's
+// device (see the claim and domain/fixtures.ts, "Sync by itself"). Sources
 // that block servers are fetched by the coach's device (fetchFrom "device"), the others by the server. The
 // sync itself is in domain/fixtures.ts.
 import { t } from "@lingui/core/macro";
@@ -7,11 +8,25 @@ import { Hono } from "hono";
 import { z } from "zod";
 import { type AppEnv, intParam, requireActor } from "../app";
 import { type Actor, isCoachOf, requireAdmin, requireCoach } from "../auth/actor";
-import { activeConnectors, allConnectors, type Connector, connectorById, importGames, SYNC_OVERVIEW_SQL, TEAM_FIXTURES_SELECT, type TeamFixtures, teamSource } from "../domain/fixtures";
+import {
+  activeConnectors,
+  allConnectors,
+  autoSyncDue,
+  CLAIM_MS,
+  type Connector,
+  connectorById,
+  importGames,
+  MANUAL_COACH_MS,
+  SYNC_OVERVIEW_SQL,
+  syncOlderThan,
+  syncsByItself,
+  TEAM_FIXTURES_SELECT,
+  type TeamFixtures,
+  teamSource,
+} from "../domain/fixtures";
 import { ownScheduleReminderDays } from "../domain/club";
-import { scheduleStale } from "../domain/coach-hints";
 import { requireTeam } from "../domain/groups";
-import { all, first, run } from "../lib/db";
+import { all, first, run, stmt } from "../lib/db";
 import { ApiError, badRequest, conflict, notFound, parse, readJson } from "../lib/http";
 import { recordServerError } from "../lib/server-errors";
 import { nowLocal, utcIso } from "../lib/time";
@@ -19,9 +34,6 @@ import { FixtureFormatError } from "../module-api";
 import { audit } from "../domain/audit";
 
 export const gameRoutes = new Hono<AppEnv>();
-
-/** A reservation to fetch expires after this long. */
-export const CLAIM_MS = 10 * 60_000;
 
 // Without a fixtures module switched on, the schedule routes do not exist
 gameRoutes.use("/teams/:id/games/*", async (c, next) => {
@@ -62,6 +74,8 @@ async function sourceView(db: D1Database, team: TeamFixtures) {
   return {
     configured: !!link,
     connector: link ? { id: link.connector.id, name: link.connector.name, fetchFrom: link.connector.fetchFrom } : null,
+    /** The source syncs by itself from a coach's device (domain/fixtures.ts, "Sync by itself"). */
+    autoSync: link && syncsByItself(link.connector) ? { days: link.connector.autoSyncDays ?? null, results: !!link.connector.autoSyncResults } : null,
     description: link ? link.connector.describe(link.source) : null,
     fetchUrl: link && link.connector.fetchFrom === "device" ? link.connector.request(link.source).url : null,
     importedAt: team.fixture_synced_at,
@@ -94,11 +108,11 @@ gameRoutes.put("/teams/:id/games/source", async (c) => {
   );
   if (link === null) {
     const before = await first<{ fixture_connector: string | null }>(c.env.DB, "SELECT fixture_connector FROM teams WHERE id = ?", teamId);
-    await run(
-      c.env.DB,
-      "UPDATE teams SET fixture_connector = NULL, fixture_source = NULL, fixture_synced_at = NULL, fixture_error = NULL WHERE id = ?",
-      teamId,
-    );
+    await c.env.DB.batch([
+      stmt(c.env.DB, "UPDATE teams SET fixture_connector = NULL, fixture_source = NULL, fixture_synced_at = NULL, fixture_error = NULL WHERE id = ?", teamId),
+      // The table belonged to that source's league
+      stmt(c.env.DB, "DELETE FROM league_tables WHERE team_id = ?", teamId),
+    ]);
     if (before?.fixture_connector) await audit(c.env.DB, actor, "schedule_removed", { teamId, detail: { source: connectorById(before.fixture_connector)?.name ?? before.fixture_connector } });
     return c.json(await sourceView(c.env.DB, await teamFixtures(c.env.DB, teamId)));
   }
@@ -109,13 +123,17 @@ gameRoutes.put("/teams/:id/games/source", async (c) => {
     const names = candidates.map((x) => x.name).join(", ");
     throw badRequest(t`Please paste the link to your team's page at ${names}.`);
   }
-  await run(
-    c.env.DB,
-    "UPDATE teams SET fixture_connector = ?, fixture_source = ?, fixture_synced_at = NULL, fixture_error = NULL WHERE id = ?",
-    match.connector.id,
-    JSON.stringify(match.source),
-    teamId,
-  );
+  await c.env.DB.batch([
+    stmt(
+      c.env.DB,
+      "UPDATE teams SET fixture_connector = ?, fixture_source = ?, fixture_synced_at = NULL, fixture_error = NULL WHERE id = ?",
+      match.connector.id,
+      JSON.stringify(match.source),
+      teamId,
+    ),
+    // Another league or source: the next sync brings its table
+    stmt(c.env.DB, "DELETE FROM league_tables WHERE team_id = ?", teamId),
+  ]);
   await audit(c.env.DB, actor, "schedule_linked", { teamId, detail: { source: match.connector.name } });
   return c.json(await sourceView(c.env.DB, await teamFixtures(c.env.DB, teamId)));
 });
@@ -159,17 +177,19 @@ gameRoutes.get("/admin/fixture-sync", async (c) => {
         error: team.fixture_error,
         upcomingGames: team.upcoming,
         seasonPlayed,
-        reminded: !!link && !seasonPlayed && scheduleStale(team.fixture_synced_at, days, now),
+        reminded: !!link && !seasonPlayed && syncOlderThan(team.fixture_synced_at, days, now),
       };
     }),
   });
 });
 
 /**
- * One device reserves the fetch, so several devices never query the source at the same time. At the push of a
- * button (`manual`), or by itself from a coach's device when the source syncs by itself (`autoSyncDays`) and the
- * last sync is that old (the same rule as `autoSync` in GET /api/coach-hints). Sources fetched by the server are
- * synced right away.
+ * One device reserves the fetch, so several devices never query the source at the same time (the reservation is
+ * atomic). By itself (`manual: false`): only from the device of a coach of the team (an admin who coaches it too, never
+ * an admin for every team), only for sources that sync by themselves and only when due (domain/fixtures.ts,
+ * autoSyncDue; the same rule as `autoSync` in GET /api/coach-hints). At the push of a button: where the source syncs by
+ * itself, coaches at most once per hour per team, admins as often as the source allows (`minIntervalMs`). Sources
+ * fetched by the server are synced right away.
  */
 gameRoutes.post("/teams/:id/games/claim", async (c) => {
   const actor = requireActor(c);
@@ -180,13 +200,16 @@ gameRoutes.post("/teams/:id/games/claim", async (c) => {
   const link = linked(team);
   if (!link) throw conflict(t`No game schedule is linked for this team.`);
   const now = Date.now();
+  const byItself = syncsByItself(link.connector);
   if (!manual) {
-    const days = link.connector.autoSyncDays;
-    if (!days) return c.json({ claimed: false, reason: "manual_only" });
-    if (!scheduleStale(team.fixture_synced_at, days, now)) return c.json({ claimed: false, reason: "not_due" });
+    if (!byItself) return c.json({ claimed: false, reason: "manual_only" });
+    if (!actor.coachTeamIds.includes(teamId) || actor.readOnly) return c.json({ claimed: false, reason: "not_coach" });
+    if (!(await autoSyncDue(c.env.DB, team, link.connector, now))) return c.json({ claimed: false, reason: "not_due" });
   }
-  if (team.fixture_synced_at && now - Date.parse(team.fixture_synced_at) < link.connector.minIntervalMs) {
-    return c.json({ claimed: false, reason: "recent", retryAt: utcIso(Date.parse(team.fixture_synced_at) + link.connector.minIntervalMs) });
+  // The button is a fallback where the schedule syncs by itself (moves or cancellations at short notice)
+  const minInterval = manual && byItself && !actor.isAdmin ? Math.max(MANUAL_COACH_MS, link.connector.minIntervalMs) : link.connector.minIntervalMs;
+  if (team.fixture_synced_at && now - Date.parse(team.fixture_synced_at) < minInterval) {
+    return c.json({ claimed: false, reason: "recent", retryAt: utcIso(Date.parse(team.fixture_synced_at) + minInterval) });
   }
   const res = await run(
     c.env.DB,

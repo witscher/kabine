@@ -18,6 +18,9 @@ export const connector: FixtureConnector = {
   // "worker" when the source allows servers; "device" when only browsers may fetch (CORS)
   fetchFrom: "worker",
   minIntervalMs: 10 * 60_000,
+  // Only if the source's terms allow it (docs/dev/connectors.md, fair use): sync by itself from a coach's device
+  // autoSyncDays: 7,
+  // autoSyncResults: true,
   linkField: () => ({
     label: t`Link to the team's page at ${vendor}`,
     hint: t`Open the team at ${vendor} and paste the link from the address bar.`,
@@ -76,6 +79,7 @@ export const connector: FixtureConnector = {
         guestGoals: goals(g.guestGoals),
       });
     }
+    // If the response also carries the league table, return it as `table` (rows with `own` for the linked team)
     return { games, ownTeamHint: text(root.team, 80), skipped };
   },
   tableUrl: (source) => `https://www.__DOMAIN__/leagues/${encodeURIComponent(String(source.leagueId))}`,

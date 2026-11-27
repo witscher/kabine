@@ -20,7 +20,8 @@ export type CoachHint =
 
 /**
  * A team whose schedule the coach's device syncs now, in the background, because its source syncs by itself
- * (`autoSyncDays` of the connector, handball.net: weekly) and the last sync is that old (GET /api/coach-hints).
+ * (connector `autoSyncDays` / `autoSyncResults`): the last sync is that old, or a game is over without a result
+ * (GET /api/coach-hints, worker/domain/fixtures.ts).
  */
 export interface ScheduleAutoSync {
   teamId: number;
@@ -326,6 +327,40 @@ export interface GameInfo {
   liveMinutes: number;
 }
 
+/** A row of a league table as a fixture connector delivers it. */
+export interface LeagueTableRow {
+  /** Position; null when the source gives none (e.g. the same place as the row above). */
+  pos: number | null;
+  team: string;
+  /** The team of this installation the table belongs to. */
+  own: boolean;
+  games: number;
+  won: number;
+  draw: number;
+  lost: number;
+  goalsFor: number;
+  goalsAgainst: number;
+  pointsPlus: number;
+  /** Minus points (handball counts 2:0); null for sports that count only plus points. */
+  pointsMinus: number | null;
+}
+
+/** A league table from a fixture connector's schedule (FixtureSchedule.table), without the fetch time. */
+export interface FixtureTable {
+  leagueName: string | null;
+  /** Note of the source about the table, plain text. */
+  comment: string | null;
+  rows: LeagueTableRow[];
+}
+
+/** League table of a game's team as of its last sync (public data of the source, no extra fetch). */
+export interface LeagueTable extends FixtureTable {
+  /** Brand name of the source ("handball4all"). */
+  source: string;
+  /** UTC time of the sync that brought it. */
+  fetchedAt: string;
+}
+
 /**
  * What game links (fixture modules, hook gameLinks) and the "in progress" window need of a game: an event, or a game
  * one only follows (fans module), which has no squad, meeting point or responses.
@@ -409,6 +444,8 @@ export interface EventDetail extends EventSummary {
    * leaders (and themselves), without the note, also when responses are visible to all.
    */
   leaders: LeaderEntry[];
+  /** Games: league table of the team from its last sync, if the source delivers one (public data, for everyone who sees the game). */
+  standings?: LeagueTable | null;
 }
 
 export interface RosterEntry {

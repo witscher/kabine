@@ -389,6 +389,8 @@ seasonRoutes.post("/season-change/execute", async (c) => {
     stmt(db, "DELETE FROM chat_mutes"),
     stmt(db, "UPDATE invites SET revoked_at = ? WHERE revoked_at IS NULL AND kind IN ('player', 'parent')", utcIso()),
     stmt(db, "DELETE FROM app_meta WHERE key = 'generated_on'"),
+    // League tables of the old leagues; the first sync of the new season brings the new ones
+    stmt(db, "DELETE FROM league_tables"),
     ...moduleSeasonChange(db),
     // The protocol starts over with the new season: only the season change itself stays in it
     stmt(db, "DELETE FROM audit_log"),
@@ -479,6 +481,8 @@ export const EXPORT_EXCLUDED = [
   "audit_log",
   // Version numbers of the cache (worker/lib/cache.ts), no data
   "cache_versions",
+  // League tables from the last sync (public data of the source): the next sync brings them again
+  "league_tables",
   // Modules' own choices (worker/module-api.ts, exportExcluded)
   ...MODULE_EXPORT_EXCLUDED,
 ];

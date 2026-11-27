@@ -1,5 +1,5 @@
 // API shapes of the fans module, shared by worker and app.
-import type { GameRef, LocationRef, TeamRef } from "../../shared/types";
+import type { GameRef, LeagueTable, LocationRef, TeamRef } from "../../shared/types";
 
 /** A team of the club on the page "Fan of …": own teams are fixed, the others can be followed. */
 export interface FollowTeam extends TeamRef {
@@ -35,6 +35,11 @@ export interface FanGame extends GameRef {
   result: { home: number; guest: number } | null;
   /** One follows a team of this game. */
   following: boolean;
+}
+
+/** The fan page of one game (GET /api/fans/games/:id): the game and the league table of its team, if stored. */
+export interface FanGamePage extends FanGame {
+  standings: LeagueTable | null;
 }
 
 /** The module's data for a page of the event list on home (worker hook eventPage, `page.modules.fans`). */

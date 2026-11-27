@@ -169,9 +169,9 @@ describe("handball4all", () => {
       expect(again.body).toMatchObject({ claimed: false, reason: "busy" });
       const imported = await api(`/teams/${wd}/games/import`, { cookie, body: { data: payload([]) } });
       expect(imported.status).toBe(200);
-      // Automatische Abrufe gibt es nicht (handball4all ist fair use)
+      // Gerade abgeglichen: von selbst nicht fällig (nach Spielen und wöchentlich, test/fixture-auto-sync.test.ts)
       const auto = await api(`/teams/${wd}/games/claim`, { cookie, body: { manual: false } });
-      expect(auto.body).toMatchObject({ claimed: false, reason: "manual_only" });
+      expect(auto.body).toMatchObject({ claimed: false, reason: "not_due" });
     });
 
     it("verknüpft kein Spiel einer fremden Mannschaft und sagt es nicht ab", async () => {

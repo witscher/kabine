@@ -6,13 +6,15 @@ import { MODULES, type ModuleId, moduleOn } from "../../shared/modules";
 import type { TeamRef } from "../../shared/types";
 import { api, errorMessage } from "../api";
 import { useClub } from "../club";
-import { ago, fullDate, isoToLocalDate } from "../format";
+import { ago, clock, fullDate, isoToLocalDate } from "../format";
 import { invalidate, useQuery } from "../store";
 import { Button, confirmDialog, Field, toast } from "../ui";
 
 export interface Source {
   configured: boolean;
   connector: { id: string; name: string; fetchFrom: "device" | "worker" } | null;
+  /** The linked source syncs by itself from a coach's device: every `days` days and/or after each game (`results`). */
+  autoSync: { days: number | null; results: boolean } | null;
   description: string | null;
   fetchUrl: string | null;
   importedAt: string | null;
@@ -36,9 +38,10 @@ export interface ImportSummary {
 
 /**
  * Sync the game schedule when a coach or admin presses the button (Team → Settings, hint on the events list),
- * or by itself (`auto`) for sources that sync weekly (src/coach-hints.tsx); the server decides whether that is
- * due. The server hands out a reservation first so that several devices never query at the same time. Sources
- * that block servers are fetched here in the browser, the others by the server.
+ * or by itself (`auto`) for sources that sync by themselves, weekly or after games (src/coach-hints.tsx); the
+ * server decides whether that is due and who may. The server hands out a reservation first so that several
+ * devices never query at the same time. Sources that block servers are fetched here in the browser, the others
+ * by the server.
  */
 export async function syncGames(teamId: number, name: string, opts: { auto?: boolean } = {}): Promise<ImportSummary | null> {
   const claim = await api.post<{
@@ -54,7 +57,10 @@ export async function syncGames(teamId: number, name: string, opts: { auto?: boo
   // By itself: not due, or another device is at it; nothing to tell
   if (!claim.claimed && opts.auto) return null;
   if (!claim.claimed) {
-    if (claim.reason === "recent") throw new Error(t`The game schedule was only just synced. Please try again in a few minutes.`);
+    if (claim.reason === "recent") {
+      const at = claim.retryAt ? clock(claim.retryAt) : null;
+      throw new Error(at ? t`The game schedule was only just synced. Possible again at ${at}.` : t`The game schedule was only just synced. Please try again in a few minutes.`);
+    }
     if (claim.reason === "busy") throw new Error(t`Another device is syncing the game schedule right now.`);
     return null;
   }
@@ -83,6 +89,22 @@ export async function syncGames(teamId: number, name: string, opts: { auto?: boo
 function useFixturesOn(): boolean {
   const club = useClub();
   return (MODULES as readonly ModuleManifest[]).some((m) => m.kind === "fixtures" && moduleOn(club, m.id as ModuleId));
+}
+
+/** How a source that syncs by itself does it (Team → Settings). */
+function autoSyncText(auto: { days: number | null; results: boolean }): string {
+  const days = auto.days ?? 0;
+  if (auto.results && days) {
+    return plural(days, {
+      one: "The app syncs by itself on a coach's device: after each game and every day. By hand only when a game was moved or cancelled at short notice.",
+      other: "The app syncs by itself on a coach's device: after each game and every # days. By hand only when a game was moved or cancelled at short notice.",
+    });
+  }
+  if (auto.results) return t`The app syncs by itself on a coach's device after each game. By hand only when a game was moved or cancelled at short notice.`;
+  return plural(days, {
+    one: "The app syncs by itself on a coach's device every day. By hand only when a game was moved or cancelled at short notice.",
+    other: "The app syncs by itself on a coach's device every # days. By hand only when a game was moved or cancelled at short notice.",
+  });
 }
 
 /** State of the game schedule with a button to sync it (Team → Settings). */
@@ -231,9 +253,7 @@ export function ScheduleSection({ team, onChanged }: { team: TeamRef; onChanged:
         ) : null}
       </div>
       {linked && choice === linked.id ? <SourceBar team={team} /> : null}
-      <p class="small muted">
-        <Trans>Syncing only happens at the press of a button, on a coach's or admin's device or by the app's server, never automatically.</Trans>
-      </p>
+      <p class="small muted">{linked && choice === linked.id && data.autoSync ? autoSyncText(data.autoSync) : <Trans>Syncing only happens at the press of a button, on a coach's or admin's device or by the app's server, never automatically.</Trans>}</p>
     </section>
   );
 }
