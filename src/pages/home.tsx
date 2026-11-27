@@ -114,7 +114,7 @@ function NextCard({ event, onDecline, later = false }: { event: EventSummary; on
   const single = mine.length === 1 && mine[0]!.person.id === me.person.id && !mine[0]!.helpRequest;
   const counts = event.counts;
   const teamLabel = useTeamLabel();
-  const kind = kindLabel()[event.kind];
+  const kind = kindLabel()[event.asTraining ? "training" : event.kind];
   const reason = single && mine[0]!.status === "no" ? mine[0]!.reason : null;
   return (
     <section class="card" aria-label={t`Next event: ${kind}`}>

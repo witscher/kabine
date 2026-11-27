@@ -1165,16 +1165,19 @@ test("Trainingsgruppe: Admin schaltet sie an, ihre Sondertermine stehen beim Chi
   await sw.click();
   await expect(sw.getByText("Gespeichert")).toBeVisible();
 
-  // The member finds the session under "Training", no longer under "Other"
+  // The member finds the session under "Training", no longer under "Other"; it is the member's next event, so the big
+  // card shows it and says "Next training"
   await coach.page.goto("/");
   const kinds = coach.page.getByRole("group", { name: "Art der Termine" });
-  const row = coach.page.locator(".event-row", { hasText: "Torwarttraining" });
+  const card = coach.page.getByRole("region", { name: "Nächster Termin: Training" });
+  await expect(card).toContainText("Nächstes Training");
+  await expect(card).toContainText("Torwarttraining");
   await kinds.getByRole("button", { name: "Training" }).click();
-  await expect(row).toBeVisible();
+  await expect(card).toContainText("Torwarttraining");
   await kinds.getByRole("button", { name: "Sonstiges" }).click();
-  await expect(row).toHaveCount(0);
+  await expect(coach.page.getByText("Torwarttraining")).toHaveCount(0);
   await kinds.getByRole("button", { name: "Alles" }).click();
-  await expect(row).toBeVisible();
+  await expect(card).toContainText("Torwarttraining");
 
   await admin.page.request.delete(`/api/teams/${group}`);
 });
