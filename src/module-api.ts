@@ -42,6 +42,19 @@ export interface HomeListContext {
   data: unknown;
 }
 
+/**
+ * A large card of a module on home (the home game day), in time order with the card of the next event: above it when
+ * its day is on or before the day of that card (or there is none), below it otherwise.
+ */
+export interface HomeListCard {
+  key: string;
+  /** Day the card is about, YYYY-MM-DD. */
+  day: string;
+  node: ComponentChildren;
+  /** Events the card already shows: rows of other modules about them are left out of the list (a game one follows). */
+  covers?: number[];
+}
+
 /** A module's part of the list on home. */
 export interface HomeListPart {
   /** Buttons after the team buttons. */
@@ -59,6 +72,8 @@ export interface HomeListPart {
    * selection comes back with that team on). `sub` is the line under the greeting.
    */
   takeover?: { show: EventShow; release: () => void; sub: string };
+  /** A large card next to the card of the next event (upcoming only). */
+  card?: HomeListCard;
   /** Rows to sort into the list (upcoming or past, as `when`). */
   rows?: HomeListRow[];
   /**

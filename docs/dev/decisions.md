@@ -40,6 +40,28 @@ Polls (`modules/polls/`) need places in the core screens a module could not reac
 - **Worker:** `badgeCount` (adds to the number on the app icon; runs for every push, so one cheap query), `seasonChange` (cleanup in the season change batch: polls are gone with the season), `exportExcluded` (tables a module leaves out of the export on purpose; polls are short-lived and their ids would need a mapping on restore).
 - **Chat:** system messages may carry a link to a page of the app (`postSystemMessage(…, link)`), only a plain path such as `/umfragen/12`, checked in the chat room. So the chat note about a new poll opens it.
 - **Notification topics:** the CHECK on `notification_settings.topic` listed the core topics and `carpool`. A module topic (`polls`) would have needed a core migration rebuilding the table every time. Migration `202611200100_core_notification-topics.sql` rebuilds it once without that list; the code checks topics (`worker/routes/parents.ts`).
+## Home game day (November 2026)
+
+Ported from the original club app as the module `modules/gameday/` (beta, off by default). Where Kabine differs or had to decide:
+
+- **Name:** German "Großer Heimspieltag" (module switch, push, card), as in the club app, because Kabine already calls a youth matchday at home "Heimspieltag" (`eventTitle`). English "Home game day".
+- **What "enabled" means:** the module switch turns the card, the tiles and the page on and off; the setting *Message the day before* only the push. The club app's single switch did both, but in Kabine the module switch already exists.
+- **Settings cached, days cached:** the list on home asks the module on every page load. Settings (`app_meta` key `gameday`) are cached with version `ref`, the club's upcoming home games with version `duties`; migration `202611230400_gameday_sent.sql` adds triggers so that settings, cancellations and venue changes bump them too, also when changed directly in D1. The club app read the settings and checked the day again on every load.
+- **Sent once:** a table `gameday_sent` (one row per day, claimed with `INSERT OR IGNORE` before sending) instead of a single `app_meta` value, so two runs cannot both send and a missed run (maintenance, update) can catch up within three hours of the configured hour, never late at night. Markers older than a week are deleted.
+- **Mascot picture:** optional, uploaded by an admin and stored in KV like the club logo; without one no picture is shown. The club app ships its own mascot. The public demo blocks the upload.
+- **Coaches and staff** of the playing teams are involved like players (the club app had no staff role); they read their team's name.
+- **Fans and duties only with their modules:** followed teams through the hook `follows`, helper duties only while the duties module is on; the page links other games to the fans module's game page only while that module is on.
+- **Not ported:** an admin's own text per day and merging the push with the duty reminder (the club app postponed both too).
+
+## Module hooks for the home game day (November 2026)
+
+The module "home game day" (`modules/gameday/`, ported from the original club app) builds on the hooks added for the fans module (home list rows, cron, notification topics, pages, admin menu, `gameLinks` with a `GameRef`). It needed four more places, each generic:
+
+- **A large card on home (app `homeList` → `card`):** the day's card sits in time order with the card of the next event (above it when its day is on or before that event's day), not at the very top like `homeCards`, which are for something that waits for the person. `covers` lists the events the card shows; rows of other modules about them are left out, so a game one follows is not listed twice (the club app's `onGamedayCard`). The covering module decides what it covers: the home game day leaves running games out of `covers`, so their live link stays in the list.
+- **Followed teams (worker `follows`):** the home game day tells fans of the playing teams and marks their games, but may not import from the fans module, which it does not require (fans may be off). The fans module answers through the hook; `moduleFollowedTeams` and `moduleFollowers` in `worker/modules.ts` are empty while no module with the hook is on.
+- **Push texts per account (`enqueuePushEach` in `worker/domain/notify.ts`):** the existing helper behind `notifyPersons`, now exported. The day's push is not about persons of an event ("you play at 14:00 (Women)", "the U15 boys play at 13:00", "your helper duty starts at 11:00"), so it is built per account and still sent together where texts match.
+- **Cache versions on the actor (`Actor.versions`):** read in the same batch as the actor already; with them a hook reads cached data without a query of its own. The home card thereby adds no query for people without a home game day ahead.
+
 ## Module hooks for the fans module (November 2026)
 
 The module "fans" (`modules/fans/`, ported from the original club app) shows games of teams one follows in the event list on home, tells fans about games moved or cancelled at short notice, and puts the games into the personal calendar. The core needed places for that; each hook is generic, so the module "home game day" (ported next) uses the same ones:

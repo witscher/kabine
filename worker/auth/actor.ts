@@ -1,7 +1,7 @@
 import { t } from "@lingui/core/macro";
 import type { ChildLimits, ChildPermission, ChildPermissions, PersonRef, Role } from "../../shared/types";
 import { CHILD_LIMITED, LIMITED_TEAMS_SQL, type LimitRow, toLimits } from "../domain/child-limits";
-import { CACHE_VERSIONS_SQL, fromCache, toVersions } from "../lib/cache";
+import { CACHE_VERSIONS_SQL, type CacheVersions, fromCache, toVersions } from "../lib/cache";
 import { all } from "../lib/db";
 import { forbidden } from "../lib/http";
 import { utcIso } from "../lib/time";
@@ -38,6 +38,11 @@ export interface Actor {
   /** Teams whose age class or team settings limit children (worker/domain/child-limits.ts); missing teams allow everything. */
   teamLimits: Map<number, ChildLimits>;
   coachTeamIds: number[];
+  /**
+   * Versions of the cache per Worker instance (worker/lib/cache.ts), read in the same batch as the actor: data of the
+   * request from the cache needs no query of its own (`fromCache(actor.versions, …)`).
+   */
+  versions: CacheVersions;
   /** Admins only: view the app from another perspective (see worker/auth/view-as.ts). */
   viewAs?: ViewMode;
   /** Nothing may be changed in this view (another person). */
@@ -168,6 +173,7 @@ export async function buildActor(db: D1Database, session: SessionRow, row: Actor
     childMemberships,
     teamLimits: new Map(limits.map((r) => [r.team_id, toLimits(r)])),
     coachTeamIds: ms.filter((m) => m.role === "coach").map((m) => m.teamId),
+    versions,
   };
 }
 

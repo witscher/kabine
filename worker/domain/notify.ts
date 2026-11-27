@@ -172,6 +172,19 @@ export async function enqueuePush(
 }
 
 /**
+ * A push written per account (e.g. "you play at 14:00", "Lena plays at 11:30"), each built in the account's language.
+ * Accounts with the same text are sent together; accounts without a registered device are skipped.
+ */
+export async function enqueuePushEach(
+  env: Env,
+  accountIds: number[],
+  build: (accountId: number) => PushPayload,
+  opts: { exclude?: number[] } = {},
+): Promise<number> {
+  return enqueueEach(env, accountIds, build, opts);
+}
+
+/**
  * Enqueues a push per account, built in the account's language; accounts with the same text are sent
  * together. Accounts without a registered device are filtered out first, so no queue operations are wasted.
  * cache: payloads per language, when the text does not depend on the account.

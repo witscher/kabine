@@ -160,6 +160,16 @@ export interface WorkerModule {
   eventPage?: (db: D1Database, actor: Actor, query: EventPageQuery) => Promise<unknown>;
   /** An event was cancelled, restored or moved; the core has already notified its teams. */
   eventChanged?: (env: Env, change: EventChange) => Promise<void>;
+  /**
+   * Teams an account follows without belonging to them (the fans module), for other modules that tell such people
+   * about games (the home game day). Only while the module is on (worker/modules.ts: moduleFollowedTeams, moduleFollowers).
+   */
+  follows?: {
+    /** Ids of the teams this account follows, without its own. */
+    teams(db: D1Database, actor: Actor): Promise<number[]>;
+    /** Accounts following any of these teams, one row per account and team (own teams of the account may be among them). */
+    accounts(db: D1Database, teamIds: number[]): Promise<{ accountId: number; teamId: number }[]>;
+  };
   /** Entries for the personal calendar feed of an account (e.g. what the person chose in the module's own settings). */
   calendarItems?: (db: D1Database, feed: CalendarFeed) => Promise<CalendarItem[]>;
   /** Participants left an event (with notifications if the module sends any). */

@@ -2,6 +2,7 @@
 import type { ModuleId } from "../shared/modules";
 import { isModuleOn } from "./domain/club";
 import type { CalendarItem } from "./domain/calendar";
+import type { Actor } from "./auth/actor";
 import type { CalendarFeed, EventChange, EventPageQuery, WorkerModule } from "./module-api";
 
 const found = import.meta.glob<{ default: WorkerModule }>("../modules/*/worker/index.ts", { eager: true });
@@ -94,4 +95,16 @@ export async function moduleEventChanged(env: Env, change: EventChange): Promise
 /** Entries of the active modules for a personal calendar feed. */
 export async function moduleCalendarItems(db: D1Database, feed: CalendarFeed): Promise<CalendarItem[]> {
   return (await Promise.all(activeWorkerModules().map((m) => m.calendarItems?.(db, feed) ?? []))).flat();
+}
+
+/** Teams the account follows through an active module (fans), without its own; empty while no such module is on. */
+export async function moduleFollowedTeams(db: D1Database, actor: Actor): Promise<number[]> {
+  const parts = await Promise.all(activeWorkerModules().map((m) => m.follows?.teams(db, actor) ?? []));
+  return [...new Set(parts.flat())];
+}
+
+/** Accounts following any of these teams through an active module, one row per account and team. */
+export async function moduleFollowers(db: D1Database, teamIds: number[]): Promise<{ accountId: number; teamId: number }[]> {
+  if (!teamIds.length) return [];
+  return (await Promise.all(activeWorkerModules().map((m) => m.follows?.accounts(db, teamIds) ?? []))).flat();
 }

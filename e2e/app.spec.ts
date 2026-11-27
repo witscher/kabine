@@ -2538,3 +2538,75 @@ test("Fans: Spielerin folgt einer anderen Mannschaft, sieht deren Spiel unter de
   await moduleSwitch.click();
   await expect(moduleSwitch).toHaveAttribute("aria-checked", "false");
 });
+
+test("Großer Heimspieltag: Karte auf der Startseite, Seite des Tages, Einstellungen", async () => {
+  await admin.page.goto("/verwaltung/verein");
+  const moduleSwitch = admin.page.getByRole("switch", { name: /^Großer Heimspieltag/ });
+  await moduleSwitch.click();
+  await expect(moduleSwitch).toHaveAttribute("aria-checked", "true");
+  // Five teams play at home in two days: the player's wT and four more
+  const date = new Date(Date.now() + 2 * 86_400_000).toLocaleDateString("sv-SE", { timeZone: "Europe/Berlin" });
+  const teamIds = [1];
+  for (const name of ["gA", "gB", "gC", "gD"]) {
+    const { id } = await (await admin.page.request.post("/api/teams", { data: { name, ageClassCode: "wC" } })).json();
+    teamIds.push(id);
+  }
+  const gameIds: number[] = [];
+  for (const [i, id] of teamIds.entries()) {
+    const created = await admin.page.request.post(`/api/duties/teams/${id}/games`, { data: { opponent: `TSV Gästeheim ${i}`, isHome: true, date, time: `${10 + i}:30` } });
+    expect(created.ok()).toBe(true);
+    gameIds.push(((await created.json()) as { id: number }).id);
+  }
+
+  const { page } = player;
+  await page.goto("/");
+  const card = page.locator("a.gameday-card");
+  await expect(card).toBeVisible();
+  await expect(card).toContainText("Großer Heimspieltag");
+  await expect(card).toContainText("5 Mannschaften");
+  // First to last kick-off of the day (the demo data may have one more game of wT that day)
+  await expect(card).toContainText(/10:30 bis \d\d:\d\d Uhr/);
+  await expect(card.locator(".gameday-games li")).toHaveText(["10:30wTdeine Mannschaft"]);
+  await expect(card).toContainText("Komm vorbei und feuer mit an!");
+  // No mascot uploaded: no picture
+  await expect(card.locator("img")).toHaveCount(0);
+  if (process.env.E2E_SHOTS) await page.screenshot({ path: `${process.env.E2E_SHOTS}/home-gameday.png`, fullPage: true });
+
+  await card.click();
+  await expect(page).toHaveURL(new RegExp(`/heimspieltag/${date}$`));
+  for (let i = 0; i < 5; i++) await expect(page.locator(".gameday-item", { hasText: `TSV Gästeheim ${i}` })).toHaveCount(1);
+  // Own game marked and linked to the event page, the others not marked
+  const own = page.locator(".gameday-item", { hasText: "TSV Gästeheim 0" });
+  await expect(own).toHaveClass(/mine/);
+  await expect(own).toContainText("deine Mannschaft");
+  await expect(own.getByRole("link")).toHaveAttribute("href", `/termine/${gameIds[0]}`);
+  await expect(page.locator(".gameday-item", { hasText: "TSV Gästeheim 3" })).not.toHaveClass(/mine/);
+  // Game data only: no names of the squad
+  await expect(page.getByText("Ida")).toHaveCount(0);
+  if (process.env.E2E_SHOTS) await page.screenshot({ path: `${process.env.E2E_SHOTS}/gameday.png`, fullPage: true });
+
+  // Administration: the next day with the time of the message
+  await admin.page.goto("/verwaltung/heimspieltage");
+  await expect(admin.page.getByRole("heading", { name: "Große Heimspieltage" })).toBeVisible();
+  await expect(admin.page.getByText(/5 Mannschaften · der Hinweis geht am .* um 18:00 Uhr raus/)).toBeVisible();
+  await admin.page.getByRole("button", { name: "Eine Mannschaft mehr" }).click();
+  await expect(admin.page.getByText("In den nächsten drei Monaten keiner.")).toBeVisible();
+  await admin.page.getByRole("button", { name: "Eine Mannschaft weniger" }).click();
+  await expect(admin.page.getByText(/5 Mannschaften · der Hinweis/)).toBeVisible();
+
+  // With six teams needed the card is gone
+  await admin.page.getByRole("button", { name: "Eine Mannschaft mehr" }).click();
+  await expect(admin.page.getByText("In den nächsten drei Monaten keiner.")).toBeVisible();
+  await page.goto("/");
+  await expect(page.locator(".hero-sub")).toBeVisible();
+  await expect(page.locator("a.gameday-card")).toHaveCount(0);
+
+  // Back as before for the tests after this one
+  await admin.page.getByRole("button", { name: "Eine Mannschaft weniger" }).click();
+  await expect(admin.page.getByText(/5 Mannschaften · der Hinweis/)).toBeVisible();
+  for (const id of gameIds) await admin.page.request.delete(`/api/duties/games/${id}`);
+  for (const id of teamIds.slice(1)) await admin.page.request.delete(`/api/teams/${id}`);
+  await admin.page.goto("/verwaltung/verein");
+  await moduleSwitch.click();
+  await expect(moduleSwitch).toHaveAttribute("aria-checked", "false");
+});
