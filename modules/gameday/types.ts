@@ -12,8 +12,6 @@ export interface GamedaySettings {
   /** A day counts from this many teams with a home game. */
   minTeams: number;
   hour: GamedayHour;
-  /** Version of the mascot picture (KV), null: none uploaded. */
-  mascotVersion: number | null;
 }
 
 /** An own or followed game on the card, with what the app needs to tell whether it is running. */
@@ -44,7 +42,6 @@ export interface GamedayPage {
   card: GamedayCard | null;
   /** Later days the person is involved in, as small tiles at the kick-off of the first home game. */
   later: { date: string; startsAt: string }[];
-  mascotVersion: number | null;
 }
 
 /** A game on the page of the day: game data that is public anyway, no squad, responses or names. */
@@ -65,7 +62,6 @@ export interface GamedayDetail extends Omit<GamedayCard, "mine"> {
   games: GamedayGame[];
   /** Open helper slots of the day the person could take (null: helper duties off). */
   helpersNeeded: number | null;
-  mascotVersion: number | null;
 }
 
 /** Administration → Home game days. */

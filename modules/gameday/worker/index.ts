@@ -15,7 +15,7 @@ export default defineWorkerModule({
   eventPage: async (db, actor, q): Promise<GamedayPage | null> => {
     if (q.past || (q.kinds && !q.kinds.includes("game"))) return null;
     const data = await homeData(db, actor, { to: q.to });
-    return data ? { card: data.card, later: data.later, mascotVersion: data.settings.mascotVersion } : null;
+    return data ? { card: data.card, later: data.later } : null;
   },
   cron: (env, now) => sendGamedayNotice(env, now),
   // Only the dates the push went out; deleted after a week anyway

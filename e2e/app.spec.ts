@@ -2539,6 +2539,84 @@ test("Fans: Spielerin folgt einer anderen Mannschaft, sieht deren Spiel unter de
   await expect(moduleSwitch).toHaveAttribute("aria-checked", "false");
 });
 
+/** A PNG drawn in the browser: a yellow disc on a transparent or coloured background. */
+async function mascotPng(page: Page, width: number, height: number, background = "transparent"): Promise<Buffer> {
+  const b64 = (await page.evaluate(`(() => {
+    const canvas = document.createElement("canvas");
+    canvas.width = ${width};
+    canvas.height = ${height};
+    const ctx = canvas.getContext("2d");
+    if (${JSON.stringify(background)} !== "transparent") {
+      ctx.fillStyle = ${JSON.stringify(background)};
+      ctx.fillRect(0, 0, ${width}, ${height});
+    }
+    ctx.fillStyle = "#f5b700";
+    ctx.beginPath();
+    ctx.arc(${width / 2}, ${height / 2}, ${Math.min(width, height) / 3}, 0, Math.PI * 2);
+    ctx.fill();
+    return canvas.toDataURL("image/png").split(",")[1];
+  })()`)) as string;
+  return Buffer.from(b64, "base64");
+}
+
+/** Width and height of a loaded picture (0 while it is not loaded). */
+const naturalSize = (img: import("@playwright/test").Locator) =>
+  img.evaluate((el) => {
+    const i = el as unknown as { naturalWidth: number; naturalHeight: number };
+    return [i.naturalWidth, i.naturalHeight];
+  });
+
+test("Vereinsmaskottchen: Bilder prüfen, hochladen und entfernen", async () => {
+  const { page } = admin;
+  await page.goto("/verwaltung/verein");
+  const moduleSwitch = page.getByRole("switch", { name: /^Vereinsmaskottchen/ });
+  await moduleSwitch.click();
+  await expect(moduleSwitch).toHaveAttribute("aria-checked", "true");
+  await page.goto("/verwaltung");
+  await page.getByRole("link", { name: /Vereinsmaskottchen/ }).click();
+  await expect(page.getByRole("heading", { name: "Vereinsmaskottchen" })).toBeVisible();
+
+  const win = page.locator('.mascot-slot[data-slot="win"]');
+  await expect(win).toContainText("Kein Bild");
+  // Checked in the browser before the upload: square faces, at least 256 pixels, no coloured background
+  await page.getByLabel("Bild hochladen: Sieg").setInputFiles({ name: "breit.png", mimeType: "image/png", buffer: await mascotPng(page, 400, 300) });
+  await expect(page.getByText("Die Gesichter müssen quadratisch sein.")).toBeVisible();
+  await page.getByLabel("Bild hochladen: Sieg").setInputFiles({ name: "klein.png", mimeType: "image/png", buffer: await mascotPng(page, 200, 200) });
+  await expect(page.getByText("Das Bild muss mindestens 256 Pixel groß sein.")).toBeVisible();
+  await page.getByLabel("Bild hochladen: Sieg").setInputFiles({ name: "blau.png", mimeType: "image/png", buffer: await mascotPng(page, 300, 300, "#2050c0") });
+  await expect(page.getByText("Der Hintergrund muss durchsichtig oder weiß sein.")).toBeVisible();
+  await page.getByLabel("Bild hochladen: Sieg").setInputFiles({ name: "jpeg.jpg", mimeType: "image/jpeg", buffer: Buffer.from("x") });
+  await expect(page.getByText("Bitte eine PNG-, WebP- oder SVG-Datei wählen.")).toBeVisible();
+  await expect(win).toContainText("Kein Bild");
+
+  // A good one: scaled to 256 x 256 and shown
+  await page.getByLabel("Bild hochladen: Sieg").setInputFiles({ name: "sieg.png", mimeType: "image/png", buffer: await mascotPng(page, 600, 600, "#ffffff") });
+  await expect(page.getByText("Bild gespeichert.")).toBeVisible();
+  const img = win.getByRole("img", { name: "Sieg" });
+  await expect(img).toHaveAttribute("src", /^\/api\/mascot\/images\/win\?v=\d+$/);
+  await expect.poll(() => naturalSize(img)).toEqual([256, 256]);
+  await expect(win.getByText("Ersetzen")).toBeVisible();
+  // An SVG is drawn into a picture, any shape for the card
+  const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="300" height="200" viewBox="0 0 300 200"><circle cx="150" cy="100" r="80" fill="#f5b700"/></svg>';
+  await page.getByLabel("Bild hochladen: Karte Heimspieltag").setInputFiles({ name: "karte.svg", mimeType: "image/svg+xml", buffer: Buffer.from(svg) });
+  const card = page.locator('.mascot-slot[data-slot="card"]').getByRole("img");
+  await expect(card).toHaveAttribute("src", /^\/api\/mascot\/images\/card\?v=\d+$/);
+  await expect.poll(() => naturalSize(card)).toEqual([512, 341]);
+  const stored = await page.request.get((await card.getAttribute("src"))!);
+  expect(stored.headers()["content-type"]).toMatch(/^image\/(webp|png)$/);
+
+  // Removed after asking
+  await win.getByRole("button", { name: "Bild entfernen: Sieg" }).click();
+  await page.getByRole("dialog").getByRole("button", { name: "Entfernen" }).click();
+  await expect(win).toContainText("Kein Bild");
+  await page.locator('.mascot-slot[data-slot="card"]').getByRole("button", { name: "Bild entfernen: Karte Heimspieltag" }).click();
+  await page.getByRole("dialog").getByRole("button", { name: "Entfernen" }).click();
+  await expect(page.locator('.mascot-slot[data-slot="card"]')).toContainText("Kein Bild");
+  await page.goto("/verwaltung/verein");
+  await moduleSwitch.click();
+  await expect(moduleSwitch).toHaveAttribute("aria-checked", "false");
+});
+
 test("Heimspieltag: Karte auf der Startseite, Seite des Tages, Einstellungen", async () => {
   await admin.page.goto("/verwaltung/verein");
   const moduleSwitch = admin.page.getByRole("switch", { name: /^Heimspieltag/ });
@@ -2568,8 +2646,21 @@ test("Heimspieltag: Karte auf der Startseite, Seite des Tages, Einstellungen", a
   await expect(card).toContainText(/10:30 bis \d\d:\d\d Uhr/);
   await expect(card.locator(".gameday-games li")).toHaveText(["10:30wTdeine Mannschaft"]);
   await expect(card).toContainText("Komm vorbei und feuer mit an!");
-  // No mascot uploaded: no picture
+  // Without the club mascot module: no picture
   await expect(card.locator("img")).toHaveCount(0);
+
+  // With it, the card shows the mascot's picture and the page of the day its head
+  const mascotSwitch = admin.page.getByRole("switch", { name: /^Vereinsmaskottchen/ });
+  await mascotSwitch.click();
+  await expect(mascotSwitch).toHaveAttribute("aria-checked", "true");
+  for (const [slot, w, h] of [["card", 512, 340], ["head", 256, 256]] as const) {
+    const res = await admin.page.request.put(`/api/mascot/images/${slot}`, { data: await mascotPng(admin.page, w, h), headers: { "content-type": "image/png" } });
+    expect(res.ok()).toBe(true);
+  }
+  await page.goto("/");
+  const mascot = card.locator("img.gameday-mascot");
+  await expect(mascot).toHaveAttribute("src", /^\/api\/mascot\/images\/card\?v=\d+$/);
+  await expect.poll(async () => (await naturalSize(mascot))[0]).toBe(512);
   if (process.env.E2E_SHOTS) await page.screenshot({ path: `${process.env.E2E_SHOTS}/home-gameday.png`, fullPage: true });
 
   await card.click();
@@ -2580,6 +2671,7 @@ test("Heimspieltag: Karte auf der Startseite, Seite des Tages, Einstellungen", a
   await expect(own).toHaveClass(/mine/);
   await expect(own).toContainText("deine Mannschaft");
   await expect(own.getByRole("link")).toHaveAttribute("href", `/termine/${gameIds[0]}`);
+  await expect(page.locator("img.gameday-day-mascot")).toHaveAttribute("src", /^\/api\/mascot\/images\/head\?v=\d+$/);
   await expect(page.locator(".gameday-item", { hasText: "TSV Gästeheim 3" })).not.toHaveClass(/mine/);
   // Game data only: no names of the squad
   await expect(page.getByText("Ida")).toHaveCount(0);
@@ -2606,7 +2698,10 @@ test("Heimspieltag: Karte auf der Startseite, Seite des Tages, Einstellungen", a
   await expect(admin.page.getByText(/5 Mannschaften · der Hinweis/)).toBeVisible();
   for (const id of gameIds) await admin.page.request.delete(`/api/duties/games/${id}`);
   for (const id of teamIds.slice(1)) await admin.page.request.delete(`/api/teams/${id}`);
+  for (const slot of ["card", "head"]) expect((await admin.page.request.delete(`/api/mascot/images/${slot}`)).ok()).toBe(true);
   await admin.page.goto("/verwaltung/verein");
   await moduleSwitch.click();
   await expect(moduleSwitch).toHaveAttribute("aria-checked", "false");
+  await mascotSwitch.click();
+  await expect(mascotSwitch).toHaveAttribute("aria-checked", "false");
 });

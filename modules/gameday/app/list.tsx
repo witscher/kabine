@@ -5,9 +5,8 @@ import { Trans } from "@lingui/react/macro";
 import { dayOfMonth, longDate, monthShort, nowLocal, relativeDay, time, weekdayShort } from "../../../src/format";
 import { Icon } from "../../../src/icons";
 import type { HomeListContext, HomeListPart } from "../../../src/module-api";
+import { useMascotImage } from "../../../src/modules";
 import type { GamedayCard, GamedayMine, GamedayPage } from "../types";
-
-export const mascotUrl = (version: number | null) => (version ? `/api/gameday/mascot?v=${version}` : null);
 
 /** Kicked off and not over yet (duration of the age class): such a game keeps its row with the live link in the list. */
 function running(m: GamedayMine, nowL: string): boolean {
@@ -20,23 +19,23 @@ export function gamedayHomeList(ctx: HomeListContext): HomeListPart | null {
   const page = ctx.data as GamedayPage | null | undefined;
   if (!page) return null;
   const nowL = nowLocal();
-  const mascot = mascotUrl(page.mascotVersion);
   return {
     card: page.card
       ? {
           key: `gameday-${page.card.date}`,
           day: page.card.date,
-          node: <GamedayCardView card={page.card} mascot={mascot} />,
+          node: <GamedayCardView card={page.card} />,
           // Games one follows stand on the card, not again in the list, except while they run (live link)
           covers: page.card.mine.filter((m) => m.fan && !running(m, nowL)).map((m) => m.eventId),
         }
       : undefined,
-    rows: page.later.map((d) => ({ key: `gameday-${d.date}`, startsAt: d.startsAt, id: 0, node: <GamedayRow key={`gameday-${d.date}`} date={d.date} mascot={mascot} /> })),
+    rows: page.later.map((d) => ({ key: `gameday-${d.date}`, startsAt: d.startsAt, id: 0, node: <GamedayRow key={`gameday-${d.date}`} date={d.date} /> })),
   };
 }
 
-/** The large card: the day's time span, one line per own or followed game, the mascot if the club has one. */
-function GamedayCardView({ card, mascot }: { card: GamedayCard; mascot: string | null }) {
+/** The large card: the day's time span, one line per own or followed game, the mascot if the club has one (mascot module). */
+function GamedayCardView({ card }: { card: GamedayCard }) {
+  const mascot = useMascotImage("card");
   const day = relativeDay(`${card.date}T00:00`);
   const date = longDate(`${card.date}T00:00`);
   const count = card.teams;
@@ -84,13 +83,14 @@ function GamedayCardView({ card, mascot }: { card: GamedayCard; mascot: string |
       <div class="gameday-cheer">
         <Trans>Come along and cheer!</Trans>
       </div>
-      {mascot ? <img class="gameday-mascot" src={mascot} alt="" width={118} height={132} decoding="async" /> : null}
+      {mascot ? <img class="gameday-mascot" src={mascot} alt="" decoding="async" /> : null}
     </a>
   );
 }
 
-/** A later home game day: a small white tile, the mascot if any, no further details. */
-function GamedayRow({ date, mascot }: { date: string; mascot: string | null }) {
+/** A later home game day: a small white tile, the mascot's head if any, no further details. */
+function GamedayRow({ date }: { date: string }) {
+  const mascot = useMascotImage("head");
   const at = `${date}T00:00`;
   return (
     <a href={`/heimspieltag/${date}`} class="event-row gameday-row">
@@ -104,7 +104,7 @@ function GamedayRow({ date, mascot }: { date: string; mascot: string | null }) {
           <Trans>Home game day</Trans>
         </div>
       </div>
-      {mascot ? <img class="gameday-row-head" src={mascot} alt="" width={64} height={64} decoding="async" /> : null}
+      {mascot ? <img class="gameday-row-head" src={mascot} alt="" decoding="async" /> : null}
     </a>
   );
 }

@@ -44,6 +44,7 @@ modules/carpools/
 | `eventChanged` | an event was cancelled, restored or moved (start or venue), after the core told its teams | no |
 | `calendarItems` | entries in a personal calendar feed (`worker/domain/calendar.ts`, `CalendarItem`) | no |
 | `follows` | teams an account follows without belonging to them (fans), for other modules: `moduleFollowedTeams`, `moduleFollowers` in `worker/modules.ts` | no |
+| `mascot` | pictures of the club's mascot by slot (result faces, home game day): carried to the app in the club profile, read with `useMascotImage(slot)` from `src/modules.ts`, in the worker with `moduleMascot` | no |
 | `participantsLeft` | someone declined or was removed from the squad | no |
 | `participantsDropped` | SQL cleanup in the core's batch (automatic squads, withdrawn stand-ins) | yes |
 | `personLeaves` | SQL cleanup when someone leaves the club | yes |
@@ -91,6 +92,7 @@ Explanations of a module's settings go behind an info button (docs/dev/design.md
 | `polls` | Polls | off (beta) | `modules/polls/` |
 | `fans` | Fans | off (beta) | `modules/fans/` |
 | `gameday` | Home game day | off (beta) | `modules/gameday/` |
+| `mascot` | Club mascot | off (beta) | `modules/mascot/` (pictures for other code through the hook `mascot`) |
 
 ## Adding a module
 

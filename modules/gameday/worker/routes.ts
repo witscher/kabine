@@ -1,5 +1,5 @@
 // API of the home game day module, mounted under /api: the page of the day for the people involved and admins, the
-// settings and the mascot picture for admins.
+// settings for admins. The mascot's pictures come from the mascot module (hook mascot, club profile).
 import { t } from "@lingui/core/macro";
 import { Hono } from "hono";
 import { z } from "zod";
@@ -9,16 +9,12 @@ import { isModuleOn } from "../../../worker/domain/club";
 import { loadHelpersNeeded } from "../../../worker/domain/duties";
 import { cachedTeamInfo, EVENT_COLUMNS, EVENT_JOINS, type EventRow, eventTitle, gameLiveMinutes, gameSource, gameTable, type TeamInfo } from "../../../worker/domain/events";
 import { all, list } from "../../../worker/lib/db";
-import { badRequest, notFound, parse, readJson } from "../../../worker/lib/http";
+import { notFound, parse, readJson } from "../../../worker/lib/http";
 import { addDays, isDate, nowLocal, todayLocal } from "../../../worker/lib/time";
 import { GAMEDAY_HOURS, type GamedayDetail, type GamedayGame, type GamedaySettingsView } from "../types";
 import { gamedaysFrom, involvement, loadGameday, loadSettings, recipients, saveSettings } from "./domain";
 
 export const routes = new Hono<AppEnv>();
-
-const MASCOT_KEY = "gameday-mascot";
-const MASCOT_TYPES = ["image/png", "image/jpeg", "image/webp"];
-const MASCOT_MAX_BYTES = 256 * 1024;
 
 /**
  * The page of the day: every home game with game data that is public anyway (kick-off, venue, opponent, result for the
@@ -87,7 +83,6 @@ routes.get("/gameday/days/:date", async (c) => {
     last: gd.last,
     games,
     helpersNeeded: needed ? [...needed.values()].reduce((a, b) => a + b, 0) : null,
-    mascotVersion: settings.mascotVersion,
   };
   return c.json(body);
 });
@@ -125,38 +120,5 @@ routes.put("/gameday/settings", async (c) => {
   const input = parse(settingsSchema, await readJson(c.req.raw));
   const current = await loadSettings(c.env.DB, actor.versions);
   await saveSettings(c.env.DB, { ...current, ...input, hour: input.hour as (typeof GAMEDAY_HOURS)[number] });
-  return c.json({ ok: true });
-});
-
-/** The mascot picture, stored in KV like the club logo; the URL carries the version. */
-routes.get("/gameday/mascot", async (c) => {
-  const { value, metadata } = await c.env.KV.getWithMetadata<{ type: string }>(MASCOT_KEY, "arrayBuffer");
-  if (!value || !metadata) return c.body(null, 404);
-  return c.body(value, 200, {
-    "Content-Type": metadata.type,
-    "Cache-Control": "public, max-age=31536000, immutable",
-    "Content-Security-Policy": "default-src 'none'",
-  });
-});
-
-routes.put("/gameday/mascot", async (c) => {
-  const actor = requireActor(c);
-  requireAdmin(actor);
-  const type = (c.req.header("content-type") ?? "").split(";")[0]!.trim();
-  if (!MASCOT_TYPES.includes(type)) throw badRequest(t`Please upload a PNG, JPEG or WebP file.`);
-  const body = await c.req.arrayBuffer();
-  if (!body.byteLength || body.byteLength > MASCOT_MAX_BYTES) throw badRequest(t`The picture may be at most 256 KB.`);
-  await c.env.KV.put(MASCOT_KEY, body, { metadata: { type } });
-  const current = await loadSettings(c.env.DB, actor.versions);
-  await saveSettings(c.env.DB, { ...current, mascotVersion: (current.mascotVersion ?? 0) + 1 });
-  return c.json({ ok: true });
-});
-
-routes.delete("/gameday/mascot", async (c) => {
-  const actor = requireActor(c);
-  requireAdmin(actor);
-  await c.env.KV.delete(MASCOT_KEY);
-  const current = await loadSettings(c.env.DB, actor.versions);
-  await saveSettings(c.env.DB, { ...current, mascotVersion: null });
   return c.json({ ok: true });
 });

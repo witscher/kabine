@@ -5,11 +5,11 @@ import { api, errorMessage } from "../../../src/api";
 import { fullDate, time } from "../../../src/format";
 import { Icon } from "../../../src/icons";
 import { GameLinks, isLiveWindow } from "../../../src/live";
+import { useMascotImage } from "../../../src/modules";
 import { AdminOnly } from "../../../src/pages/admin";
 import { useQuery } from "../../../src/store";
-import { Button, ErrorBox, Segmented, Spinner, SwitchRow, toast, TopBar, useDocumentTitle } from "../../../src/ui";
+import { ErrorBox, Segmented, Spinner, SwitchRow, toast, TopBar, useDocumentTitle } from "../../../src/ui";
 import { GAMEDAY_HOURS, type GamedayDetail, type GamedayGame, type GamedaySettings, type GamedaySettingsView } from "../types";
-import { mascotUrl } from "./list";
 
 /** All home games of the day; own and followed ones marked, the live link while a game runs, open helper slots. */
 export function GamedayPage({ date }: { date: string }) {
@@ -18,7 +18,7 @@ export function GamedayPage({ date }: { date: string }) {
   const count = d?.teams ?? 0;
   const first = d ? time(d.first) : "";
   const last = d ? time(d.last) : "";
-  const mascot = d ? mascotUrl(d.mascotVersion) : null;
+  const mascot = useMascotImage("head");
   const open = d?.helpersNeeded ?? 0;
   return (
     <main class="page">
@@ -39,7 +39,7 @@ export function GamedayPage({ date }: { date: string }) {
                 <div class="small muted">
                   {plural(count, { one: "# team", other: "# teams" })} · <Trans>{first} to {last}</Trans>
                 </div>
-                {mascot ? <img class="gameday-day-mascot" src={mascot} alt="" width={72} height={80} decoding="async" /> : null}
+                {mascot ? <img class="gameday-day-mascot" src={mascot} alt="" decoding="async" /> : null}
               </div>
               {d.games.map((g) => (
                 <GameItem key={g.id} game={g} />
@@ -107,7 +107,7 @@ function GameItem({ game: g }: { game: GamedayGame }) {
   );
 }
 
-/** Administration → Home game days: the push the day before, from how many teams, at which hour, the mascot. */
+/** Administration → Home game days: the push the day before, from how many teams, at which hour. */
 export function AdminGamedayPage() {
   useDocumentTitle(t`Home game days`);
   const { data, error, reload } = useQuery<GamedaySettingsView>("/gameday/settings");
@@ -120,16 +120,6 @@ export function AdminGamedayPage() {
       toast(errorMessage(err), "error");
     }
   };
-  const upload = async (file: File | undefined) => {
-    if (!file) return;
-    try {
-      await api.upload("/gameday/mascot", file);
-      await reload();
-    } catch (err) {
-      toast(errorMessage(err), "error");
-    }
-  };
-  const mascot = data ? mascotUrl(data.mascotVersion) : null;
   const next = data?.next;
   const nextDate = next ? fullDate(next.date) : "";
   const sendDate = next ? fullDate(next.sendAt) : "";
@@ -146,6 +136,9 @@ export function AdminGamedayPage() {
               When many teams play at home on the same day, everyone involved gets a message the day before: players, parents and coaches of the teams
               that play, their fans and whoever has a helper duty that day. They also see a card on the start page and the overview of the day.
             </Trans>
+          </p>
+          <p class="small muted">
+            <Trans>The mascot on the card and the tiles comes from the module Club mascot, under Administration → Club mascot.</Trans>
           </p>
           {error ? <ErrorBox error={error} onRetry={reload} /> : null}
           {!data && !error ? <Spinner /> : null}
@@ -183,33 +176,6 @@ export function AdminGamedayPage() {
                   onChange={(v) => save({ hour: Number(v) as GamedaySettings["hour"] })}
                   options={GAMEDAY_HOURS.map((h) => ({ value: String(h), label: t`${h}:00` }))}
                 />
-              </section>
-              <section class="card card-pad stack-sm" aria-label={t`Mascot`}>
-                <strong>
-                  <Trans>Mascot</Trans>
-                </strong>
-                <p class="small muted">
-                  <Trans>Optional: a picture of the club's mascot on the card and the tiles. PNG, JPEG or WebP, at most 256 KB. Without one, no picture is shown.</Trans>
-                </p>
-                {mascot ? <img class="gameday-admin-mascot" src={mascot} alt={t`Mascot`} width={118} height={132} /> : null}
-                <div class="row-gap">
-                  <label class="btn btn-dashed">
-                    <Trans>Upload picture</Trans>
-                    <input type="file" accept="image/png,image/jpeg,image/webp" class="sr-only" onChange={(e) => void upload((e.target as HTMLInputElement).files?.[0])} />
-                  </label>
-                  {mascot ? (
-                    <Button
-                      variant="ghost"
-                      icon="trash"
-                      onClick={async () => {
-                        await api.del("/gameday/mascot");
-                        await reload();
-                      }}
-                    >
-                      <Trans>Remove picture</Trans>
-                    </Button>
-                  ) : null}
-                </div>
               </section>
               <section class="card card-pad stack-sm" aria-label={t`Next home game day`}>
                 <strong>

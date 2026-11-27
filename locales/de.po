@@ -673,6 +673,12 @@ msgid "As soon as we see the payment we mark the order as paid. This can take 1 
 msgstr "Sobald wir den Geldeingang feststellen, markieren wir die Bestellung als bezahlt. Das kann 1 bis 2 Tage dauern."
 
 # ai
+#: modules/mascot/app/prepare.ts
+#: modules/mascot/app/prepare.ts
+msgid "The picture could not be opened. Please choose a PNG, WebP or SVG file."
+msgstr "Das Bild ließ sich nicht öffnen. Bitte eine PNG-, WebP- oder SVG-Datei wählen."
+
+# ai
 #: modules/polls/app/pages.tsx
 msgid "Add answer"
 msgstr "Antwort hinzufügen"
@@ -1029,6 +1035,12 @@ msgstr "Ablehnen"
 msgid "Open"
 msgstr "Öffnen"
 
+# ai
+#: modules/mascot/app/prepare.ts
+#: modules/mascot/worker/routes.ts
+msgid "The picture must be at least {side} pixels in size."
+msgstr "Das Bild muss mindestens {side} Pixel groß sein."
+
 #: src/respond.tsx
 msgid "Please do not give details about illnesses, “ill” is enough. Only the coaches see the reason."
 msgstr "Bitte keine Details zu Erkrankungen angeben, „krank“ genügt. Den Grund sehen nur die Trainer."
@@ -1245,6 +1257,11 @@ msgstr "Zur selben Zeit für {games} nominiert"
 msgid "Home games of the teams you follow, game data only"
 msgstr "Heimspiele der Mannschaften, denen du folgst, nur Spieldaten"
 
+# ai
+#: modules/gameday/module.ts
+msgid "No further personal data: the settings and the dates on which the message the day before went out (the mascot's pictures belong to the mascot module). Who gets the message is worked out from the teams, the parent links, the teams one follows and the helper duties of the day."
+msgstr "Keine weiteren personenbezogenen Daten: die Einstellungen und die Tage, an denen der Hinweis am Vortag verschickt wurde (die Bilder des Maskottchens gehören zum Modul Vereinsmaskottchen). Wer den Hinweis bekommt, ergibt sich aus den Mannschaften, den Elternverknüpfungen, den gefolgten Mannschaften und den Helferdiensten des Tages."
+
 #: modules/carpools/worker/routes.ts
 msgid "Passengers can be nominated players who have not declined, and the coaches."
 msgstr "Mitfahren können nominierte Spieler, die nicht abgesagt haben, und die Trainer."
@@ -1308,6 +1325,11 @@ msgstr "{actorName} hat für {name} {what} am {when} zugesagt."
 msgid "Please enter the password of the mail account."
 msgstr "Bitte gib das Passwort des Mail-Kontos ein."
 
+# ai
+#: modules/gameday/module.ts
+msgid "The dates after a week."
+msgstr "Die Tage nach einer Woche."
+
 #: src/pages/join.tsx
 msgid "I am {playerName} – set up passkey"
 msgstr "Ich bin {playerName} – Passkey einrichten"
@@ -1344,6 +1366,11 @@ msgstr "{duty} ({child})"
 #: src/pages/season.tsx
 msgid "Step {step}"
 msgstr "Schritt {step}"
+
+# ai
+#: modules/mascot/app/admin.tsx
+msgid "Draw"
+msgstr "Unentschieden"
 
 #: src/pages/group.tsx
 msgid "Rename"
@@ -1540,6 +1567,14 @@ msgstr "Code aus der SMS"
 #: src/pages/login.tsx
 msgid "Code by SMS"
 msgstr "Code per SMS"
+
+# ai
+#: modules/mascot/app/admin.tsx
+#: modules/mascot/app/admin.tsx
+#: modules/mascot/app/index.tsx
+#: modules/mascot/module.ts
+msgid "Club mascot"
+msgstr "Vereinsmaskottchen"
 
 #: worker/routes/season.ts
 msgid "The new season must begin after the start of the current season {name}."
@@ -2669,6 +2704,7 @@ msgstr "Zu dieser Adresse gehören mehrere Zugänge. Mit welchem möchtest du di
 #: modules/duties/app/admin.tsx
 #: modules/duties/app/approvals.tsx
 #: modules/gameday/app/pages.tsx
+#: modules/mascot/app/admin.tsx
 #: modules/polls/app/settings.tsx
 #: modules/sms/app/settings.tsx
 #: src/pages/admin.tsx
@@ -2701,6 +2737,11 @@ msgstr "Gerade sind keine Plätze frei. Erinnern geht wieder, sobald Dienste off
 #: worker/routes/events.ts
 msgid "{name} declined {what} on {when} at short notice."
 msgstr "{name} hat {what} am {when} kurzfristig abgesagt."
+
+# ai
+#: modules/mascot/app/prepare.ts
+msgid "The background must be transparent or white."
+msgstr "Der Hintergrund muss durchsichtig oder weiß sein."
 
 # ai
 #: modules/duties/worker/stats.ts
@@ -2954,9 +2995,9 @@ msgid "{label}: one slot fewer"
 msgstr "{label}: ein Platz weniger"
 
 # ai
-#: modules/gameday/worker/routes.ts
-msgid "Please upload a PNG, JPEG or WebP file."
-msgstr "Bitte eine PNG-, JPEG- oder WebP-Datei hochladen."
+#: modules/mascot/module.ts
+msgid "Admins upload pictures of the club's mascot: faces for won, drawn, narrowly and clearly lost games, and the mascot on the cards of the home game day."
+msgstr "Admins laden Bilder des Vereinsmaskottchens hoch: Gesichter für gewonnene, unentschiedene, knapp und deutlich verlorene Spiele und das Maskottchen auf den Karten des Heimspieltags."
 
 #: worker/routes/events.ts
 msgid "This is only possible once the event has started."
@@ -3344,6 +3385,11 @@ msgid "You cannot remove your own admin rights."
 msgstr "Du kannst dir die Admin-Rechte nicht selbst entziehen."
 
 # ai
+#: modules/mascot/app/admin.tsx
+msgid "Picture saved."
+msgstr "Bild gespeichert."
+
+# ai
 #: src/pages/club-settings.tsx
 msgid "Save name"
 msgstr "Namen speichern"
@@ -3549,6 +3595,11 @@ msgstr "Die Begründung ist zu lang (höchstens 200 Zeichen)."
 msgid "Assign as {roleName}"
 msgstr "Als {roleName} zuordnen"
 
+# ai
+#: modules/mascot/app/admin.tsx
+msgid "Upload picture: {label}"
+msgstr "Bild hochladen: {label}"
+
 #: modules/duties/app/helpers.tsx
 #: modules/duties/worker/routes.ts
 #: modules/duties/worker/routes.ts
@@ -3686,6 +3737,11 @@ msgstr "Link zurückziehen?"
 #: src/avatar.tsx
 msgid "Move with your finger, zoom with two fingers or the slider."
 msgstr "Verschieben mit dem Finger, vergrößern mit zwei Fingern oder dem Regler."
+
+# ai
+#: modules/mascot/app/prepare.ts
+msgid "Please choose a PNG, WebP or SVG file."
+msgstr "Bitte eine PNG-, WebP- oder SVG-Datei wählen."
 
 # ai
 #. placeholder {0}: used.ageClasses
@@ -4118,11 +4174,6 @@ msgstr "Top-Helfer"
 msgid "{name} is now {intoName}."
 msgstr "{name} ist jetzt {intoName}."
 
-# ai
-#: modules/gameday/app/pages.tsx
-msgid "Optional: a picture of the club's mascot on the card and the tiles. PNG, JPEG or WebP, at most 256 KB. Without one, no picture is shown."
-msgstr "Optional: ein Bild des Vereinsmaskottchens auf der Karte und den Kacheln. PNG, JPEG oder WebP, höchstens 256 KB. Ohne Bild wird keines gezeigt."
-
 #: src/pages/team.tsx
 msgid "Dear parents of {teamName}, we use the {club} app for events, responses, helper duties and the team chat."
 msgstr "Liebe Eltern der {teamName}, wir nutzen die App {club} für Termine, Zu- und Absagen, Helferdienste und den Mannschaftschat."
@@ -4405,6 +4456,11 @@ msgstr "Neue Infos zu {label} am {date}: Treffpunkt {point} um {meetAt}."
 #: modules/sms/app/settings.tsx
 msgid "At most 11 letters and digits, e.g. the club's short name."
 msgstr "Höchstens 11 Buchstaben und Ziffern, z. B. der Kurzname des Vereins."
+
+# ai
+#: modules/mascot/app/admin.tsx
+msgid "Remove picture: {label}"
+msgstr "Bild entfernen: {label}"
 
 #: src/app.tsx
 #: src/pages/help.tsx
@@ -6447,6 +6503,11 @@ msgid "Everyone approved for {duty}"
 msgstr "Alle Freigegebenen für {duty}"
 
 # ai
+#: modules/mascot/app/admin.tsx
+msgid "Replace"
+msgstr "Ersetzen"
+
+# ai
 #: src/help-texts.ts
 msgid "A hidden marker that only admins see. Full club members can help organise special events and take on duties with “Who helps: members”."
 msgstr "Ein verstecktes Merkmal, das nur Admins sehen. Ordentliche Mitglieder können Sondertermine mitorganisieren und Dienste übernehmen, bei denen „Wer hilft: Mitglieder“ eingestellt ist."
@@ -6496,11 +6557,6 @@ msgstr "folgt"
 #: src/list-import.tsx
 msgid "Without first name"
 msgstr "Ohne Vorname"
-
-# ai
-#: modules/gameday/worker/routes.ts
-msgid "The picture may be at most 256 KB."
-msgstr "Das Bild darf höchstens 256 KB groß sein."
 
 # ai
 #: src/pages/audit.tsx
@@ -6701,7 +6757,6 @@ msgstr "Läuft gerade · Spiel"
 msgid "A date is listed twice."
 msgstr "Ein Termin steht doppelt drin."
 
-#: modules/gameday/app/pages.tsx
 #: src/avatar.tsx
 msgid "Remove picture"
 msgstr "Bild entfernen"
@@ -6748,13 +6803,6 @@ msgstr "Bestellungen können nicht anonym sein."
 msgid "Add members"
 msgstr "Mitglieder hinzufügen"
 
-# ai
-#: modules/gameday/app/pages.tsx
-#: modules/gameday/app/pages.tsx
-#: modules/gameday/app/pages.tsx
-msgid "Mascot"
-msgstr "Maskottchen"
-
 #: src/list-import.tsx
 #: src/pages/admin.tsx
 #: src/pages/admin.tsx
@@ -6764,6 +6812,11 @@ msgstr "Rolle"
 #: src/pages/team.tsx
 msgid "Upcoming events created by hand. Tap one to open it for editing, cancelling or deleting."
 msgstr "Kommende, von Hand angelegte Termine. Antippen öffnet den Termin zum Bearbeiten, Absagen oder Löschen."
+
+# ai
+#: modules/gameday/app/pages.tsx
+msgid "The mascot on the card and the tiles comes from the module Club mascot, under Administration → Club mascot."
+msgstr "Das Maskottchen auf der Karte und den Kacheln kommt aus dem Modul Vereinsmaskottchen, unter Verwaltung → Vereinsmaskottchen."
 
 # ai
 #: src/duty-blocks.tsx
@@ -6944,6 +6997,11 @@ msgstr "Jahrgang {birthYear} ist zu alt für die {ageClass}"
 msgid "people"
 msgstr "Personen"
 
+# ai
+#: modules/mascot/app/admin.tsx
+msgid "Pictures of your club's mascot. PNG, WebP or SVG with a transparent or white background, at least 256 pixels; the faces square. The app scales them down before the upload. Where a picture is missing, nothing is shown in its place."
+msgstr "Bilder des Maskottchens eures Vereins. PNG, WebP oder SVG mit durchsichtigem oder weißem Hintergrund, mindestens 256 Pixel, die Gesichter quadratisch. Die App verkleinert sie vor dem Hochladen. Wo ein Bild fehlt, wird an seiner Stelle nichts gezeigt."
+
 #: src/faq.tsx
 msgid "Inactive or away long-term: what is the difference?"
 msgstr "Inaktiv oder dauerhaft abwesend: Was ist der Unterschied?"
@@ -6987,6 +7045,11 @@ msgstr "Export"
 #: src/pages/games.tsx
 msgid "Another device is syncing the game schedule right now."
 msgstr "Ein anderes Gerät gleicht den Spielplan gerade ab."
+
+# ai
+#: modules/mascot/module.ts
+msgid "Everyone who opens the app, like the club logo."
+msgstr "Alle, die die App öffnen, wie das Vereinslogo."
 
 #: src/pages/home.tsx
 msgid "Next event: {kind}"
@@ -7549,6 +7612,11 @@ msgstr "Wie nominiere ich den Kader für ein Spiel?"
 #: src/pages/admin.tsx
 msgid "The legal notice or privacy policy of your club is missing. Your club is the provider of this app and must link both: <0>enter the links</0>."
 msgstr "Impressum oder Datenschutzerklärung deines Vereins fehlen. Dein Verein ist Anbieter dieser App und muss beides verlinken: <0>Links eintragen</0>."
+
+# ai
+#: modules/gameday/app/index.tsx
+msgid "Message the day before, from how many teams"
+msgstr "Hinweis am Vortag, ab wie vielen Mannschaften"
 
 # ai
 #: src/game-import.tsx
@@ -8538,11 +8606,6 @@ msgstr "Danach: Spiel"
 msgid "It's your turn for {label}: {game}, {from}–{until}. Sign up in the Helpers tab under “Help out”."
 msgstr "Ihr seid dran als {label}: {game}, {from}–{until}. Eintragen im Reiter Helfer unter „Aushelfen“."
 
-# ai
-#: modules/gameday/module.ts
-msgid "The dates after a week; the picture when an admin removes it."
-msgstr "Die Tage nach einer Woche; das Bild, wenn ein Admin es entfernt."
-
 #: src/help-texts.ts
 #: src/help-texts.ts
 #: src/pages/group.tsx
@@ -8729,6 +8792,12 @@ msgstr "Ältere Nachrichten laden"
 msgctxt "training"
 msgid "Optional"
 msgstr "Optional"
+
+# ai
+#: modules/mascot/app/prepare.ts
+#: modules/mascot/worker/routes.ts
+msgid "The picture may be at most 200 KB."
+msgstr "Das Bild darf höchstens 200 KB groß sein."
 
 # ai
 #: modules/polls/app/pages.tsx
@@ -9060,6 +9129,11 @@ msgstr "Gemeinsam mit"
 #: modules/duties/app/admin.tsx
 msgid "Kind"
 msgstr "Art"
+
+# ai
+#: modules/mascot/module.ts
+msgid "No personal data: up to six pictures of the club's mascot, uploaded by an admin."
+msgstr "Keine personenbezogenen Daten: bis zu sechs Bilder des Vereinsmaskottchens, von einem Admin hochgeladen."
 
 #: modules/duties/app/helpers.tsx
 #: modules/duties/app/helpers.tsx
@@ -9615,6 +9689,11 @@ msgid "OpenHolidays API (openholidaysapi.org), licence ODbL"
 msgstr "OpenHolidays API (openholidaysapi.org), Lizenz ODbL"
 
 # ai
+#: modules/mascot/app/admin.tsx
+msgid "No picture"
+msgstr "Kein Bild"
+
+# ai
 #: modules/polls/app/home.tsx
 #: modules/polls/app/pages.tsx
 msgid "Vote"
@@ -9656,6 +9735,12 @@ msgstr "Füge deine Listen hinzu: Excel-Dateien (.xlsx) mit einem oder mehreren 
 #: src/pages/event.tsx
 msgid "Choose meeting point"
 msgstr "Treffpunkt wählen"
+
+# ai
+#: modules/mascot/app/admin.tsx
+#: modules/mascot/app/admin.tsx
+msgid "Faces for results"
+msgstr "Gesichter für Ergebnisse"
 
 # ai
 #: src/pages/stats.tsx
@@ -10337,6 +10422,11 @@ msgid "Create a new link?"
 msgstr "Neuen Link erzeugen?"
 
 # ai
+#: modules/mascot/app/admin.tsx
+msgid "Win"
+msgstr "Sieg"
+
+# ai
 #: modules/polls/app/pages.tsx
 msgid "Reference"
 msgstr "Verwendungszweck"
@@ -10386,6 +10476,11 @@ msgstr "Nominiert"
 #: src/pages/squad.tsx
 msgid "Nobody is nominated."
 msgstr "Niemand ist nominiert."
+
+# ai
+#: modules/mascot/app/admin.tsx
+msgid "Remove picture?"
+msgstr "Bild entfernen?"
 
 #: worker/domain/events.ts
 msgid "Home matchday {own}"
@@ -10650,11 +10745,6 @@ msgstr "Inaktiv"
 #: worker/routes/admin.ts
 msgid "There is no current season yet."
 msgstr "Es gibt noch keine laufende Saison."
-
-# ai
-#: modules/gameday/module.ts
-msgid "No further personal data: the settings, the dates on which the message the day before went out, and a mascot picture an admin may upload. Who gets the message is worked out from the teams, the parent links, the teams one follows and the helper duties of the day."
-msgstr "Keine weiteren personenbezogenen Daten: die Einstellungen, die Tage, an denen der Hinweis am Vortag verschickt wurde, und ein Maskottchen-Bild, das ein Admin hochladen kann. Wer den Hinweis bekommt, ergibt sich aus den Mannschaften, den Elternverknüpfungen, den gefolgten Mannschaften und den Helferdiensten des Tages."
 
 # ai
 #: src/pages/admin.tsx
@@ -11161,6 +11251,11 @@ msgid "The personal link for {person} was used: previous devices signed out"
 msgstr "Der persönliche Link für {person} wurde genutzt: bisherige Geräte abgemeldet"
 
 # ai
+#: modules/mascot/app/admin.tsx
+msgid "Upload"
+msgstr "Hochladen"
+
+# ai
 #: src/pages/updates.tsx
 msgid "Copy command"
 msgstr "Befehl kopieren"
@@ -11289,6 +11384,11 @@ msgstr "Keine passenden Spieler gefunden."
 #: worker/routes/feedback.ts
 msgid "Please write briefly what it is about."
 msgstr "Bitte schreib kurz, worum es geht."
+
+# ai
+#: modules/mascot/app/admin.tsx
+msgid "Home game day card"
+msgstr "Karte Heimspieltag"
 
 # ai
 #: src/pages/updates.tsx
@@ -12552,6 +12652,11 @@ msgid "Running"
 msgstr "Laufend"
 
 # ai
+#: modules/mascot/app/admin.tsx
+msgid "Clear loss"
+msgstr "Deutlich verloren"
+
+# ai
 #: src/pages/admin.tsx
 #: src/pages/team.tsx
 msgid "A link for the parents of {firstName} only, to send to them directly instead of the team's parent link."
@@ -13021,11 +13126,6 @@ msgid "These details are kept even when the fixture list is synced again."
 msgstr "Diese Angaben bleiben auch erhalten, wenn der Spielplan neu abgeglichen wird."
 
 # ai
-#: modules/gameday/app/index.tsx
-msgid "Message the day before, from how many teams, mascot"
-msgstr "Hinweis am Vortag, ab wie vielen Mannschaften, Maskottchen"
-
-# ai
 #: modules/polls/app/settings.tsx
 msgid "Payment details saved."
 msgstr "Bezahlangaben gespeichert."
@@ -13149,6 +13249,11 @@ msgstr "Fahrer können Nominierte, ihre Eltern und die Trainer sein."
 msgid "Error"
 msgstr "Fehler"
 
+# ai
+#: modules/mascot/app/admin.tsx
+msgid "Home game day tile"
+msgstr "Kachel Heimspieltag"
+
 #: src/pages/team.tsx
 msgid "Coaches · {coachCount}"
 msgstr "Trainer · {coachCount}"
@@ -13219,6 +13324,11 @@ msgstr "Wichtig: Jede und jeder nutzt den Link nur einmal, für sich selbst. Bit
 #: worker/demo/routes.ts
 msgid "Unknown endpoint."
 msgstr "Unbekannter Endpunkt."
+
+# ai
+#: modules/mascot/worker/routes.ts
+msgid "Please upload a picture in PNG or WebP format."
+msgstr "Bitte ein Bild im Format PNG oder WebP hochladen."
 
 #: modules/carpools/worker/routes.ts
 msgid "There is no search for this person."
@@ -13348,6 +13458,8 @@ msgid "Shows all games of the club, your own ones as usual. Only on this device.
 msgstr "Zeigt alle Spiele des Vereins, deine eigenen wie gewohnt. Nur auf diesem Gerät."
 
 #: modules/duties/app/approvals.tsx
+#: modules/mascot/app/admin.tsx
+#: modules/mascot/app/admin.tsx
 #: modules/polls/app/pages.tsx
 #: src/avatar.tsx
 #: src/avatar.tsx
@@ -13830,6 +13942,11 @@ msgstr "Termine"
 #: modules/handball4all/module.ts
 msgid "Game schedule from handball4all"
 msgstr "Spielplan von handball4all"
+
+# ai
+#: modules/mascot/app/index.tsx
+msgid "Faces for results, pictures for home game days"
+msgstr "Gesichter für Ergebnisse, Bilder für Heimspieltage"
 
 # ai
 #: modules/duties/app/stats.tsx
@@ -14415,6 +14532,11 @@ msgstr "Kader aktualisiert ({added} neu, {removed} entfernt)."
 msgid "{reported} reported as paid"
 msgstr "{reported} als bezahlt gemeldet"
 
+# ai
+#: modules/mascot/app/admin.tsx
+msgid "Close loss"
+msgstr "Knapp verloren"
+
 #: src/pages/admin.tsx
 msgid "{plans, plural, one {One holiday plan is linked to this period and takes over new dates automatically.} other {# holiday plans are linked to this period and take over new dates automatically.}}"
 msgstr "{plans, plural, one {Ein Ferienplan ist mit diesem Zeitraum verknüpft und übernehmen neue Daten automatisch.} other {# Ferienpläne sind mit diesem Zeitraum verknüpft und übernehmen neue Daten automatisch.}}"
@@ -14721,6 +14843,11 @@ msgstr "Deine Mannschaft"
 #: modules/polls/app/pages.tsx
 msgid "at"
 msgstr "um"
+
+# ai
+#: modules/mascot/app/admin.tsx
+msgid "With the home game day module: the picture on the large card on the start page and the head on the small tiles of later days."
+msgstr "Mit dem Modul Heimspieltag: das Bild auf der großen Karte der Startseite und der Kopf auf den kleinen Kacheln späterer Tage."
 
 # ai
 #: modules/polls/app/pages.tsx
@@ -15314,6 +15441,11 @@ msgid "{playerName} will help out {teamName} on {date}."
 msgstr "{playerName} hilft am {date} bei der {teamName} aus."
 
 # ai
+#: modules/mascot/app/admin.tsx
+msgid "Next to the result of a game, for players under 14: won, drawn, lost narrowly (up to 4 goals) or clearly."
+msgstr "Neben dem Ergebnis eines Spiels, für Spieler unter 14: gewonnen, unentschieden, knapp (bis 4 Tore) oder deutlich verloren."
+
+# ai
 #: src/pages/list-import.tsx
 msgid "From the club's lists"
 msgstr "Aus den Listen des Vereins"
@@ -15544,6 +15676,11 @@ msgstr "Wer in einer Umfrage abstimmen darf und was jede Person oder Familie gea
 #: src/pages/admin.tsx
 msgid "E-mail (admins only)"
 msgstr "E-Mail (nur für Admins)"
+
+# ai
+#: modules/mascot/module.ts
+msgid "When an admin removes a picture or replaces it."
+msgstr "Wenn ein Admin ein Bild entfernt oder ersetzt."
 
 #: src/pages/team.tsx
 #: src/pages/team.tsx
@@ -15831,11 +15968,6 @@ msgstr "Aktivität"
 msgid "Same as last game"
 msgstr "Wie letztes Spiel"
 
-# ai
-#: modules/gameday/app/pages.tsx
-msgid "Upload picture"
-msgstr "Bild hochladen"
-
 #: src/pages/join.tsx
 #: src/pages/login.tsx
 #: src/pages/profile.tsx
@@ -15883,6 +16015,12 @@ msgstr "Betreuer hinzufügen"
 #: src/pages/admin.tsx
 msgid "{players, plural, one {# player} other {# players}}"
 msgstr "{players, plural, one {# Spieler} other {# Spieler}}"
+
+# ai
+#: modules/mascot/app/prepare.ts
+#: modules/mascot/worker/routes.ts
+msgid "The faces must be square."
+msgstr "Die Gesichter müssen quadratisch sein."
 
 #: src/pages/join.tsx
 msgid "Only needed if you want to sign in by code without a passkey. Nobody else in the app sees it."
@@ -16537,6 +16675,8 @@ msgstr "Nachzahlung"
 #: modules/gameday/app/pages.tsx
 #: modules/gameday/app/pages.tsx
 #: modules/gameday/module.ts
+#: modules/mascot/app/admin.tsx
+#: modules/mascot/app/admin.tsx
 msgid "Home game day"
 msgstr "Heimspieltag"
 
@@ -17012,6 +17152,11 @@ msgstr "Neu: ein Elternlink für ein Kind. Öffne den Spieler in deinem Kader un
 #: src/pages/plans.tsx
 msgid "Please enter a deadline between 0 and 168 hours."
 msgstr "Bitte eine Frist zwischen 0 und 168 Stunden angeben."
+
+# ai
+#: modules/mascot/app/admin.tsx
+msgid "Nothing is shown in its place then."
+msgstr "An seiner Stelle wird dann nichts gezeigt."
 
 #: src/pages/admin.tsx
 msgid "Created. Assign the person as a coach under Teams."

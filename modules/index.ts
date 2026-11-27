@@ -9,6 +9,7 @@ import handballnet from "./handballnet/module";
 import polls from "./polls/module";
 import fans from "./fans/module";
 import gameday from "./gameday/module";
+import mascot from "./mascot/module";
 
 export const MODULES = [
   duties,
@@ -19,5 +20,6 @@ export const MODULES = [
   polls,
   fans,
   gameday,
+  mascot,
   // new modules: above this line
 ] as const;

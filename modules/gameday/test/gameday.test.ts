@@ -1,6 +1,6 @@
 // Home game day: the day rule, who is involved, the push texts, sending once at the hour in club time, the page of the
 // day, the card on home, the settings and the upgrade. Invented names only.
-import { env, exports } from "cloudflare:workers";
+import { env } from "cloudflare:workers";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { DEFAULT_MODULES } from "../../../shared/modules";
 import { api, eventIn, exec, freshDb, guardian, hall, loginAs, member, migrateRest, one, person, rows, season, team, upgradeFrom } from "../../../test/helpers";
@@ -46,15 +46,6 @@ async function dutyOn(personId: number, eventId: number, startsAt: string) {
     startsAt.replace(/T\d\d/, "T23"),
   );
   await exec("INSERT INTO duties (event_id, event_duty_id, duty_type_id, person_id) VALUES (?, ?, ?, ?)", eventId, block.id, type.id, personId);
-}
-
-/** The mascot route with a picture body (api() of the test helpers sends JSON only). */
-function fetchMascot(method: "GET" | "PUT" | "DELETE", cookie: string, type?: string): Promise<Response> {
-  const headers: Record<string, string> = { cookie };
-  if (type) headers["content-type"] = type;
-  return exports.default.fetch(
-    new Request("http://localhost:5173/api/gameday/mascot", { method, headers, body: method === "PUT" ? new Uint8Array([0x89, 0x50, 0x4e, 0x47, 1, 2, 3]) : undefined }),
-  );
 }
 
 async function day() {
@@ -270,27 +261,11 @@ describe("home game day: page, card and settings", () => {
     expect((await api("/gameday/settings", { cookie: await loginAs(mona) })).status).toBe(403);
     const admin = await loginAs(await person("Ada", { admin: true }));
     const view = (await api<GamedaySettingsView>("/gameday/settings", { cookie: admin })).body;
-    expect(view).toMatchObject({ enabled: true, minTeams: 5, hour: 18, mascotVersion: null, next: { date, teams: 5, sendAt: `${addDays(date, -1)}T18:00`, recipients: 4 } });
+    expect(view).toMatchObject({ enabled: true, minTeams: 5, hour: 18, next: { date, teams: 5, sendAt: `${addDays(date, -1)}T18:00`, recipients: 4 } });
     expect((await api("/gameday/settings", { method: "PUT", cookie: admin, body: { enabled: true, minTeams: 1, hour: 18 } })).status).toBe(400);
     expect((await api("/gameday/settings", { method: "PUT", cookie: admin, body: { enabled: true, minTeams: 5, hour: 17 } })).status).toBe(400);
     expect((await api("/gameday/settings", { method: "PUT", cookie: admin, body: { enabled: true, minTeams: 6, hour: 20 } })).status).toBe(200);
     expect((await api<GamedaySettingsView>("/gameday/settings", { cookie: admin })).body).toMatchObject({ minTeams: 6, hour: 20, next: null });
-  });
-
-  it("the mascot picture: uploaded by an admin, served with its version, removed", async () => {
-    const admin = await loginAs(await person("Ada", { admin: true }));
-    const res = await fetchMascot("PUT", admin, "image/png");
-    expect(res.status).toBe(200);
-    expect((await fetchMascot("PUT", await loginAs(mona), "image/png")).status).toBe(403);
-    expect((await fetchMascot("PUT", admin, "image/gif")).status).toBe(400);
-    const v = (await api<GamedaySettingsView>("/gameday/settings", { cookie: admin })).body.mascotVersion;
-    expect(v).toBe(1);
-    const got = await fetchMascot("GET", admin);
-    expect(got.status).toBe(200);
-    expect(got.headers.get("content-type")).toBe("image/png");
-    expect((await fetchMascot("DELETE", admin)).status).toBe(200);
-    expect((await fetchMascot("GET", admin)).status).toBe(404);
-    expect((await api<GamedaySettingsView>("/gameday/settings", { cookie: admin })).body.mascotVersion).toBeNull();
   });
 });
 

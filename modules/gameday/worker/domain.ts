@@ -16,7 +16,7 @@ import { moduleFollowedTeams, moduleFollowers } from "../../../worker/modules";
 import { GAMEDAY_HOURS, type GamedayCard, type GamedayHour, type GamedaySettings } from "../types";
 
 const SETTINGS_KEY = "gameday";
-export const GAMEDAY_DEFAULTS: GamedaySettings = { enabled: true, minTeams: 5, hour: 18, mascotVersion: null };
+export const GAMEDAY_DEFAULTS: GamedaySettings = { enabled: true, minTeams: 5, hour: 18 };
 /** The card on home shows this many days ahead. */
 export const CARD_DAYS = 3;
 /** On the day itself the card stays until this long after the last kick-off. */
@@ -44,7 +44,6 @@ function parseSettings(value: string | null): GamedaySettings {
     enabled: typeof stored.enabled === "boolean" ? stored.enabled : GAMEDAY_DEFAULTS.enabled,
     minTeams: Number.isInteger(stored.minTeams) && stored.minTeams! >= 2 && stored.minTeams! <= 20 ? stored.minTeams! : GAMEDAY_DEFAULTS.minTeams,
     hour: (GAMEDAY_HOURS as readonly number[]).includes(stored.hour as number) ? (stored.hour as GamedayHour) : GAMEDAY_DEFAULTS.hour,
-    mascotVersion: typeof stored.mascotVersion === "number" ? stored.mascotVersion : null,
   };
 }
 
