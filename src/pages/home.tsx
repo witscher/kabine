@@ -48,8 +48,12 @@ function BreakNote({ item }: { item: TrainingBreak }) {
   );
 }
 
-/** Card heading "Up next: game" or, for a further event on the same day, "Then: game". */
-function nextHeading(kind: EventSummary["kind"], later: boolean): string {
+/**
+ * Card heading "Up next: game" or, for a further event on the same day, "Then: game". Special events of a training
+ * group are trainings here.
+ */
+function nextHeading(event: EventSummary, later: boolean): string {
+  const kind = event.asTraining ? "training" : event.kind;
   if (later) return kind === "game" ? t`Then: game` : kind === "training" ? t`Then: training` : t`Then: event`;
   return kind === "game" ? t`Up next: game` : kind === "training" ? t`Up next: training` : t`Up next: event`;
 }
@@ -116,7 +120,7 @@ function NextCard({ event, onDecline, later = false }: { event: EventSummary; on
     <section class="card" aria-label={t`Next event: ${kind}`}>
       <CardHead event={event}>
         <span class="label">
-          {nextHeading(event.kind, later)}
+          {nextHeading(event, later)}
           {teamLabel(event) ? ` · ${teamLabel(event)}` : ""}
         </span>
       </CardHead>
@@ -225,7 +229,7 @@ function CoachNextCard({ event, later = false }: { event: EventSummary; later?: 
     <section class="card" aria-label={t`Your team's next event`}>
       <CardHead event={event}>
         <span class="label">
-          {nextHeading(event.kind, later)} ·{" "}
+          {nextHeading(event, later)} ·{" "}
           <span class="nocaps">{event.teams.map((t) => t.name).join(" + ")}</span>
         </span>
       </CardHead>
@@ -440,7 +444,11 @@ const showLabels = (): { value: EventShow; label: string }[] => [
   { value: "other", label: t({ message: "Other", context: "event kinds" }) },
 ];
 
-const kindOk = (show: EventShow, kind: EventSummary["kind"]) => show === "all" || (show === "other" ? kind === "special" : kind === show);
+/** Kind chip; special events of a training group count as trainings (the same rule as fitsListFilter on the server). */
+const kindOk = (show: EventShow, e: EventSummary) => {
+  const kind = e.asTraining ? "training" : e.kind;
+  return show === "all" || (show === "other" ? kind === "special" : kind === show);
+};
 
 /** An event as a row of the list; modules add rows of their own (src/module-api.ts, homeList). */
 const eventRow = (e: EventSummary): HomeListRow => ({ key: `event-${e.id}`, startsAt: e.startsAt, id: e.id, node: <EventRow key={e.id} event={e} /> });
@@ -563,7 +571,7 @@ export function HomePage() {
   const hasMore = !!shown?.hasMore || moduleMore.length > 0;
 
   // The same rule as on the server, for the kept list while the new one loads and for offline
-  const picked = (e: EventSummary) => kindOk(show, e.kind) && (!!takeover || allOn || e.clubWide || e.teams.some((t) => onIds.has(t.id)));
+  const picked = (e: EventSummary) => kindOk(show, e) && (!!takeover || allOn || e.clubWide || e.teams.some((t) => onIds.has(t.id)));
   const events = (shown?.events ?? []).filter(isRelevantEvent).filter(picked);
   const past = when === "past" ? events.filter((e) => e.isPast && !e.isRunning) : [];
   // Games that have started with a live score stay at the top until the end of the live window

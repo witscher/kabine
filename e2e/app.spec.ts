@@ -1152,6 +1152,33 @@ test("Terminübersicht: jedes Team-Label schaltet seine Termine an und aus, Chip
   await admin.page.request.delete(`/api/teams/${second}`);
 });
 
+test("Trainingsgruppe: Admin schaltet sie an, ihre Sondertermine stehen beim Chip „Training“", async () => {
+  const { id: group } = await (await admin.page.request.post("/api/groups", { data: { name: "Torwartgruppe" } })).json();
+  expect((await admin.page.request.post(`/api/teams/${group}/members`, { data: { personId: 2, role: "player" } })).ok()).toBe(true);
+  const day = new Date(Date.now() + 2 * 86_400_000).toLocaleDateString("sv-SE", { timeZone: "Europe/Berlin" });
+  expect((await admin.page.request.post("/api/events", { data: { title: "Torwarttraining", startsAt: `${day}T17:00`, teamIds: [group] } })).ok()).toBe(true);
+
+  const { page } = admin;
+  await page.goto(`/team/${group}`);
+  const sw = page.getByRole("switch", { name: /Trainingsgruppe/ });
+  await expect(sw).toHaveAttribute("aria-checked", "false");
+  await sw.click();
+  await expect(sw.getByText("Gespeichert")).toBeVisible();
+
+  // The member finds the session under "Training", no longer under "Other"
+  await coach.page.goto("/");
+  const kinds = coach.page.getByRole("group", { name: "Art der Termine" });
+  const row = coach.page.locator(".event-row", { hasText: "Torwarttraining" });
+  await kinds.getByRole("button", { name: "Training" }).click();
+  await expect(row).toBeVisible();
+  await kinds.getByRole("button", { name: "Sonstiges" }).click();
+  await expect(row).toHaveCount(0);
+  await kinds.getByRole("button", { name: "Alles" }).click();
+  await expect(row).toBeVisible();
+
+  await admin.page.request.delete(`/api/teams/${group}`);
+});
+
 test("Terminübersicht: 20 Termine, „Mehr Termine“ lädt weitere, bleibt beim Zurückkehren", async () => {
   const { page } = coach;
   const me = (await (await page.request.get("/api/session")).json()).me;

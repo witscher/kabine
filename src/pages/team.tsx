@@ -61,6 +61,8 @@ export interface TeamDetail {
   awayTemplateId: number | null;
   showResponses: boolean;
   gameAllPlayers: boolean;
+  /** Group whose special events count as trainings in the event overview */
+  trainingGroup: boolean;
   coaches: { person: PersonRef; hasAccount: boolean }[];
   /** Team staff (physio, manager): see everything of the team, take no part */
   staff: { person: PersonRef; hasAccount: boolean; hasPush: boolean }[];

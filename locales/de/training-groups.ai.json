@@ -1,0 +1,8 @@
+{
+  "Only groups can be training groups.": "Nur Gruppen können Trainingsgruppe sein.",
+  "The goalkeeper group meets every two weeks. Parents who picked “Training” at the top still see these sessions.": "Die Torwartgruppe trifft sich alle zwei Wochen. Eltern, die oben „Training“ gewählt haben, sehen diese Termine trotzdem.",
+  "Training group: its events appear under the chip “Training”.": "Trainingsgruppe: Ihre Termine stehen beim Filter „Training“.",
+  "The special events of this group are trainings, for example a goalkeeper training. In the event overview they then appear under the chip “Training” instead of “Other”. Nothing else changes: responses and deadlines stay those of a special event. Leave it off for groups such as a coaching team.": "Die Sondertermine dieser Gruppe sind Trainings, zum Beispiel beim Torwarttraining. In der Terminübersicht stehen sie dann beim Filter „Training“ statt bei „Sonstiges“. Sonst ändert sich nichts: Zusagen und Absagefristen bleiben die eines Sondertermins. Für Gruppen wie ein Trainerteam ausgeschaltet lassen.",
+  "Event overview": "Terminübersicht",
+  "Training group": "Trainingsgruppe"
+}

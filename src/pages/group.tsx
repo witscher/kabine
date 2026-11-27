@@ -349,6 +349,27 @@ export function GroupPage({ team, onChanged }: { team: TeamDetail; onChanged: ()
               }}
             />
           ) : null}
+          {me.isAdmin ? (
+            <>
+              <h2 class="section-title">
+                <Trans>Event overview</Trans>
+              </h2>
+              <SwitchRow
+                label={t`Training group`}
+                info="trainingGroup"
+                checked={team.trainingGroup}
+                onChange={async (value) => {
+                  await api.patch(`/teams/${team.id}`, { trainingGroup: value });
+                  invalidate("/events");
+                  onChanged();
+                }}
+              />
+            </>
+          ) : team.trainingGroup ? (
+            <p class="small muted">
+              <Trans>Training group: its events appear under the chip “Training”.</Trans>
+            </p>
+          ) : null}
         </section>
 
         {me.isAdmin ? (

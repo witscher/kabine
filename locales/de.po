@@ -4817,6 +4817,11 @@ msgstr "Trainings"
 msgid "Progress"
 msgstr "Fortschritt"
 
+# ai
+#: worker/routes/teams.ts
+msgid "Only groups can be training groups."
+msgstr "Nur Gruppen können Trainingsgruppe sein."
+
 #: src/pages/help.tsx
 msgid "Reply by e-mail wanted"
 msgstr "Antwort per E-Mail erwünscht"
@@ -4897,6 +4902,11 @@ msgstr "Spiel verlegt ({teamName})"
 #: src/pages/club-settings.tsx
 msgid "Switch off this source?"
 msgstr "Diese Quelle ausschalten?"
+
+# ai
+#: src/help-texts.ts
+msgid "The goalkeeper group meets every two weeks. Parents who picked “Training” at the top still see these sessions."
+msgstr "Die Torwartgruppe trifft sich alle zwei Wochen. Eltern, die oben „Training“ gewählt haben, sehen diese Termine trotzdem."
 
 #: src/pages/profile.tsx
 msgid "No parents are involved in the teams of {firstName}. {firstName} accepts and declines on their own and is alone in the chat. So there are no permissions or notifications for {firstName}."
@@ -9176,6 +9186,11 @@ msgstr "{name}: Foto wählen"
 msgid "You"
 msgstr "Du"
 
+# ai
+#: src/pages/group.tsx
+msgid "Training group: its events appear under the chip “Training”."
+msgstr "Trainingsgruppe: Ihre Termine stehen beim Filter „Training“."
+
 #: src/push.ts
 msgid "Push is not set up on the server yet."
 msgstr "Push ist auf dem Server noch nicht eingerichtet."
@@ -9925,6 +9940,11 @@ msgstr "Ein Profilbild kann hier gerade nicht geändert werden."
 #: worker/routes/join.ts
 msgid "If this was not you, please contact your coach or an admin immediately."
 msgstr "Warst du das nicht, melde dich bitte sofort bei deinem Trainer oder einem Admin."
+
+# ai
+#: src/help-texts.ts
+msgid "The special events of this group are trainings, for example a goalkeeper training. In the event overview they then appear under the chip “Training” instead of “Other”. Nothing else changes: responses and deadlines stay those of a special event. Leave it off for groups such as a coaching team."
+msgstr "Die Sondertermine dieser Gruppe sind Trainings, zum Beispiel beim Torwarttraining. In der Terminübersicht stehen sie dann beim Filter „Training“ statt bei „Sonstiges“. Sonst ändert sich nichts: Zusagen und Absagefristen bleiben die eines Sondertermins. Für Gruppen wie ein Trainerteam ausgeschaltet lassen."
 
 #: modules/carpools/worker/routes.ts
 msgid "At least one passenger is not riding with this driver."
@@ -11206,6 +11226,11 @@ msgstr "{driver} fährt nicht: {game}. Die Suche nach einer Mitfahrgelegenheit f
 #: modules/polls/app/pages.tsx
 msgid "Maybe: {maybeNames}"
 msgstr "Vielleicht: {maybeNames}"
+
+# ai
+#: src/pages/group.tsx
+msgid "Event overview"
+msgstr "Terminübersicht"
 
 #: modules/carpools/app/card.tsx
 #: modules/polls/app/pages.tsx
@@ -15461,6 +15486,12 @@ msgstr "Eine Frage mit festen Antworten, z. B. „Wohin geht die Abschlussfahrt?
 #: modules/duties/app/stats.tsx
 msgid "Remind families?"
 msgstr "Familien erinnern?"
+
+# ai
+#: src/help-texts.ts
+#: src/pages/group.tsx
+msgid "Training group"
+msgstr "Trainingsgruppe"
 
 #: worker/domain/email-login.ts
 msgid "If you use the app from the home screen, it is best to enter the code there directly."

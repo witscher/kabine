@@ -107,6 +107,8 @@ export interface TeamInfo {
   parents_enabled: number;
   /** A team or a group (coaches' team, referees, …) */
   kind: "team" | "group";
+  /** Training group: its special events count as trainings in the event overview */
+  training_group: number;
 }
 
 export interface MemberRow {
@@ -244,7 +246,7 @@ export function cachedTeamInfo(db: D1Database, versions: CacheVersions): Promise
       db,
       `SELECT t.id, t.name, t.age_class_code, t.level, COALESCE(ac.game_minutes, 120) AS game_minutes, t.decline_hours_training,
               t.decline_hours_game, t.max_squad, t.auto_squad, t.fixture_connector, t.fixture_source, t.show_responses,
-              t.game_all_players, t.parents_enabled, t.kind
+              t.game_all_players, t.parents_enabled, t.kind, t.training_group
          FROM teams t ${CURRENT_AGE_CLASS_JOIN("t", "ac")}
         ORDER BY t.name`,
     ),
@@ -801,6 +803,8 @@ export function toSummary(e: EventRow, ctx: EventContext, actor: Actor, now: num
         ? { id: e.location_id, name: e.loc_name, address: e.loc_address, mapUrl: e.loc_map_url, kind: e.loc_kind ?? "custom" }
         : null,
     teams: teamRefs,
+    // Special event of a training group: counts as a training in the event overview
+    asTraining: e.kind === "special" && teams.some((tm) => tm.training_group === 1),
     optionalTeamIds: teamRefs.filter((tm) => ctx.optional.has(`${e.id}:${tm.id}`)).map((tm) => tm.id),
     clubWide: e.club_wide === 1,
     noAttendance: isNoAttendance(e),
@@ -1016,6 +1020,8 @@ export async function listVisibleEvents(
 export interface EventListFilter {
   teamIds: number[] | null;
   kinds: EventKind[] | null;
+  /** Training groups: their special events count as trainings for `kinds` (docs/dev/decisions.md, "Training groups") */
+  trainingGroups?: number[];
 }
 
 /** SQL conditions on `e` for a filter, its values appended to params. Empty without a filter. */
@@ -1027,14 +1033,25 @@ export function listFilterSql(filter: EventListFilter | undefined, params: (stri
   }
   if (filter?.kinds) {
     params.push(list(filter.kinds));
-    sql += ` AND e.kind IN (SELECT value FROM json_each(?${params.length}))`;
+    let kinds = `e.kind IN (SELECT value FROM json_each(?${params.length}))`;
+    // Special events of training groups move from "other" to "training"; without training groups the query stays as it was
+    const training = filter.kinds.includes("training");
+    if (filter.trainingGroups?.length && training !== filter.kinds.includes("special")) {
+      params.push(list(filter.trainingGroups));
+      const group = `e.kind = 'special' AND EXISTS (SELECT 1 FROM event_teams tg WHERE tg.event_id = e.id AND tg.team_id IN (SELECT value FROM json_each(?${params.length})))`;
+      kinds = training ? `(${kinds} OR (${group}))` : `${kinds} AND NOT (${group})`;
+    }
+    sql += ` AND ${kinds}`;
   }
   return sql;
 }
 
 /** Does an event fit the filter (the same rule as listFilterSql, for events loaded another way)? */
-export function fitsListFilter(s: { kind: EventKind; clubWide: boolean; teams: { id: number }[] }, filter: EventListFilter | undefined): boolean {
-  if (filter?.kinds && !filter.kinds.includes(s.kind)) return false;
+export function fitsListFilter(
+  s: { kind: EventKind; asTraining?: boolean; clubWide: boolean; teams: { id: number }[] },
+  filter: EventListFilter | undefined,
+): boolean {
+  if (filter?.kinds && !filter.kinds.includes(s.asTraining ? "training" : s.kind)) return false;
   return !filter?.teamIds || s.clubWide || s.teams.some((t) => filter.teamIds!.includes(t.id));
 }
 
