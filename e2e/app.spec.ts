@@ -2539,9 +2539,9 @@ test("Fans: Spielerin folgt einer anderen Mannschaft, sieht deren Spiel unter de
   await expect(moduleSwitch).toHaveAttribute("aria-checked", "false");
 });
 
-test("Großer Heimspieltag: Karte auf der Startseite, Seite des Tages, Einstellungen", async () => {
+test("Heimspieltag: Karte auf der Startseite, Seite des Tages, Einstellungen", async () => {
   await admin.page.goto("/verwaltung/verein");
-  const moduleSwitch = admin.page.getByRole("switch", { name: /^Großer Heimspieltag/ });
+  const moduleSwitch = admin.page.getByRole("switch", { name: /^Heimspieltag/ });
   await moduleSwitch.click();
   await expect(moduleSwitch).toHaveAttribute("aria-checked", "true");
   // Five teams play at home in two days: the player's wT and four more
@@ -2562,7 +2562,7 @@ test("Großer Heimspieltag: Karte auf der Startseite, Seite des Tages, Einstellu
   await page.goto("/");
   const card = page.locator("a.gameday-card");
   await expect(card).toBeVisible();
-  await expect(card).toContainText("Großer Heimspieltag");
+  await expect(card).toContainText("Heimspieltag");
   await expect(card).toContainText("5 Mannschaften");
   // First to last kick-off of the day (the demo data may have one more game of wT that day)
   await expect(card).toContainText(/10:30 bis \d\d:\d\d Uhr/);
@@ -2587,7 +2587,7 @@ test("Großer Heimspieltag: Karte auf der Startseite, Seite des Tages, Einstellu
 
   // Administration: the next day with the time of the message
   await admin.page.goto("/verwaltung/heimspieltage");
-  await expect(admin.page.getByRole("heading", { name: "Große Heimspieltage" })).toBeVisible();
+  await expect(admin.page.getByRole("heading", { name: "Heimspieltage" })).toBeVisible();
   await expect(admin.page.getByText(/5 Mannschaften · der Hinweis geht am .* um 18:00 Uhr raus/)).toBeVisible();
   await admin.page.getByRole("button", { name: "Eine Mannschaft mehr" }).click();
   await expect(admin.page.getByText("In den nächsten drei Monaten keiner.")).toBeVisible();

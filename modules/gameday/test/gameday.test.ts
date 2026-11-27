@@ -167,7 +167,7 @@ describe("home game day: the push", () => {
     expect((await push(mona, "en")).body).toContain(", Lena plays at 11:30 (wD).");
     expect((await push(carl, "en")).body).toContain(", the mC play at 13:00.");
     expect((await push(fritz, "en")).body).toContain(", the Damen play at 18:00.");
-    expect((await push(lena)).title).toBe("Morgen ist großer Heimspieltag!");
+    expect((await push(lena)).title).toBe("Morgen ist Heimspieltag!");
     expect((await push(lena)).body).toContain("du spielst um 11:30 (wD)");
     expect((await push(mona)).body).toContain("Lena spielt um 11:30 (wD)");
   });

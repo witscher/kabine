@@ -1466,7 +1466,7 @@ msgstr "von {name}"
 #: modules/gameday/app/pages.tsx
 #: modules/gameday/app/pages.tsx
 msgid "Next home game day"
-msgstr "Nächster großer Heimspieltag"
+msgstr "Nächster Heimspieltag"
 
 #: src/pages/help.tsx
 msgid "Attached image"
@@ -4362,7 +4362,7 @@ msgstr "Verwerfen"
 # ai
 #: modules/gameday/worker/domain.ts
 msgid "Tomorrow is home game day!"
-msgstr "Morgen ist großer Heimspieltag!"
+msgstr "Morgen ist Heimspieltag!"
 
 #: worker/domain/email-login.ts
 msgid "here is your code to set up your access:"
@@ -5078,7 +5078,7 @@ msgstr "Spielerlink"
 #: modules/gameday/app/pages.tsx
 #: modules/gameday/app/pages.tsx
 msgid "Home game days"
-msgstr "Große Heimspieltage"
+msgstr "Heimspieltage"
 
 #: src/pages/squad.tsx
 #: src/pages/team.tsx
@@ -6849,7 +6849,7 @@ msgstr "{name} organisiert jetzt mit."
 # ai
 #: modules/gameday/worker/routes.ts
 msgid "There is no home game day on this date, or you are not involved in it."
-msgstr "An diesem Tag ist kein großer Heimspieltag, oder du bist nicht dabei."
+msgstr "An diesem Tag ist kein Heimspieltag, oder du bist nicht dabei."
 
 # ai
 #: modules/duties/app/stats.tsx
@@ -10986,7 +10986,7 @@ msgstr "Gespeichert. Deine Eltern müssen das Bild noch freigeben."
 # ai
 #: modules/gameday/module.ts
 msgid "Home game day (the day before)"
-msgstr "Großer Heimspieltag (Hinweis am Vortag)"
+msgstr "Heimspieltag (Hinweis am Vortag)"
 
 #: worker/routes/feedback.ts
 msgctxt "feedback"
@@ -11912,7 +11912,7 @@ msgstr "Unentschuldigt"
 # ai
 #: modules/gameday/app/list.tsx
 msgid "Home game day {date}"
-msgstr "Großer Heimspieltag {date}"
+msgstr "Heimspieltag {date}"
 
 # ai
 #: modules/duties/app/stats.tsx
@@ -13774,7 +13774,7 @@ msgstr "Sie muss auch diese App abdecken; die Kabine-Dokumentation hat eine Vorl
 # ai
 #: modules/gameday/app/list.tsx
 msgid "Home game day · {day}"
-msgstr "Großer Heimspieltag · {day}"
+msgstr "Heimspieltag · {day}"
 
 #: worker/routes/events.ts
 msgid "New info on {label} on {date}: meeting point {point}."
@@ -16538,7 +16538,7 @@ msgstr "Nachzahlung"
 #: modules/gameday/app/pages.tsx
 #: modules/gameday/module.ts
 msgid "Home game day"
-msgstr "Großer Heimspieltag"
+msgstr "Heimspieltag"
 
 #: src/pages/profile.tsx
 msgid "Only for signing in. Neither coaches nor admins see the address."

@@ -44,7 +44,7 @@ Polls (`modules/polls/`) need places in the core screens a module could not reac
 
 Ported from the original club app as the module `modules/gameday/` (beta, off by default). Where Kabine differs or had to decide:
 
-- **Name:** German "Großer Heimspieltag" (module switch, push, card), as in the club app, because Kabine already calls a youth matchday at home "Heimspieltag" (`eventTitle`). English "Home game day".
+- **Name:** German "Heimspieltag", English "Home game day". The club app says "Großer Heimspieltag" because a youth matchday at home is also called "Heimspieltag" (`eventTitle`); the maintainer chose the same word for both (November 2026): the hall is open and games are played either way. The card and the push say how many teams play.
 - **What "enabled" means:** the module switch turns the card, the tiles and the page on and off; the setting *Message the day before* only the push. The club app's single switch did both, but in Kabine the module switch already exists.
 - **Settings cached, days cached:** the list on home asks the module on every page load. Settings (`app_meta` key `gameday`) are cached with version `ref`, the club's upcoming home games with version `duties`; migration `202611230400_gameday_sent.sql` adds triggers so that settings, cancellations and venue changes bump them too, also when changed directly in D1. The club app read the settings and checked the day again on every load.
 - **Sent once:** a table `gameday_sent` (one row per day, claimed with `INSERT OR IGNORE` before sending) instead of a single `app_meta` value, so two runs cannot both send and a missed run (maintenance, update) can catch up within three hours of the configured hour, never late at night. Markers older than a week are deleted.
