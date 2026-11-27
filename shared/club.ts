@@ -1,5 +1,6 @@
 // Club profile shared by worker and app (GET /api/club).
 import type { Locale } from "./i18n";
+import type { MascotImages, MascotSlot } from "./module-api";
 import type { SportId } from "./sports";
 
 export { type ClubModules, DEFAULT_MODULES, type ModuleId, moduleOn } from "./modules";
@@ -58,6 +59,16 @@ export interface ClubProfile {
    * after it. Null: not known, all releases.
    */
   startedOn: string | null;
+  /**
+   * Pictures of the club's mascot by slot, added by GET /api/club from the worker hook `mascot` while a module
+   * provides them; never stored in the profile. Ask with `mascotImage`.
+   */
+  mascot?: MascotImages;
+}
+
+/** URL of the mascot's picture for a slot, null while no module provides one or the slot is empty. */
+export function mascotImage(club: Pick<ClubProfile, "mascot">, slot: MascotSlot): string | null {
+  return club.mascot?.[slot] ?? null;
 }
 
 /** Choices for the reminder to sync the game schedule; 0 = off. */

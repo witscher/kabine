@@ -2,7 +2,7 @@
 // Guide: docs/dev/modules.md. Data hooks (routes, cron, event data, notifications) only run while the
 // module is on; cleanup hooks always run, because data may exist from a time it was on.
 import type { Hono } from "hono";
-import type { ModuleManifest } from "../shared/module-api";
+import type { MascotImages, ModuleManifest } from "../shared/module-api";
 import type { AppEnv } from "./app";
 import type { EventKind } from "../shared/types";
 import type { Actor } from "./auth/actor";
@@ -170,6 +170,12 @@ export interface WorkerModule {
     /** Accounts following any of these teams, one row per account and team (own teams of the account may be among them). */
     accounts(db: D1Database, teamIds: number[]): Promise<{ accountId: number; teamId: number }[]>;
   };
+  /**
+   * Pictures of the club's mascot by slot (the mascot module): result faces and the home game day. GET /api/club
+   * carries them to the app (`useMascotImage` in src/modules.ts), worker code asks `moduleMascot` (worker/modules.ts).
+   * Leave out slots without a picture; read little, it runs on every start of the app.
+   */
+  mascot?: (db: D1Database) => Promise<MascotImages>;
   /** Entries for the personal calendar feed of an account (e.g. what the person chose in the module's own settings). */
   calendarItems?: (db: D1Database, feed: CalendarFeed) => Promise<CalendarItem[]>;
   /** Participants left an event (with notifications if the module sends any). */

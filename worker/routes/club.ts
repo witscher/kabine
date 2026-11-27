@@ -2,13 +2,14 @@ import { t } from "@lingui/core/macro";
 // Club profile: public read (login page, splash, manifest) and admin edit.
 import { Hono } from "hono";
 import { z } from "zod";
-import { type ClubModules, isHexColor, isScheduleReminderDays, isTimeZone, type ModuleId } from "../../shared/club";
+import { type ClubModules, type ClubProfile, isHexColor, isScheduleReminderDays, isTimeZone, type ModuleId } from "../../shared/club";
 import { SPORT_IDS } from "../../shared/sports";
 import { MODULES } from "../../shared/modules";
 import { LOCALES } from "../../shared/i18n";
 import { type AppEnv, requireActor } from "../app";
 import { requireAdmin } from "../auth/actor";
-import { loadClub, saveClub } from "../domain/club";
+import { type ClubSettings, loadClub, saveClub } from "../domain/club";
+import { moduleMascot } from "../modules";
 import { markModulesSeen } from "../domain/news";
 import { holidaySource } from "../domain/holidays";
 import { currentLocale } from "../i18n";
@@ -20,8 +21,15 @@ const LOGO_KEY = "club-logo";
 const LOGO_TYPES = ["image/png", "image/jpeg", "image/webp", "image/svg+xml"];
 const LOGO_MAX_BYTES = 256 * 1024;
 
+/** The profile as the app gets it: without the owner, with the mascot's pictures while a module provides them. */
+async function publicClub(db: D1Database, settings: ClubSettings): Promise<ClubProfile> {
+  const { ownerPersonId: _, ...club } = settings;
+  const mascot = await moduleMascot(db);
+  return Object.keys(mascot).length ? { ...club, mascot } : club;
+}
+
 clubRoutes.get("/club", async (c) => {
-  const { ownerPersonId: _, ...club } = await loadClub(c.env.DB);
+  const club = await publicClub(c.env.DB, await loadClub(c.env.DB));
   c.header("Cache-Control", "no-cache");
   return c.json(club);
 });
@@ -56,7 +64,7 @@ clubRoutes.put("/admin/club", async (c) => {
   const { modules: changed, ...rest } = input;
   const modules: ClubModules = { ...current.modules };
   for (const [k, v] of Object.entries(changed ?? {})) if (typeof v === "boolean") modules[k as ModuleId] = v;
-  const { ownerPersonId: _, ...club } = await saveClub(c.env.DB, { ...rest, modules });
+  const club = await publicClub(c.env.DB, await saveClub(c.env.DB, { ...rest, modules }));
   // Whoever saves the module switches has seen the new ones
   if (changed) await markModulesSeen(c.env.DB, actor.accountId);
   return c.json(club);
