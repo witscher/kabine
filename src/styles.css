@@ -556,6 +556,14 @@ a.list-row:hover {
   color: var(--text-2);
 }
 
+/* "Elsewhere" (coaches): an overlap with the own event is marked */
+.elsewhere-clash {
+  box-shadow: inset 4px 0 0 var(--warn);
+}
+.elsewhere-clash .sub {
+  color: var(--warn);
+}
+
 .event-row {
   background: var(--card);
   border-radius: 12px;

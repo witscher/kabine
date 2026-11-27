@@ -7,6 +7,7 @@ import { type Actor, buildActor } from "../worker/auth/actor";
 import type { SessionRow } from "../worker/auth/session";
 import { canHelpOut, ensureEventDuties, hasClubDuties, helperTeams, loadHelpersNeeded, loadMyDuties } from "../worker/domain/duties";
 import { loadCoachHints } from "../worker/domain/coach-hints";
+import { elsewhereFor } from "../worker/domain/elsewhere";
 import { loadEventPage, ownCandidates } from "../worker/domain/event-page";
 import { SYNC_OVERVIEW_SQL } from "../worker/domain/fixtures";
 import { listVisibleEvents } from "../worker/domain/events";
@@ -139,6 +140,14 @@ describe("Abfragepläne ohne Durchsuchen aller Termine", () => {
     const { db, seen } = recording(env.DB);
     await loadCoachHints(db, { ...actor, coachTeamIds: [teamId] });
     expect(seen.length).toBe(3);
+    expect(await fullScans(seen)).toEqual([]);
+  });
+
+  it("Elsewhere for coaches: from the people's other teams and nominations", async () => {
+    const { db, seen } = recording(env.DB);
+    await elsewhereFor(db, { personIds: [childId], from: "2000-01-01T00:00", to: "2099-01-01T00:00", excludeTeamIds: [] });
+    await elsewhereFor(db, { personIds: [childId], from: "2000-01-01T00:00", to: "2099-01-01T00:00", excludeTeamIds: [teamId], excludeEventId: eventIds[0] });
+    expect(seen.length).toBeGreaterThan(3);
     expect(await fullScans(seen)).toEqual([]);
   });
 

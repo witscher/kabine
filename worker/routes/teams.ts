@@ -5,6 +5,7 @@ import { type AppEnv, intParam, requireActor } from "../app";
 import { requireAdmin, requireCoach } from "../auth/actor";
 import { syncAutoSquads } from "../domain/auto-squad";
 import { closeChildConnections, closeParentConnections, revalidateChatAccess } from "../domain/chat";
+import { elsewhereFor } from "../domain/elsewhere";
 import { listExtraEvents } from "../domain/extra-events";
 import { requireTeam, syncAutoGroups, teamKind } from "../domain/groups";
 import { clubMemberStmt, resetTeamDuties } from "../domain/duties";
@@ -16,7 +17,7 @@ import { notifyCoaches } from "../domain/notify";
 import { ageWarning } from "./squad";
 import { all, first, list, run, stmt } from "../lib/db";
 import { badRequest, conflict, notFound, parse, readJson } from "../lib/http";
-import { nowLocal, utcIso } from "../lib/time";
+import { addDays, nowLocal, todayLocal, utcIso } from "../lib/time";
 import { relyingParty } from "../auth/webauthn";
 import { audit, auditStmt } from "../domain/audit";
 
@@ -862,4 +863,19 @@ teamRoutes.get("/teams/:id/extra-events", async (c) => {
   const teamId = intParam(c, "id");
   requireCoach(actor, teamId);
   return c.json({ events: await listExtraEvents(c.env.DB, actor, { teamId }) });
+});
+
+/** Team → player: where the person takes part in the next two weeks in other teams and groups (without reasons). */
+teamRoutes.get("/teams/:id/players/:personId/elsewhere", async (c) => {
+  const actor = requireActor(c);
+  const teamId = intParam(c, "id");
+  requireCoach(actor, teamId);
+  const personId = intParam(c, "personId");
+  if (!(await first(c.env.DB, "SELECT 1 AS ok FROM team_memberships WHERE person_id = ? AND team_id = ? AND role = 'player'", personId, teamId))) {
+    throw notFound(t`This person does not play in this team.`);
+  }
+  const today = todayLocal();
+  return c.json({
+    entries: await elsewhereFor(c.env.DB, { personIds: [personId], from: `${today}T00:00`, to: `${addDays(today, 15)}T00:00`, excludeTeamIds: [teamId] }),
+  });
 });

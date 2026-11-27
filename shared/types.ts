@@ -146,6 +146,16 @@ export type EventKind = "training" | "game" | "special";
 /** Effective status of a person for an event. */
 export type ParticipationStatus = "yes" | "no" | "open" | "standing" | "inactive";
 
+/**
+ * "Elsewhere": an event of another team or group where one of the coach's players takes part. Coaches and admins of
+ * the team only, with status, never the reason, no link (docs/dev/decisions.md, Players elsewhere).
+ */
+export interface ElsewhereEntry {
+  person: PersonRef;
+  event: { id: number; kind: EventKind; title: string; startsAt: string; endsAt: string | null; teams: string[] };
+  status: ParticipationStatus;
+}
+
 export type RespondedBy = "self" | "guardian" | "child" | "other";
 
 export interface MyParticipation {
@@ -409,6 +419,8 @@ export interface EventDetail extends EventSummary {
    * leaders (and themselves), without the note, also when responses are visible to all.
    */
   leaders: LeaderEntry[];
+  /** Coaches and admins: where the players take part elsewhere the same day (other teams and groups), else null */
+  elsewhere: ElsewhereEntry[] | null;
 }
 
 export interface RosterEntry {

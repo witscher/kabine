@@ -6,6 +6,7 @@ import type { EventDetail, LeaderRole, LocationRef, MyParticipation, Participant
 import { api, errorMessage } from "../api";
 import { dutyLines, helperPath, neededText } from "../duties";
 import { EventDutyManager } from "../duty-manage";
+import { ElsewhereList } from "../elsewhere";
 import { longDate, personName, shortName, stamp, time, timeRange, weekdayPlural } from "../format";
 import { Icon } from "../icons";
 import { GameLinks, isLiveWindow, isReportWindow } from "../live";
@@ -623,6 +624,18 @@ function CoachView({ event, onChanged, onAbsence }: { event: EventDetail; onChan
       ) : null}
 
       {event.kind === "training" && grouped && editable && !event.cancelled ? <JoiningTeams event={event} onChanged={refresh} /> : null}
+
+      {event.elsewhere?.length ? (
+        <section class="card card-body stack-sm" aria-label={t`Elsewhere the same day`}>
+          <h2 class="section-title" style={{ margin: 0 }}>
+            <Trans>Elsewhere the same day</Trans>
+          </h2>
+          <ElsewhereList entries={event.elsewhere} showPerson showDate={false} overlapWith={{ startsAt: event.startsAt, endsAt: event.endsAt }} />
+          <p class="small muted">
+            <Trans>Events of other teams and groups where your players take part. Reasons are only seen by those in charge there.</Trans>
+          </p>
+        </section>
+      ) : null}
 
       {!parts.length && !event.noAttendance ? (
         <Notice>{event.kind === "game" ? t`Nobody nominated yet.` : t`There are no participants for this event.`}</Notice>
