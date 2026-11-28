@@ -6735,6 +6735,10 @@ msgstr "No venue"
 msgid "Changed: {label}"
 msgstr "Changed: {label}"
 
+#: src/pages/games.tsx
+msgid "How syncing with {docsName} works (kabine.dev)"
+msgstr "How syncing with {docsName} works (kabine.dev)"
+
 #: src/pages/plans.tsx
 #: src/pages/plans.tsx
 #: src/pages/plans.tsx
@@ -7325,6 +7329,10 @@ msgstr "Leave empty: the longest deadline of the teams involved applies."
 #: src/pages/join.tsx
 msgid "Kabine is installed. Enter the setup password you chose when deploying (<0>ADMIN_BOOTSTRAP_TOKEN</0>). It works once and makes you the first admin."
 msgstr "Kabine is installed. Enter the setup password you chose when deploying (<0>ADMIN_BOOTSTRAP_TOKEN</0>). It works once and makes you the first admin."
+
+#: modules/mascot/app/admin.tsx
+msgid "How the pictures should look (kabine.dev)"
+msgstr "How the pictures should look (kabine.dev)"
 
 #: src/pages/season.tsx
 msgid "No automatic assignment without year of birth. Suggestion: previous team."
@@ -8481,6 +8489,10 @@ msgstr "You"
 #: src/pages/group.tsx
 msgid "Training group: its events appear under the chip “Training”."
 msgstr "Training group: its events appear under the chip “Training”."
+
+#: src/pages/games.tsx
+msgid "Where to find this link (kabine.dev)"
+msgstr "Where to find this link (kabine.dev)"
 
 #: src/push.ts
 msgid "Push is not set up on the server yet."
@@ -12441,6 +12453,10 @@ msgstr "Current season: none"
 #: modules/polls/app/pages.tsx
 msgid "Poll ended."
 msgstr "Poll ended."
+
+#: src/pages/club-settings.tsx
+msgid "What each module does and stores (kabine.dev)"
+msgstr "What each module does and stores (kabine.dev)"
 
 #: src/format.ts
 msgid "tomorrow"

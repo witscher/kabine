@@ -4,10 +4,12 @@ import { Trans } from "@lingui/react/macro";
 import { useState } from "preact/hooks";
 import { api, errorMessage } from "../../../src/api";
 import { loadClub } from "../../../src/club";
+import { currentLocale } from "../../../src/i18n";
 import { useMascotImage } from "../../../src/modules";
 import { AdminOnly } from "../../../src/pages/admin";
-import { Button, confirmDialog, toast, TopBar, useDocumentTitle } from "../../../src/ui";
+import { Button, confirmDialog, DocsLink, toast, TopBar, useDocumentTitle } from "../../../src/ui";
 import type { MascotSlot } from "../../../shared/module-api";
+import { DOC_SECTIONS, moduleDocsUrl } from "../../../shared/site-docs";
 import { FACE_SLOTS } from "../shared/rules";
 import { ACCEPT, prepareMascot } from "./prepare";
 
@@ -33,6 +35,9 @@ export function AdminMascotPage() {
               scales them down before the upload. Where a picture is missing, nothing is shown in its place.
             </Trans>
           </p>
+          <DocsLink href={moduleDocsUrl("mascot", currentLocale(), DOC_SECTIONS.mascotGuide)}>
+            <Trans>How the pictures should look (kabine.dev)</Trans>
+          </DocsLink>
           <section class="card card-pad stack-sm" aria-label={t`Faces for results`}>
             <strong>
               <Trans>Faces for results</Trans>
