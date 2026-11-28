@@ -1,4 +1,5 @@
 // The worker parts of all modules (modules/<id>/worker/index.ts), found by the build: adding a folder is enough.
+import type { MascotImages } from "../shared/module-api";
 import type { ModuleId } from "../shared/modules";
 import { isModuleOn } from "./domain/club";
 import type { CalendarItem } from "./domain/calendar";
@@ -107,4 +108,10 @@ export async function moduleFollowedTeams(db: D1Database, actor: Actor): Promise
 export async function moduleFollowers(db: D1Database, teamIds: number[]): Promise<{ accountId: number; teamId: number }[]> {
   if (!teamIds.length) return [];
   return (await Promise.all(activeWorkerModules().map((m) => m.follows?.accounts(db, teamIds) ?? []))).flat();
+}
+
+/** Pictures of the club's mascot by slot from the active modules; empty while no such module is on. */
+export async function moduleMascot(db: D1Database): Promise<MascotImages> {
+  const parts = await Promise.all(activeWorkerModules().map((m) => m.mascot?.(db) ?? {}));
+  return Object.assign({}, ...parts) as MascotImages;
 }

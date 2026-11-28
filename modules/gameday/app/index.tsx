@@ -15,6 +15,6 @@ export default defineAppModule({
     { path: "/heimspieltag/:date", page: lazyPage(() => pages().then((m) => m.GamedayPage)) },
     { path: "/verwaltung/heimspieltage", page: lazyPage(() => pages().then((m) => m.AdminGamedayPage)) },
   ],
-  adminMenu: () => [{ href: "/verwaltung/heimspieltage", icon: "ball", title: t`Home game days`, sub: t`Message the day before, from how many teams, mascot` }],
+  adminMenu: () => [{ href: "/verwaltung/heimspieltage", icon: "ball", title: t`Home game days`, sub: t`Message the day before, from how many teams` }],
   homeList: gamedayHomeList,
 });

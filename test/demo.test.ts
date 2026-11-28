@@ -103,7 +103,7 @@ describe("demo installation", () => {
     const login = await fetchApp(new Request("https://demo.example/api/demo/login/admin", { redirect: "manual" }));
     const cookie = login.headers.get("set-cookie")!.split(";")[0]!;
     // Also where a module that takes photos or payment details is switched on
-    await saveClub(env.DB, { modules: { ...(await loadClub(env.DB)).modules, polls: true, gameday: true } });
+    await saveClub(env.DB, { modules: { ...(await loadClub(env.DB)).modules, polls: true, mascot: true } });
     for (const [method, path] of [
       ["POST", "/api/me/passkeys/options"],
       ["PUT", "/api/admin/club/owner"],
@@ -114,8 +114,9 @@ describe("demo installation", () => {
       // Polls module: product photos, and the PayPal name and account every visitor would be sent to
       ["PUT", "/api/polls/1/options/2/image"],
       ["PUT", "/api/polls/payment"],
-      // Home game day module: the mascot every visitor would see
-      ["PUT", "/api/gameday/mascot"],
+      // Club mascot module: pictures every visitor would see
+      ["PUT", "/api/mascot/images/win"],
+      ["DELETE", "/api/mascot/images/win"],
       // Restore would bring in photos, other links and handball4all past the checks above
       ["POST", "/api/admin/restore/rows"],
       ["POST", "/api/admin/restore/fixups"],

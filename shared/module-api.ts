@@ -52,6 +52,15 @@ export interface ModuleManifest {
   }[];
 }
 
+/**
+ * Slots for pictures of the club's mascot (worker hook `mascot`): the faces next to a game's result (win, draw, close
+ * loss, clear loss) and the large card and small tiles of the home game day. Stored by slot name: never rename one.
+ */
+export const MASCOT_SLOTS = ["win", "draw", "close", "clear", "card", "head"] as const;
+export type MascotSlot = (typeof MASCOT_SLOTS)[number];
+/** Picture URLs by slot; a slot without a picture is missing. */
+export type MascotImages = Partial<Record<MascotSlot, string>>;
+
 /** Declares a module; keeps the literal types (the id becomes part of ModuleId). */
 export function defineModule<const M extends ModuleManifest>(manifest: M): M {
   return manifest;
