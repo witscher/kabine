@@ -2,7 +2,10 @@
 // (shared/site-docs.ts): every module needs both READMEs, and the headings the app links to must exist.
 import { describe, expect, it } from "vitest";
 import { MODULES } from "../shared/modules";
+import { UPDATE_DOC_SECTIONS, updateGuideUrl } from "../shared/releases";
 import { DOC_SECTIONS, moduleDocsSlug, moduleDocsUrl } from "../shared/site-docs";
+import operationDe from "../docs/operation.de.md?raw";
+import operationEn from "../docs/operation.md?raw";
 
 const manifests = import.meta.glob("../modules/*/module.ts", { query: "?raw", import: "default", eager: true }) as Record<string, string>;
 const readmes = import.meta.glob("../modules/*/README*.md", { query: "?raw", import: "default", eager: true }) as Record<string, string>;
@@ -47,5 +50,19 @@ describe("module documentation", () => {
     expect(moduleDocsSlug("matchReports")).toBe("match-reports");
     expect(moduleDocsUrl("mascot", "de", DOC_SECTIONS.mascotGuide)).toBe("https://kabine.dev/docs/module/mascot/#bilder-vorbereiten");
     expect(moduleDocsUrl("handballnet", "en")).toBe("https://kabine.dev/en/docs/modules/handballnet/");
+  });
+});
+
+describe("update guide", () => {
+  it("the operation guide has the headings the app and the chatbot link to, in both languages", () => {
+    for (const { en, de } of Object.values(UPDATE_DOC_SECTIONS)) {
+      expect(anchors(operationEn), en).toContain(en);
+      expect(anchors(operationDe), de).toContain(de);
+    }
+    // Links inside the guide point to its own headings
+    for (const [md, name] of [[operationEn, "en"], [operationDe, "de"]] as const) {
+      for (const [, anchor] of md.matchAll(/\]\(#([^)]+)\)/g)) expect(anchors(md), `${name}: #${anchor}`).toContain(anchor);
+    }
+    expect(updateGuideUrl("de", "notices")).toBe("https://kabine.dev/docs/betrieb/#update-hinweise");
   });
 });
