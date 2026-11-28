@@ -205,7 +205,7 @@ Sitemap: ${ORIGIN}/sitemap.xml
 );
 
 // Static files, screenshots as WebP, fonts ----------------------------------------------------------------
-for (const f of ["style.css", "lang.js", "gallery.js", "copy.js", "chat.js", "chat.css", "icon.svg", "_headers", "og-de.png", "og-en.png"]) cpSync(`site/src/${f}`, `${out}/${f}`);
+for (const f of ["style.css", "lang.js", "gallery.js", "menu.js", "copy.js", "chat.js", "chat.css", "icon.svg", "_headers", "og-de.png", "og-en.png"]) cpSync(`site/src/${f}`, `${out}/${f}`);
 // Banners for club websites (npm run site:banners renders them)
 cpSync("site/src/banner", `${out}/banner`, { recursive: true });
 // What the chatbot may answer from (read by site/chat.mjs through the assets binding; public like the pages)

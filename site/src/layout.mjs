@@ -82,6 +82,7 @@ export function head({ lang, path, title, description, alternates = {}, jsonLd =
     `<link rel="stylesheet" href="/style.css">`,
     `<script src="/lang.js" defer></script>`,
     `<script src="/gallery.js" defer></script>`,
+    `<script src="/menu.js" defer></script>`,
     ...jsonLd.map((o) => `<script type="application/ld+json">${JSON.stringify(o).replace(/</g, "\\u003c")}</script>`),
   ].join("\n");
 }
