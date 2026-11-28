@@ -35,6 +35,31 @@ export interface CoachNote {
 
 export const CHANGELOG: readonly ChangelogEntry[] = [
   {
+    version: "1.0.0",
+    date: "2026-11-28",
+    items: () => [
+      t`Kabine 1.0: the first stable release. The modules Polls, Fans and Home game day are no longer beta; switch them on under Administration → Modules.`,
+      everyone(t`Played games show the result with "Win", "Draw" or "Loss"; players under 14 also see the club mascot when the club has uploaded one.`),
+      everyone(t`Fans: follow other teams of the club under Profile → Fan of … and see their games on the start page (when the club has switched it on).`),
+      everyone(t`Home game day: when many teams play at home on one day, everyone involved gets a message the day before and a card on the start page.`),
+      everyone(t`On the start page, the team buttons each switch their team on and off.`),
+      everyone(t`Notifications older than a day are closed by themselves.`),
+      t`Game schedules from handball4all and handball.net sync by themselves after games and once a week, from a coach's device; games show the league table.`,
+      t`Groups can be marked as training groups: their events count as training on the start page.`,
+      t`New module (beta): club mascot, pictures for results and home game days.`,
+      t`Administration is grouped, modules have a page of their own with a link to their documentation on kabine.dev, and help and feedback is at the top of the profile.`,
+      t`Update notices: Administration → Updates and maintenance shows when a new version is available, with a push to admins (can be switched off).`,
+    ],
+    coaches: () => [
+      {
+        text: t`Game schedules now sync by themselves: after a game without a result and once a week, when you open the app. The button stays for short-notice changes. Game pages show the league table.`,
+      },
+      {
+        text: t`On your event you see under "Elsewhere the same day" where your players take part in other teams or groups that day, with time and status, never the reason.`,
+      },
+    ],
+  },
+  {
     version: "0.9.0",
     date: "2026-11-19",
     items: () => [

@@ -343,6 +343,11 @@ msgstr "Zurück zu den Listen"
 msgid "Others take on this duty."
 msgstr "Diesen Dienst übernehmen andere."
 
+# ai
+#: shared/changelog.ts
+msgid "Game schedules now sync by themselves: after a game without a result and once a week, when you open the app. The button stays for short-notice changes. Game pages show the league table."
+msgstr "Spielpläne gleichen sich jetzt selbst ab: nach einem Spiel ohne Ergebnis und einmal pro Woche, wenn du die App öffnest. Der Knopf bleibt für kurzfristige Änderungen. Spielseiten zeigen die Tabelle der Staffel."
+
 #: modules/duties/worker/routes.ts
 msgid "Please choose a duty."
 msgstr "Bitte einen Dienst wählen."
@@ -1354,6 +1359,11 @@ msgstr "Bitte gib das Passwort des Mail-Kontos ein."
 #: modules/gameday/module.ts
 msgid "The dates after a week."
 msgstr "Die Tage nach einer Woche."
+
+# ai
+#: shared/changelog.ts
+msgid "On your event you see under \"Elsewhere the same day\" where your players take part in other teams or groups that day, with time and status, never the reason."
+msgstr "An deinem Termin siehst du unter „Am selben Tag woanders dabei“, wo deine Spielerinnen und Spieler an diesem Tag in anderen Mannschaften oder Gruppen dabei sind, mit Uhrzeit und Status, nie mit Grund."
 
 #: src/pages/join.tsx
 msgid "I am {playerName} – set up passkey"
@@ -2742,6 +2752,11 @@ msgid "Tap a team at the top to see its events."
 msgstr "Tippe oben auf eine Mannschaft, um ihre Termine zu sehen."
 
 # ai
+#: shared/changelog.ts
+msgid "Update notices: Administration → Updates and maintenance shows when a new version is available, with a push to admins (can be switched off)."
+msgstr "Update-Hinweise: Verwaltung → Updates und Wartung zeigt, wenn eine neue Version verfügbar ist, mit einem Push an die Admins (abschaltbar)."
+
+# ai
 #: src/help-texts.ts
 msgid "This person may take the duty and sees it in the Helpers tab. Without the approval they do not see it at all. Coaches and admins can still enter anyone. For duties taken across teams, such as youth referee, the Helpers tab lists all games that still need someone."
 msgstr "Diese Person darf den Dienst übernehmen und sieht ihn im Reiter Helfer. Ohne Freigabe sieht sie ihn gar nicht. Trainer und Admins können trotzdem jeden eintragen. Bei Diensten über alle Mannschaften, etwa Jugendschiedsrichter, listet der Reiter Helfer alle Spiele, bei denen noch jemand fehlt."
@@ -3330,6 +3345,11 @@ msgstr "Schulferien und Feiertage deiner Region lassen sich jetzt auch für die 
 #: src/pages/setup-wizard.tsx
 msgid "From an export of Kabine"
 msgstr "Aus einem Kabine-Export"
+
+# ai
+#: shared/changelog.ts
+msgid "Home game day: when many teams play at home on one day, everyone involved gets a message the day before and a card on the start page."
+msgstr "Heimspieltag: Spielen an einem Tag viele Mannschaften zu Hause, bekommen alle Beteiligten am Vortag einen Hinweis und eine Karte auf der Startseite."
 
 # ai
 #: modules/duties/worker/stats.ts
@@ -5487,6 +5507,11 @@ msgid "Announcement · {author}"
 msgstr "Ankündigung · {author}"
 
 # ai
+#: shared/changelog.ts
+msgid "Administration is grouped, modules have a page of their own with a link to their documentation on kabine.dev, and help and feedback is at the top of the profile."
+msgstr "Die Verwaltung ist gruppiert, die Module haben eine eigene Seite mit Link zu ihrer Doku auf kabine.dev, und Hilfe und Feedback stehen oben im Profil."
+
+# ai
 #: src/pages/audit.tsx
 msgid "{who} set {person} inactive"
 msgstr "{who} hat {person} inaktiv gesetzt"
@@ -6666,6 +6691,11 @@ msgid "Everyone approved for {duty}"
 msgstr "Alle Freigegebenen für {duty}"
 
 # ai
+#: shared/changelog.ts
+msgid "Game schedules from handball4all and handball.net sync by themselves after games and once a week, from a coach's device; games show the league table."
+msgstr "Spielpläne aus handball4all und handball.net gleichen sich nach Spielen und einmal pro Woche selbst ab, vom Gerät eines Trainers; Spiele zeigen die Tabelle der Staffel."
+
+# ai
 #: src/pages/updates.tsx
 msgid "Read what it says: whether the database changes, and whether wrangler.jsonc or workflow files need a change by hand."
 msgstr "Lies, was darin steht: ob sich die Datenbank ändert und ob wrangler.jsonc oder Workflow-Dateien von Hand angepasst werden müssen."
@@ -6975,6 +7005,11 @@ msgstr "Bestellungen können nicht anonym sein."
 #: src/pages/group.tsx
 msgid "Add members"
 msgstr "Mitglieder hinzufügen"
+
+# ai
+#: shared/changelog.ts
+msgid "Groups can be marked as training groups: their events count as training on the start page."
+msgstr "Gruppen lassen sich als Trainingsgruppe markieren: Ihre Termine zählen auf der Startseite als Training."
 
 #: src/list-import.tsx
 #: src/pages/admin.tsx
@@ -8498,6 +8533,11 @@ msgstr "Für alle, die keine Sprache gewählt haben, und für Nachrichten außer
 #: modules/polls/worker/routes.ts
 msgid "Only orders are paid."
 msgstr "Nur Bestellungen werden bezahlt."
+
+# ai
+#: shared/changelog.ts
+msgid "Kabine 1.0: the first stable release. The modules Polls, Fans and Home game day are no longer beta; switch them on under Administration → Modules."
+msgstr "Kabine 1.0: die erste stabile Version. Die Module Umfragen, Fans und Heimspieltag sind keine Beta mehr; einschalten unter Verwaltung → Module."
 
 #: src/pages/team.tsx
 msgid "Set core squad"
@@ -12009,6 +12049,11 @@ msgid "A team or group with this name already exists."
 msgstr "Eine Mannschaft oder Gruppe mit diesem Namen gibt es schon."
 
 # ai
+#: shared/changelog.ts
+msgid "Fans: follow other teams of the club under Profile → Fan of … and see their games on the start page (when the club has switched it on)."
+msgstr "Fans: anderen Mannschaften des Vereins folgen unter Profil → Fan von … und ihre Spiele auf der Startseite sehen (wenn der Verein es eingeschaltet hat)."
+
+# ai
 #: worker/routes/squad.ts
 msgid "{form, select, you {You have been nominated} one {{names} has been nominated} youAnd {{names} have been nominated} other {{names} have been nominated}}"
 msgstr "{form, select, you {Du bist nominiert} one {{names} ist nominiert} youAnd {{names} seid nominiert} other {{names} sind nominiert}}"
@@ -12176,6 +12221,11 @@ msgstr "Keine Spiellisten gefunden"
 msgid "Assigned by the coach"
 msgstr "Vergibt der Trainer"
 
+# ai
+#: shared/changelog.ts
+msgid "Notifications older than a day are closed by themselves."
+msgstr "Mitteilungen, die älter als einen Tag sind, verschwinden von selbst."
+
 #: src/pages/team.tsx
 msgid "Players · {playerCount}"
 msgstr "Spieler · {playerCount}"
@@ -12183,6 +12233,11 @@ msgstr "Spieler · {playerCount}"
 #: src/pages/event.tsx
 msgid "Cancel this training session for everyone?"
 msgstr "Trainingstermin komplett für alle absagen?"
+
+# ai
+#: shared/changelog.ts
+msgid "Played games show the result with \"Win\", \"Draw\" or \"Loss\"; players under 14 also see the club mascot when the club has uploaded one."
+msgstr "Gespielte Spiele zeigen das Ergebnis mit „Sieg“, „Unentschieden“ oder „Niederlage“; Spielerinnen und Spieler unter 14 sehen dazu das Vereinsmaskottchen, wenn der Verein eines hochgeladen hat."
 
 # ai
 #: src/pages/mail-settings.tsx
@@ -13024,6 +13079,11 @@ msgid "Continue here anyway (only for trying out)"
 msgstr "Trotzdem hier weitermachen (nur zum Ausprobieren)"
 
 # ai
+#: shared/changelog.ts
+msgid "On the start page, the team buttons each switch their team on and off."
+msgstr "Auf der Startseite schalten die Mannschaftsknöpfe ihre Mannschaft jeweils ein und aus."
+
+# ai
 #: src/special-attendance.tsx
 msgid "You see this as an organiser."
 msgstr "Siehst du als Organisator."
@@ -13830,6 +13890,11 @@ msgstr "Dienstart löschen"
 #: src/howto.tsx
 msgid "You choose what you get at any time in your profile under notifications. You can also turn them on there later."
 msgstr "Was genau du bekommst, stellst du jederzeit im Profil unter „Benachrichtigungen“ ein. Dort kannst du sie auch später einschalten."
+
+# ai
+#: shared/changelog.ts
+msgid "New module (beta): club mascot, pictures for results and home game days."
+msgstr "Neues Modul (Beta): Vereinsmaskottchen, Bilder für Ergebnisse und Heimspieltage."
 
 #: src/pages/event.tsx
 #: src/pages/event.tsx

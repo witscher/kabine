@@ -66,6 +66,10 @@ Each milestone ends with typecheck, unit tests and e2e green, a commit on `main`
 
 Released as v0.9.0 on 19 November 2026, after two release candidates on the test installation (deployed by hand, without a public tag, see `docs/dev/decisions.md`, "Release candidates"). All open entries of `docs/dev/upstream-tasks.md` are ported: the polls module (`modules/polls/`, beta), the helper duties block, attendance modes of special events, home and events polish, the one-time push prompt, "Work as admin" for parent admins and the "What's new" page; also the handball.net module out of beta with a weekly sync from the coach's device, the parent link for one child, server errors, lower read load, push texts per recipient, and sign-in and invitations without anonymous KV writes.
 
+## Release 1.0 (November 2026)
+
+Released as v1.0.0 on 28 November 2026, the first stable release, after four release candidates on the test installation. Polls, fans and home game day are no longer beta; the club mascot module is new (beta). Also ported from the original club app: results with an outcome word, fixture sync by itself with league tables, training groups, "elsewhere the same day" for coaches, closing old notifications. New in Kabine: update notices for admins (`kabine.dev/releases.json`), the administration in groups with a modules page, the documentation on kabine.dev built from the repository, banners for clubs and a chatbot on kabine.dev (Clef triage in front of the LLM, see `docs/dev/decisions.md`). Fixed: a build file missing right after a deploy could leave the app blank (`docs/dev/decisions.md`, "Missing build files").
+
 ## Requested for the end (also for the original club app)
 
 - **Holiday plans visible:** done in Kabine (notes in the timeline, see `docs/dev/decisions.md`) and in the original club app.

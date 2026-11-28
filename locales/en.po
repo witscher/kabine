@@ -317,6 +317,10 @@ msgstr "Back to the lists"
 msgid "Others take on this duty."
 msgstr "Others take on this duty."
 
+#: shared/changelog.ts
+msgid "Game schedules now sync by themselves: after a game without a result and once a week, when you open the app. The button stays for short-notice changes. Game pages show the league table."
+msgstr "Game schedules now sync by themselves: after a game without a result and once a week, when you open the app. The button stays for short-notice changes. Game pages show the league table."
+
 #: modules/duties/worker/routes.ts
 msgid "Please choose a duty."
 msgstr "Please choose a duty."
@@ -1236,6 +1240,10 @@ msgstr "Please enter the password of the mail account."
 #: modules/gameday/module.ts
 msgid "The dates after a week."
 msgstr "The dates after a week."
+
+#: shared/changelog.ts
+msgid "On your event you see under \"Elsewhere the same day\" where your players take part in other teams or groups that day, with time and status, never the reason."
+msgstr "On your event you see under \"Elsewhere the same day\" where your players take part in other teams or groups that day, with time and status, never the reason."
 
 #: src/pages/join.tsx
 msgid "I am {playerName} – set up passkey"
@@ -2502,6 +2510,10 @@ msgstr "Game cancelled ({teamName})"
 msgid "Tap a team at the top to see its events."
 msgstr "Tap a team at the top to see its events."
 
+#: shared/changelog.ts
+msgid "Update notices: Administration → Updates and maintenance shows when a new version is available, with a push to admins (can be switched off)."
+msgstr "Update notices: Administration → Updates and maintenance shows when a new version is available, with a push to admins (can be switched off)."
+
 #: src/help-texts.ts
 msgid "This person may take the duty and sees it in the Helpers tab. Without the approval they do not see it at all. Coaches and admins can still enter anyone. For duties taken across teams, such as youth referee, the Helpers tab lists all games that still need someone."
 msgstr "This person may take the duty and sees it in the Helpers tab. Without the approval they do not see it at all. Coaches and admins can still enter anyone. For duties taken across teams, such as youth referee, the Helpers tab lists all games that still need someone."
@@ -3034,6 +3046,10 @@ msgstr "School holidays and public holidays of your region now also load for the
 #: src/pages/setup-wizard.tsx
 msgid "From an export of Kabine"
 msgstr "From an export of Kabine"
+
+#: shared/changelog.ts
+msgid "Home game day: when many teams play at home on one day, everyone involved gets a message the day before and a card on the start page."
+msgstr "Home game day: when many teams play at home on one day, everyone involved gets a message the day before and a card on the start page."
 
 #: modules/duties/worker/stats.ts
 msgid "{n, plural, one {Reminder sent to one family.} other {Reminder sent to # families.}}"
@@ -4974,6 +4990,10 @@ msgstr "Please paste the link to your team's page at {names}."
 msgid "Announcement · {author}"
 msgstr "Announcement · {author}"
 
+#: shared/changelog.ts
+msgid "Administration is grouped, modules have a page of their own with a link to their documentation on kabine.dev, and help and feedback is at the top of the profile."
+msgstr "Administration is grouped, modules have a page of their own with a link to their documentation on kabine.dev, and help and feedback is at the top of the profile."
+
 #: src/pages/audit.tsx
 msgid "{who} set {person} inactive"
 msgstr "{who} set {person} inactive"
@@ -6038,6 +6058,10 @@ msgstr "Inactive: all events count as absent, no reminders."
 msgid "Everyone approved for {duty}"
 msgstr "Everyone approved for {duty}"
 
+#: shared/changelog.ts
+msgid "Game schedules from handball4all and handball.net sync by themselves after games and once a week, from a coach's device; games show the league table."
+msgstr "Game schedules from handball4all and handball.net sync by themselves after games and once a week, from a coach's device; games show the league table."
+
 #: src/pages/updates.tsx
 msgid "Read what it says: whether the database changes, and whether wrangler.jsonc or workflow files need a change by hand."
 msgstr "Read what it says: whether the database changes, and whether wrangler.jsonc or workflow files need a change by hand."
@@ -6317,6 +6341,10 @@ msgstr "Orders cannot be anonymous."
 #: src/pages/group.tsx
 msgid "Add members"
 msgstr "Add members"
+
+#: shared/changelog.ts
+msgid "Groups can be marked as training groups: their events count as training on the start page."
+msgstr "Groups can be marked as training groups: their events count as training on the start page."
 
 #: src/list-import.tsx
 #: src/pages/admin.tsx
@@ -7679,6 +7707,10 @@ msgstr "For everyone who has not chosen a language, and for messages outside the
 #: modules/polls/worker/routes.ts
 msgid "Only orders are paid."
 msgstr "Only orders are paid."
+
+#: shared/changelog.ts
+msgid "Kabine 1.0: the first stable release. The modules Polls, Fans and Home game day are no longer beta; switch them on under Administration → Modules."
+msgstr "Kabine 1.0: the first stable release. The modules Polls, Fans and Home game day are no longer beta; switch them on under Administration → Modules."
 
 #: src/pages/team.tsx
 msgid "Set core squad"
@@ -10865,6 +10897,10 @@ msgstr "{code} is your sign-in code for {app}"
 msgid "A team or group with this name already exists."
 msgstr "A team or group with this name already exists."
 
+#: shared/changelog.ts
+msgid "Fans: follow other teams of the club under Profile → Fan of … and see their games on the start page (when the club has switched it on)."
+msgstr "Fans: follow other teams of the club under Profile → Fan of … and see their games on the start page (when the club has switched it on)."
+
 #: worker/routes/squad.ts
 msgid "{form, select, you {You have been nominated} one {{names} has been nominated} youAnd {{names} have been nominated} other {{names} have been nominated}}"
 msgstr "{form, select, you {You have been nominated} one {{names} has been nominated} youAnd {{names} have been nominated} other {{names} have been nominated}}"
@@ -11019,6 +11055,10 @@ msgstr "No game lists found"
 msgid "Assigned by the coach"
 msgstr "Assigned by the coach"
 
+#: shared/changelog.ts
+msgid "Notifications older than a day are closed by themselves."
+msgstr "Notifications older than a day are closed by themselves."
+
 #: src/pages/team.tsx
 msgid "Players · {playerCount}"
 msgstr "Players · {playerCount}"
@@ -11026,6 +11066,10 @@ msgstr "Players · {playerCount}"
 #: src/pages/event.tsx
 msgid "Cancel this training session for everyone?"
 msgstr "Cancel this training session for everyone?"
+
+#: shared/changelog.ts
+msgid "Played games show the result with \"Win\", \"Draw\" or \"Loss\"; players under 14 also see the club mascot when the club has uploaded one."
+msgstr "Played games show the result with \"Win\", \"Draw\" or \"Loss\"; players under 14 also see the club mascot when the club has uploaded one."
 
 #: src/pages/mail-settings.tsx
 msgid "Encryption"
@@ -11789,6 +11833,10 @@ msgstr "no own access"
 msgid "Continue here anyway (only for trying out)"
 msgstr "Continue here anyway (only for trying out)"
 
+#: shared/changelog.ts
+msgid "On the start page, the team buttons each switch their team on and off."
+msgstr "On the start page, the team buttons each switch their team on and off."
+
 #: src/special-attendance.tsx
 msgid "You see this as an organiser."
 msgstr "You see this as an organiser."
@@ -12520,6 +12568,10 @@ msgstr "Delete duty type"
 #: src/howto.tsx
 msgid "You choose what you get at any time in your profile under notifications. You can also turn them on there later."
 msgstr "You choose what you get at any time in your profile under notifications. You can also turn them on there later."
+
+#: shared/changelog.ts
+msgid "New module (beta): club mascot, pictures for results and home game days."
+msgstr "New module (beta): club mascot, pictures for results and home game days."
 
 #: src/pages/event.tsx
 #: src/pages/event.tsx
