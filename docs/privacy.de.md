@@ -28,7 +28,7 @@ Kabine wird vor allem von Kindern, Jugendlichen und ihren Eltern genutzt. Die Ap
 
 Den eigenen Namen ändern nur Admins; Spieler, Eltern und Trainer wenden sich an ihren Trainer oder einen Admin, die ihn korrigieren (Recht auf Berichtigung, Art. 16 DSGVO). So weiß jeder, wer wer ist, und Kinder können sich nicht umbenennen.
 
-| Jahrgang | Spieler | Altersklasse und Mannschaft; Helferdienste „Nur Erwachsene“ werden danach niemandem unter 18 angeboten | Trainer, Admins | Wie oben |
+| Jahrgang | Spieler | Altersklasse und Mannschaft; Helferdienste „Nur Erwachsene“ werden danach niemandem unter 18 angeboten; mit dem Modul Vereinsmaskottchen zeigen Ergebnisse Spielern unter 14 das Gesicht des Maskottchens (die App auf dem eigenen Gerät erfährt nur „unter 14: ja/nein“, nie den Jahrgang) | Trainer, Admins | Wie oben |
 | Mannschaften, Rollen | Alle | Wer welche Termine und Chats sieht | Mannschaft (Trainer und Admins vollständig) | Beim Austritt; zum Saisonwechsel neu zugeordnet |
 | Eltern-Kind-Verbindung, Freigaben mit Protokoll | Eltern, Minderjährige | Eltern handeln für ihre Kinder | Das Elternteil, Trainer, Admins | Beim Austritt |
 | Rückmeldungen (zu/ab, später) | Spieler | Planung von Training und Spiel | Trainer, Admins; Betreuer und, wenn die Mannschaft es einschaltet, die Mannschaft (ohne Gründe); Trainer der anderen Mannschaften und Gruppen der Person (und Admins) sehen Uhrzeit, Mannschaft und Status, nie den Grund: im eigenen Termin am selben Tag und auf der Spielerseite für die nächsten zwei Wochen | Zum Saisonwechsel |

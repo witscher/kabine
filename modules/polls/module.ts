@@ -5,7 +5,7 @@ export default defineModule({
   id: "polls",
   kind: "feature",
   // New modules start as beta: switched off until a club turns them on, marked "Beta" in the settings
-  status: "beta",
+  status: "stable",
   defaultOn: false,
   // Every API route of the module must match one of these (test/modules-contract.test.ts)
   paths: [/^\/api\/polls(\/|$)/],

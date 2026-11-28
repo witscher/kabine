@@ -7,6 +7,7 @@ import { dayOfMonth, monthShort, nowLocal, time, weekdayShort } from "../../../s
 import { GameBall, HomeTag } from "../../../src/game-ball";
 import { Icon } from "../../../src/icons";
 import { GameLinks, isLiveWindow } from "../../../src/live";
+import { ResultLine } from "../../../src/result";
 import type { HomeListContext, HomeListPart } from "../../../src/module-api";
 import type { FanGame, FansPage } from "../types";
 
@@ -130,16 +131,20 @@ function FanRowLink({ game }: { game: FanGame }) {
           {game.isHome ? <HomeTag /> : null}
           {game.shortTitle}
         </div>
-        <div class="sub">
-          {cancelled ? (
-            <span class="cancel-tag">
-              <Trans>Not taking place</Trans>
-            </span>
-          ) : (
-            `${time(game.startsAt)} · ${game.location?.name ?? t`Location to follow`}`
-          )}
-          {game.result ? ` · ${game.result.home}:${game.result.guest}` : ""}
-        </div>
+        {/* Played: the score with the outcome instead of time and venue (those are on the game page) */}
+        {game.result && !cancelled ? (
+          <ResultLine home={game.result.home} guest={game.result.guest} isHome={game.isHome} inTable={!!game.game?.inTable} />
+        ) : (
+          <div class="sub">
+            {cancelled ? (
+              <span class="cancel-tag">
+                <Trans>Not taking place</Trans>
+              </span>
+            ) : (
+              `${time(game.startsAt)} · ${game.location?.name ?? t`Location to follow`}`
+            )}
+          </div>
+        )}
       </div>
       <GameBall
         teams={game.teams.map((tm) => tm.name)}

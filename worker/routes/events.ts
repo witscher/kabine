@@ -161,7 +161,9 @@ eventRoutes.get("/events/:id", async (c) => {
   const forOrganizer = organizing && !detail.canManage;
   const families = detail.families ?? (forOrganizer ? familyOverview(ctx.families.get(event.id)) : null);
   const optionalYes = forOrganizer && detail.optionalAttendance ? optionalYesNames(event, ctx) : null;
-  return c.json({ ...detail, families, optionalYes, ...info, organizing, modules, leaders: leaderEntries(leaders, event, ctx, actor, detail.canManage, now), standings, elsewhere });
+  // Outcome word at the result only where the league has a table
+  const game = detail.game ? { ...detail.game, inTable: !!standings } : null;
+  return c.json({ ...detail, game, families, optionalYes, ...info, organizing, modules, leaders: leaderEntries(leaders, event, ctx, actor, detail.canManage, now), standings, elsewhere });
 });
 
 /** Coaches and admins: where the event's players take part the same day in other teams and groups (without reasons). */

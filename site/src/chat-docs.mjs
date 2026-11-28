@@ -54,8 +54,8 @@ const githubSlug = (html) =>
 const plain = (html) => decode(html.replace(/<[^>]+>/g, "")).replace(/\s+/g, " ").trim();
 
 /**
- * Sections of one built page: [{ id, lang, title, url, text }]. The id is the path plus the anchor,
- * the url points to the section on kabine.dev.
+ * Sections of one built page: [{ id, lang, title, url, text }]. The id is the path plus the anchor (or the
+ * heading's slug where it has none), the url points to the section on kabine.dev.
  */
 export function pageSections(path, html, base = `${ORIGIN}${path}`) {
   const lang = /<html lang="(\w+)"/.exec(html)?.[1] ?? "en";
@@ -85,7 +85,10 @@ export function pageSections(path, html, base = `${ORIGIN}${path}`) {
     let text = htmlToText(body);
     if (text.length < 40) return;
     if (text.length > MAX_SECTION) text = `${text.slice(0, text.lastIndexOf(" ", MAX_SECTION))} …`;
-    sections.push({ id: `${path}${anchor ? `#${anchor}` : ""}`, lang, title, url: `${base}${anchor ? `#${anchor}` : ""}`, text });
+    // The id is Clef's option key, so it must be unique: a heading without an anchor gets its slug after "~"
+    let id = anchor ? `${path}#${anchor}` : i > 0 ? `${path}~${githubSlug(title.split(" › ").pop())}` : path;
+    for (let n = 2; sections.some((s) => s.id === id); n++) id = `${id.replace(/-\d+$/, "")}-${n}`;
+    sections.push({ id, lang, title, url: `${base}${anchor ? `#${anchor}` : ""}`, text });
   });
   return sections;
 }

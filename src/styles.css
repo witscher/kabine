@@ -833,6 +833,74 @@ a.list-row:hover {
   font-weight: 600;
 }
 
+/* Result of a played game (src/result.tsx): the score large, next to it a white box with the outcome word and, for
+   users under 14, the mascot face. White because game rows are dark; on light ground with a border. */
+.result-line {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 6px;
+}
+.result-big {
+  font-family: var(--font-cond);
+  font-weight: 800;
+  font-size: 28px;
+  line-height: 1;
+  letter-spacing: 0.01em;
+}
+.result-page .result-big {
+  font-size: 34px;
+}
+.result-box {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #fff;
+  border-radius: 9px;
+  padding: 0 0 0 8px;
+  height: 38px;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+.result-box:not(:has(.result-word)) {
+  padding: 0;
+}
+/* Without a face: only the word, centred */
+.result-box.no-face {
+  padding: 0 10px;
+}
+.result-box img {
+  width: 38px;
+  height: 38px;
+  display: block;
+  object-fit: contain;
+}
+.result-word {
+  font-family: var(--font-cond);
+  font-weight: 800;
+  font-size: 17px;
+  line-height: 1;
+}
+/* Dark enough on white for small bold text (the yellow of the brand would not be readable) */
+.result-win {
+  color: #1f7a35;
+}
+.result-draw {
+  color: #8a6a00;
+}
+.result-loss {
+  color: #b3342a;
+}
+.result-page .result-box,
+.event-row:not(.dark) .result-box {
+  border: 1.5px solid var(--line);
+}
+.result-page .result-box img,
+.event-row:not(.dark) .result-box img {
+  width: 35px;
+  height: 35px;
+}
+
 .month-label {
   font-family: var(--font-cond);
   font-weight: 700;

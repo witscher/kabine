@@ -3457,6 +3457,12 @@ msgid "Taking turns: {order}. The new team is told in its chat in good time."
 msgstr "Abwechselnd: {order}. Die neue Mannschaft bekommt rechtzeitig Bescheid in ihrem Chat."
 
 # ai
+#: src/result.tsx
+msgctxt "game outcome"
+msgid "Drawn"
+msgstr "Unentschieden"
+
+# ai
 #: src/pages/audit.tsx
 msgid "{who} carried out the season change to {season}"
 msgstr "{who} hat den Saisonwechsel auf {season} durchgeführt"
@@ -3982,6 +3988,11 @@ msgstr "{short}: alle Spiele des Vereins"
 #: src/pages/help.tsx
 msgid "Thank you, your message has arrived."
 msgstr "Danke, deine Nachricht ist angekommen."
+
+# ai
+#: src/result.tsx
+msgid "Lost narrowly"
+msgstr "Knapp verloren"
 
 #: src/pages/admin.tsx
 msgid "the assignment to {teamNames}"
@@ -14701,6 +14712,12 @@ msgid "Goal difference"
 msgstr "Tordifferenz"
 
 # ai
+#: src/result.tsx
+msgctxt "game outcome"
+msgid "Loss"
+msgstr "Niederlage"
+
+# ai
 #: modules/mascot/app/admin.tsx
 msgid "Close loss"
 msgstr "Knapp verloren"
@@ -14943,6 +14960,12 @@ msgstr "In der {teamName} sind keine Eltern eingebunden. Die Spieler sagen selbs
 #: worker/routes/join.ts
 msgid "There is now an access for this person. Please ask for a new link."
 msgstr "Für diese Person gibt es inzwischen einen Zugang. Bitte frag nach einem neuen Link."
+
+# ai
+#: src/result.tsx
+msgctxt "game outcome"
+msgid "Won"
+msgstr "Gewonnen"
 
 #: modules/duties/app/helpers.tsx
 #: modules/fans/app/pages.tsx
@@ -16053,6 +16076,11 @@ msgstr "Nachricht"
 msgid "{name}: missed without excuse"
 msgstr "{name}: unentschuldigt gefehlt"
 
+# ai
+#: src/result.tsx
+msgid "Lost clearly"
+msgstr "Deutlich verloren"
+
 #: modules/polls/app/pages.tsx
 #: src/view-as.tsx
 msgid "End"
@@ -16195,6 +16223,12 @@ msgstr "Mannschaftschat {teamName}"
 #: src/pages/team.tsx
 msgid "Add staff"
 msgstr "Betreuer hinzufügen"
+
+# ai
+#: src/result.tsx
+msgctxt "game outcome"
+msgid "Win"
+msgstr "Sieg"
 
 #: src/list-import.tsx
 #: src/pages/admin.tsx
@@ -17164,6 +17198,12 @@ msgstr "Gruppen"
 msgid "At most {max} players in the squad."
 msgstr "Höchstens {max} Spieler im Kader."
 
+# ai
+#: src/result.tsx
+msgctxt "game outcome"
+msgid "Draw"
+msgstr "Remis"
+
 #: src/pages/event.tsx
 msgid "{name} is now inactive."
 msgstr "{name} ist jetzt inaktiv."
@@ -17259,11 +17299,6 @@ msgstr "Gib der App zuerst die Adresse des Vereins"
 #: modules/polls/app/pages.tsx
 msgid "Making it smaller …"
 msgstr "Wird verkleinert …"
-
-# ai
-#: modules/fans/app/pages.tsx
-msgid "Result {home}:{guest}"
-msgstr "Ergebnis {home}:{guest}"
 
 # ai
 #: src/special-attendance.tsx

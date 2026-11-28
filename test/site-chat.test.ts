@@ -342,6 +342,13 @@ describe("the docs bundle", () => {
     expect(docs.sections).toHaveLength(2);
     expect(docs.german).toEqual({ "https://kabine.dev/en/handball/": "https://kabine.dev/handball/" });
     expect(htmlToText('<p>A<br>B</p><table><tr><td>x</td><td>y</td></tr></table>')).toBe("A\nB\n\n| x | y");
+    // Headings without an anchor still get distinct ids (they are Clef's option keys)
+    const legal = pageSections("/en/privacy/", '<html lang="en"><main><h1>Privacy policy</h1><h2>1. Controller</h2><p>Name and address of the operator of this website.</p><h2>2. Hosting</h2><p>The website runs on Cloudflare as a processor.</p><h2 id="chat">7. Chat</h2><p>What the chat assistant stores and for how long.</p></main></html>');
+    expect(legal.map((s) => [s.id, s.url])).toEqual([
+      ["/en/privacy/~1-controller", "https://kabine.dev/en/privacy/"],
+      ["/en/privacy/~2-hosting", "https://kabine.dev/en/privacy/"],
+      ["/en/privacy/#chat", "https://kabine.dev/en/privacy/#chat"],
+    ]);
   });
 
   it("takes module READMEs without a page from the Markdown, without the Code part", () => {
