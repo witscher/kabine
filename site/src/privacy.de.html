@@ -29,7 +29,7 @@
 <p>Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO; mein berechtigtes Interesse ist der Schutz der Websites vor Missbrauch. Der Zugriff auf dein Gerät ist dafür unbedingt erforderlich (§ 25 Abs. 2 Nr. 2 TDDDG).</p>
 
 <h2>4. kabine.dev</h2>
-<p>Die Website setzt außer dem Cookie aus Abschnitt 3 keine Cookies, nutzt keine Analyse- oder Werbedienste und lädt keine Schriften, Skripte, Bilder oder sonstigen Inhalte von fremden Servern. Einzige Ausnahme ist Cloudflare Turnstile auf der Kontaktseite (Abschnitt 6).</p>
+<p>Die Website setzt außer dem Cookie aus Abschnitt 3 keine Cookies, nutzt keine Analyse- oder Werbedienste und lädt keine Schriften, Skripte, Bilder oder sonstigen Inhalte von fremden Servern. Einzige Ausnahme ist Cloudflare Turnstile auf der Kontaktseite (Abschnitt 6). Wenn du den Chat nutzt, speichert er eine Kennung in deinem Browser (Abschnitt 7).</p>
 <p>Wenn du die Sprache wechselst oder den Hinweis auf die andere Sprachfassung schließt, speichert dein Browser diese Wahl im localStorage (Eintrag <code>kabine-site-lang</code>). Sie bleibt auf deinem Gerät, bis du sie in den Browser-Einstellungen löschst, und wird nicht an mich übertragen. Das Speichern ist für die von dir gewünschte Sprachwahl unbedingt erforderlich (§ 25 Abs. 2 Nr. 2 TDDDG).</p>
 <p>Links zu anderen Websites (etwa GitHub) sind einfache Links. Erst wenn du einen anklickst, verbindet sich dein Browser mit der anderen Website; er übermittelt dabei nur die Adresse kabine.dev, nicht die Unterseite. Ab dann gilt die Datenschutzerklärung des jeweiligen Anbieters.</p>
 
@@ -41,12 +41,33 @@
 <p>Die Kontaktseite nutzt Cloudflare Turnstile, um das Formular vor Bots zu schützen. Dazu lädt die Seite ein Skript von Cloudflare (challenges.cloudflare.com), das technische Informationen über deinen Browser und dein Gerät auswertet. Turnstile wird nur auf der Kontaktseite geladen.</p>
 <p>Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO; mein berechtigtes Interesse ist der Schutz des Formulars vor Missbrauch. Der Zugriff auf diese Informationen auf deinem Gerät ist unbedingt erforderlich, um das Kontaktformular bereitzustellen, das du nutzt (§ 25 Abs. 2 Nr. 2 TDDDG). Cloudflare verarbeitet die Daten wie in Abschnitt 2 beschrieben.</p>
 
-<h2>7. Demo auf handball.kabine.dev</h2>
+<h2 id="chat">7. Chat-Assistent</h2>
+<p>Auf jeder Seite von kabine.dev kannst du unten rechts einen Chat öffnen, der Fragen zu Kabine beantwortet. Die Antworten schreibt eine KI aus der Dokumentation von Kabine; sie können falsch sein. Bitte gib im Chat keine personenbezogenen Daten ein. Solange du keine Nachricht sendest, wird nichts übertragen und nichts gespeichert. Ohne JavaScript erscheint der Chat nicht.</p>
+
+<h3>7.1 Was mit deiner Nachricht passiert</h3>
+<p>Deine Nachricht geht per HTTPS an den Server dieser Website (einen Cloudflare Worker), im Inhalt der Anfrage, nicht in der Adresse. Der Server prüft sie zuerst mit einem Entscheidungsmodell (Clef-flash): ob es um Kabine geht und ob sie versucht, den Assistenten zu manipulieren. Grüße, Dank, Nachrichten ohne Bezug zu Kabine und Manipulationsversuche bekommen eine feste Antwort, ohne weiteres Modell. Fragen zu Kabine gehen danach an ein zweites Entscheidungsmodell (Clef), das passende Abschnitte der Dokumentation auswählt, und an ein Sprachmodell (GLM-5.3), das die Antwort schreibt. Die Modelle bekommen deine Nachricht und als Zusammenhang die letzten zwei Fragen und Antworten deines Chats, nie eine als Manipulationsversuch erkannte Nachricht. Unter jeder Antwort zeigt der Chat, welchen Weg sie genommen hat.</p>
+<p>Alle Modelle laufen bei Cloudflare Workers AI, als Auftragsverarbeiter wie in Abschnitt 2 beschrieben; die Hersteller der Modelle erhalten nichts. Cloudflare speichert Eingaben und Antworten von Workers AI nicht über die Bearbeitung der Anfrage hinaus und verwendet sie nicht zum Training von KI-Modellen; es behält nur Betriebsdaten ohne Inhalt (etwa Modell, Zeitpunkt, Anzahl der Tokens, Dauer). Die Anfragen laufen über das AI Gateway von Cloudflare. Der Server weist es bei jeder Anfrage an, keinen Protokolleintrag anzulegen und nichts zwischenzuspeichern; es zählt nur die Aufrufe, Tokens und Kosten ohne Inhalt. Der Server selbst schreibt keine Protokolle (Workers Logs sind ausgeschaltet), weder Nachrichten noch die Kennung deines Chats noch Fehlermeldungen.</p>
+
+<h3>7.2 Was gespeichert wird</h3>
+<table>
+<thead><tr><th>Wo</th><th>Was</th><th>Wie lange</th></tr></thead>
+<tbody>
+<tr><td>localStorage in deinem Browser</td><td>Eine zufällige Kennung deines Chats (<code>kabine-chat-id</code>), angelegt erst mit deiner ersten Nachricht. Damit findet der Server deinen Chat auf jeder Seite von kabine.dev wieder.</td><td>Bis du im Chat „Chat löschen“ wählst oder sie im Browser löschst</td></tr>
+<tr><td>Server: Durable Object deines Chats</td><td>Deine Nachrichten und die Antworten (die letzten zehn), damit du sie nach dem Wechsel der Seite wieder siehst und Rückfragen verstanden werden; die Zeitpunkte deiner Nachrichten, um sie zu begrenzen (höchstens 5 pro Minute und 40 pro Tag).</td><td>Wird 24 Stunden nach deiner letzten Nachricht automatisch gelöscht, sofort mit „Chat löschen“</td></tr>
+<tr><td>Server: Zähler der Website</td><td>Wie viele Nachrichten und Modellaufrufe die ganze Website an einem Tag und in der letzten Minute hatte, damit der Chat nicht zum kostenlosen KI-Dienst für andere wird. Nur Zahlen, ohne Bezug zu dir.</td><td>Bis zum nächsten Tag</td></tr>
+</tbody>
+</table>
+<p>Deine IP-Adresse speichert der Chat nicht; Cloudflare verarbeitet die Verbindungsdaten wie in Abschnitt 2 beschrieben.</p>
+
+<h3>7.3 Rechtsgrundlage</h3>
+<p>Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO; mein berechtigtes Interesse ist, Fragen zu Kabine schnell zu beantworten und den Chat vor Missbrauch und Kosten zu schützen. Die Kennung in deinem Browser ist unbedingt erforderlich, damit der Chat funktioniert, den du ausdrücklich nutzt (§ 25 Abs. 2 Nr. 2 TDDDG); sie wird erst angelegt, wenn du eine Nachricht sendest.</p>
+
+<h2>8. Demo auf handball.kabine.dev</h2>
 <p>Die Demo zeigt die App mit einem erfundenen Verein. Du nutzt sie ohne Anmeldung über geteilte Demo-Zugänge (Spielerin, Elternteil, Trainerin, Admin), die alle Besucher gemeinsam verwenden. Was du dort einträgst, sehen andere Besucher. Bitte gib keine echten personenbezogenen Daten ein. E-Mail, SMS, Passkeys, Profilbilder, das Hochladen eines Vereinslogos, Feedback und die Spielpläne von handball4all sind in der Demo abgeschaltet.</p>
 <p><strong>Jede Nacht um 3:00 Uhr (deutsche Zeit) wird die Demo zurückgesetzt:</strong> Alles, was Besucher eingetragen haben, wird auf dem Server gelöscht, und der erfundene Verein wird neu angelegt.</p>
-<p>Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO; mein berechtigtes Interesse ist, die Software vorzuführen und ausprobieren zu lassen. Der Zugriff auf dein Gerät (Abschnitt 7.1) ist unbedingt erforderlich, damit die Demo so funktioniert, wie du sie nutzt (§ 25 Abs. 2 Nr. 2 TDDDG).</p>
+<p>Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO; mein berechtigtes Interesse ist, die Software vorzuführen und ausprobieren zu lassen. Der Zugriff auf dein Gerät (Abschnitt 8.1) ist unbedingt erforderlich, damit die Demo so funktioniert, wie du sie nutzt (§ 25 Abs. 2 Nr. 2 TDDDG).</p>
 
-<h3>7.1 In deinem Browser</h3>
+<h3>8.1 In deinem Browser</h3>
 <table>
 <thead><tr><th>Was</th><th>Wozu</th><th>Wie lange</th></tr></thead>
 <tbody>
@@ -61,7 +82,7 @@
 </table>
 <p>IndexedDB nutzt die Demo nicht.</p>
 
-<h3>7.2 Auf dem Server</h3>
+<h3>8.2 Auf dem Server</h3>
 <table>
 <thead><tr><th>Wo</th><th>Was</th><th>Wie lange</th></tr></thead>
 <tbody>
@@ -73,10 +94,10 @@
 </tbody>
 </table>
 
-<h2>8. Keine Weitergabe, kein Tracking</h2>
+<h2>9. Keine Weitergabe, kein Tracking</h2>
 <p>Ich gebe keine Daten an Dritte weiter, außer an Cloudflare als Auftragsverarbeiter, an meinen E-Mail-Anbieter für Nachrichten aus dem Kontaktformular und, wenn du in der Demo Benachrichtigungen einschaltest, an den Push-Dienst deines Browsers. Es gibt kein Tracking, keine Analyse und keine Werbung.</p>
 
-<h2>9. Deine Rechte</h2>
+<h2>10. Deine Rechte</h2>
 <p>Du hast das Recht auf Auskunft (Art. 15 DSGVO), Berichtigung (Art. 16), Löschung (Art. 17), Einschränkung der Verarbeitung (Art. 18), Datenübertragbarkeit (Art. 20) und Widerspruch (Art. 21). Schreib dazu an die E-Mail-Adresse oben. Außerdem kannst du dich bei einer Datenschutzaufsichtsbehörde beschweren, etwa bei der Behörde deines Wohnorts.</p>
 
 <div class="note">

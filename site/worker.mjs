@@ -1,6 +1,9 @@
-// kabine.dev: static pages from site/dist, plus the contact form (POST /api/contact). The form checks
-// Cloudflare Turnstile and sends the message by e-mail to the operator; nothing is stored or logged.
-// Deliberately in German and English only, like the website.
+// kabine.dev: static pages from site/dist, plus the contact form (POST /api/contact) and the chatbot
+// (POST /api/chat…, site/chat.mjs). The form checks Cloudflare Turnstile and sends the message by e-mail to
+// the operator; nothing is stored or logged. Deliberately in German and English only, like the website.
+import { handleChat } from "./chat.mjs";
+
+export { KabineChatBudget, KabineChatVisitor } from "./chat.mjs";
 
 const SITEVERIFY_URL = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
 const MAIL_FROM = { email: "noreply@kabine.dev", name: "kabine.dev contact form" };
@@ -40,6 +43,7 @@ export default {
       if (request.method !== "POST") return new Response("Method not allowed", { status: 405, headers: { Allow: "POST" } });
       return handleContact(request, env);
     }
+    if (url.pathname === "/api/chat" || url.pathname.startsWith("/api/chat/")) return handleChat(request, env);
     return env.ASSETS.fetch(request);
   },
 };
