@@ -13,6 +13,7 @@ const DOCS: Docs = {
     { id: "/en/docs/operation/#backup", lang: "en", title: "Running Kabine › Backup", url: "https://kabine.dev/en/docs/operation/#backup", text: "Administration → Export downloads all data as JSON." },
     { id: "/en/docs/install/#costs-and-limits", lang: "en", title: "Installing Kabine › Costs and limits", url: "https://kabine.dev/en/docs/install/#costs-and-limits", text: "The free plan of Cloudflare is enough for most clubs." },
     { id: "/en/docs/operation/#updates", lang: "en", title: "Running Kabine › Updates", url: "https://kabine.dev/en/docs/operation/#updates", text: "Updates arrive as a pull request." },
+    { id: "/en/docs/operation/#installing-an-update", lang: "en", title: "Running Kabine › Installing an update", url: "https://kabine.dev/en/docs/operation/#installing-an-update", text: "1. Open the pull request: Administration → Updates and maintenance → Install update. 2. Read what it says. 3. Merge at a quiet time." },
     { id: "/en/#faq", lang: "en", title: "Start › FAQ", url: "https://kabine.dev/en/#faq", text: "Q: Does it cost anything? A: No." },
   ],
   german: { "https://kabine.dev/en/": "https://kabine.dev/" },
@@ -51,7 +52,7 @@ function memoryStorage(): ChatStorage & { data: Map<string, unknown>; alarm: num
 interface Call { model: string; input: { messages?: { role: string; content: string }[]; model?: string; questions?: Record<string, unknown> }; options: unknown }
 
 /** Workers AI with fixed answers per model; `fail` makes a model throw with the message text in the error. */
-function fakeEnv(scores: Scores, opts: { answer?: string; fail?: string[] } = {}) {
+function fakeEnv(scores: Scores, opts: { answer?: string; fail?: string[]; sections?: Record<string, number> } = {}) {
   const calls: Call[] = [];
   const env = {
     ASSETS: { fetch: async () => Response.json(DOCS) },
@@ -69,7 +70,7 @@ function fakeEnv(scores: Scores, opts: { answer?: string; fail?: string[] } = {}
           };
         }
         if (input.questions?.section) {
-          return { answers: { section: { type: "choice", probabilities: { "/en/docs/operation/#backup": 0.6, "/en/docs/operation/#updates": 0.2, none: 0.1, "/en/docs/install/#costs-and-limits": 0.1 } } } };
+          return { answers: { section: { type: "choice", probabilities: opts.sections ?? { "/en/docs/operation/#backup": 0.6, "/en/docs/operation/#updates": 0.2, none: 0.1, "/en/docs/install/#costs-and-limits": 0.1 } } } };
         }
         return { choices: [{ message: { content: opts.answer ?? "Use **Administration → Export**. Details: https://kabine.dev/en/docs/operation/#backup" } }] };
       },
@@ -199,6 +200,21 @@ describe("one message", () => {
     expect(calls[2]!.input.messages![0]!.content).toContain("https://kabine.dev/en/docs/operation/#backup");
     expect(storage.alarm).toBe(now + core.LIMITS.keepMs);
     expect(storage.data.get("history")).toHaveLength(2);
+  });
+
+  it.each([
+    ["Wie installiere ich ein Update?", "de"],
+    ["How do I update Kabine?", "en"],
+    ["Bei uns kommt kein Update-Pull-Request, was tun?", "de"],
+  ])("answers update questions from the update guide: %s", async (message, lang) => {
+    // Section scores of an update question: the step-by-step guide first, the overview second
+    const sections = { "/en/docs/operation/#installing-an-update": 0.55, "/en/docs/operation/#updates": 0.3, "/en/docs/operation/#backup": 0.05, none: 0.1 };
+    const { env, calls } = fakeEnv(SCORES.question!, { sections, answer: "Administration → Updates and maintenance → Install update: https://kabine.dev/en/docs/operation/#installing-an-update" });
+    const res = await handleMessage({ storage: memoryStorage(), env, budget: openBudget(), message, lang: lang as "de" | "en", now: Date.now() });
+    expect(res.route).toBe("answer");
+    const prompt = calls[2]!.input.messages![0]!.content;
+    expect(prompt).toContain("https://kabine.dev/en/docs/operation/#installing-an-update");
+    expect(res.reply).toContain("https://kabine.dev/en/docs/operation/#installing-an-update");
   });
 
   it.each([

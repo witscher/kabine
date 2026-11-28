@@ -9,6 +9,10 @@
 /fonts/*
   Cache-Control: public, max-age=31536000, immutable
 
+# Read once a day by every club installation (site/src/releases.mjs); a new release shows within the hour
+/releases.json
+  Cache-Control: public, max-age=3600
+
 /shots/*
   Cache-Control: public, max-age=86400
 

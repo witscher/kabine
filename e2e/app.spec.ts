@@ -1,6 +1,6 @@
 // Ende-zu-Ende-Durchlauf mit echten Passkeys (virtueller Authenticator von
 // Chromium). Alle Namen stammen aus e2e/fixtures.sql und sind erfunden.
-import { type ChildProcess, spawn } from "node:child_process";
+import { type ChildProcess, execFileSync, spawn } from "node:child_process";
 import { cpSync, readFileSync, rmSync } from "node:fs";
 import { type BrowserContext, expect, type Page, test } from "@playwright/test";
 import { activeMotd, MOTD } from "../shared/motd";
@@ -555,7 +555,7 @@ test("Admin schaltet unter Updates und Wartung den Wartungsmodus ein und wieder 
   const { page } = admin;
   await page.goto("/verwaltung");
   await page.getByRole("link", { name: /Updates und Wartung/ }).click();
-  await expect(page.getByRole("region", { name: "Version" })).toContainText(/Kabine \d+\.\d+\.\d+/);
+  await expect(page.getByRole("region", { name: "Version", exact: true })).toContainText(/Kabine \d+\.\d+\.\d+/);
   await expect(page.getByText("Noch kein Update aufgezeichnet.", { exact: false })).toBeVisible();
   await page.getByRole("switch", { name: /Wartungsmodus/ }).click();
   await expect(page.getByText("Wartungsmodus an.", { exact: false })).toBeVisible();
@@ -568,6 +568,63 @@ test("Admin schaltet unter Updates und Wartung den Wartungsmodus ein und wieder 
   await expect(page.getByRole("switch", { name: /Wartungsmodus/ })).toHaveAttribute("aria-checked", "false");
   await player.page.goto("/");
   await expect(player.page.getByRole("heading", { name: /^Hallo/ })).toBeVisible();
+});
+
+/** SQL against the local database of the running test server (the same files e2e-reset.mjs fills). */
+function e2eSql(command: string) {
+  execFileSync("npx", ["wrangler", "d1", "execute", "DB", "--local", "--persist-to", ".wrangler/e2e-state", "--command", command], { stdio: "pipe", env: { ...process.env, CI: "1" } });
+}
+
+test("Update-Hinweis: neue Version oben in der Verwaltung, Schritte und Knopf unter Updates und Wartung, Sicherheitsupdate nicht schließbar", async () => {
+  const { page } = admin;
+  // kabine.dev is never asked in the tests: the state is written as if the daily check had found a version, and the
+  // deploy had found the club's copy on GitHub
+  const state = (version: string, security: boolean) => {
+    const release = { version, date: "2026-12-01", notes: `https://kabine.dev/en/news/#v${version.replace(/\./g, "-")}`, security };
+    const value = { off: false, triedOn: "2026-12-01", fetchedAt: "2026-12-01T09:00:00Z", feed: { latest: release, versions: [release] }, notified: version };
+    e2eSql(`INSERT OR REPLACE INTO app_meta (key, value) VALUES ('update_check', '${JSON.stringify(value)}')`);
+  };
+  state("99.0.0", false);
+  e2eSql(`INSERT OR REPLACE INTO app_meta (key, value) VALUES ('last_update', '${JSON.stringify({ at: "2026-11-30T03:00:00Z", version: "0.0.0", migrations: [], bookmark: null, repo: "sv-muster/kabine" })}')`);
+  try {
+    await page.goto("/verwaltung");
+    const hint = page.getByRole("status").filter({ hasText: "Kabine 99.0.0 ist da." });
+    await expect(hint).toBeVisible();
+    await hint.getByRole("button", { name: "Hinweis ausblenden" }).click();
+    await expect(hint).toHaveCount(0);
+    await page.reload();
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+    await expect(page.getByText("Kabine 99.0.0 ist da.")).toHaveCount(0);
+
+    await page.getByRole("link", { name: /Updates und Wartung/ }).click();
+    const card = page.getByRole("region", { name: "Neue Versionen" });
+    await expect(card).toContainText("Kabine 99.0.0 ist da");
+    const install = card.getByRole("link", { name: "Update installieren" });
+    await expect(install).toHaveAttribute("href", "https://github.com/sv-muster/kabine/pulls?q=is%3Apr+head%3Akabine-update-v99.0.0");
+    await expect(install).toHaveAttribute("target", "_blank");
+    await expect(card).toContainText("„Update installieren“ öffnet den Pull Request „Update Kabine to v99.0.0“");
+    await expect(card.getByRole("link", { name: /Update-Anleitung/ })).toHaveAttribute("href", "https://kabine.dev/docs/betrieb/#ein-update-installieren");
+
+    // Switched off: no version, no hint
+    const check = card.getByRole("switch", { name: /Nach neuen Versionen suchen/ });
+    await expect(check).toHaveAttribute("aria-checked", "true");
+    await check.click();
+    await expect(page.getByText("Die App sucht nicht mehr nach neuen Versionen.")).toBeVisible();
+    await expect(card).toContainText("Die Suche nach neuen Versionen ist aus.");
+    await expect(check).toHaveAttribute("aria-checked", "false");
+
+    // A security release: highlighted, and its hint cannot be closed
+    state("99.0.1", true);
+    await page.goto("/verwaltung");
+    const alert = page.getByRole("alert").filter({ hasText: "Sicherheitsupdate: Kabine 99.0.1." });
+    await expect(alert).toBeVisible();
+    await expect(alert.getByRole("button", { name: "Hinweis ausblenden" })).toHaveCount(0);
+    await alert.getByRole("link", { name: "Update ansehen" }).click();
+    await expect(page.getByRole("region", { name: "Neue Versionen" }).getByRole("alert")).toContainText("Sicherheitsupdate.");
+  } finally {
+    e2eSql("DELETE FROM app_meta WHERE key IN ('update_check', 'last_update')");
+    await page.evaluate(() => localStorage.removeItem("kabine-hint-update"));
+  }
 });
 
 test("Trainer meldet sich für ein Training ab: der Termin bleibt, die Spielerin sieht es ohne Notiz", async () => {

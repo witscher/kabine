@@ -142,6 +142,8 @@ parentRoutes.get("/me/notifications", async (c) => {
     persons: persons.map((p) => {
       const topics = shownTopics()
         .filter((t) => (t === "coach" ? p.self && isCoach : true))
+        // New Kabine versions: admins only (worker/domain/releases.ts)
+        .filter((t) => (t === "updates" ? p.self && actor.isAdmin : true))
         .filter((t) => !(t === "responses" && p.self && !selfInCharge))
         // Module topics about the account itself (games of followed teams) are not offered per child
         .filter((t) => p.self || !selfOnly.has(t));

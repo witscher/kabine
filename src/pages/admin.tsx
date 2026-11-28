@@ -14,6 +14,7 @@ import { ExtraEventList } from "../extra-events";
 import { AdminAvatar, PersonAvatar } from "../avatar";
 import { Icon, type IconName } from "../icons";
 import { useMe, useSession } from "../session";
+import { UpdateHint } from "../update-hint";
 import { invalidate, useQuery } from "../store";
 import { Button, confirmDialog, copyText, Empty, ErrorBox, Field, InfoButton, Notice, Segmented, shareLink, Sheet, Spinner, SwitchRow, TextField, toast, TopBar, useDocumentTitle } from "../ui";
 import { childParentMessage, QrLink } from "./team";
@@ -104,7 +105,7 @@ export function AdminPage() {
       items: [
         { href: "/verwaltung/verein", icon: "settings", title: t`Club`, sub: t`Name, colours, logo, region, legal notice and privacy` },
         { href: "/verwaltung/mail", icon: "mail", title: t`E-mail`, sub: t`How the app sends e-mails` },
-        { href: "/verwaltung/updates", icon: "refresh", title: t`Updates and maintenance`, sub: t`Installed version, last update, maintenance mode` },
+        { href: "/verwaltung/updates", icon: "refresh", title: t`Updates and maintenance`, sub: t`Installed version, new versions, maintenance mode`, dot: !!me.update },
         { href: "/verwaltung/protokoll", icon: "shield", title: t`Protocol`, sub: t`Who did what: access, leaving, admin rights, members, schedules, cancellations` },
         { href: "/api/admin/export", icon: "download", title: t`Export`, sub: t`All data as a JSON file, for backup`, download: true },
         { href: "/verwaltung/einrichtung", icon: "check", title: t`Setup wizard`, sub: t`Go through the setup step by step again` },
@@ -160,6 +161,8 @@ export function AdminPage() {
               </span>
             </a>
           ) : null}
+          {/* A newer Kabine release (src/update-hint.tsx), above the groups like the warning below */}
+          <UpdateHint update={me.update} />
           {legalLinksMissing(club) ? (
             <div role="alert">
               <Notice kind="warn">

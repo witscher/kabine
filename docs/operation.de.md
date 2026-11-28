@@ -29,28 +29,75 @@ Der Schalter liegt in KV (Schlüssel `maintenance`), unabhängig von der Datenba
 
 ## Updates
 
-Ein Pull Request „Update Kabine to vX.Y.Z“ erscheint in der Kopie des Vereins, wenn eine neue Version da ist (`.github/workflows/update.yml`, wöchentlich). Er sagt, ob die Version die Datenbank ändert und ob `wrangler.jsonc` neue Einträge braucht. Du entscheidest, wann du mergst; Workers Builds stellt dann mit `npm run deploy` bereit (`scripts/deploy.mjs`). Eine fehlgeschlagene Prüfung „Workers Builds“ am Pull Request selbst kommt von den Builds für Preview-Branches; schalte sie aus wie in [der Installation](install.de.md) (Schritt 1), das Deployment nach dem Mergen ist davon nicht betroffen:
+Neue Versionen von Kabine erreichen einen Verein auf drei Wegen:
 
-1. **Ohne Änderungen an der Datenbank:** bauen und hochladen. Die App läuft weiter; offene Seiten holen sich die neue Version beim nächsten Start.
-2. **Mit Änderungen an der Datenbank:** das Skript notiert zuerst einen **Wiederherstellungspunkt** (ein Lesezeichen von D1 Time Travel, im Build-Protokoll ausgegeben) und markiert dann das Update in der Datenbank. Etwa eine Minute lang sehen alle, Admins eingeschlossen, „Kabine wird aktualisiert“, und der Cron-Lauf pausiert. Die Migrationen laufen, die neue Version wird hochgeladen, die Markierung entfernt, und die App lädt sich von selbst neu. Bricht der Build ab, läuft die Markierung nach 15 Minuten ab.
+- **In der App:** einmal am Tag fragt die Installation bei kabine.dev nach der neuesten Version. Gibt es eine neuere, sehen Admins einen Hinweis oben in der *Verwaltung* und den Abschnitt *Neue Versionen* unter *Verwaltung → Updates und Wartung*, und sie bekommen eine Push-Nachricht ([Update-Hinweise](#update-hinweise)).
+- **Auf GitHub:** einmal in der Woche (Montagmorgen) öffnet der Workflow `.github/workflows/update.yml` in der Kopie des Vereins einen Pull Request „Update Kabine to vX.Y.Z“ mit der neuesten Version. Die Kopie braucht diesen Workflow einmal ([Installation](install.de.md), Schritt 6).
+- **Die Installation des Updates:** Mergen des Pull Requests stellt die Version über Workers Builds bereit (`npm run deploy`, `scripts/deploy.mjs`). Ohne das wird nichts installiert; du entscheidest, wann.
 
-*Verwaltung → Updates und Wartung* zeigt die installierte Version und das letzte Update: wann, welche Änderungen an der Datenbank, und den Wiederherstellungspunkt mit dem Befehl zum Zurückgehen. Merge Versionen mit Änderungen an der Datenbank zu einer ruhigen Zeit, nicht kurz vor einem Spiel.
+## Ein Update installieren
 
-**Zurückgehen.** Migrationen halten die vorige Version lauffähig (`migrations/README.md`), daher reicht es meist, nur den Worker zurückzusetzen: *Workers & Pages → dieser Worker → Deployments → Rollback*. Das gilt für eine Version zurück. Nach einem Update, das Versionen übersprungen hat, passt ein älterer Worker vielleicht nicht mehr zur Datenbank (eine spätere Version kann entfernen, was er noch braucht): setz dann den Worker und die Datenbank zusammen auf den Wiederherstellungspunkt zurück. Setz die Datenbank auch zurück, wenn die Daten selbst falsch sind:
+1. **Den Pull Request öffnen.** *Verwaltung → Updates und Wartung → Update installieren* öffnet ihn in der Kopie deines Vereins auf GitHub (oder diese Anleitung, wenn die App die Kopie nicht kennt). Auf GitHub selbst: deine Kopie → *Pull requests* → „Update Kabine to vX.Y.Z“. Die App kann bis zu einer Woche vor dem Pull Request von einer Version wissen; damit er gleich kommt, [führ den Workflow von Hand aus](#kein-update-pull-request).
+2. **Lesen, was der Pull Request sagt.** Ganz oben steht (auf Englisch):
+   - *No database changes: the app keeps running during the deploy.* Keine Änderungen an der Datenbank; merge, wann du willst.
+   - **Database changes:** die Version ändert die Datenbank (die Migrationsdateien stehen dabei). Die App pausiert während des Deployments etwa eine Minute, also merge zu einer ruhigen Zeit.
+   - **Check wrangler.jsonc:** die Version ändert die Cloudflare-Konfiguration, zum Beispiel eine neue Bindung. Vergleich deine `wrangler.jsonc` mit der der Version (der Pull Request behält deine, mit deinen Kennungen der Ressourcen und deiner Domain) und trag die neuen Einträge **vor** dem Mergen in deiner Kopie nach (Datei auf GitHub bearbeiten, *Commit changes*).
+   - **Update the workflows by hand, after the deploy:** GitHub lässt das automatische Update keine Dateien in `.github/workflows` ändern. Die aufgeführten Dateien ersetzt du **nach** dem Mergen von Hand (Schritt 6).
+   - Darunter: die Versionshinweise jeder Version seit der installierten.
+
+   Eine fehlgeschlagene Prüfung „Workers Builds“ am Pull Request selbst kommt von den Builds für Preview-Branches; schalte sie aus wie in [der Installation](install.de.md) (Schritt 1). Das Deployment nach dem Mergen ist davon nicht betroffen.
+3. **Zu einer ruhigen Zeit mergen.** *Merge pull request → Confirm merge*. Nicht kurz vor einem Spiel oder wenn gerade viele zu- und absagen, vor allem, wenn sich die Datenbank ändert.
+4. **Die Wartungsminute.** Workers Builds startet das Deployment nach ein, zwei Minuten; insgesamt dauert es ein paar Minuten.
+   - *Ohne Änderungen an der Datenbank:* bauen und hochladen. Die App läuft weiter; offene Seiten holen sich die neue Version beim nächsten Start.
+   - *Mit Änderungen an der Datenbank:* das Skript notiert zuerst einen **Wiederherstellungspunkt** (ein Lesezeichen von D1 Time Travel, im Build-Protokoll ausgegeben) und markiert dann das Update in der Datenbank. Etwa eine Minute lang sehen alle, Admins eingeschlossen, „Kabine wird aktualisiert“, und der Cron-Lauf pausiert. Die Migrationen laufen, die neue Version wird hochgeladen, die Markierung entfernt, und die App lädt sich von selbst neu. Bricht der Build ab, läuft die Markierung nach 15 Minuten ab.
+5. **Die Version prüfen.** Nach ein paar Minuten zeigt *Verwaltung → Updates und Wartung* die neue Version unter *Installierte Version*, und unter *Letztes Update* wann, welche Änderungen an der Datenbank und den Wiederherstellungspunkt mit dem Befehl zum Zurückgehen; der Hinweis oben in der *Verwaltung* ist weg. Nach 15 Minuten noch die alte Version? Sieh dir den Build im Cloudflare-Dashboard an (*Workers & Pages → dein Worker → Deployments*, das Build-Protokoll des Merges). Ein Build, der vor den Migrationen fehlschlug, hat nichts geändert: starte ihn dort neu. Schlug er danach fehl, läuft die vorige Version mit der neuen Datenbank weiter; starte ihn neu oder [geh zurück](#ein-update-rückgängig-machen).
+6. **Workflow-Dateien, wenn der Pull Request welche aufgeführt hat.** Öffne jeden Link, kopier den Inhalt, bearbeite dieselbe Datei in deiner Kopie auf GitHub und füg ihn ein. Mach das erst nach Schritt 5: jeder Commit in die Kopie startet ein Deployment, eine Änderung am Workflow kurz vor dem Mergen stellt die alte Version bereit, und der Build des Merges gleich danach stellt vielleicht gar nichts bereit. Ist das trotzdem passiert, ist noch die alte Version installiert: committe eine beliebige kleine Änderung in die Kopie (oder starte das Deployment im Cloudflare-Dashboard neu), um das Update bereitzustellen.
+
+Willst du eine Version lieber erst selbst prüfen, schalt den Wartungsmodus ein, merge, prüf die App als Admin und schalt ihn wieder aus.
+
+## Update-Hinweise
+
+**Was die App prüft.** Einmal am Tag, ab 10 Uhr in der Zeitzone des Vereins, holt die Installation auf dem Server `https://kabine.dev/releases.json` (der stündliche Cron-Lauf; nie aus einem Browser): die neueste Version mit Datum, einem Link zu ihren Versionshinweisen und ob sie ein Sicherheitsupdate ist. Die Anfrage ist eine gewöhnliche HTTPS-Anfrage mit dem User-Agent `Kabine/<installierte Version>`; Cloudflare fügt jeder Anfrage eines Workers den Header `CF-Worker` mit der Domain der Installation hinzu. Es werden kein Cookie, keine Kennung und nichts über die Leute des Vereins gesendet, und kabine.dev protokolliert und wertet diese Anfragen nicht aus. Ist kabine.dev nicht erreichbar, versucht es die App am nächsten Tag wieder.
+
+**Was Admins sehen.** Hat kabine.dev eine neuere Version als die installierte:
+
+- einen Hinweis oben in der *Verwaltung*, den jeder Admin für diese Version auf seinem Gerät schließen kann,
+- einen Punkt bei *Updates und Wartung* und dort den Abschnitt *Neue Versionen*: Version und Datum, *Versionshinweise*, *Update installieren* und die Schritte oben,
+- eine Push-Nachricht an jeden Admin (in seiner Sprache), einmal je neuer Version. Wer *Als Admin arbeiten* ausgeschaltet hat, bekommt keine.
+
+**Sicherheitsupdates** sind in ihren Versionshinweisen als solche gekennzeichnet. Die App zeigt „Sicherheitsupdate“ in Rot, und der Hinweis lässt sich nicht schließen, bis das Update installiert ist. Installier sie bald.
+
+**„Update installieren“** öffnet den Update-Pull-Request in der Kopie deines Vereins, wenn die App die Kopie kennt: das Deployment in Workers Builds findet sie im Checkout (im Build-Protokoll steht `GitHub copy: owner/name`) und vermerkt sie mit dem Update. Bis zum ersten Deployment mit dieser Funktion, oder wenn das Deployment sie nicht gefunden hat, nimmt die App den Quellcode-Link unter *Verwaltung → Verein*, wenn er auf eine Kopie auf GitHub zeigt (diesen Link sehen alle unter *Hilfe*, trag ihn also nur für eine öffentliche Kopie ein). Sonst öffnet der Knopf diese Anleitung. Die App hat selbst keinen Zugriff auf GitHub; sie verlinkt nur dorthin.
+
+**Ausschalten.** *Verwaltung → Updates und Wartung → Nach neuen Versionen suchen*: aus, holt die Installation nichts, und es gibt weder Hinweis noch Push-Nachricht; Update-Pull-Requests kommen trotzdem auf GitHub an. Nur die Push-Nachricht: *Profil → Benachrichtigungen → Neue Kabine-Versionen (Admins)*, je Admin.
+
+## Kein Update-Pull-Request
+
+**Den Workflow von Hand ausführen.** In deiner Kopie auf GitHub: *Actions → Kabine updates → Run workflow*. Innerhalb einer Minute erscheint ein Pull Request „Update Kabine to v…“, oder der Lauf zeigt, warum nicht. Ist die Kopie schon auf der neuesten Version, tut er nichts.
+
+Kommt nichts:
+
+- **Kein Workflow „Kabine updates“ unter *Actions*:** die Kopie hat den Update-Workflow noch nicht. Leg ihn an wie in [der Installation](install.de.md) (Schritt 6).
+- **Actions sind ausgeschaltet:** *Settings → Actions → General → Actions permissions*: Actions erlauben. In einer öffentlichen Kopie pausiert GitHub geplante Workflows außerdem nach 60 Tagen ohne Aktivität im Repository; *Actions → Kabine updates → Enable workflow* schaltet ihn wieder ein.
+- **Ein Issue „Kabine vX.Y.Z is ready to install“ statt eines Pull Requests:** GitHub hat den Workflow den Pull Request nicht öffnen lassen. Öffne ihn über den Link im Issue, prüf ihn und merge ihn. Für das nächste Mal: *Settings → Actions → General → Workflow permissions* → *Allow GitHub Actions to create and approve pull requests* ankreuzen und speichern.
+- **Der Lauf ist fehlgeschlagen:** öffne ihn unter *Actions*; der letzte rote Schritt sagt, warum. „Open the pull request by hand“ mit einem Link bedeutet dasselbe wie das Issue oben.
+- **Der Pull Request dieser Version wurde ohne Mergen geschlossen:** der Workflow öffnet ihn nicht noch einmal. Öffne ihn auf GitHub wieder (*Pull requests → Closed*) oder warte auf die nächste Version.
+
+## Versionen überspringen
+
+Eine Kopie kann von jeder Version direkt auf die neueste gehen. Der Pull Request bringt immer die neueste Version, listet die Änderungen an der Datenbank und zeigt die Versionshinweise jeder Version seit der installierten; das Deployment spielt alle ausstehenden Migrationen der Reihe nach ein, mit einer Pause und einem Wiederherstellungspunkt. Ein älterer Update-Pull-Request, der noch offen ist, wird mit einem Link auf den neuen geschlossen, damit niemand versehentlich eine ältere Version installiert. Willst du eine Version bewusst auslassen, merge ihren Pull Request einfach nicht; die nächste Version bringt sie ohnehin mit.
+
+## Ein Update rückgängig machen
+
+Migrationen halten die vorige Version lauffähig (`migrations/README.md`), daher reicht es meist, nur den Worker zurückzusetzen: *Workers & Pages → dieser Worker → Deployments → Rollback*. Das gilt für eine Version zurück. Nach einem Update, das Versionen übersprungen hat, passt ein älterer Worker vielleicht nicht mehr zur Datenbank (eine spätere Version kann entfernen, was er noch braucht): setz dann den Worker und die Datenbank zusammen auf den Wiederherstellungspunkt zurück. Setz die Datenbank auch zurück, wenn die Daten selbst falsch sind:
 
 ```sh
 npx wrangler d1 time-travel restore DB --bookmark=<wiederherstellungspunkt>
 ```
 
-Das Zurücksetzen verwirft alles, was nach dem Wiederherstellungspunkt geschrieben wurde. Schalt vorher den Wartungsmodus ein und wieder aus, wenn du die App geprüft hast.
+Der Wiederherstellungspunkt steht im Build-Protokoll und unter *Verwaltung → Updates und Wartung → Letztes Update* (mit einem Knopf, der den Befehl kopiert). D1 Time Travel reicht im kostenlosen Tarif 7 Tage zurück, im bezahlten 30. Das Zurücksetzen verwirft alles, was nach dem Wiederherstellungspunkt geschrieben wurde. Schalt vorher den Wartungsmodus ein und wieder aus, wenn du die App geprüft hast. Der zurückgesetzte Worker zeigt unter *Installierte Version* wieder die alte Version; installier eine spätere Version, wenn das Problem behoben ist.
 
-Willst du eine Version lieber erst selbst prüfen, schalt den Wartungsmodus ein, merge, prüf die App als Admin und schalt ihn wieder aus.
-
-**Versionen überspringen.** Eine Kopie kann von jeder Version direkt auf die neueste gehen. Der Pull Request bringt immer die neueste Version, listet die Änderungen an der Datenbank und zeigt die Versionshinweise jeder Version seit der installierten; das Deployment spielt alle ausstehenden Migrationen der Reihe nach ein, mit einer Pause und einem Wiederherstellungspunkt. Ein älterer Update-Pull-Request, der noch offen ist, wird mit einem Link auf den neuen geschlossen, damit niemand versehentlich eine ältere Version installiert.
-
-**Workflow-Dateien.** GitHub lässt das automatische Update keine Dateien in `.github/workflows` ändern. Ändert eine Version sie, listet der Pull Request sie mit Links: öffne jeden Link, kopier den Inhalt, bearbeite dieselbe Datei in deiner Kopie auf GitHub und füg ihn ein. Mach das **nach** dem Mergen, wenn das Deployment fertig ist (*Verwaltung → Updates und Wartung* zeigt die neue Version). Jeder Commit in die Kopie startet ein Deployment; eine Änderung am Workflow kurz vor dem Mergen stellt die alte Version bereit, und der Build des Merges gleich danach stellt vielleicht gar nichts bereit. Ist das trotzdem passiert, ist noch die alte Version installiert: committe eine beliebige kleine Änderung in die Kopie (oder starte das Deployment im Cloudflare-Dashboard neu), um das Update bereitzustellen.
-
-### Eine ältere Kopie aktualisieren
+## Eine ältere Kopie aktualisieren
 
 Kopien, die vor der ersten Version (v0.2.0, Oktober 2026) angelegt wurden, brauchen einmal drei Dinge. Danach kommen Updates wie oben beschrieben.
 
@@ -66,7 +113,7 @@ Kopien, die vor der ersten Version (v0.2.0, Oktober 2026) angelegt wurden, brauc
 
 Der Pull Request sagt auch, ob `wrangler.jsonc` neue Einträge braucht; vergleich das vor dem Mergen mit der Version.
 
-### Von Hand aus einem Klon installiert
+## Von Hand aus einem Klon installiert
 
 Hast du `witscher/kabine` geklont und stellst von deinem Rechner aus bereit, behalte deine `wrangler.jsonc` (Kennungen der Ressourcen, Domain) und hol die neue Version:
 

@@ -1,6 +1,7 @@
 // Builds the project website (kabine.dev) into site/dist: start pages, content pages (site/src/pages.mjs, site/src/banners.mjs),
 // the club documentation and release notes as pages (site/src/docs.mjs), sitemap, robots.txt, 404, the demo
-// screenshots as WebP, the self-hosted fonts and the chatbot's documentation bundle (site/src/chat-docs.mjs).
+// screenshots as WebP, the self-hosted fonts, the chatbot's documentation bundle (site/src/chat-docs.mjs) and
+// releases.json, which club installations read for their update notices (site/src/releases.mjs).
 // The legal notice needs the publisher's details from
 // site/legal.json (not in the repository, see site/legal.example.json); `--preview` builds with placeholders where
 // it is missing.
@@ -11,6 +12,7 @@ import { chatDocs } from "../site/src/chat-docs.mjs";
 import { docPages, docsHub, newsPage } from "../site/src/docs.mjs";
 import { contentPage, footer, GITHUB, head, header, LEGAL_ALTERNATES, ORIGIN } from "../site/src/layout.mjs";
 import { bannerPage } from "../site/src/banners.mjs";
+import { releasesJson } from "../site/src/releases.mjs";
 import { PAGES, softwareApplication } from "../site/src/pages.mjs";
 
 const preview = process.argv.includes("--preview");
@@ -211,7 +213,15 @@ mkdirSync(`${out}/chat`, { recursive: true });
 const moduleReadmes = readdirSync("modules", { withFileTypes: true })
   .filter((d) => d.isDirectory() && existsSync(`modules/${d.name}/README.md`))
   .map((d) => ({ id: d.name, markdown: read(`modules/${d.name}/README.md`) }));
-writeFileSync(`${out}/chat/docs.json`, JSON.stringify(chatDocs(built, moduleReadmes)));
+const chatBundle = chatDocs(built, moduleReadmes);
+// The update guide must be in the bundle: the app links to it and the chatbot answers update questions from it
+// (anchors as in shared/releases.ts, UPDATE_DOC_SECTIONS)
+for (const anchor of ["updates", "installing-an-update", "update-notices", "no-update-pull-request", "skipping-versions", "going-back-after-an-update"]) {
+  if (!chatBundle.sections.some((s) => s.id === `/en/docs/operation/#${anchor}`)) throw new Error(`Chatbot docs bundle: section /en/docs/operation/#${anchor} is missing`);
+}
+writeFileSync(`${out}/chat/docs.json`, JSON.stringify(chatBundle));
+// The newest releases, for the update notices of club installations (deploy the site with every release)
+writeFileSync(`${out}/releases.json`, `${JSON.stringify(releasesJson(read("CHANGELOG.md"), read("shared/changelog.ts")), null, 2)}\n`);
 // Screenshots of the demo club (npm run screenshots writes them to docs/screenshots), a third of the PNG size
 for (const locale of ["de", "en"]) {
   mkdirSync(`${out}/shots/${locale}`, { recursive: true });

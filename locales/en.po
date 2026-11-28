@@ -735,6 +735,10 @@ msgstr "Still open"
 msgid "Training time changed"
 msgstr "Training time changed"
 
+#: src/pages/updates.tsx
+msgid "Kabine {version} is available ({date})."
+msgstr "Kabine {version} is available ({date})."
+
 #: src/pages/profile.tsx
 msgid "Linked parents: {guardians}. Each parent can change the permissions."
 msgstr "Linked parents: {guardians}. Each parent can change the permissions."
@@ -1147,6 +1151,10 @@ msgstr "Stand-ins"
 msgid "Sticker album kick-off: everyone is invited, nobody has to answer, but cake and set-up need helpers."
 msgstr "Sticker album kick-off: everyone is invited, nobody has to answer, but cake and set-up need helpers."
 
+#: src/pages/updates.tsx
+msgid "Open your club's copy on GitHub. Under Pull requests you find \"Update Kabine to v{version}\"."
+msgstr "Open your club's copy on GitHub. Under Pull requests you find \"Update Kabine to v{version}\"."
+
 #: src/pages/season.tsx
 msgid "Start season {nextName}?"
 msgstr "Start season {nextName}?"
@@ -1166,6 +1174,10 @@ msgstr "No further personal data: the settings and the dates on which the messag
 #: modules/carpools/worker/routes.ts
 msgid "Passengers can be nominated players who have not declined, and the coaches."
 msgstr "Passengers can be nominated players who have not declined, and the coaches."
+
+#: shared/types.ts
+msgid "New Kabine versions (admins)"
+msgstr "New Kabine versions (admins)"
 
 #: modules/carpools/module.ts
 msgid "Carpools (passengers, free seats)"
@@ -1353,6 +1365,10 @@ msgstr "last used {lastUsed}"
 #: src/calendar.tsx
 msgid "Subscribe in calendar"
 msgstr "Subscribe in calendar"
+
+#: worker/domain/releases.ts
+msgid "Security update: Kabine {version}"
+msgstr "Security update: Kabine {version}"
 
 #: src/pages/profile.tsx
 msgid "The club and the coaches set this per age group and team; the permissions below apply in addition."
@@ -2193,6 +2209,10 @@ msgstr "Skip"
 msgid "all done"
 msgstr "all done"
 
+#: src/pages/updates.tsx
+msgid "Release notes (kabine.dev)"
+msgstr "Release notes (kabine.dev)"
+
 #: worker/routes/events.ts
 #: worker/routes/events.ts
 msgid "New event: {title}"
@@ -2238,6 +2258,10 @@ msgstr "Maximum squad size"
 #: src/pages/admin.tsx
 msgid "Parents see their children's events, respond for them and are in the team chat, provided the team includes parents."
 msgstr "Parents see their children's events, respond for them and are in the team chat, provided the team includes parents."
+
+#: src/pages/updates.tsx
+msgid "Update guide: no pull request, skipping versions, going back (kabine.dev)"
+msgstr "Update guide: no pull request, skipping versions, going back (kabine.dev)"
 
 #: src/pages/team.tsx
 msgid "with access"
@@ -2378,6 +2402,10 @@ msgstr "Only the owner can hand over this role."
 #: src/respond.tsx
 msgid "Reason: “{reason}”"
 msgstr "Reason: “{reason}”"
+
+#: src/pages/updates.tsx
+msgid "Install update"
+msgstr "Install update"
 
 #: worker/routes/teams.ts
 msgid "The team still has members. Please remove all of them first."
@@ -3929,6 +3957,10 @@ msgctxt "person"
 msgid "Details"
 msgstr "Details"
 
+#: src/pages/updates.tsx
+msgid "Not checked yet. The app asks kabine.dev once a day, from 10 o'clock."
+msgstr "Not checked yet. The app asks kabine.dev once a day, from 10 o'clock."
+
 #: src/pages/profile.tsx
 msgid "Add address"
 msgstr "Add address"
@@ -4412,6 +4444,10 @@ msgstr "Ready"
 msgid "To all teams"
 msgstr "To all teams"
 
+#: src/pages/updates.tsx
+msgid "The check for new versions is off. Update pull requests still arrive in your club's copy on GitHub."
+msgstr "The check for new versions is off. Update pull requests still arrive in your club's copy on GitHub."
+
 #: src/list-import.tsx
 msgid "Choose an age group for every new team."
 msgstr "Choose an age group for every new team."
@@ -4687,6 +4723,7 @@ msgstr "{count, plural, one {The announcement appears in one team chat.} other {
 
 #: src/howto.tsx
 #: src/howto.tsx
+#: src/update-hint.tsx
 msgid "Hide hint"
 msgstr "Hide hint"
 
@@ -6001,6 +6038,10 @@ msgstr "Inactive: all events count as absent, no reminders."
 msgid "Everyone approved for {duty}"
 msgstr "Everyone approved for {duty}"
 
+#: src/pages/updates.tsx
+msgid "Read what it says: whether the database changes, and whether wrangler.jsonc or workflow files need a change by hand."
+msgstr "Read what it says: whether the database changes, and whether wrangler.jsonc or workflow files need a change by hand."
+
 #: modules/mascot/app/admin.tsx
 msgid "Replace"
 msgstr "Replace"
@@ -6117,6 +6158,10 @@ msgstr "Admins only"
 #: src/pages/stats.tsx
 msgid "{late} short n."
 msgstr "{late} short n."
+
+#: src/pages/updates.tsx
+msgid "A few minutes later this page shows the new version as installed."
+msgstr "A few minutes later this page shows the new version as installed."
 
 #: modules/duties/app/admin.tsx
 msgid "New template"
@@ -6594,6 +6639,10 @@ msgstr "Chat messages remain and appear as “Deleted person”. If someone is o
 msgid "Under <0>Profile</0>, at <1>Notifications</1>, tap <2>Enable on this device</2> and allow the request. With <3>Test</3> you check that everything arrives. Under <4>What should I receive?</4> you choose the topics."
 msgstr "Under <0>Profile</0>, at <1>Notifications</1>, tap <2>Enable on this device</2> and allow the request. With <3>Test</3> you check that everything arrives. Under <4>What should I receive?</4> you choose the topics."
 
+#: worker/domain/releases.ts
+msgid "Kabine {version} is available"
+msgstr "Kabine {version} is available"
+
 #: src/pages/team.tsx
 #: src/pages/team.tsx
 #: src/pages/team.tsx
@@ -6998,6 +7047,10 @@ msgstr "e.g. When shall we have the summer party?"
 msgid "How do I nominate the squad for a game?"
 msgstr "How do I nominate the squad for a game?"
 
+#: src/pages/updates.tsx
+msgid "Once a day the app asks kabine.dev for the newest version number and tells the admins by a hint and a push. Nothing about your club or its people is sent."
+msgstr "Once a day the app asks kabine.dev for the newest version number and tells the admins by a hint and a push. Nothing about your club or its people is sent."
+
 #: src/pages/admin.tsx
 msgid "The legal notice or privacy policy of your club is missing. Your club is the provider of this app and must link both: <0>enter the links</0>."
 msgstr "The legal notice or privacy policy of your club is missing. Your club is the provider of this app and must link both: <0>enter the links</0>."
@@ -7349,6 +7402,10 @@ msgstr "Kabine is installed. Enter the setup password you chose when deploying (
 msgid "How the pictures should look (kabine.dev)"
 msgstr "How the pictures should look (kabine.dev)"
 
+#: src/update-hint.tsx
+msgid "<0>Kabine {version} is available.</0> Install it when it suits the club."
+msgstr "<0>Kabine {version} is available.</0> Install it when it suits the club."
+
 #: src/pages/season.tsx
 msgid "No automatic assignment without year of birth. Suggestion: previous team."
 msgstr "No automatic assignment without year of birth. Suggestion: previous team."
@@ -7385,6 +7442,10 @@ msgstr "If subscribing does not work, copy the link and paste it in the calendar
 #: modules/polls/app/pages.tsx
 msgid "paid"
 msgstr "paid"
+
+#: worker/domain/releases.ts
+msgid "Install it when it suits the club. Administration → Updates and maintenance shows how."
+msgstr "Install it when it suits the club. Administration → Updates and maintenance shows how."
 
 #: worker/chat/room.ts
 msgctxt "chat author"
@@ -7780,6 +7841,10 @@ msgstr "Only coaches, leads, staff and organisers of this event can say they are
 msgid "here is your code to sign in:"
 msgstr "here is your code to sign in:"
 
+#: src/pages/updates.tsx
+msgid "The app looks for new versions again."
+msgstr "The app looks for new versions again."
+
 #: modules/sms/module.ts
 msgid "When removed in the profile or when the person leaves the club."
 msgstr "When removed in the profile or when the person leaves the club."
@@ -7958,6 +8023,10 @@ msgstr "{name} is now a lead in {teamName}."
 #: worker/routes/calendar.ts
 msgid "You do not have a calendar link yet."
 msgstr "You do not have a calendar link yet."
+
+#: src/pages/admin.tsx
+msgid "Installed version, new versions, maintenance mode"
+msgstr "Installed version, new versions, maintenance mode"
 
 #: src/pages/event.tsx
 msgid "Meeting point"
@@ -8505,6 +8574,10 @@ msgstr "Training group: its events appear under the chip “Training”."
 msgid "Where to find this link (kabine.dev)"
 msgstr "Where to find this link (kabine.dev)"
 
+#: src/pages/updates.tsx
+msgid "\"Install update\" opens the pull request \"Update Kabine to v{version}\" in your club's copy on GitHub."
+msgstr "\"Install update\" opens the pull request \"Update Kabine to v{version}\" in your club's copy on GitHub."
+
 #: src/push.ts
 msgid "Push is not set up on the server yet."
 msgstr "Push is not set up on the server yet."
@@ -8820,6 +8893,10 @@ msgstr "{name} is there for {what} on {when} after all."
 #: worker/lib/server-errors.ts
 msgid "Something went wrong. Please try again later."
 msgstr "Something went wrong. Please try again later."
+
+#: src/update-hint.tsx
+msgid "<0>Security update: Kabine {version}.</0> It fixes a security problem; please install it soon."
+msgstr "<0>Security update: Kabine {version}.</0> It fixes a security problem; please install it soon."
 
 #: src/duty-blocks.tsx
 #: src/duty-blocks.tsx
@@ -11138,6 +11215,10 @@ msgstr "Upload logo"
 msgid "Respond themselves {name}"
 msgstr "Respond themselves {name}"
 
+#: src/update-hint.tsx
+msgid "Show update"
+msgstr "Show update"
+
 #: src/pages/admin.tsx
 msgid "Like a normal chat message: a bundled chat notification for everyone who has turned it on."
 msgstr "Like a normal chat message: a bundled chat notification for everyone who has turned it on."
@@ -11490,6 +11571,10 @@ msgstr "{club}: {count} server errors on {day}"
 #: worker/routes/events.ts
 msgid "{name} is missing from “{title}”"
 msgstr "{name} is missing from “{title}”"
+
+#: src/pages/updates.tsx
+msgid "This is the newest version. Last checked {checked}."
+msgstr "This is the newest version. Last checked {checked}."
 
 #: src/pages/group.tsx
 msgid "Only chat and special events. No training, no games, no squad."
@@ -11922,6 +12007,10 @@ msgstr "Link another child, e.g. a sibling"
 #: src/pages/games.tsx
 msgid "Last synced on {importedDate}."
 msgstr "Last synced on {importedDate}."
+
+#: worker/domain/releases.ts
+msgid "Please install it soon. Administration → Updates and maintenance shows how."
+msgstr "Please install it soon. Administration → Updates and maintenance shows how."
 
 #: modules/polls/app/pages.tsx
 msgid "Created on {created}."
@@ -12755,6 +12844,11 @@ msgstr "Signed up."
 msgid "No passkey on this device?"
 msgstr "No passkey on this device?"
 
+#: src/pages/updates.tsx
+#: src/pages/updates.tsx
+msgid "New versions"
+msgstr "New versions"
+
 #: src/pages/stats.tsx
 msgid "No trainings yet"
 msgstr "No trainings yet"
@@ -13220,6 +13314,10 @@ msgstr "Push"
 msgid "Merge"
 msgstr "Merge"
 
+#: src/pages/privacy.tsx
+msgid "New versions: once a day the app's server asks kabine.dev for the newest Kabine version number, unless the admins switched this off. Nothing about you or other members is sent."
+msgstr "New versions: once a day the app's server asks kabine.dev for the newest Kabine version number, unless the admins switched this off. Nothing about you or other members is sent."
+
 #: src/pages/season.tsx
 msgid "1 · New season"
 msgstr "1 · New season"
@@ -13393,6 +13491,10 @@ msgstr "The logo may be at most 256 KB."
 #: src/pages/home.tsx
 msgid "Events of the {team} for {kids}"
 msgstr "Events of the {team} for {kids}"
+
+#: src/pages/updates.tsx
+msgid "Look for new versions"
+msgstr "Look for new versions"
 
 #: modules/polls/app/common.tsx
 #: modules/polls/app/home.tsx
@@ -14474,6 +14576,10 @@ msgstr "Invalid request origin."
 msgid "Last name of {name}"
 msgstr "Last name of {name}"
 
+#: src/pages/updates.tsx
+msgid "<0>Security update.</0> It fixes a security problem; please install it soon."
+msgstr "<0>Security update.</0> It fixes a security problem; please install it soon."
+
 #: src/pages/team.tsx
 msgid "As set for the age group"
 msgstr "As set for the age group"
@@ -15177,6 +15283,10 @@ msgstr "How it works: open the link, enter your own name, select your child (sib
 msgid "{name}: please save it as .xlsx or .csv first (.xls and .ods files cannot be read)."
 msgstr "{name}: please save it as .xlsx or .csv first (.xls and .ods files cannot be read)."
 
+#: src/pages/updates.tsx
+msgid "The app no longer looks for new versions."
+msgstr "The app no longer looks for new versions."
+
 #: src/child-limits.tsx
 msgid "Respond"
 msgstr "Respond"
@@ -15239,6 +15349,10 @@ msgstr "optional"
 #: modules/duties/app/helpers.tsx
 msgid "assigned by the coach"
 msgstr "assigned by the coach"
+
+#: src/pages/updates.tsx
+msgid "Merge it at a quiet time. With database changes the app pauses for about a minute."
+msgstr "Merge it at a quiet time. With database changes the app pauses for about a minute."
 
 #: src/pages/plans.tsx
 msgid "Valid from"
@@ -15452,10 +15566,6 @@ msgstr "Line {line}: “{value}” is not a birth year"
 #: src/pages/admin.tsx
 msgid "All members, admins, access links"
 msgstr "All members, admins, access links"
-
-#: src/pages/admin.tsx
-msgid "Installed version, last update, maintenance mode"
-msgstr "Installed version, last update, maintenance mode"
 
 #: worker/domain/fixtures.ts
 msgid "{venue, select, hall {Hall} pitch {Pitch} other {Venue}}"

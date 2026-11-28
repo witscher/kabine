@@ -29,28 +29,75 @@ The switch lives in KV (key `maintenance`), independent of the database.
 
 ## Updates
 
-A pull request "Update Kabine to vX.Y.Z" appears in the club's copy when a release is out (`.github/workflows/update.yml`, weekly). It says whether the release changes the database and whether `wrangler.jsonc` needs new entries. You choose when to merge; Workers Builds then deploys with `npm run deploy` (`scripts/deploy.mjs`). A failed check "Workers Builds" on the pull request itself comes from builds for preview branches; switch them off as in `docs/install.md` (step 1), the deploy after merging is not affected:
+New Kabine versions reach a club in three ways:
 
-1. **No database changes:** build and upload. The app keeps running; open pages pick up the new version on their next start.
-2. **With database changes:** the script first notes a **restore point** (D1 Time Travel bookmark, printed in the build log), then marks the update in the database. For about a minute everyone, admins included, sees "Kabine is being updated", and the cron run pauses. The migrations run, the new version is uploaded, the mark is removed and the app reloads by itself. If the build is cut off, the mark expires after 15 minutes.
+- **In the app:** once a day the installation asks kabine.dev for the newest version. When there is a newer one, admins see a hint at the top of *Administration*, the section *New versions* under *Administration → Updates and maintenance*, and get one push ([Update notices](#update-notices)).
+- **On GitHub:** once a week (Monday morning) the workflow `.github/workflows/update.yml` in the club's copy opens a pull request "Update Kabine to vX.Y.Z" with the newest release. The copy needs this workflow once (`docs/install.md`, step 6).
+- **The install:** merging the pull request deploys the version through Workers Builds (`npm run deploy`, `scripts/deploy.mjs`). Nothing is installed without it; you choose when.
 
-*Administration → Updates and maintenance* shows the installed version and the last update: when, which database changes, and the restore point with the command to go back. Merge releases with database changes at a quiet time, not right before a game.
+## Installing an update
 
-**Going back.** Migrations keep the previous release working (`migrations/README.md`), so rolling back only the Worker is usually enough: *Workers & Pages → this Worker → Deployments → Rollback*. That holds for one release back. After an update that skipped releases, an older Worker may no longer fit the database (a later release can remove what it still uses): roll back the Worker and restore the database to the restore point together. Also restore the database if the data itself is wrong:
+1. **Open the pull request.** *Administration → Updates and maintenance → Install update* opens it in your club's copy on GitHub (or this guide, if the app does not know the copy). On GitHub itself: your copy → *Pull requests* → "Update Kabine to vX.Y.Z". The app can know about a version up to a week before the pull request appears; to get it right away, [run the workflow by hand](#no-update-pull-request).
+2. **Read what the pull request says.** At the top:
+   - *No database changes: the app keeps running during the deploy.* Merge whenever you like.
+   - **Database changes:** the release changes the database (the migration files are listed). The app pauses for about a minute during the deploy, so merge at a quiet time.
+   - **Check wrangler.jsonc:** the release changes the Cloudflare configuration, for example a new binding. Compare your `wrangler.jsonc` with the release's (the pull request keeps yours, with your resource IDs and domain) and add the new entries in your copy **before** merging (edit the file on GitHub, *Commit changes*).
+   - **Update the workflows by hand, after the deploy:** GitHub does not let the automatic update change files in `.github/workflows`. The listed files are replaced by hand **after** merging (step 6).
+   - Below: the release notes of every version since the installed one.
+
+   A failed check "Workers Builds" on the pull request itself comes from builds for preview branches; switch them off as in `docs/install.md` (step 1). The deploy after merging is not affected.
+3. **Merge at a quiet time.** *Merge pull request → Confirm merge*. Not right before a game or while many people respond, above all when the database changes.
+4. **The maintenance minute.** Workers Builds starts the deploy within a minute or two; it takes a few minutes in all.
+   - *No database changes:* build and upload. The app keeps running; open pages pick up the new version on their next start.
+   - *With database changes:* the script first notes a **restore point** (D1 Time Travel bookmark, printed in the build log), then marks the update in the database. For about a minute everyone, admins included, sees "Kabine is being updated", and the cron run pauses. The migrations run, the new version is uploaded, the mark is removed and the app reloads by itself. If the build is cut off, the mark expires after 15 minutes.
+5. **Check the version.** After a few minutes *Administration → Updates and maintenance* shows the new version under *Installed version*, and under *Last update* when, which database changes and the restore point with the command to go back; the hint at the top of *Administration* is gone. Still the old version after 15 minutes? Look at the build in the Cloudflare dashboard (*Workers & Pages → your Worker → Deployments*, the build log of the merge). A build that failed before the migrations changed nothing: start it again there. If it failed after them, the previous version keeps working with the new database; start it again, or [go back](#going-back-after-an-update).
+6. **Workflow files, if the pull request listed any.** Open each link, copy the content, edit the same file in your copy on GitHub and paste it. Do this only after step 5: every commit to the copy starts a deploy, a workflow edit just before merging deploys the old version, and the build of the merge right after it may not deploy at all. If that happened anyway, the installed version is still the old one: commit any small change to the copy (or run the deploy again in the Cloudflare dashboard) to deploy the update.
+
+If you would rather check a release on your own first, switch maintenance mode on, merge, check the app as an admin and switch it off again.
+
+## Update notices
+
+**What the app checks.** Once a day, from 10 o'clock in the club's time zone, the installation fetches `https://kabine.dev/releases.json` on the server (the hourly cron run; never from a browser): the newest version with its date, a link to its release notes and whether it is a security release. The request is an ordinary HTTPS request with the User-Agent `Kabine/<installed version>`; Cloudflare adds the header `CF-Worker` with the installation's domain to every request a Worker makes. No cookie, no ID and nothing about the club's people is sent, and kabine.dev does not log or evaluate these requests. If kabine.dev cannot be reached, the app tries again the next day.
+
+**What admins see.** When kabine.dev has a newer version than the installed one:
+
+- a hint at the top of *Administration*, which each admin can close for this version on their device,
+- a dot at *Updates and maintenance*, and there the section *New versions*: version and date, *Release notes*, *Install update* and the steps above,
+- one push to every admin (in their language), once per new version. An admin who switched off *Work as admin* gets none.
+
+**Security releases** are marked as such in their release notes. The app shows "Security update" in red, and its hint cannot be closed until the update is installed. Install those soon.
+
+**"Install update"** opens the update pull request of your club's copy when the app knows the copy: the deploy in Workers Builds finds it from the checkout (the build log says `GitHub copy: owner/name`) and records it with the update. Until the first deploy after this feature, or if the deploy did not find it, the app takes the source code link under *Administration → Club* if it points to a copy on GitHub (everyone sees that link under *Help*, so enter it only for a public copy). Otherwise the button opens this guide. The app has no access to GitHub itself; it only links there.
+
+**Switching it off.** *Administration → Updates and maintenance → Look for new versions*: off, the installation fetches nothing, and there is no hint and no push; update pull requests still arrive on GitHub. Only the push: *Profile → Notifications → New Kabine versions (admins)*, per admin.
+
+## No update pull request
+
+**Run the workflow by hand.** In your copy on GitHub: *Actions → Kabine updates → Run workflow*. Within a minute a pull request "Update Kabine to v…" appears, or the run shows why not. If the copy is already on the newest release, it does nothing.
+
+If nothing appears:
+
+- **No workflow "Kabine updates" under *Actions*:** the copy does not have the update workflow yet. Add it as in `docs/install.md` (step 6).
+- **Actions are switched off:** *Settings → Actions → General → Actions permissions*: allow actions. In a public copy GitHub also pauses scheduled workflows after 60 days without activity in the repository; *Actions → Kabine updates → Enable workflow* switches it on again.
+- **An issue "Kabine vX.Y.Z is ready to install" instead of a pull request:** GitHub did not let the workflow open the pull request. Open it with the link in the issue, check it and merge it. For next time: *Settings → Actions → General → Workflow permissions* → tick *Allow GitHub Actions to create and approve pull requests* and save.
+- **The run failed:** open it under *Actions*; the last red step says why. "Open the pull request by hand" with a link means the same as the issue above.
+- **The pull request for this version was closed without merging:** the workflow does not open it again. Reopen it on GitHub (*Pull requests → Closed*), or wait for the next version.
+
+## Skipping versions
+
+A copy can go from any release straight to the newest one. The pull request always brings the newest release, lists the database changes and shows the release notes of every version since the installed one; the deploy applies all pending migrations in order, with one pause and one restore point. An older update pull request that is still open is closed with a link to the new one, so nobody installs an older version by mistake. To leave out a version on purpose, simply do not merge its pull request; the next release brings it along anyway.
+
+## Going back after an update
+
+Migrations keep the previous release working (`migrations/README.md`), so rolling back only the Worker is usually enough: *Workers & Pages → this Worker → Deployments → Rollback*. That holds for one release back. After an update that skipped releases, an older Worker may no longer fit the database (a later release can remove what it still uses): roll back the Worker and restore the database to the restore point together. Also restore the database if the data itself is wrong:
 
 ```sh
 npx wrangler d1 time-travel restore DB --bookmark=<restore point>
 ```
 
-Restoring discards everything written after the restore point. Switch maintenance mode on before, and off when you have checked the app.
+The restore point is in the build log and under *Administration → Updates and maintenance → Last update* (with a button to copy the command). D1 Time Travel keeps 7 days on the free plan and 30 on the paid plan. Restoring discards everything written after the restore point. Switch maintenance mode on before, and off when you have checked the app. The rolled-back Worker shows the old version again under *Installed version*; install a later release once the problem is fixed.
 
-If you would rather check a release on your own first, switch maintenance mode on, merge, check the app as an admin and switch it off again.
-
-**Skipping releases.** A copy can go from any release straight to the newest one. The pull request always brings the newest release, lists the database changes and shows the release notes of every version since the installed one; the deploy applies all pending migrations in order, with one pause and one restore point. An older update pull request that is still open is closed with a link to the new one, so nobody installs an older version by mistake.
-
-**Workflow files.** GitHub does not let the automatic update change files in `.github/workflows`. If a release changes them, the pull request lists them with links: open each link, copy the content, edit the same file in your copy on GitHub and paste it. Do this **after** merging, once the deploy has finished (*Administration → Updates and maintenance* shows the new version). Every commit to the copy starts a deploy; a workflow edit just before merging deploys the old version, and the build of the merge right after it may not deploy at all. If that happened anyway, the installed version is still the old one: commit any small change to the copy (or run the deploy again in the Cloudflare dashboard) to deploy the update.
-
-### Updating an older copy
+## Updating an older copy
 
 Copies created before the first release (v0.2.0, October 2026) need three things once. After that, updates arrive as described above.
 
@@ -66,7 +113,7 @@ Copies created before the first release (v0.2.0, October 2026) need three things
 
 The pull request also says whether `wrangler.jsonc` needs new entries; compare it with the release before merging.
 
-### Installed by hand from a clone
+## Installed by hand from a clone
 
 If you cloned `witscher/kabine` and deploy from your machine, keep your `wrangler.jsonc` (resource IDs, domain) and pull the release:
 

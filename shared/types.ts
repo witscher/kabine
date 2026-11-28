@@ -60,7 +60,7 @@ export const childPermissionLabels = (): Record<ChildPermission, string> => ({
   may_answer_help: t`Answer stand-in requests on their own`,
 });
 
-export const CORE_NOTIFICATION_TOPICS = ["events", "reminders", "squad", "responses", "chat", "mentions", "coach"] as const;
+export const CORE_NOTIFICATION_TOPICS = ["events", "reminders", "squad", "responses", "chat", "mentions", "coach", "updates"] as const;
 /** Topics people can switch off; modules add their own (manifest `notificationTopics`). */
 export type NotificationTopic = (typeof CORE_NOTIFICATION_TOPICS)[number] | ModuleNotificationTopic;
 
@@ -72,6 +72,7 @@ export const notificationTopicLabels = (): Record<NotificationTopic, string> => 
   chat: t`Chat messages`,
   mentions: t`Mentions in the chat (@name)`,
   coach: t`Coach notes (short-notice declines, stand-ins)`,
+  updates: t`New Kabine versions (admins)`,
   ...(Object.fromEntries(MODULES.flatMap((m) => ("notificationTopics" in m ? m.notificationTopics : []).map((topic) => [topic.id, topic.label()]))) as Record<
     ModuleNotificationTopic,
     string
@@ -125,6 +126,8 @@ export interface Me {
   young: boolean;
   /** Admins and coaches: release notes and (admins) modules they have not seen yet (src/news.tsx); null when there is nothing new. */
   news: AdminNews | null;
+  /** Admins in their own view: a newer Kabine release (worker/domain/releases.ts), else null. */
+  update: import("./releases").AvailableUpdate | null;
 }
 
 /** What is new for an admin or coach since they last marked it as read (worker/domain/news.ts). */

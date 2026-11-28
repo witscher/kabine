@@ -78,7 +78,7 @@ New Kabine versions arrive as a pull request in your copy on GitHub; you decide 
 2. *Settings → Actions → General*: under *Workflow permissions* tick **Allow GitHub Actions to create and approve pull requests** and save.
 3. *Actions → Kabine updates → Run workflow*: it looks for a release right away. If your copy is already on the latest release, it does nothing.
 
-From then on the workflow looks for a new release every Monday and opens a pull request "Update Kabine to vX.Y.Z". It says whether the release changes the database or the Cloudflare configuration (`wrangler.jsonc`). Merging it deploys the new version; if the release changes the database, the app shows "being updated" for about a minute and the deploy notes a restore point first (`docs/operation.md`, Updates). If GitHub still does not let the workflow open the pull request, it opens an issue with a link to open it yourself.
+From then on the workflow looks for a new release every Monday and opens a pull request "Update Kabine to vX.Y.Z". It says whether the release changes the database or the Cloudflare configuration (`wrangler.jsonc`). Merging it deploys the new version; if the release changes the database, the app shows "being updated" for about a minute and the deploy notes a restore point first (`docs/operation.md`, Updates). If GitHub still does not let the workflow open the pull request, it opens an issue with a link to open it yourself. Admins also learn about a new version in the app: a hint in *Administration* and one push, with an *Install update* button that opens the pull request (`docs/operation.md`, Installing an update and Update notices).
 
 A copy from before October 2026 needs a few steps once: `docs/operation.md`, Updating an older copy.
 
