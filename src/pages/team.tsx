@@ -241,7 +241,7 @@ export function TeamPage({ id }: { id: string }) {
         {tab === "kader" ? <RosterTab team={team} onChanged={reload} /> : null}
         {tab === "einladungen" ? <InvitesTab team={team} onChanged={reload} /> : null}
         {tab === "einstellungen" ? <SettingsTab team={team} onChanged={reload} /> : null}
-        {/* Coaches have no Help tab; admins find it under Administration */}
+        {/* Coaches have no Help tab: also here, besides the top of the profile */}
         {!me.isAdmin ? (
           <ul class="list">
             <li>

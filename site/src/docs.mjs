@@ -39,8 +39,8 @@ function switchFacts(m, lang) {
   const de = lang === "de";
   const fixtures = m.kind === "fixtures";
   const where = de
-    ? `<em>Verwaltung → Verein → Module → ${fixtures ? "Spielplan-Quellen → " : ""}${m.label.de}</em>`
-    : `<em>Administration → Club → Modules → ${fixtures ? "Game schedule sources → " : ""}${m.label.en}</em>`;
+    ? `<em>Verwaltung → Module → ${fixtures ? "Spielplan-Quellen → " : ""}${m.label.de}</em>`
+    : `<em>Administration → Modules → ${fixtures ? "Game schedule sources → " : ""}${m.label.en}</em>`;
   const link = !fixtures
     ? ""
     : de
@@ -246,8 +246,8 @@ export function docsHub(lang) {
   <h2>${de ? "Was ein Verein dazuschalten kann." : "What a club can switch on."}</h2>
   <p class="sub">${
     de
-      ? "Jedes Modul schaltet ein Admin unter <em>Verwaltung → Verein → Module</em> ein oder aus. Hier steht, was es tut, was es speichert und wer es sieht."
-      : "An admin switches each module on or off under <em>Administration → Club → Modules</em>. Here is what it does, what it stores and who sees it."
+      ? "Jedes Modul schaltet ein Admin unter <em>Verwaltung → Module</em> ein oder aus. Hier steht, was es tut, was es speichert und wer es sieht."
+      : "An admin switches each module on or off under <em>Administration → Modules</em>. Here is what it does, what it stores and who sees it."
   }</p>
   <div class="grid g3">${modules.join("")}</div>
 </div></section>`;

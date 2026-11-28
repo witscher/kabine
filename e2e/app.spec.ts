@@ -885,7 +885,7 @@ test("Sondertermin ohne Helferdienste: „Helferdienste verwalten“ beginnt mit
   await page.request.delete(`/api/events/${created.id}`);
 });
 
-test("Hilfe und Feedback: Spielerin im eigenen Reiter, Admin unter Verwaltung", async () => {
+test("Hilfe und Feedback: Spielerin im eigenen Reiter, Admin oben im Profil", async () => {
   const { page } = player;
   await page.goto("/");
   await page.getByRole("link", { name: "Hilfe" }).click();
@@ -924,9 +924,10 @@ test("Hilfe und Feedback: Spielerin im eigenen Reiter, Admin unter Verwaltung", 
   expect(sent).toContain("Content-Type: image/jpeg");
   await page.unroute("**/api/feedback");
 
-  // Admin: kein Hilfe-Reiter, aber Eintrag unter Verwaltung
-  await admin.page.goto("/verwaltung");
+  // Admin: kein Hilfe-Reiter, der Eintrag steht ganz oben im Profil
+  await admin.page.goto("/profil");
   await expect(admin.page.getByRole("navigation", { name: "Hauptnavigation" }).getByRole("link", { name: "Hilfe" })).toHaveCount(0);
+  await expect(admin.page.locator(".content a.list-row").first()).toHaveAttribute("href", "/hilfe");
   await admin.page.getByRole("link", { name: /Hilfe und Feedback/ }).click();
   await expect(admin.page.getByRole("heading", { name: "Hilfe und Feedback" })).toBeVisible();
 });
@@ -1487,7 +1488,7 @@ test("Ergebnis in der Liste: groß mit Wort, für Spieler unter 14 mit dem Gesic
 
   // With the club mascot and a face for a win, the player under 14 sees it next to the word
   const mascotSwitch = admin.page.getByRole("switch", { name: /^Vereinsmaskottchen/ });
-  await admin.page.goto("/verwaltung/verein");
+  await admin.page.goto("/verwaltung/module");
   await mascotSwitch.click();
   await expect(mascotSwitch).toHaveAttribute("aria-checked", "true");
   const res = await admin.page.request.put("/api/mascot/images/win", { data: await mascotPng(admin.page, 256, 256), headers: { "content-type": "image/png" } });
@@ -1504,7 +1505,7 @@ test("Ergebnis in der Liste: groß mit Wort, für Spieler unter 14 mit dem Gesic
 
   // Clean up for the tests after this one
   await admin.page.request.delete("/api/mascot/images/win");
-  await admin.page.goto("/verwaltung/verein");
+  await admin.page.goto("/verwaltung/module");
   await mascotSwitch.click();
   await expect(mascotSwitch).toHaveAttribute("aria-checked", "false");
   await page.request.put("/api/teams/1/games/source", { data: { link: null } });
@@ -1866,7 +1867,10 @@ test("Fahrgemeinschaft: Trainer fährt, Spielerin bucht, Trainer trägt eine Mit
 test("Verein: Admin ändert Name und Kürzel, Verwaltung und Datenschutz zeigen sie", async () => {
   const { page } = admin;
   await page.goto("/verwaltung");
-  await page.getByRole("link", { name: /^Verein/ }).click();
+  // Grouped: the club under "Verein und Technik", the modules on a page of their own
+  await expect(page.getByRole("heading", { name: "Verein und Technik" })).toBeVisible();
+  await expect(page.getByRole("link", { name: /^Module ein- und ausschalten/ })).toHaveAttribute("href", "/verwaltung/module");
+  await page.getByRole("link", { name: /^Verein Name, Farben/ }).click();
   await page.getByLabel("Name des Vereins").fill("SV Beispielhausen 1920");
   await page.getByLabel("Kurzname").fill("SVB Handball");
   await page.getByLabel("Kürzel").fill("SVB");
@@ -2584,7 +2588,7 @@ test("Sondertermin mit Anmeldung je Familie: Zahl je Familie statt Zusage, Warnu
 });
 
 test("Umfragen: Admin schaltet das Modul ein, Trainer legt eine Umfrage mit Vorschau an, Spielerin stimmt ab", async () => {
-  await admin.page.goto("/verwaltung/verein");
+  await admin.page.goto("/verwaltung/module");
   // Each module links to its documentation, to read before switching it on
   const docs = admin.page.locator('a[href="https://kabine.dev/docs/module/polls/"]');
   await expect(docs).toHaveText(/Details und was es speichert/);
@@ -2686,7 +2690,7 @@ test("Bestellung: Mengen je Artikel und Größe, Export als Excel für den Train
 });
 
 test("Fans: Spielerin folgt einer anderen Mannschaft, sieht deren Spiel unter dem Stern und öffnet die Spielseite", async () => {
-  await admin.page.goto("/verwaltung/verein");
+  await admin.page.goto("/verwaltung/module");
   const moduleSwitch = admin.page.getByRole("switch", { name: /^Fans/ });
   await moduleSwitch.click();
   await expect(moduleSwitch).toHaveAttribute("aria-checked", "true");
@@ -2738,7 +2742,7 @@ test("Fans: Spielerin folgt einer anderen Mannschaft, sieht deren Spiel unter de
   await expect(fans).toHaveAttribute("aria-pressed", "false");
   await admin.page.request.delete(`/api/duties/games/${gameId}`);
   await admin.page.request.delete(`/api/teams/${other}`);
-  await admin.page.goto("/verwaltung/verein");
+  await admin.page.goto("/verwaltung/module");
   await moduleSwitch.click();
   await expect(moduleSwitch).toHaveAttribute("aria-checked", "false");
 });
@@ -2772,7 +2776,7 @@ const naturalSize = (img: import("@playwright/test").Locator) =>
 
 test("Vereinsmaskottchen: Bilder prüfen, hochladen und entfernen", async () => {
   const { page } = admin;
-  await page.goto("/verwaltung/verein");
+  await page.goto("/verwaltung/module");
   const moduleSwitch = page.getByRole("switch", { name: /^Vereinsmaskottchen/ });
   await moduleSwitch.click();
   await expect(moduleSwitch).toHaveAttribute("aria-checked", "true");
@@ -2816,13 +2820,13 @@ test("Vereinsmaskottchen: Bilder prüfen, hochladen und entfernen", async () => 
   await page.locator('.mascot-slot[data-slot="card"]').getByRole("button", { name: "Bild entfernen: Karte Heimspieltag" }).click();
   await page.getByRole("dialog").getByRole("button", { name: "Entfernen" }).click();
   await expect(page.locator('.mascot-slot[data-slot="card"]')).toContainText("Kein Bild");
-  await page.goto("/verwaltung/verein");
+  await page.goto("/verwaltung/module");
   await moduleSwitch.click();
   await expect(moduleSwitch).toHaveAttribute("aria-checked", "false");
 });
 
 test("Heimspieltag: Karte auf der Startseite, Seite des Tages, Einstellungen", async () => {
-  await admin.page.goto("/verwaltung/verein");
+  await admin.page.goto("/verwaltung/module");
   const moduleSwitch = admin.page.getByRole("switch", { name: /^Heimspieltag/ });
   await moduleSwitch.click();
   await expect(moduleSwitch).toHaveAttribute("aria-checked", "true");
@@ -2903,7 +2907,7 @@ test("Heimspieltag: Karte auf der Startseite, Seite des Tages, Einstellungen", a
   for (const id of gameIds) await admin.page.request.delete(`/api/duties/games/${id}`);
   for (const id of teamIds.slice(1)) await admin.page.request.delete(`/api/teams/${id}`);
   for (const slot of ["card", "head"]) expect((await admin.page.request.delete(`/api/mascot/images/${slot}`)).ok()).toBe(true);
-  await admin.page.goto("/verwaltung/verein");
+  await admin.page.goto("/verwaltung/module");
   await moduleSwitch.click();
   await expect(moduleSwitch).toHaveAttribute("aria-checked", "false");
   await mascotSwitch.click();

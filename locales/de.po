@@ -1027,6 +1027,11 @@ msgstr "Auf diesem Account ist noch kein Gerät für Push registriert."
 msgid "{seats, plural, one {{coach} entered you as a driver with one free seat: {game}.} other {{coach} entered you as a driver with # free seats: {game}.}}"
 msgstr "{seats, plural, one {{coach} hat dich mit einem freien Platz als Fahrer eingetragen: {game}.} other {{coach} hat dich mit # freien Plätzen als Fahrer eingetragen: {game}.}}"
 
+# ai
+#: src/pages/admin.tsx
+msgid "Name, colours, logo, region, legal notice and privacy"
+msgstr "Name, Farben, Logo, Region, Impressum und Datenschutz"
+
 #: src/avatar.tsx
 msgid "Reject"
 msgstr "Ablehnen"
@@ -2758,9 +2763,9 @@ msgstr "Zu dieser Adresse gehören mehrere Zugänge. Mit welchem möchtest du di
 #: src/pages/admin.tsx
 #: src/pages/admin.tsx
 #: src/pages/admin.tsx
-#: src/pages/admin.tsx
 #: src/pages/audit.tsx
 #: src/pages/chat.tsx
+#: src/pages/club-settings.tsx
 #: src/pages/club-settings.tsx
 #: src/pages/fixture-sync.tsx
 #: src/pages/group.tsx
@@ -3118,6 +3123,11 @@ msgstr "{team} hat zur selben Zeit Training ({clock})."
 #: src/session.tsx
 msgid "Not signed in"
 msgstr "Nicht angemeldet"
+
+# ai
+#: src/news.tsx
+msgid "Switch on under Administration → Modules"
+msgstr "Einschalten unter Verwaltung → Module"
 
 # ai
 #: modules/duties/app/admin.tsx
@@ -5322,6 +5332,11 @@ msgid "This link sets up a new passkey for an existing access. You can add an e-
 msgstr "Mit diesem Link richtest du einen neuen Passkey für einen bestehenden Zugang ein. Eine E-Mail-Adresse kannst du danach im Profil eintragen."
 
 # ai
+#: src/pages/admin.tsx
+msgid "What each module does and stores"
+msgstr "Was jedes Modul tut und speichert"
+
+# ai
 #: src/game-import.tsx
 msgid "Away game at {opponent}"
 msgstr "Auswärtsspiel bei {opponent}"
@@ -6568,6 +6583,11 @@ msgstr "männlich"
 msgid "Reason for declining"
 msgstr "Grund der Absage"
 
+# ai
+#: src/pages/admin.tsx
+msgid "Teams and people"
+msgstr "Mannschaften und Personen"
+
 #: src/pages/help.tsx
 msgid "Your browser cannot open this image format. Please choose a photo or screenshot as JPEG or PNG."
 msgstr "Dieses Bildformat kann dein Browser nicht öffnen. Bitte ein Foto oder einen Screenshot als JPEG oder PNG wählen."
@@ -7360,7 +7380,6 @@ msgstr "{form, select, you {Du bist im Kader} one {{names} ist im Kader} youAnd 
 msgid "You are now working as a coach."
 msgstr "Du arbeitest jetzt als Trainer."
 
-#: src/pages/admin.tsx
 #: src/pages/group.tsx
 #: src/pages/help.tsx
 #: src/pages/help.tsx
@@ -9366,11 +9385,6 @@ msgid "There is no current season."
 msgstr "Es gibt keine laufende Saison."
 
 # ai
-#: src/news.tsx
-msgid "Switch on under Administration → Club"
-msgstr "Einschalten unter Verwaltung → Verein"
-
-# ai
 #: modules/polls/app/pages.tsx
 msgid "{name}: choose photo"
 msgstr "{name}: Foto wählen"
@@ -10007,10 +10021,6 @@ msgstr "Sieht auch Trainings"
 msgid "The e-mail address on your access is used for signing in. Helper plan reminders only come by e-mail if you switch this on in your profile. With feedback it is only sent along if you want a reply. Otherwise nobody sees it, not even coaches and admins."
 msgstr "Die E-Mail-Adresse an deinem Zugang dient der Anmeldung. Erinnerungen zum Helferplan kommen nur per Mail, wenn du das im Profil einschaltest. Beim Feedback geht sie nur mit, wenn du eine Antwort wünschst. Sonst sieht sie niemand, auch Trainer und Admins nicht."
 
-#: src/pages/admin.tsx
-msgid "Send feedback about the app"
-msgstr "Rückmeldung zur App schicken"
-
 #: worker/routes/teams.ts
 msgid "{playerName} now also plays in the other team (added by {by})."
 msgstr "{playerName} spielt jetzt auch in der anderen Mannschaft (aufgenommen von {by})."
@@ -10271,11 +10281,6 @@ msgstr "Eine <0>Gruppe</0> hat nur einen Chat und Sondertermine mit Zu- und Absa
 #: src/pages/team.tsx
 msgid "Link for new passkey"
 msgstr "Link für neuen Passkey"
-
-# ai
-#: src/pages/setup-wizard.tsx
-msgid "Switch on what your club needs. You can change this at any time under administration → club."
-msgstr "Schalte ein, was dein Verein braucht. Ändern kannst du das jederzeit unter Verwaltung → Verein."
 
 #: worker/routes/persons.ts
 msgid "A link already exists the other way round: the child is registered as a parent of this person."
@@ -10916,6 +10921,11 @@ msgstr "Artikel hinzufügen"
 msgid "the child"
 msgstr "das Kind"
 
+# ai
+#: src/pages/admin.tsx
+msgid "Club and technology"
+msgstr "Verein und Technik"
+
 #: worker/domain/notify.ts
 msgid "Game {title}"
 msgstr "Spiel {title}"
@@ -11138,11 +11148,6 @@ msgstr "Weitere Mannschaft für {name}"
 #: src/special-attendance.tsx
 msgid "Registered families"
 msgstr "Angemeldete Familien"
-
-# ai
-#: src/pages/admin.tsx
-msgid "Name, colours, logo, region, modules"
-msgstr "Name, Farben, Logo, Region, Module"
 
 # ai
 #: src/coach-hints.tsx
@@ -11495,6 +11500,7 @@ msgstr "Diese Größe gibt es nicht."
 msgid "{firstName} gets their own access with a passkey. Only give the link to {firstName} or open it directly on their phone."
 msgstr "{firstName} bekommt einen eigenen Zugang mit Passkey. Den Link nur {firstName} geben oder direkt auf dem Handy öffnen."
 
+#: src/pages/profile.tsx
 #: src/pages/team.tsx
 msgid "FAQ, guides, feedback on the app"
 msgstr "Häufige Fragen, Anleitungen, Rückmeldung zur App"
@@ -14636,6 +14642,11 @@ msgid "uses the app"
 msgstr "nutzt die App"
 
 # ai
+#: src/pages/setup-wizard.tsx
+msgid "Switch on what your club needs. You can change this at any time under administration → modules."
+msgstr "Schalte ein, was dein Verein braucht. Du kannst das jederzeit unter Verwaltung → Module ändern."
+
+# ai
 #: modules/polls/app/pages.tsx
 msgid "“Multiple answers” and “One vote per family” can no longer be switched."
 msgstr "„Mehrere Antworten“ und „Eine Stimme je Familie“ lassen sich nicht mehr umstellen."
@@ -16004,6 +16015,11 @@ msgstr "Spieler"
 msgid "I'll join"
 msgstr "Ich mache mit"
 
+# ai
+#: src/pages/admin.tsx
+msgid "Switch modules on and off"
+msgstr "Module ein- und ausschalten"
+
 #: src/pages/team.tsx
 msgid "Remove access?"
 msgstr "Zugang lösen?"
@@ -16076,6 +16092,7 @@ msgid "Nobody is offering seats yet"
 msgstr "Noch niemand bietet Plätze an"
 
 # ai
+#: src/pages/admin.tsx
 #: src/pages/setup-wizard.tsx
 #: src/pages/stats.tsx
 msgid "Season"
@@ -16088,6 +16105,9 @@ msgid "Unknown team under “Helpers from”."
 msgstr "Unbekannte Mannschaft bei „Helfer aus“."
 
 # ai
+#: src/pages/admin.tsx
+#: src/pages/club-settings.tsx
+#: src/pages/club-settings.tsx
 #: src/pages/club-settings.tsx
 #: src/pages/club-settings.tsx
 msgid "Modules"

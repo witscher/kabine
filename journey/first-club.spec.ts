@@ -331,6 +331,7 @@ test("Jede Seite lädt ohne Fehler: Admin, Trainer, Spieler und Eltern", async (
     "/verwaltung/altersklassen",
     "/verwaltung/orte",
     "/verwaltung/verein",
+    "/verwaltung/module",
     "/verwaltung/mail",
     "/verwaltung/saisonwechsel",
     "/verwaltung/sondertermine",

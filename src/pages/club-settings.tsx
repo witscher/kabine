@@ -329,7 +329,22 @@ export function AdminClubPage() {
       <main class="page">
         <TopBar title={t`Club`} kicker={t`Administration`} back="/verwaltung" />
         <div class="content">
-          <ClubProfileForm cards />
+          <ClubProfileForm cards parts={ALL_PARTS.filter((p) => p !== "modules")} />
+        </div>
+      </main>
+    </AdminOnly>
+  );
+}
+
+/** Administration → Modules: the switches, each with what the module does and a link to its documentation. */
+export function AdminModulesPage() {
+  useDocumentTitle(t`Modules`);
+  return (
+    <AdminOnly>
+      <main class="page">
+        <TopBar title={t`Modules`} kicker={t`Administration`} back="/verwaltung" />
+        <div class="content">
+          <ClubProfileForm cards parts={["modules"]} />
         </div>
       </main>
     </AdminOnly>

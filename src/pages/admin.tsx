@@ -52,42 +52,64 @@ export function AdminPage() {
   const own = (teamsQuery.data?.teams ?? []).filter((x) => coaching.has(x.id));
   const teamCount = teams.data?.teams.length ?? 0;
   const firstName = me.person.firstName;
-  const items: { href: string; icon: IconName; title: string; sub: string; download?: boolean; dot?: boolean }[] = [
+  type Item = { href: string; icon: IconName; title: string; sub: string; download?: boolean; dot?: boolean };
+  // Grouped, the everyday tasks first
+  const groups: { title: string; items: Item[] }[] = [
     {
-      href: "/verwaltung/mannschaften",
-      icon: "users",
-      title: t`Teams`,
-      sub: teams.data
-        ? `${plural(teamCount, { one: "# team", other: "# teams" })} · ${t`Open squads, create, assign coaches`}`
-        : t`Open squads, create, assign coaches`,
+      title: t`Teams and people`,
+      items: [
+        {
+          href: "/verwaltung/mannschaften",
+          icon: "users",
+          title: t`Teams`,
+          sub: teams.data
+            ? `${plural(teamCount, { one: "# team", other: "# teams" })} · ${t`Open squads, create, assign coaches`}`
+            : t`Open squads, create, assign coaches`,
+        },
+        {
+          href: "/verwaltung/gruppen",
+          icon: "chat",
+          title: t`Groups`,
+          sub: `${groupCount ? `${plural(groupCount, { one: "# group", other: "# groups" })} · ` : ""}${t`Only chat and special events, e.g. coaching team`}`,
+        },
+        { href: "/verwaltung/personen", icon: "user", title: t`People`, sub: t`All members, admins, access links` },
+        { href: "/verwaltung/rundnachricht", icon: "bell", title: t`Broadcast`, sub: t`Announcement in all or selected team chats` },
+        { href: "/chat?alle", icon: "chat", title: t`All chats`, sub: t`Team chats in which you are not a coach or parent` },
+        { href: "/verwaltung/sondertermine", icon: "calendar", title: t`Special events and games`, sub: t`Upcoming events of other teams, create a special event` },
+      ],
     },
     {
-      href: "/verwaltung/gruppen",
-      icon: "chat",
-      title: t`Groups`,
-      sub: `${groupCount ? `${plural(groupCount, { one: "# group", other: "# groups" })} · ` : ""}${t`Only chat and special events, e.g. coaching team`}`,
+      title: t`Season`,
+      items: [
+        { href: "/verwaltung/altersklassen", icon: "calendar", title: t`Age groups`, sub: t`Birth years of the current season` },
+        { href: "/verwaltung/ferien", icon: "sun", title: t`Holidays`, sub: t`Edit periods (e.g. carnival)` },
+        { href: "/verwaltung/orte", icon: "pin", title: t`Training venues`, sub: select(venue, { hall: "Club halls and other locations", pitch: "Club pitches and other locations", other: "Club venues and other locations" }) },
+        ...(fixtureSources.length
+          ? [{ href: "/verwaltung/spielplan", icon: "refresh" as IconName, title: fixtureSyncTitle(fixtureSources), sub: t`Game schedule sync and reminder` }]
+          : []),
+        { href: "/verwaltung/saisonwechsel", icon: "refresh", title: t`Season change`, sub: t`Once a year, with preview` },
+        { href: "/verwaltung/import", icon: "users", title: t`Import / restore`, sub: t`Teams, coaches and players from Excel or CSV lists, or a Kabine backup` },
+      ],
     },
-    { href: "/verwaltung/personen", icon: "user", title: t`People`, sub: t`All members, admins, access links` },
-    { href: "/verwaltung/altersklassen", icon: "calendar", title: t`Age groups`, sub: t`Birth years of the current season` },
-    { href: "/verwaltung/ferien", icon: "sun", title: t`Holidays`, sub: t`Edit periods (e.g. carnival)` },
-    { href: "/verwaltung/orte", icon: "pin", title: t`Training venues`, sub: select(venue, { hall: "Club halls and other locations", pitch: "Club pitches and other locations", other: "Club venues and other locations" }) },
-    ...(fixtureSources.length
-      ? [{ href: "/verwaltung/spielplan", icon: "refresh" as IconName, title: fixtureSyncTitle(fixtureSources), sub: t`Game schedule sync and reminder` }]
-      : []),
-    { href: "/verwaltung/rundnachricht", icon: "bell", title: t`Broadcast`, sub: t`Announcement in all or selected team chats` },
-    // Pages of the switched-on modules (modules/<id>/app, adminMenu)
-    ...modules.flatMap((m) => m.adminMenu?.() ?? []),
-    { href: "/chat?alle", icon: "chat", title: t`All chats`, sub: t`Team chats in which you are not a coach or parent` },
-    { href: "/verwaltung/sondertermine", icon: "calendar", title: t`Special events and games`, sub: t`Upcoming events of other teams, create a special event` },
-    { href: "/verwaltung/einrichtung", icon: "check", title: t`Setup wizard`, sub: t`Go through the setup step by step again` },
-    { href: "/verwaltung/verein", icon: "settings", title: t`Club`, sub: t`Name, colours, logo, region, modules`, dot: !!me?.news?.newModules.length },
-    { href: "/verwaltung/mail", icon: "mail", title: t`E-mail`, sub: t`How the app sends e-mails` },
-    { href: "/verwaltung/saisonwechsel", icon: "refresh", title: t`Season change`, sub: t`Once a year, with preview` },
-    { href: "/verwaltung/protokoll", icon: "shield", title: t`Protocol`, sub: t`Who did what: access, leaving, admin rights, members, schedules, cancellations` },
-    { href: "/verwaltung/updates", icon: "refresh", title: t`Updates and maintenance`, sub: t`Installed version, last update, maintenance mode` },
-    { href: "/verwaltung/import", icon: "users", title: t`Import / restore`, sub: t`Teams, coaches and players from Excel or CSV lists, or a Kabine backup` },
-    { href: "/api/admin/export", icon: "download", title: t`Export`, sub: t`All data as a JSON file, for backup`, download: true },
-    { href: "/hilfe", icon: "info", title: t`Help and feedback`, sub: t`Send feedback about the app` },
+    {
+      title: t`Modules`,
+      items: [
+        { href: "/verwaltung/module", icon: "settings", title: t`Switch modules on and off`, sub: t`What each module does and stores`, dot: !!me?.news?.newModules.length },
+        // Pages of the switched-on modules (modules/<id>/app, adminMenu)
+        ...modules.flatMap((m) => m.adminMenu?.() ?? []),
+      ],
+    },
+    {
+      title: t`Club and technology`,
+      items: [
+        { href: "/verwaltung/verein", icon: "settings", title: t`Club`, sub: t`Name, colours, logo, region, legal notice and privacy` },
+        { href: "/verwaltung/mail", icon: "mail", title: t`E-mail`, sub: t`How the app sends e-mails` },
+        { href: "/verwaltung/updates", icon: "refresh", title: t`Updates and maintenance`, sub: t`Installed version, last update, maintenance mode` },
+        { href: "/verwaltung/protokoll", icon: "shield", title: t`Protocol`, sub: t`Who did what: access, leaving, admin rights, members, schedules, cancellations` },
+        { href: "/api/admin/export", icon: "download", title: t`Export`, sub: t`All data as a JSON file, for backup`, download: true },
+        { href: "/verwaltung/einrichtung", icon: "check", title: t`Setup wizard`, sub: t`Go through the setup step by step again` },
+      ],
+    },
   ];
   return (
     <AdminOnly>
@@ -149,40 +171,45 @@ export function AdminPage() {
             </div>
           ) : null}
           {teams.error ? <ErrorBox error={teams.error} /> : null}
-          <ul class="list" aria-label={t`Administration`}>
-            {items.map((i) => (
-              <li>
-                {i.download ? (
-                  // Button instead of link: the router would intercept the link, the privacy notice comes first
-                  <button type="button" class="list-row" onClick={() => void downloadExport()}>
-                    <Icon name={i.icon} size={22} />
-                    <span class="main">
-                      <span class="title">{i.title}</span>
-                      <span class="sub">{i.sub}</span>
-                    </span>
-                    <Icon name="chevron" size={18} />
-                  </button>
-                ) : (
-                  <a class="list-row" href={i.href}>
-                    <Icon name={i.icon} size={22} />
-                    <span class="main">
-                      <span class="title">{i.title}</span>
-                      <span class="sub">{i.sub}</span>
-                    </span>
-                    {i.dot ? (
-                      <>
-                        <span class="dot" aria-hidden="true" />
-                        <span class="sr-only">
-                          <Trans>(new)</Trans>
+          {groups.map((group) => (
+            <section class="stack-sm" aria-label={group.title}>
+              <h2 class="section-title">{group.title}</h2>
+              <ul class="list">
+                {group.items.map((i) => (
+                  <li>
+                    {i.download ? (
+                      // Button instead of link: the router would intercept the link, the privacy notice comes first
+                      <button type="button" class="list-row" onClick={() => void downloadExport()}>
+                        <Icon name={i.icon} size={22} />
+                        <span class="main">
+                          <span class="title">{i.title}</span>
+                          <span class="sub">{i.sub}</span>
                         </span>
-                      </>
-                    ) : null}
-                    <Icon name="chevron" size={18} />
-                  </a>
-                )}
-              </li>
-            ))}
-          </ul>
+                        <Icon name="chevron" size={18} />
+                      </button>
+                    ) : (
+                      <a class="list-row" href={i.href}>
+                        <Icon name={i.icon} size={22} />
+                        <span class="main">
+                          <span class="title">{i.title}</span>
+                          <span class="sub">{i.sub}</span>
+                        </span>
+                        {i.dot ? (
+                          <>
+                            <span class="dot" aria-hidden="true" />
+                            <span class="sr-only">
+                              <Trans>(new)</Trans>
+                            </span>
+                          </>
+                        ) : null}
+                        <Icon name="chevron" size={18} />
+                      </a>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ))}
         </div>
       </main>
     </AdminOnly>

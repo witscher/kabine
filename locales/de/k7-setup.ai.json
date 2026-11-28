@@ -23,7 +23,6 @@
   "First day": "Erster Tag",
   "Coaches do this in their team: import players from a list, enter training times, send invitations.": "Das machen die Trainer in ihrer Mannschaft: Spieler aus einer Liste übernehmen, Trainingszeiten eintragen, Einladungen verschicken.",
   "The sport brings suitable age groups, playing times and helper duties. You adjust them later under administration.": "Die Sportart bringt passende Altersklassen, Spielzeiten und Helferdienste mit. Anpassen kannst du sie später in der Verwaltung.",
-  "Switch on what your club needs. You can change this at any time under administration → club.": "Schalte ein, was dein Verein braucht. Ändern kannst du das jederzeit unter Verwaltung → Verein.",
   "The app is set up": "Die App ist eingerichtet",
   "Continue the setup wizard": "Einrichtungsassistent fortsetzen",
   "Current season: <0>{seasonName}</0>, {seasonFrom} to {seasonTo}": "Aktuelle Saison: <0>{seasonName}</0>, {seasonFrom} bis {seasonTo}",

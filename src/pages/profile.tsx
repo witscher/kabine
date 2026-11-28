@@ -227,6 +227,26 @@ export function ProfilePage() {
         </div>
       </header>
       <div class="content">
+        {/* Admins and coaches have no Help tab (Administration or Team instead): help and feedback first here */}
+        {me.isAdmin || me.manageableTeams.length ? (
+          <ul class="list">
+            <li>
+              <a class="list-row" href="/hilfe">
+                <Icon name="info" size={22} />
+                <span class="main">
+                  <span class="title">
+                    <Trans>Help and feedback</Trans>
+                  </span>
+                  <span class="sub">
+                    <Trans>FAQ, guides, feedback on the app</Trans>
+                  </span>
+                </span>
+                <Icon name="chevron" size={18} />
+              </a>
+            </li>
+          </ul>
+        ) : null}
+
         {me.parentsInCharge ? (
           <Notice>
             <Trans>Your parents are linked to your access. They decide what you can do yourself in the app.</Trans>
@@ -347,19 +367,6 @@ export function ProfilePage() {
               </div>
             )}
           </li>
-          {!me.isAdmin && me.manageableTeams.length ? (
-            <li>
-              <a class="list-row" href="/hilfe">
-                <Icon name="info" size={22} />
-                <span class="main">
-                  <span class="title">
-                    <Trans>Help and feedback</Trans>
-                  </span>
-                </span>
-                <Icon name="chevron" size={18} />
-              </a>
-            </li>
-          ) : null}
           <li>
             <a class="list-row" href="/datenschutz">
               <Icon name="shield" size={22} />
