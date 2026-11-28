@@ -50,6 +50,7 @@ const AdminExtraEventsPage = lazyPage(() => import("./pages/admin").then((m) => 
 const AdminAgeClassesPage = lazyPage(() => import("./pages/admin").then((m) => m.AdminAgeClassesPage));
 const AdminLocationsPage = lazyPage(() => import("./pages/admin").then((m) => m.AdminLocationsPage));
 const AdminClubPage = lazyPage(() => import("./pages/club-settings").then((m) => m.AdminClubPage));
+const AdminModulesPage = lazyPage(() => import("./pages/club-settings").then((m) => m.AdminModulesPage));
 const AdminMailPage = lazyPage(() => import("./pages/mail-settings").then((m) => m.AdminMailPage));
 const AdminListImportPage = lazyPage(() => import("./pages/list-import").then((m) => m.AdminListImportPage));
 const AdminFixtureSyncPage = lazyPage(() => import("./pages/fixture-sync").then((m) => m.AdminFixtureSyncPage));
@@ -295,6 +296,7 @@ export function App() {
               <Route path="/verwaltung/altersklassen" component={AdminAgeClassesPage} />
               <Route path="/verwaltung/orte" component={AdminLocationsPage} />
               <Route path="/verwaltung/verein" component={AdminClubPage} />
+              <Route path="/verwaltung/module" component={AdminModulesPage} />
               <Route path="/verwaltung/mail" component={AdminMailPage} />
               <Route path="/verwaltung/spielplan" component={AdminFixtureSyncPage} />
               <Route path="/verwaltung/updates" component={AdminUpdatesPage} />

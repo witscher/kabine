@@ -942,6 +942,10 @@ msgstr "No device is registered for push on this account yet."
 msgid "{seats, plural, one {{coach} entered you as a driver with one free seat: {game}.} other {{coach} entered you as a driver with # free seats: {game}.}}"
 msgstr "{seats, plural, one {{coach} entered you as a driver with one free seat: {game}.} other {{coach} entered you as a driver with # free seats: {game}.}}"
 
+#: src/pages/admin.tsx
+msgid "Name, colours, logo, region, legal notice and privacy"
+msgstr "Name, colours, logo, region, legal notice and privacy"
+
 #: src/avatar.tsx
 msgid "Reject"
 msgstr "Reject"
@@ -2552,9 +2556,9 @@ msgstr "Several accesses belong to this address. Which one do you want to sign i
 #: src/pages/admin.tsx
 #: src/pages/admin.tsx
 #: src/pages/admin.tsx
-#: src/pages/admin.tsx
 #: src/pages/audit.tsx
 #: src/pages/chat.tsx
+#: src/pages/club-settings.tsx
 #: src/pages/club-settings.tsx
 #: src/pages/fixture-sync.tsx
 #: src/pages/group.tsx
@@ -2877,6 +2881,10 @@ msgstr "{team} has training at the same time ({clock})."
 #: src/session.tsx
 msgid "Not signed in"
 msgstr "Not signed in"
+
+#: src/news.tsx
+msgid "Switch on under Administration → Modules"
+msgstr "Switch on under Administration → Modules"
 
 #: modules/duties/app/admin.tsx
 msgid "It cannot be deleted while it is in {places}. Archiving hides it for new things."
@@ -4866,6 +4874,10 @@ msgstr "Only chat and special events, e.g. coaching team"
 msgid "This link sets up a new passkey for an existing access. You can add an e-mail address in the profile afterwards."
 msgstr "This link sets up a new passkey for an existing access. You can add an e-mail address in the profile afterwards."
 
+#: src/pages/admin.tsx
+msgid "What each module does and stores"
+msgstr "What each module does and stores"
+
 #: src/game-import.tsx
 msgid "Away game at {opponent}"
 msgstr "Away game at {opponent}"
@@ -5994,6 +6006,10 @@ msgstr "male"
 msgid "Reason for declining"
 msgstr "Reason for declining"
 
+#: src/pages/admin.tsx
+msgid "Teams and people"
+msgstr "Teams and people"
+
 #: src/pages/help.tsx
 msgid "Your browser cannot open this image format. Please choose a photo or screenshot as JPEG or PNG."
 msgstr "Your browser cannot open this image format. Please choose a photo or screenshot as JPEG or PNG."
@@ -6716,7 +6732,6 @@ msgstr "{form, select, you {You are in the squad} one {{names} is in the squad} 
 msgid "You are now working as a coach."
 msgstr "You are now working as a coach."
 
-#: src/pages/admin.tsx
 #: src/pages/group.tsx
 #: src/pages/help.tsx
 #: src/pages/help.tsx
@@ -8540,10 +8555,6 @@ msgstr "On the iPhone, notifications only work if the app is installed on the Ho
 msgid "There is no current season."
 msgstr "There is no current season."
 
-#: src/news.tsx
-msgid "Switch on under Administration → Club"
-msgstr "Switch on under Administration → Club"
-
 #: modules/polls/app/pages.tsx
 msgid "{name}: choose photo"
 msgstr "{name}: choose photo"
@@ -9133,10 +9144,6 @@ msgstr "Also sees trainings"
 msgid "The e-mail address on your access is used for signing in. Helper plan reminders only come by e-mail if you switch this on in your profile. With feedback it is only sent along if you want a reply. Otherwise nobody sees it, not even coaches and admins."
 msgstr "The e-mail address on your access is used for signing in. Helper plan reminders only come by e-mail if you switch this on in your profile. With feedback it is only sent along if you want a reply. Otherwise nobody sees it, not even coaches and admins."
 
-#: src/pages/admin.tsx
-msgid "Send feedback about the app"
-msgstr "Send feedback about the app"
-
 #: worker/routes/teams.ts
 msgid "{playerName} now also plays in the other team (added by {by})."
 msgstr "{playerName} now also plays in the other team (added by {by})."
@@ -9377,10 +9384,6 @@ msgstr "A <0>group</0> only has a chat and special events with responses, for ex
 #: src/pages/team.tsx
 msgid "Link for new passkey"
 msgstr "Link for new passkey"
-
-#: src/pages/setup-wizard.tsx
-msgid "Switch on what your club needs. You can change this at any time under administration → club."
-msgstr "Switch on what your club needs. You can change this at any time under administration → club."
 
 #: worker/routes/persons.ts
 msgid "A link already exists the other way round: the child is registered as a parent of this person."
@@ -9972,6 +9975,10 @@ msgstr "Add item"
 msgid "the child"
 msgstr "the child"
 
+#: src/pages/admin.tsx
+msgid "Club and technology"
+msgstr "Club and technology"
+
 #: worker/domain/notify.ts
 msgid "Game {title}"
 msgstr "Game {title}"
@@ -10173,10 +10180,6 @@ msgstr "Additional team for {name}"
 #: src/special-attendance.tsx
 msgid "Registered families"
 msgstr "Registered families"
-
-#: src/pages/admin.tsx
-msgid "Name, colours, logo, region, modules"
-msgstr "Name, colours, logo, region, modules"
 
 #: src/coach-hints.tsx
 msgid "Game schedule of {team} synced."
@@ -10496,6 +10499,7 @@ msgstr "This size does not exist."
 msgid "{firstName} gets their own access with a passkey. Only give the link to {firstName} or open it directly on their phone."
 msgstr "{firstName} gets their own access with a passkey. Only give the link to {firstName} or open it directly on their phone."
 
+#: src/pages/profile.tsx
 #: src/pages/team.tsx
 msgid "FAQ, guides, feedback on the app"
 msgstr "FAQ, guides, feedback on the app"
@@ -11276,6 +11280,10 @@ msgstr "of {expected}"
 #: src/pages/chat.tsx
 msgid "Message removed."
 msgstr "Message removed."
+
+#: src/pages/club-settings.tsx
+msgid "Details and what it stores (kabine.dev)"
+msgstr "Details and what it stores (kabine.dev)"
 
 #: src/pages/join.tsx
 msgid "You are setting up a parent access for the {teamName}."
@@ -13369,6 +13377,10 @@ msgstr "Without parents"
 msgid "uses the app"
 msgstr "uses the app"
 
+#: src/pages/setup-wizard.tsx
+msgid "Switch on what your club needs. You can change this at any time under administration → modules."
+msgstr "Switch on what your club needs. You can change this at any time under administration → modules."
+
 #: modules/polls/app/pages.tsx
 msgid "“Multiple answers” and “One vote per family” can no longer be switched."
 msgstr "“Multiple answers” and “One vote per family” can no longer be switched."
@@ -14620,6 +14632,10 @@ msgstr "Players"
 msgid "I'll join"
 msgstr "I'll join"
 
+#: src/pages/admin.tsx
+msgid "Switch modules on and off"
+msgstr "Switch modules on and off"
+
 #: src/pages/team.tsx
 msgid "Remove access?"
 msgstr "Remove access?"
@@ -14686,6 +14702,7 @@ msgstr "{who} approved {person} for {duty}"
 msgid "Nobody is offering seats yet"
 msgstr "Nobody is offering seats yet"
 
+#: src/pages/admin.tsx
 #: src/pages/setup-wizard.tsx
 #: src/pages/stats.tsx
 msgid "Season"
@@ -14696,6 +14713,9 @@ msgstr "Season"
 msgid "Unknown team under “Helpers from”."
 msgstr "Unknown team under “Helpers from”."
 
+#: src/pages/admin.tsx
+#: src/pages/club-settings.tsx
+#: src/pages/club-settings.tsx
 #: src/pages/club-settings.tsx
 #: src/pages/club-settings.tsx
 msgid "Modules"

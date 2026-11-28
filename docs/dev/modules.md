@@ -1,6 +1,6 @@
 # Modules and extension points
 
-Kabine has a small core (events, responses, squads, chat, push) and **modules** a club switches on or off under *Administration → Club → Modules*. A module lives in one folder, `modules/<id>/`. While it is off, it disappears from the app and its API paths answer 404. Contributions are welcome as pull requests: start with [CONTRIBUTING.md](../../CONTRIBUTING.md).
+Kabine has a small core (events, responses, squads, chat, push) and **modules** a club switches on or off under *Administration → Modules*. A module lives in one folder, `modules/<id>/`. While it is off, it disappears from the app and its API paths answer 404. Contributions are welcome as pull requests: start with [CONTRIBUTING.md](../../CONTRIBUTING.md).
 
 ## A module folder
 

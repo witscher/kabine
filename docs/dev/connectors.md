@@ -4,7 +4,7 @@ A fixture connector brings a team's game schedule from an association's system i
 
 ## One source per team
 
-A club may switch on several sources (they form the group "Game schedule sources" under *Administration → Club*); each team takes its games from exactly one of them or from none (`teams.fixture_connector`, games by hand or from a table). With one source switched on, the coach only pastes the link; with several, the coach picks the source first. Changing or removing a team's source leaves its games as they are: they keep their `external_ref`, so they are neither changed nor cancelled by the new source, only no longer synced. Switching a source off for the club pauses the sync of its teams; their games stay, and the settings say how many teams are affected before saving. This follows from the kind `fixtures`, a connector needs nothing for it.
+A club may switch on several sources (they form the group "Game schedule sources" under *Administration → Modules*); each team takes its games from exactly one of them or from none (`teams.fixture_connector`, games by hand or from a table). With one source switched on, the coach only pastes the link; with several, the coach picks the source first. Changing or removing a team's source leaves its games as they are: they keep their `external_ref`, so they are neither changed nor cancelled by the new source, only no longer synced. Switching a source off for the club pauses the sync of its teams; their games stay, and the settings say how many teams are affected before saving. This follows from the kind `fixtures`, a connector needs nothing for it.
 
 ## Rules for sources
 

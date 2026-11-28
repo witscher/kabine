@@ -104,7 +104,7 @@ export function SetupWizardPage() {
           {step === "modules" ? (
             <>
               <p class="muted">
-                <Trans>Switch on what your club needs. You can change this at any time under administration → club.</Trans>
+                <Trans>Switch on what your club needs. You can change this at any time under administration → modules.</Trans>
               </p>
               <ClubProfileForm parts={["modules"]} submitLabel={t`Save and continue`} onSaved={next} />
             </>

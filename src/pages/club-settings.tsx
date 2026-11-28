@@ -8,7 +8,7 @@ import { type ClubModules, type ClubProfile, isHexColor, KABINE_SOURCE } from ".
 import type { ModuleManifest } from "../../shared/module-api";
 import { MODULES, type ModuleId, moduleOffered } from "../../shared/modules";
 import { LOCALE_NAMES, LOCALES, type Locale } from "../../shared/i18n";
-import { modulesOverviewUrl } from "../../shared/site-docs";
+import { moduleDocsUrl, modulesOverviewUrl } from "../../shared/site-docs";
 import { useQuery } from "../store";
 import { api, errorMessage } from "../api";
 import { loadRegionHolidays } from "../holidays";
@@ -329,7 +329,22 @@ export function AdminClubPage() {
       <main class="page">
         <TopBar title={t`Club`} kicker={t`Administration`} back="/verwaltung" />
         <div class="content">
-          <ClubProfileForm cards />
+          <ClubProfileForm cards parts={ALL_PARTS.filter((p) => p !== "modules")} />
+        </div>
+      </main>
+    </AdminOnly>
+  );
+}
+
+/** Administration → Modules: the switches, each with what the module does and a link to its documentation. */
+export function AdminModulesPage() {
+  useDocumentTitle(t`Modules`);
+  return (
+    <AdminOnly>
+      <main class="page">
+        <TopBar title={t`Modules`} kicker={t`Administration`} back="/verwaltung" />
+        <div class="content">
+          <ClubProfileForm cards parts={["modules"]} />
         </div>
       </main>
     </AdminOnly>
@@ -484,6 +499,10 @@ export function ModulesSection({ modules, onChange, confirmOff = false }: { modu
             }).then((ok) => (ok ? onChange(next) : false));
           }}
         />
+        {/* Read before switching on: the module's page on kabine.dev (from its README) */}
+        <DocsLink href={moduleDocsUrl(m.id, currentLocale())}>
+          <Trans>Details and what it stores (kabine.dev)</Trans>
+        </DocsLink>
         {losing ? (
           <p class="small warn-text">
             {plural(teams, {

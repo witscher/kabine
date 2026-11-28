@@ -65,9 +65,9 @@ export function NewsCard() {
               </li>
             ))}
           </ul>
-          <a class="ext-link" href="/verwaltung/verein">
+          <a class="ext-link" href="/verwaltung/module">
             <Icon name="settings" size={16} />
-            <Trans>Switch on under Administration → Club</Trans>
+            <Trans>Switch on under Administration → Modules</Trans>
           </a>
         </div>
       ) : null}
