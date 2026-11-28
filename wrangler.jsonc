@@ -9,7 +9,9 @@
   "compatibility_flags": ["nodejs_als"],
   "assets": {
     "binding": "ASSETS",
-    "not_found_handling": "single-page-application",
+    // "none": a missing file reaches the Worker, which answers 404 without caching; the app's routes get
+    // the page from the Worker (worker/index.ts, serveAsset)
+    "not_found_handling": "none",
     // Pages too (not the hashed build files), so a plain http:// request is redirected to https://
     "run_worker_first": ["/*", "!/assets/*"]
   },

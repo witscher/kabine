@@ -104,8 +104,27 @@ export async function handleFetch(request: Request, env: Env, ctx: ExecutionCont
     url.protocol = "https:";
     return Response.redirect(url.toString(), 301);
   }
-  if (!url.pathname.startsWith("/api/")) return withLegalLinks(await env.ASSETS.fetch(request), env);
+  if (!url.pathname.startsWith("/api/")) return withLegalLinks(await serveAsset(request, url, env), env);
   return app.fetch(request, env, ctx);
+}
+
+/** Build files and other files with an extension: never answered with the app's page. */
+const FILE = /^\/assets\/|\.[a-z0-9]{1,8}$/i;
+
+/**
+ * Static files, and the app's page for its routes (/termine, /verwaltung, …). A missing file gets a 404
+ * that no cache keeps: right after an update a browser may ask for a new build file before it has reached
+ * every data centre, and the page in its place, cached as immutable, left the app blank for a year.
+ * Clubs whose wrangler.jsonc still says not_found_handling "single-page-application" get the page from the
+ * assets as before; this only takes over with "none".
+ */
+async function serveAsset(request: Request, url: URL, env: Env): Promise<Response> {
+  const res = await env.ASSETS.fetch(request);
+  if (res.status !== 404) return res;
+  if (FILE.test(url.pathname) || (request.method !== "GET" && request.method !== "HEAD")) {
+    return new Response("Not found", { status: 404, headers: { "content-type": "text/plain; charset=utf-8", "cache-control": "no-store" } });
+  }
+  return env.ASSETS.fetch(new Request(new URL("/", url), { method: request.method, headers: request.headers }));
 }
 
 const escapeAttr = (s: string) => s.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");

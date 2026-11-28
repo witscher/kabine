@@ -75,6 +75,33 @@ describe("Vereinsprofil", () => {
     expect(await page({ ASSETS: icon })).toBe("<svg/>");
   });
 
+  it("fehlende Dateien: 404 ohne Cache, die Wege der App bekommen die Seite", async () => {
+    const shell = '<html><body><div id="app"></div></body></html>';
+    // Assets with not_found_handling "none": only "/" and one build file exist
+    const assets = {
+      fetch: async (req: Request) => {
+        const path = new URL(req.url).pathname;
+        if (path === "/") return new Response(shell, { headers: { "content-type": "text/html" } });
+        if (path === "/assets/index-alt.js") return new Response("export {}", { headers: { "content-type": "text/javascript" } });
+        return new Response("", { status: 404 });
+      },
+    };
+    const get = (path: string, method = "GET") =>
+      handleFetch(new Request(`http://localhost:5173${path}`, { method }), { ...env, ASSETS: assets } as unknown as Env, {} as ExecutionContext);
+    // A build file that has not reached this data centre yet: no page in its place, nothing cached
+    const missing = await get("/assets/index-neu.js");
+    expect(missing.status).toBe(404);
+    expect(missing.headers.get("cache-control")).toBe("no-store");
+    expect((await get("/icons/fehlt.png")).status).toBe(404);
+    expect((await get("/termine", "POST")).status).toBe(404);
+    expect(await (await get("/assets/index-alt.js")).text()).toBe("export {}");
+    for (const path of ["/termine", "/verwaltung/maskottchen", "/heimspieltag/2026-11-29"]) {
+      const page = await get(path);
+      expect(page.status).toBe(200);
+      expect(await page.text()).toContain('<div id="app">');
+    }
+  });
+
   it("Logo: Hochladen, Ausliefern mit Version, Entfernen", async () => {
     expect(await upload(PNG, "image/png", playerCookie)).toBe(403);
     expect(await upload("<html></html>", "text/html")).toBe(400);
