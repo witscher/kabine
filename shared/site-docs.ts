@@ -5,9 +5,16 @@ import type { Locale } from "./i18n";
 
 const SITE = "https://kabine.dev";
 
-/** Headings of module pages the app links to (anchors as site/src/docs.mjs makes them; test/site-docs.test.ts checks them). */
-export const DOC_SECTIONS: Record<string, { module: string; en: string; de: string }> = {
-  mascotGuide: { module: "mascot", en: "preparing-the-pictures", de: "bilder-vorbereiten" },
+/**
+ * Headings of module pages the app links to (anchors as site/src/docs.mjs makes them). test/site-docs.test.ts checks
+ * that the READMEs of these modules have them; `"fixtures"` means every game schedule source.
+ */
+export const DOC_SECTIONS: Record<string, { modules: string[] | "fixtures"; en: string; de: string }> = {
+  mascotGuide: { modules: ["mascot"], en: "preparing-the-pictures", de: "bilder-vorbereiten" },
+  /** Where a coach finds the team's link at the source and where it goes. */
+  scheduleLink: { modules: "fixtures", en: "linking-a-team", de: "link-der-mannschaft" },
+  /** How and how often the source syncs. */
+  scheduleSync: { modules: ["handball4all", "handballnet"], en: "how-the-sync-works", de: "so-funktioniert-der-abgleich" },
 };
 
 /** Path segment of a module's page: its id in kebab case (the folder name, site/src/docs.mjs). */

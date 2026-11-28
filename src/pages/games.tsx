@@ -3,7 +3,7 @@ import { Trans } from "@lingui/react/macro";
 import { useState } from "preact/hooks";
 import type { ModuleManifest } from "../../shared/module-api";
 import { MODULES, type ModuleId, moduleOn } from "../../shared/modules";
-import { moduleDocsUrl } from "../../shared/site-docs";
+import { DOC_SECTIONS, moduleDocsUrl } from "../../shared/site-docs";
 import type { TeamRef } from "../../shared/types";
 import { api, errorMessage } from "../api";
 import { useClub } from "../club";
@@ -182,8 +182,7 @@ export function ScheduleSection({ team, onChanged }: { team: TeamRef; onChanged:
   const linkedName = linked?.name ?? "";
   const pausedName = data.paused?.name ?? "";
   // The source's page on kabine.dev: how and how often it syncs
-  const docsFor = linked ?? chosen;
-  const docsName = docsFor?.name ?? "";
+  const docsName = linked?.name ?? "";
   return (
     <section class="card card-body" aria-label={t`Game schedule`}>
       <h2 class="section-title" style={{ margin: 0 }}>
@@ -206,8 +205,8 @@ export function ScheduleSection({ team, onChanged }: { team: TeamRef; onChanged:
         </p>
       )}
       {data.error && linked ? <p class="small warn-text">{data.error}</p> : null}
-      {docsFor ? (
-        <DocsLink href={moduleDocsUrl(docsFor.id, currentLocale())}>
+      {linked ? (
+        <DocsLink href={moduleDocsUrl(linked.id, currentLocale(), DOC_SECTIONS.scheduleSync)}>
           <Trans>How syncing with {docsName} works (kabine.dev)</Trans>
         </DocsLink>
       ) : null}
@@ -229,6 +228,11 @@ export function ScheduleSection({ team, onChanged }: { team: TeamRef; onChanged:
             <input id={id} class="input" type="url" value={link} placeholder={chosen.link.placeholder} onInput={(e) => setLink((e.target as HTMLInputElement).value)} />
           )}
         </Field>
+      ) : null}
+      {chosen ? (
+        <DocsLink href={moduleDocsUrl(chosen.id, currentLocale(), DOC_SECTIONS.scheduleLink)}>
+          <Trans>Where to find this link (kabine.dev)</Trans>
+        </DocsLink>
       ) : null}
       <div class="btn-row">
         {chosen ? (

@@ -9376,6 +9376,11 @@ msgstr "Du"
 msgid "Training group: its events appear under the chip “Training”."
 msgstr "Trainingsgruppe: Ihre Termine stehen beim Filter „Training“."
 
+# ai
+#: src/pages/games.tsx
+msgid "Where to find this link (kabine.dev)"
+msgstr "Wo du diesen Link findest (kabine.dev)"
+
 #: src/push.ts
 msgid "Push is not set up on the server yet."
 msgstr "Push ist auf dem Server noch nicht eingerichtet."
@@ -17541,3 +17546,4 @@ msgstr "Chat schreiben"
 #: worker/routes/events.ts
 msgid "In one time block the end is before the start."
 msgstr "Bei einem Zeitblock liegt das Ende vor dem Beginn."
+

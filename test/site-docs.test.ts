@@ -30,9 +30,15 @@ describe("module documentation", () => {
   });
 
   it("the headings the app links to exist in both languages", () => {
-    for (const { module, en, de } of Object.values(DOC_SECTIONS)) {
-      expect(anchors(readmes[`../modules/${module}/README.md`]!), `${module}: ${en}`).toContain(en);
-      expect(anchors(readmes[`../modules/${module}/README.de.md`]!), `${module}: ${de}`).toContain(de);
+    const fixtures = Object.entries(manifests)
+      .filter(([, src]) => /\bkind: "fixtures"/.test(src))
+      .map(([p]) => p.split("/")[2]!);
+    expect(fixtures).toContain("handball4all");
+    for (const { modules, en, de } of Object.values(DOC_SECTIONS)) {
+      for (const module of modules === "fixtures" ? fixtures : modules) {
+        expect(anchors(readmes[`../modules/${module}/README.md`]!), `${module}: ${en}`).toContain(en);
+        expect(anchors(readmes[`../modules/${module}/README.de.md`]!), `${module}: ${de}`).toContain(de);
+      }
     }
   });
 

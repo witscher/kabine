@@ -10,6 +10,21 @@ Game schedules of the German handball associations that run their games in Handb
 
 Open: a team in several leagues may show all of them in one calendar; whether the team id stays the same in the next season is not known yet.
 
+## Linking a team
+
+A coach of the team or an admin copies the address of the team's page on handball.net once:
+
+1. Search for the club or the team on handball.net and open the team's page.
+2. Copy the address from the browser's address bar, or the link behind *Kalender abonnieren* on the team page. They look like this (the numbers here are invented):
+
+   - `https://www.handball.net/team/12345?season_id=2627`
+   - `webcal://www.handball.net/kalender/team/12345.ics`
+
+   What counts is the team's number after `/team/`. Also accepted: `https://handball.net/mannschaften/12345/…`, `…/teams/12345`, the calendar address with `https://` or `webcals://`, with or without `www.` and anything after `?`.
+3. In Kabine open *Team → Settings → Game schedule*, paste it into *Link to the team at handball.net* (with several sources switched on, choose *handball.net* as the source first), tap *Link schedule* and then *Sync now*.
+
+Whether a team keeps its number in the next season is not known yet; if the sync reports games of another team or none, link the new team page.
+
 ## How the sync works
 
 - **In the coach's browser, not on the server.** The app on the phone or computer of a coach of the team fetches the team's calendar, one request, like a calendar app on the phone, and hands it to the club's server, which checks it. The server has no timer that fetches and never calls handball.net itself.

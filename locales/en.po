@@ -8481,6 +8481,10 @@ msgstr "You"
 msgid "Training group: its events appear under the chip “Training”."
 msgstr "Training group: its events appear under the chip “Training”."
 
+#: src/pages/games.tsx
+msgid "Where to find this link (kabine.dev)"
+msgstr "Where to find this link (kabine.dev)"
+
 #: src/push.ts
 msgid "Push is not set up on the server yet."
 msgstr "Push is not set up on the server yet."

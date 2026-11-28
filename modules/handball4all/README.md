@@ -7,6 +7,20 @@ Game schedules of the German handball associations from [handball4all](https://w
 - **Links in the app:** league table, live ticker while a game is played and the game report afterwards (`app/live.tsx`); both are looked up only when tapped, from the device, without cookies or referrer.
 - **Samples:** `samples/schedule.json` is an invented response in the format of the interface; `samples/links.json` holds a portal link and an API link.
 
+## Linking a team
+
+A coach of the team or an admin copies the address of the team's page in the association's portal once:
+
+1. Open the portal of the association on handball4all.de (the association's website links to it, usually from its game schedules or results), choose the league, then the team, for example by tapping its name in the table.
+2. Copy the address from the browser's address bar. It looks like this, with the association's portal name and three numbers (the ones here are invented):
+
+   `https://www.handball4all.de/home/portal/example-hv#/league?ogId=123&lId=45678&tId=901234`
+
+   What counts are the three numbers: `ogId` (association), `lId` (league) and `tId` (team), behind `#` or `?`. A link of the league without `tId` is not enough. Any address on handball4all.de with these numbers works, also the interface link `https://spo.handball4all.de/service/if_g_json.php?cmd=ps&og=123&cl=45678&ct=901234`.
+3. In Kabine open *Team → Settings → Game schedule*, paste it into *Link from the handball4all portal* (with several sources switched on, choose *handball4all* as the source first), tap *Link schedule* and then *Sync now*.
+
+A team in a new league (for example after the season change) gets the new link the same way.
+
 ## How the sync works
 
 - **In the coach's browser, not on the server.** The app on the phone or computer of a coach of the team fetches the team's schedule, one request, and hands it to the club's server, which checks it like anything else from a browser. The server has no timer that fetches and never calls handball4all itself.

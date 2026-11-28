@@ -9,6 +9,21 @@ Spielpläne der deutschen Handballverbände, die ihren Spielbetrieb in Handball3
 
 Offen: Eine Mannschaft in mehreren Ligen zeigt vielleicht alle in einem Kalender; ob die Kennung der Mannschaft in der nächsten Saison gleich bleibt, ist noch nicht bekannt.
 
+## Link der Mannschaft
+
+Ein Trainer der Mannschaft oder ein Admin kopiert einmal die Adresse der Mannschaftsseite auf handball.net:
+
+1. Such den Verein oder die Mannschaft auf handball.net und öffne die Seite der Mannschaft.
+2. Kopier die Adresse aus der Adresszeile des Browsers oder den Link hinter *Kalender abonnieren* auf der Mannschaftsseite. Sie sehen so aus (die Zahlen hier sind erfunden):
+
+   - `https://www.handball.net/team/12345?season_id=2627`
+   - `webcal://www.handball.net/kalender/team/12345.ics`
+
+   Es kommt auf die Nummer der Mannschaft nach `/team/` an. Ebenfalls erkannt: `https://handball.net/mannschaften/12345/…`, `…/teams/12345`, die Kalenderadresse mit `https://` oder `webcals://`, mit oder ohne `www.` und mit allem nach `?`.
+3. Öffne in Kabine *Mannschaft → Einstellungen → Spielplan*, füg sie bei *Link zur Mannschaft bei handball.net* ein (sind mehrere Quellen eingeschaltet, wähl vorher *handball.net* als Quelle), tipp auf *Verknüpfen* und dann auf *Jetzt abgleichen*.
+
+Ob eine Mannschaft ihre Nummer in der nächsten Saison behält, ist noch nicht bekannt; meldet der Abgleich Spiele einer anderen Mannschaft oder keine, verknüpf die neue Mannschaftsseite.
+
 ## So funktioniert der Abgleich
 
 - **Im Browser des Trainers, nicht auf dem Server.** Die App auf dem Handy oder Computer eines Trainers der Mannschaft holt den Kalender der Mannschaft, eine Anfrage, wie eine Kalender-App auf dem Handy, und gibt ihn an den Server des Vereins, der ihn prüft. Der Server hat keinen Zeitplan, nach dem er abruft, und ruft handball.net nie selbst auf.

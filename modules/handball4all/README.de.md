@@ -6,6 +6,20 @@ Spielpläne der deutschen Handballverbände von [handball4all](https://www.handb
 - **Daten:** Spiele, Hallen, Ergebnisse und die Tabelle der Liga. Keine personenbezogenen Daten. Die Tabelle kommt mit dem Spielplan, ohne zusätzlichen Abruf.
 - **Links in der App:** Tabelle, Liveticker während eines Spiels und danach der Spielbericht; beide werden erst beim Antippen nachgeschlagen, vom Gerät, ohne Cookies und Referrer.
 
+## Link der Mannschaft
+
+Ein Trainer der Mannschaft oder ein Admin kopiert einmal die Adresse der Mannschaftsseite im Portal des Verbands:
+
+1. Öffne das Portal des Verbands auf handball4all.de (die Website des Verbands verlinkt es, meist bei Spielbetrieb oder Ergebnissen), wähl die Liga und dann die Mannschaft, etwa mit einem Tipp auf ihren Namen in der Tabelle.
+2. Kopier die Adresse aus der Adresszeile des Browsers. Sie sieht so aus, mit dem Portalnamen des Verbands und drei Zahlen (die hier sind erfunden):
+
+   `https://www.handball4all.de/home/portal/beispiel-hv#/league?ogId=123&lId=45678&tId=901234`
+
+   Es kommt auf die drei Zahlen an: `ogId` (Verband), `lId` (Liga) und `tId` (Mannschaft), hinter `#` oder `?`. Ein Link der Liga ohne `tId` reicht nicht. Jede Adresse auf handball4all.de mit diesen Zahlen funktioniert, auch der Schnittstellen-Link `https://spo.handball4all.de/service/if_g_json.php?cmd=ps&og=123&cl=45678&ct=901234`.
+3. Öffne in Kabine *Mannschaft → Einstellungen → Spielplan*, füg ihn bei *Link aus dem handball4all-Portal* ein (sind mehrere Quellen eingeschaltet, wähl vorher *handball4all* als Quelle), tipp auf *Verknüpfen* und dann auf *Jetzt abgleichen*.
+
+Spielt die Mannschaft in einer neuen Liga (etwa nach dem Saisonwechsel), verknüpfst du den neuen Link genauso.
+
 ## So funktioniert der Abgleich
 
 - **Im Browser des Trainers, nicht auf dem Server.** Die App auf dem Handy oder Computer eines Trainers der Mannschaft holt den Spielplan der Mannschaft, eine Anfrage, und gibt ihn an den Server des Vereins, der ihn prüft wie alles, was aus einem Browser kommt. Der Server hat keinen Zeitplan, nach dem er abruft, und ruft handball4all nie selbst auf.
