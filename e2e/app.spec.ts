@@ -976,6 +976,43 @@ test("Kader: Spielerin aus der 2. Mannschaft zusätzlich aufnehmen", async () =>
   await page.request.delete(`/api/teams/${second}`);
 });
 
+test("Woanders dabei: Trainer sieht im eigenen Training und auf der Spielerseite Termine anderer Mannschaften", async () => {
+  const { page } = admin;
+  const { id: other } = await (await page.request.post("/api/teams", { data: { name: "wT3", ageClassCode: "wD", level: 3 } })).json();
+  expect((await page.request.post(`/api/teams/${other}/members`, { data: { personId: 13, role: "player" } })).ok()).toBe(true);
+  const tomorrow = new Date(Date.now() + 86_400_000).toLocaleDateString("sv-SE", { timeZone: "Europe/Berlin" });
+  // Overlaps with the daily wT training at 23:30
+  const res = await page.request.post("/api/events", { data: { title: "Torwartschule", teamIds: [other], startsAt: `${tomorrow}T23:00`, endsAt: `${tomorrow}T23:45` } });
+  expect(res.ok()).toBe(true);
+  const { id: special } = (await res.json()) as { id: number };
+  expect((await page.request.post(`/api/events/${special}/responses`, { data: { personId: 13, status: "no", reason: "Geheimer Grund" } })).ok()).toBe(true);
+
+  const list = (await (await coach.page.request.get(`/api/events?from=${tomorrow}&to=${tomorrow}&teamId=1&kind=training`)).json()) as { events: { id: number }[] };
+  const training = list.events[0]!.id;
+  const c = coach.page;
+  await c.goto(`/termine/${training}`);
+  const card = c.getByRole("region", { name: "Am selben Tag woanders dabei" });
+  await expect(card).toContainText("Kim Probe · Torwartschule");
+  await expect(card).toContainText("wT3");
+  await expect(card).toContainText("überschneidet sich");
+  await expect(card).not.toContainText("Geheimer Grund");
+  await expect(card.getByRole("link")).toHaveCount(0);
+  if (process.env.E2E_SHOTS) await c.screenshot({ path: `${process.env.E2E_SHOTS}/elsewhere-event.png`, fullPage: true });
+
+  await c.goto("/team/1/person/13");
+  const further = c.getByRole("region", { name: "Weitere Termine von Kim" });
+  await expect(further).toContainText("Torwartschule");
+  await expect(further).not.toContainText("überschneidet sich");
+  if (process.env.E2E_SHOTS) await c.screenshot({ path: `${process.env.E2E_SHOTS}/elsewhere-player.png`, fullPage: true });
+  // Not on the page of a player without other events
+  await c.goto("/team/1/person/12");
+  await expect(c.getByRole("region", { name: "Stammdaten" })).toBeVisible();
+  await expect(c.getByRole("region", { name: /Weitere Termine von/ })).toHaveCount(0);
+
+  await page.request.delete(`/api/events/${special}`);
+  await page.request.delete(`/api/teams/${other}`);
+});
+
 test("Ferien: Admin legt einen Zeitraum an, ändert und löscht ihn", async () => {
   const { page } = admin;
   await page.goto("/verwaltung/ferien");

@@ -1585,6 +1585,11 @@ msgstr "Vereinsmaskottchen"
 msgid "The new season must begin after the start of the current season {name}."
 msgstr "Die neue Saison muss nach dem Beginn der laufenden Saison {name} anfangen."
 
+# ai
+#: src/pages/team.tsx
+msgid "Next two weeks in other teams and groups."
+msgstr "Nächste zwei Wochen in anderen Mannschaften und Gruppen."
+
 #: modules/carpools/worker/routes.ts
 msgid "This offer does not exist."
 msgstr "Dieses Angebot gibt es nicht."
@@ -2081,6 +2086,11 @@ msgid "{name} (\"{reason}\")"
 msgstr "{name} („{reason}“)"
 
 # ai
+#: worker/routes/teams.ts
+msgid "This person does not play in this team."
+msgstr "Diese Person spielt nicht in dieser Mannschaft."
+
+# ai
 #: shared/changelog.ts
 msgid "Administration → Import is now called Import / restore: for the club's lists and Kabine backups."
 msgstr "Verwaltung → Import heißt jetzt Import / Wiederherstellen: für die Listen des Vereins und Kabine-Sicherungen."
@@ -2103,6 +2113,12 @@ msgstr "Danach kann die Person über den Spielerlink einen Zugang einrichten."
 msgctxt "player list"
 msgid "Players"
 msgstr "Spielerinnen und Spieler"
+
+# ai
+#: src/pages/team.tsx
+#: src/pages/team.tsx
+msgid "Further events of {firstName}"
+msgstr "Weitere Termine von {firstName}"
 
 #: src/pages/home.tsx
 #: src/ui.tsx
@@ -2146,6 +2162,12 @@ msgstr "Begleittext ansehen"
 #: modules/carpools/app/card.tsx
 msgid "One seat fewer"
 msgstr "Ein Platz weniger"
+
+# ai
+#: src/pages/event.tsx
+#: src/pages/event.tsx
+msgid "Elsewhere the same day"
+msgstr "Am selben Tag woanders dabei"
 
 # ai
 #: src/pages/join.tsx
@@ -4224,6 +4246,11 @@ msgstr "Alles"
 #: src/respond.tsx
 msgid "Accepted {by}"
 msgstr "Zugesagt {by}"
+
+# ai
+#: src/elsewhere.tsx
+msgid "overlaps"
+msgstr "überschneidet sich"
 
 #: src/pages/team.tsx
 msgid "Create new"
@@ -12113,6 +12140,11 @@ msgstr "Pkt."
 #: modules/polls/app/pages.tsx
 msgid "Photo"
 msgstr "Foto"
+
+# ai
+#: src/pages/event.tsx
+msgid "Events of other teams and groups where your players take part. Reasons are only seen by those in charge there."
+msgstr "Termine anderer Mannschaften und Gruppen, bei denen deine Spieler dabei sind. Gründe sieht nur, wer dort verantwortlich ist."
 
 # ai
 #: modules/fans/app/pages.tsx

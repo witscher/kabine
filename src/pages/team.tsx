@@ -4,7 +4,7 @@ import { clubName, useModule } from "../club";
 import { useLocation } from "preact-iso";
 import { useEffect, useState } from "preact/hooks";
 import { renderSVG } from "uqr";
-import type { ChildLimits, PersonRef } from "../../shared/types";
+import type { ChildLimits, ElsewhereEntry, PersonRef } from "../../shared/types";
 import { teamSetUp } from "../../shared/invites";
 import { ChildLimitControls } from "../child-limits";
 import { api, errorMessage } from "../api";
@@ -14,6 +14,7 @@ import { fullDate, isoToLocalDate, joinNames, personName } from "../format";
 import { PersonAvatar } from "../avatar";
 import { ScheduleSection } from "./games";
 import { Icon } from "../icons";
+import { ElsewhereList } from "../elsewhere";
 import { ExtraEventList } from "../extra-events";
 import { GroupPage } from "./group";
 import { useMe, useSession } from "../session";
@@ -1407,6 +1408,8 @@ export function PersonPage({ id, personId }: { id: string; personId: string }) {
           </section>
         ) : null}
 
+        {player ? <PlayerElsewhere teamId={team.id} personId={person.id} firstName={firstName} /> : null}
+
         {player ? (
           <section class="card card-body" aria-label={t`Parents`}>
             <h2 class="section-title" style={{ margin: 0 }}>
@@ -1561,6 +1564,23 @@ export function PersonPage({ id, personId }: { id: string; personId: string }) {
 
 
 /** Helper duty template for home and away games (maintained club-wide, only chosen here). */
+/** Team → player: events of other teams and groups in the next two weeks (only if there are any). */
+function PlayerElsewhere({ teamId, personId, firstName }: { teamId: number; personId: number; firstName: string }) {
+  const { data } = useQuery<{ entries: ElsewhereEntry[] }>(`/teams/${teamId}/players/${personId}/elsewhere`);
+  if (!data?.entries.length) return null;
+  return (
+    <section class="card card-body stack-sm" aria-label={t`Further events of ${firstName}`}>
+      <h2 class="section-title" style={{ margin: 0 }}>
+        <Trans>Further events of {firstName}</Trans>
+      </h2>
+      <p class="small muted">
+        <Trans>Next two weeks in other teams and groups.</Trans>
+      </p>
+      <ElsewhereList entries={data.entries} showPerson={false} showDate />
+    </section>
+  );
+}
+
 function TemplateChoice({ team, onChanged }: { team: TeamDetail; onChanged: () => void }) {
   const templates = useQuery<{ templates: TemplateInfo[] }>("/duty-templates");
   const types = useQuery<{ types: DutyTypeInfo[] }>("/duty-types?all=1");

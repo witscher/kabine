@@ -1447,6 +1447,10 @@ msgstr "Club mascot"
 msgid "The new season must begin after the start of the current season {name}."
 msgstr "The new season must begin after the start of the current season {name}."
 
+#: src/pages/team.tsx
+msgid "Next two weeks in other teams and groups."
+msgstr "Next two weeks in other teams and groups."
+
 #: modules/carpools/worker/routes.ts
 msgid "This offer does not exist."
 msgstr "This offer does not exist."
@@ -1897,6 +1901,10 @@ msgstr "No connection. Please check your internet connection."
 msgid "{name} (\"{reason}\")"
 msgstr "{name} (\"{reason}\")"
 
+#: worker/routes/teams.ts
+msgid "This person does not play in this team."
+msgstr "This person does not play in this team."
+
 #: shared/changelog.ts
 msgid "Administration → Import is now called Import / restore: for the club's lists and Kabine backups."
 msgstr "Administration → Import is now called Import / restore: for the club's lists and Kabine backups."
@@ -1918,6 +1926,11 @@ msgstr "The person can then set up access via the player link."
 msgctxt "player list"
 msgid "Players"
 msgstr "Players"
+
+#: src/pages/team.tsx
+#: src/pages/team.tsx
+msgid "Further events of {firstName}"
+msgstr "Further events of {firstName}"
 
 #: src/pages/home.tsx
 #: src/ui.tsx
@@ -1959,6 +1972,11 @@ msgstr "View accompanying text"
 #: modules/carpools/app/card.tsx
 msgid "One seat fewer"
 msgstr "One seat fewer"
+
+#: src/pages/event.tsx
+#: src/pages/event.tsx
+msgid "Elsewhere the same day"
+msgstr "Elsewhere the same day"
 
 #: src/pages/join.tsx
 msgid "Your child"
@@ -3842,6 +3860,10 @@ msgstr "All"
 #: src/respond.tsx
 msgid "Accepted {by}"
 msgstr "Accepted {by}"
+
+#: src/elsewhere.tsx
+msgid "overlaps"
+msgstr "overlaps"
 
 #: src/pages/team.tsx
 msgid "Create new"
@@ -10977,6 +10999,10 @@ msgstr "Pts."
 #: modules/polls/app/pages.tsx
 msgid "Photo"
 msgstr "Photo"
+
+#: src/pages/event.tsx
+msgid "Events of other teams and groups where your players take part. Reasons are only seen by those in charge there."
+msgstr "Events of other teams and groups where your players take part. Reasons are only seen by those in charge there."
 
 #: modules/fans/app/pages.tsx
 msgid "You now follow {name}."

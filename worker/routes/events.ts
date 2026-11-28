@@ -1,13 +1,14 @@
 import { select, t } from "@lingui/core/macro";
 import { Hono } from "hono";
 import { z } from "zod";
-import type { EventSummary, MyDuty, TeamRef } from "../../shared/types";
+import type { ElsewhereEntry, EventSummary, MyDuty, TeamRef } from "../../shared/types";
 import { type AppEnv, intParam, requireActor } from "../app";
 import { type Actor, isCoachOfAny, mayActFor, PARENTS_HANDLE_IT, requireActFor, requireAdmin } from "../auth/actor";
 import { postSystemMessage } from "../domain/chat";
 import {
   attendanceEditable,
   deadlineInstant,
+  type EventContext,
   type EventRow,
   eventTeams,
   eventTitle,
@@ -28,6 +29,7 @@ import { dutyManagers, loadDutyTypes, loadHelpersNeeded, loadMyDuties, mayManage
 import { notifyDutyHubs } from "../duties/hub";
 import { loadCoachHints } from "../domain/coach-hints";
 import { loadEventPage } from "../domain/event-page";
+import { elsewhereFor } from "../domain/elsewhere";
 import { loadLeagueTable } from "../domain/league-table";
 import { absenceChangeable, leaderAccounts, leaderEntries, loadLeaders } from "../domain/leaders";
 import { ensureGenerated } from "../domain/generate";
@@ -145,12 +147,13 @@ eventRoutes.get("/events/:id", async (c) => {
   ]);
   const now = Date.now();
   const detail = withDuties(toDetail(event, ctx, actor, now), duties, needed);
-  const [info, modules, leaders, standings] = await Promise.all([
+  const [info, modules, leaders, standings, elsewhere] = await Promise.all([
     organizerInfo(c.env.DB, actor, event.id, event.kind, detail.teams.map((t) => t.id), event.club_wide === 1),
     moduleEventDetail(c.env.DB, actor, event, ctx, now),
     loadLeaders(c.env.DB, event, detail.teams.map((t) => t.id)),
     // League table from the last sync: public data of the source, for everyone who sees the game
     event.kind === "game" ? loadLeagueTable(c.env.DB, detail.teams.map((t) => t.id)) : null,
+    elsewhereSameDay(c.env.DB, event, ctx, detail.canManage),
   ]);
   const organizing = !!info.organizers && (info.organizers.creator?.id === actor.personId || info.organizers.people.some((p) => p.id === actor.personId));
   // Organisers without coach rights see who comes: with optional attendance who said yes, with registration per family the
@@ -158,8 +161,22 @@ eventRoutes.get("/events/:id", async (c) => {
   const forOrganizer = organizing && !detail.canManage;
   const families = detail.families ?? (forOrganizer ? familyOverview(ctx.families.get(event.id)) : null);
   const optionalYes = forOrganizer && detail.optionalAttendance ? optionalYesNames(event, ctx) : null;
-  return c.json({ ...detail, families, optionalYes, ...info, organizing, modules, leaders: leaderEntries(leaders, event, ctx, actor, detail.canManage, now), standings });
+  return c.json({ ...detail, families, optionalYes, ...info, organizing, modules, leaders: leaderEntries(leaders, event, ctx, actor, detail.canManage, now), standings, elsewhere });
 });
+
+/** Coaches and admins: where the event's players take part the same day in other teams and groups (without reasons). */
+function elsewhereSameDay(db: D1Database, event: EventRow, ctx: EventContext, canManage: boolean): Promise<ElsewhereEntry[] | null> {
+  // Club-wide events have every player of the club; that list would say nothing
+  if (!canManage || event.club_wide === 1) return Promise.resolve(null);
+  const day = event.starts_at.slice(0, 10);
+  return elsewhereFor(db, {
+    personIds: [...new Set((ctx.participants.get(event.id) ?? []).filter((p) => !p.isHelper).map((p) => p.person.id))],
+    from: `${day}T00:00`,
+    to: `${addDays(day, 1)}T00:00`,
+    excludeTeamIds: ctx.eventTeams.get(event.id) ?? [],
+    excludeEventId: event.id,
+  });
+}
 
 /** Creator and organisers of a special event; they manage the helper duties. */
 async function organizerInfo(db: D1Database, actor: Actor, eventId: number, kind: string, teamIds: number[], clubWide = false) {

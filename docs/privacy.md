@@ -31,7 +31,7 @@ Only admins change their own name; players, parents and coaches ask their coach 
 | Year of birth | Players | Age group and team assignment; helper duties marked "adults only" are not offered to anyone under 18 by it | Coaches, admins | As above |
 | Team memberships, roles | Everyone | Who sees which events and chats | Team members (coaches and admins in full) | When leaving; at the season change teams are assigned again |
 | Parent–child link, child permissions with log | Parents, minors | Parents act for their children | The parent, coaches and admins | When leaving |
-| Responses (yes/no, late) | Players | Planning trainings and games | Coaches, admins; team staff and, if the team switches it on, the team (without reasons) | At the season change |
+| Responses (yes/no, late) | Players | Planning trainings and games | Coaches, admins; team staff and, if the team switches it on, the team (without reasons); coaches of the person's other teams and groups (and admins) see time, team and status, never the reason: on their own event of the same day and on the player page for the next two weeks | At the season change |
 | Decline reasons | Players | Planning | Coaches, admins | 60 days after the event |
 | Special events with optional attendance: who said yes | Players, parents | Organisers book for those who come | As responses; also the event's organisers ("First name L.", never reasons) | With the event at the season change |
 | Special events with registration per family: how many people a family brings, who changed it last | Players, parents | Organisers plan the number of guests | The family itself; coaches, admins and the event's organisers (families as "Kim, Lea and Mona K." with their number) | With the event at the season change |

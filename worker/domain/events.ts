@@ -913,6 +913,7 @@ export function toDetail(e: EventRow, ctx: EventContext, actor: Actor, now: numb
     dutyManage: false,
     organizers: null,
     leaders: [],
+    elsewhere: null,
     attendanceUntil: summary.canManage ? attendanceUntil(e, actor) : null,
     attendanceEditable: summary.canManage && attendanceEditable(e, actor, now),
   };
