@@ -145,7 +145,24 @@ self.addEventListener("message", (event) => {
   const data = event.data || {};
   if (data.type === "precache" && typeof data.version === "string") event.waitUntil(precache(data.version).catch(() => {}));
   if (data.type === "clear-data") event.waitUntil(caches.delete(API_CACHE));
+  if (data.type === "tidy-notifications") event.waitUntil(closeOldNotifications());
 });
+
+/** Web Push never expires a notification once shown: the app closes them after a day (on the next push and when it opens). */
+const NOTIFICATION_MAX_AGE_MS = 24 * 3_600_000;
+
+async function closeOldNotifications() {
+  try {
+    const now = Date.now();
+    for (const n of await self.registration.getNotifications()) {
+      // Notifications from before this change carry no time of their own: the browser's, if it has one
+      const shownAt = (n.data && n.data.shownAt) || n.timestamp;
+      if (typeof shownAt === "number" && shownAt > 0 && now - shownAt > NOTIFICATION_MAX_AGE_MS) n.close();
+    }
+  } catch {
+    // No matter, e.g. without support for getNotifications
+  }
+}
 
 self.addEventListener("push", (event) => {
   let data = {};
@@ -160,16 +177,19 @@ self.addEventListener("push", (event) => {
     const badge = data.badge > 0 ? self.navigator.setAppBadge(data.badge) : self.navigator.clearAppBadge();
     event.waitUntil(badge.catch(() => {}));
   }
+  // Show first (otherwise Safari counts the push as silent), then tidy up
   event.waitUntil(
-    self.registration.showNotification(title, {
-      body: data.body || "",
-      icon: "/icons/icon-192.png",
-      badge: "/icons/badge-96.png",
-      tag: data.tag || undefined,
-      renotify: Boolean(data.tag),
-      data: { url: data.url || "/" },
-      lang: "de",
-    }),
+    self.registration
+      .showNotification(title, {
+        body: data.body || "",
+        icon: "/icons/icon-192.png",
+        badge: "/icons/badge-96.png",
+        tag: data.tag || undefined,
+        renotify: Boolean(data.tag),
+        data: { url: data.url || "/", shownAt: Date.now() },
+        lang: "de",
+      })
+      .then(closeOldNotifications),
   );
 });
 

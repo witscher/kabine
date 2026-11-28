@@ -308,6 +308,68 @@ test("Offline: zuletzt geladener Stand bleibt sichtbar, online wird aktualisiert
   }
 });
 
+test("Mitteilungen älter als einen Tag räumt die App beim Öffnen ab", async () => {
+  // Headless Chromium blocks notifications: the service worker runs here with a stand-in registration
+  const page = await player.context.newPage();
+  try {
+    await page.addInitScript(() => {
+      const sent: string[] = [];
+      (globalThis as unknown as { e2eSwMessages: string[] }).e2eSwMessages = sent;
+      type Post = (this: unknown, msg: { type?: string }, ...rest: unknown[]) => void;
+      const proto = (globalThis as unknown as { ServiceWorker: { prototype: { postMessage: Post } } }).ServiceWorker.prototype;
+      const post = proto.postMessage;
+      proto.postMessage = function (msg, ...rest) {
+        if (msg && msg.type) sent.push(msg.type);
+        return post.call(this, msg, ...rest);
+      };
+    });
+    await page.goto("/");
+    // The app asks the service worker to tidy up when it starts
+    await expect.poll(() => page.evaluate("globalThis.e2eSwMessages"), { timeout: 10_000 }).toContain("tidy-notifications");
+
+    // The service worker's code on a blank page (the app's CSP rightly forbids eval)
+    const src = await (await page.request.get("/sw.js")).text();
+    await page.goto("about:blank");
+    const result = await page.evaluate(async (src) => {
+      const listeners: Record<string, (e: unknown) => void> = {};
+      const now = Date.now();
+      const notes = [
+        { title: "Alt", data: { shownAt: now - 25 * 3600000 }, timestamp: now, closed: false },
+        { title: "Neu", data: { shownAt: now - 23 * 3600000 }, timestamp: now, closed: false },
+        { title: "Ohne Zeit, alt", data: { url: "/" }, timestamp: now - 30 * 3600000, closed: false },
+        { title: "Ohne Zeit", data: null, timestamp: 0, closed: false },
+      ].map((n) => ({ ...n, close() { n.closed = true; this.closed = true; } }));
+      const shown: { title: string; options: { data: { shownAt?: number } } }[] = [];
+      const fakeSelf = {
+        addEventListener: (type: string, fn: (e: unknown) => void) => (listeners[type] = fn),
+        registration: {
+          getNotifications: async () => notes,
+          showNotification: async (title: string, options: { data: { shownAt?: number } }) => void shown.push({ title, options }),
+        },
+        navigator: {},
+        clients: {},
+      };
+      new Function("self", "caches", src)(fakeSelf, {});
+      const waits: Promise<unknown>[] = [];
+      listeners.message!({ data: { type: "tidy-notifications" }, waitUntil: (p: Promise<unknown>) => waits.push(p) });
+      await Promise.all(waits);
+      const afterTidy = notes.filter((n) => n.closed).map((n) => n.title);
+      // A push is shown first and carries its time, then old ones are closed
+      notes.forEach((n) => (n.closed = false));
+      waits.length = 0;
+      listeners.push!({ data: { json: () => ({ title: "Training fällt aus" }) }, waitUntil: (p: Promise<unknown>) => waits.push(p) });
+      await Promise.all(waits);
+      return { afterTidy, afterPush: notes.filter((n) => n.closed).map((n) => n.title), shown: shown.map((s) => s.title), stamped: typeof shown[0]?.options.data.shownAt === "number" };
+    }, src);
+    expect(result.afterTidy).toEqual(["Alt", "Ohne Zeit, alt"]);
+    expect(result.afterPush).toEqual(["Alt", "Ohne Zeit, alt"]);
+    expect(result.shown).toEqual(["Training fällt aus"]);
+    expect(result.stamped).toBe(true);
+  } finally {
+    await page.close();
+  }
+});
+
 test("Profilbild hochladen, zuschneiden und im Chat sehen", async () => {
   const { page } = coach;
   await page.goto("/profil");
