@@ -179,7 +179,7 @@ function callToAction(lang) {
     }</p>
     <div class="cta">
       <a class="btn primary" href="${de ? "/#demo" : "/en/#demo"}">${de ? "Zur Demo" : "Open the demo"}</a>
-      <a class="btn ghost" href="${de ? "/en/docs/install/" : "/en/docs/install/"}">${de ? "Installation (Englisch)" : "Installation guide"}</a>
+      <a class="btn ghost" href="${de ? "/docs/installation/" : "/en/docs/install/"}">${de ? "Installationsanleitung" : "Installation guide"}</a>
     </div>
   </div>
 </section>`;

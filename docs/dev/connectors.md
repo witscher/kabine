@@ -27,7 +27,8 @@ modules/<folder>/
   samples/links.json  links a coach would paste, with the source each one gives
   samples/*.json      recorded responses of the source (invented or public data only)
   test/*.test.ts      tests of anything special about the source
-  README.md           the source, the kind of access, the terms, the samples' origin
+  README.md           the source, the kind of access, the terms, the samples' origin, how often it fetches
+  README.de.md        the same for clubs in German
 ```
 
 `FixtureConnector` ([`worker/module-api.ts`](../../worker/module-api.ts)):

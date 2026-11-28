@@ -80,7 +80,7 @@ ${section(
     ["Kein Server zu pflegen.", "Die Plattform spielt Sicherheitsupdates selbst ein. Für einen üblichen Verein reicht der kostenlose Tarif."],
     ["Updates, wann der Verein will.", "Updates werden bereitgestellt, aber der Verein bestimmt, ob und wann."],
     ["Aufhören ist einfach.", "Daten exportieren, Ressourcen im eigenen Konto löschen, fertig. Niemand muss gekündigt oder um Löschung gebeten werden."],
-  ]) + links([["/en/docs/install/", "Installationsanleitung (Englisch)"], ["/vorstand-datenschutz/", "Für Vorstand und Datenschutz"]]),
+  ]) + links([["/docs/installation/", "Installationsanleitung"], ["/vorstand-datenschutz/", "Für Vorstand und Datenschutz"]]),
 )}
 ${section(
   "",

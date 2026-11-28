@@ -169,6 +169,7 @@ footer .push { margin-left: auto; }
 .prose :not(pre) > code { background: var(--muted); padding: 1px 5px; border-radius: 5px; font-size: 0.88em; }
 .prose .btn { margin-top: 8px; }
 .prose .source { margin-top: 36px; font-size: 14px; color: var(--text-2); }
+.prose .switch-on { margin-top: 0; padding: 12px 16px; background: var(--muted); border-left: 4px solid var(--yellow); border-radius: 0 12px 12px 0; }
 .table { overflow-x: auto; margin-top: 16px; }
 .table table { border-collapse: collapse; font-size: 15px; min-width: 560px; }
 .table th, .table td { text-align: left; vertical-align: top; padding: 8px 10px; border-bottom: 1px solid var(--line); }

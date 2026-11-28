@@ -71,7 +71,7 @@ New modules start as `status: "beta"`, switched off. Modules never change core f
 
 - `npm run check` passes (typecheck, all tests including the module and connector contract tests, translations complete).
 - New behaviour has a test; screens that change are covered by `npm run e2e` where it matters.
-- The module's `README.md` and the docs say what it does and what it stores.
+- The module's `README.md` and `README.de.md` and the docs say what it does and what it stores (they become its page on kabine.dev).
 - A change clubs notice gets a line under *Unreleased* in `CHANGELOG.md`.
 - One topic per pull request, with a short description of what changes for whom.
 

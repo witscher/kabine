@@ -1,0 +1,16 @@
+# Heimspieltag
+
+An einem Tag, an dem viele Mannschaften des Vereins zu Hause spielen, ist die Halle den ganzen Tag voll. Dieses Modul lädt alle Beteiligten ein, früher zu kommen oder länger zu bleiben und die anderen Mannschaften anzufeuern. Die Karte und die Push-Nachricht sagen, wie viele Mannschaften spielen. Die [englische Fassung](README.md) enthält auch die technischen Einzelheiten.
+
+- **Wann ein Tag zählt:** wenn mindestens *N* Mannschaften (keine Gruppen) ein Heimspiel haben, das stattfindet. *N* legen Admins fest, 2 bis 20, ab Werk 5. Zwei Spiele einer Mannschaft zählen einmal.
+- **Push am Vortag** (Thema *Heimspieltag*, nur für den eigenen Zugang): zur eingestellten Uhrzeit (12, 18 oder 20 Uhr, Vereinszeit), einmal pro Tag. Eine Nachricht pro Zugang, persönlich und in der Sprache des Empfängers: „du spielst um 11:30 (wD)“, „Lena spielt um 11:30 (wD)“, „dein Helferdienst beginnt um 09:30“. Wer spielt: vor der Kaderveröffentlichung alle, danach die Nominierten; die anderen lesen den Namen ihrer Mannschaft.
+- **Wer beteiligt ist:** Spieler, Helfer, Trainer und Betreuer der Mannschaften, die spielen; die Eltern ihrer Spieler, wo Eltern eingebunden sind; Fans dieser Mannschaften (nur mit dem Fans-Modul); wer an dem Tag einen Helferdienst hat (nur mit dem Modul Helferdienste). Admins können die Seite des Tages öffnen, bekommen dafür aber keine Push-Nachricht. Nicht: inaktive oder ehemalige Personen, gesperrte Zugänge, wer das Thema abgeschaltet hat.
+- **Startseite:** ab drei Tagen vorher eine große Karte (am Tag selbst bis zwei Stunden nach dem letzten Anpfiff) für den ersten solchen Tag, an dem die Person beteiligt ist: der Tag, die Zahl der Mannschaften, die Halle mit den meisten Spielen, erster bis letzter Anpfiff, eine Zeile pro eigener oder gefolgter Mannschaft, *Alle Spiele ansehen*, „Komm vorbei und feuer mit an!“ und das Bild des Maskottchens, wenn der Verein eines mit dem Modul Vereinsmaskottchen hochgeladen hat. Spätere Tage erscheinen als kleine weiße Kacheln mit dem Kopf des Maskottchens.
+- **Seite des Tages:** alle Heimspiele des Tages mit Anpfiff, Titel und Halle; eigene Spiele markiert und mit ihrer Terminseite verlinkt, gefolgte markiert. Ein laufendes Spiel zeigt die Live-Links der Spielplan-Module. Dazu offene Helferplätze des Tages, die die Person übernehmen könnte. Nur für Beteiligte und Admins, nur Spieldaten.
+- **Verwaltung → Heimspieltage:** die Push-Nachricht an oder aus, ab wie vielen Mannschaften, die Uhrzeit, und der nächste Heimspieltag in den kommenden 90 Tagen mit dem Zeitpunkt der Nachricht und der Zahl der Zugänge, die sie erreicht.
+
+## Datenschutz
+
+- **Speichert:** keine personenbezogenen Daten. Die Einstellungen (an oder aus, Mindestzahl der Mannschaften, Uhrzeit) und die Tage, deren Nachricht verschickt ist (`gameday_sent`, nur ein Datum). Die Bilder des Maskottchens gehören zum Modul Vereinsmaskottchen.
+- **Wer es sieht:** die Seite und die Karte nur die Beteiligten und Admins, mit Spieldaten, die ohnehin öffentlich sind (Anpfiff, Halle, Gegner); keine Kader, Rückmeldungen oder Namen. Wen eine Nachricht erreicht, wird beim Verschicken aus Mannschaften, Elternverknüpfungen, gefolgten Mannschaften und Diensten ermittelt und nicht gespeichert.
+- **Gelöscht:** die Versandmarken nach einer Woche. Nicht im Export.

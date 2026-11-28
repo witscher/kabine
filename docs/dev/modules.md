@@ -15,7 +15,10 @@ modules/carpools/
   app/*.tsx, *.css   the module's own app code and styles
   test/*.test.ts     tests (Vitest in the Workers pool)
   README.md          what it does, for whom, what it stores
+  README.de.md       the same for clubs in German (without the code details)
 ```
+
+Both READMEs become the module's page on kabine.dev (`/en/docs/modules/<id>/`, `/docs/module/<id>/`, the id in kebab case; `site/src/docs.mjs`), with a line on where to switch it on taken from the manifest. A section `## Code` stays on GitHub. The app links to these pages with `moduleDocsUrl` (`shared/site-docs.ts`); `test/site-docs.test.ts` checks that every module has both files.
 
 `modules/index.ts` lists the manifests, one line per module. A module may import from a module it `requires`, never from others. The worker and app parts are found by the build (`import.meta.glob`), so nothing else in the core needs to change. Code in `worker/` may only import from the worker, `shared/` and the module itself; code in `app/` only from `src/`, `shared/` and the module itself.
 
@@ -102,7 +105,7 @@ Explanations of a module's settings go behind an info button (docs/dev/design.md
 4. Schema changes are a new file in `migrations/` that runs safely for every club. List the module's tables in `exportTables` and clean them up in `personLeaves` (and `participantsDropped` if they hang on participants).
 5. Texts through Lingui, then `npm run i18n` and the German translation (see [translation.md](translation.md)).
 6. Tests in `test/`, invented names only. `test/modules-contract.test.ts` runs for every module.
-7. A row in the table above and a `README.md` in the folder.
+7. A row in the table above and a `README.md` and `README.de.md` in the folder.
 
 `npm run check` must pass.
 
