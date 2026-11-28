@@ -6,6 +6,7 @@ Changes that are merged but not released yet go under *Unreleased*, one line eac
 
 ## Unreleased
 
+- No blank app right after an update: a build file that has not reached every Cloudflare data centre yet used to be answered with the app's page, which the browser then kept for a year. It now gets a 404 that is not cached. **Check wrangler.jsonc:** in `assets`, change `"not_found_handling": "single-page-application"` to `"not_found_handling": "none"` (the update pull request points this out); without the change everything works as before, just without this fix.
 - The modules *Polls*, *Fans* and *Home game day* are no longer beta. They stay off until an admin switches them on under *Administration → Modules*; *Club mascot* stays beta.
 - Notifications close after 24 hours: Web Push never expires a notification once shown, so the app closes older ones after the next push and whenever it is opened (on iOS not on every version).
 - Results in the event list: played games show the score large instead of time and venue, and next to it "Win" (green), "Draw" (yellow) or "Loss" (red) from the team's view, but only where the team's league has a table from its game schedule source (the youngest age groups often play without one). The same on the game page and on the fans module's game page. With the club mascot module, players under 14 also see the mascot's face for the outcome (win, draw, close loss up to 4 goals, clear loss); the app only learns "under 14" from the server, never the birth year (privacy texts updated). Nothing new is stored.
