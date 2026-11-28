@@ -24,6 +24,7 @@ const FOOTER_LINKS = {
     ["/funktionen/helferdienste/", "Helferdienste"],
     ["/funktionen/fahrgemeinschaften/", "Fahrgemeinschaften"],
     ["/funktionen/anwesenheit/", "Anwesenheit"],
+    ["/banner/", "Banner für Vereine"],
     ["/docs/", "Dokumentation"],
   ],
   en: [
@@ -35,6 +36,7 @@ const FOOTER_LINKS = {
     ["/en/features/helper-duties/", "Helper duties"],
     ["/en/features/carpools/", "Carpools"],
     ["/en/features/attendance/", "Attendance"],
+    ["/en/banner/", "Banners for clubs"],
     ["/en/docs/", "Documentation"],
     ["/en/news/", "Release notes"],
   ],

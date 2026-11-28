@@ -10,6 +10,7 @@ import { ElsewhereList } from "../elsewhere";
 import { longDate, personName, shortName, stamp, time, timeRange, weekdayPlural } from "../format";
 import { Icon } from "../icons";
 import { LeagueTableCard } from "../league-table";
+import { ResultLine } from "../result";
 import { GameLinks, isLiveWindow, isReportWindow } from "../live";
 import { AttendanceBadge, byGuardianText, DeclineSheet, deadlineText, PersonResponseRow, quickReasons, ResponseButtons, respondedByText, sendResponse } from "../respond";
 import { useActiveModules } from "../modules";
@@ -248,7 +249,6 @@ function GameInfo({ event }: { event: EventDetail }) {
   const g = event.game!;
   const helperPlan = event.teams.some((t) => me.helperTeams.some((h) => h.id === t.id));
   const tableSource = g.table?.name ?? "";
-  const result = g.homeGoals != null && g.guestGoals != null ? `${g.homeGoals}:${g.guestGoals}` : null;
   const gameNo = g.gameNo;
   const text = event.myDuties.length ? dutyLines(event.myDuties).join(" · ") : event.helpersNeeded ? neededText(event.helpersNeeded) : null;
   const point = g.meetingPoint ?? t`to follow`;
@@ -266,8 +266,10 @@ function GameInfo({ event }: { event: EventDetail }) {
       </div>
       <div style={{ fontWeight: 700, fontSize: "17px" }}>
         {g.homeTeam} – {g.guestTeam}
-        {result ? <span style={{ marginLeft: "8px", fontFamily: "var(--font-cond)", fontSize: "22px" }}>{result}</span> : null}
       </div>
+      {g.homeGoals != null && g.guestGoals != null && !event.cancelled ? (
+        <ResultLine home={g.homeGoals} guest={g.guestGoals} isHome={g.isHome} inTable={!!g.inTable} size="page" />
+      ) : null}
       {isLiveWindow(event) ? <GameLinks event={event} phase="live" /> : isReportWindow(event) ? <GameLinks event={event} phase="after" /> : null}
       {event.location?.address ? (
         <p class="small muted row-gap" style={{ gap: "6px", alignItems: "center" }}>

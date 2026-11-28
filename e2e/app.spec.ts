@@ -1452,6 +1452,64 @@ test("Liveticker und Spielbericht: erst beim Antippen ein Abruf, Seite öffnet i
   await page.request.put("/api/teams/1/games/source", { data: { link: null } });
 });
 
+test("Ergebnis in der Liste: groß mit Wort, für Spieler unter 14 mit dem Gesicht des Maskottchens", async () => {
+  const { page } = coach;
+  // A home game two days ago with a result, from handball4all with the league table (invented teams)
+  const p = Object.fromEntries(
+    new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Berlin", year: "numeric", month: "2-digit", day: "2-digit" })
+      .formatToParts(new Date(Date.now() - 2 * 86_400_000))
+      .map((x) => [x.type, x.value]),
+  );
+  const game = {
+    gID: "778001", gNo: "1", gDate: `${p.day}.${p.month}.${p.year!.slice(2)}`, gTime: "11:00",
+    gHomeTeam: "SV Musterstadt", gGuestTeam: "TSV Ergebnisdorf", gGymnasiumID: "901", gGymnasiumName: "Testhalle",
+    gHomeGoals: "27", gGuestGoals: "25",
+  };
+  const score = [
+    { tabScore: 1, tabTeamID: "999", tabTeamname: "SV Musterstadt", numPlayedGames: 1, numWonGames: 1, numEqualGames: 0, numLostGames: 0, numGoalsShot: 27, numGoalsGot: 25, pointsPlus: 2, pointsMinus: 0 },
+    { tabScore: 2, tabTeamID: "997", tabTeamname: "TSV Ergebnisdorf", numPlayedGames: 1, numWonGames: 0, numEqualGames: 0, numLostGames: 1, numGoalsShot: 25, numGoalsGot: 27, pointsPlus: 0, pointsMinus: 2 },
+  ];
+  const payload = [{ head: { name: "Testliga" }, content: { actualGames: [], futureGames: { gClassID: "555", games: [game] }, teamsList: [{ teamID: "999", teamName: "SV Musterstadt" }], score } }];
+  expect((await page.request.put("/api/teams/1/games/source", { data: { link: "https://www.handball4all.de/home/portal/baden-wuerttembergischer-hv#/league?ogId=216&lId=555&tId=999" } })).ok()).toBe(true);
+  expect((await page.request.post("/api/teams/1/games/claim", { data: { manual: true } })).ok()).toBe(true);
+  expect((await page.request.post("/api/teams/1/games/import", { data: { data: payload } })).ok()).toBe(true);
+
+  // The coach (no birth year): score and word instead of time and venue, no face
+  await page.goto("/?zeit=vergangen");
+  const row = page.locator(".event-row", { hasText: "TSV Ergebnisdorf" });
+  await expect(row.locator(".result-big")).toHaveText("27:25");
+  await expect(row.getByRole("img", { name: "Sieg" })).toBeVisible();
+  await expect(row).not.toContainText("11:00");
+  await expect(row.locator(".result-box img")).toHaveCount(0);
+  await row.click();
+  await expect(page.locator(".result-page .result-big")).toHaveText("27:25");
+  await expect(page.locator(".result-page").getByRole("img", { name: "Sieg" })).toBeVisible();
+
+  // With the club mascot and a face for a win, the player under 14 sees it next to the word
+  const mascotSwitch = admin.page.getByRole("switch", { name: /^Vereinsmaskottchen/ });
+  await admin.page.goto("/verwaltung/verein");
+  await mascotSwitch.click();
+  await expect(mascotSwitch).toHaveAttribute("aria-checked", "true");
+  const res = await admin.page.request.put("/api/mascot/images/win", { data: await mascotPng(admin.page, 256, 256), headers: { "content-type": "image/png" } });
+  expect(res.ok()).toBe(true);
+  await player.page.goto("/?zeit=vergangen");
+  const own = player.page.locator(".event-row", { hasText: "TSV Ergebnisdorf" });
+  await expect(own.getByRole("img", { name: "Sieg" })).toContainText("Sieg");
+  await expect(own.locator(".result-box img")).toHaveAttribute("src", /^\/api\/mascot\/images\/win\?v=\d+$/);
+  if (process.env.E2E_SHOTS) await player.page.screenshot({ path: `${process.env.E2E_SHOTS}/home-result.png`, fullPage: true });
+  // Adults still see only the word
+  await page.goto("/?zeit=vergangen");
+  await expect(row.getByRole("img", { name: "Sieg" })).toBeVisible();
+  await expect(row.locator(".result-box img")).toHaveCount(0);
+
+  // Clean up for the tests after this one
+  await admin.page.request.delete("/api/mascot/images/win");
+  await admin.page.goto("/verwaltung/verein");
+  await mascotSwitch.click();
+  await expect(mascotSwitch).toHaveAttribute("aria-checked", "false");
+  await page.request.put("/api/teams/1/games/source", { data: { link: null } });
+});
+
 test("handball.net: Spielplan gleicht sich beim Öffnen der App von selbst ab, höchstens einmal pro Woche", async () => {
   const { page } = coach;
   const ctx = page.context();

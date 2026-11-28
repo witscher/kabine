@@ -12,5 +12,7 @@
 /manifest.webmanifest
   Cache-Control: no-cache
 
+# Build files: revalidated (a cheap 304), not immutable. Right after a deploy a data centre may not have a new
+# file yet; its 404 must not stay in the browser for a year. The app takes them from the service worker's cache.
 /assets/*
-  Cache-Control: public, max-age=31536000, immutable
+  Cache-Control: public, max-age=0, must-revalidate

@@ -12,7 +12,8 @@ import { clearedSessionCookie, createSession, deleteSession, deviceLabel, sessio
 import { finishLogin, finishRegistration, openLoginChallenge, startLogin, startRegistration, type StoredPasskey } from "../auth/webauthn";
 import { all, first, run } from "../lib/db";
 import { badRequest, conflict, forbidden, notFound, parse, readJson } from "../lib/http";
-import { utcIso } from "../lib/time";
+import { todayLocal, utcIso } from "../lib/time";
+import { isYoung } from "../../shared/result";
 import { loadMailSettings } from "../domain/mail";
 import { textsAvailable } from "../domain/texts";
 import { setupPending } from "./join";
@@ -75,6 +76,8 @@ export async function buildMe(env: Env, actor: Actor): Promise<Me> {
         : null,
     // Language chosen on the account (null: app or club default)
     locale: isLocale(actor.locale) ? actor.locale : null,
+    // Mascot faces at results: only the flag, never the birth year (docs/dev/decisions.md, "Results in the event list")
+    young: isYoung(actor.birthYear, Number(todayLocal().slice(0, 4))),
     // Release notes (coaches: only the coach notes) and new modules (admins), in their own view only
     news: (actor.isAdmin || actor.coachTeamIds.length > 0) && !actor.viewAs ? await loadNews(env.DB, actor.accountId, ownClubSport(), actor.isAdmin) : null,
   };

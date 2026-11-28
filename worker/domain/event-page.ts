@@ -24,6 +24,9 @@ import {
 } from "./events";
 import { HORIZON_DAYS } from "./generate";
 import { moduleEventPage, moduleEventSummaries } from "../modules";
+import { teamsWithLeagueTable } from "./league-table";
+
+const hasResult = (s: EventSummary) => s.game?.homeGoals != null && s.game.guestGoals != null;
 
 /** How far the server looks for the next own event for the large card (like the former 70 days). */
 const NEXT_CARD_DAYS = 70;
@@ -219,11 +222,15 @@ export async function loadEventPage(
           ),
           moduleEventSummaries(db, actor, shown, ctx, now),
         ]);
+  // Outcome word at results only where the league has a table; asked only when a game shown has a result
+  const scored = [...page, ...live, ...next, ...openHelp].filter((i) => hasResult(i.summary));
+  const tableTeams = scored.length ? await teamsWithLeagueTable(db, [...new Set(scored.flatMap((i) => i.summary.teams.map((tm) => tm.id)))]) : new Set<number>();
   const finish = ({ row, summary }: Item): EventSummary => ({
     ...summary,
     // Whoever (or whose family) already has a duty gets no call
     helpersNeeded: summary.myDuties.length ? 0 : (needed.get(row.id) ?? 0),
     modules: extras.get(row.id) ?? {},
+    game: summary.game && hasResult(summary) ? { ...summary.game, inTable: summary.teams.some((tm) => tableTeams.has(tm.id)) } : summary.game,
   });
   // With more pages the window ends with the last day of this page (whole days, as the page)
   const lastDay = page.at(-1)?.summary.startsAt.slice(0, 10);

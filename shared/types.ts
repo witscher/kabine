@@ -118,6 +118,11 @@ export interface Me {
   adminSwitch: { coachMode: boolean } | null;
   /** Language chosen on the account; null: the app's language or the club default. */
   locale: import("./i18n").Locale | null;
+  /**
+   * Under 14 by birth year in the club's year: results show the mascot face (src/result.tsx). Only this flag leaves
+   * the server, never the birth year.
+   */
+  young: boolean;
   /** Admins and coaches: release notes and (admins) modules they have not seen yet (src/news.tsx); null when there is nothing new. */
   news: AdminNews | null;
 }
@@ -331,6 +336,11 @@ export interface GameInfo {
   /** League table at the team's schedule source (fixture connector), if one is linked. */
   table: { url: string; name: string; connector: string } | null;
   /**
+   * A team of the game plays in a league with a stored table (worker/domain/league-table.ts): the result shows the
+   * outcome word. Only set on games with a result where the app shows it (event list, event page, fan game page).
+   */
+  inTable?: boolean;
+  /**
    * Imported games: the connector module, the game's id there and what the team's connector fetches
    * (modules use it for links such as a live ticker, fetched only when tapped).
    */
@@ -382,7 +392,7 @@ export interface GameRef {
   kind: EventKind;
   startsAt: string;
   cancelled: object | null;
-  game: Pick<GameInfo, "homeTeam" | "guestTeam" | "isHome" | "homeGoals" | "guestGoals" | "table" | "source" | "liveMinutes"> | null;
+  game: Pick<GameInfo, "homeTeam" | "guestTeam" | "isHome" | "homeGoals" | "guestGoals" | "table" | "inTable" | "source" | "liveMinutes"> | null;
 }
 
 export interface ParticipantDetail {

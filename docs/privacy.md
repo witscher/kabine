@@ -28,7 +28,7 @@ Kabine is used mostly by children and teenagers and their parents. It is built t
 
 Only admins change their own name; players, parents and coaches ask their coach or an admin, who correct it (right to rectification, Art. 16 GDPR). So everyone knows who is who, and children cannot rename themselves.
 
-| Year of birth | Players | Age group and team assignment; helper duties marked "adults only" are not offered to anyone under 18 by it | Coaches, admins | As above |
+| Year of birth | Players | Age group and team assignment; helper duties marked "adults only" are not offered to anyone under 18 by it; with the club mascot module, results show the mascot's face to players under 14 (the app on their own device only learns "under 14: yes/no", never the year) | Coaches, admins | As above |
 | Team memberships, roles | Everyone | Who sees which events and chats | Team members (coaches and admins in full) | When leaving; at the season change teams are assigned again |
 | Parent–child link, child permissions with log | Parents, minors | Parents act for their children | The parent, coaches and admins | When leaving |
 | Responses (yes/no, late) | Players | Planning trainings and games | Coaches, admins; team staff and, if the team switches it on, the team (without reasons); coaches of the person's other teams and groups (and admins) see time, team and status, never the reason: on their own event of the same day and on the player page for the next two weeks | At the season change |
