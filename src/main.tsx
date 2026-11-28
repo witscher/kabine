@@ -34,6 +34,12 @@ if ("serviceWorker" in navigator && import.meta.env.PROD) {
     navigator.serviceWorker.register("/sw.js").catch((err) => console.warn("Service Worker", err));
     // Pre-cache all pages of the app for offline use
     void navigator.serviceWorker.ready.then((reg) => reg.active?.postMessage({ type: "precache", version: __APP_VERSION__ }));
+    // Close notifications older than a day, at start and whenever the app comes back to the foreground
+    const tidy = () => void navigator.serviceWorker.ready.then((reg) => reg.active?.postMessage({ type: "tidy-notifications" }));
+    tidy();
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") tidy();
+    });
   };
   // The language catalog is loaded first (await above), so the page may already be loaded
   if (document.readyState === "complete") register();
