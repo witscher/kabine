@@ -308,8 +308,8 @@ const coaches = (): Faq[] => [
     a: (
       <p>
         <Trans>
-          Under <em>Team → Settings → Schedule</em>, tap <em>Sync now</em>. The app only fetches the schedule from handball4all at the push of a button, never
-          automatically. Moved games are then announced to everyone.
+          The app syncs it by itself on a coach's device, after each game and once a week. If a game was moved or cancelled at short notice, tap{" "}
+          <em>Sync now</em> under <em>Team → Settings → Schedule</em>. Moved and cancelled games are then announced to the team and the coaches.
         </Trans>
       </p>
     ),

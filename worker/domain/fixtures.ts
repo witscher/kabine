@@ -1,7 +1,8 @@
 // Game schedules from fixture connectors (modules of kind "fixtures", worker/module-api.ts): which
 // connector a team uses, and the sync that is the same for every source: halls, home or away, new,
-// moved and cancelled games, notifications. The connector only knows its source.
-import { select, t } from "@lingui/core/macro";
+// moved and cancelled games, results, the league table, notifications, and when a schedule syncs by
+// itself. The connector only knows its source.
+import { plural, select, t } from "@lingui/core/macro";
 import { LOCALES } from "../../shared/i18n";
 import type { ModuleId } from "../../shared/modules";
 import { withLocale } from "../i18n";
@@ -11,7 +12,8 @@ import type { FixtureConnector, FixtureGame, FixtureSource } from "../module-api
 import { moduleEventChanged, WORKER_MODULES } from "../modules";
 import { syncAutoSquads } from "./auto-squad";
 import { isModuleOn, ownVenue } from "./club";
-import { notifyPersons, shortDate, shortTime } from "./notify";
+import { notifyCoaches, notifyPersons, shortDate, shortTime } from "./notify";
+import type { FixtureTable, LeagueTableRow } from "../../shared/types";
 
 /** A connector with the id of its module. */
 export interface Connector extends FixtureConnector {
@@ -131,6 +133,118 @@ export function ownTeamName(games: FixtureGame[], hint: string | null, homeVenue
   return atHome?.home ?? null;
 }
 
+// Sync by itself --------------------------------------------------------------------
+//
+// Sources that allow it sync from a coach's device without a button (docs/dev/connectors.md, fair use): once the
+// last sync is `autoSyncDays` old, and with `autoSyncResults` after each game until its result is there. The state
+// lives on the team and the game, so several coaches cause one fetch, not one each; the server refuses a sync by
+// itself that is not due and never fetches on its own.
+
+/** A reservation to fetch expires after this long; no two devices fetch a team's schedule at the same time. */
+export const CLAIM_MS = 10 * 60_000;
+/** After kick-off plus the playing time, wait this long: by then the result is usually entered. */
+export const RESULT_DELAY_MINUTES = 60;
+/** Between two tries to fetch a missing result. */
+export const RESULT_RETRY_MS = 3 * 3_600_000;
+/** At most this many tries per game, then quiet until the next game (or the weekly sync). */
+export const RESULT_MAX_TRIES = 2;
+/** Games longer ago than this are not waited for. */
+const RESULT_WINDOW_DAYS = 7;
+/** The button for coaches of a team that syncs by itself: at most this often (admins only the source's minimum). */
+export const MANUAL_COACH_MS = 3_600_000;
+
+/** Does the source sync by itself at all? Then the button is only a fallback. */
+export function syncsByItself(connector: Pick<FixtureConnector, "autoSyncDays" | "autoSyncResults">): boolean {
+  return !!(connector.autoSyncDays || connector.autoSyncResults);
+}
+
+/** Last sync at least this many days ago (or never); 0 = never due. */
+export function syncOlderThan(syncedAt: string | null, days: number, now: number): boolean {
+  return days > 0 && (!syncedAt || now - Date.parse(syncedAt) >= days * 86_400_000);
+}
+
+/**
+ * Games of these teams from their source that are over (kick-off plus the age class's playing time plus an hour, at
+ * most a week back), still have no result and have a try left. Only teams whose source syncs results by itself.
+ * One query for all teams, starting from their games.
+ */
+export async function resultDueGames(
+  db: D1Database,
+  teams: Pick<TeamFixtures, "id" | "fixture_connector">[],
+  now: number,
+): Promise<{ id: number; teamId: number; externalId: string }[]> {
+  const connectorOf = new Map(
+    teams.flatMap((tm) => {
+      const c = connectorById(tm.fixture_connector);
+      return c?.autoSyncResults && isModuleOn(c.id as ModuleId) ? [[tm.id, c.id] as const] : [];
+    }),
+  );
+  if (!connectorOf.size) return [];
+  const nowL = nowLocal(now);
+  const rows = await all<{ id: number; team_id: number; external_ref: string; starts_at: string; game_minutes: number | null }>(
+    db,
+    `SELECT e.id, et.team_id, e.external_ref, e.starts_at, ac.game_minutes
+       FROM json_each(?1) j CROSS JOIN event_teams et ON et.team_id = j.value CROSS JOIN events e ON e.id = et.event_id
+       JOIN teams t ON t.id = et.team_id
+       LEFT JOIN age_classes ac ON ac.code = t.age_class_code AND ac.season_id = (SELECT id FROM seasons WHERE is_current = 1)
+      WHERE e.kind = 'game' AND e.external_ref IS NOT NULL AND e.cancelled_at IS NULL AND e.home_goals IS NULL
+        AND e.starts_at >= ?2 AND e.starts_at < ?3
+        AND e.result_tries < ?4 AND (e.result_tried_at IS NULL OR e.result_tried_at < ?5)`,
+    list([...connectorOf.keys()]),
+    addMinutesLocal(nowL, -RESULT_WINDOW_DAYS * 24 * 60),
+    nowL,
+    RESULT_MAX_TRIES,
+    utcIso(now - RESULT_RETRY_MS),
+  );
+  return rows.flatMap((r) => {
+    const ref = splitRef(r.external_ref);
+    if (!ref || ref.connector !== connectorOf.get(r.team_id)) return [];
+    if (addMinutesLocal(r.starts_at, (r.game_minutes ?? 90) + RESULT_DELAY_MINUTES) > nowL) return [];
+    return [{ id: r.id, teamId: r.team_id, externalId: ref.id }];
+  });
+}
+
+/** Is a sync by itself due for the team: after a game without a result, or once the last sync is old enough? */
+export async function autoSyncDue(db: D1Database, team: TeamFixtures, connector: FixtureConnector, now = Date.now()): Promise<"result" | "weekly" | null> {
+  if (connector.autoSyncResults && (await resultDueGames(db, [team], now)).length) return "result";
+  if (syncOlderThan(team.fixture_synced_at, connector.autoSyncDays ?? 0, now)) return "weekly";
+  return null;
+}
+
+// League table ----------------------------------------------------------------------
+
+const MAX_TABLE_ROWS = 40;
+const int = (v: unknown, max = 9999): number => (typeof v === "number" && Number.isInteger(v) && Math.abs(v) <= max ? v : 0);
+const text = (v: unknown, max: number): string | null => (typeof v === "string" && v.trim() ? v.trim().slice(0, max) : null);
+
+/**
+ * A connector's table, checked again before it is stored: it comes from a coach's browser for device sources. Rows
+ * without a team name are dropped; null when nothing is left.
+ */
+export function cleanTable(table: FixtureTable | null | undefined): FixtureTable | null {
+  if (!table || !Array.isArray(table.rows)) return null;
+  const rows: LeagueTableRow[] = [];
+  for (const r of table.rows.slice(0, MAX_TABLE_ROWS)) {
+    const team = text(r?.team, 80);
+    if (!team) continue;
+    const pos = int(r.pos, 99);
+    rows.push({
+      pos: pos > 0 ? pos : null,
+      team,
+      own: r.own === true,
+      games: int(r.games),
+      won: int(r.won),
+      draw: int(r.draw),
+      lost: int(r.lost),
+      goalsFor: int(r.goalsFor),
+      goalsAgainst: int(r.goalsAgainst),
+      pointsPlus: int(r.pointsPlus),
+      pointsMinus: r.pointsMinus == null ? null : int(r.pointsMinus),
+    });
+  }
+  return rows.length ? { leagueName: text(table.leagueName, 120), comment: text(table.comment, 400), rows } : null;
+}
+
 // Sync -----------------------------------------------------------------------------
 
 /** Cancel reason of games that disappeared from the schedule; stored in the language of the import. */
@@ -240,9 +354,15 @@ export async function importGames(
     ).map((e) => [e.external_ref, { id: e.id, teams: JSON.parse(e.teams) as number[] }]),
   );
   const nowL = nowLocal(now);
+  // Games waiting for their result, before this sync writes any
+  const resultDue = await resultDueGames(db, [team], now);
   const statements: D1PreparedStatement[] = [];
   const summary: ImportSummary = { created: 0, updated: 0, moved: 0, cancelled: 0, skipped: schedule.skipped, foreign: 0 };
   const movedEvents: { id: number; before: string; startsAt: string; locationId: number | null; cancelled: boolean }[] = [];
+  /** Games no longer in the schedule (cancelled by the sync) and games back in it. */
+  const dropped: { id: number; startsAt: string }[] = [];
+  const reopened: { id: number; startsAt: string }[] = [];
+  let newGames = 0;
 
   for (const g of schedule.games) {
     const gameRef = ref(g.externalId);
@@ -287,6 +407,7 @@ export async function importGames(
         ),
       );
       summary.created++;
+      if (startsAt > nowL) newGames++;
       continue;
     }
     const moved = ex.starts_at !== startsAt || ex.location_id !== locationId;
@@ -314,6 +435,7 @@ export async function importGames(
       ),
     );
     summary.updated++;
+    if (reopen && startsAt > nowL) reopened.push({ id: ex.id, startsAt });
     if (moved && startsAt > nowL) {
       summary.moved++;
       movedEvents.push({ id: ex.id, before: ex.starts_at, startsAt, locationId, cancelled: ex.cancelled_at != null && !reopen });
@@ -327,28 +449,86 @@ export async function importGames(
     if (!delivered.has(ex.external_ref) && ex.starts_at > nowL && !ex.cancelled_at && !ex.shared) {
       statements.push(stmt(db, "UPDATE events SET cancelled_at = ?, cancel_reason = ?, cancelled_by = NULL WHERE id = ?", utcIso(now), cancelReason, ex.id));
       summary.cancelled++;
+      dropped.push({ id: ex.id, startsAt: ex.starts_at });
     }
+  }
+  // Still no result: count the try, so the sync by itself does not come back for it forever
+  const byId = new Map(schedule.games.map((g) => [g.externalId, g]));
+  for (const d of resultDue) {
+    const g = byId.get(d.externalId);
+    if (g?.homeGoals == null || g.guestGoals == null) {
+      statements.push(stmt(db, "UPDATE events SET result_tries = result_tries + 1, result_tried_at = ? WHERE id = ?", utcIso(now), d.id));
+    }
+  }
+  // League table from the same response; without one the stored table stays
+  const table = cleanTable(schedule.table);
+  if (table) {
+    statements.push(
+      stmt(
+        db,
+        `INSERT INTO league_tables (team_id, connector, league_name, rows, comment, fetched_at) VALUES (?, ?, ?, ?, ?, ?)
+         ON CONFLICT (team_id) DO UPDATE SET connector = excluded.connector, league_name = excluded.league_name, rows = excluded.rows,
+           comment = excluded.comment, fetched_at = excluded.fetched_at`,
+        team.id,
+        connector.id,
+        table.leagueName,
+        JSON.stringify(table.rows),
+        table.comment,
+        utcIso(now),
+      ),
+    );
   }
   statements.push(stmt(db, "UPDATE teams SET fixture_synced_at = ?, fixture_error = NULL, fixture_claimed_at = NULL WHERE id = ?", utcIso(now), team.id));
   for (let i = 0; i < statements.length; i += 80) await db.batch(statements.slice(i, i + 80));
   // With an automatic squad, new games get the core squad right away (without push)
   await syncAutoSquads(db, [team.id], now);
 
-  // Push when the throw-off time or hall changed
+  await notifySync(env, team, connector.name, { moved: movedEvents, dropped, reopened, newGames: team.fixture_synced_at ? newGames : 0 });
+  return summary;
+}
+
+/**
+ * Pushes after a sync, the same by button or by itself (docs/dev/connectors.md): a move to the team (players, parents,
+ * staff) and to the coaches with old and new time; a game no longer in the schedule counts as cancelled, and one back
+ * in it takes place after all, both to the team and the coaches; fans of the game hear of all three at short notice
+ * (hook eventChanged). New games only to the coaches (the team hears of them with the squad), not on a team's first
+ * sync. Results without push.
+ */
+async function notifySync(
+  env: Env,
+  team: TeamFixtures,
+  source: string,
+  changes: {
+    moved: { id: number; before: string; startsAt: string; locationId: number | null; cancelled: boolean }[];
+    dropped: { id: number; startsAt: string }[];
+    reopened: { id: number; startsAt: string }[];
+    newGames: number;
+  },
+): Promise<void> {
+  const db = env.DB;
+  const { moved: movedEvents, dropped, reopened, newGames } = changes;
+  const teamName = team.name;
+  // The team (players, helpers, staff; parents through notifyPersons), loaded once when needed
+  let teamPeople: number[] | null = null;
+  const playersOnce = async () =>
+    (teamPeople ??= (
+      await all<{ person_id: number }>(
+        db,
+        `SELECT tm.person_id FROM team_memberships tm JOIN persons p ON p.id = tm.person_id
+          WHERE tm.team_id = ? AND tm.role IN ('player', 'helper', 'staff') AND p.is_active = 1 AND p.is_former = 0`,
+        team.id,
+      )
+    ).map((r) => r.person_id));
+
+  // The throw-off time or hall changed
   if (movedEvents.length) {
-    const players = await all<{ person_id: number }>(
-      db,
-      `SELECT tm.person_id FROM team_memberships tm JOIN persons p ON p.id = tm.person_id
-        WHERE tm.team_id = ? AND tm.role IN ('player', 'helper', 'staff') AND p.is_active = 1 AND p.is_former = 0`,
-      team.id,
-    );
+    const players = await playersOnce();
     for (const m of movedEvents) {
       const loc = m.locationId ? await first<{ name: string }>(db, "SELECT name FROM locations WHERE id = ?", m.locationId) : null;
-      const teamName = team.name;
       const location = loc?.name ?? null;
       await notifyPersons(
         env,
-        players.map((p) => p.person_id),
+        players,
         "events",
         () => {
           const date = shortDate(m.startsAt);
@@ -361,11 +541,51 @@ export async function importGames(
         },
         { teamIds: [team.id] },
       );
+      if (m.cancelled) continue;
+      // The coaches with the old time, so they can check with the opponent or the hall
+      await notifyCoaches(env, [team.id], () => {
+        const oldDate = shortDate(m.before);
+        const oldTime = shortTime(m.before);
+        const date = shortDate(m.startsAt);
+        const time = shortTime(m.startsAt);
+        return {
+          title: t`Game moved (${teamName})`,
+          body: location
+            ? t`According to ${source} from ${oldDate}, ${oldTime} to ${date}, ${time}, ${location}.`
+            : t`According to ${source} from ${oldDate}, ${oldTime} to ${date}, ${time}.`,
+          url: `/termine/${m.id}`,
+        };
+      });
       // Others (fans of the game) after the team
-      if (!m.cancelled) {
-        await moduleEventChanged(env, { change: "moved", eventId: m.id, kind: "game", teamIds: [team.id], before: m.before, startsAt: m.startsAt, exclude: [] });
-      }
+      await moduleEventChanged(env, { change: "moved", eventId: m.id, kind: "game", teamIds: [team.id], before: m.before, startsAt: m.startsAt, exclude: [] });
     }
   }
-  return summary;
+
+  // No longer in the schedule, or back in it. The text names the source: games sometimes vanish there only for a while.
+  for (const [items, change] of [
+    [dropped, "cancelled"],
+    [reopened, "restored"],
+  ] as const) {
+    if (!items.length) continue;
+    const players = await playersOnce();
+    for (const m of items) {
+      const content = () => {
+        const when = `${shortDate(m.startsAt)}, ${shortTime(m.startsAt)}`;
+        return change === "cancelled"
+          ? { title: t`Game cancelled (${teamName})`, body: t`The game on ${when} is no longer in the schedule of ${source} and counts as cancelled.`, url: `/termine/${m.id}` }
+          : { title: t`Game going ahead (${teamName})`, body: t`The game on ${when} is back in the schedule of ${source}.`, url: `/termine/${m.id}` };
+      };
+      await notifyPersons(env, players, "events", content, { teamIds: [team.id] });
+      await notifyCoaches(env, [team.id], content);
+      await moduleEventChanged(env, { change, eventId: m.id, kind: "game", teamIds: [team.id], before: m.startsAt, startsAt: m.startsAt, exclude: [] });
+    }
+  }
+
+  if (newGames) {
+    await notifyCoaches(env, [team.id], () => ({
+      title: t`New games (${teamName})`,
+      body: plural(newGames, { one: `One new game is in the schedule of ${source}.`, other: `# new games are in the schedule of ${source}.` }),
+      url: `/team/${team.id}`,
+    }));
+  }
 }

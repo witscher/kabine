@@ -28,6 +28,7 @@ import { dutyManagers, loadDutyTypes, loadHelpersNeeded, loadMyDuties, mayManage
 import { notifyDutyHubs } from "../duties/hub";
 import { loadCoachHints } from "../domain/coach-hints";
 import { loadEventPage } from "../domain/event-page";
+import { loadLeagueTable } from "../domain/league-table";
 import { absenceChangeable, leaderAccounts, leaderEntries, loadLeaders } from "../domain/leaders";
 import { ensureGenerated } from "../domain/generate";
 import { areYouComing, eventLabel, guardianAccounts, notifyCoaches, notifyPersons, pushForm, recipientsForPersons, enqueuePush, shortDate, shortTime, staffOf, whoNames } from "../domain/notify";
@@ -144,10 +145,12 @@ eventRoutes.get("/events/:id", async (c) => {
   ]);
   const now = Date.now();
   const detail = withDuties(toDetail(event, ctx, actor, now), duties, needed);
-  const [info, modules, leaders] = await Promise.all([
+  const [info, modules, leaders, standings] = await Promise.all([
     organizerInfo(c.env.DB, actor, event.id, event.kind, detail.teams.map((t) => t.id), event.club_wide === 1),
     moduleEventDetail(c.env.DB, actor, event, ctx, now),
     loadLeaders(c.env.DB, event, detail.teams.map((t) => t.id)),
+    // League table from the last sync: public data of the source, for everyone who sees the game
+    event.kind === "game" ? loadLeagueTable(c.env.DB, detail.teams.map((t) => t.id)) : null,
   ]);
   const organizing = !!info.organizers && (info.organizers.creator?.id === actor.personId || info.organizers.people.some((p) => p.id === actor.personId));
   // Organisers without coach rights see who comes: with optional attendance who said yes, with registration per family the
@@ -155,7 +158,7 @@ eventRoutes.get("/events/:id", async (c) => {
   const forOrganizer = organizing && !detail.canManage;
   const families = detail.families ?? (forOrganizer ? familyOverview(ctx.families.get(event.id)) : null);
   const optionalYes = forOrganizer && detail.optionalAttendance ? optionalYesNames(event, ctx) : null;
-  return c.json({ ...detail, families, optionalYes, ...info, organizing, modules, leaders: leaderEntries(leaders, event, ctx, actor, detail.canManage, now) });
+  return c.json({ ...detail, families, optionalYes, ...info, organizing, modules, leaders: leaderEntries(leaders, event, ctx, actor, detail.canManage, now), standings });
 });
 
 /** Creator and organisers of a special event; they manage the helper duties. */

@@ -945,6 +945,10 @@ msgstr "Open"
 msgid "Please do not give details about illnesses, “ill” is enough. Only the coaches see the reason."
 msgstr "Please do not give details about illnesses, “ill” is enough. Only the coaches see the reason."
 
+#: worker/domain/fixtures.ts
+msgid "The game on {when} is no longer in the schedule of {source} and counts as cancelled."
+msgstr "The game on {when} is no longer in the schedule of {source} and counts as cancelled."
+
 #: src/howto.tsx
 msgid "Install as an app"
 msgstr "Install as an app"
@@ -1524,6 +1528,10 @@ msgstr "Task · before"
 #: src/pages/profile.tsx
 msgid "Training, games and your family's helper duties"
 msgstr "Training, games and your family's helper duties"
+
+#: src/league-table.tsx
+msgid "Table"
+msgstr "Table"
 
 #: src/pages/admin.tsx
 msgid "The association sets the birth years per season. Please check them against the competition rules. “Rank” orders the classes from young to old and determines which is the next higher youth class."
@@ -2377,6 +2385,10 @@ msgstr "Choose reaction"
 msgid "The duty also appears for {linkedChild}'s other parent."
 msgstr "The duty also appears for {linkedChild}'s other parent."
 
+#: worker/domain/fixtures.ts
+msgid "The game on {when} is back in the schedule of {source}."
+msgstr "The game on {when} is back in the schedule of {source}."
+
 #: modules/handball4all/worker/connector.ts
 msgid "Field content is missing"
 msgstr "Field content is missing"
@@ -2402,6 +2414,10 @@ msgstr "Helpers from"
 #: src/pages/chat.tsx
 msgid "All chats"
 msgstr "All chats"
+
+#: worker/domain/fixtures.ts
+msgid "Game cancelled ({teamName})"
+msgstr "Game cancelled ({teamName})"
 
 #: src/pages/home.tsx
 msgid "Tap a team at the top to see its events."
@@ -2891,6 +2907,11 @@ msgstr "{unexcused} unexc."
 msgid "This item does not exist."
 msgstr "This item does not exist."
 
+#: src/league-table.tsx
+msgctxt "league table"
+msgid "Diff."
+msgstr "Diff."
+
 #: src/pages/home.tsx
 msgid "Attending"
 msgstr "Attending"
@@ -3188,6 +3209,10 @@ msgstr "{groupCount, plural, one {# group} other {# groups}}"
 msgid "Group chat"
 msgstr "Group chat"
 
+#: src/league-table.tsx
+msgid "Place {pos} of {count} · {pts} points"
+msgstr "Place {pos} of {count} · {pts} points"
+
 #: src/pages/admin.tsx
 msgid "Born to"
 msgstr "Born to"
@@ -3358,6 +3383,11 @@ msgstr "you"
 #: src/pages/team.tsx
 msgid "Withdraw link?"
 msgstr "Withdraw link?"
+
+#: src/league-table.tsx
+msgctxt "league table"
+msgid "Gms."
+msgstr "Gms."
 
 #: src/avatar.tsx
 msgid "Move with your finger, zoom with two fingers or the slider."
@@ -4258,6 +4288,11 @@ msgstr "Remove {label}?"
 msgid "at {opponent}"
 msgstr "at {opponent}"
 
+#: src/league-table.tsx
+msgctxt "league table"
+msgid "Pos."
+msgstr "Pos."
+
 #: modules/polls/shared/order-export.ts
 #: modules/polls/shared/order-export.ts
 msgid "Size"
@@ -4375,6 +4410,10 @@ msgstr "Delete team?"
 msgid "Public holidays (no training)"
 msgstr "Public holidays (no training)"
 
+#: src/league-table.tsx
+msgid "Points"
+msgstr "Points"
+
 #: src/pages/stats.tsx
 msgid "Trainings"
 msgstr "Trainings"
@@ -4449,6 +4488,7 @@ msgstr "Confirmed. You can use it to sign in with a code."
 msgid "The setup link has already been used. Sign in with your passkey."
 msgstr "The setup link has already been used. Sign in with your passkey."
 
+#: worker/domain/fixtures.ts
 #: worker/domain/fixtures.ts
 msgid "Game moved ({teamName})"
 msgstr "Game moved ({teamName})"
@@ -4982,10 +5022,6 @@ msgstr "Order saved."
 msgid "{firstName} does not have their own access yet."
 msgstr "{firstName} does not have their own access yet."
 
-#: src/pages/privacy.tsx
-msgid "Game schedules: {scheduleSources}. They are only fetched at the press of a button by a coach or admin."
-msgstr "Game schedules: {scheduleSources}. They are only fetched at the press of a button by a coach or admin."
-
 #: modules/duties/worker/notify.ts
 msgid "{duty} wanted: {team} {opponent}"
 msgstr "{duty} wanted: {team} {opponent}"
@@ -5159,6 +5195,10 @@ msgstr "{label} by push"
 #: worker/routes/setup.ts
 msgid "Away game"
 msgstr "Away game"
+
+#: src/faq.tsx
+msgid "The app syncs it by itself on a coach's device, after each game and once a week. If a game was moved or cancelled at short notice, tap <0>Sync now</0> under <1>Team → Settings → Schedule</1>. Moved and cancelled games are then announced to the team and the coaches."
+msgstr "The app syncs it by itself on a coach's device, after each game and once a week. If a game was moved or cancelled at short notice, tap <0>Sync now</0> under <1>Team → Settings → Schedule</1>. Moved and cancelled games are then announced to the team and the coaches."
 
 #: src/pages/team.tsx
 msgid "Parents are not included in this team."
@@ -6283,6 +6323,10 @@ msgstr "This is already your team."
 msgid "PayPal (paypal.me/{paypal})"
 msgstr "PayPal (paypal.me/{paypal})"
 
+#: src/league-table.tsx
+msgid "League"
+msgstr "League"
+
 #: modules/polls/app/pages.tsx
 msgid "Note copied."
 msgstr "Note copied."
@@ -6900,6 +6944,10 @@ msgstr "Port"
 msgid "and"
 msgstr "and"
 
+#: src/pages/games.tsx
+msgid "The game schedule was only just synced. Possible again at {at}."
+msgstr "The game schedule was only just synced. Possible again at {at}."
+
 #: worker/routes/email.ts
 msgid "Without a passkey, the e-mail address is your only way into the app. Set up a passkey first."
 msgstr "Without a passkey, the e-mail address is your only way into the app. Set up a passkey first."
@@ -7028,6 +7076,10 @@ msgstr "Move event"
 #: src/pages/setup-wizard.tsx
 msgid "Has access."
 msgstr "Has access."
+
+#: worker/domain/fixtures.ts
+msgid "According to {source} from {oldDate}, {oldTime} to {date}, {time}, {location}."
+msgstr "According to {source} from {oldDate}, {oldTime} to {date}, {time}, {location}."
 
 #: src/pages/team.tsx
 msgid "As set for the age group again."
@@ -7399,6 +7451,10 @@ msgstr "Past events of the {team} for {kids} this season"
 msgid "Additional team"
 msgstr "Additional team"
 
+#: src/pages/privacy.tsx
+msgid "Game schedules: {scheduleSources}. They are fetched at the press of a button by a coach or admin and, where the source allows it, by a coach's device by itself after games and once a week."
+msgstr "Game schedules: {scheduleSources}. They are fetched at the press of a button by a coach or admin and, where the source allows it, by a coach's device by itself after games and once a week."
+
 #: src/pages/team.tsx
 msgid "Physio, team manager or kit manager: they see the events, who takes part and the chat, and get changes. They do not respond themselves."
 msgstr "Physio, team manager or kit manager: they see the events, who takes part and the chat, and get changes. They do not respond themselves."
@@ -7523,6 +7579,10 @@ msgstr "Optional: with a confirmed mobile number you can sign in with a code by 
 #: src/duty-blocks.tsx
 msgid "taking turns, no team yet"
 msgstr "taking turns, no team yet"
+
+#: src/pages/games.tsx
+msgid "{days, plural, one {The app syncs by itself on a coach's device every day. By hand only when a game was moved or cancelled at short notice.} other {The app syncs by itself on a coach's device every # days. By hand only when a game was moved or cancelled at short notice.}}"
+msgstr "{days, plural, one {The app syncs by itself on a coach's device every day. By hand only when a game was moved or cancelled at short notice.} other {The app syncs by itself on a coach's device every # days. By hand only when a game was moved or cancelled at short notice.}}"
 
 #: src/pages/fixture-sync.tsx
 msgid "Game schedules"
@@ -9316,6 +9376,10 @@ msgstr "Date"
 msgid "Delete team"
 msgstr "Delete team"
 
+#: worker/domain/fixtures.ts
+msgid "New games ({teamName})"
+msgstr "New games ({teamName})"
+
 #: src/pages/profile.tsx
 msgid "Valid for 7 days, can be used once."
 msgstr "Valid for 7 days, can be used once."
@@ -10153,6 +10217,10 @@ msgstr "Signed up: {label}."
 msgid "No access"
 msgstr "No access"
 
+#: src/league-table.tsx
+msgid "As of {when} ({source})"
+msgstr "As of {when} ({source})"
+
 #: modules/duties/app/helpers.tsx
 #: modules/duties/app/helpers.tsx
 msgid "My duties"
@@ -10282,6 +10350,10 @@ msgstr "What does “absent without excuse” mean?"
 #: src/pages/stats.tsx
 msgid "Team {name}"
 msgstr "Team {name}"
+
+#: src/league-table.tsx
+msgid "Position"
+msgstr "Position"
 
 #: src/list-import.tsx
 msgid "{name} is in no team."
@@ -10552,10 +10624,6 @@ msgstr "Needs prior knowledge"
 msgid "Fan of …"
 msgstr "Fan of …"
 
-#: src/faq.tsx
-msgid "Under <0>Team → Settings → Schedule</0>, tap <1>Sync now</1>. The app only fetches the schedule from handball4all at the push of a button, never automatically. Moved games are then announced to everyone."
-msgstr "Under <0>Team → Settings → Schedule</0>, tap <1>Sync now</1>. The app only fetches the schedule from handball4all at the push of a button, never automatically. Moved games are then announced to everyone."
-
 #: modules/polls/app/pages.tsx
 msgid "{over} paid too much"
 msgstr "{over} paid too much"
@@ -10800,6 +10868,11 @@ msgstr "You are signed in as {loggedInAs}. Select the child you want to link in 
 msgid "{team} has an event at the same time ({clock})."
 msgstr "{team} has an event at the same time ({clock})."
 
+#: src/league-table.tsx
+msgctxt "league table"
+msgid "Pts."
+msgstr "Pts."
+
 #: modules/polls/app/pages.tsx
 msgid "Photo"
 msgstr "Photo"
@@ -10853,6 +10926,10 @@ msgstr "{unexcused} unexcused"
 #: worker/routes/mail.ts
 msgid "Test mail from Kabine"
 msgstr "Test mail from Kabine"
+
+#: worker/domain/fixtures.ts
+msgid "According to {source} from {oldDate}, {oldTime} to {date}, {time}."
+msgstr "According to {source} from {oldDate}, {oldTime} to {date}, {time}."
 
 #: modules/carpools/module.ts
 msgid "At the season change; future entries when someone leaves the club or the squad."
@@ -11800,6 +11877,10 @@ msgstr "Family {last}: {names}"
 msgid "All, members"
 msgstr "All, members"
 
+#: worker/domain/fixtures.ts
+msgid "{newGames, plural, one {One new game is in the schedule of {source}.} other {# new games are in the schedule of {source}.}}"
+msgstr "{newGames, plural, one {One new game is in the schedule of {source}.} other {# new games are in the schedule of {source}.}}"
+
 #: src/club.tsx
 #: worker/index.ts
 msgid "Privacy policy"
@@ -12334,6 +12415,10 @@ msgstr "Functions of this club"
 #: src/pages/team.tsx
 msgid "Birth year"
 msgstr "Birth year"
+
+#: worker/domain/fixtures.ts
+msgid "Game going ahead ({teamName})"
+msgstr "Game going ahead ({teamName})"
 
 #: src/pages/updates.tsx
 msgid "New versions arrive as a pull request in your club's copy on GitHub. Merging it installs the update; you choose when. Updates that change the database put the app into maintenance mode for about a minute, so merge those at a quiet time."
@@ -13106,6 +13191,10 @@ msgstr "Squad updated ({added} new, {removed} removed)."
 msgid "{reported} reported as paid"
 msgstr "{reported} reported as paid"
 
+#: src/league-table.tsx
+msgid "Goal difference"
+msgstr "Goal difference"
+
 #: src/pages/admin.tsx
 msgid "{plans, plural, one {One holiday plan is linked to this period and takes over new dates automatically.} other {# holiday plans are linked to this period and take over new dates automatically.}}"
 msgstr "{plans, plural, one {One holiday plan is linked to this period and takes over new dates automatically.} other {# holiday plans are linked to this period and take over new dates automatically.}}"
@@ -13394,6 +13483,10 @@ msgstr "To confirm, please enter <0>{nextName}</0>."
 msgid "Up next: training"
 msgstr "Up next: training"
 
+#: src/pages/games.tsx
+msgid "{days, plural, one {The app syncs by itself on a coach's device: after each game and every day. By hand only when a game was moved or cancelled at short notice.} other {The app syncs by itself on a coach's device: after each game and every # days. By hand only when a game was moved or cancelled at short notice.}}"
+msgstr "{days, plural, one {The app syncs by itself on a coach's device: after each game and every day. By hand only when a game was moved or cancelled at short notice.} other {The app syncs by itself on a coach's device: after each game and every # days. By hand only when a game was moved or cancelled at short notice.}}"
+
 #: modules/gameday/app/pages.tsx
 msgid "When many teams play at home on the same day, everyone involved gets a message the day before: players, parents and coaches of the teams that play, their fans and whoever has a helper duty that day. They also see a card on the start page and the overview of the day."
 msgstr "When many teams play at home on the same day, everyone involved gets a message the day before: players, parents and coaches of the teams that play, their fans and whoever has a helper duty that day. They also see a card on the start page and the overview of the day."
@@ -13655,6 +13748,7 @@ msgid "Please register how many of your family are coming."
 msgstr "Please register how many of your family are coming."
 
 #: src/calendar.tsx
+#: src/league-table.tsx
 #: src/pages/home.tsx
 #: src/pages/stats.tsx
 #: src/pages/stats.tsx
@@ -13767,6 +13861,10 @@ msgstr "Offer from {driver}"
 #: src/pages/season.tsx
 msgid "Assigned automatically"
 msgstr "Assigned automatically"
+
+#: src/pages/games.tsx
+msgid "The app syncs by itself on a coach's device after each game. By hand only when a game was moved or cancelled at short notice."
+msgstr "The app syncs by itself on a coach's device after each game. By hand only when a game was moved or cancelled at short notice."
 
 #: modules/duties/worker/notify.ts
 msgid "You are signed up tomorrow at {game}: {what}."
@@ -14728,6 +14826,11 @@ msgstr "The duty type is used nowhere and disappears completely."
 #: src/pages/profile.tsx
 msgid "{firstName} has their own access. Here you decide what {firstName} may do on their own. You can always accept and decline for {firstName}."
 msgstr "{firstName} has their own access. Here you decide what {firstName} may do on their own. You can always accept and decline for {firstName}."
+
+#: src/league-table.tsx
+msgctxt "league table"
+msgid "Team"
+msgstr "Team"
 
 #: src/duties.tsx
 msgid "{n, plural, one {Helpers needed · # spot free} other {Helpers needed · # spots free}}"

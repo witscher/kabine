@@ -5,15 +5,10 @@ import type { Actor } from "../auth/actor";
 import { ownScheduleReminderDays } from "./club";
 import { all, list } from "../lib/db";
 import { addDays, nowLocal, todayLocal } from "../lib/time";
-import { activeConnectors, teamSource } from "./fixtures";
+import { activeConnectors, CLAIM_MS, resultDueGames, syncOlderThan, teamSource } from "./fixtures";
 
 /** This many days before a game the app reminds the coaches of meeting point and time (hint and push). */
 export const MEETING_REMINDER_DAYS = 3;
-
-/** Is the team's schedule due for a reminder? `days` from the club profile, 0 = never. */
-export function scheduleStale(syncedAt: string | null, days: number, now: number): boolean {
-  return days > 0 && (!syncedAt || now - Date.parse(syncedAt) >= days * 86_400_000);
-}
 
 /** The opponent of a game for texts: the other team, or the title of a game without home/away. */
 export function gameOpponent(g: { is_home: number | null; home_team: string | null; guest_team: string | null; title: string | null }): string | null {
@@ -30,25 +25,34 @@ export async function loadCoachHints(db: D1Database, actor: Actor, now = Date.no
 
 /**
  * Linked schedules that are due: as a hint after the club's reminder days, and for a sync from the coach's device
- * after the source's `autoSyncDays` (only sources that sync by themselves). One query for both.
+ * (only sources that sync by themselves) after the source's `autoSyncDays` or, with `autoSyncResults`, after a game
+ * without a result (worker/domain/fixtures.ts, autoSyncDue). A team another device is syncing right now is left out.
  */
 async function dueSchedules(db: D1Database, teamIds: number[], now: number): Promise<{ hints: CoachHint[]; autoSync: ScheduleAutoSync[] }> {
   const connectors = activeConnectors();
   const days = ownScheduleReminderDays();
-  if (!connectors.some((c) => days || c.autoSyncDays)) return { hints: [], autoSync: [] };
-  const teams = (
-    await all<{ id: number; name: string; fixture_connector: string; fixture_source: string | null; fixture_synced_at: string | null }>(
+  if (!connectors.some((c) => days || c.autoSyncDays || c.autoSyncResults)) return { hints: [], autoSync: [] };
+  const linked = (
+    await all<{ id: number; name: string; fixture_connector: string; fixture_source: string | null; fixture_synced_at: string | null; fixture_claimed_at: string | null }>(
       db,
-      `SELECT id, name, fixture_connector, fixture_source, fixture_synced_at FROM teams
+      `SELECT id, name, fixture_connector, fixture_source, fixture_synced_at, fixture_claimed_at FROM teams
         WHERE id IN (SELECT value FROM json_each(?)) AND fixture_connector IS NOT NULL ORDER BY name`,
       list(teamIds),
     )
   ).flatMap((t) => {
     const connector = connectors.find((c) => c.id === t.fixture_connector);
-    if (!connector || !teamSource(t)) return [];
-    const remind = scheduleStale(t.fixture_synced_at, days, now);
-    const auto = scheduleStale(t.fixture_synced_at, connector.autoSyncDays ?? 0, now);
-    return remind || auto ? [{ ...t, source: connector.name, remind, auto }] : [];
+    return connector && teamSource(t) ? [{ ...t, connector }] : [];
+  });
+  // Not by itself while another device syncs, or within the source's minimum after the last sync (the claim says "recent")
+  const waiting = (t: (typeof linked)[number]) =>
+    (!!t.fixture_claimed_at && now - Date.parse(t.fixture_claimed_at) < CLAIM_MS) ||
+    (!!t.fixture_synced_at && now - Date.parse(t.fixture_synced_at) < t.connector.minIntervalMs);
+  // Games over without a result: due even when the season is played (the last game)
+  const results = new Set((await resultDueGames(db, linked.filter((t) => !waiting(t)), now)).map((g) => g.teamId));
+  const teams = linked.flatMap((t) => {
+    const remind = syncOlderThan(t.fixture_synced_at, days, now);
+    const auto = !waiting(t) && syncOlderThan(t.fixture_synced_at, t.connector.autoSyncDays ?? 0, now);
+    return remind || auto || results.has(t.id) ? [{ ...t, source: t.connector.name, remind, auto }] : [];
   });
   if (!teams.length) return { hints: [], autoSync: [] };
   // A team with only past games left has played its season: nothing to sync
@@ -74,7 +78,7 @@ async function dueSchedules(db: D1Database, teamIds: number[], now: number): Pro
         source: t.source,
         days: t.fixture_synced_at ? Math.floor((now - Date.parse(t.fixture_synced_at)) / 86_400_000) : null,
       })),
-    autoSync: open.filter((t) => t.auto).map((t) => ({ teamId: t.id, team: t.name, source: t.source })),
+    autoSync: teams.filter((t) => results.has(t.id) || (t.auto && open.includes(t))).map((t) => ({ teamId: t.id, team: t.name, source: t.source })),
   };
 }
 

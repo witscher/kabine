@@ -73,7 +73,7 @@ describe("Hinweise für Trainer", () => {
     expect(await hints(coach)).toEqual([]);
   });
 
-  it("Abgleich von selbst: handball.net ab 7 Tagen, unabhängig von der Erinnerung, nie bei handball4all", async () => {
+  it("Abgleich von selbst: handball.net und handball4all ab 7 Tagen, unabhängig von der Erinnerung", async () => {
     await eventIn(wd, 10, { kind: "game" });
     const link = (connector: string, syncedAt: string | null) =>
       exec("UPDATE teams SET fixture_connector = ?, fixture_source = '{\"teamId\":\"999\"}', fixture_synced_at = ? WHERE id = ?", connector, syncedAt, wd);
@@ -92,9 +92,9 @@ describe("Hinweise für Trainer", () => {
     // Erinnerung aus: der Abgleich von selbst bleibt
     await saveClub(env.DB, { scheduleReminderDays: 0 });
     expect(await autoSync(coach)).toHaveLength(1);
-    // handball4all gleicht nie von selbst ab
+    // handball4all gleicht seit 2026-11 ebenfalls wöchentlich von selbst ab (und nach Spielen, test/fixture-auto-sync.test.ts)
     await link("handball4all", daysAgo(40));
-    expect(await autoSync(coach)).toEqual([]);
+    expect(await autoSync(coach)).toEqual([{ teamId: wd, team: "wD", source: "handball4all" }]);
     // Saison gespielt oder Modul aus: nichts
     await link("handballnet", daysAgo(8));
     await exec("DELETE FROM events");

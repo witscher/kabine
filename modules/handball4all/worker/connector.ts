@@ -2,10 +2,12 @@
 //
 // The interface is protected against automated access. It is therefore queried
 // only from the device of a coach or admin (CORS is allowed), sparingly and
-// throttled. The server checks the response format and syncs the games; it never
-// calls handball4all itself.
+// throttled: at the press of a button, after each game until the result is there
+// and once a week (README). The server checks the response format and syncs the
+// games; it never calls handball4all itself.
 
 import { t } from "@lingui/core/macro";
+import type { LeagueTableRow } from "../../../shared/types";
 import { type FixtureConnector, FixtureFormatError, type FixtureGame, type FixtureSchedule, type FixtureSource } from "../../../worker/module-api";
 
 export const H4A_ENDPOINT = "https://spo.handball4all.de/service/if_g_json.php";
@@ -86,8 +88,23 @@ function groups(v: unknown): Record<string, unknown>[] {
   return [];
 }
 
-/** The raw schedule of handball4all, with the league and the team list it names. */
-export function parseSchedule(data: unknown): { leagueId: string | null; leagueName: string | null; teams: { teamId: string; teamName: string }[]; games: FixtureGame[]; skipped: number } {
+/** A row of the league table (content.score) with the team's id at handball4all, to mark the own one. */
+export type H4aTableRow = Omit<LeagueTableRow, "own"> & { teamId: string | null };
+
+export interface H4aSchedule {
+  leagueId: string | null;
+  leagueName: string | null;
+  teams: { teamId: string; teamName: string }[];
+  games: FixtureGame[];
+  skipped: number;
+  /** League table; empty when handball4all has none (e.g. matchdays of the youngest). */
+  table: H4aTableRow[];
+  /** Note on the table (scoreComments), without HTML. */
+  tableComment: string | null;
+}
+
+/** The raw schedule of handball4all, with the league, the team list it names and the league table. */
+export function parseSchedule(data: unknown): H4aSchedule {
   const root = Array.isArray(data) ? data[0] : data;
   if (typeof root !== "object" || root === null) throw new FixtureFormatError(t`Response is not an object`);
   const content = (root as Record<string, unknown>).content;
@@ -157,7 +174,47 @@ export function parseSchedule(data: unknown): { leagueId: string | null; leagueN
       })
     : [];
 
-  return { leagueId, leagueName: str(head?.name), teams, games, skipped };
+  const table = parseTable(c.score);
+  const comment = Array.isArray(c.scoreComments)
+    ? (c.scoreComments as unknown[])
+        .map((x) => (typeof x === "string" ? x.replace(/<br\s*\/?>/gi, " ").replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim() : ""))
+        .filter(Boolean)
+        .join(" ")
+        .slice(0, 400) || null
+    : null;
+  return { leagueId, leagueName: str(head?.name), teams, games, skipped, table, tableComment: table.length ? comment : null };
+}
+
+const int = (v: unknown): number => {
+  const n = typeof v === "number" ? v : typeof v === "string" && /^-?\d{1,4}$/.test(v.trim()) ? Number(v.trim()) : NaN;
+  return Number.isInteger(n) ? n : 0;
+};
+
+/** League table (content.score). Entries without a team are skipped, at most 30 rows. */
+export function parseTable(score: unknown): H4aTableRow[] {
+  if (!Array.isArray(score)) return [];
+  const rows: H4aTableRow[] = [];
+  for (const raw of score.slice(0, 30)) {
+    if (typeof raw !== "object" || raw === null) continue;
+    const r = raw as Record<string, unknown>;
+    const team = str(r.tabTeamname);
+    if (!team) continue;
+    const pos = int(r.tabScore);
+    rows.push({
+      pos: pos > 0 ? pos : null,
+      teamId: str(r.tabTeamID),
+      team: team.slice(0, 80),
+      games: int(r.numPlayedGames),
+      won: int(r.numWonGames),
+      draw: int(r.numEqualGames),
+      lost: int(r.numLostGames),
+      goalsFor: int(r.numGoalsShot),
+      goalsAgainst: int(r.numGoalsGot),
+      pointsPlus: int(r.pointsPlus),
+      pointsMinus: int(r.pointsMinus),
+    });
+  }
+  return rows;
 }
 
 const ids = (source: FixtureSource) => ({
@@ -170,8 +227,11 @@ const ids = (source: FixtureSource) => ({
 export const handball4all: FixtureConnector = {
   name: "handball4all",
   fetchFrom: "device",
-  // Fair use: at the push of a button, at most every 10 minutes per team
+  // Fair use: at the push of a button at most every 10 minutes per team (coaches once an hour, see the core), by itself
+  // after each game until its result is there (at most twice) and once a week
   minIntervalMs: 10 * 60_000,
+  autoSyncDays: 7,
+  autoSyncResults: true,
   linkField: () => ({
     label: t`Link from the handball4all portal`,
     hint: t`Open the team in the portal and paste the link from the address bar. It contains ogId, lId and tId.`,
@@ -195,8 +255,12 @@ export const handball4all: FixtureConnector = {
     if (schedule.leagueId !== String(ids(source).leagueId)) {
       throw new FixtureFormatError(schedule.leagueId ? t`The data belongs to another league` : t`The data names no league`);
     }
-    const hint = schedule.teams.find((x) => x.teamId === String(ids(source).teamId))?.teamName ?? null;
-    return { games: schedule.games, ownTeamHint: hint, skipped: schedule.skipped };
+    const own = String(ids(source).teamId);
+    const hint = schedule.teams.find((x) => x.teamId === own)?.teamName ?? null;
+    const table = schedule.table.length
+      ? { leagueName: schedule.leagueName, comment: schedule.tableComment, rows: schedule.table.map(({ teamId, ...row }) => ({ ...row, own: teamId === own })) }
+      : null;
+    return { games: schedule.games, ownTeamHint: hint, skipped: schedule.skipped, table };
   },
   tableUrl: (source) => {
     const { orgId, leagueId, teamId, portal } = ids(source);

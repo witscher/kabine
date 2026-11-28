@@ -165,7 +165,7 @@ The picture address contains its version, so the picture under it never changes 
 
 ## handball4all
 
-handball4all is an optional module. The schedule is fetched only in the browser of a coach or admin, never by the server, because the interface blocks automated access. It is fetched only by hand (Team → Settings → Game schedule → "Sync now"), never automatically, because the interface is meant for fair use. The server hands out a job for 10 minutes, checks the result, stores it and then locks the team for 10 minutes. If the fetch fails, the browser releases the job at once.
+handball4all is an optional module. The schedule is fetched only in the browser of a coach or admin, never by the server, because the interface blocks automated access. Because the interface is meant for fair use, it is fetched by a fixed rule: by itself on the device of a coach of the team after each game until its result is there (at most twice) and once a week, and by hand (Team → Settings → Game schedule → "Sync now") for games moved or cancelled at short notice, by coaches at most once an hour (`docs/dev/connectors.md`). The server hands out a job for 10 minutes, checks the result and stores it, with the league table from the same response. If the fetch fails, the browser releases the job at once.
 
 Games are matched by their handball4all game ID. The own team is the name that appears in every game. Future games that are no longer in the schedule are cancelled. Fields that coaches maintain (meeting point, notes) are never overwritten by the import.
 

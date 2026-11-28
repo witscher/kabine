@@ -120,7 +120,10 @@ export function PrivacyPage() {
           </p>
           {scheduleSources ? (
             <p>
-              <Trans>Game schedules: {scheduleSources}. They are only fetched at the press of a button by a coach or admin.</Trans>
+              <Trans>
+                Game schedules: {scheduleSources}. They are fetched at the press of a button by a coach or admin and, where the source allows it, by a
+                coach's device by itself after games and once a week.
+              </Trans>
             </p>
           ) : null}
           <p>

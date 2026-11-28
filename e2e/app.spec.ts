@@ -1250,7 +1250,12 @@ test("Liveticker und Spielbericht: erst beim Antippen ein Abruf, Seite öffnet i
   // Zweites Spiel, seit 5 Stunden vorbei: Spielbericht statt Ticker
   const q = berlin(300);
   const done = { ...game, gID: "777002", gNo: "2", gDate: `${q.day}.${q.month}.${q.year!.slice(2)}`, gTime: `${q.hour}:${q.minute}`, gGuestTeam: "SG Beispielstadt" };
-  const payload = [{ head: { name: "Testliga" }, content: { actualGames: [], futureGames: { gClassID: "555", games: [game, done] }, teamsList: [{ teamID: "999", teamName: "SV Musterstadt" }] } }];
+  // With the league table, which the sync stores from the same response (invented teams)
+  const score = [
+    { tabScore: 1, tabTeamID: "999", tabTeamname: "SV Musterstadt", numPlayedGames: 3, numWonGames: 3, numEqualGames: 0, numLostGames: 0, numGoalsShot: 60, numGoalsGot: 41, pointsPlus: 6, pointsMinus: 0 },
+    { tabScore: 2, tabTeamID: "998", tabTeamname: "TSV Testdorf", numPlayedGames: 3, numWonGames: 1, numEqualGames: 0, numLostGames: 2, numGoalsShot: 45, numGoalsGot: 50, pointsPlus: 2, pointsMinus: 4 },
+  ];
+  const payload = [{ head: { name: "Testliga" }, content: { actualGames: [], futureGames: { gClassID: "555", games: [game, done] }, teamsList: [{ teamID: "999", teamName: "SV Musterstadt" }], score } }];
   expect((await page.request.put("/api/teams/1/games/source", { data: { link: "https://www.handball4all.de/home/portal/baden-wuerttembergischer-hv#/league?ogId=216&lId=555&tId=999" } })).ok()).toBe(true);
   expect((await page.request.post("/api/teams/1/games/claim", { data: { manual: true } })).ok()).toBe(true);
   expect((await page.request.post("/api/teams/1/games/import", { data: { data: payload } })).ok()).toBe(true);
@@ -1296,6 +1301,14 @@ test("Liveticker und Spielbericht: erst beim Antippen ein Abruf, Seite öffnet i
   await page.goto("/?zeit=vergangen");
   await page.getByRole("link", { name: /SG Beispielstadt/ }).first().click();
   await expect(page.getByRole("button", { name: "Liveticker bei handball4all" })).toHaveCount(0);
+  // League table from the sync, collapsed with the own position, nothing fetched for it
+  const table = page.locator("details.league-table");
+  await expect(table.locator("summary")).toContainText("Platz 1 von 2 · 6:0 Punkte");
+  await expect(table.getByRole("cell", { name: "TSV Testdorf" })).toBeHidden();
+  await table.locator("summary").click();
+  await expect(table.getByRole("row", { name: /SV Musterstadt/ })).toHaveClass("own");
+  await expect(table).toContainText("Testliga · Stand");
+  expect(h4aRequests).toEqual([]);
   const popup2 = page.waitForEvent("popup");
   await page.getByRole("button", { name: "Spielbericht bei handball4all" }).click();
   const r = await popup2;
