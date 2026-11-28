@@ -2585,6 +2585,10 @@ test("Sondertermin mit Anmeldung je Familie: Zahl je Familie statt Zusage, Warnu
 
 test("Umfragen: Admin schaltet das Modul ein, Trainer legt eine Umfrage mit Vorschau an, Spielerin stimmt ab", async () => {
   await admin.page.goto("/verwaltung/verein");
+  // Each module links to its documentation, to read before switching it on
+  const docs = admin.page.locator('a[href="https://kabine.dev/docs/module/polls/"]');
+  await expect(docs).toHaveText(/Details und was es speichert/);
+  await expect(docs).toHaveAttribute("rel", "noopener noreferrer");
   const moduleSwitch = admin.page.getByRole("switch", { name: /Umfragen/ });
   await moduleSwitch.click();
   await expect(moduleSwitch).toHaveAttribute("aria-checked", "true");

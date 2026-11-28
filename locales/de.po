@@ -12364,6 +12364,11 @@ msgstr "von {expected}"
 msgid "Message removed."
 msgstr "Nachricht entfernt."
 
+# ai
+#: src/pages/club-settings.tsx
+msgid "Details and what it stores (kabine.dev)"
+msgstr "Details und was es speichert (kabine.dev)"
+
 #: src/pages/join.tsx
 msgid "You are setting up a parent access for the {teamName}."
 msgstr "Du richtest einen Elternzugang für die {teamName} ein."
