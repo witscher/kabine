@@ -1,0 +1,11 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  // www.kabine.dev redirects to kabine.dev (worker.mjs). Deployed with the website by npm run site:deploy.
+  "name": "kabine-site-www",
+  "compatibility_date": "2026-08-20",
+  "main": "./worker.mjs",
+  "workers_dev": false,
+  "preview_urls": false,
+  "routes": [{ "pattern": "www.kabine.dev", "custom_domain": true }],
+  "observability": { "enabled": false }
+}
