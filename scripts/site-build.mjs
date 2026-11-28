@@ -1,4 +1,4 @@
-// Builds the project website (kabine.dev) into site/dist: start pages, content pages (site/src/pages.mjs),
+// Builds the project website (kabine.dev) into site/dist: start pages, content pages (site/src/pages.mjs, site/src/banners.mjs),
 // the club documentation and release notes as pages (site/src/docs.mjs), sitemap, robots.txt, 404, the demo
 // screenshots as WebP and the self-hosted fonts. The legal notice needs the publisher's details from
 // site/legal.json (not in the repository, see site/legal.example.json); `--preview` builds with placeholders where
@@ -8,6 +8,7 @@ import { dirname } from "node:path";
 import sharp from "sharp";
 import { docPages, docsHub, newsPage } from "../site/src/docs.mjs";
 import { contentPage, footer, GITHUB, head, header, LEGAL_ALTERNATES, ORIGIN } from "../site/src/layout.mjs";
+import { bannerPage } from "../site/src/banners.mjs";
 import { PAGES, softwareApplication } from "../site/src/pages.mjs";
 
 const preview = process.argv.includes("--preview");
@@ -98,7 +99,7 @@ for (const lang of ["de", "en"]) {
 }
 
 // Content pages, documentation, release notes -------------------------------------------------------------
-for (const page of PAGES) {
+for (const page of [...PAGES, bannerPage()]) {
   const alternates = Object.fromEntries(["de", "en"].filter((l) => page[l]).map((l) => [l, page[l].path]));
   for (const lang of ["de", "en"]) {
     const p = page[lang];
@@ -195,7 +196,9 @@ Sitemap: ${ORIGIN}/sitemap.xml
 );
 
 // Static files, screenshots as WebP, fonts ----------------------------------------------------------------
-for (const f of ["style.css", "lang.js", "gallery.js", "icon.svg", "_headers", "og-de.png", "og-en.png"]) cpSync(`site/src/${f}`, `${out}/${f}`);
+for (const f of ["style.css", "lang.js", "gallery.js", "copy.js", "icon.svg", "_headers", "og-de.png", "og-en.png"]) cpSync(`site/src/${f}`, `${out}/${f}`);
+// Banners for club websites (npm run site:banners renders them)
+cpSync("site/src/banner", `${out}/banner`, { recursive: true });
 // Screenshots of the demo club (npm run screenshots writes them to docs/screenshots), a third of the PNG size
 for (const locale of ["de", "en"]) {
   mkdirSync(`${out}/shots/${locale}`, { recursive: true });
