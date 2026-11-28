@@ -4,15 +4,25 @@
   // form in worker.mjs. Deploy: npm run site:deploy, which builds wrangler.deploy.jsonc from this file with the
   // recipient from legal.json (MAIL_TO and the destination of the e-mail binding).
   // Secret, once: npx wrangler secret put TURNSTILE_SECRET_KEY --config site/wrangler.jsonc
+  // The chatbot (site/chat.mjs) uses Workers AI through the account's default AI Gateway and two Durable
+  // Objects: one per visitor (messages, rate limit, deleted after 24 hours) and one global daily budget.
   "name": "kabine-site",
   "compatibility_date": "2026-08-20",
   "main": "./worker.mjs",
   "assets": { "directory": "./dist", "binding": "ASSETS", "not_found_handling": "404-page", "run_worker_first": ["/api/*"] },
   // Needs kabine.dev onboarded to Email Sending; the binding sends only to the operator's address
   "send_email": [{ "name": "EMAIL" }],
+  "ai": { "binding": "AI", "remote": true },
+  "durable_objects": {
+    "bindings": [
+      { "name": "CHAT_VISITOR", "class_name": "KabineChatVisitor" },
+      { "name": "CHAT_BUDGET", "class_name": "KabineChatBudget" }
+    ]
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["KabineChatVisitor", "KabineChatBudget"] }],
   "workers_dev": false,
   "preview_urls": false,
   "routes": [{ "pattern": "kabine.dev", "custom_domain": true }],
-  // No Workers Logs: the contact form is the only code that runs, and nothing about it needs to be kept
+  // No Workers Logs: nothing about the contact form or the chat may be kept
   "observability": { "enabled": false }
 }

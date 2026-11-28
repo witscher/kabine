@@ -1,11 +1,13 @@
 // Builds the project website (kabine.dev) into site/dist: start pages, content pages (site/src/pages.mjs, site/src/banners.mjs),
 // the club documentation and release notes as pages (site/src/docs.mjs), sitemap, robots.txt, 404, the demo
-// screenshots as WebP and the self-hosted fonts. The legal notice needs the publisher's details from
+// screenshots as WebP, the self-hosted fonts and the chatbot's documentation bundle (site/src/chat-docs.mjs).
+// The legal notice needs the publisher's details from
 // site/legal.json (not in the repository, see site/legal.example.json); `--preview` builds with placeholders where
 // it is missing.
 import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
 import sharp from "sharp";
+import { chatDocs } from "../site/src/chat-docs.mjs";
 import { docPages, docsHub, newsPage } from "../site/src/docs.mjs";
 import { contentPage, footer, GITHUB, head, header, LEGAL_ALTERNATES, ORIGIN } from "../site/src/layout.mjs";
 import { bannerPage } from "../site/src/banners.mjs";
@@ -14,10 +16,15 @@ import { PAGES, softwareApplication } from "../site/src/pages.mjs";
 const preview = process.argv.includes("--preview");
 const out = "site/dist";
 const read = (f) => readFileSync(f, "utf8");
+/** Every built page, for the chatbot's documentation bundle. */
+const built = [];
 const write = (path, html) => {
   const file = path.endsWith("/") ? `${out}${path}index.html` : `${out}${path}`;
   mkdirSync(dirname(file), { recursive: true });
-  writeFileSync(file, html);
+  // The chat bubble on every page; without JavaScript the page stays as it is
+  const page = html.replace("</head>", '<script src="/chat.js" defer></script>\n</head>');
+  writeFileSync(file, page);
+  built.push({ path, html: page });
 };
 
 // Turnstile's test key (always passes) for local builds
@@ -196,9 +203,15 @@ Sitemap: ${ORIGIN}/sitemap.xml
 );
 
 // Static files, screenshots as WebP, fonts ----------------------------------------------------------------
-for (const f of ["style.css", "lang.js", "gallery.js", "copy.js", "icon.svg", "_headers", "og-de.png", "og-en.png"]) cpSync(`site/src/${f}`, `${out}/${f}`);
+for (const f of ["style.css", "lang.js", "gallery.js", "copy.js", "chat.js", "chat.css", "icon.svg", "_headers", "og-de.png", "og-en.png"]) cpSync(`site/src/${f}`, `${out}/${f}`);
 // Banners for club websites (npm run site:banners renders them)
 cpSync("site/src/banner", `${out}/banner`, { recursive: true });
+// What the chatbot may answer from (read by site/chat.mjs through the assets binding; public like the pages)
+mkdirSync(`${out}/chat`, { recursive: true });
+const moduleReadmes = readdirSync("modules", { withFileTypes: true })
+  .filter((d) => d.isDirectory() && existsSync(`modules/${d.name}/README.md`))
+  .map((d) => ({ id: d.name, markdown: read(`modules/${d.name}/README.md`) }));
+writeFileSync(`${out}/chat/docs.json`, JSON.stringify(chatDocs(built, moduleReadmes)));
 // Screenshots of the demo club (npm run screenshots writes them to docs/screenshots), a third of the PNG size
 for (const locale of ["de", "en"]) {
   mkdirSync(`${out}/shots/${locale}`, { recursive: true });

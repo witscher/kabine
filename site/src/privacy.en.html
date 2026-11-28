@@ -29,7 +29,7 @@
 <p>Legal basis: Art. 6(1)(f) GDPR; my legitimate interest is protecting the websites against misuse. Accessing your device for this is strictly necessary (§ 25(2) no. 2 TDDDG).</p>
 
 <h2>4. kabine.dev</h2>
-<p>Apart from the cookie in section 3, the website sets no cookies, uses no analytics or advertising and loads no fonts, scripts, images or other content from other servers. The only exception is Cloudflare Turnstile on the contact page (section 6).</p>
+<p>Apart from the cookie in section 3, the website sets no cookies, uses no analytics or advertising and loads no fonts, scripts, images or other content from other servers. The only exception is Cloudflare Turnstile on the contact page (section 6). If you use the chat, it stores an id in your browser (section 7).</p>
 <p>If you switch the language or close the hint about the other language version, your browser stores this choice in localStorage (entry <code>kabine-site-lang</code>). It stays on your device until you delete it in your browser settings and is not sent to me. Storing it is strictly necessary for the language choice you asked for (§ 25(2) no. 2 TDDDG).</p>
 <p>Links to other websites (such as GitHub) are plain links. Only when you click one does your browser connect to the other website; it then sends only the address kabine.dev, not the page you came from. From then on the other provider's privacy policy applies.</p>
 
@@ -41,12 +41,34 @@
 <p>The contact page uses Cloudflare Turnstile to protect the form against bots. For this the page loads a Cloudflare script (challenges.cloudflare.com) that evaluates technical information about your browser and device. Turnstile is loaded only on the contact page.</p>
 <p>Legal basis: Art. 6(1)(f) GDPR; my legitimate interest is protecting the form against abuse. Accessing this information on your device is strictly necessary to provide the contact form you are using (§ 25(2) no. 2 TDDDG). Cloudflare processes the data as described in section 2.</p>
 
-<h2>7. Demo on handball.kabine.dev</h2>
+<h2 id="chat">7. Chat assistant</h2>
+<p>On every page of kabine.dev you can open a chat at the bottom right that answers questions about Kabine. An AI writes the answers from Kabine's documentation; they can be wrong. Please don't enter personal data in the chat. As long as you don't send a message, nothing is transmitted or stored. Without JavaScript the chat does not appear.</p>
+
+<h3>7.1 What happens to your message</h3>
+<p>Your message goes over HTTPS to this website's server (a Cloudflare Worker), in the body of the request, not in the address. The server first checks it with a decision model (Clef-flash): whether it is about Kabine, whether it contains personal data and whether it tries to manipulate the assistant. Greetings, thanks, messages unrelated to Kabine and manipulation attempts get a fixed reply, without another model. Questions about Kabine then go to a second decision model (Clef), which picks matching sections of the documentation, and to a language model (GLM-5.3), which writes the answer. The models get your message and, as context, the last two questions and answers of your chat, never a message recognised as a manipulation attempt. Under each answer the chat shows which route it took.</p>
+<p>The chat refuses messages with personal data. The server itself recognises obvious e-mail addresses, phone numbers and account numbers (IBAN); such messages go to no model. Clef-flash recognises names, postal addresses, dates of birth and similar details. In both cases you get a fixed reply asking you to ask again without these details. The message goes to no language model and is not stored, not even in your chat's history; only its time is kept for the rate limit. The detection is not perfect, so please don't enter personal data in the first place.</p>
+<p>All models run on Cloudflare Workers AI, as a processor as described in section 2; the makers of the models receive nothing. Cloudflare does not keep Workers AI inputs and outputs beyond processing the request and does not use them to train AI models; it keeps only operational data without content (such as model, time, number of tokens, duration). The requests go through Cloudflare's AI Gateway. With every request the server tells it not to create a log entry and not to cache anything; it only counts calls, tokens and costs, without content. The server itself writes no logs (Workers Logs are switched off): no messages, no chat id, no error messages.</p>
+
+<h3>7.2 What is stored</h3>
+<table>
+<thead><tr><th>Where</th><th>What</th><th>How long</th></tr></thead>
+<tbody>
+<tr><td>localStorage in your browser</td><td>A random id of your chat (<code>kabine-chat-id</code>), created only with your first message. With it the server finds your chat again on every page of kabine.dev.</td><td>Until you choose “Delete chat” in the chat or delete it in your browser</td></tr>
+<tr><td>Server: your chat's Durable Object</td><td>Your messages and the answers (the last ten; refused messages with personal data are not stored), so you see them again after changing pages and follow-up questions are understood; the times of your messages, to limit them (at most 5 a minute and 40 a day).</td><td>Deleted automatically 24 hours after your last message, immediately with “Delete chat”</td></tr>
+<tr><td>Server: the website's counter</td><td>How many messages and model calls the whole website had on a day and in the last minute, so the chat does not become a free AI service for others. Numbers only, not linked to you.</td><td>Until the next day</td></tr>
+</tbody>
+</table>
+<p>The chat does not store your IP address; Cloudflare processes connection data as described in section 2.</p>
+
+<h3>7.3 Legal basis</h3>
+<p>Legal basis: Art. 6(1)(f) GDPR; my legitimate interest is answering questions about Kabine quickly and protecting the chat against abuse and costs. The id in your browser is strictly necessary for the chat you explicitly use to work (§ 25(2) no. 2 TDDDG); it is created only when you send a message.</p>
+
+<h2>8. Demo on handball.kabine.dev</h2>
 <p>The demo shows the app with an invented club. You use it without signing up, through shared demo access (player, parent, coach, admin) that all visitors use together. Whatever you enter there is seen by other visitors. Please do not enter real personal data. Email, SMS, passkeys, profile pictures, uploading a club logo, feedback and the game schedules from handball4all are switched off in the demo.</p>
 <p><strong>Every night at 3:00 (German time) the demo is reset:</strong> everything visitors entered is deleted on the server and the invented club is created again.</p>
-<p>Legal basis: Art. 6(1)(f) GDPR; my legitimate interest is presenting the software and letting people try it. Accessing your device (section 7.1) is strictly necessary for the demo to work the way you use it (§ 25(2) no. 2 TDDDG).</p>
+<p>Legal basis: Art. 6(1)(f) GDPR; my legitimate interest is presenting the software and letting people try it. Accessing your device (section 8.1) is strictly necessary for the demo to work the way you use it (§ 25(2) no. 2 TDDDG).</p>
 
-<h3>7.1 In your browser</h3>
+<h3>8.1 In your browser</h3>
 <table>
 <thead><tr><th>What</th><th>Purpose</th><th>How long</th></tr></thead>
 <tbody>
@@ -61,7 +83,7 @@
 </table>
 <p>The demo does not use IndexedDB.</p>
 
-<h3>7.2 On the server</h3>
+<h3>8.2 On the server</h3>
 <table>
 <thead><tr><th>Where</th><th>What</th><th>How long</th></tr></thead>
 <tbody>
@@ -73,10 +95,10 @@
 </tbody>
 </table>
 
-<h2>8. No sharing, no tracking</h2>
+<h2>9. No sharing, no tracking</h2>
 <p>I do not share data with third parties, except Cloudflare as processor, my email provider for messages from the contact form and, if you switch on notifications in the demo, your browser's push service. There is no tracking, no analytics and no advertising.</p>
 
-<h2>9. Your rights</h2>
+<h2>10. Your rights</h2>
 <p>You have the right of access (Art. 15 GDPR), rectification (Art. 16), erasure (Art. 17), restriction of processing (Art. 18), data portability (Art. 20) and to object (Art. 21). To exercise them, write to the email address above. You also have the right to lodge a complaint with a data protection supervisory authority, for example the authority where you live.</p>
 
 <div class="note">
