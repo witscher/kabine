@@ -125,7 +125,6 @@ export function AdminPage() {
           </div>
         </header>
         <div class="content">
-          <UpdateHint update={me.update} />
           {/* Only own teams as a shortcut, all others under Administration → Teams */}
           {own.length ? (
             <section class="stack-sm" aria-label={t`My teams`}>
@@ -162,6 +161,8 @@ export function AdminPage() {
               </span>
             </a>
           ) : null}
+          {/* A newer Kabine release (src/update-hint.tsx), above the groups like the warning below */}
+          <UpdateHint update={me.update} />
           {legalLinksMissing(club) ? (
             <div role="alert">
               <Notice kind="warn">

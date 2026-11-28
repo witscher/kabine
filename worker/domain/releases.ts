@@ -54,6 +54,17 @@ async function saveUpdateCheck(db: D1Database, state: UpdateCheck): Promise<void
   await run(db, "INSERT INTO app_meta (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value", KEY, JSON.stringify(state));
 }
 
+/** Like saveUpdateCheck, but keeps the switch as it is now: an admin may switch the check off while it fetches. */
+async function saveCheckResult(db: D1Database, state: UpdateCheck): Promise<void> {
+  await run(
+    db,
+    `INSERT INTO app_meta (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE
+       SET value = json_set(excluded.value, '$.off', CASE WHEN json_extract(app_meta.value, '$.off') THEN json('true') ELSE json('false') END)`,
+    KEY,
+    JSON.stringify(state),
+  );
+}
+
 /** Admins switch the check on or off. Off forgets what was fetched, so no stale hint stays. */
 export async function setUpdateCheck(db: D1Database, on: boolean): Promise<void> {
   const state = await loadUpdateCheck(db);
@@ -94,11 +105,11 @@ export async function checkForUpdates(env: Env, now = Date.now(), fetcher: typeo
     const update = availableUpdate(feed, KABINE_VERSION, null, "en")!;
     // Stored before sending: a failing queue must not lead to a second push tomorrow
     next.notified = latest.version;
-    await saveUpdateCheck(env.DB, next);
+    await saveCheckResult(env.DB, next);
     await notifyAdmins(env, update);
     return "checked";
   }
-  await saveUpdateCheck(env.DB, next);
+  await saveCheckResult(env.DB, next);
   if (!feed) console.log("Update check: releases.json not available");
   return feed ? "checked" : "failed";
 }

@@ -140,6 +140,16 @@ describe("the daily check", () => {
     expect((await loadUpdateCheck(env.DB)).feed?.latest.version).toBe(NEXT);
   });
 
+  it("an admin switching it off while the fetch runs stays off", async () => {
+    const slow = (async () => {
+      await api("/admin/update-check", { method: "PUT", body: { on: false }, cookie: adaCookie });
+      return Response.json(feed(release(NEXT)));
+    }) as unknown as typeof fetch;
+    await checkForUpdates(env, noon(), slow);
+    expect((await loadUpdateCheck(env.DB)).off).toBe(true);
+    expect((await api("/session", { cookie: adaCookie })).body.me.update).toBeNull();
+  });
+
   it("switched off, nothing is fetched and nothing shown; on again, it checks the same day", async () => {
     const { fetcher, seen } = fakeFetch(feed(release(NEXT)));
     expect((await api("/admin/update-check", { method: "PUT", body: { on: false }, cookie: taraCookie })).status).toBe(403);
