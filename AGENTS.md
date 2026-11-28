@@ -39,7 +39,7 @@ New modules start as `status: "beta"`, switched off. Modules never change core f
 | `test/` | Vitest in the Workers pool, incl. the contract tests every module and connector must pass |
 | `e2e/` | Playwright tests against a local build with invented data |
 | `docs/` | for clubs: install, operation, privacy (also in German) |
-| `docs/dev/` | for contributors: [architecture](docs/dev/architecture.md), modules, connectors, sports, translation, design, security, decisions, roadmap |
+| `docs/dev/` | for contributors: [architecture](docs/dev/architecture.md), modules, connectors, sports, translation, design, security, [releases](docs/dev/releases.md), decisions, roadmap |
 
 ## Rules
 
