@@ -7423,6 +7423,11 @@ msgstr "Kein Ort"
 msgid "Changed: {label}"
 msgstr "Geändert: {label}"
 
+# ai
+#: src/pages/games.tsx
+msgid "How syncing with {docsName} works (kabine.dev)"
+msgstr "So funktioniert der Abgleich mit {docsName} (kabine.dev)"
+
 #: src/pages/plans.tsx
 #: src/pages/plans.tsx
 #: src/pages/plans.tsx
@@ -8084,6 +8089,11 @@ msgstr "Leer lassen: Es gilt die längste Frist der beteiligten Mannschaften."
 #: src/pages/join.tsx
 msgid "Kabine is installed. Enter the setup password you chose when deploying (<0>ADMIN_BOOTSTRAP_TOKEN</0>). It works once and makes you the first admin."
 msgstr "Kabine ist installiert. Gib das Einrichtungspasswort ein, das du beim Deploy gewählt hast (<0>ADMIN_BOOTSTRAP_TOKEN</0>). Es funktioniert einmal und macht dich zum ersten Admin."
+
+# ai
+#: modules/mascot/app/admin.tsx
+msgid "How the pictures should look (kabine.dev)"
+msgstr "So sollten die Bilder aussehen (kabine.dev)"
 
 #: src/pages/season.tsx
 msgid "No automatic assignment without year of birth. Suggestion: previous team."
@@ -13714,6 +13724,11 @@ msgstr "Laufende Saison: keine"
 #: modules/polls/app/pages.tsx
 msgid "Poll ended."
 msgstr "Umfrage beendet."
+
+# ai
+#: src/pages/club-settings.tsx
+msgid "What each module does and stores (kabine.dev)"
+msgstr "Was jedes Modul tut und speichert (kabine.dev)"
 
 #: src/format.ts
 msgid "tomorrow"

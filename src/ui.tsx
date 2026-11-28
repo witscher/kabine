@@ -484,6 +484,16 @@ export function ErrorBox(props: { error: unknown; onRetry?: () => void }) {
   );
 }
 
+/** A link to the documentation on kabine.dev (shared/site-docs.ts) in a new tab, without referrer. */
+export function DocsLink({ href, children }: { href: string; children: ComponentChildren }) {
+  return (
+    <a class="ext-link small" href={href} target="_blank" rel="noopener noreferrer">
+      <Icon name="link" size={16} />
+      {children}
+    </a>
+  );
+}
+
 export function Notice(props: { kind?: "info" | "warn" | "yellow"; icon?: IconName; children: ComponentChildren }) {
   return (
     <div class={`notice ${props.kind === "warn" ? "warn" : props.kind === "yellow" ? "yellow" : ""}`}>

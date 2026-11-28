@@ -3,12 +3,14 @@ import { Trans } from "@lingui/react/macro";
 import { useState } from "preact/hooks";
 import type { ModuleManifest } from "../../shared/module-api";
 import { MODULES, type ModuleId, moduleOn } from "../../shared/modules";
+import { moduleDocsUrl } from "../../shared/site-docs";
 import type { TeamRef } from "../../shared/types";
 import { api, errorMessage } from "../api";
 import { useClub } from "../club";
 import { ago, clock, fullDate, isoToLocalDate } from "../format";
+import { currentLocale } from "../i18n";
 import { invalidate, useQuery } from "../store";
-import { Button, confirmDialog, Field, toast } from "../ui";
+import { Button, confirmDialog, DocsLink, Field, toast } from "../ui";
 
 export interface Source {
   configured: boolean;
@@ -179,6 +181,9 @@ export function ScheduleSection({ team, onChanged }: { team: TeamRef; onChanged:
   };
   const linkedName = linked?.name ?? "";
   const pausedName = data.paused?.name ?? "";
+  // The source's page on kabine.dev: how and how often it syncs
+  const docsFor = linked ?? chosen;
+  const docsName = docsFor?.name ?? "";
   return (
     <section class="card card-body" aria-label={t`Game schedule`}>
       <h2 class="section-title" style={{ margin: 0 }}>
@@ -201,6 +206,11 @@ export function ScheduleSection({ team, onChanged }: { team: TeamRef; onChanged:
         </p>
       )}
       {data.error && linked ? <p class="small warn-text">{data.error}</p> : null}
+      {docsFor ? (
+        <DocsLink href={moduleDocsUrl(docsFor.id, currentLocale())}>
+          <Trans>How syncing with {docsName} works (kabine.dev)</Trans>
+        </DocsLink>
+      ) : null}
       {data.connectors.length > 1 ? (
         <Field label={t({ message: "Source", context: "game schedule" })} hint={t`Each team takes its games from one source.`}>
           {(id) => (

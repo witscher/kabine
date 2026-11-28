@@ -8,13 +8,14 @@ import { type ClubModules, type ClubProfile, isHexColor, KABINE_SOURCE } from ".
 import type { ModuleManifest } from "../../shared/module-api";
 import { MODULES, type ModuleId, moduleOffered } from "../../shared/modules";
 import { LOCALE_NAMES, LOCALES, type Locale } from "../../shared/i18n";
+import { modulesOverviewUrl } from "../../shared/site-docs";
 import { useQuery } from "../store";
 import { api, errorMessage } from "../api";
 import { loadRegionHolidays } from "../holidays";
 import { ClubMark, loadClub, setClub, useClub } from "../club";
 import { currentLocale } from "../i18n";
 import { useSession } from "../session";
-import { Button, confirmDialog, Field, Notice, SavedNote, SwitchRow, TextField, toast, TopBar, useDocumentTitle, useSaving } from "../ui";
+import { Button, confirmDialog, DocsLink, Field, Notice, SavedNote, SwitchRow, TextField, toast, TopBar, useDocumentTitle, useSaving } from "../ui";
 import { AdminOnly } from "./admin";
 
 const LOGO_TYPES = "image/png,image/jpeg,image/webp,image/svg+xml";
@@ -501,6 +502,9 @@ export function ModulesSection({ modules, onChange, confirmOff = false }: { modu
       <h2 class="section-title" style={{ margin: 0 }}>
         <Trans>Modules</Trans>
       </h2>
+      <DocsLink href={modulesOverviewUrl(currentLocale())}>
+        <Trans>What each module does and stores (kabine.dev)</Trans>
+      </DocsLink>
       {features.map(row)}
       {sources.length ? (
         <>
