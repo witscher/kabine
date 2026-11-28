@@ -8,6 +8,7 @@ import { fullDate, time } from "../../../src/format";
 import { Icon } from "../../../src/icons";
 import { LeagueTableCard } from "../../../src/league-table";
 import { GameLinks, isLiveWindow, isReportWindow } from "../../../src/live";
+import { ResultLine } from "../../../src/result";
 import { invalidate, useQuery } from "../../../src/store";
 import { ErrorBox, Notice, Spinner, SwitchRow, toast, TopBar, useDocumentTitle } from "../../../src/ui";
 import type { FanGamePage, FollowTeam, FollowView } from "../types";
@@ -107,8 +108,6 @@ export function FanGamePage({ id }: { id: string }) {
   useDocumentTitle(g ? g.title : t`Game`);
   const team = g ? g.teams.map((tm) => tm.name).join(" + ") : "";
   const kickoff = g ? time(g.startsAt) : "";
-  const home = g?.result?.home;
-  const guest = g?.result?.guest;
   return (
     <main class="page">
       <TopBar title={t`Game`} kicker={g?.following ? t`${team} · Fan` : team} back="/" />
@@ -148,16 +147,7 @@ export function FanGamePage({ id }: { id: string }) {
                     )}
                   </div>
                 ) : null}
-                {g.result ? (
-                  <div class="row-gap">
-                    <Icon name="check" size={18} />
-                    <span>
-                      <Trans>
-                        Result {home}:{guest}
-                      </Trans>
-                    </span>
-                  </div>
-                ) : null}
+                {g.result && !g.cancelled ? <ResultLine home={g.result.home} guest={g.result.guest} isHome={g.isHome} inTable={!!g.game?.inTable} size="page" /> : null}
               </div>
             </section>
             {isLiveWindow(g) ? (

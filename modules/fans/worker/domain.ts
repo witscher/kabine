@@ -8,6 +8,7 @@ import { cachedTeamInfo, EVENT_COLUMNS, EVENT_JOINS, type EventRow, eventTitle, 
 import { enqueuePush, shortDate, shortTime } from "../../../worker/domain/notify";
 import { cacheVersions } from "../../../worker/lib/cache";
 import { all, first, list, run } from "../../../worker/lib/db";
+import { teamsWithLeagueTable } from "../../../worker/domain/league-table";
 import { localToInstant } from "../../../worker/lib/time";
 import type { EventChange } from "../../../worker/module-api";
 import type { FanGame, FollowTeam } from "../types";
@@ -139,6 +140,17 @@ function toFanGame(e: GameRow, info: Map<number, TeamInfo>, following: Set<numbe
     },
     following: ids.some((id) => following.has(id)),
   };
+}
+
+/**
+ * Games with a result learn whether their league has a table (then the result shows the outcome word, src/result.tsx).
+ * One query, and only when a game has a result.
+ */
+export async function withLeagueTables(db: D1Database, games: FanGame[]): Promise<FanGame[]> {
+  const scored = games.filter((g) => g.result && g.game);
+  if (!scored.length) return games;
+  const tables = await teamsWithLeagueTable(db, [...new Set(scored.flatMap((g) => g.teams.map((tm) => tm.id)))]);
+  return games.map((g) => (g.result && g.game ? { ...g, game: { ...g.game, inTable: g.teams.some((tm) => tables.has(tm.id)) } } : g));
 }
 
 /**

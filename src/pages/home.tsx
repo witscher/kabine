@@ -21,6 +21,7 @@ import { useOffline } from "../offline";
 import { useQuery } from "../store";
 import { Button, CoachMark, Empty, ErrorBox, Segmented, StatusPill, useDocumentTitle } from "../ui";
 import { isLiveWindow, LiveCard } from "../live";
+import { ResultLine } from "../result";
 import { isRelevantEvent } from "../../shared/relevance";
 import { FamilyShort } from "../special-attendance";
 
@@ -295,6 +296,8 @@ function EventRow({ event }: { event: EventSummary }) {
   const single = mine.length === 1 ? mine[0]! : null;
   const team = useTeamLabel()(event);
   const at = time(event.startsAt);
+  // Played: the score with the outcome instead of time and venue (those are on the game page)
+  const result = game && !cancelled && event.game?.homeGoals != null && event.game.guestGoals != null ? event.game : null;
   // Games: the short title ("SVM 2 – Opponent"), the team sits in the ball
   const label =
     event.kind === "training" ? (team ? t`Training ${team} · ${at}` : t`Training · ${at}`) : game ? event.shortTitle : `${event.title} · ${time(event.startsAt)}`;
@@ -317,6 +320,7 @@ function EventRow({ event }: { event: EventSummary }) {
           {game && event.game?.isHome ? <HomeTag /> : null}
           {label}
         </div>
+        {result ? <ResultLine home={result.homeGoals!} guest={result.guestGoals!} isHome={result.isHome} inTable={!!result.inTable} /> : null}
         {cancelled ? (
           <div class="sub">
             <span class="cancel-tag">
@@ -325,7 +329,7 @@ function EventRow({ event }: { event: EventSummary }) {
             {byName ? t`by ${byName}` : ""}
             {event.cancelled!.reason ? `${event.cancelled!.byName ? ": " : ""}${event.cancelled!.reason}` : ""}
           </div>
-        ) : (
+        ) : result ? null : (
           <div class="sub">
             {game ? `${time(event.startsAt)} · ` : ""}
             {event.location?.name ?? t`Location to follow`}

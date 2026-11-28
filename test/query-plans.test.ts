@@ -187,4 +187,19 @@ describe("Abfragepläne ohne Durchsuchen aller Termine", () => {
     expect(seen.length).toBeGreaterThan(8);
     expect(await fullScans(seen)).toEqual([]);
   });
+
+  it("Results in the list: league tables asked once, only when a game shown has a result", async () => {
+    const tables = (seen: Recorded[]) => seen.filter((q) => q.sql.includes("league_tables"));
+    {
+      const { db, seen } = recording(env.DB);
+      await loadEventPage(db, actor, { limit: 20, past: false, teamIds: null });
+      expect(tables(seen)).toEqual([]);
+    }
+    const played = await eventIn(teamId, -2, { kind: "game" });
+    await exec("UPDATE events SET is_home = 1, home_goals = 27, guest_goals = 25 WHERE id = ?", played);
+    const { db, seen } = recording(env.DB);
+    await loadEventPage(db, actor, { limit: 20, past: true, teamIds: null });
+    expect(tables(seen)).toHaveLength(1);
+    expect(await fullScans(seen)).toEqual([]);
+  });
 });

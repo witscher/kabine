@@ -3149,6 +3149,11 @@ msgstr "Import games from a table"
 msgid "Taking turns: {order}. The new team is told in its chat in good time."
 msgstr "Taking turns: {order}. The new team is told in its chat in good time."
 
+#: src/result.tsx
+msgctxt "game outcome"
+msgid "Drawn"
+msgstr "Drawn"
+
 #: src/pages/audit.tsx
 msgid "{who} carried out the season change to {season}"
 msgstr "{who} carried out the season change to {season}"
@@ -3620,6 +3625,10 @@ msgstr "{short}: all games of the club"
 #: src/pages/help.tsx
 msgid "Thank you, your message has arrived."
 msgstr "Thank you, your message has arrived."
+
+#: src/result.tsx
+msgid "Lost narrowly"
+msgstr "Lost narrowly"
 
 #: src/pages/admin.tsx
 msgid "the assignment to {teamNames}"
@@ -13336,6 +13345,11 @@ msgstr "{reported} reported as paid"
 msgid "Goal difference"
 msgstr "Goal difference"
 
+#: src/result.tsx
+msgctxt "game outcome"
+msgid "Loss"
+msgstr "Loss"
+
 #: modules/mascot/app/admin.tsx
 msgid "Close loss"
 msgstr "Close loss"
@@ -13552,6 +13566,11 @@ msgstr "Parents are not included in {teamName}. The players accept and decline t
 #: worker/routes/join.ts
 msgid "There is now an access for this person. Please ask for a new link."
 msgstr "There is now an access for this person. Please ask for a new link."
+
+#: src/result.tsx
+msgctxt "game outcome"
+msgid "Won"
+msgstr "Won"
 
 #: modules/duties/app/helpers.tsx
 #: modules/fans/app/pages.tsx
@@ -14568,6 +14587,10 @@ msgstr "Message"
 msgid "{name}: missed without excuse"
 msgstr "{name}: missed without excuse"
 
+#: src/result.tsx
+msgid "Lost clearly"
+msgstr "Lost clearly"
+
 #: modules/polls/app/pages.tsx
 #: src/view-as.tsx
 msgid "End"
@@ -14699,6 +14722,11 @@ msgstr "Team chat {teamName}"
 #: src/pages/team.tsx
 msgid "Add staff"
 msgstr "Add staff"
+
+#: src/result.tsx
+msgctxt "game outcome"
+msgid "Win"
+msgstr "Win"
 
 #: src/list-import.tsx
 #: src/pages/admin.tsx
@@ -15584,6 +15612,11 @@ msgstr "Groups"
 msgid "At most {max} players in the squad."
 msgstr "At most {max} players in the squad."
 
+#: src/result.tsx
+msgctxt "game outcome"
+msgid "Draw"
+msgstr "Draw"
+
 #: src/pages/event.tsx
 msgid "{name} is now inactive."
 msgstr "{name} is now inactive."
@@ -15670,10 +15703,6 @@ msgstr "First give the app the club's address"
 #: modules/polls/app/pages.tsx
 msgid "Making it smaller …"
 msgstr "Making it smaller …"
-
-#: modules/fans/app/pages.tsx
-msgid "Result {home}:{guest}"
-msgstr "Result {home}:{guest}"
 
 #: src/special-attendance.tsx
 msgid "{n, plural, one {# person} other {# people}}"
