@@ -26,7 +26,6 @@
   "You now follow {name}.": "Du folgst jetzt {name}.",
   "You no longer follow {name}.": "Du folgst {name} nicht mehr.",
   "{team} · Fan": "{team} · Fan",
-  "Result {home}:{guest}": "Ergebnis {home}:{guest}",
   "Only the team's players, parents and coaches see the squad, responses and carpools.": "Kader, Zu- und Absagen und Fahrgemeinschaften sehen nur Spieler, Eltern und Trainer der Mannschaft.",
   "You follow {team} as a fan.": "Du folgst {team} als Fan.",
   "Home games of the teams you follow, game data only": "Heimspiele der Mannschaften, denen du folgst, nur Spieldaten",

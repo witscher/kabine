@@ -1,0 +1,9 @@
+{
+  "Win  [context: game outcome]": "Sieg",
+  "Draw  [context: game outcome]": "Remis",
+  "Loss  [context: game outcome]": "Niederlage",
+  "Won  [context: game outcome]": "Gewonnen",
+  "Drawn  [context: game outcome]": "Unentschieden",
+  "Lost narrowly": "Knapp verloren",
+  "Lost clearly": "Deutlich verloren"
+}

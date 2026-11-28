@@ -53,6 +53,8 @@ routes.get("/fans/games/:id", async (c) => {
   const actor = requireActor(c);
   const game = await fanGame(c.env.DB, actor, intParam(c, "id"));
   if (!game) throw notFound(t`This game does not exist.`);
-  const page: FanGamePage = { ...game, standings: await loadLeagueTable(c.env.DB, game.teams.map((tm) => tm.id)) };
+  const standings = await loadLeagueTable(c.env.DB, game.teams.map((tm) => tm.id));
+  // Outcome word at the result only where the league has a table
+  const page: FanGamePage = { ...game, game: game.game && game.result ? { ...game.game, inTable: !!standings } : game.game, standings };
   return c.json(page);
 });
