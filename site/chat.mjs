@@ -2,7 +2,8 @@
 // Durable Object (KabineChatVisitor) with their last messages, their rate limit and an alarm that deletes
 // everything 24 hours after the last message; one more object (KabineChatBudget) counts the model calls of
 // the whole site per day. Every message passes the triage with Clef first; only questions about Kabine
-// reach the language model (site/chat-core.mjs). Nothing here logs: no message text, no visitor id, no error.
+// reach the language model (site/chat-core.mjs). Messages with personal data are refused and not stored.
+// Nothing here logs: no message text, no visitor id, no error.
 import { DurableObject } from "cloudflare:workers";
 import * as core from "./chat-core.mjs";
 
@@ -120,6 +121,14 @@ export async function handleMessage({ storage, env, budget, message, lang, now =
   await storage.put("times", window.keep);
   await storage.setAlarm(now + LIMITS.keepMs);
 
+  // Personal data: refused before any model when obvious, after Clef otherwise; such a message is never
+  // stored, not even in the history (only the time above, for the rate limit)
+  const refusePersonal = () => ({ reply: fixed.personal_data, route: "personal_data", steps });
+  if (core.hasObviousPersonalData(message)) {
+    steps.push({ step: "precheck", ms: 0 });
+    return refusePersonal();
+  }
+
   const history = (await storage.get("history")) ?? [];
   const finish = async (reply, route, extra = {}) => {
     const latest = (await storage.get("history")) ?? [];
@@ -139,6 +148,7 @@ export async function handleMessage({ storage, env, budget, message, lang, now =
     return finish(fixed.error, "error");
   }
   const route = core.decideRoute(scores);
+  if (route === "personal_data") return refusePersonal();
   if (route === "blocked" || route === "off_topic" || route === "greeting" || route === "thanks") return finish(fixed[route], route);
 
   if (!(await budget.take("answer"))) return finish(fixed.budget, "budget");

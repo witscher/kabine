@@ -26,7 +26,7 @@
         confirmClear: "Den Chat löschen? Die Nachrichten werden auch auf dem Server gelöscht.",
         typing: "Antwort kommt …",
         offline: "Gerade kann ich nicht antworten. Versuch es später noch einmal.",
-        note: "Deine Nachrichten verarbeiten Workers AI und der Server dieser Website bei Cloudflare; gespeichert werden sie bis 24 Stunden nach deiner letzten Nachricht. Gib keine persönlichen Daten ein. ",
+        note: "Deine Nachrichten verarbeiten Workers AI und der Server dieser Website bei Cloudflare; gespeichert werden sie bis 24 Stunden nach deiner letzten Nachricht. Bitte gib keine persönlichen Daten ein (Namen, E-Mail-Adressen, Telefonnummern, Anschriften): Nachrichten damit lehnt der Chat ab und speichert sie nicht. ",
         privacy: "Datenschutz",
         privacyHref: "/datenschutz/#chat",
         you: "Du",
@@ -35,6 +35,7 @@
         seconds: function (ms) { return (ms / 1000).toLocaleString("de", { maximumFractionDigits: 1 }) + " s"; },
         routes: {
           answer: "Clef → GLM-5.3, aus der Doku",
+          personal_data: "persönliche Daten erkannt, nicht gespeichert",
           answer_unsure: "Clef unsicher → GLM-5.3, aus der Doku",
           blocked: "Clef: Manipulationsversuch, feste Antwort",
           off_topic: "Clef: nicht zu Kabine, feste Antwort",
@@ -45,7 +46,7 @@
           error: "Fehler, feste Antwort",
           too_long: "zu lang, kein Modell",
         },
-        steps: { triage: "Triage", sections: "Abschnitte", answer: "Antwort" },
+        steps: { precheck: "Vorprüfung", triage: "Triage", sections: "Abschnitte", answer: "Antwort" },
       }
     : {
         open: "Questions about Kabine? Open the chat",
@@ -62,7 +63,7 @@
         confirmClear: "Delete the chat? The messages are deleted on the server too.",
         typing: "Answer coming …",
         offline: "I can't answer right now. Please try again later.",
-        note: "Your messages are processed by Workers AI and this website's server at Cloudflare and kept until 24 hours after your last message. Please don't enter personal data. ",
+        note: "Your messages are processed by Workers AI and this website's server at Cloudflare and kept until 24 hours after your last message. Please don't send personal data (names, e-mail addresses, phone numbers, postal addresses): the chat refuses such messages and does not store them. ",
         privacy: "Privacy",
         privacyHref: "/en/privacy/#chat",
         you: "You",
@@ -71,6 +72,7 @@
         seconds: function (ms) { return (ms / 1000).toLocaleString("en", { maximumFractionDigits: 1 }) + " s"; },
         routes: {
           answer: "Clef → GLM-5.3, from the docs",
+          personal_data: "personal data detected, not stored",
           answer_unsure: "Clef unsure → GLM-5.3, from the docs",
           blocked: "Clef: manipulation attempt, fixed reply",
           off_topic: "Clef: not about Kabine, fixed reply",
@@ -81,7 +83,7 @@
           error: "error, fixed reply",
           too_long: "too long, no model",
         },
-        steps: { triage: "triage", sections: "sections", answer: "answer" },
+        steps: { precheck: "pre-check", triage: "triage", sections: "sections", answer: "answer" },
       };
 
   function storedId() {
@@ -314,7 +316,7 @@
     sendBtn.disabled = true;
     var examples = log.querySelector(".kc-examples");
     if (examples) examples.remove();
-    addMessage("user", text);
+    var mine = addMessage("user", text);
     var typing = el("div", "kc-msg kc-bot kc-typing", T.typing);
     typing.setAttribute("aria-hidden", "true");
     log.appendChild(typing);
@@ -322,6 +324,14 @@
     status.textContent = T.typing;
     post("/api/chat", { id: visitorId(true), message: text })
       .then(function (r) {
+        // Refused for personal data: the message is gone from the chat and back in the field for editing
+        if (r && r.route === "personal_data") {
+          mine.remove();
+          if (!input.value) {
+            input.value = text;
+            count.textContent = T.count(text.length);
+          }
+        }
         addMessage("bot", r && r.reply ? r.reply : T.offline, r);
       })
       .catch(function () {

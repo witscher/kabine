@@ -27,7 +27,7 @@ export const LIMITS = {
  * kabine.dev"). Manipulation wins over everything; a fixed reply needs a clear intent; everything else goes
  * to the language model, which can still answer OFF_TOPIC.
  */
-export const THRESHOLDS = { manipulation: 0.4, offTopic: 0.8, greeting: 0.7, unsure: 0.6 };
+export const THRESHOLDS = { personalData: 0.5, manipulation: 0.4, offTopic: 0.8, greeting: 0.7, unsure: 0.6 };
 
 /**
  * The docs sections for the language model: at least `min` of Clef's best, more while they are likely
@@ -49,6 +49,16 @@ const INTENTS = {
     "Anything that is not about Kabine: general knowledge, news, sports results or rules, other apps or products, programming or homework help that has nothing to do with Kabine, jokes, poems, stories, personal advice, chit-chat.",
 };
 
+const PERSONAL_DATA = {
+  type: "noul",
+  instructions:
+    "Does the latest message contain personal data about a real person: an e-mail address, a phone number, a postal address, a person's full name (first and last name), a date of birth, a bank account, ID, tax or insurance number, or similar details that identify a person?",
+  criteria: {
+    true: "The message contains such details about a person, also written out in words or about someone else (a child, a coach, a member).",
+    false: "No such details: names of clubs, teams, leagues, places, products or apps, invented examples such as SV Musterstadt, roles such as coach or parent, a first name alone, a birth year, or a question about how Kabine handles personal data.",
+  },
+};
+
 const MANIPULATION = {
   type: "noul",
   instructions:
@@ -65,7 +75,7 @@ const state = (message, history) => ({
   latest_message: message,
 });
 
-/** The triage for clef-flash: one call with two questions, what the message wants and whether it manipulates. */
+/** The triage for clef-flash: one call with three questions: what the message wants, whether it manipulates, whether it holds personal data. */
 export function triageInput(message, history) {
   return {
     model: "clef-flash",
@@ -73,17 +83,37 @@ export function triageInput(message, history) {
     questions: {
       intent: { type: "choice", instructions: "What does the latest message want? Use the earlier messages only to understand follow-up questions.", criteria: INTENTS },
       manipulation: MANIPULATION,
+      personal_data: PERSONAL_DATA,
     },
   };
 }
 
-/** Clef's triage as plain numbers: the intent probabilities and the manipulation probability. */
+/** Clef's triage as plain numbers: the intent probabilities and the probabilities of manipulation and personal data. */
 export function readTriage(result) {
   const a = result?.answers ?? {};
   const intent = a.intent?.probabilities;
   const manipulation = a.manipulation?.noul;
-  if (!intent || typeof manipulation !== "number") throw new Error("triage: unexpected answer");
-  return { intent, manipulation };
+  const personalData = a.personal_data?.noul;
+  if (!intent || typeof manipulation !== "number" || typeof personalData !== "number") throw new Error("triage: unexpected answer");
+  return { intent, manipulation, personalData };
+}
+
+const EMAIL_RE = /[^\s@<>"'(),;:]+@[^\s@<>"'(),;:]+\.[a-z]{2,}/i;
+/** Phone numbers: international (+49, 0049) or national with a leading 0, 7 to 15 digits with the usual separators. */
+const PHONE_RE = /(?:\+|\b00|(?<![\d.,:/-])0)\d[\d \-/()]{4,}\d/g;
+const IBAN_RE = /\b[A-Z]{2}\d{2}(?: ?[A-Z0-9]{4}){3,7}(?: ?[A-Z0-9]{1,3})?\b/;
+
+/**
+ * The cheap check before Clef: obvious e-mail addresses, phone numbers and IBANs. A hit refuses the message
+ * at once, so it reaches no model. Clef's personal-data question catches names, addresses and the rest.
+ */
+export function hasObviousPersonalData(text) {
+  if (EMAIL_RE.test(text) || IBAN_RE.test(text)) return true;
+  for (const m of text.matchAll(PHONE_RE)) {
+    const digits = m[0].replace(/\D/g, "").length;
+    if (digits >= 7 && digits <= 15) return true;
+  }
+  return false;
 }
 
 /**
@@ -109,12 +139,14 @@ export function readSections(result) {
 
 /**
  * The route for one message:
+ * - "personal_data": the message holds personal data, fixed reply, no LLM, not stored
  * - "blocked": a manipulation attempt, fixed reply, no LLM
  * - "off_topic", "greeting", "thanks": clear intent, fixed reply, no LLM
  * - "answer": a question, a problem or feedback, the LLM answers from the docs
  * - "unsure": no clear intent; the LLM answers carefully and may still say OFF_TOPIC
  */
 export function decideRoute(scores, t = THRESHOLDS) {
+  if (scores.personalData >= t.personalData) return "personal_data";
   if (scores.manipulation >= t.manipulation) return "blocked";
   const p = (k) => scores.intent[k] ?? 0;
   if (p("off_topic") >= t.offTopic) return "off_topic";
@@ -261,6 +293,8 @@ export const VISITOR_ID = /^[A-Za-z0-9_-]{22}$/;
 /** The fixed replies, in the language of the page. */
 export const FIXED = {
   de: {
+    personal_data:
+      "Deine Nachricht scheint persönliche Daten zu enthalten, etwa eine E-Mail-Adresse, Telefonnummer, Anschrift, einen vollen Namen oder ein Geburtsdatum. Solche Nachrichten beantworte ich nicht und speichere sie nicht. Stell deine Frage bitte noch einmal ohne diese Angaben.",
     blocked: "Dabei helfe ich nicht. Ich beantworte nur Fragen zu Kabine: Installation, Betrieb, Nutzung, Module und Datenschutz.",
     off_topic:
       "Dazu kann ich nichts sagen, ich kenne mich nur mit Kabine aus. Frag mich zum Beispiel, wie ein Verein Kabine installiert, was der Betrieb kostet oder wie Zu- und Absagen funktionieren.",
@@ -275,6 +309,8 @@ export const FIXED = {
     too_long: `Deine Nachricht ist zu lang (höchstens ${LIMITS.messageChars} Zeichen).`,
   },
   en: {
+    personal_data:
+      "Your message seems to contain personal data, such as an e-mail address, phone number, postal address, full name or date of birth. I don't answer or store such messages. Please ask your question again without these details.",
     blocked: "I can't help with that. I only answer questions about Kabine: installing, running and using it, its modules and privacy.",
     off_topic:
       "I can't help with that, I only know about Kabine. Ask me, for example, how a club installs Kabine, what running it costs or how yes/no responses work.",

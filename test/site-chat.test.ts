@@ -20,15 +20,18 @@ const DOCS: Docs = {
 
 /** Scores as measured with clef-flash (rounded): see docs/dev/decisions.md. */
 const SCORES: Record<string, Scores> = {
-  question: { intent: { question: 0.79, problem: 0.08, feedback: 0.03, greeting: 0.01, thanks: 0.01, off_topic: 0.08 }, manipulation: 0.01 },
-  problem: { intent: { question: 0.06, problem: 0.86, feedback: 0.02, greeting: 0, thanks: 0, off_topic: 0.06 }, manipulation: 0.05 },
-  lookalike: { intent: { question: 0.84, problem: 0.05, feedback: 0.01, greeting: 0, thanks: 0, off_topic: 0.1 }, manipulation: 0.09 },
-  edge: { intent: { question: 0.23, problem: 0.01, feedback: 0.01, greeting: 0, thanks: 0, off_topic: 0.74 }, manipulation: 0.01 },
-  off_topic: { intent: { question: 0.03, problem: 0, feedback: 0.02, greeting: 0.01, thanks: 0.02, off_topic: 0.92 }, manipulation: 0.04 },
-  greeting: { intent: { question: 0.03, problem: 0, feedback: 0, greeting: 0.92, thanks: 0.03, off_topic: 0.02 }, manipulation: 0.02 },
-  thanks: { intent: { question: 0.01, problem: 0, feedback: 0.01, greeting: 0.01, thanks: 0.97, off_topic: 0 }, manipulation: 0.03 },
-  injection_weakest: { intent: { question: 0.05, problem: 0, feedback: 0.03, greeting: 0, thanks: 0, off_topic: 0.89 }, manipulation: 0.7 },
-  injection_on_topic: { intent: { question: 0.75, problem: 0.17, feedback: 0, greeting: 0, thanks: 0, off_topic: 0.08 }, manipulation: 0.93 },
+  question: { intent: { question: 0.79, problem: 0.08, feedback: 0.03, greeting: 0.01, thanks: 0.01, off_topic: 0.08 }, manipulation: 0.01, personalData: 0.03 },
+  problem: { intent: { question: 0.06, problem: 0.86, feedback: 0.02, greeting: 0, thanks: 0, off_topic: 0.06 }, manipulation: 0.05, personalData: 0.03 },
+  lookalike: { intent: { question: 0.84, problem: 0.05, feedback: 0.01, greeting: 0, thanks: 0, off_topic: 0.1 }, manipulation: 0.09, personalData: 0.03 },
+  edge: { intent: { question: 0.23, problem: 0.01, feedback: 0.01, greeting: 0, thanks: 0, off_topic: 0.74 }, manipulation: 0.01, personalData: 0.03 },
+  off_topic: { intent: { question: 0.03, problem: 0, feedback: 0.02, greeting: 0.01, thanks: 0.02, off_topic: 0.92 }, manipulation: 0.04, personalData: 0.03 },
+  greeting: { intent: { question: 0.03, problem: 0, feedback: 0, greeting: 0.92, thanks: 0.03, off_topic: 0.02 }, manipulation: 0.02, personalData: 0.03 },
+  thanks: { intent: { question: 0.01, problem: 0, feedback: 0.01, greeting: 0.01, thanks: 0.97, off_topic: 0 }, manipulation: 0.03, personalData: 0.03 },
+  injection_weakest: { intent: { question: 0.05, problem: 0, feedback: 0.03, greeting: 0, thanks: 0, off_topic: 0.89 }, manipulation: 0.7, personalData: 0.03 },
+  injection_on_topic: { intent: { question: 0.75, problem: 0.17, feedback: 0, greeting: 0, thanks: 0, off_topic: 0.08 }, manipulation: 0.93, personalData: 0.03 },
+  personal_weakest: { intent: { question: 0.88, problem: 0.03, feedback: 0.03, greeting: 0, thanks: 0, off_topic: 0.06 }, manipulation: 0.03, personalData: 0.57 },
+  first_name_only: { intent: { question: 0.23, problem: 0.69, feedback: 0.02, greeting: 0, thanks: 0, off_topic: 0.06 }, manipulation: 0.02, personalData: 0.61 },
+  error_with_date: { intent: { question: 0.02, problem: 0.93, feedback: 0.01, greeting: 0, thanks: 0, off_topic: 0.04 }, manipulation: 0.07, personalData: 0.17 },
 };
 
 function memoryStorage(): ChatStorage & { data: Map<string, unknown>; alarm: number | null } {
@@ -57,7 +60,13 @@ function fakeEnv(scores: Scores, opts: { answer?: string; fail?: string[] } = {}
         calls.push({ model, input, options });
         if (opts.fail?.includes(model)) throw new Error(`failed on: ${input.state?.latest_message ?? input.messages?.at(-1)?.content}`);
         if (model === core.MODELS.triage && !input.questions?.section) {
-          return { answers: { intent: { type: "choice", probabilities: scores.intent }, manipulation: { type: "noul", noul: scores.manipulation } } };
+          return {
+            answers: {
+              intent: { type: "choice", probabilities: scores.intent },
+              manipulation: { type: "noul", noul: scores.manipulation },
+              personal_data: { type: "noul", noul: scores.personalData },
+            },
+          };
         }
         if (input.questions?.section) {
           return { answers: { section: { type: "choice", probabilities: { "/en/docs/operation/#backup": 0.6, "/en/docs/operation/#updates": 0.2, none: 0.1, "/en/docs/install/#costs-and-limits": 0.1 } } } };
@@ -87,6 +96,36 @@ describe("routing from Clef's probabilities", () => {
     expect(core.decideRoute(SCORES.injection_on_topic!)).toBe("blocked");
     expect(core.decideRoute({ ...SCORES.question!, manipulation: core.THRESHOLDS.manipulation })).toBe("blocked");
     expect(core.decideRoute({ ...SCORES.question!, manipulation: core.THRESHOLDS.manipulation - 0.01 })).toBe("answer");
+  });
+
+  it("refuses personal data before everything else", () => {
+    expect(core.decideRoute(SCORES.personal_weakest!)).toBe("personal_data");
+    expect(core.decideRoute(SCORES.first_name_only!)).toBe("personal_data");
+    expect(core.decideRoute(SCORES.error_with_date!)).toBe("answer");
+    expect(core.decideRoute({ ...SCORES.injection_on_topic!, personalData: 0.9 })).toBe("personal_data");
+  });
+
+  it("finds obvious e-mail addresses, phone numbers and IBANs before Clef", () => {
+    for (const text of [
+      "Meine E-Mail ist max.beispiel@example.org",
+      "Ruf mich an: 0151 23456789",
+      "call +49 30 1234567",
+      "Tel. 030/123 45 67",
+      "(0221) 123456",
+      "IBAN DE89 3704 0044 0532 0130 00",
+    ]) {
+      expect(core.hasObviousPersonalData(text), text).toBe(true);
+    }
+    for (const text of [
+      "Error 3021 at 2026-11-28 14:03",
+      "Kabine v0.9.0 on port 5432",
+      "Our club SV Musterstadt has 300 members",
+      "Ab 01.08.2026 beginnt die Saison, 5 US-Dollar im Monat",
+      "Kann ich Kabine unter vereinsapp.meinverein.de betreiben?",
+      "Training 10:00 - 12:00 for the U13 (born 2014)",
+    ]) {
+      expect(core.hasObviousPersonalData(text), text).toBe(false);
+    }
   });
 
   it("picks at least three sections, adds the FAQ and skips unknown ids", () => {
@@ -200,6 +239,30 @@ describe("one message", () => {
   });
 });
 
+describe("personal data", () => {
+  it("refuses an obvious phone number without any model and stores nothing of it", async () => {
+    const storage = memoryStorage();
+    const { env, calls } = fakeEnv(SCORES.question!);
+    const res = await handleMessage({ storage, env, budget: openBudget(), message: "Ruf mich an: 0151 23456789", lang: "de", now: Date.now() });
+    expect(res).toMatchObject({ route: "personal_data", reply: core.FIXED.de.personal_data, steps: [{ step: "precheck" }] });
+    expect(calls).toHaveLength(0);
+    expect(storage.data.get("history")).toBeUndefined();
+    expect(JSON.stringify([...storage.data.values()])).not.toContain("0151");
+  });
+
+  it("refuses what Clef finds, without the LLM and without storing the message", async () => {
+    const storage = memoryStorage();
+    const { env: first } = fakeEnv(SCORES.question!);
+    await handleMessage({ storage, env: first, budget: openBudget(), message: "How do backups work?", lang: "en", now: Date.now() });
+    const { env, calls } = fakeEnv(SCORES.personal_weakest!);
+    const res = await handleMessage({ storage, env, budget: openBudget(), message: "Lisa Testfrau, 12, plays in our U13", lang: "en", now: Date.now() + 1 });
+    expect(res).toMatchObject({ route: "personal_data", reply: core.FIXED.en.personal_data });
+    expect(calls.map((c) => c.model)).toEqual([core.MODELS.triage]);
+    expect(storage.data.get("history")).toHaveLength(2);
+    expect(JSON.stringify([...storage.data.values()])).not.toContain("Testfrau");
+  });
+});
+
 describe("limits", () => {
   it("allows five messages a minute per visitor and stores nothing for the sixth", async () => {
     const storage = memoryStorage();
@@ -304,7 +367,7 @@ describe("no logging", () => {
   });
 
   it("writes nothing to the console on any route, also when every model fails", async () => {
-    const secret = "Mein Sohn Lukas Beispiel hat die Nummer 0151 0000000";
+    const secret = "Mein Sohn Lukas Beispiel aus der Probestraße 5 fragt nach Push";
     for (const [kind, fail] of [
       ["question", []],
       ["injection_weakest", []],
