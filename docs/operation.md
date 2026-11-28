@@ -57,7 +57,7 @@ If you would rather check a release on your own first, switch maintenance mode o
 
 ## Update notices
 
-**What the app checks.** Once a day, from 10 o'clock in the club's time zone, the installation fetches `https://kabine.dev/releases.json` on the server (the hourly cron run; never from a browser): the newest version with its date, a link to its release notes and whether it is a security release. The request is an ordinary HTTPS request with the User-Agent `Kabine/<installed version>`; Cloudflare adds the header `CF-Worker` with the installation's domain to every request a Worker makes. No cookie, no ID and nothing about the club's people is sent, and kabine.dev does not log or evaluate these requests. If kabine.dev cannot be reached, the app tries again the next day.
+**What the app checks.** Once a day, from 10 o'clock in the club's time zone, the installation fetches `https://kabine.dev/releases.json` on the server (the hourly cron run; never from a browser): the newest version with its date, a link to its release notes and whether it is a security release. The request is an ordinary HTTPS request with the User-Agent `Kabine/<installed version>`; Cloudflare adds the header `CF-Worker` with the installation's domain to every request a Worker makes. No cookie, no ID and nothing about the club's people is sent, and kabine.dev does not log these requests; it only counts per day how many installations check and with which version, without storing domains or addresses. If kabine.dev cannot be reached, the app tries again the next day.
 
 **What admins see.** When kabine.dev has a newer version than the installed one:
 

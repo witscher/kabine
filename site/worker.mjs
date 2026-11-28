@@ -2,8 +2,10 @@
 // (POST /api/chat…, site/chat.mjs). The form checks Cloudflare Turnstile and sends the message by e-mail to
 // the operator; nothing is stored or logged. Deliberately in German and English only, like the website.
 import { handleChat } from "./chat.mjs";
+import { handleReleases, handleStats } from "./stats.mjs";
 
 export { KabineChatBudget, KabineChatVisitor } from "./chat.mjs";
+export { KabineInstallStats } from "./stats.mjs";
 
 const SITEVERIFY_URL = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
 const MAIL_FROM = { email: "noreply@kabine.dev", name: "kabine.dev contact form" };
@@ -37,8 +39,11 @@ const CONTACT_CSP =
   "default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self' https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; connect-src 'self'; font-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'";
 
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     const url = new URL(request.url);
+    // Update checks of the installations are counted per day, without domains or addresses (site/stats.mjs)
+    if (url.pathname === "/releases.json") return handleReleases(request, env, ctx);
+    if (url.pathname === "/api/stats/installs") return handleStats(request, env);
     if (url.pathname === "/api/contact") {
       if (request.method !== "POST") return new Response("Method not allowed", { status: 405, headers: { Allow: "POST" } });
       return handleContact(request, env);

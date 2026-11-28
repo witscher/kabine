@@ -57,7 +57,7 @@ Willst du eine Version lieber erst selbst prüfen, schalt den Wartungsmodus ein,
 
 ## Update-Hinweise
 
-**Was die App prüft.** Einmal am Tag, ab 10 Uhr in der Zeitzone des Vereins, holt die Installation auf dem Server `https://kabine.dev/releases.json` (der stündliche Cron-Lauf; nie aus einem Browser): die neueste Version mit Datum, einem Link zu ihren Versionshinweisen und ob sie ein Sicherheitsupdate ist. Die Anfrage ist eine gewöhnliche HTTPS-Anfrage mit dem User-Agent `Kabine/<installierte Version>`; Cloudflare fügt jeder Anfrage eines Workers den Header `CF-Worker` mit der Domain der Installation hinzu. Es werden kein Cookie, keine Kennung und nichts über die Leute des Vereins gesendet, und kabine.dev protokolliert und wertet diese Anfragen nicht aus. Ist kabine.dev nicht erreichbar, versucht es die App am nächsten Tag wieder.
+**Was die App prüft.** Einmal am Tag, ab 10 Uhr in der Zeitzone des Vereins, holt die Installation auf dem Server `https://kabine.dev/releases.json` (der stündliche Cron-Lauf; nie aus einem Browser): die neueste Version mit Datum, einem Link zu ihren Versionshinweisen und ob sie ein Sicherheitsupdate ist. Die Anfrage ist eine gewöhnliche HTTPS-Anfrage mit dem User-Agent `Kabine/<installierte Version>`; Cloudflare fügt jeder Anfrage eines Workers den Header `CF-Worker` mit der Domain der Installation hinzu. Es werden kein Cookie, keine Kennung und nichts über die Leute des Vereins gesendet, und kabine.dev protokolliert diese Anfragen nicht; es zählt nur je Tag, wie viele Installationen prüfen und mit welcher Version, ohne Domains oder Adressen zu speichern. Ist kabine.dev nicht erreichbar, versucht es die App am nächsten Tag wieder.
 
 **Was Admins sehen.** Hat kabine.dev eine neuere Version als die installierte:
 

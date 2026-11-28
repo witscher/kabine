@@ -30,6 +30,7 @@
     "site:og": "node scripts/site-og.mjs",
     "site:banners": "node scripts/site-banners.mjs",
     "site:dev": "node scripts/site-build.mjs --preview && wrangler dev --config site/wrangler.jsonc --port 8790",
+    "site:stats": "node scripts/site-stats.mjs",
     "site:deploy": "node scripts/site-build.mjs && wrangler deploy --config site/wrangler.deploy.jsonc && wrangler deploy --config site/www/wrangler.jsonc",
     "demo:reset": "node scripts/demo-reset.mjs",
     "admin:link": "node scripts/admin-link.mjs",

@@ -3,23 +3,29 @@
   // Project website on kabine.dev: static files built by `npm run site:build` into site/dist, plus the contact
   // form in worker.mjs. Deploy: npm run site:deploy, which builds wrangler.deploy.jsonc from this file with the
   // recipient from legal.json (MAIL_TO and the destination of the e-mail binding).
-  // Secret, once: npx wrangler secret put TURNSTILE_SECRET_KEY --config site/wrangler.jsonc
+  // Secrets, once: npx wrangler secret put TURNSTILE_SECRET_KEY --config site/wrangler.jsonc; STATS_TOKEN for
+  // npm run site:stats (from .secrets.site.json, see scripts/site-stats.mjs)
   // The chatbot (site/chat.mjs) uses Workers AI through the account's default AI Gateway and two Durable
   // Objects: one per visitor (messages, rate limit, deleted after 24 hours) and one global daily budget.
   "name": "kabine-site",
   "compatibility_date": "2026-08-20",
   "main": "./worker.mjs",
-  "assets": { "directory": "./dist", "binding": "ASSETS", "not_found_handling": "404-page", "run_worker_first": ["/api/*"] },
+  "assets": { "directory": "./dist", "binding": "ASSETS", "not_found_handling": "404-page", "run_worker_first": ["/api/*", "/releases.json"] },
   // Needs kabine.dev onboarded to Email Sending; the binding sends only to the operator's address
   "send_email": [{ "name": "EMAIL" }],
   "ai": { "binding": "AI", "remote": true },
   "durable_objects": {
     "bindings": [
       { "name": "CHAT_VISITOR", "class_name": "KabineChatVisitor" },
-      { "name": "CHAT_BUDGET", "class_name": "KabineChatBudget" }
+      { "name": "CHAT_BUDGET", "class_name": "KabineChatBudget" },
+      // How many installations check for updates, counts per day only (site/stats.mjs)
+      { "name": "INSTALL_STATS", "class_name": "KabineInstallStats" }
     ]
   },
-  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["KabineChatVisitor", "KabineChatBudget"] }],
+  "migrations": [
+    { "tag": "v1", "new_sqlite_classes": ["KabineChatVisitor", "KabineChatBudget"] },
+    { "tag": "v2", "new_sqlite_classes": ["KabineInstallStats"] }
+  ],
   "workers_dev": false,
   "preview_urls": false,
   "routes": [{ "pattern": "kabine.dev", "custom_domain": true }],
