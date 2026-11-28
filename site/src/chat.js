@@ -27,6 +27,7 @@
         typing: "Antwort kommt …",
         offline: "Gerade kann ich nicht antworten. Versuch es später noch einmal.",
         note: "Deine Nachrichten verarbeiten Workers AI und der Server dieser Website bei Cloudflare; gespeichert werden sie bis 24 Stunden nach deiner letzten Nachricht. Bitte gib keine persönlichen Daten ein (Namen, E-Mail-Adressen, Telefonnummern, Anschriften): Nachrichten damit lehnt der Chat ab und speichert sie nicht. ",
+        noteShort: "Bitte keine persönlichen Daten eingeben. Gespeichert bis 24 Stunden nach der letzten Nachricht. ",
         privacy: "Datenschutz",
         privacyHref: "/datenschutz/#chat",
         you: "Du",
@@ -64,6 +65,7 @@
         typing: "Answer coming …",
         offline: "I can't answer right now. Please try again later.",
         note: "Your messages are processed by Workers AI and this website's server at Cloudflare and kept until 24 hours after your last message. Please don't send personal data (names, e-mail addresses, phone numbers, postal addresses): the chat refuses such messages and does not store them. ",
+        noteShort: "Please don't send personal data. Kept until 24 hours after the last message. ",
         privacy: "Privacy",
         privacyHref: "/en/privacy/#chat",
         you: "You",
@@ -243,8 +245,11 @@
   count.setAttribute("aria-hidden", "true");
   var sendBtn = row.appendChild(el("button", "kc-send", T.send));
   sendBtn.type = "submit";
-  var note = panel.appendChild(el("p", "kc-note", T.note));
+  // The full note; on a phone a short one, so the conversation keeps the room above the keyboard
+  var note = panel.appendChild(el("p", "kc-note"));
   note.id = "kc-note";
+  note.appendChild(el("span", "kc-note-long", T.note));
+  note.appendChild(el("span", "kc-note-short", T.noteShort));
   var privacy = note.appendChild(el("a", null, T.privacy));
   privacy.href = T.privacyHref;
 
@@ -346,9 +351,23 @@
   }
 
   // Events -------------------------------------------------------------------------------------------------
+  // On a phone the open panel fills the visible part of the screen, above the keyboard (chat.css)
+  var vv = window.visualViewport;
+  function fitViewport() {
+    if (!vv) return;
+    root.style.setProperty("--kc-vh", vv.height + "px");
+    root.style.setProperty("--kc-top", vv.offsetTop + "px");
+    log.scrollTop = log.scrollHeight;
+  }
   function open() {
     panel.hidden = false;
     root.classList.add("kc-open");
+    document.documentElement.classList.add("kc-lock");
+    if (vv) {
+      fitViewport();
+      vv.addEventListener("resize", fitViewport);
+      vv.addEventListener("scroll", fitViewport);
+    }
     bubble.setAttribute("aria-expanded", "true");
     loadHistory();
     input.focus();
@@ -356,6 +375,11 @@
   function close() {
     panel.hidden = true;
     root.classList.remove("kc-open");
+    document.documentElement.classList.remove("kc-lock");
+    if (vv) {
+      vv.removeEventListener("resize", fitViewport);
+      vv.removeEventListener("scroll", fitViewport);
+    }
     bubble.setAttribute("aria-expanded", "false");
     bubble.focus();
   }
