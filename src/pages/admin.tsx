@@ -14,6 +14,7 @@ import { ExtraEventList } from "../extra-events";
 import { AdminAvatar, PersonAvatar } from "../avatar";
 import { Icon, type IconName } from "../icons";
 import { useMe, useSession } from "../session";
+import { UpdateHint } from "../update-hint";
 import { invalidate, useQuery } from "../store";
 import { Button, confirmDialog, copyText, Empty, ErrorBox, Field, InfoButton, Notice, Segmented, shareLink, Sheet, Spinner, SwitchRow, TextField, toast, TopBar, useDocumentTitle } from "../ui";
 import { childParentMessage, QrLink } from "./team";
@@ -84,7 +85,7 @@ export function AdminPage() {
     { href: "/verwaltung/mail", icon: "mail", title: t`E-mail`, sub: t`How the app sends e-mails` },
     { href: "/verwaltung/saisonwechsel", icon: "refresh", title: t`Season change`, sub: t`Once a year, with preview` },
     { href: "/verwaltung/protokoll", icon: "shield", title: t`Protocol`, sub: t`Who did what: access, leaving, admin rights, members, schedules, cancellations` },
-    { href: "/verwaltung/updates", icon: "refresh", title: t`Updates and maintenance`, sub: t`Installed version, last update, maintenance mode` },
+    { href: "/verwaltung/updates", icon: "refresh", title: t`Updates and maintenance`, sub: t`Installed version, new versions, maintenance mode`, dot: !!me.update },
     { href: "/verwaltung/import", icon: "users", title: t`Import / restore`, sub: t`Teams, coaches and players from Excel or CSV lists, or a Kabine backup` },
     { href: "/api/admin/export", icon: "download", title: t`Export`, sub: t`All data as a JSON file, for backup`, download: true },
     { href: "/hilfe", icon: "info", title: t`Help and feedback`, sub: t`Send feedback about the app` },
@@ -102,6 +103,7 @@ export function AdminPage() {
           </div>
         </header>
         <div class="content">
+          <UpdateHint update={me.update} />
           {/* Only own teams as a shortcut, all others under Administration → Teams */}
           {own.length ? (
             <section class="stack-sm" aria-label={t`My teams`}>

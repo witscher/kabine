@@ -88,10 +88,30 @@ try {
   }
 }
 
-if (!process.exitCode) {
-  // For Administration → Updates: when, which version, which migrations, the restore point
+/**
+ * The club's copy on GitHub ("owner/name"), from the checkout Workers Builds deploys, so "Install update" in the
+ * app can open its update pull request. Only owner and name are kept, never the rest of the remote address (it may
+ * carry a token); null outside Workers Builds or when the remote is not on GitHub.
+ */
+function githubCopy() {
+  if (!process.env.WORKERS_CI) return null;
   try {
-    setMeta("last_update", { at: new Date().toISOString(), version, migrations: fresh ? [] : pending, bookmark });
+    const remote = execFileSync("git", ["remote", "get-url", "origin"], { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim();
+    const url = new URL(remote.replace(/^git@github\.com:/, "https://github.com/"));
+    const m = /^\/([A-Za-z0-9-]{1,39})\/([A-Za-z0-9._-]{1,100}?)(?:\.git)?\/?$/.exec(url.pathname);
+    if (url.hostname.toLowerCase() !== "github.com" || !m || `${m[1]}/${m[2]}`.toLowerCase() === "witscher/kabine") return null;
+    return `${m[1]}/${m[2]}`;
+  } catch {
+    return null;
+  }
+}
+
+if (!process.exitCode) {
+  // For Administration → Updates: when, which version, which migrations, the restore point, the club's copy
+  const repo = env ? null : githubCopy();
+  console.log(repo ? `GitHub copy: ${repo} ("Install update" in the app opens its update pull requests)` : "GitHub copy not found; \"Install update\" in the app opens the guide on kabine.dev.");
+  try {
+    setMeta("last_update", { at: new Date().toISOString(), version, migrations: fresh ? [] : pending, bookmark, repo });
   } catch (err) {
     console.warn(`Update not recorded: ${err instanceof Error ? err.message.split("\n")[0] : err}`);
   }

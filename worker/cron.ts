@@ -11,6 +11,7 @@ import { areYouComing, ifYouCannot, notifyCoaches, notifyPersons, pushForm, shor
 import { all, run } from "./lib/db";
 import { recordServerError } from "./lib/server-errors";
 import { maintenanceState } from "./lib/maintenance";
+import { checkForUpdates } from "./domain/releases";
 import { activeWorkerModules } from "./modules";
 import { addDays, addMinutesLocal, localToInstant, nowLocal, todayLocal, toLocal, utcIso } from "./lib/time";
 
@@ -42,6 +43,8 @@ export async function handleScheduled(baseEnv: Env, scheduledTime: number): Prom
     ["Game reminders", () => sendGameReminders(env, scheduledTime)],
     ["Attendance", () => recordAttendance(env.DB, scheduledTime)],
     ["Meeting point", () => sendMeetingReminders(env, scheduledTime)],
+    // Once a day: is there a newer Kabine release? (kabine.dev/releases.json, unless an admin switched it off)
+    ["Update check", () => checkForUpdates(env, scheduledTime)],
   ];
   // Modules decide themselves what is due
   for (const m of activeWorkerModules()) if (m.cron) tasks.push([m.manifest.id, () => m.cron!(env, scheduledTime)]);

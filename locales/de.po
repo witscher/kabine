@@ -805,6 +805,11 @@ msgstr "Noch offen"
 msgid "Training time changed"
 msgstr "Trainingszeit geändert"
 
+# ai
+#: src/pages/updates.tsx
+msgid "Kabine {version} is available ({date})."
+msgstr "Kabine {version} ist da ({date})."
+
 #: src/pages/profile.tsx
 msgid "Linked parents: {guardians}. Each parent can change the permissions."
 msgstr "Verknüpfte Eltern: {guardians}. Jedes Elternteil kann die Freigaben ändern."
@@ -1249,6 +1254,11 @@ msgstr "Aushilfen"
 msgid "Sticker album kick-off: everyone is invited, nobody has to answer, but cake and set-up need helpers."
 msgstr "Kick-off Stickeralbum: Alle sind eingeladen, niemand muss sich melden, aber Kuchen und Aufbau brauchen Helfer."
 
+# ai
+#: src/pages/updates.tsx
+msgid "Open your club's copy on GitHub. Under Pull requests you find \"Update Kabine to v{version}\"."
+msgstr "Öffne die Kopie deines Vereins auf GitHub. Unter „Pull requests“ findest du „Update Kabine to v{version}“."
+
 #: src/pages/season.tsx
 msgid "Start season {nextName}?"
 msgstr "Saison {nextName} starten?"
@@ -1270,6 +1280,11 @@ msgstr "Keine weiteren personenbezogenen Daten: die Einstellungen und die Tage, 
 #: modules/carpools/worker/routes.ts
 msgid "Passengers can be nominated players who have not declined, and the coaches."
 msgstr "Mitfahren können nominierte Spieler, die nicht abgesagt haben, und die Trainer."
+
+# ai
+#: shared/types.ts
+msgid "New Kabine versions (admins)"
+msgstr "Neue Kabine-Versionen (Admins)"
 
 #: modules/carpools/module.ts
 msgid "Carpools (passengers, free seats)"
@@ -1474,6 +1489,11 @@ msgstr "zuletzt {lastUsed}"
 #: src/calendar.tsx
 msgid "Subscribe in calendar"
 msgstr "Im Kalender abonnieren"
+
+# ai
+#: worker/domain/releases.ts
+msgid "Security update: Kabine {version}"
+msgstr "Sicherheitsupdate: Kabine {version}"
 
 # ai
 #: src/pages/profile.tsx
@@ -2397,6 +2417,11 @@ msgstr "Überspringen"
 msgid "all done"
 msgstr "alle erledigt"
 
+# ai
+#: src/pages/updates.tsx
+msgid "Release notes (kabine.dev)"
+msgstr "Versionshinweise (kabine.dev)"
+
 #: worker/routes/events.ts
 #: worker/routes/events.ts
 msgid "New event: {title}"
@@ -2443,6 +2468,11 @@ msgstr "Maximale Kadergröße"
 #: src/pages/admin.tsx
 msgid "Parents see their children's events, respond for them and are in the team chat, provided the team includes parents."
 msgstr "Eltern sehen die Termine ihrer Kinder, sagen für sie zu und ab und sind im Mannschaftschat, sofern die Mannschaft Eltern einbindet."
+
+# ai
+#: src/pages/updates.tsx
+msgid "Update guide: no pull request, skipping versions, going back (kabine.dev)"
+msgstr "Update-Anleitung: kein Pull Request, Versionen überspringen, zurückgehen (kabine.dev)"
 
 #: src/pages/team.tsx
 msgid "with access"
@@ -2597,6 +2627,11 @@ msgstr "Nur der Inhaber kann diese Rolle übergeben."
 #: src/respond.tsx
 msgid "Reason: “{reason}”"
 msgstr "Grund: „{reason}“"
+
+# ai
+#: src/pages/updates.tsx
+msgid "Install update"
+msgstr "Update installieren"
 
 #: worker/routes/teams.ts
 msgid "The team still has members. Please remove all of them first."
@@ -4311,6 +4346,11 @@ msgctxt "person"
 msgid "Details"
 msgstr "Angaben"
 
+# ai
+#: src/pages/updates.tsx
+msgid "Not checked yet. The app asks kabine.dev once a day, from 10 o'clock."
+msgstr "Noch nicht geprüft. Die App fragt einmal am Tag ab 10 Uhr bei kabine.dev nach."
+
 #: src/pages/profile.tsx
 msgid "Add address"
 msgstr "Adresse hinzufügen"
@@ -4853,6 +4893,11 @@ msgid "To all teams"
 msgstr "An alle Mannschaften"
 
 # ai
+#: src/pages/updates.tsx
+msgid "The check for new versions is off. Update pull requests still arrive in your club's copy on GitHub."
+msgstr "Die Suche nach neuen Versionen ist aus. Update-Pull-Requests kommen trotzdem in der Kopie deines Vereins auf GitHub an."
+
+# ai
 #: src/list-import.tsx
 msgid "Choose an age group for every new team."
 msgstr "Wähle für jede neue Mannschaft eine Altersklasse."
@@ -5161,6 +5206,7 @@ msgstr "{count, plural, one {Die Ankündigung erscheint in einem Mannschaftschat
 
 #: src/howto.tsx
 #: src/howto.tsx
+#: src/update-hint.tsx
 msgid "Hide hint"
 msgstr "Hinweis ausblenden"
 
@@ -6600,6 +6646,11 @@ msgid "Everyone approved for {duty}"
 msgstr "Alle Freigegebenen für {duty}"
 
 # ai
+#: src/pages/updates.tsx
+msgid "Read what it says: whether the database changes, and whether wrangler.jsonc or workflow files need a change by hand."
+msgstr "Lies, was darin steht: ob sich die Datenbank ändert und ob wrangler.jsonc oder Workflow-Dateien von Hand angepasst werden müssen."
+
+# ai
 #: modules/mascot/app/admin.tsx
 msgid "Replace"
 msgstr "Ersetzen"
@@ -6730,6 +6781,11 @@ msgstr "Nur für Admins"
 #: src/pages/stats.tsx
 msgid "{late} short n."
 msgstr "{late} kurzfr."
+
+# ai
+#: src/pages/updates.tsx
+msgid "A few minutes later this page shows the new version as installed."
+msgstr "Ein paar Minuten später zeigt diese Seite die neue Version als installiert."
 
 #: modules/duties/app/admin.tsx
 msgid "New template"
@@ -7261,6 +7317,11 @@ msgstr "Chatnachrichten bleiben stehen und erscheinen als „Gelöschte Person�
 msgid "Under <0>Profile</0>, at <1>Notifications</1>, tap <2>Enable on this device</2> and allow the request. With <3>Test</3> you check that everything arrives. Under <4>What should I receive?</4> you choose the topics."
 msgstr "Unter <0>Profil</0> bei <1>Benachrichtigungen</1> auf <2>Auf diesem Gerät aktivieren</2> tippen und die Nachfrage erlauben. Mit <3>Testen</3> prüfst du, ob alles ankommt. Unter <4>Was soll ich bekommen?</4> wählst du die Themen."
 
+# ai
+#: worker/domain/releases.ts
+msgid "Kabine {version} is available"
+msgstr "Kabine {version} ist da"
+
 #: src/pages/team.tsx
 #: src/pages/team.tsx
 #: src/pages/team.tsx
@@ -7716,6 +7777,11 @@ msgid "How do I nominate the squad for a game?"
 msgstr "Wie nominiere ich den Kader für ein Spiel?"
 
 # ai
+#: src/pages/updates.tsx
+msgid "Once a day the app asks kabine.dev for the newest version number and tells the admins by a hint and a push. Nothing about your club or its people is sent."
+msgstr "Einmal am Tag fragt die App bei kabine.dev nach der neuesten Versionsnummer und sagt den Admins mit einem Hinweis und einer Push-Nachricht Bescheid. Über deinen Verein und seine Leute wird nichts gesendet."
+
+# ai
 #: src/pages/admin.tsx
 msgid "The legal notice or privacy policy of your club is missing. Your club is the provider of this app and must link both: <0>enter the links</0>."
 msgstr "Impressum oder Datenschutzerklärung deines Vereins fehlen. Dein Verein ist Anbieter dieser App und muss beides verlinken: <0>Links eintragen</0>."
@@ -8106,6 +8172,11 @@ msgstr "Kabine ist installiert. Gib das Einrichtungspasswort ein, das du beim De
 msgid "How the pictures should look (kabine.dev)"
 msgstr "So sollten die Bilder aussehen (kabine.dev)"
 
+# ai
+#: src/update-hint.tsx
+msgid "<0>Kabine {version} is available.</0> Install it when it suits the club."
+msgstr "<0>Kabine {version} ist da.</0> Installiere das Update, wann es für den Verein passt."
+
 #: src/pages/season.tsx
 msgid "No automatic assignment without year of birth. Suggestion: previous team."
 msgstr "Ohne Geburtsjahr keine automatische Zuordnung. Vorschlag: bisherige Mannschaft."
@@ -8145,6 +8216,11 @@ msgstr "Klappt das Abonnieren nicht, den Link kopieren und in der Kalender-App u
 #: modules/polls/app/pages.tsx
 msgid "paid"
 msgstr "bezahlt"
+
+# ai
+#: worker/domain/releases.ts
+msgid "Install it when it suits the club. Administration → Updates and maintenance shows how."
+msgstr "Installiere das Update, wann es für den Verein passt. Wie, steht unter Verwaltung → Updates und Wartung."
 
 #: worker/chat/room.ts
 msgctxt "chat author"
@@ -8590,6 +8666,11 @@ msgid "here is your code to sign in:"
 msgstr "hier ist dein Code zum Anmelden:"
 
 # ai
+#: src/pages/updates.tsx
+msgid "The app looks for new versions again."
+msgstr "Die App sucht wieder nach neuen Versionen."
+
+# ai
 #: modules/sms/module.ts
 msgid "When removed in the profile or when the person leaves the club."
 msgstr "Wenn sie im Profil entfernt wird oder die Person den Verein verlässt."
@@ -8788,6 +8869,11 @@ msgstr "{name} ist jetzt Verantwortlich in {teamName}."
 #: worker/routes/calendar.ts
 msgid "You do not have a calendar link yet."
 msgstr "Du hast noch keinen Kalender-Link."
+
+# ai
+#: src/pages/admin.tsx
+msgid "Installed version, new versions, maintenance mode"
+msgstr "Installierte Version, neue Versionen, Wartungsmodus"
 
 #: src/pages/event.tsx
 msgid "Meeting point"
@@ -9392,6 +9478,11 @@ msgstr "Trainingsgruppe: Ihre Termine stehen beim Filter „Training“."
 msgid "Where to find this link (kabine.dev)"
 msgstr "Wo du diesen Link findest (kabine.dev)"
 
+# ai
+#: src/pages/updates.tsx
+msgid "\"Install update\" opens the pull request \"Update Kabine to v{version}\" in your club's copy on GitHub."
+msgstr "„Update installieren“ öffnet den Pull Request „Update Kabine to v{version}“ in der Kopie deines Vereins auf GitHub."
+
 #: src/push.ts
 msgid "Push is not set up on the server yet."
 msgstr "Push ist auf dem Server noch nicht eingerichtet."
@@ -9739,6 +9830,11 @@ msgstr "{name} ist bei {what} am {when} doch da."
 #: worker/lib/server-errors.ts
 msgid "Something went wrong. Please try again later."
 msgstr "Es ist ein Fehler aufgetreten. Bitte versuche es später erneut."
+
+# ai
+#: src/update-hint.tsx
+msgid "<0>Security update: Kabine {version}.</0> It fixes a security problem; please install it soon."
+msgstr "<0>Sicherheitsupdate: Kabine {version}.</0> Es behebt ein Sicherheitsproblem; bitte bald installieren."
 
 #: src/duty-blocks.tsx
 #: src/duty-blocks.tsx
@@ -12296,6 +12392,11 @@ msgstr "Logo hochladen"
 msgid "Respond themselves {name}"
 msgstr "Selbst zu- und absagen {name}"
 
+# ai
+#: src/update-hint.tsx
+msgid "Show update"
+msgstr "Update ansehen"
+
 #: src/pages/admin.tsx
 msgid "Like a normal chat message: a bundled chat notification for everyone who has turned it on."
 msgstr "Wie eine normale Chatnachricht: gebündelte Chat-Benachrichtigung für alle, die sie eingeschaltet haben."
@@ -12669,6 +12770,11 @@ msgstr "{club}: {count} Serverfehler am {day}"
 #: worker/routes/events.ts
 msgid "{name} is missing from “{title}”"
 msgstr "{name} fehlt bei „{title}“"
+
+# ai
+#: src/pages/updates.tsx
+msgid "This is the newest version. Last checked {checked}."
+msgstr "Das ist die neueste Version. Zuletzt geprüft: {checked}."
 
 # ai
 #: src/pages/group.tsx
@@ -13147,6 +13253,11 @@ msgstr "Weiteres Kind verknüpfen, z. B. ein Geschwisterkind"
 #: src/pages/games.tsx
 msgid "Last synced on {importedDate}."
 msgstr "Zuletzt abgeglichen am {importedDate}."
+
+# ai
+#: worker/domain/releases.ts
+msgid "Please install it soon. Administration → Updates and maintenance shows how."
+msgstr "Bitte bald installieren. Wie, steht unter Verwaltung → Updates und Wartung."
 
 # ai
 #: modules/polls/app/pages.tsx
@@ -14064,6 +14175,12 @@ msgid "No passkey on this device?"
 msgstr "Kein Passkey auf diesem Gerät?"
 
 # ai
+#: src/pages/updates.tsx
+#: src/pages/updates.tsx
+msgid "New versions"
+msgstr "Neue Versionen"
+
+# ai
 #: src/pages/stats.tsx
 msgid "No trainings yet"
 msgstr "Noch keine Trainings"
@@ -14565,6 +14682,11 @@ msgstr "Push"
 msgid "Merge"
 msgstr "Zusammenführen"
 
+# ai
+#: src/pages/privacy.tsx
+msgid "New versions: once a day the app's server asks kabine.dev for the newest Kabine version number, unless the admins switched this off. Nothing about you or other members is sent."
+msgstr "Neue Versionen: einmal am Tag fragt der Server der App bei kabine.dev nach der neuesten Versionsnummer von Kabine, sofern die Admins das nicht ausgeschaltet haben. Über dich oder andere Mitglieder wird nichts gesendet."
+
 #: src/pages/season.tsx
 msgid "1 · New season"
 msgstr "1 · Neue Saison"
@@ -14754,6 +14876,11 @@ msgstr "Das Logo darf höchstens 256 KB groß sein."
 #: src/pages/home.tsx
 msgid "Events of the {team} for {kids}"
 msgstr "Termine der {team} für {kids}"
+
+# ai
+#: src/pages/updates.tsx
+msgid "Look for new versions"
+msgstr "Nach neuen Versionen suchen"
 
 # ai
 #: modules/polls/app/common.tsx
@@ -15943,6 +16070,11 @@ msgid "Last name of {name}"
 msgstr "Nachname von {name}"
 
 # ai
+#: src/pages/updates.tsx
+msgid "<0>Security update.</0> It fixes a security problem; please install it soon."
+msgstr "<0>Sicherheitsupdate.</0> Es behebt ein Sicherheitsproblem; bitte bald installieren."
+
+# ai
 #: src/pages/team.tsx
 msgid "As set for the age group"
 msgstr "Wie für die Altersklasse"
@@ -16700,6 +16832,11 @@ msgid "{name}: please save it as .xlsx or .csv first (.xls and .ods files cannot
 msgstr "{name}: bitte zuerst als .xlsx oder .csv speichern (.xls- und .ods-Dateien können nicht gelesen werden)."
 
 # ai
+#: src/pages/updates.tsx
+msgid "The app no longer looks for new versions."
+msgstr "Die App sucht nicht mehr nach neuen Versionen."
+
+# ai
 #: src/child-limits.tsx
 msgid "Respond"
 msgstr "Zu-/Absagen"
@@ -16770,6 +16907,11 @@ msgstr "optional"
 #: modules/duties/app/helpers.tsx
 msgid "assigned by the coach"
 msgstr "vergibt der Trainer"
+
+# ai
+#: src/pages/updates.tsx
+msgid "Merge it at a quiet time. With database changes the app pauses for about a minute."
+msgstr "Merge ihn zu einer ruhigen Zeit. Mit Datenbankänderungen pausiert die App etwa eine Minute."
 
 #: src/pages/plans.tsx
 msgid "Valid from"
@@ -17003,11 +17145,6 @@ msgstr "Zeile {line}: „{value}“ ist kein Jahrgang"
 #: src/pages/admin.tsx
 msgid "All members, admins, access links"
 msgstr "Alle Mitglieder, Admins, Zugangslinks"
-
-# ai
-#: src/pages/admin.tsx
-msgid "Installed version, last update, maintenance mode"
-msgstr "Installierte Version, letztes Update, Wartungsmodus"
 
 # ai
 #: worker/domain/fixtures.ts
@@ -17581,3 +17718,4 @@ msgstr "Chat schreiben"
 #: worker/routes/events.ts
 msgid "In one time block the end is before the start."
 msgstr "Bei einem Zeitblock liegt das Ende vor dem Beginn."
+

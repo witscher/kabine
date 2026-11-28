@@ -2,6 +2,8 @@ import { t } from "@lingui/core/macro";
 import { ownClubSport } from "../domain/club";
 import { canHelpOut, hasClubDuties, helperTeams, qualifiedLists } from "../domain/duties";
 import { loadNews, markNewsSeen } from "../domain/news";
+import { loadUpdateNotice } from "../domain/releases";
+import { currentLocale } from "../i18n";
 import type { AuthenticationResponseJSON, RegistrationResponseJSON } from "@simplewebauthn/server";
 import { Hono } from "hono";
 import { z } from "zod";
@@ -80,6 +82,8 @@ export async function buildMe(env: Env, actor: Actor): Promise<Me> {
     young: isYoung(actor.birthYear, Number(todayLocal().slice(0, 4))),
     // Release notes (coaches: only the coach notes) and new modules (admins), in their own view only
     news: (actor.isAdmin || actor.coachTeamIds.length > 0) && !actor.viewAs ? await loadNews(env.DB, actor.accountId, ownClubSport(), actor.isAdmin) : null,
+    // A newer Kabine release, for the hint at the top of the administration
+    update: actor.isAdmin && !actor.viewAs ? (await loadUpdateNotice(env.DB, currentLocale())).update : null,
   };
 }
 

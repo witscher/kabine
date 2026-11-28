@@ -128,6 +128,12 @@ export function PrivacyPage() {
           ) : null}
           <p>
             <Trans>
+              New versions: once a day the app's server asks kabine.dev for the newest Kabine version number, unless the admins switched this off. Nothing about
+              you or other members is sent.
+            </Trans>
+          </p>
+          <p>
+            <Trans>
               Helper plan icon: <a href="https://lucide.dev">Lucide</a> (ISC licence).
             </Trans>
           </p>
