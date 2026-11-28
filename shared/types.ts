@@ -234,6 +234,8 @@ export interface EventSummary {
   endsAt: string | null;
   location: LocationRef | null;
   teams: TeamRef[];
+  /** Special event of a training group (e.g. goalkeeper training): under the chip "Training" instead of "Other" */
+  asTraining: boolean;
   /** Teams for which this training is optional ("together with"). */
   optionalTeamIds: number[];
   clubWide: boolean;

@@ -13,6 +13,7 @@ import {
   type EventCursor,
   type EventListFilter,
   type EventRow,
+  cachedTeamInfo,
   fitsListFilter,
   listFilterSql,
   loadEventContext,
@@ -122,7 +123,9 @@ export async function loadEventPage(
     return { events: [], hasMore: false, live: [], next: [], openHelp: [], trainingsUntil: null, breaks: [], modules: await modulePage(fullWindow) };
   }
   // The selection goes into the queries, so a narrow selection does not walk through the whole season
-  const filter: EventListFilter | undefined = opts.teamIds || kinds ? { teamIds: opts.teamIds, kinds } : undefined;
+  // Special events of training groups count as trainings for the kind chips; the groups come from the cache
+  const trainingGroups = kinds ? (await cachedTeamInfo(db, actor.versions)).filter((tm) => tm.training_group === 1).map((tm) => tm.id) : [];
+  const filter: EventListFilter | undefined = opts.teamIds || kinds ? { teamIds: opts.teamIds, kinds, trainingGroups } : undefined;
   const fits = (s: EventSummary) => isRelevantEvent(s) && fitsListFilter(s, filter);
   // No upper date: events only exist for the current season, the season change deletes the old ones
   const range = opts.past

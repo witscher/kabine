@@ -4468,6 +4468,10 @@ msgstr "Trainings"
 msgid "Progress"
 msgstr "Progress"
 
+#: worker/routes/teams.ts
+msgid "Only groups can be training groups."
+msgstr "Only groups can be training groups."
+
 #: src/pages/help.tsx
 msgid "Reply by e-mail wanted"
 msgstr "Reply by e-mail wanted"
@@ -4542,6 +4546,10 @@ msgstr "Game moved ({teamName})"
 #: src/pages/club-settings.tsx
 msgid "Switch off this source?"
 msgstr "Switch off this source?"
+
+#: src/help-texts.ts
+msgid "The goalkeeper group meets every two weeks. Parents who picked “Training” at the top still see these sessions."
+msgstr "The goalkeeper group meets every two weeks. Parents who picked “Training” at the top still see these sessions."
 
 #: src/pages/profile.tsx
 msgid "No parents are involved in the teams of {firstName}. {firstName} accepts and declines on their own and is alone in the chat. So there are no permissions or notifications for {firstName}."
@@ -8439,6 +8447,10 @@ msgstr "{name}: choose photo"
 msgid "You"
 msgstr "You"
 
+#: src/pages/group.tsx
+msgid "Training group: its events appear under the chip “Training”."
+msgstr "Training group: its events appear under the chip “Training”."
+
 #: src/push.ts
 msgid "Push is not set up on the server yet."
 msgstr "Push is not set up on the server yet."
@@ -9136,6 +9148,10 @@ msgstr "The profile picture cannot be changed here right now."
 #: worker/routes/join.ts
 msgid "If this was not you, please contact your coach or an admin immediately."
 msgstr "If this was not you, please contact your coach or an admin immediately."
+
+#: src/help-texts.ts
+msgid "The special events of this group are trainings, for example a goalkeeper training. In the event overview they then appear under the chip “Training” instead of “Other”. Nothing else changes: responses and deadlines stay those of a special event. Leave it off for groups such as a coaching team."
+msgstr "The special events of this group are trainings, for example a goalkeeper training. In the event overview they then appear under the chip “Training” instead of “Other”. Nothing else changes: responses and deadlines stay those of a special event. Leave it off for groups such as a coaching team."
 
 #: modules/carpools/worker/routes.ts
 msgid "At least one passenger is not riding with this driver."
@@ -10326,6 +10342,10 @@ msgstr "{driver} is not driving: {game}. The search for a lift for {rider} conti
 #: modules/polls/app/pages.tsx
 msgid "Maybe: {maybeNames}"
 msgstr "Maybe: {maybeNames}"
+
+#: src/pages/group.tsx
+msgid "Event overview"
+msgstr "Event overview"
 
 #: modules/carpools/app/card.tsx
 #: modules/polls/app/pages.tsx
@@ -14267,6 +14287,11 @@ msgstr "A question with fixed answers, e.g. “Where shall the end-of-season tri
 #: modules/duties/app/stats.tsx
 msgid "Remind families?"
 msgstr "Remind families?"
+
+#: src/help-texts.ts
+#: src/pages/group.tsx
+msgid "Training group"
+msgstr "Training group"
 
 #: worker/domain/email-login.ts
 msgid "If you use the app from the home screen, it is best to enter the code there directly."

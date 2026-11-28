@@ -45,6 +45,11 @@ export const HELP = {
     text: t`Parents respond for their child, are in the chat and get the notifications. Turn it off when the players take responsibility themselves, for example in older youth teams and for adults.`,
     example: t`In the under-11s the parents respond. In the under-19s the players do it themselves, parents are not included there.`,
   }),
+  trainingGroup: () => ({
+    title: t`Training group`,
+    text: t`The special events of this group are trainings, for example a goalkeeper training. In the event overview they then appear under the chip “Training” instead of “Other”. Nothing else changes: responses and deadlines stay those of a special event. Leave it off for groups such as a coaching team.`,
+    example: t`The goalkeeper group meets every two weeks. Parents who picked “Training” at the top still see these sessions.`,
+  }),
   parentsEnabledGroup: () => ({
     title: t`Include parents`,
     text: t`For a youth group: linked parents see the group's special events for their child, respond for it and are in the chat. Parents are linked through the child's team; groups have no parent links.`,

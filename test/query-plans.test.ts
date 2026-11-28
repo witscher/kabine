@@ -10,6 +10,7 @@ import { loadCoachHints } from "../worker/domain/coach-hints";
 import { loadEventPage, ownCandidates } from "../worker/domain/event-page";
 import { SYNC_OVERVIEW_SQL } from "../worker/domain/fixtures";
 import { listVisibleEvents } from "../worker/domain/events";
+import { cacheVersions } from "../worker/lib/cache";
 import { loadMyStats, loadPersonStatsEvents, loadTeamStats } from "../worker/domain/stats";
 import { loadHelperStats, loadMyHelperStats } from "../modules/duties/worker/stats";
 import { eventIn, exec, freshDb, guardian, member, person, season, team } from "./helpers";
@@ -115,7 +116,25 @@ describe("Abfragepläne ohne Durchsuchen aller Termine", () => {
     const { db, seen } = recording(env.DB);
     await ownCandidates(db, actor, "2000-01-01T00:00", "2099-01-01T00:00");
     await ownCandidates(db, actor, "2000-01-01T00:00", "2099-01-01T00:00", { teamIds: [teamId], kinds: ["training"] });
+    // Training groups: their special events move between the chips "Training" and "Other" inside the query
+    for (const kinds of [["training"], ["special"]] as const) {
+      await ownCandidates(db, actor, "2000-01-01T00:00", "2099-01-01T00:00", { teamIds: null, kinds: [...kinds], trainingGroups: [teamId] });
+    }
+    expect(seen.some((q) => q.sql.includes("tg.team_id"))).toBe(true);
     expect(await fullScans(seen)).toEqual([]);
+  });
+
+  it("Seite der Terminübersicht mit Trainingsgruppe (Chips Training und Sonstiges)", async () => {
+    const group = await team("Torwartgruppe", "wD");
+    await exec("UPDATE teams SET kind = 'group', training_group = 1 WHERE id = ?", group);
+    await eventIn(group, 2, { kind: "special", title: "Torwarttraining" });
+    const fresh = { ...actor, versions: await cacheVersions(env.DB) };
+    for (const show of ["training", "other"] as const) {
+      const { db, seen } = recording(env.DB);
+      await loadEventPage(db, fresh, { limit: 20, past: false, teamIds: null, show });
+      expect(seen.some((q) => q.sql.includes("tg.team_id"))).toBe(true);
+      expect(await fullScans(seen)).toEqual([]);
+    }
   });
 
   it("eigene Dienste und Zeitblöcke in der Terminübersicht", async () => {
